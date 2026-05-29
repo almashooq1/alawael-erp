@@ -46,6 +46,8 @@ const gratuitySchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+        amount_halalas: { type: Number, default: 0 },
         details: {
           yearsBreakdown: [
             {
@@ -54,6 +56,7 @@ const gratuitySchema = new mongoose.Schema(
               rate: Number,
               calculation: String,
               amount: Number,
+              amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             },
           ],
           totalYears: Number,
@@ -75,6 +78,7 @@ const gratuitySchema = new mongoose.Schema(
             type: String,
             description: String,
             amount: Number,
+            amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             details: mongoose.Schema.Types.Mixed,
           },
         ],
@@ -86,6 +90,7 @@ const gratuitySchema = new mongoose.Schema(
             type: String,
             description: String,
             amount: Number,
+            amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             details: mongoose.Schema.Types.Mixed,
           },
         ],
@@ -115,6 +120,12 @@ const gratuitySchema = new mongoose.Schema(
         type: Number,
         required: true,
       },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      baseGratuity_halalas: { type: Number, default: 0 },
+      totalAdditions_halalas: { type: Number, default: 0 },
+      totalDeductions_halalas: { type: Number, default: 0 },
+      grossSettlement_halalas: { type: Number, default: 0 },
+      netSettlement_halalas: { type: Number, default: 0 },
     },
 
     // معلومات الدفع
@@ -236,9 +247,26 @@ const gratuitySchema = new mongoose.Schema(
 );
 
 // تحديث updatedAt قبل الحفظ
-gratuitySchema.pre('save', function (next) {
+gratuitySchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings,
+  // including the per-element amounts in the calculation arrays. Async style
+  // (W494/Mongoose-9): a callback `function(next)` hook throws under Mongoose 9.
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
+    'summary.baseGratuity',
+    'summary.totalAdditions',
+    'summary.totalDeductions',
+    'summary.grossSettlement',
+    'summary.netSettlement',
+    'calculation.baseGratuity.amount',
+  ]);
+  const calc = this.calculation || {};
+  (((calc.baseGratuity || {}).details || {}).yearsBreakdown || []).forEach(y =>
+    deriveHalalas(y, ['amount'])
+  );
+  ((calc.additions || {}).items || []).forEach(i => deriveHalalas(i, ['amount']));
+  ((calc.deductions || {}).items || []).forEach(d => deriveHalalas(d, ['amount']));
 });
 
 // الفهرس المركب للبحث السريع

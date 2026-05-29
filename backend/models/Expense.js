@@ -39,6 +39,8 @@ const expenseSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
 
     // العملة
     currency: {
@@ -89,6 +91,7 @@ const expenseSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    taxAmount_halalas: { type: Number, default: 0 },
 
     // الحالة
     status: {
@@ -138,6 +141,8 @@ const expenseSchema = new mongoose.Schema(
 
 // Auto-generate reference before save
 expenseSchema.pre('save', async function () {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'taxAmount']);
   if (!this.reference) {
     const count = await this.constructor.countDocuments();
     this.reference = `EXP-${String(count + 1).padStart(4, '0')}`;

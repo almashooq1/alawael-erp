@@ -27,6 +27,9 @@ const journalEntrySchema = new mongoose.Schema(
     lines: [journalEntryLineSchema],
     total_debit: { type: Number, default: 0 },
     total_credit: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    total_debit_halalas: { type: Number, default: 0 },
+    total_credit_halalas: { type: Number, default: 0 },
     is_balanced: { type: Boolean, default: false },
     status: { type: String, enum: ['draft', 'posted', 'reversed'], default: 'draft' },
     posted_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -52,6 +55,8 @@ journalEntrySchema.pre('save', async function (next) {
     this.total_credit = this.lines.reduce((s, l) => s + (l.credit || 0), 0);
     this.is_balanced = Math.abs(this.total_debit - this.total_credit) < 0.01;
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../../intelligence/money.lib').deriveHalalas(this, ['total_debit', 'total_credit']);
   next();
 });
 
@@ -65,5 +70,4 @@ journalEntrySchema.index({ deleted_at: 1 });
 // Registered as `FinanceJournalEntry` to dodge the collision with the
 // canonical models/JournalEntry.js. Default export unchanged.
 module.exports =
-  mongoose.models.FinanceJournalEntry ||
-  mongoose.model('FinanceJournalEntry', journalEntrySchema);
+  mongoose.models.FinanceJournalEntry || mongoose.model('FinanceJournalEntry', journalEntrySchema);

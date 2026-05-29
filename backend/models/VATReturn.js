@@ -25,10 +25,14 @@ const vatReturnSchema = new mongoose.Schema(
       standardRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
       zeroRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
     },
 
@@ -37,10 +41,14 @@ const vatReturnSchema = new mongoose.Schema(
       standardRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
       imports: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
     },
 
@@ -57,6 +65,10 @@ const vatReturnSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    totalOutputVAT_halalas: { type: Number, default: 0 },
+    totalInputVAT_halalas: { type: Number, default: 0 },
+    netVAT_halalas: { type: Number, default: 0 },
 
     // التسويات
     adjustments: [
@@ -71,6 +83,7 @@ const vatReturnSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    adjustedNetVAT_halalas: { type: Number, default: 0 },
 
     // الحالة
     status: {
@@ -120,6 +133,26 @@ const vatReturnSchema = new mongoose.Schema(
 );
 
 // فهرسة
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// Nested sales/purchases amount+vat sub-objects are deferred (per-category).
+vatReturnSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'totalOutputVAT',
+    'totalInputVAT',
+    'netVAT',
+    'adjustedNetVAT',
+    'taxableSales.standardRated.amount',
+    'taxableSales.standardRated.vat',
+    'taxableSales.zeroRated.amount',
+    'taxableSales.zeroRated.vat',
+    'taxablePurchases.standardRated.amount',
+    'taxablePurchases.standardRated.vat',
+    'taxablePurchases.imports.amount',
+    'taxablePurchases.imports.vat',
+  ]);
+  next();
+});
+
 vatReturnSchema.index({ 'period.startDate': 1, 'period.endDate': 1 });
 vatReturnSchema.index({ status: 1 });
 

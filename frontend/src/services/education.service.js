@@ -1,12 +1,13 @@
 import api from './api.client';
 
 const educationService = {
-  // Knowledge Base
-  getArticles: async () => api.get('/knowledge'),
-  getArticle: async id => api.get(`/knowledge/${id}`),
-  createArticle: async data => api.post('/knowledge', data),
-  updateArticle: async (id, data) => api.put(`/knowledge/${id}`, data),
-  deleteArticle: async id => api.delete(`/knowledge/${id}`),
+  // Knowledge Base — backend router is mounted at /knowledge with article CRUD
+  // under /articles (a bare GET /knowledge has no handler → 404).
+  getArticles: async () => api.get('/knowledge/articles'),
+  getArticle: async id => api.get(`/knowledge/articles/${id}`),
+  createArticle: async data => api.post('/knowledge/articles', data),
+  updateArticle: async (id, data) => api.put(`/knowledge/articles/${id}`, data),
+  deleteArticle: async id => api.delete(`/knowledge/articles/${id}`),
 
   // CMS
   getContent: async () => api.get('/cms'),
@@ -29,12 +30,13 @@ const educationService = {
   updateProgram: async (id, data) => api.put(`/specialized-programs/${id}`, data),
   deleteProgram: async id => api.delete(`/specialized-programs/${id}`),
 
-  // Community
-  getCommunityEvents: async () => api.get('/community'),
-  getCommunityEvent: async id => api.get(`/community/${id}`),
-  createCommunityEvent: async data => api.post('/community', data),
-  updateCommunityEvent: async (id, data) => api.put(`/community/${id}`, data),
-  deleteCommunityEvent: async id => api.delete(`/community/${id}`),
+  // Community — backend router is mounted at /community with content CRUD under
+  // /content (a bare GET /community has no handler → 404).
+  getCommunityEvents: async () => api.get('/community/content'),
+  getCommunityEvent: async id => api.get(`/community/content/${id}`),
+  createCommunityEvent: async data => api.post('/community/content', data),
+  updateCommunityEvent: async (id, data) => api.put(`/community/content/${id}`, data),
+  deleteCommunityEvent: async id => api.delete(`/community/content/${id}`),
 };
 
 export default educationService;

@@ -35,6 +35,13 @@ const gosiSubscriptionSchema = new Schema(
     employeeContribution: { type: Number, default: 0 },
     employerContribution: { type: Number, default: 0 },
     totalContribution: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    basicSalary_halalas: { type: Number, default: 0 },
+    housingAllowance_halalas: { type: Number, default: 0 },
+    subscriberWage_halalas: { type: Number, default: 0 },
+    employeeContribution_halalas: { type: Number, default: 0 },
+    employerContribution_halalas: { type: Number, default: 0 },
+    totalContribution_halalas: { type: Number, default: 0 },
     // Rates
     employeeRate: { type: Number },
     employerRate: { type: Number },
@@ -51,6 +58,7 @@ const gosiSubscriptionSchema = new Schema(
     nextPaymentDue: { type: Date },
     totalContributionMonths: { type: Number, default: 0 },
     balanceDue: { type: Number, default: 0 },
+    balanceDue_halalas: { type: Number, default: 0 },
     // Benefits flags
     annuities: { type: Boolean, default: false },
     occupationalHazards: { type: Boolean, default: true },
@@ -74,6 +82,20 @@ const gosiSubscriptionSchema = new Schema(
 gosiSubscriptionSchema.index({ organization: 1, status: 1 });
 gosiSubscriptionSchema.index({ nationality: 1, isSaudi: 1 });
 
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+gosiSubscriptionSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'basicSalary',
+    'housingAllowance',
+    'subscriberWage',
+    'employeeContribution',
+    'employerContribution',
+    'totalContribution',
+    'balanceDue',
+  ]);
+  next();
+});
+
 const GOSISubscription =
   mongoose.models.GOSISubscription || mongoose.model('GOSISubscription', gosiSubscriptionSchema);
 
@@ -95,6 +117,11 @@ const gosiContributionSchema = new Schema(
     employeeContribution: { type: Number, required: true },
     employerContribution: { type: Number, required: true },
     totalContribution: { type: Number, required: true },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    subscriberWage_halalas: { type: Number, default: 0 },
+    employeeContribution_halalas: { type: Number, default: 0 },
+    employerContribution_halalas: { type: Number, default: 0 },
+    totalContribution_halalas: { type: Number, default: 0 },
     paymentDate: { type: Date },
     paymentStatus: {
       type: String,
@@ -108,6 +135,17 @@ const gosiContributionSchema = new Schema(
 );
 
 gosiContributionSchema.index({ subscription: 1, period: 1 }, { unique: true });
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+gosiContributionSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'subscriberWage',
+    'employeeContribution',
+    'employerContribution',
+    'totalContribution',
+  ]);
+  next();
+});
 
 const GOSIContribution =
   mongoose.models.GOSIContribution || mongoose.model('GOSIContribution', gosiContributionSchema);
@@ -259,6 +297,10 @@ const gosiPaymentSchema = new Schema(
     totalEmployeeShare: { type: Number, default: 0, comment: 'إجمالي حصة الموظفين' },
     totalEmployerShare: { type: Number, default: 0, comment: 'إجمالي حصة صاحب العمل' },
     grandTotal: { type: Number, default: 0, comment: 'الإجمالي الكلي' },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    totalEmployeeShare_halalas: { type: Number, default: 0 },
+    totalEmployerShare_halalas: { type: Number, default: 0 },
+    grandTotal_halalas: { type: Number, default: 0 },
     totalEmployees: { type: Number, default: 0 },
     saudiEmployees: { type: Number, default: 0 },
     gccEmployees: { type: Number, default: 0 },
@@ -283,6 +325,16 @@ const gosiPaymentSchema = new Schema(
 
 gosiPaymentSchema.index({ organization: 1, period: 1 }, { unique: true });
 gosiPaymentSchema.index({ status: 1, dueDate: 1 });
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+gosiPaymentSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'totalEmployeeShare',
+    'totalEmployerShare',
+    'grandTotal',
+  ]);
+  next();
+});
 
 const GOSIPayment = mongoose.models.GOSIPayment || mongoose.model('GOSIPayment', gosiPaymentSchema);
 
@@ -323,6 +375,17 @@ const endOfServiceSchema = new Schema(
     fullEntitlement: { type: Number, comment: 'المستحق الكامل (مادة 84)' },
     entitlementRatio: { type: Number, default: 1.0, comment: 'النسبة المستحقة' },
     finalAmount: { type: Number, comment: 'المبلغ النهائي بعد تطبيق النسبة' },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    lastSalary_halalas: { type: Number, default: 0 },
+    basicSalary_halalas: { type: Number, default: 0 },
+    housingAllowance_halalas: { type: Number, default: 0 },
+    transportAllowance_halalas: { type: Number, default: 0 },
+    otherAllowances_halalas: { type: Number, default: 0 },
+    firstFiveYearsAmount_halalas: { type: Number, default: 0 },
+    remainingYearsAmount_halalas: { type: Number, default: 0 },
+    fractionYearAmount_halalas: { type: Number, default: 0 },
+    fullEntitlement_halalas: { type: Number, default: 0 },
+    finalAmount_halalas: { type: Number, default: 0 },
     // المادة القانونية المطبقة
     applicableArticle: { type: String },
     ratioDescription: { type: String },
@@ -343,6 +406,23 @@ const endOfServiceSchema = new Schema(
 
 endOfServiceSchema.index({ employee: 1, status: 1 });
 endOfServiceSchema.index({ organization: 1, createdAt: -1 });
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+endOfServiceSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'lastSalary',
+    'basicSalary',
+    'housingAllowance',
+    'transportAllowance',
+    'otherAllowances',
+    'firstFiveYearsAmount',
+    'remainingYearsAmount',
+    'fractionYearAmount',
+    'fullEntitlement',
+    'finalAmount',
+  ]);
+  next();
+});
 
 const EndOfServiceCalculation =
   mongoose.models.EndOfServiceCalculation ||

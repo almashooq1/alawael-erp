@@ -28,6 +28,8 @@ const recurringTransactionSchema = new mongoose.Schema(
       required: [true, 'المبلغ مطلوب'],
       min: [0, 'المبلغ يجب أن يكون موجباً'],
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
 
     // العملة
     currency: { type: String, default: 'SAR' },
@@ -94,6 +96,12 @@ const recurringTransactionSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+recurringTransactionSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
+});
 
 recurringTransactionSchema.index({ status: 1, nextExecutionDate: 1 });
 recurringTransactionSchema.index({ createdBy: 1 });

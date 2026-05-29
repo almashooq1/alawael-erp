@@ -120,6 +120,11 @@ const costCenterSchema = new mongoose.Schema(
         type: Number,
         default: 0,
       },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      totalBudget_halalas: { type: Number, default: 0 },
+      allocatedBudget_halalas: { type: Number, default: 0 },
+      spentBudget_halalas: { type: Number, default: 0 },
+      remainingBudget_halalas: { type: Number, default: 0 },
       currency: {
         type: String,
         default: 'SAR',
@@ -147,6 +152,9 @@ const costCenterSchema = new mongoose.Schema(
           type: Number,
           default: 0,
         },
+        // integer-halalas siblings (audit #5 EXPAND) — per-element, set in pre('save')
+        budgetAmount_halalas: { type: Number, default: 0 },
+        actualAmount_halalas: { type: Number, default: 0 },
         variance: {
           type: Number,
           default: 0,
@@ -175,6 +183,9 @@ const costCenterSchema = new mongoose.Schema(
       },
       fixedCosts: { type: Number, default: 0 },
       variableCosts: { type: Number, default: 0 },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      fixedCosts_halalas: { type: Number, default: 0 },
+      variableCosts_halalas: { type: Number, default: 0 },
     },
 
     // الإيرادات (لمراكز الإيراد والربح)
@@ -182,6 +193,10 @@ const costCenterSchema = new mongoose.Schema(
       totalRevenue: { type: Number, default: 0 },
       targetRevenue: { type: Number, default: 0 },
       actualRevenue: { type: Number, default: 0 },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      totalRevenue_halalas: { type: Number, default: 0 },
+      targetRevenue_halalas: { type: Number, default: 0 },
+      actualRevenue_halalas: { type: Number, default: 0 },
       revenueBySource: {
         type: Map,
         of: Number,
@@ -689,6 +704,23 @@ costCenterSchema.pre('save', function () {
 
   this.costBreakdown.fixedCosts = indirectTotal;
   this.costBreakdown.variableCosts = directTotal;
+
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings for
+  // the nested money sub-objects (dot-paths). Array (monthlyBudgets) + Map
+  // (revenueBySource) money are deferred — they need per-element handling.
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
+    'budget.totalBudget',
+    'budget.allocatedBudget',
+    'budget.spentBudget',
+    'budget.remainingBudget',
+    'costBreakdown.fixedCosts',
+    'costBreakdown.variableCosts',
+    'revenue.totalRevenue',
+    'revenue.targetRevenue',
+    'revenue.actualRevenue',
+  ]);
+  (this.monthlyBudgets || []).forEach(m => deriveHalalas(m, ['budgetAmount', 'actualAmount']));
 });
 
 // بعد الحفظ - تحديث المراكز الفرعية

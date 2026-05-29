@@ -23,6 +23,8 @@ const accountingPaymentSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
 
     // تاريخ الدفع
     paymentDate: {
@@ -124,6 +126,8 @@ accountingPaymentSchema.virtual('invoiceDetails', {
 
 // Pre-save middleware
 accountingPaymentSchema.pre('save', async function () {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
   // إذا كانت الدفعة جديدة ومكتملة، تحديث الفاتورة
   if (this.isNew && this.status === 'completed') {
     try {

@@ -45,6 +45,14 @@ const MudadSalaryRecordSchema = new Schema(
     totalSalary: { type: Number, required: true, min: 0 },
     deductions: { type: Number, default: 0, min: 0 },
     netSalary: { type: Number, required: true, min: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    basicSalary_halalas: { type: Number, default: 0 },
+    housingAllowance_halalas: { type: Number, default: 0 },
+    transportAllowance_halalas: { type: Number, default: 0 },
+    otherAllowances_halalas: { type: Number, default: 0 },
+    totalSalary_halalas: { type: Number, default: 0 },
+    deductions_halalas: { type: Number, default: 0 },
+    netSalary_halalas: { type: Number, default: 0 },
 
     // معلومات البنك
     bankCode: { type: String, required: true },
@@ -136,6 +144,7 @@ const MudadBatchSchema = new Schema(
     // إحصائيات الدفعة
     totalEmployees: { type: Number, required: true, min: 0 },
     totalAmount: { type: Number, required: true, min: 0 },
+    totalAmount_halalas: { type: Number, default: 0 },
     paidCount: { type: Number, default: 0 },
     rejectedCount: { type: Number, default: 0 },
     pendingCount: { type: Number, default: 0 },
@@ -338,6 +347,25 @@ MudadComplianceReportSchema.index({ establishmentId: 1, reportMonth: 1 }, { uniq
 // ============================================================
 // التصدير
 // ============================================================
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// Hooks registered before model compilation (this file has no other save hooks).
+MudadSalaryRecordSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'basicSalary',
+    'housingAllowance',
+    'transportAllowance',
+    'otherAllowances',
+    'totalSalary',
+    'deductions',
+    'netSalary',
+  ]);
+  next();
+});
+MudadBatchSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['totalAmount']);
+  next();
+});
+
 const MudadSalaryRecord =
   mongoose.models.MudadSalaryRecord || mongoose.model('MudadSalaryRecord', MudadSalaryRecordSchema);
 const MudadBatch = mongoose.models.MudadBatch || mongoose.model('MudadBatch', MudadBatchSchema);

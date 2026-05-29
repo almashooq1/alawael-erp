@@ -94,6 +94,10 @@ const paymentVoucherSchema = new mongoose.Schema(
     taxAmount: { type: Number, default: 0 },
     taxRate: { type: Number, default: 0 },
     netAmount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    taxAmount_halalas: { type: Number, default: 0 },
+    netAmount_halalas: { type: Number, default: 0 },
     notes: String,
     organization: {
       type: mongoose.Schema.Types.ObjectId,
@@ -119,6 +123,9 @@ paymentVoucherSchema.pre('save', function (next) {
     this.voucherNumber = `${prefix}-${Date.now()}`;
   }
   this.netAmount = this.amount - this.taxAmount;
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  // (Extends the existing callback-style hook in-style; no new hook added.)
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'taxAmount', 'netAmount']);
   next();
 });
 

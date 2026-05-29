@@ -46,6 +46,8 @@ const FinancialTransactionSchema = new mongoose.Schema(
         required: true,
         min: 0,
       },
+      // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+      amount_halalas: { type: Number, default: 0 },
     },
     // Credit Account
     creditAccount: {
@@ -61,6 +63,8 @@ const FinancialTransactionSchema = new mongoose.Schema(
         required: true,
         min: 0,
       },
+      // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+      amount_halalas: { type: Number, default: 0 },
     },
     // Transaction Classification
     transactionType: {
@@ -237,6 +241,11 @@ FinancialTransactionSchema.pre('save', function (next) {
   if (this.debitAccount.amount !== this.creditAccount.amount) {
     return next(new Error('Debit and credit amounts must be equal'));
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'debitAccount.amount',
+    'creditAccount.amount',
+  ]);
   next();
 });
 

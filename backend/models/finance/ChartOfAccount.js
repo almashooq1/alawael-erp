@@ -19,11 +19,24 @@ const chartOfAccountSchema = new mongoose.Schema(
     branch_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' }, // null = مشترك
     current_balance: { type: Number, default: 0 },
     opening_balance: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    current_balance_halalas: { type: Number, default: 0 },
+    opening_balance_halalas: { type: Number, default: 0 },
     notes: { type: String },
     deleted_at: { type: Date, default: null },
   },
   { timestamps: true }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// New async hook (none existed) per the W483/Mongoose-9 async doctrine.
+chartOfAccountSchema.pre('save', async function (next) {
+  require('../../intelligence/money.lib').deriveHalalas(this, [
+    'current_balance',
+    'opening_balance',
+  ]);
+  next();
+});
 
 // REMOVED DUPLICATE: chartOfAccountSchema.index({ code: 1 }); — field already has index:true
 chartOfAccountSchema.index({ account_type: 1 });

@@ -40,6 +40,11 @@ const insuranceClaimSchema = new mongoose.Schema(
     total_approved: { type: Number, default: 0 },
     total_rejected: { type: Number, default: 0 },
     patient_share: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    total_claimed_halalas: { type: Number, default: 0 },
+    total_approved_halalas: { type: Number, default: 0 },
+    total_rejected_halalas: { type: Number, default: 0 },
+    patient_share_halalas: { type: Number, default: 0 },
     // الموافقة المسبقة
     prior_auth_number: { type: String },
     prior_auth_date: { type: Date },
@@ -92,6 +97,13 @@ insuranceClaimSchema.pre('save', async function (next) {
     this.total_approved = this.items.reduce((s, i) => s + (i.approved_amount || 0), 0);
     this.total_rejected = this.total_claimed - this.total_approved;
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../../intelligence/money.lib').deriveHalalas(this, [
+    'total_claimed',
+    'total_approved',
+    'total_rejected',
+    'patient_share',
+  ]);
   next();
 });
 

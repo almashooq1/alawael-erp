@@ -155,7 +155,7 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/conversation.model.js',
   'models/disability-assessment.model.js',
   'models/emr.model.js',
-  'models/gratuity.model.js',
+  // models/gratuity.model.js — removed: hook converted to async (W494/audit #5)
   'models/pharmacy.model.js',
   // W503: CapaItem converted to async style — unblocks auto-CAPA on major equity disparity.
   'models/quality/Risk.model.js',

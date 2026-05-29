@@ -38,6 +38,17 @@ const invoiceSchema = new mongoose.Schema(
     total_amount: { type: Number, default: 0 },
     paid_amount: { type: Number, default: 0 },
     balance_due: { type: Number, default: 0 },
+    // ── Money-Type Migration (audit #5) — integer-halalas siblings ──
+    // Dual-written from the float fields above by the pre('save') hook (EXPAND
+    // step). Reads cut over to these in a later phase; floats remain the source
+    // of truth for now. Integer (Math.round) — exact, no IEEE-754 drift.
+    subtotal_halalas: { type: Number, default: 0 },
+    discount_total_halalas: { type: Number, default: 0 },
+    taxable_amount_halalas: { type: Number, default: 0 },
+    vat_amount_halalas: { type: Number, default: 0 },
+    total_amount_halalas: { type: Number, default: 0 },
+    paid_amount_halalas: { type: Number, default: 0 },
+    balance_due_halalas: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
     payment_method: {
       type: String,
@@ -62,6 +73,9 @@ const invoiceSchema = new mongoose.Schema(
     insurance_claim_id: { type: mongoose.Schema.Types.ObjectId, ref: 'InsuranceClaim' },
     insurance_coverage_amount: { type: Number, default: 0 },
     patient_share_amount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — derived in pre('save')
+    insurance_coverage_amount_halalas: { type: Number, default: 0 },
+    patient_share_amount_halalas: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ['draft', 'issued', 'partially_paid', 'paid', 'overdue', 'cancelled', 'void'],
@@ -111,6 +125,9 @@ invoiceSchema.pre('save', async function (next) {
     this.total_amount = Math.round((this.taxable_amount + this.vat_amount) * 100) / 100;
     this.balance_due = Math.round((this.total_amount - this.paid_amount) * 100) / 100;
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings from
+  // the float fields just computed. Additive: does not change float behaviour.
+  require('../../intelligence/invoice-money.lib').applyInvoiceHalalas(this);
   next();
 });
 
@@ -124,5 +141,4 @@ invoiceSchema.index({ deleted_at: 1 });
 
 // Registered as `FinanceInvoice` to dodge the collision with the
 // canonical models/Invoice.js. Default export unchanged.
-module.exports =
-  mongoose.models.FinanceInvoice || mongoose.model('FinanceInvoice', invoiceSchema);
+module.exports = mongoose.models.FinanceInvoice || mongoose.model('FinanceInvoice', invoiceSchema);

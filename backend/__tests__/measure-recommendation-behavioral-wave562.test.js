@@ -90,7 +90,10 @@ async function makeToddler() {
     fileNumber: 'T-001',
     dateOfBirth: '2024-05-29',
     _ageReferenceDate: REF_DATE,
-    disability: { type: 'autism', conditions: ['F84.0'] },
+    // realistic ICF disability.type enum value (W571 — 'autism' is NOT a
+    // valid disability.type; it lives in targetPopulation only). 'mental'
+    // bridges to the autism cohort via DISABILITY_TYPE_TO_COHORTS.
+    disability: { type: 'mental', conditions: ['F84.0'] },
   });
 }
 
@@ -119,7 +122,7 @@ describe('W562 — eligibility gate', () => {
       fileNumber: 'T-002',
       dateOfBirth: '2016-05-29', // 10y at REF_DATE
       _ageReferenceDate: REF_DATE,
-      disability: { type: 'autism' },
+      disability: { type: 'mental' },
     });
     const out = await svc.recommendForBeneficiary(ben._id, { now: REF_DATE });
     const codes = out.recommendations.map(r => r.measureCode);

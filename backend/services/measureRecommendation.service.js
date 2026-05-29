@@ -40,6 +40,22 @@ const logger = require('../utils/logger');
 const MS_PER_DAY = 86400000;
 const DUE_SOON_WINDOW_DAYS = 14;
 
+// Best-effort bridge between the Beneficiary.disability.type vocabulary
+// (ICF-style: physical/mental/sensory/…) and the catalog's clinical-cohort
+// targetPopulation tokens (autism/cerebral_palsy/…). Used ONLY for a SOFT
+// ranking boost — never a hard gate (the two vocabularies don't align 1:1,
+// so hard-excluding on disability.type would silently drop appropriate
+// instruments — see recommendForBeneficiary). Conservative + extensible.
+const DISABILITY_TYPE_TO_COHORTS = {
+  mental: ['autism', 'developmental', 'intellectual', 'behavioral'],
+  learning: ['learning', 'developmental', 'adhd'],
+  physical: ['cerebral_palsy', 'physical', 'motor'],
+  speech: ['speech', 'communication', 'language'],
+  sensory: ['sensory', 'hearing', 'vision'],
+  multiple: ['multiple', 'cerebral_palsy', 'autism', 'developmental'],
+  other: [],
+};
+
 // Priority band thresholds on the computed numeric score.
 const PRIORITY_HIGH = 45;
 const PRIORITY_MEDIUM = 20;
@@ -302,8 +318,18 @@ class MeasureRecommendationService {
       category: opts.category,
     });
 
-    // 2. Hard population gate (targetPopulation vs disability.type) + flag a
-    //    soft population-match boost for the ranking core.
+    // 2. targetPopulation is a SOFT ranking signal, NOT a hard gate (W571).
+    //    The Beneficiary.disability.type vocabulary (physical/mental/sensory/…)
+    //    does NOT align with the catalog's clinical-cohort targetPopulation
+    //    tokens (autism/cerebral_palsy/children/…), so hard-excluding on it
+    //    silently dropped clinically-appropriate instruments — e.g. the
+    //    universal M-CHAT-R autism screen for EVERY real beneficiary, since
+    //    none carries disability.type='autism'. The real eligibility gate is
+    //    age + ICD-10 (Measure.findEligibleFor above); population only nudges
+    //    ranking via the soft boost in rankMeasures.
+    // Generic cohort tokens never gate (every child/adolescent qualifies).
+    const GENERIC_POPULATION = ['all', 'children', 'adolescents', 'adults', 'any'];
+    const cohorts = DISABILITY_TYPE_TO_COHORTS[norm.disabilityType] || [];
     const candidates = [];
     for (const row of eligibleRows) {
       const m = row.measure;
@@ -311,10 +337,17 @@ class MeasureRecommendationService {
       const populationMatch =
         tp.length === 0 ||
         tp.includes('all') ||
-        (norm.disabilityType && tp.includes(norm.disabilityType));
-      // If a measure declares a population and the beneficiary's type doesn't
-      // match (and it isn't an 'all' measure), it is clinically wrong here.
-      if (tp.length && !tp.includes('all') && norm.disabilityType && !populationMatch) continue;
+        (norm.disabilityType && tp.includes(norm.disabilityType)) ||
+        cohorts.some(c => tp.includes(c));
+
+      // CONFIDENT hard-exclude ONLY when we have a vocabulary bridge for this
+      // disability type (cohorts non-empty) AND the measure targets a specific
+      // clinical cohort that doesn't intersect it. Without that confidence we
+      // never exclude (age + ICD-10 already gated) — this is what prevents the
+      // W571 silent-drop while still keeping a CP motor scale out of an
+      // autism-only child's list.
+      const specificTokens = tp.filter(t => !GENERIC_POPULATION.includes(t));
+      if (cohorts.length > 0 && specificTokens.length > 0 && !populationMatch) continue;
 
       candidates.push({
         code: m.code,
@@ -384,4 +417,5 @@ module.exports = {
   reassessmentStatus,
   normalizeBeneficiary,
   _scoreCandidate,
+  DISABILITY_TYPE_TO_COHORTS,
 };

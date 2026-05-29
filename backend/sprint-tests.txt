@@ -106,6 +106,7 @@ __tests__/access-review-attestation-behavioral-wave38.test.js
 __tests__/beneficiary-lifecycle-wave39.test.js
 __tests__/beneficiary-lifecycle-transition-behavioral-wave39.test.js
 __tests__/beneficiary-lifecycle-deceased-waitlist-wave581.test.js
+__tests__/beneficiary-lifecycle-side-effects-wave583.test.js
 __tests__/care-plan-wave41.test.js
 __tests__/care-plan-version-behavioral-wave41.test.js
 __tests__/care-plan-explain-views-llm-wave48.test.js

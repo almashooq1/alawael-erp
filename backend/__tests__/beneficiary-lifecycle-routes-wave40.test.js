@@ -428,11 +428,14 @@ describe('GET /_health', () => {
   test('returns wave info + counts', async () => {
     const { app } = makeApp();
     const r = await request(app).get('/api/v1/beneficiary-lifecycle/_health');
+    // Assert against the live registry so adding states/transitions (e.g. W581
+    // added waitlisted + deceased) never silently breaks this health check.
+    const reg = require('../intelligence/beneficiary-lifecycle.registry');
     expect(r.status).toBe(200);
     expect(r.body.data.wave).toBe(40);
-    expect(r.body.data.states).toBe(9);
-    expect(r.body.data.transitions).toBe(12);
-    expect(r.body.data.statuses).toBe(7);
+    expect(r.body.data.states).toBe(reg.STATES.length);
+    expect(r.body.data.transitions).toBe(reg.TRANSITIONS.length);
+    expect(r.body.data.statuses).toBe(reg.STATUSES.length);
   });
 });
 

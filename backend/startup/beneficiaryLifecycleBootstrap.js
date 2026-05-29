@@ -73,13 +73,62 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
       /* audit optional */
     }
 
+    // ── Wave 583 — wire the lifecycle side-effect handlers ────────────────
+    // Until this wave the service ran with `sideEffectHandlers: {}`, so every
+    // declared side-effect (≈40 ops across 15 transitions, including the
+    // clinically-critical `record_deceased` effects from Wave 581) was a
+    // silent no-op. The factory below derives a registry-complete handler map
+    // from `beneficiary-lifecycle.registry` so nothing falls through to the
+    // 'no handler wired' branch:
+    //   • end-active-schedules → cancel the beneficiary's FUTURE appointments
+    //   • close-open-episodes  → close the beneficiary's OPEN episodes of care
+    //   • every other op       → categorized deferred emit (notification /
+    //                            compliance / workflow) onto `eventSink`.
+    let lifecycleSideEffectHandlers = {};
+    try {
+      const {
+        createBeneficiaryLifecycleSideEffectHandlers,
+      } = require('../intelligence/beneficiary-lifecycle-side-effects.service');
+
+      let appointmentModel = null;
+      try {
+        appointmentModel = require('../models/Appointment');
+      } catch {
+        /* appointment model optional — handler self-skips if absent */
+      }
+
+      let episodeModel = null;
+      try {
+        episodeModel = require('../domains/episodes/models/EpisodeOfCare');
+      } catch {
+        /* episode model optional — handler self-skips if absent */
+      }
+
+      lifecycleSideEffectHandlers = createBeneficiaryLifecycleSideEffectHandlers({
+        appointmentModel,
+        episodeModel,
+        // Deferred ops emit a structured `beneficiary.lifecycle.side_effect`
+        // event so existing notification / compliance / workflow infra can
+        // pick them up. Until a dedicated bus is wired here we log them so the
+        // intent is observable rather than silent.
+        eventSink: (eventName, payload) => {
+          logger.info(`[BeneficiaryLifecycle] ${eventName}`, payload);
+        },
+        logger,
+      });
+      logger.info(
+        `[BeneficiaryLifecycle] ✓ side-effect handlers wired (${Object.keys(lifecycleSideEffectHandlers).length} ops)`
+      );
+    } catch (seErr) {
+      logger.warn('[BeneficiaryLifecycle] side-effect handlers not wired:', seErr.message);
+    }
+
     if (transitionModel) {
       const lifecycleSvc = createBeneficiaryLifecycleService({
         transitionLog: transitionModel,
         beneficiaryModel,
-        // No side-effect handlers wired in Wave 40 — those land in Wave 41+
-        // alongside scheduler / care-team / notification wiring.
-        sideEffectHandlers: {},
+        // Wave 583 — registry-complete side-effect handlers (see above).
+        sideEffectHandlers: lifecycleSideEffectHandlers,
         auditLogger,
         logger,
         // Wave 95 — production routes now enforce the Wave-86 MFA tier

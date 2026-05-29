@@ -211,7 +211,7 @@ function _scoreCandidate(cand, reasm, administrable, clinical = {}) {
     reasons_ar.push('موجَّه لنوع إعاقة هذا المستفيد');
   }
 
-  // W575 — clinical-urgency signals from the LAST administration. A worsening
+  // W576 — clinical-urgency signals from the LAST administration. A worsening
   // trajectory (or a severe/critical last result) raises priority — and can
   // promote an otherwise up-to-date measure to an EARLY reassessment, because
   // a beneficiary who is declining shouldn't wait out the full cadence.

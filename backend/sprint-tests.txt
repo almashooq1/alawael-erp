@@ -406,4 +406,4 @@ __tests__/scoring-cfcs-edacs-wave567.test.js
 __tests__/assessment-goal-from-suggestion-wave568.test.js
 __tests__/measure-recommendations-routes-behavioral-wave570.test.js
 __tests__/measure-recommendation-population-gate-wave571.test.js
-__tests__/measure-recommendation-trend-aware-wave575.test.js
+__tests__/measure-recommendation-trend-aware-wave576.test.js

@@ -16,9 +16,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Notifications from 'expo-notifications';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
 
-import store from './src/store';
+import store, { useAppSelector } from './src/store';
+import { checkAuth } from './src/store/slices/authSlice';
 import { initializeOfflineStorage } from './src/services/OfflineStorageService';
 import { setupPushNotifications } from './src/services/NotificationService';
 
@@ -94,12 +94,47 @@ const MainTabNavigator = () => {
 };
 
 // ============================================
+// ROOT NAVIGATOR
+// ============================================
+//
+// Lives INSIDE <Provider> and gates on the live Redux auth flag. Previously
+// the navigator gated on a boot-time-only local `isSignedIn` that never
+// updated after the login/register thunks set `auth.isAuthenticated` — so a
+// successful login left the user stranded on the Auth screen until an app
+// restart. Reading the selector makes login AND logout navigate immediately.
+
+const RootNavigator = () => {
+  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+
+  return (
+    <NavigationContainer>
+      <StatusBar style="dark" />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <>
+            <Stack.Screen name="MainApp" component={MainTabNavigator} options={{ animation: 'none' }} />
+            <Stack.Group screenOptions={{ presentation: 'modal' }}>
+              <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+              <Stack.Screen name="CreateOrder" component={CreateOrderScreen} />
+              <Stack.Screen name="DashboardView" component={DashboardViewScreen} />
+              <Stack.Screen name="Notifications" component={NotificationsScreen} />
+              <Stack.Screen name="Profile" component={ProfileScreen} />
+            </Stack.Group>
+          </>
+        ) : (
+          <Stack.Screen name="Auth" component={AuthNavigator} options={{ animation: 'none' }} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+// ============================================
 // MAIN APP COMPONENT
 // ============================================
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
     async function prepare() {
@@ -117,9 +152,15 @@ export default function App() {
         // Setup push notifications
         await setupPushNotifications();
 
-        // Check if user is authenticated
-        const token = await SecureStore.getItemAsync('authToken');
-        setIsSignedIn(!!token);
+        // Validate any stored token against the backend (/auth/me) and seed
+        // Redux auth state BEFORE the first render. Replaces the old
+        // "token present === signed in" check — an expired or revoked token
+        // no longer renders the authenticated UI. A failed/absent check
+        // leaves the user signed out, the safe default.
+        await store
+          .dispatch(checkAuth())
+          .unwrap()
+          .catch(() => {});
       } catch (error) {
         console.error('App initialization error:', error);
       } finally {
@@ -138,25 +179,7 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {isSignedIn ? (
-            <>
-              <Stack.Screen name="MainApp" component={MainTabNavigator} options={{ animation: 'none' }} />
-              <Stack.Group screenOptions={{ presentation: 'modal' }}>
-                <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
-                <Stack.Screen name="CreateOrder" component={CreateOrderScreen} />
-                <Stack.Screen name="DashboardView" component={DashboardViewScreen} />
-                <Stack.Screen name="Notifications" component={NotificationsScreen} />
-                <Stack.Screen name="Profile" component={ProfileScreen} />
-              </Stack.Group>
-            </>
-          ) : (
-            <Stack.Screen name="Auth" component={AuthNavigator} options={{ animation: 'none' }} />
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
+      <RootNavigator />
     </Provider>
   );
 }

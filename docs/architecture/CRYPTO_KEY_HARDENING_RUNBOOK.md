@@ -62,7 +62,10 @@ in `config/secrets.js`.
 
 1. **#13** (no data migration) — ship first; pure win.
 2. **#4** + **#12** — ship the code; run the re-key/re-hash job (or dual-accept window) per the migration rows.
-3. **#5/#16** — highest effort (versioned envelope + cipher swap); do last with the legacy-decrypt fallback so nothing breaks mid-migration.
+3. **#5/#16** — ✅ **DONE** (commit `492548b05`): `_encrypt` now uses authenticated
+   AES-256-GCM with a per-record random salt in a `v2:salt:iv:authTag:ciphertext`
+   envelope; `_decrypt` keeps the legacy CBC path so existing ciphertext reads with **zero
+   migration** — rows upgrade to v2 on next write. No re-encrypt job required.
 
 ## Verification per change
 

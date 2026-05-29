@@ -42,6 +42,9 @@ const bankAccountSchema = new mongoose.Schema(
     },
     openingBalance: { type: Number, default: 0 },
     currentBalance: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    openingBalance_halalas: { type: Number, default: 0 },
+    currentBalance_halalas: { type: Number, default: 0 },
     openingDate: { type: Date },
     chartAccountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
     isPrimary: { type: Boolean, default: false },
@@ -61,6 +64,12 @@ const bankAccountSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+bankAccountSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['openingBalance', 'currentBalance']);
+  next();
+});
 
 bankAccountSchema.index({ organization: 1, status: 1 });
 bankAccountSchema.index({ bankName: 1, accountNumber: 1 }, { unique: true });

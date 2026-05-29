@@ -76,6 +76,9 @@ const budgetSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    totalBudgeted_halalas: { type: Number, default: 0 },
+    totalSpent_halalas: { type: Number, default: 0 },
     totalRemaining: {
       type: Number,
       default: 0,
@@ -123,6 +126,12 @@ const budgetSchema = new mongoose.Schema(
 );
 
 // فهرسة
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+budgetSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['totalBudgeted', 'totalSpent']);
+  next();
+});
+
 budgetSchema.index({ fiscalYear: 1, period: 1 });
 budgetSchema.index({ status: 1 });
 budgetSchema.index({ startDate: 1, endDate: 1 });

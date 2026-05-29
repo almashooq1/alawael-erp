@@ -44,6 +44,11 @@ const bankReconciliationSchema = new mongoose.Schema(
     bookBalance: { type: Number, required: true },
     adjustedBankBalance: { type: Number },
     adjustedBookBalance: { type: Number },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    bankStatementBalance_halalas: { type: Number, default: 0 },
+    bookBalance_halalas: { type: Number, default: 0 },
+    adjustedBankBalance_halalas: { type: Number, default: 0 },
+    adjustedBookBalance_halalas: { type: Number, default: 0 },
     difference: { type: Number, default: 0 },
 
     // كشف الحساب البنكي
@@ -116,6 +121,17 @@ const bankReconciliationSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+bankReconciliationSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'bankStatementBalance',
+    'bookBalance',
+    'adjustedBankBalance',
+    'adjustedBookBalance',
+  ]);
+  next();
+});
 
 bankReconciliationSchema.index({ accountId: 1, periodEnd: -1 });
 bankReconciliationSchema.index({ status: 1 });

@@ -26,14 +26,17 @@ const {
 // ─── 1. Registry surface ───────────────────────────────────────────
 
 describe('beneficiary-lifecycle.registry — constants', () => {
-  test('exports the 9 lifecycle states', () => {
+  test('exports the 11 lifecycle states', () => {
+    // W581: added 'waitlisted' (after draft) + 'deceased' (after discharged).
     expect(reg.STATES).toEqual([
       'draft',
+      'waitlisted',
       'active',
       'suspended',
       'transferred-pending',
       'transferred',
       'discharged',
+      'deceased',
       'archived',
       'deletion-pending',
       'deleted',
@@ -54,11 +57,14 @@ describe('beneficiary-lifecycle.registry — constants', () => {
     );
   });
 
-  test('exports the 12 lifecycle transitions', () => {
-    expect(reg.TRANSITIONS.length).toBe(12);
+  test('exports the 15 lifecycle transitions', () => {
+    // W581: added waitlist + cancel_waitlist + record_deceased.
+    expect(reg.TRANSITIONS.length).toBe(15);
     const ids = reg.TRANSITIONS.map(t => t.id);
     expect(ids).toEqual(
       expect.arrayContaining([
+        'waitlist',
+        'cancel_waitlist',
         'admit',
         'suspend',
         'reactivate',
@@ -66,6 +72,7 @@ describe('beneficiary-lifecycle.registry — constants', () => {
         'complete_transfer',
         'reverse_transfer',
         'discharge',
+        'record_deceased',
         'archive',
         'restore',
         'request_deletion',
@@ -116,9 +123,21 @@ describe('beneficiary-lifecycle.registry — helpers', () => {
     );
   });
 
-  test('getAllowedTransitionsFrom("draft") only allows admit', () => {
+  test('getAllowedTransitionsFrom("draft") allows admit + waitlist', () => {
     const ids = reg.getAllowedTransitionsFrom('draft').map(t => t.id);
-    expect(ids).toEqual(['admit']);
+    expect(ids).toEqual(expect.arrayContaining(['admit', 'waitlist']));
+    expect(ids).toHaveLength(2);
+  });
+
+  test('getAllowedTransitionsFrom("waitlisted") allows admit + cancel_waitlist', () => {
+    const ids = reg.getAllowedTransitionsFrom('waitlisted').map(t => t.id);
+    expect(ids).toEqual(expect.arrayContaining(['admit', 'cancel_waitlist']));
+    expect(ids).toHaveLength(2);
+  });
+
+  test('getAllowedTransitionsFrom("deceased") only allows archive (terminal)', () => {
+    const ids = reg.getAllowedTransitionsFrom('deceased').map(t => t.id);
+    expect(ids).toEqual(['archive']);
   });
 
   test('getAllowedTransitionsFrom("deleted") returns nothing', () => {

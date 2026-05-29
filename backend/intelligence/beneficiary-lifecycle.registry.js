@@ -2,6 +2,8 @@
 
 /**
  * beneficiary-lifecycle.registry.js — Wave 39 (Beneficiary 360 Phase 1).
+ *                                     — Wave 581 (lifecycle completion:
+ *                                       waitlisted + deceased states).
  *
  * State machine + transition matrix for the Beneficiary 360 Enterprise
  * Master Record. Pure registry — no DB, no I/O. The service layer
@@ -10,12 +12,15 @@
  *
  * Aligned with §2 of the Beneficiary 360 design blueprint:
  *
- *   intake → draft → active
- *                     ↘
- *                      ↘── suspended → active
- *                      ↘── transferred-pending → transferred → (active@new_branch)
- *                      ↘── discharged → archived
- *                      ↘── deletion-pending → deleted (DPO+ approved)
+ *   intake → draft ──admit──────────────→ active
+ *                 ↘── waitlist → waitlisted ──admit──→ active
+ *                                          ↘─ cancel_waitlist → archived
+ *   active
+ *     ↘── suspended → active
+ *     ↘── transferred-pending → transferred → (active@new_branch)
+ *     ↘── discharged → archived
+ *     ↘── record_deceased → deceased → archived   (terminal clinical event)
+ *     ↘── deletion-pending → deleted (DPO+ approved)
  *   archived → restored → active   (rare; DPO + clinical lead)
  *   deleted  → (no return; tombstone only)
  *
@@ -28,11 +33,13 @@
 
 const LIFECYCLE_STATES = Object.freeze({
   DRAFT: 'draft',
+  WAITLISTED: 'waitlisted', // W581 — admitted-to-queue, awaiting capacity
   ACTIVE: 'active',
   SUSPENDED: 'suspended',
   TRANSFERRED_PENDING: 'transferred-pending',
   TRANSFERRED: 'transferred',
   DISCHARGED: 'discharged',
+  DECEASED: 'deceased', // W581 — clinical death event (terminal, archive-only exit)
   ARCHIVED: 'archived',
   DELETION_PENDING: 'deletion-pending',
   DELETED: 'deleted',
@@ -57,11 +64,13 @@ const STATUSES = Object.freeze(Object.values(TRANSITION_STATUS));
 // ─── Reason-code namespaces (per-transition allowlists below) ──────
 
 const REASON_CODES = Object.freeze({
+  CANCEL_WAITLIST: ['family-withdrew', 'no-capacity', 'ineligible', 'found-alternative', 'admin'],
   SUSPEND: ['medical', 'family', 'billing', 'admin'],
   REACTIVATE: ['medical-clear', 'family-resolved', 'billing-resolved', 'admin'],
   TRANSFER: ['clinical-need', 'family-relocation', 'capacity', 'admin', 'regulator-required'],
   DISCHARGE: ['goals-met', 'family-request', 'medical', 'aged-out', 'no-show', 'other'],
-  ARCHIVE: ['discharged-retention', 'inactive-long', 'admin'],
+  DECEASED: ['natural', 'medical-complication', 'accident', 'unknown', 'other'],
+  ARCHIVE: ['discharged-retention', 'inactive-long', 'deceased-retention', 'admin'],
   RESTORE: ['data-correction', 'family-return', 'clinical-need', 'admin'],
   REQUEST_DELETE: ['pdpl-erasure', 'duplicate-record', 'wrong-record', 'test-data'],
   CANCEL_DELETION: ['retention-still-active', 'legal-hold', 'family-withdrew-request', 'admin'],
@@ -71,10 +80,42 @@ const REASON_CODES = Object.freeze({
 
 const TRANSITIONS = Object.freeze([
   {
+    id: 'waitlist',
+    descriptionAr: 'إدراج المستفيد على قائمة الانتظار',
+    descriptionEn: 'Place beneficiary on the admission waitlist',
+    from: [LIFECYCLE_STATES.DRAFT],
+    to: LIFECYCLE_STATES.WAITLISTED,
+    requiredApproverRoles: ['admissions_officer'],
+    mfaTier: 2,
+    requiresNafath: false,
+    requiresReason: false,
+    allowedReasonCodes: null,
+    sideEffects: ['enqueue-waitlist', 'notify-family-waitlisted'],
+    severity: 'low',
+    reversalWindowDays: null,
+    auditCategory: 'beneficiary.lifecycle.waitlist',
+  },
+  {
+    id: 'cancel_waitlist',
+    descriptionAr: 'إلغاء إدراج المستفيد من قائمة الانتظار',
+    descriptionEn: 'Remove beneficiary from the waitlist (no admission)',
+    from: [LIFECYCLE_STATES.WAITLISTED],
+    to: LIFECYCLE_STATES.ARCHIVED,
+    requiredApproverRoles: ['admissions_officer', 'branch_manager'],
+    mfaTier: 2,
+    requiresNafath: false,
+    requiresReason: true,
+    allowedReasonCodes: REASON_CODES.CANCEL_WAITLIST,
+    sideEffects: ['dequeue-waitlist', 'notify-family-waitlist-cancelled'],
+    severity: 'medium',
+    reversalWindowDays: null,
+    auditCategory: 'beneficiary.lifecycle.waitlist.cancel',
+  },
+  {
     id: 'admit',
     descriptionAr: 'قبول وتفعيل المستفيد',
     descriptionEn: 'Admit and activate beneficiary',
-    from: [LIFECYCLE_STATES.DRAFT],
+    from: [LIFECYCLE_STATES.DRAFT, LIFECYCLE_STATES.WAITLISTED],
     to: LIFECYCLE_STATES.ACTIVE,
     requiredApproverRoles: ['admissions_officer', 'clinical_lead'],
     mfaTier: 2,
@@ -199,10 +240,38 @@ const TRANSITIONS = Object.freeze([
     auditCategory: 'beneficiary.lifecycle.discharge',
   },
   {
+    id: 'record_deceased',
+    descriptionAr: 'تسجيل وفاة المستفيد',
+    descriptionEn: 'Record beneficiary death (clinical terminal event)',
+    from: [LIFECYCLE_STATES.ACTIVE, LIFECYCLE_STATES.SUSPENDED],
+    to: LIFECYCLE_STATES.DECEASED,
+    requiredApproverRoles: ['clinical_lead', 'branch_director'],
+    mfaTier: 3,
+    requiresNafath: true,
+    requiresReason: true,
+    allowedReasonCodes: REASON_CODES.DECEASED,
+    sideEffects: [
+      'end-active-schedules',
+      'close-open-episodes',
+      'release-care-team',
+      'generate-closure-report',
+      'notify-family-condolence',
+      'notify-regulator-if-required',
+    ],
+    severity: 'critical',
+    reversalWindowDays: 14, // data-entry-error correction window only
+    auditCategory: 'beneficiary.lifecycle.deceased',
+  },
+  {
     id: 'archive',
     descriptionAr: 'أرشفة ملف المستفيد',
     descriptionEn: 'Archive beneficiary record per retention policy',
-    from: [LIFECYCLE_STATES.DISCHARGED, LIFECYCLE_STATES.ACTIVE, LIFECYCLE_STATES.SUSPENDED],
+    from: [
+      LIFECYCLE_STATES.DISCHARGED,
+      LIFECYCLE_STATES.DECEASED,
+      LIFECYCLE_STATES.ACTIVE,
+      LIFECYCLE_STATES.SUSPENDED,
+    ],
     to: LIFECYCLE_STATES.ARCHIVED,
     requiredApproverRoles: ['branch_director', 'dpo'],
     mfaTier: 3,

@@ -105,6 +105,7 @@ __tests__/access-review-wave38.test.js
 __tests__/access-review-attestation-behavioral-wave38.test.js
 __tests__/beneficiary-lifecycle-wave39.test.js
 __tests__/beneficiary-lifecycle-transition-behavioral-wave39.test.js
+__tests__/beneficiary-lifecycle-deceased-waitlist-wave581.test.js
 __tests__/care-plan-wave41.test.js
 __tests__/care-plan-version-behavioral-wave41.test.js
 __tests__/care-plan-explain-views-llm-wave48.test.js
@@ -406,4 +407,4 @@ __tests__/scoring-cfcs-edacs-wave567.test.js
 __tests__/assessment-goal-from-suggestion-wave568.test.js
 __tests__/measure-recommendations-routes-behavioral-wave570.test.js
 __tests__/measure-recommendation-population-gate-wave571.test.js
-__tests__/measure-recommendation-trend-aware-wave575.test.js
+__tests__/measure-recommendation-trend-aware-wave576.test.js

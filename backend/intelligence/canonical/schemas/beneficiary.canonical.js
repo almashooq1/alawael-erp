@@ -57,7 +57,9 @@ const Beneficiary = z
     consentTrackingEnabled: z.boolean().optional(),
 
     // ── Lifecycle status (managed by beneficiary-lifecycle module) ──
-    status: z.enum(['draft', 'active', 'on_hold', 'discharged', 'archived', 'deceased']).optional(),
+    status: z
+      .enum(['draft', 'waitlisted', 'active', 'on_hold', 'discharged', 'deceased', 'archived'])
+      .optional(),
 
     // ── Audit envelope ───────────────────────────────────────
     ...AuditEnvelope.shape,

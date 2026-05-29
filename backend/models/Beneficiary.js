@@ -351,9 +351,10 @@ const beneficiarySchema = new mongoose.Schema(
 
     // ── Status & Lifecycle ─────────────────────────────────
     // الحالة — lowercase فقط (ACTIVE/INACTIVE أُزيلت لتجنب التعارض)
+    // W581: 'waitlisted' أُضيفت لمواءمة state machine لدورة حياة المستفيد.
     status: {
       type: String,
-      enum: ['active', 'inactive', 'pending', 'transferred', 'deceased', 'graduated'],
+      enum: ['active', 'inactive', 'pending', 'waitlisted', 'transferred', 'deceased', 'graduated'],
       default: 'active',
     },
     registrationDate: { type: Date, default: Date.now, index: true },

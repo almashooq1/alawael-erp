@@ -161,7 +161,10 @@ function decrypt(encryptedText) {
  */
 function deterministicHash(value, salt = '') {
   if (!value) return value;
-  const hmacKey = process.env.DB_HASH_KEY || process.env.DB_ENCRYPTION_KEY || 'default-hash-key';
+  // Centralized: throws in prod if unset instead of silently using a
+  // repo-published default key (audit #4). Preserves the prior resolution
+  // chain + default value for dev/test.
+  const hmacKey = require('../../config/secrets').dbHashKey();
   return crypto.createHmac(HASH_ALGORITHM, hmacKey).update(`${salt}:${value}`).digest(ENCODING);
 }
 

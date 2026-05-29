@@ -225,7 +225,9 @@ const PROVIDER_TEMPLATES = {
 class DocumentIntegrationsService extends EventEmitter {
   constructor() {
     super();
-    this.encryptionKey = process.env.INTEGRATION_SECRET || 'integration-default-key-32chars!!';
+    // Centralized: throws in prod if unset instead of silently using a
+    // repo-published default key (audit #5). Dev/test fallback unchanged.
+    this.encryptionKey = require('../../config/secrets').integrationSecret();
   }
 
   /* ── Encrypt sensitive data ───────────────────────────────── */

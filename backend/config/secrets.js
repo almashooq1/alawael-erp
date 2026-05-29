@@ -68,6 +68,69 @@ const sessionSecret = secret('SESSION_SECRET', 'dev-only-session-secret-do-not-u
 // ─── External Services ───────────────────────────────────────────────────────
 const fcmServerKey = secret('FCM_SERVER_KEY', '', false);
 
+// ─── Document / field crypto (audit #4/#5/#12/#13) ───────────────────────────
+// These were previously read inline as `process.env.X || 'hardcoded-default'`,
+// so a prod deploy missing the env var silently used a repo-published key.
+// Exposed here as LAZY getters (resolve at call time — env may be injected late
+// under APM agents) that throw in production when unset, matching the doctrine
+// above. The dev fallback is the EXACT prior literal, so dev/test/CI behaviour
+// is unchanged and existing data keyed under the old default still validates
+// when prod sets the var to that same value. Migration (rotate to a strong key
+// + re-key/re-hash existing data) is documented in
+// docs/architecture/CRYPTO_KEY_HARDENING_RUNBOOK.md.
+function requiredInProd(envKey, legacyDefault, hint) {
+  return () => {
+    const v = process.env[envKey];
+    if (v) return v;
+    if (isProd) {
+      throw new Error(
+        `[SECURITY] Missing required env var "${envKey}" in production. ` +
+          `${hint} See docs/architecture/CRYPTO_KEY_HARDENING_RUNBOOK.md.`
+      );
+    }
+    return legacyDefault;
+  };
+}
+
+// #4 — deterministic search-hash key. Preserves the original
+// DB_HASH_KEY → DB_ENCRYPTION_KEY → default resolution chain.
+function dbHashKey() {
+  const v = process.env.DB_HASH_KEY || process.env.DB_ENCRYPTION_KEY;
+  if (v) return v;
+  if (isProd) {
+    throw new Error(
+      '[SECURITY] Missing required env var "DB_HASH_KEY" (or "DB_ENCRYPTION_KEY") ' +
+        'in production. Set it to the prior default to preserve existing ' +
+        'search-hashes, or rotate + re-hash. See ' +
+        'docs/architecture/CRYPTO_KEY_HARDENING_RUNBOOK.md.'
+    );
+  }
+  return 'default-hash-key';
+}
+
+// #5 — document-integration credential encryption key.
+const integrationSecret = requiredInProd(
+  'INTEGRATION_SECRET',
+  'integration-default-key-32chars!!',
+  'It encrypts stored third-party integration credentials.'
+);
+
+// #12 — document-QR verification HMAC secret.
+const qrSecret = requiredInProd(
+  'QR_SECRET',
+  'doc-qr-secret',
+  'It makes document QR codes forgery-resistant.'
+);
+
+// #13 — Nafath JWS HS signing secret (mock-mode signer). required=false: a prod
+// running in NAFATH mock mode legitimately uses a non-production signer, so this
+// centralizes the key + removes the inline literal without breaking that path.
+const nafathJwsHsSecret = secret(
+  'NAFATH_JWS_HS_SECRET',
+  'alawael-nafath-mock-secret-do-not-use-in-prod',
+  false
+);
+
 module.exports = {
   jwtSecret,
   jwtRefreshSecret,
@@ -78,4 +141,10 @@ module.exports = {
   gpsEncryptionKey,
   sessionSecret,
   fcmServerKey,
+  // lazy getters (call to resolve)
+  dbHashKey,
+  integrationSecret,
+  qrSecret,
+  // resolved value (mock-mode, non-required)
+  nafathJwsHsSecret,
 };

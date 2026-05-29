@@ -162,9 +162,12 @@ class DocumentQRCodeService extends EventEmitter {
 
   /* ── Generate verification hash ───────────────────────────── */
   _generateVerifyHash(documentId, code) {
+    // Centralized: throws in prod if unset instead of silently using a
+    // repo-published default secret (audit #12). Dev/test fallback unchanged.
+    const qrSecret = require('../../config/secrets').qrSecret();
     return crypto
       .createHash('sha256')
-      .update(`${documentId}:${code}:${process.env.QR_SECRET || 'doc-qr-secret'}`)
+      .update(`${documentId}:${code}:${qrSecret}`)
       .digest('hex')
       .substring(0, 16);
   }

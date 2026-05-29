@@ -133,6 +133,29 @@ const SPECS = [
       'totalSalary',
     ],
   },
+  {
+    file: 'gosi.models.js',
+    fields: [
+      'basicSalary',
+      'housingAllowance',
+      'subscriberWage',
+      'employeeContribution',
+      'employerContribution',
+      'totalContribution',
+      'balanceDue',
+      'totalEmployeeShare',
+      'totalEmployerShare',
+      'grandTotal',
+      'lastSalary',
+      'transportAllowance',
+      'otherAllowances',
+      'firstFiveYearsAmount',
+      'remainingYearsAmount',
+      'fractionYearAmount',
+      'fullEntitlement',
+      'finalAmount',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

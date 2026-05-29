@@ -564,6 +564,118 @@ const MEASURES = [
     status: 'active',
     tags: ['cerebral-palsy', 'motor', 'classification', 'digital-administration'],
   },
+
+  // ── CFCS — communication function classification (CP) ─────────────────
+  {
+    code: 'CFCS',
+    name: 'Communication Function Classification System',
+    name_ar: 'نظام تصنيف وظيفة التواصل',
+    abbreviation: 'CFCS',
+    version: '1.0.0',
+    description: '5-level ordinal classification of everyday communication effectiveness in CP.',
+    description_ar: 'تصنيف ترتيبي من 5 مستويات لفعالية التواصل اليومية في الشلل الدماغي.',
+    category: 'speech_language',
+    type: 'rating_scale',
+    targetPopulation: ['children', 'cerebral_palsy'],
+    ageRange: { min: 2, max: 18, unit: 'years' },
+
+    scoringType: 'numeric',
+    minScore: 1,
+    maxScore: 5,
+    scoringDirection: 'lower_better',
+    scoringRules: [
+      { rangeLabel: 'Level I', rangeLabel_ar: 'المستوى I — فعّال مع الجميع', minScore: 1, maxScore: 1, severity: 'normal', color: '#1b5e20' },
+      { rangeLabel: 'Level II', rangeLabel_ar: 'المستوى II — فعّال بوتيرة أبطأ', minScore: 2, maxScore: 2, severity: 'mild', color: '#558b2f' },
+      { rangeLabel: 'Level III', rangeLabel_ar: 'المستوى III — فعّال مع المألوفين', minScore: 3, maxScore: 3, severity: 'moderate', color: '#ef6c00' },
+      { rangeLabel: 'Level IV', rangeLabel_ar: 'المستوى IV — غير متّسق مع المألوفين', minScore: 4, maxScore: 4, severity: 'severe', color: '#c62828' },
+      { rangeLabel: 'Level V', rangeLabel_ar: 'المستوى V — نادرًا ما يكون فعّالًا', minScore: 5, maxScore: 5, severity: 'critical', color: '#b71c1c' },
+    ],
+
+    purpose: 'descriptor',
+    rawShape: 'items_array',
+    derivedType: 'lookup_table',
+    derivedRange: { min: 1, max: 5 },
+    interpretationStyle: 'tier',
+    scoringAlgorithmRef: 'scoring/cfcs.js',
+    scoringEngineVersion: '1.0.0',
+
+    interpretation: { mcid: { status: 'not_applicable' } },
+    reassessment: { standardIntervalDays: 365, minIntervalDays: 180 },
+
+    administrationTime: 5,
+    administeredBy: ['speech_therapist', 'physician', 'any_trained'],
+    trainingRequired: false,
+    publisher: 'Hidecker et al. (2011)',
+    citation: 'Hidecker MJC, et al. Dev Med Child Neurol. 2011;53(8):704-710.',
+    evidenceLevel: 'level_1',
+
+    eligibility: { languages: ['ar', 'en'], culturalAdaptation: 'not_required' },
+    reporting: {
+      showInFamilyReport: true,
+      familyFriendlyLabel: 'Communication level',
+      familyFriendlyLabel_ar: 'مستوى التواصل',
+    },
+    engine: { feedsSmartEngine: true },
+    sensitivityLevel: 'MEDIUM',
+    status: 'active',
+    tags: ['cerebral-palsy', 'communication', 'classification', 'digital-administration'],
+  },
+
+  // ── EDACS — eating & drinking ability classification (CP) ─────────────
+  {
+    code: 'EDACS',
+    name: 'Eating and Drinking Ability Classification System',
+    name_ar: 'نظام تصنيف القدرة على الأكل والشرب',
+    abbreviation: 'EDACS',
+    version: '1.0.0',
+    description: '5-level ordinal classification of eating/drinking safety & efficiency in CP.',
+    description_ar: 'تصنيف ترتيبي من 5 مستويات لأمان وكفاءة الأكل والشرب في الشلل الدماغي.',
+    category: 'functional',
+    type: 'rating_scale',
+    targetPopulation: ['children', 'cerebral_palsy'],
+    ageRange: { min: 3, max: 18, unit: 'years' },
+
+    scoringType: 'numeric',
+    minScore: 1,
+    maxScore: 5,
+    scoringDirection: 'lower_better',
+    scoringRules: [
+      { rangeLabel: 'Level I', rangeLabel_ar: 'المستوى I — بأمان وكفاءة', minScore: 1, maxScore: 1, severity: 'normal', color: '#1b5e20' },
+      { rangeLabel: 'Level II', rangeLabel_ar: 'المستوى II — بأمان مع قيود على الكفاءة', minScore: 2, maxScore: 2, severity: 'mild', color: '#558b2f' },
+      { rangeLabel: 'Level III', rangeLabel_ar: 'المستوى III — قيود على الأمان', minScore: 3, maxScore: 3, severity: 'moderate', color: '#ef6c00' },
+      { rangeLabel: 'Level IV', rangeLabel_ar: 'المستوى IV — قيود كبيرة على الأمان', minScore: 4, maxScore: 4, severity: 'severe', color: '#c62828' },
+      { rangeLabel: 'Level V', rangeLabel_ar: 'المستوى V — غير قادر بأمان (تغذية أنبوبية)', minScore: 5, maxScore: 5, severity: 'critical', color: '#b71c1c' },
+    ],
+
+    purpose: 'descriptor',
+    rawShape: 'items_array',
+    derivedType: 'lookup_table',
+    derivedRange: { min: 1, max: 5 },
+    interpretationStyle: 'tier',
+    scoringAlgorithmRef: 'scoring/edacs.js',
+    scoringEngineVersion: '1.0.0',
+
+    interpretation: { mcid: { status: 'not_applicable' } },
+    reassessment: { standardIntervalDays: 365, minIntervalDays: 180 },
+
+    administrationTime: 5,
+    administeredBy: ['speech_therapist', 'occupational_therapist', 'physician', 'any_trained'],
+    trainingRequired: false,
+    publisher: 'Sellers et al. (2014)',
+    citation: 'Sellers D, et al. Dev Med Child Neurol. 2014;56(3):245-252.',
+    evidenceLevel: 'level_1',
+
+    eligibility: { languages: ['ar', 'en'], culturalAdaptation: 'not_required' },
+    reporting: {
+      showInFamilyReport: true,
+      familyFriendlyLabel: 'Eating & drinking level',
+      familyFriendlyLabel_ar: 'مستوى الأكل والشرب',
+    },
+    engine: { feedsSmartEngine: true },
+    sensitivityLevel: 'MEDIUM',
+    status: 'active',
+    tags: ['cerebral-palsy', 'feeding', 'classification', 'digital-administration'],
+  },
 ];
 
 module.exports = { MEASURES };

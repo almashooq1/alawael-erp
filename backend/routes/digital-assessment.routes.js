@@ -161,12 +161,10 @@ router.post(
         .json({ success: false, message: 'measureCode و rawItems (مصفوفة) مطلوبان' });
     }
     if (purpose && !VALID_PURPOSES.includes(purpose)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `purpose غير صالح — المسموح: ${VALID_PURPOSES.join(', ')}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `purpose غير صالح — المسموح: ${VALID_PURPOSES.join(', ')}`,
+      });
     }
 
     // Defense-in-depth (bodyScopedBeneficiaryGuard already enforced this).
@@ -290,6 +288,45 @@ router.get(
       await enforceBeneficiaryBranch(req, owner.beneficiaryId);
       const insight = await assessmentInsightService.insightForApplication(applicationId);
       res.json({ success: true, data: insight });
+    } catch (err) {
+      if (err.statusCode) {
+        return res.status(err.statusCode).json({ success: false, message: err.message });
+      }
+      throw err;
+    }
+  })
+);
+
+// ── POST /insight/:applicationId/create-goal ─────────────────────────────
+// W568 — materialize one assessment-derived SMART goal DRAFT into a real
+// TherapeuticGoal (clinician accepts a suggestion). Body: { goalIndex?, episodeId? }.
+router.post(
+  '/insight/:applicationId/create-goal',
+  requireRole(WRITE_ROLES),
+  asyncHandler(async (req, res) => {
+    const { applicationId } = req.params;
+    if (!mongoose.isValidObjectId(applicationId)) {
+      return res.status(400).json({ success: false, message: 'applicationId غير صالح' });
+    }
+    const { goalIndex, episodeId } = req.body || {};
+    if (episodeId != null && !mongoose.isValidObjectId(episodeId)) {
+      return res.status(400).json({ success: false, message: 'episodeId غير صالح' });
+    }
+    try {
+      const MeasureApplication = mongoose.model('MeasureApplication');
+      const owner = await MeasureApplication.findById(applicationId).select('beneficiaryId').lean();
+      if (!owner) {
+        return res.status(404).json({ success: false, message: 'التطبيق غير موجود' });
+      }
+      await enforceBeneficiaryBranch(req, owner.beneficiaryId);
+      const goal = await assessmentInsightService.createGoalFromSuggestion({
+        applicationId,
+        goalIndex: Number.isInteger(goalIndex) ? goalIndex : 0,
+        episodeId: episodeId || undefined,
+        assessorId: getUserId(req),
+        branchId: req.user?.branchId || undefined,
+      });
+      res.status(201).json({ success: true, data: goal });
     } catch (err) {
       if (err.statusCode) {
         return res.status(err.statusCode).json({ success: false, message: err.message });

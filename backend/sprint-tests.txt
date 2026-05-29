@@ -400,3 +400,5 @@ __tests__/assessment-insight-wave563.test.js
 __tests__/assessment-insight-behavioral-wave564.test.js
 __tests__/scoring-sdq-wave565.test.js
 __tests__/scoring-cp-motor-classifications-wave566.test.js
+
+__tests__/assessment-goal-from-suggestion-wave568.test.js

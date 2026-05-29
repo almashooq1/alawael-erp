@@ -162,7 +162,7 @@ describe('W553 — registry + engine item-bank surface', () => {
       .listAdministrable()
       .map(m => m.measureCode)
       .sort();
-    expect(codes).toEqual(['CARS-2', 'GMFCS', 'M-CHAT-R', 'MACS', 'PEDSQL', 'SDQ']);
+    expect(codes).toEqual(['CARS-2', 'CFCS', 'EDACS', 'GMFCS', 'M-CHAT-R', 'MACS', 'PEDSQL', 'SDQ']);
   });
 
   test('every item-bank item carries bilingual text', () => {

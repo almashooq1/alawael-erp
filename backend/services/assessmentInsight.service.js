@@ -335,6 +335,92 @@ class AssessmentInsightService {
       measureId: app.measureId,
     });
   }
+
+  /**
+   * W568 — Materialize ONE assessment-derived SMART goal draft into a real
+   * persisted TherapeuticGoal. This closes the loop: the insight SUGGESTS,
+   * the clinician ACCEPTS, and a goal is created with the clinician as author.
+   *
+   * The goal is created WITHOUT an objective-level measureLink — the W235
+   * goal↔measure linkage carries its own strict invariants (PRIMARY weight,
+   * interventionRefs, etc.) that are a deliberate clinical step, not an
+   * auto-fill. The source measure is recorded in tags + notes; the clinician
+   * formally links it afterward via the existing goal-linkage surface.
+   *
+   * @param {Object} input
+   * @param {string} input.applicationId
+   * @param {number} [input.goalIndex=0]  which suggestion to materialize
+   * @param {string} [input.episodeId]    required if the administration has none
+   * @param {string} input.assessorId     author (clinician)
+   * @param {string} [input.branchId]
+   * @returns {Promise<Object>} the created TherapeuticGoal
+   */
+  async createGoalFromSuggestion({
+    applicationId,
+    goalIndex = 0,
+    episodeId,
+    assessorId,
+    branchId,
+  }) {
+    if (!mongoose.isValidObjectId(applicationId)) throw _err('valid applicationId required', 400);
+    if (!assessorId) throw _err('assessorId required', 400);
+
+    const MeasureApplication = mongoose.model('MeasureApplication');
+    const TherapeuticGoal = mongoose.model('TherapeuticGoal');
+
+    const app = await MeasureApplication.findById(applicationId)
+      .select('beneficiaryId episodeId measureId')
+      .lean();
+    if (!app) throw _err('administration not found', 404);
+
+    const insight = await this.insightForApplication(applicationId);
+    const draft = (insight.goalSuggestions || [])[goalIndex];
+    if (!draft) throw _err(`no goal suggestion at index ${goalIndex}`, 400);
+
+    const resolvedEpisode = episodeId || app.episodeId;
+    if (!resolvedEpisode) {
+      throw _err('episodeId required — this administration is not linked to an episode', 400);
+    }
+
+    const goal = await TherapeuticGoal.create({
+      beneficiaryId: app.beneficiaryId,
+      episodeId: resolvedEpisode,
+      title: draft.title,
+      title_ar: draft.title_ar,
+      description: draft.specific || draft.title,
+      specific: draft.specific,
+      measurable: draft.measurable,
+      achievable: draft.achievable,
+      relevant: draft.relevant,
+      timeBound: draft.timeBound,
+      type: draft.type,
+      domain: draft.domain,
+      priority: draft.priority || 'medium',
+      baseline: draft.baseline
+        ? {
+            value: draft.baseline.value,
+            description: draft.baseline.description,
+            date: new Date(),
+          }
+        : undefined,
+      target: {
+        value: draft.target?.value,
+        description: draft.target?.description,
+        criteria: draft.target?.criteria,
+      },
+      startDate: new Date(),
+      status: 'draft',
+      createdBy: assessorId,
+      assignedTo: assessorId,
+      branchId,
+      tags: ['assessment-derived', insight.measureCode].filter(Boolean),
+      notes:
+        `هدف مشتقّ تلقائيًّا من تطبيق المقياس ${insight.measureCode || ''} (W568). ` +
+        'اربط المقياس رسميًّا عبر واجهة ربط الأهداف عند الحاجة.',
+    });
+
+    return goal;
+  }
 }
 
 const assessmentInsightService = new AssessmentInsightService();

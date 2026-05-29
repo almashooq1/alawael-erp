@@ -3,6 +3,10 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
+  // email was referenced by the register/login handlers but missing from the
+  // schema, so Mongoose silently dropped it. sparse keeps the unique index from
+  // colliding on any legacy docs that predate this field.
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true, sparse: true },
   password: { type: String, required: true, select: false },
   role: { type: String, enum: ['admin', 'manager', 'user'], default: 'user' },
   createdAt: { type: Date, default: Date.now },

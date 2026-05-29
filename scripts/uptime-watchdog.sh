@@ -30,6 +30,11 @@ log() { echo "$(ts) $*" >> "$LOG"; }
 
 probe() { local c; c=$(curl -sk -m 10 -o /dev/null -w '%{http_code}' "$1" 2>/dev/null); echo "${c:-000}"; }
 
+# Confirm a surface is really down: re-probe once after a short delay so a single
+# transient blip (a GC pause, a deploy's restart window) never triggers a restart.
+# Echoes the SECOND code; caller treats non-healthy as confirmed-down.
+reprobe() { sleep 5; probe "$1"; }
+
 alert() {
   [ -n "$ALERT_WEBHOOK" ] || return 0
   curl -sk -m 10 -X POST -H 'Content-Type: application/json' \
@@ -58,14 +63,23 @@ B=$(probe "$BASE/health")
 A=$(probe "$BASE/admin/welcome")   # 302 here = nginx fallback = :3100 down
 L=$(probe "$BASE/")
 
-# backend
-[ "$B" = "200" ] || { log "WARN   backend /health=$B"; maybe_restart alawael-api "backend" "$B"; }
+# backend — only act on a CONFIRMED failure (two consecutive bad probes) so a
+# transient blip never triggers a disruptive full-backend restart.
+if [ "$B" != "200" ]; then
+  B2=$(reprobe "$BASE/health")
+  if [ "$B2" != "200" ]; then log "WARN   backend /health=$B then $B2 (confirmed)"; maybe_restart alawael-api "backend" "$B2"
+  else log "INFO   backend /health=$B recovered on re-probe ($B2) — no action"; fi
+fi
 # web-admin (200 healthy; anything else incl. 302 fallback = unhealthy)
-[ "$A" = "200" ] || { log "WARN   web-admin /admin/welcome=$A"; maybe_restart alawael-web-admin "web-admin" "$A"; }
-# legacy static (nginx-served; no pm2 proc to restart — alert only)
+if [ "$A" != "200" ]; then
+  A2=$(reprobe "$BASE/admin/welcome")
+  if [ "$A2" != "200" ]; then log "WARN   web-admin /admin/welcome=$A then $A2 (confirmed)"; maybe_restart alawael-web-admin "web-admin" "$A2"
+  else log "INFO   web-admin=$A recovered on re-probe ($A2) — no action"; fi
+fi
+# legacy static (nginx-served; no pm2 proc to restart — alert only, also confirmed)
 case "$L" in
   200|301|302) ;;
-  *) log "WARN   legacy /=$L (nginx/static)"; alert "legacy site / down ($L)";;
+  *) L2=$(reprobe "$BASE/"); case "$L2" in 200|301|302) log "INFO   legacy /=$L recovered ($L2)";; *) log "WARN   legacy /=$L then $L2 (confirmed)"; alert "legacy site / down ($L2)";; esac;;
 esac
 
 # hourly heartbeat (top of the hour) so the log proves the watchdog is alive

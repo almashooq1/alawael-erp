@@ -157,6 +157,19 @@ const SPECS = [
     ],
   },
   { file: 'taqat.models.js', fields: ['fundingAmount', 'stipend'] },
+  {
+    file: 'gratuity.model.js',
+    fields: [
+      'baseGratuity',
+      'totalAdditions',
+      'totalDeductions',
+      'grossSettlement',
+      'netSettlement',
+      'amount',
+    ],
+  },
+  { file: 'compensation.model.js', fields: ['amount'] },
+  { file: 'finance/ExpenseApprovalChain.js', fields: ['amount', 'maxAmount'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

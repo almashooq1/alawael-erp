@@ -46,6 +46,8 @@ const gratuitySchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+        amount_halalas: { type: Number, default: 0 },
         details: {
           yearsBreakdown: [
             {
@@ -115,6 +117,12 @@ const gratuitySchema = new mongoose.Schema(
         type: Number,
         required: true,
       },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      baseGratuity_halalas: { type: Number, default: 0 },
+      totalAdditions_halalas: { type: Number, default: 0 },
+      totalDeductions_halalas: { type: Number, default: 0 },
+      grossSettlement_halalas: { type: Number, default: 0 },
+      netSettlement_halalas: { type: Number, default: 0 },
     },
 
     // معلومات الدفع
@@ -238,6 +246,16 @@ const gratuitySchema = new mongoose.Schema(
 // تحديث updatedAt قبل الحفظ
 gratuitySchema.pre('save', function (next) {
   this.updatedAt = new Date();
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
+  // Array item amounts (yearsBreakdown[], additions/deductions items[]) deferred.
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'summary.baseGratuity',
+    'summary.totalAdditions',
+    'summary.totalDeductions',
+    'summary.grossSettlement',
+    'summary.netSettlement',
+    'calculation.baseGratuity.amount',
+  ]);
   next();
 });
 

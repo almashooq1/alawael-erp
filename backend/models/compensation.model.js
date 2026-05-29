@@ -275,6 +275,8 @@ const individualIncentiveSchema = new Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
     percentage: Number, // من الراتب الأساسي
 
     // المقاييس (للحوافز المبنية على الأداء)
@@ -339,6 +341,8 @@ const performancePenaltySchema = new Schema(
     reason: String,
     description: String,
     amount: { type: Number, required: true, min: 0 },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
 
     severity: {
       type: String,
@@ -629,6 +633,17 @@ compensationStructureSchema.statics.getActiveStructures = function () {
 };
 
 // ========== التصدير ==========
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+// compensationStructure allowance/deduction array items are deferred.
+individualIncentiveSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
+});
+performancePenaltySchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
+});
+
 module.exports = {
   CompensationStructure:
     mongoose.models.CompensationStructure ||

@@ -27,6 +27,7 @@ const chainStepSchema = new mongoose.Schema(
   {
     level: { type: Number, required: true },
     maxAmount: { type: Number, default: null },
+    maxAmount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-step, set in pre-save)
     allowedRoles: { type: [String], default: [] },
     dualControl: { type: Boolean, default: false },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
@@ -43,6 +44,7 @@ const historyEntrySchema = new mongoose.Schema(
     actorId: { type: String, default: null },
     level: { type: Number, default: null },
     amount: { type: Number, default: null },
+    amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-entry, set in pre-save)
     reason: { type: String, default: null },
   },
   { _id: false }
@@ -72,6 +74,7 @@ const chainSchema = new mongoose.Schema(
   {
     expenseId: { type: String, required: true, unique: true, index: true },
     amount: { type: Number, required: true },
+    amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND — set in pre-save
     branchId: { type: String, default: null, index: true },
     category: { type: String, default: null },
     status: {
@@ -96,6 +99,17 @@ const chainSchema = new mongoose.Schema(
 
 chainSchema.index({ status: 1, branchId: 1 });
 chainSchema.index({ status: 1, currentLevel: 1 });
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings, including
+// the per-element money in the chain[] (step maxAmount) and history[] arrays
+// (which dot-paths can't address — iterate each subdoc).
+chainSchema.pre('save', function (next) {
+  const { deriveHalalas } = require('../../intelligence/money.lib');
+  deriveHalalas(this, ['amount']);
+  (this.chain || []).forEach(step => deriveHalalas(step, ['maxAmount']));
+  (this.history || []).forEach(entry => deriveHalalas(entry, ['amount']));
+  next();
+});
 
 module.exports =
   mongoose.models.ExpenseApprovalChain || mongoose.model('ExpenseApprovalChain', chainSchema);

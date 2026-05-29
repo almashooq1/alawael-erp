@@ -233,7 +233,7 @@ if $DEPLOY_FRONTEND; then
 
   # 4) Prune assets untouched for 14d + keep only the last ~10 index.html backups.
   find "\$APP/frontend/build/assets" -type f -mtime +14 -delete 2>/dev/null || true
-  ls -1t "\$APP/frontend/build/"index.html.before-* 2>/dev/null | tail -n +11 | xargs -r rm -f
+  { ls -1t "\$APP/frontend/build/"index.html.before-* 2>/dev/null | tail -n +11 | xargs -r rm -f; } || true
 
   chown -R www:www "\$APP/frontend/build"
   rm -rf "\$STAGE"

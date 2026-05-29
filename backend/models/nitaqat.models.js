@@ -85,6 +85,9 @@ const wpsRecordSchema = new Schema(
     unpaidEmployees: { type: Number, default: 0 },
     totalAmount: { type: Number, default: 0 },
     paidAmount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    totalAmount_halalas: { type: Number, default: 0 },
+    paidAmount_halalas: { type: Number, default: 0 },
     compliancePercentage: { type: Number, default: 0 },
 
     // ملف SIF
@@ -125,6 +128,12 @@ const wpsRecordSchema = new Schema(
 wpsRecordSchema.index({ organization: 1, period: 1 }, { unique: true });
 // REMOVED DUPLICATE INDEX: wpsRecordSchema.index({ status: 1 });
 
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+wpsRecordSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['totalAmount', 'paidAmount']);
+  next();
+});
+
 const WpsRecord = mongoose.models.WpsRecord || mongoose.model('WpsRecord', wpsRecordSchema);
 
 /* ═══════════════════════════════════════════════════════
@@ -160,6 +169,12 @@ const employmentContractSchema = new Schema(
     transportAllowance: { type: Number, default: 0 },
     otherAllowances: { type: Number, default: 0 },
     totalSalary: { type: Number, required: true },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    basicSalary_halalas: { type: Number, default: 0 },
+    housingAllowance_halalas: { type: Number, default: 0 },
+    transportAllowance_halalas: { type: Number, default: 0 },
+    otherAllowances_halalas: { type: Number, default: 0 },
+    totalSalary_halalas: { type: Number, default: 0 },
 
     // شروط العمل
     workingHoursPerWeek: { type: Number, default: 48 },
@@ -202,6 +217,18 @@ employmentContractSchema.index({ organization: 1, status: 1 });
 
 // Registered as `NitaqatEmploymentContract` to dodge the collision with
 // the canonical models/EmploymentContract.js + HR/EmploymentContract.js.
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+employmentContractSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'basicSalary',
+    'housingAllowance',
+    'transportAllowance',
+    'otherAllowances',
+    'totalSalary',
+  ]);
+  next();
+});
+
 const EmploymentContract =
   mongoose.models.NitaqatEmploymentContract ||
   mongoose.model('NitaqatEmploymentContract', employmentContractSchema);

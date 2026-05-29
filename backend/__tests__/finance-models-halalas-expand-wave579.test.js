@@ -121,6 +121,18 @@ const SPECS = [
       'totalAmount',
     ],
   },
+  {
+    file: 'nitaqat.models.js',
+    fields: [
+      'totalAmount',
+      'paidAmount',
+      'basicSalary',
+      'housingAllowance',
+      'transportAllowance',
+      'otherAllowances',
+      'totalSalary',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

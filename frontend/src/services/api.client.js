@@ -90,6 +90,17 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
  */
 apiClient.interceptors.request.use(
   config => {
+    // Normalize a duplicated /api/v1 prefix. baseURL already supplies /api/v1, but
+    // many services (ddd, admin-communications, dashboard, episodes, goals, tasks,
+    // user-management, mdt-coordination, …) historically hardcoded the prefix in
+    // their paths too, producing /api/v1/api/v1/… → 404 and silent demo-data
+    // fallbacks. Strip a single leading /api/v1 so both the bare-path and prefixed
+    // conventions resolve to the same backend route. The lookahead keeps paths like
+    // "/api/v1foo" untouched.
+    if (typeof config.url === 'string' && /^\/api\/v1(?=\/|$)/.test(config.url)) {
+      config.url = config.url.replace(/^\/api\/v1/, '') || '/';
+    }
+
     // Check if offline
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       return Promise.reject({

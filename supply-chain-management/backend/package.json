@@ -22,7 +22,7 @@
     "bwip-js": "^4.8.0",
     "canvas": "^3.2.3",
     "cors": "^2.8.5",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.21",
     "dotenv": "^16.0.0",
     "express": "^5.2.1",
     "express-rate-limit": "^6.11.2",

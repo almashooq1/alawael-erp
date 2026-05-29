@@ -103,12 +103,11 @@ chainSchema.index({ status: 1, currentLevel: 1 });
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings, including
 // the per-element money in the chain[] (step maxAmount) and history[] arrays
 // (which dot-paths can't address — iterate each subdoc).
-chainSchema.pre('save', function (next) {
+chainSchema.pre('save', async function () {
   const { deriveHalalas } = require('../../intelligence/money.lib');
   deriveHalalas(this, ['amount']);
   (this.chain || []).forEach(step => deriveHalalas(step, ['maxAmount']));
   (this.history || []).forEach(entry => deriveHalalas(entry, ['amount']));
-  next();
 });
 
 module.exports =

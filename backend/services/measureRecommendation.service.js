@@ -148,7 +148,7 @@ const STATUS_LABELS = {
  * @param {Object} reasm         reassessmentStatus() output
  * @param {boolean} administrable measure ships a digital item bank
  */
-function _scoreCandidate(cand, reasm, administrable) {
+function _scoreCandidate(cand, reasm, administrable, clinical = {}) {
   let score = 0;
   const reasons = [];
   const reasons_ar = [];
@@ -211,11 +211,31 @@ function _scoreCandidate(cand, reasm, administrable) {
     reasons_ar.push('موجَّه لنوع إعاقة هذا المستفيد');
   }
 
+  // W575 — clinical-urgency signals from the LAST administration. A worsening
+  // trajectory (or a severe/critical last result) raises priority — and can
+  // promote an otherwise up-to-date measure to an EARLY reassessment, because
+  // a beneficiary who is declining shouldn't wait out the full cadence.
+  const SEVERE = clinical.severity === 'severe' || clinical.severity === 'critical';
+  const DECLINING = clinical.trend === 'declining';
+  if (DECLINING) {
+    score += 18;
+    reasons.push('Last trajectory was declining — earlier reassessment indicated');
+    reasons_ar.push('آخر اتجاه كان نحو التدهور — يُستحسن إعادة تقييم مبكّرة');
+  }
+  if (SEVERE) {
+    score += 10;
+    reasons.push(`Last result was ${clinical.severity}`);
+    reasons_ar.push('آخر نتيجة كانت ضمن النطاق الشديد — متابعة لصيقة');
+  }
+
   let priority = 'not_now';
   if (reasm.status !== 'current') {
     if (score >= PRIORITY_HIGH) priority = 'high';
     else if (score >= PRIORITY_MEDIUM) priority = 'medium';
     else priority = 'low';
+  } else if (DECLINING || SEVERE) {
+    // up-to-date on cadence, but clinically worsening → still surface it.
+    priority = DECLINING ? 'medium' : 'low';
   }
 
   return { score: Math.round(score * 10) / 10, priority, reasons, reasons_ar };
@@ -245,7 +265,10 @@ function rankMeasures({ candidates, latestByCode = {}, administrableCodes = [], 
     const standardIntervalDays = cand.reassessment?.standardIntervalDays ?? null;
     const reasm = reassessmentStatus(last?.lastDate, standardIntervalDays, now);
     const administrable = adminSet.has(cand.code);
-    const { score, priority, reasons, reasons_ar } = _scoreCandidate(cand, reasm, administrable);
+    const { score, priority, reasons, reasons_ar } = _scoreCandidate(cand, reasm, administrable, {
+      trend: last?.trend,
+      severity: last?.severity,
+    });
 
     return {
       measureCode: cand.code,

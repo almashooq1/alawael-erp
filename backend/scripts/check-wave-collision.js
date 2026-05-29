@@ -38,6 +38,12 @@
  *     than a claim (e.g. "W518 — based on W462 …") → reported anyway;
  *     dev decides if it's a real claim. Conservative-by-design: false
  *     positive (1× per ~20 pushes) is cheaper than a missed collision.
+ *   - BUNDLE RANGE in the claim zone (e.g. "W553-W565" / "W553–W565") →
+ *     expanded to claim EVERY wave it covers (554…564 too), not just the
+ *     two endpoints. Closes the 2026-05-29 miss where a "W553-W565" bundle
+ *     + a sibling "W561" were not flagged because the interior was invisible.
+ *     A spaced " - " is the claim/reference separator (NOT a range), and a
+ *     range wider than RANGE_EXPANSION_CAP (50) keeps only its endpoints.
  *
  * USAGE:
  *   node scripts/check-wave-collision.js              # human-readable
@@ -81,6 +87,21 @@ const DEFAULT_OTHER_REPO = 'c:/Users/x-be/alawael-rehab-platform';
 // so we use lookbehind/lookahead to avoid matching mid-word hits like
 // "GROW123" or "AWS123".
 const WAVE_RE = /(?<![A-Za-z0-9])W(\d{2,4})[a-zA-Z]{0,2}(?![A-Za-z0-9])/g;
+
+// Inclusive wave RANGE, e.g. "W553-W565" or "W553–W565" (ASCII hyphen or
+// en-dash, NO surrounding spaces — a spaced " - " is the claim/reference
+// separator, handled in extractClaimWaves, and must NOT be read as a range).
+// Endpoints carry the same optional 1-2 letter sub-wave suffix as WAVE_RE;
+// only the numeric portions are captured. Boundaries mirror WAVE_RE so a
+// mid-word "GROW553-W565" never matches.
+const WAVE_RANGE_RE =
+  /(?<![A-Za-z0-9])W(\d{2,4})[a-zA-Z]{0,2}[-–]W(\d{2,4})[a-zA-Z]{0,2}(?![A-Za-z0-9])/g;
+
+// A bundle commit rarely spans more than a handful of waves. Cap expansion
+// so a typo like "W10-W9999" can't balloon the index to ~10k entries; past
+// the cap the two endpoints are still captured by WAVE_RE, so nothing is
+// silently dropped — only the interior is skipped.
+const RANGE_EXPANSION_CAP = 50;
 
 function shouldSkip() {
   return process.env.CHECK_WAVE_SKIP === '1';
@@ -165,6 +186,36 @@ function extractWaves(subject) {
 // shape is near-universal across this repo's feature commits, so
 // indexing references-as-claims made the gate cry wolf on essentially
 // every wave that builds on a prior one.
+// Expand inclusive wave RANGES ("W553-W565") into every wave they cover.
+// A bundle commit ("feat: W553-W565 — …") semantically claims all 13 waves,
+// but the plain-token WAVE_RE only sees the two endpoints — so a wave INSIDE
+// the range (e.g. W561) looks free, and a parallel session can mint it
+// undetected. That is the exact 2026-05-29 miss: commit "W553-W565" + a
+// sibling "W561" did not register as a collision. Returns numeric strings,
+// deduped, order of first appearance. Ranges wider than RANGE_EXPANSION_CAP
+// are left to WAVE_RE's endpoint capture (interior skipped).
+function expandWaveRanges(text) {
+  const out = [];
+  const seen = new Set();
+  let m;
+  WAVE_RANGE_RE.lastIndex = 0;
+  while ((m = WAVE_RANGE_RE.exec(text)) !== null) {
+    const start = parseInt(m[1], 10);
+    const end = parseInt(m[2], 10);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+    if (end < start) continue;
+    if (end - start > RANGE_EXPANSION_CAP) continue;
+    for (let n = start; n <= end; n++) {
+      const s = String(n);
+      if (!seen.has(s)) {
+        seen.add(s);
+        out.push(s);
+      }
+    }
+  }
+  return out;
+}
+
 function extractClaimWaves(subject) {
   const em = subject.indexOf('—');
   const hy = subject.indexOf(' - ');
@@ -173,7 +224,23 @@ function extractClaimWaves(subject) {
   else if (hy === -1) sepIdx = em;
   else sepIdx = Math.min(em, hy);
   const claimZone = sepIdx === -1 ? subject : subject.slice(0, sepIdx);
-  return extractWaves(claimZone);
+  // Discrete tokens (W553, W565) PLUS interior waves from any inclusive
+  // range bundle (W553-W565 → 554…564). Deduped, discrete-first order.
+  const out = [];
+  const seen = new Set();
+  for (const w of extractWaves(claimZone)) {
+    if (!seen.has(w)) {
+      seen.add(w);
+      out.push(w);
+    }
+  }
+  for (const w of expandWaveRanges(claimZone)) {
+    if (!seen.has(w)) {
+      seen.add(w);
+      out.push(w);
+    }
+  }
+  return out;
 }
 
 // Parse "abcdef1234 subject line text" → { sha, subject }.
@@ -356,6 +423,7 @@ function main() {
 // real `git log` invocation.
 module.exports = {
   extractWaves,
+  expandWaveRanges,
   extractClaimWaves,
   parseOneline,
   buildWaveIndex,
@@ -363,6 +431,8 @@ module.exports = {
   nextFreeWave,
   resolveOtherRepoPath,
   WAVE_RE,
+  WAVE_RANGE_RE,
+  RANGE_EXPANSION_CAP,
   DEFAULT_OTHER_REPO,
 };
 

@@ -25,6 +25,7 @@ const path = require('path');
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'check-wave-collision.js');
 const {
   extractWaves,
+  expandWaveRanges,
   extractClaimWaves,
   parseOneline,
   buildWaveIndex,
@@ -32,6 +33,7 @@ const {
   nextFreeWave,
   resolveOtherRepoPath,
   WAVE_RE,
+  RANGE_EXPANSION_CAP,
   DEFAULT_OTHER_REPO,
 } = require('../scripts/check-wave-collision');
 
@@ -123,6 +125,60 @@ describe('check-wave-collision — extractClaimWaves (claim vs cross-reference)'
 
   it('handles the ASCII " - " separator as well as the em-dash', () => {
     expect(extractClaimWaves('feat: W600 - builds on W123')).toEqual(['600']);
+  });
+
+  it('expands a bundle RANGE in the claim zone so interior waves are claimed (the W561 miss)', () => {
+    // The exact 2026-05-29 case: a "W553-W565" bundle must claim every
+    // wave it spans, so a sibling minting W561 is caught as a collision.
+    const claimed = extractClaimWaves('feat(measures): W553-W565 — digital assessment engine');
+    expect(claimed).toContain('553');
+    expect(claimed).toContain('561'); // interior wave — the whole point
+    expect(claimed).toContain('565');
+    expect(claimed).toHaveLength(13); // 553..565 inclusive
+  });
+
+  it('does NOT treat the spaced " - " separator as a range', () => {
+    // "W600 - builds on W123": the " - " is the claim/reference separator,
+    // so the claim is W600 only — must not expand into a 600..??? range.
+    expect(extractClaimWaves('feat: W600 - builds on W123')).toEqual(['600']);
+  });
+});
+
+describe('check-wave-collision — expandWaveRanges (bundle ranges)', () => {
+  it('expands an inclusive ASCII-hyphen range', () => {
+    expect(expandWaveRanges('W100-W103')).toEqual(['100', '101', '102', '103']);
+  });
+
+  it('expands an en-dash range too', () => {
+    expect(expandWaveRanges('W100–W102')).toEqual(['100', '101', '102']);
+  });
+
+  it('expands ranges whose endpoints carry sub-wave letter suffixes', () => {
+    expect(expandWaveRanges('W325c-W327')).toEqual(['325', '326', '327']);
+  });
+
+  it('returns [] when there is no range (single token / plus-joined run)', () => {
+    expect(expandWaveRanges('W512')).toEqual([]);
+    expect(expandWaveRanges('W512+W514')).toEqual([]);
+  });
+
+  it('ignores a reversed range (end < start)', () => {
+    expect(expandWaveRanges('W565-W553')).toEqual([]);
+  });
+
+  it('keeps only endpoints (skips interior) when range exceeds the cap', () => {
+    // A typo like "W10-W9999" must NOT balloon the index; WAVE_RE still
+    // captures the endpoints, so expandWaveRanges contributes nothing here.
+    const wide = `W10-W${10 + RANGE_EXPANSION_CAP + 5}`;
+    expect(expandWaveRanges(wide)).toEqual([]);
+  });
+
+  it('does NOT match a mid-word range (avoids GROW100-W200)', () => {
+    expect(expandWaveRanges('GROW100-W200')).toEqual([]);
+  });
+
+  it('does NOT match a date-like hyphen string', () => {
+    expect(expandWaveRanges('2026-05-29 release')).toEqual([]);
   });
 });
 
@@ -336,6 +392,17 @@ describe('check-wave-collision — CLI exit-code contract', () => {
     expect(r.status).toBe(1);
     expect(r.stdout).toMatch(/collision/);
     expect(r.stdout).toMatch(/W500/);
+  });
+
+  it('exits 1 when a pushed INTERIOR wave collides with a sibling bundle RANGE (W561 case)', () => {
+    // Sibling repo shipped the "W553-W565" bundle; pushing a fresh W561
+    // here must now be flagged because the interior is claimed by the range.
+    initRepo(tmpDir, ['feat: W561 standalone interior wave']);
+    initRepo(otherRepoDir, ['feat(measures): W553-W565 — digital assessment engine']);
+    const r = runScript(tmpDir, ['--json']);
+    expect(r.status).toBe(1);
+    const parsed = JSON.parse(r.stdout);
+    expect(parsed.collisions.map(c => c.wave)).toContain('561');
   });
 
   it('respects CHECK_WAVE_SKIP=1 (emergency bypass) → exit 0', () => {

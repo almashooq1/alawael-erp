@@ -7,9 +7,18 @@
 name: "🚀 Deploy to Production"
 
 on:
-  # ✅ تلقائي عند كل push على main + يدوي
+  # ✅ تلقائي عند كل push على main + يدوي.
+  # paths-ignore: لا تُطلق نشراً إنتاجياً للتغييرات التي لا تمسّ وقت تشغيل
+  # التطبيق المنشور (وثائق + إعدادات CI/الحوكمة). أي تغيير في كود backend/
+  # frontend أو التبعيات (package.json) لا يُطابَق هنا فيستمر بالنشر كالمعتاد.
+  # يُتخطّى التشغيل فقط حين تكون كل الملفات المتغيّرة ضمن هذه الأنماط.
+  # النشر اليدوي (workflow_dispatch) لا يتأثر بـ paths-ignore إطلاقاً.
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/**"
   workflow_dispatch:
     inputs:
       deploy_target:

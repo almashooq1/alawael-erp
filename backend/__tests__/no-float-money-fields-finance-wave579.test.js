@@ -69,7 +69,7 @@ const FINANCE_FILES = [
 ];
 
 const MONEY =
-  /(amount|price|cost|salary|wage|fee|premium|subtotal|vat|tax|payable|receivable|deposit|copay|fare|revenue|expense|deduction|allowance|reimbursement|gratuity|refund|balance|payment|contribution|share|due|paid|gross|\bnet|budget|spent|disbursed|funding|incentive|penalt|principal|outstanding|approved|claimed|requested|collected|target|settlement|eos|dues|inflow|outflow)/i;
+  /(amount|price|cost|salary|wage|fee|premium|subtotal|vat|tax|payable|receivable|deposit|copay|fare|revenue|expense|deduction|allowance|reimbursement|gratuity|refund|balance|payment|contribution|share|due|paid|gross|\bnet|budget|spent|disbursed|funding|incentive|penalt|principal|outstanding|approved|claimed|requested|collected|target|settlement|eos|dues|inflow|outflow|debit|credit)/i;
 const COUNT =
   /(employee|month|year|hour|day|row|count|application|hired|interview|jobseeker|participant|session|student|enrolled|attempt|trip|order|response|recipient|delivery|question|item|module|standard|frame|cycle|point|stock|distance|passenger|floor|room|stop|prediction|trial|acknowledg|absence|width|height|size|ratio|rate|percent|score|level|age|number)/i;
 const FIELD = /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*\{[^{}]*\btype:\s*Number\b[^{}]*\}/g;
@@ -96,6 +96,8 @@ const BASELINE = new Set([
   'BankReconciliation.js::balance',
   'BankReconciliation.js::bankStatementBalance',
   'BankReconciliation.js::bookBalance',
+  'BankReconciliation.js::credit',
+  'BankReconciliation.js::debit',
   'Budget.js::amount',
   'Budget.js::spent',
   'Budget.js::totalBudgeted',
@@ -196,6 +198,10 @@ const BASELINE = new Set([
   'finance/Invoice.js::total_amount',
   'finance/Invoice.js::unit_price',
   'finance/Invoice.js::vat_amount',
+  'finance/JournalEntry.js::credit',
+  'finance/JournalEntry.js::debit',
+  'finance/JournalEntry.js::total_credit',
+  'finance/JournalEntry.js::total_debit',
   'finance/Payment.js::amount',
   'finance/Payment.js::refund_amount',
   'gosi.models.js::balanceDue',
@@ -279,6 +285,6 @@ describe('no-float-money-fields (finance domain) — W579 ratchet', () => {
   });
 
   it('baseline is the documented size and only ratchets down', () => {
-    expect(BASELINE.size).toBeLessThanOrEqual(158);
+    expect(BASELINE.size).toBeLessThanOrEqual(164);
   });
 });

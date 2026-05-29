@@ -19,6 +19,12 @@ const SPECS = [
   { file: 'finance/Payment.js', fields: ['amount', 'refund_amount'] },
   { file: 'CreditNote.js', fields: ['subtotal', 'taxAmount', 'totalAmount', 'remainingAmount'] },
   { file: 'EInvoice.js', fields: ['subtotal', 'totalVAT', 'totalDiscount', 'totalAmount'] },
+  { file: 'finance/JournalEntry.js', fields: ['total_debit', 'total_credit'] },
+  { file: 'finance/ChartOfAccount.js', fields: ['current_balance', 'opening_balance'] },
+  {
+    file: 'finance/InsuranceClaim.js',
+    fields: ['total_claimed', 'total_approved', 'total_rejected', 'patient_share'],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

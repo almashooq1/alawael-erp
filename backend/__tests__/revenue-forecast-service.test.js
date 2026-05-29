@@ -14,6 +14,12 @@ function inv({
   provider = null,
 }) {
   const issueDate = new Date();
+  // Anchor to mid-month BEFORE subtracting months. Subtracting from a
+  // day-29/30/31 "today" can overflow into a shorter target month (e.g. on
+  // 2026-05-29, minus 3 months = Feb 29 → rolls to Mar 1), silently merging
+  // two month-buckets and making this date-dependent suite flaky on
+  // month-end calendar days. Day 15 exists in every month → deterministic.
+  issueDate.setDate(15);
   issueDate.setMonth(issueDate.getMonth() - issuedMonthsAgo);
   const updatedAt =
     paidDaysAfterIssue != null

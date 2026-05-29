@@ -50,6 +50,11 @@ const paymentTransactionSchema = new mongoose.Schema(
     netAmount: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
     vatAmount: { type: Number, default: 0 }, // ضريبة القيمة المضافة 15%
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    feeAmount_halalas: { type: Number, default: 0 },
+    netAmount_halalas: { type: Number, default: 0 },
+    vatAmount_halalas: { type: Number, default: 0 },
 
     // الحالة
     status: {
@@ -100,6 +105,7 @@ const paymentTransactionSchema = new mongoose.Schema(
     // الاسترداد
     isRefunded: { type: Boolean, default: false },
     refundedAmount: { type: Number, default: 0 },
+    refundedAmount_halalas: { type: Number, default: 0 },
 
     // 3D Secure
     threeDSecureStatus: {
@@ -137,6 +143,19 @@ const paymentTransactionSchema = new mongoose.Schema(
 );
 
 // Indexes
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// New async hook (none existed) per the W483/Mongoose-9 async doctrine.
+paymentTransactionSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'amount',
+    'feeAmount',
+    'netAmount',
+    'vatAmount',
+    'refundedAmount',
+  ]);
+  next();
+});
+
 paymentTransactionSchema.index({ branchId: 1, status: 1 });
 paymentTransactionSchema.index({ gateway: 1, status: 1 });
 paymentTransactionSchema.index({ gatewayTransactionId: 1 });

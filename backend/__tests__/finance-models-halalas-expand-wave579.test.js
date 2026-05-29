@@ -25,6 +25,12 @@ const SPECS = [
     file: 'finance/InsuranceClaim.js',
     fields: ['total_claimed', 'total_approved', 'total_rejected', 'patient_share'],
   },
+  {
+    file: 'PaymentTransaction.js',
+    fields: ['amount', 'feeAmount', 'netAmount', 'vatAmount', 'refundedAmount'],
+  },
+  { file: 'PaymentRefund.js', fields: ['amount'] },
+  { file: 'PaymentVoucher.js', fields: ['amount', 'taxAmount', 'netAmount'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

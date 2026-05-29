@@ -18,6 +18,8 @@ const paymentRefundSchema = new mongoose.Schema(
     gatewayRefundId: { type: String }, // معرف الاسترداد في البوابة
 
     amount: { type: Number, required: true, min: 0 },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
 
     reason: { type: String, required: true },
@@ -47,6 +49,13 @@ const paymentRefundSchema = new mongoose.Schema(
     collection: 'payment_refunds',
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// New async hook (none existed) per the W483/Mongoose-9 async doctrine.
+paymentRefundSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
+});
 
 paymentRefundSchema.index({ branchId: 1, status: 1 });
 paymentRefundSchema.index({ transactionId: 1 });

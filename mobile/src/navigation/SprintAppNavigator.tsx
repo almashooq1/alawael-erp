@@ -20,7 +20,7 @@
  * Host app can embed this as a sub-navigator, or use it as the root.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -68,6 +68,19 @@ type RootParamList = {
 };
 
 type SessionUser = { id: string; email: string; role: string; name?: string };
+
+// Session context — exposes the current user and a logout() that clears the
+// persisted credentials. Without this there was no way to sign out: the token
+// and currentUser lived in SecureStore with nothing to remove them, so an
+// expired/compromised session could not be ended without reinstalling the app.
+type SprintSession = { user: SessionUser | null; logout: () => Promise<void> };
+const SprintSessionContext = createContext<SprintSession>({
+  user: null,
+  logout: async () => {},
+});
+export function useSprintSession(): SprintSession {
+  return useContext(SprintSessionContext);
+}
 
 const RootStack = createNativeStackNavigator<RootParamList>();
 const ParentTab = createBottomTabNavigator<ParentTabsParamList>();
@@ -166,6 +179,15 @@ export default function SprintAppNavigator({
     loadSession();
   }, [loadSession]);
 
+  const logout = useCallback(async () => {
+    try {
+      await SecureStore.deleteItemAsync('authToken');
+      await SecureStore.deleteItemAsync('currentUser');
+    } finally {
+      setUser(null);
+    }
+  }, []);
+
   const initialRoute: keyof RootParamList = !user
     ? 'NafathLogin'
     : isSecurity(user.role)
@@ -224,7 +246,11 @@ export default function SprintAppNavigator({
     );
   }
 
-  return embedded ? tree : <NavigationContainer>{tree}</NavigationContainer>;
+  return (
+    <SprintSessionContext.Provider value={{ user, logout }}>
+      {embedded ? tree : <NavigationContainer>{tree}</NavigationContainer>}
+    </SprintSessionContext.Provider>
+  );
 }
 
 export { ParentTabs, TherapistTabs, SecurityTabs, isParent, isTherapist, isSecurity };

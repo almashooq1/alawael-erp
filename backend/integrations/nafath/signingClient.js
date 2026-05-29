@@ -33,8 +33,8 @@ const { _signHs256 } = require('./jwsVerifier');
 const MODE = (process.env.NAFATH_MODE || 'mock').toLowerCase();
 const MOCK_APPROVE_MS = parseInt(process.env.NAFATH_MOCK_APPROVE_MS, 10) || 5000;
 const REQUEST_TTL_MS = 15 * 60 * 1000;
-const MOCK_SECRET =
-  process.env.NAFATH_JWS_HS_SECRET || 'alawael-nafath-mock-secret-do-not-use-in-prod';
+// Centralized via config/secrets (audit #13) — removes the inline literal.
+const MOCK_SECRET = require('../../config/secrets').nafathJwsHsSecret;
 
 const integrationLog = new InMemoryIntegrationLog();
 const client = new AclClient({

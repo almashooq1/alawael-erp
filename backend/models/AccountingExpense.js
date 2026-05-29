@@ -50,6 +50,8 @@ const accountingExpenseSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
 
     // طريقة الدفع
     paymentMethod: {
@@ -184,6 +186,8 @@ accountingExpenseSchema.methods.reject = function (userId, reason) {
 
 // Pre-save middleware للتحقق
 accountingExpenseSchema.pre('save', function (next) {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
   // التحقق من وجود سبب الرفض عند الرفض
   if (this.status === 'rejected' && !this.rejectionReason) {
     return next(new Error('يجب تحديد سبب الرفض'));

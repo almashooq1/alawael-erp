@@ -31,6 +31,12 @@ const SPECS = [
   },
   { file: 'PaymentRefund.js', fields: ['amount'] },
   { file: 'PaymentVoucher.js', fields: ['amount', 'taxAmount', 'netAmount'] },
+  {
+    file: 'AccountingInvoice.js',
+    fields: ['subtotal', 'vatAmount', 'totalAmount', 'paidAmount', 'remainingAmount'],
+  },
+  { file: 'AccountingPayment.js', fields: ['amount'] },
+  { file: 'AccountingExpense.js', fields: ['amount'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

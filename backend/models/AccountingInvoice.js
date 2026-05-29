@@ -135,6 +135,12 @@ const accountingInvoiceSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    subtotal_halalas: { type: Number, default: 0 },
+    vatAmount_halalas: { type: Number, default: 0 },
+    totalAmount_halalas: { type: Number, default: 0 },
+    paidAmount_halalas: { type: Number, default: 0 },
+    remainingAmount_halalas: { type: Number, default: 0 },
 
     // ملاحظات وشروط
     notes: {
@@ -227,6 +233,14 @@ accountingInvoiceSchema.methods.recordPayment = function (amount, paymentId) {
 
 // Pre-save middleware للتحقق من البيانات
 accountingInvoiceSchema.pre('save', function () {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'subtotal',
+    'vatAmount',
+    'totalAmount',
+    'paidAmount',
+    'remainingAmount',
+  ]);
   // التأكد من أن remainingAmount صحيح
   if (this.isNew || this.isModified('totalAmount') || this.isModified('paidAmount')) {
     this.remainingAmount = this.totalAmount - this.paidAmount;

@@ -787,6 +787,31 @@ router.get('/beneficiaries/:id/reports', authenticate, async (req, res) => {
   }
 });
 
+// W557 — family-friendly assessment outcomes for the parent. Reuses the
+// W240 measureFamilyReport service (jargon-free, traffic-light), which
+// aggregates every MeasureApplication for the child — including the new
+// digital-administration ones (M-CHAT-R / CARS-2 / PedsQL). Guardian-scoped.
+router.get('/beneficiaries/:id/assessments', authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
+    }
+    let report;
+    try {
+      const familyReport = require('../services/measureFamilyReport.service');
+      report = await familyReport.generate(req.params.id);
+    } catch (_e) {
+      report = { error: 'unavailable', measures: [] };
+    }
+    return res.json(report);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
+});
+
 router.get('/reports/:reportId', authenticate, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;

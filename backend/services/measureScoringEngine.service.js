@@ -166,6 +166,24 @@ class MeasureScoringEngineSvc {
   }
 
   /**
+   * W553 — Return the digital item bank (bilingual questionnaire) for a
+   * measure code, or null when the module has no bank. Drives the
+   * digital-administration UI + GET /measures/:code/item-bank.
+   */
+  getItemBank(measureCode) {
+    return registry.getItemBank(measureCode);
+  }
+
+  /**
+   * W553 — List every measure code that ships a digital item bank.
+   * Lets the UI show which standardized instruments can be administered
+   * digitally (vs. manual domain-score entry).
+   */
+  listAdministrable() {
+    return registry.list().filter(m => m.hasItemBank);
+  }
+
+  /**
    * Re-scan the scoring directory (test/reload only).
    */
   _reload() {

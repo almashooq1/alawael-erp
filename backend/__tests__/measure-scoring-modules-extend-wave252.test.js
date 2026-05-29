@@ -38,12 +38,24 @@ describe('W252 — registry picks up new modules', () => {
     expect(m.direction).toBe('higher_better');
   });
 
-  test('list() now includes 5 modules (SCQ, BERG, FIM, WEEFIM, VINELAND-3)', () => {
+  test('list() includes the W212/W252 modules + the W554/W555 item-bank modules', () => {
     const codes = registry
       .list()
       .map(m => m.measureCode)
       .sort();
-    expect(codes).toEqual(['BERG', 'FIM', 'SCQ', 'VINELAND-3', 'WEEFIM']);
+    // W554 added M-CHAT-R; W555 added CARS-2 + PEDSQL; W565 added SDQ
+    // (all with item banks).
+    expect(codes).toEqual([
+      'BERG',
+      'CARS-2',
+      'FIM',
+      'M-CHAT-R',
+      'PEDSQL',
+      'SCQ',
+      'SDQ',
+      'VINELAND-3',
+      'WEEFIM',
+    ]);
   });
 });
 

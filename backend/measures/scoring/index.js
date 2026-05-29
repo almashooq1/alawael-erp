@@ -120,7 +120,32 @@ function list() {
     derivedType: m.derivedType,
     direction: m.direction,
     hasSubscales: !!m.subscaleDerivedTypes,
+    hasItemBank: !!m.itemBank,
+    rawShape: m.rawShape || (m.itemBank ? 'item_array' : null),
+    itemCount: m.itemBank ? m.itemBank.items.length : null,
   }));
+}
+
+/**
+ * W553 — Return the digital item bank for a measure code, or null if
+ * the module carries no bank. Used by the administration UI to render
+ * the questionnaire and by /measures/:code/item-bank.
+ */
+function getItemBank(measureCode) {
+  const mod = resolve(measureCode);
+  if (!mod || !mod.itemBank) return null;
+  return {
+    measureCode: mod.measureCode,
+    engineVersion: mod.engineVersion,
+    derivedType: mod.derivedType,
+    direction: mod.direction,
+    scoreRange: mod.scoreRange || null,
+    cutoff: mod.cutoff != null ? mod.cutoff : null,
+    rawShape: mod.rawShape || 'item_array',
+    expectedItemCount:
+      mod.expectedItemCount != null ? mod.expectedItemCount : mod.itemBank.items.length,
+    itemBank: mod.itemBank,
+  };
 }
 
 function has(measureCode) {
@@ -132,4 +157,4 @@ function reload() {
   return _ensure();
 }
 
-module.exports = { resolve, resolveStrict, list, has, reload };
+module.exports = { resolve, resolveStrict, list, has, reload, getItemBank };

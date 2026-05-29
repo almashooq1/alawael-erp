@@ -673,6 +673,19 @@ on:
       - 'backend/__tests__/auth-validate-middleware-regression-wave529.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-route-shadowing-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/scoring-item-bank-contract-wave553.test.js'
+      - 'backend/__tests__/scoring-mchat-r-wave554.test.js'
+      - 'backend/__tests__/scoring-cars2-pedsql-wave555.test.js'
+      - 'backend/__tests__/measures-catalog-seed-wave556.test.js'
+      - 'backend/__tests__/digital-assessment-behavioral-wave557.test.js'
+      - 'backend/__tests__/digital-assessment-routes-wave559.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measure-recommendation-wave561.test.js'
+      - 'backend/__tests__/measure-recommendation-behavioral-wave562.test.js'
+      - 'backend/__tests__/assessment-insight-wave563.test.js'
+      - 'backend/__tests__/assessment-insight-behavioral-wave564.test.js'
+      - 'backend/__tests__/scoring-sdq-wave565.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1329,6 +1342,19 @@ on:
       - 'backend/__tests__/auth-validate-middleware-regression-wave529.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-route-shadowing-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/scoring-item-bank-contract-wave553.test.js'
+      - 'backend/__tests__/scoring-mchat-r-wave554.test.js'
+      - 'backend/__tests__/scoring-cars2-pedsql-wave555.test.js'
+      - 'backend/__tests__/measures-catalog-seed-wave556.test.js'
+      - 'backend/__tests__/digital-assessment-behavioral-wave557.test.js'
+      - 'backend/__tests__/digital-assessment-routes-wave559.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measure-recommendation-wave561.test.js'
+      - 'backend/__tests__/measure-recommendation-behavioral-wave562.test.js'
+      - 'backend/__tests__/assessment-insight-wave563.test.js'
+      - 'backend/__tests__/assessment-insight-behavioral-wave564.test.js'
+      - 'backend/__tests__/scoring-sdq-wave565.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -51,6 +51,8 @@ module.exports = function registerFeatureRoutes(
   const dietPrescriptionRoutes = safeRequire('../routes/diet-prescription.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
+  const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
+  const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
   const decisionRightsRoutes = safeRequire('../routes/decision-rights.routes');
   const selfAdvocacyRoutes = safeRequire('../routes/self-advocacy.routes');
@@ -144,6 +146,17 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence
   dualMountAuth(app, 'caregiver-support', caregiverSupportProgramRoutes, authenticate);
+  // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
+  // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
+  // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal
+  // auto-update (W216), reassessment auto-close (W214), trend detection + family/clinical
+  // reports. 5 endpoints: administrable / item-bank / preview / administer / history.
+  dualMountAuth(app, 'digital-assessment', digitalAssessmentRoutes, authenticate);
+  // Wave 561/562: Smart measure-recommendation engine (محرك توصية المقاييس الذكي).
+  // Beneficiary → ranked + bilingual-reasoned instruments to administer next
+  // (eligibility × coverage gap × reassessment cadence), flagging the digitally
+  // administrable ones. Intelligence layer on top of W210/W212/W553–W559.
+  dualMountAuth(app, 'measure-recommendations', measureRecommendationRoutes, authenticate);
   // Wave 513 (Phase B Rights & Voice — REST surface): voice-log on top of W460 BeneficiaryVoiceLog
   // model. CRPD Article 7+12+21 — beneficiary's persistent voice channel (preferences / dreams /
   // fears / dislikes / daily+session ratings / complaints / consent changes / requests). 9

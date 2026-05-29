@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+const { authMiddleware } = require('../middleware/auth');
 
 // Rate limiter: 5 requests per 10 minutes per IP
 const authLimiter = rateLimit({
@@ -29,15 +30,16 @@ function isStrongPassword(password) {
 // Register
 router.post('/register', authLimiter, async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     if (!isStrongPassword(password)) {
       return res.status(400).json({
         error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
       });
     }
-    const hashed = await bcrypt.hash(password, 12);
-    // Role is always 'user' on self-registration; only admins can promote via a separate endpoint
-    const user = new User({ username, password: hashed, role: 'user' });
+    // Pass plaintext — User.pre('save') hashes once. Hashing here too would
+    // double-hash (hash-of-a-hash) and make login compare never match.
+    // Role is always 'user' on self-registration; only admins can promote via a separate endpoint.
+    const user = new User({ username, email, password, role: 'user' });
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (err) {

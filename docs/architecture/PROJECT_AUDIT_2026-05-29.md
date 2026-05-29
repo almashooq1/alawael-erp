@@ -47,6 +47,35 @@ the urgent items.
   navigates) and dispatched `checkAuth()` at boot to validate the token (not just presence).
   eslint clean; `tsc` reports no errors referencing `App.tsx`.
 
+### Second remediation wave (2026-05-29, MEDIUM/LOW + remaining HIGH)
+
+- ✅ **HIGH #7 fixed** — `apps/web-admin/src/lib/universal-code-api.ts`: `renderUrl` no
+  longer wraps the absolute `API_BASE` URL in `withBasePath` (which produced
+  `/adminhttps://…` → 404). Returns `API_BASE + path` like `request()`; dropped the now-unused
+  import. web-admin `tsc --noEmit` clean.
+- ✅ **HIGH #9 + #10 fixed** — supply-chain `routes/suppliers.js` (two concatenated
+  CJS+ESM bodies → `SyntaxError`) merged into one consistent CJS module incl. the missing
+  `logAction` import; `routes/auth.js` now imports `authMiddleware` (was a load-time
+  ReferenceError). Both `node --check` clean. While in `auth.js`, also fixed the same
+  double-hash class as #8 (passed plaintext to `new User` — the `pre('save')` hook hashes
+  once) and passed the now-required `email`.
+- ✅ **MEDIUM #20 fixed** — supply-chain `index.js` now has a terminal error handler +
+  404 handler (no more default-Express stack-trace leak / hang).
+- ✅ **MEDIUM #18 fixed** — `mobile/src/navigation/SprintAppNavigator.tsx` exposes a
+  `useSprintSession()` context with `logout()` that clears `authToken` + `currentUser` from
+  SecureStore and resets state. mobile `tsc` clean.
+- ✅ **LOW #21 fixed** — `backend/routes/parent-portal-v1.routes.js`: 27 catch blocks no
+  longer echo raw `err.message` to clients; each returns its existing generic fallback while
+  keeping the `error:'InternalError'` code. No test asserts on those bodies.
+- ✅ **LOW #25 already resolved** — verified all 5 `server-clean.js` delete handlers now
+  return 404 on a missing id (landed with the #1–#3 hardening; the original audit predates it).
+- ⚖️ **MEDIUM #17 — FALSE POSITIVE, no change.** `mobile/src/services/ApiService.ts:370`
+  resolving the offline queue with the full Axios `response` is **correct**: that promise is
+  awaited by the `get/post/put/delete` wrappers, which each `return response.data`. Resolving
+  with `response.data` would double-extract (`.data.data` → undefined) and _introduce_ the bug.
+- ⏳ **Still deferred (need a data migration, not autonomous):** #16 (AES-CBC→GCM versioned
+  envelope) and #23 (visitor JWT → httpOnly cookie).
+
 ## Severity tally
 
 | Severity    | Count |

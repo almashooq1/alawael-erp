@@ -203,7 +203,7 @@ router.post('/auth/login', loginLimiter, async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       error: 'InternalError',
-      message: err instanceof Error ? err.message : 'login failed',
+      message: 'login failed',
     });
   }
 });
@@ -270,7 +270,7 @@ router.get('/me', authenticate, async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       error: 'InternalError',
-      message: err instanceof Error ? err.message : 'failed to load guardian profile',
+      message: 'failed to load guardian profile',
     });
   }
 });
@@ -320,9 +320,7 @@ router.get('/beneficiaries/:id/summary', authenticate, async (req, res) => {
       activeCarePlanStatus: activePlan?.status || null,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -356,9 +354,7 @@ router.get('/beneficiaries/:id/sessions', authenticate, async (req, res) => {
       }))
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -400,9 +396,7 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
       })
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -479,9 +473,7 @@ router.get('/beneficiaries/:id/care-plan', authenticate, async (req, res) => {
       goals,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -622,9 +614,7 @@ router.get('/home', authenticate, async (req, res) => {
       progress30d,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -668,9 +658,7 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
 
     return res.json({ count: data.length, appointments: data });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -717,9 +705,7 @@ router.post('/appointments/:appointmentId/reschedule-request', authenticate, asy
 
     return res.json({ ok: true, appointmentId: req.params.appointmentId });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -781,9 +767,7 @@ router.get('/beneficiaries/:id/reports', authenticate, async (req, res) => {
 
     return res.json(reports);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -806,9 +790,113 @@ router.get('/beneficiaries/:id/assessments', authenticate, async (req, res) => {
     }
     return res.json(report);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
+  }
+});
+
+// ─── Caregiver self-administration (تعبئة ولي الأمر ذاتيًا) ───────────────
+// Lets a guardian complete the caregiver-report standardized instruments
+// (M-CHAT-R / PedsQL / SDQ) directly. Reuses the existing item banks +
+// scoring engine — no new instrument content. Submissions persist with
+// status='in_progress' + requiresReview=true so the W214/W216 goal/trend
+// hooks do NOT fire on un-reviewed data; a clinician reviews + finalizes.
+router.get('/beneficiaries/:id/assessment-forms', authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
+    }
+    const engine = require('../services/measureScoringEngine.service');
+    const forms = engine
+      .listAdministrable()
+      .map(m => engine.getItemBank(m.measureCode))
+      .filter(ib => ib && ib.itemBank.respondent === 'caregiver')
+      .map(ib => ({
+        measureCode: ib.measureCode,
+        instrumentName_ar: ib.itemBank.instrumentName_ar,
+        estimatedMinutes: ib.itemBank.estimatedMinutes || null,
+        responseScaleNote_ar: ib.itemBank.responseScaleNote_ar || null,
+        items: ib.itemBank.items,
+      }));
+    return res.json({ forms, total: forms.length });
+  } catch (err) {
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
+  }
+});
+
+router.post('/beneficiaries/:id/assessment-forms/:code', authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
+    }
+    const { rawItems } = req.body;
+    if (!Array.isArray(rawItems)) {
+      return res.status(400).json({ error: 'BadRequest', message: 'rawItems (مصفوفة) مطلوبة' });
+    }
+    const engine = require('../services/measureScoringEngine.service');
+    const ib = engine.getItemBank(req.params.code);
+    if (!ib) {
+      return res
+        .status(404)
+        .json({ error: 'NotFound', message: 'الأداة غير متاحة للتعبئة الرقمية' });
+    }
+    if (ib.itemBank.respondent !== 'caregiver') {
+      return res.status(403).json({ error: 'Forbidden', message: 'هذا المقياس يُكمله الأخصائي' });
+    }
+    require('../domains/goals/models/Measure');
+    require('../domains/goals/models/MeasureApplication');
+    const Measure = mongoose.model('Measure');
+    const MeasureApplication = mongoose.model('MeasureApplication');
+    const measure = await Measure.findOne({ code: req.params.code });
+    if (!measure) {
+      return res.status(404).json({ error: 'NotFound', message: 'المقياس غير موجود في الكتالوج' });
+    }
+    let scored;
+    try {
+      scored = await engine.score({ measure, rawItems });
+    } catch (e) {
+      return res
+        .status(400)
+        .json({ error: 'InvalidResponses', message: e.message, details: e.errors || null });
+    }
+    const { _buildDomainScores } = require('../services/digitalAssessment.service');
+    const domainScores = _buildDomainScores(ib, rawItems, scored);
+    const Beneficiary = require('../models/Beneficiary');
+    const ben = await Beneficiary.findById(req.params.id).select('branchId organizationId').lean();
+    const application = await MeasureApplication.create({
+      beneficiaryId: req.params.id,
+      measureId: measure._id,
+      applicationDate: new Date(),
+      purpose: 'screening',
+      domainScores,
+      totalRawScore: scored.derived.value,
+      overallInterpretation: scored.interpretation.label_en,
+      overallInterpretation_ar: scored.interpretation.label_ar,
+      overallSeverity: scored.interpretation.severity,
+      isAutoScored: true,
+      requiresReview: true,
+      status: 'in_progress',
+      assessorId: userId,
+      setting: 'home',
+      notes: 'تعبئة ذاتية من ولي الأمر — بانتظار مراجعة الفريق العلاجي',
+      branchId: ben?.branchId,
+      organizationId: ben?.organizationId,
+      createdBy: userId,
+    });
+    return res.status(201).json({
+      ok: true,
+      submitted: true,
+      applicationId: String(application._id),
+      result: {
+        score: scored.derived.value,
+        label_ar: scored.interpretation.label_ar,
+        severity: scored.interpretation.severity,
+        message_ar: 'شكرًا لك. تم استلام إجاباتك وسيراجعها الفريق العلاجي قريبًا.',
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -866,9 +954,7 @@ router.get('/reports/:reportId', authenticate, async (req, res) => {
       attachments: [], // Documents service integration pending
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -939,9 +1025,7 @@ router.get('/approvals', authenticate, async (req, res) => {
 
     return res.json(items);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1015,9 +1099,7 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
 
     return res.status(404).json({ error: 'NotFound', message: 'approval not found' });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1090,9 +1172,7 @@ router.get('/invoices', authenticate, async (req, res) => {
       })
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1223,9 +1303,7 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
       });
     }
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1246,9 +1324,7 @@ router.get('/messages/threads', authenticate, async (req, res) => {
     const threads = await _messagingService.getThreads(userId, { page, limit });
     return res.json(threads);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1271,9 +1347,7 @@ router.get('/messages/threads/:threadId', authenticate, async (req, res) => {
     }
     return res.json({ thread: r.thread, messages: r.messages });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1313,9 +1387,7 @@ router.post('/messages/threads/:threadId', authenticate, async (req, res) => {
     }
     return res.status(201).json({ message: r.message });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1385,9 +1457,7 @@ router.get('/consents', authenticate, async (req, res) => {
       }))
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1435,9 +1505,7 @@ router.post('/consents/:id/grant', authenticate, async (req, res) => {
       expiresAt: doc.expiresAt ? new Date(doc.expiresAt).toISOString() : null,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1486,9 +1554,7 @@ router.post('/consents/:id/revoke', authenticate, async (req, res) => {
       expiresAt: doc.expiresAt ? new Date(doc.expiresAt).toISOString() : null,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1550,9 +1616,7 @@ router.get('/settings/notifications', authenticate, async (req, res) => {
 
     return res.json(coerceNotificationPrefs(g.notificationPrefs));
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1572,9 +1636,7 @@ router.put('/settings/notifications', authenticate, async (req, res) => {
     );
     return res.json(prefs);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 
@@ -1624,9 +1686,7 @@ router.get('/settings/delegates', authenticate, async (req, res) => {
       }))
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+    return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
 

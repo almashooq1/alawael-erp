@@ -1,8 +1,9 @@
 const express = require('express');
 const ChangeLog = require('../models/ChangeLog');
+const Supplier = require('../models/Supplier');
 const { sendMail } = require('../utils/mailer');
 const { authMiddleware } = require('../middleware/auth');
-const Supplier = require('../models/Supplier');
+const { logAction } = require('../utils/auditLogger');
 
 const router = express.Router();
 
@@ -49,12 +50,6 @@ router.post('/:id/review', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'فشل إضافة التقييم' });
   }
 });
-import express from 'express';
-import Supplier from '../models/Supplier.js';
-import { logAction } from '../utils/auditLogger.js';
-import { authMiddleware } from '../middleware/auth.js';
-
-const router = express.Router();
 
 // Get all suppliers (paginated)
 router.get('/', authMiddleware, async (req, res) => {
@@ -123,6 +118,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const before = await Supplier.findById(req.params.id);
+    if (!before) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
     await Supplier.findByIdAndDelete(req.params.id);
     await logAction({
       user: req.user,

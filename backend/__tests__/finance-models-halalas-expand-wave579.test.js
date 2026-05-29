@@ -156,6 +156,7 @@ const SPECS = [
       'finalAmount',
     ],
   },
+  { file: 'taqat.models.js', fields: ['fundingAmount', 'stipend'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

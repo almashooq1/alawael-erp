@@ -455,6 +455,9 @@ const TaqatTrainingProgramSchema = new Schema(
     hadafFunded: { type: Boolean, default: false },
     fundingAmount: { type: Number },
     stipend: { type: Number }, // مكافأة شهرية للمتدرب
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    fundingAmount_halalas: { type: Number, default: 0 },
+    stipend_halalas: { type: Number, default: 0 },
 
     // التسجيل
     maxParticipants: { type: Number },
@@ -548,6 +551,12 @@ const TaqatJobOpportunity =
 const TaqatJobApplication =
   mongoose.models.TaqatJobApplication ||
   mongoose.model('TaqatJobApplication', TaqatJobApplicationSchema);
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
+TaqatTrainingProgramSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['fundingAmount', 'stipend']);
+  next();
+});
+
 const TaqatTrainingProgram =
   mongoose.models.TaqatTrainingProgram ||
   mongoose.model('TaqatTrainingProgram', TaqatTrainingProgramSchema);

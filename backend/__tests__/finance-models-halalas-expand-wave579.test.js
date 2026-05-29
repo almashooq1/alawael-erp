@@ -90,6 +90,24 @@ const SPECS = [
     fields: ['changeAmount', 'totalInflows', 'totalOutflows', 'netCashFlow', 'endBalance'],
   },
   { file: 'FinancialTransaction.js', fields: ['amount'] },
+  {
+    file: 'VATReturn.js',
+    fields: ['totalOutputVAT', 'totalInputVAT', 'netVAT', 'adjustedNetVAT'],
+  },
+  {
+    file: 'payroll.model.js',
+    fields: [
+      'baseSalary',
+      'totalAllowances',
+      'totalIncentives',
+      'totalPenalties',
+      'totalGross',
+      'totalDeductions',
+      'totalNet',
+      'netPayable',
+      'incomeTax',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

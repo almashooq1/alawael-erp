@@ -39,6 +39,8 @@ const payrollSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    baseSalary_halalas: { type: Number, default: 0 },
     allowances: [
       {
         _id: mongoose.Schema.Types.ObjectId,
@@ -150,12 +152,21 @@ const payrollSchema = new mongoose.Schema(
       totalDeductions: { type: Number, default: 0 },
       totalNet: { type: Number, default: 0 },
       netPayable: { type: Number, default: 0 },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      totalAllowances_halalas: { type: Number, default: 0 },
+      totalIncentives_halalas: { type: Number, default: 0 },
+      totalPenalties_halalas: { type: Number, default: 0 },
+      totalGross_halalas: { type: Number, default: 0 },
+      totalDeductions_halalas: { type: Number, default: 0 },
+      totalNet_halalas: { type: Number, default: 0 },
+      netPayable_halalas: { type: Number, default: 0 },
       lastCalculatedAt: Date,
     },
 
     // ========== الضرائب والتأمينات ==========
     taxes: {
       incomeTax: { type: Number, min: 0, default: 0 },
+      incomeTax_halalas: { type: Number, default: 0 },
       incomeTaxPercentage: { type: Number, min: 0, max: 100, default: 0 },
       socialSecurity: { type: Number, min: 0, default: 0 },
       socialSecurityPercentage: { type: Number, min: 0, max: 100, default: 0 },
@@ -245,6 +256,23 @@ const payrollSchema = new mongoose.Schema(
 );
 
 // ========== المؤشرات (Indexes) ==========
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
+// Array allowance/deduction item amounts are deferred (per-element handling).
+payrollSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'baseSalary',
+    'calculations.totalAllowances',
+    'calculations.totalIncentives',
+    'calculations.totalPenalties',
+    'calculations.totalGross',
+    'calculations.totalDeductions',
+    'calculations.totalNet',
+    'calculations.netPayable',
+    'taxes.incomeTax',
+  ]);
+  next();
+});
+
 payrollSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true });
 payrollSchema.index({ month: 1, year: 1, 'payment.status': 1 });
 payrollSchema.index({ departmentId: 1, month: 1, year: 1 });

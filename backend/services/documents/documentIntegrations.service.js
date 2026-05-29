@@ -231,19 +231,38 @@ class DocumentIntegrationsService extends EventEmitter {
   }
 
   /* ── Encrypt sensitive data ───────────────────────────────── */
+  // v2 envelope: authenticated AES-256-GCM with a PER-RECORD random scrypt
+  // salt (audit #16). Replaces the prior unauthenticated AES-256-CBC that
+  // derived its key with a constant 'salt'. Format:
+  //   v2:<saltHex>:<ivHex>:<authTagHex>:<ciphertextHex>
+  // _decrypt still reads the legacy `ivHex:ciphertext` CBC format, so existing
+  // ciphertext keeps working; rows upgrade to v2 the next time they're written.
   _encrypt(text) {
-    if (!text) return text;
-    const iv = crypto.randomBytes(16);
-    const key = crypto.scryptSync(this.encryptionKey, 'salt', 32);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    if (!text && text !== 0) return text;
+    const salt = crypto.randomBytes(16);
+    const iv = crypto.randomBytes(12);
+    const key = crypto.scryptSync(this.encryptionKey, salt, 32);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
     let encrypted = cipher.update(JSON.stringify(text), 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+    const authTag = cipher.getAuthTag().toString('hex');
+    return `v2:${salt.toString('hex')}:${iv.toString('hex')}:${authTag}:${encrypted}`;
   }
 
   _decrypt(encrypted) {
-    if (!encrypted || !encrypted.includes(':')) return encrypted;
+    if (!encrypted || typeof encrypted !== 'string' || !encrypted.includes(':')) return encrypted;
     try {
+      if (encrypted.startsWith('v2:')) {
+        const [, saltHex, ivHex, authTagHex, data] = encrypted.split(':');
+        const key = crypto.scryptSync(this.encryptionKey, Buffer.from(saltHex, 'hex'), 32);
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(ivHex, 'hex'));
+        decipher.setAuthTag(Buffer.from(authTagHex, 'hex'));
+        let decrypted = decipher.update(data, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return JSON.parse(decrypted);
+      }
+      // Legacy AES-256-CBC (constant-salt key) — kept so pre-existing
+      // ciphertext still decrypts until it is re-written as v2.
       const [ivHex, data] = encrypted.split(':');
       const iv = Buffer.from(ivHex, 'hex');
       const key = crypto.scryptSync(this.encryptionKey, 'salt', 32);

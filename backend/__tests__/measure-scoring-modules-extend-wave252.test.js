@@ -43,13 +43,15 @@ describe('W252 — registry picks up new modules', () => {
       .list()
       .map(m => m.measureCode)
       .sort();
-    // W554 added M-CHAT-R; W555 added CARS-2 + PEDSQL; W565 added SDQ
-    // (all with item banks).
+    // W554 added M-CHAT-R; W555 added CARS-2 + PEDSQL; W565 added SDQ;
+    // W566 added GMFCS + MACS (all with item banks).
     expect(codes).toEqual([
       'BERG',
       'CARS-2',
       'FIM',
+      'GMFCS',
       'M-CHAT-R',
+      'MACS',
       'PEDSQL',
       'SCQ',
       'SDQ',

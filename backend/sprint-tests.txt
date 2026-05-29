@@ -388,3 +388,15 @@ __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
 __tests__/attendance-mgmt-dashboard-wave528.test.js
 __tests__/auth-validate-middleware-regression-wave529.test.js
 __tests__/check-route-shadowing-script.test.js
+__tests__/scoring-item-bank-contract-wave553.test.js
+__tests__/scoring-mchat-r-wave554.test.js
+__tests__/scoring-cars2-pedsql-wave555.test.js
+__tests__/measures-catalog-seed-wave556.test.js
+__tests__/digital-assessment-behavioral-wave557.test.js
+__tests__/digital-assessment-routes-wave559.test.js
+__tests__/measure-recommendation-wave561.test.js
+__tests__/measure-recommendation-behavioral-wave562.test.js
+__tests__/assessment-insight-wave563.test.js
+__tests__/assessment-insight-behavioral-wave564.test.js
+__tests__/scoring-sdq-wave565.test.js
+__tests__/scoring-cp-motor-classifications-wave566.test.js

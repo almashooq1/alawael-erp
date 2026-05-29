@@ -1,6 +1,8 @@
 # ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — Deploy to Production VPS (Manual Only)
-#  النشر يدوي فقط — لا يعمل تلقائياً عند كل push
+#  Al-Awael ERP — Deploy to Production VPS (auto on push to main + manual dispatch)
+#  ينشر تلقائياً عند كل push إلى main (CD)، وأيضاً يدوياً عبر workflow_dispatch.
+#  للتشغيل اليدوي فقط يلزم كتابة "deploy" في حقل confirm — انظر خطوة
+#  "Confirm deployment intent" أدناه؛ الـ push التلقائي لا يحتاج تأكيداً.
 # ════════════════════════════════════════════════════════════════════
 name: "🚀 Deploy to Production"
 

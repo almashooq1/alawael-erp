@@ -41,9 +41,12 @@ describe('test-file completeness', () => {
     // Strip block comments + line comments to avoid counting commented
     // tests. Quick-and-cheap — not a full JS parse.
     const stripped = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-    expect(/\bdescribe\s*\(/.test(stripped)).toBe(true);
+    // Allow describe() and describe.each()() — table-driven suites use the
+    // latter (W572: scoring-cp-motor-classifications-wave566 used describe.each
+    // + test() and tripped this gate, going red on a perfectly valid suite).
+    expect(/\bdescribe(\.each)?\s*[(`]/.test(stripped)).toBe(true);
     // Allow it(), test(), it.each()(), test.each()() — .each is common
     // for table-driven assertions and should count as "has tests".
-    expect(/\b(it|test)(\.each)?\s*\(/.test(stripped)).toBe(true);
+    expect(/\b(it|test)(\.each)?\s*[(`]/.test(stripped)).toBe(true);
   });
 });

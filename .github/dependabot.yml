@@ -1,6 +1,17 @@
 # ════════════════════════════════════════════════════════════════
 #  Al-Awael ERP — Dependabot Configuration
 #  تحديث التبعيات تلقائياً: npm + GitHub Actions
+#
+#  سياسة الإصدارات الكبرى (semver-major) — مُضافة 2026-05-29 (W561):
+#  نتجاهل ترقيات major تلقائياً في كل حِزم npm. السبب الجذري: ترقيات
+#  major شبه دائماً كاسرة وتحتاج ترحيل يدوي للكود، فطلبات Dependabot
+#  الآلية لها تَفشل في CI أسبوعياً بلا فائدة (≈35 طلباً فاشلاً تراكَم
+#  هكذا). الترقيات الصغيرة/التصحيحية (minor/patch) — بما فيها تصحيحات
+#  الأمان — تستمر تلقائياً كالمعتاد.
+#  لتفعيل ترقية major لحزمة بعينها عند الرغبة في ترحيلها: احذف هذه
+#  الحزمة من قائمة ignore (أو نفّذ الترقية يدوياً).
+#  حزم github-actions لا تتأثر بالتجاهل عمداً — نريد إبقاء الإجراءات
+#  محدّثة (مثل الابتعاد عن وقت تشغيل Node 20 المهمَل).
 # ════════════════════════════════════════════════════════════════
 version: 2
 
@@ -21,6 +32,9 @@ updates:
       - "backend"
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       express:
         patterns:
@@ -64,6 +78,9 @@ updates:
       - "frontend"
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       react:
         patterns:
@@ -82,6 +99,8 @@ updates:
           - "react-chartjs*"
 
   # ─── GitHub Actions ──────────────────────────────────────────
+  # عمداً بلا تجاهل major — ترقيات الإجراءات منخفضة المخاطر ونريدها
+  # (تُبقينا على وقت تشغيل Node حديث).
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -110,6 +129,9 @@ updates:
       - "mobile"
     commit-message:
       prefix: "chore(deps-mobile)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # ─── Supply Chain Management (backend) ───────────────────────
   - package-ecosystem: "npm"
@@ -125,6 +147,9 @@ updates:
       - "scm"
     commit-message:
       prefix: "chore(deps-scm-be)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # ─── Supply Chain Management (frontend) ──────────────────────
   - package-ecosystem: "npm"
@@ -140,6 +165,9 @@ updates:
       - "scm"
     commit-message:
       prefix: "chore(deps-scm-fe)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # ─── Microservices (file-processor, queue-worker, etc.) ──────
   - package-ecosystem: "npm"
@@ -150,6 +178,9 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/services/queue-worker"
@@ -159,6 +190,9 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/services/iot-gateway"
@@ -168,6 +202,9 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/services/saudi-gov-gateway"
@@ -177,6 +214,9 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/services/scheduler"
@@ -186,6 +226,9 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/services/webhook-worker"
@@ -195,3 +238,6 @@ updates:
     labels: ["dependencies", "services"]
     commit-message:
       prefix: "chore(deps-svc)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

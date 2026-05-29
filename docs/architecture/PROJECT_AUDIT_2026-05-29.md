@@ -38,9 +38,11 @@ the urgent items.
   tests pass). **DEPLOY NOTE:** set `DB_HASH_KEY` / `INTEGRATION_SECRET` / `QR_SECRET` in
   prod with this deploy — to the prior default to preserve existing data, or to a strong
   value + the re-key migration in `CRYPTO_KEY_HARDENING_RUNBOOK.md`.
-- ⏳ **#16 (doc AES-CBC → GCM + per-record salt)** — deferred follow-up; needs the
-  versioned-envelope migration documented in the runbook (would otherwise break existing
-  ciphertext). Key fallback for that module is already closed by #5 above.
+- ✅ **#16 (doc AES-CBC → GCM + per-record salt) fixed** — branch
+  `security/crypto-key-hardening` (PR #165, `492548b05`). `documentIntegrations.service.js`
+  now writes a `v2:<salt>:<iv>:<authTag>:<ct>` authenticated AES-256-GCM envelope with a
+  PER-RECORD random scrypt salt, and keeps a legacy AES-256-CBC decrypt fallback so existing
+  ciphertext still reads — **zero migration**. Ships when #165 merges (same env-var gate).
 - ✅ **HIGH #11 + #23 + #26 fixed** — branch `security/mobile-auth-flow` (`4beee6ed7`).
   Resolved #26 by confirming `App.tsx` is the production entry (`package.json` main =
   `expo/AppEntry.js`), then drove the navigator off Redux `auth.isAuthenticated` (login now
@@ -73,8 +75,9 @@ the urgent items.
   resolving the offline queue with the full Axios `response` is **correct**: that promise is
   awaited by the `get/post/put/delete` wrappers, which each `return response.data`. Resolving
   with `response.data` would double-extract (`.data.data` → undefined) and _introduce_ the bug.
-- ⏳ **Still deferred (need a data migration, not autonomous):** #16 (AES-CBC→GCM versioned
-  envelope) and #23 (visitor JWT → httpOnly cookie).
+- ⏳ **Only genuinely deferred item:** #23 (visitor JWT in localStorage → httpOnly cookie)
+  — a planned auth-storage migration (backend cookie issuance + CSRF + cross-app read
+  changes), not an autonomous quick fix. (#16 is **done** in #165 — see above.)
 
 ## Severity tally
 

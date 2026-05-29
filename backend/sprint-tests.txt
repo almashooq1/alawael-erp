@@ -403,3 +403,4 @@ __tests__/scoring-cp-motor-classifications-wave566.test.js
 __tests__/scoring-cfcs-edacs-wave567.test.js
 
 __tests__/assessment-goal-from-suggestion-wave568.test.js
+__tests__/measure-recommendations-routes-behavioral-wave570.test.js

@@ -45,6 +45,10 @@ const checklistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Tenant-scoped queries filter on branchId (+ type / isActive); index them so
+// they don't collection-scan as checklist volume grows.
+checklistSchema.index({ branchId: 1, type: 1, isActive: 1 });
+
 const Checklist = mongoose.models.Checklist || mongoose.model('Checklist', checklistSchema);
 
 module.exports = Checklist;

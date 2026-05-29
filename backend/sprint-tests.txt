@@ -38,6 +38,7 @@ __tests__/test-script-dedupe.test.js
 __tests__/no-it-only-or-skip.test.js
 __tests__/engines-aligned.test.js
 __tests__/no-broken-requires.test.js
+__tests__/no-flaky-relative-date-month-math.test.js
 __tests__/cpe-service.test.js
 __tests__/cpe-attention-script.test.js
 __tests__/cpe-minimums-consistency.test.js

@@ -22,6 +22,9 @@ const pettyCashSchema = new mongoose.Schema(
     chartAccountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
     lastReplenishmentDate: { type: Date },
     lastReplenishmentAmount: { type: Number },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    currentBalance_halalas: { type: Number, default: 0 },
+    lastReplenishmentAmount_halalas: { type: Number, default: 0 },
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
@@ -66,6 +69,9 @@ const pettyCashTransactionSchema = new mongoose.Schema(
     },
     attachments: [{ filename: String, path: String, uploadDate: Date }],
     balanceAfter: { type: Number },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    balanceAfter_halalas: { type: Number, default: 0 },
     notes: { type: String },
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -74,11 +80,22 @@ const pettyCashTransactionSchema = new mongoose.Schema(
 );
 
 pettyCashTransactionSchema.pre('save', async function (next) {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'balanceAfter']);
   if (!this.transactionNumber) {
     const prefix = this.type === 'replenishment' ? 'PCR' : 'PCT';
     const count = await mongoose.model('PettyCashTransaction').countDocuments();
     this.transactionNumber = `${prefix}-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
+  next();
+});
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings (main fund).
+pettyCashSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'currentBalance',
+    'lastReplenishmentAmount',
+  ]);
   next();
 });
 

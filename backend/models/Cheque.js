@@ -34,6 +34,8 @@ const chequeSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
     currency: {
       type: String,
       default: 'SAR',
@@ -97,6 +99,12 @@ const chequeSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+chequeSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
+});
 
 chequeSchema.index({ chequeNumber: 1, bankName: 1 });
 chequeSchema.index({ status: 1, dueDate: 1 });

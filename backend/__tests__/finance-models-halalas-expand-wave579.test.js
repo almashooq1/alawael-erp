@@ -43,6 +43,13 @@ const SPECS = [
     fields: ['bankStatementBalance', 'bookBalance', 'adjustedBankBalance', 'adjustedBookBalance'],
   },
   { file: 'Budget.js', fields: ['totalBudgeted', 'totalSpent'] },
+  { file: 'Cheque.js', fields: ['amount'] },
+  {
+    file: 'PettyCash.js',
+    fields: ['amount', 'balanceAfter', 'currentBalance', 'lastReplenishmentAmount'],
+  },
+  { file: 'Expense.js', fields: ['amount', 'taxAmount'] },
+  { file: 'RecurringTransaction.js', fields: ['amount'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

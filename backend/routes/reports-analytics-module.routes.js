@@ -502,9 +502,7 @@ router.get('/analytics/executive', authenticate, requireBranchAccess, async (req
 
     const buildMatch = (extra = {}) => {
       const m = { deleted_at: null, ...extra };
-      if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-        m.branch_id = new mongoose.Types.ObjectId(branch_id);
-      }
+      applyRawBranchScope(m, req, branch_id);
       return m;
     };
 
@@ -595,9 +593,7 @@ router.get('/analytics/beneficiaries', authenticate, requireBranchAccess, async 
     const db = mongoose.connection.db;
 
     const match = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
     if (date_from || date_to) {
       match.createdAt = {};
       if (date_from) match.createdAt.$gte = new Date(date_from);
@@ -804,9 +800,7 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
     const db = mongoose.connection.db;
 
     const matchInvoice = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      matchInvoice.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(matchInvoice, req, branch_id);
     if (date_from || date_to) {
       matchInvoice.invoice_date = {};
       if (date_from) matchInvoice.invoice_date.$gte = new Date(date_from);
@@ -947,9 +941,7 @@ router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) 
     const db = mongoose.connection.db;
 
     const matchHR = { deleted_at: null, is_active: true };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      matchHR.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(matchHR, req, branch_id);
 
     const [
       headcountByDept,
@@ -1040,9 +1032,7 @@ router.get('/analytics/operational', authenticate, requireBranchAccess, async (r
     const db = mongoose.connection.db;
 
     const matchBase = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      matchBase.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(matchBase, req, branch_id);
 
     const [
       appointmentsByStatus,
@@ -1255,9 +1245,7 @@ router.get('/built-in/beneficiary-list', authenticate, requireBranchAccess, asyn
     if (status) match.status = status;
     if (disability_type) match.disability_type = disability_type;
     if (gender) match.gender = gender;
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
     if (date_from || date_to) {
       match.createdAt = {};
       if (date_from) match.createdAt.$gte = new Date(date_from);
@@ -1323,9 +1311,7 @@ router.get(
       const db = mongoose.connection.db;
 
       const match = { deleted_at: null };
-      if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-        match.branch_id = new mongoose.Types.ObjectId(branch_id);
-      }
+      applyRawBranchScope(match, req, branch_id);
 
       const skip = (Number(page) - 1) * Number(limit);
       const data = await db
@@ -1394,9 +1380,7 @@ router.get('/built-in/assessments-summary', authenticate, requireBranchAccess, a
     const db = mongoose.connection.db;
 
     const match = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
     if (tool_id && mongoose.Types.ObjectId.isValid(tool_id)) {
       match.tool_id = new mongoose.Types.ObjectId(tool_id);
     }
@@ -1477,9 +1461,7 @@ router.get('/built-in/sessions-log', authenticate, requireBranchAccess, async (r
     const db = mongoose.connection.db;
 
     const match = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
     if (therapist_id && mongoose.Types.ObjectId.isValid(therapist_id)) {
       match.therapist_id = new mongoose.Types.ObjectId(therapist_id);
     }
@@ -1551,9 +1533,7 @@ router.get('/built-in/attendance', authenticate, requireBranchAccess, async (req
     const db = mongoose.connection.db;
 
     const match = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
     if (employee_id && mongoose.Types.ObjectId.isValid(employee_id)) {
       match.employee_id = new mongoose.Types.ObjectId(employee_id);
     }
@@ -1633,9 +1613,7 @@ router.get('/built-in/financial-summary', authenticate, requireBranchAccess, asy
       if (date_from) matchInv.invoice_date.$gte = new Date(date_from);
       if (date_to) matchInv.invoice_date.$lte = new Date(date_to + 'T23:59:59.999Z');
     }
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      matchInv.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(matchInv, req, branch_id);
 
     const [invoices, payments, expenses] = await Promise.all([
       db
@@ -1712,9 +1690,7 @@ router.get('/built-in/hr-headcount', authenticate, requireBranchAccess, async (r
     const db = mongoose.connection.db;
 
     const match = { deleted_at: null, is_active: true };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    applyRawBranchScope(match, req, branch_id);
 
     const [byDept, byRole, byNationality, byGender, total] = await Promise.all([
       db

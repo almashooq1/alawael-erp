@@ -38,6 +38,15 @@ const {
   resolveRole,
 } = require('../config/constants/roles.constants');
 
+// External / portal roles (ADR-036 archetype = NON_MATRIX). These are NOT staff
+// and are NOT branch-scoped: a parent/guardian/student is governed by the
+// parent-portal + guardian-own-child ABAC policy (own beneficiary only), never
+// by branchId. The BRANCH_SCOPE_FAIL_CLOSED flip changes STAFF branch scope, so
+// a branch-less external account is NOT an at-risk fail-open hole — flagging
+// them is a false positive that blocks the flip forever. (driver/bus_assistant
+// are transport-ops and DO carry a branch, so they stay in scope.)
+const EXTERNAL_PORTAL_ROLES = ['parent', 'guardian', 'student', 'viewer', 'user', 'guest'];
+
 function log(...a) {
   if (!JSON_OUT) console.log(...a);
 }
@@ -77,6 +86,7 @@ function log(...a) {
   for (const u of candidates) {
     const role = resolveRole(u.role);
     if (CROSS_BRANCH_ROLES.includes(role)) continue; // legitimately branchless
+    if (EXTERNAL_PORTAL_ROLES.includes(role)) continue; // portal/external — not staff branch scope
     if (REGION_SCOPED_ROLES.includes(role) && (u.regionIds || []).length > 0) continue; // region-scoped
 
     // Does an active secondment cover them? If so, post-W597 they're fine.

@@ -428,3 +428,4 @@ __tests__/money-lib-wave579.test.js
 __tests__/no-float-money-fields-finance-wave579.test.js
 __tests__/invoice-halalas-expand-wave579.test.js
 __tests__/finance-models-halalas-expand-wave579.test.js
+__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js

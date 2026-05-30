@@ -484,9 +484,24 @@ function createBeneficiaryLifecycleService({
           metadata: record.metadata,
           actor,
         });
+        // Wave 587 — a real-data handler self-skips (returns `skipped:true`)
+        // when its backing model is not injected in the running process. The
+        // transition itself is fine, so status stays 'ok', but this is an
+        // OPS misconfiguration the operator must notice — otherwise a critical
+        // effect (e.g. cancelling a deceased beneficiary's future appointments)
+        // silently does nothing while the audit shows sideEffectsFailed:0. Tag
+        // the row + emit a warning so it surfaces in logs and the summary.
+        const selfSkipped = Boolean(result && result.skipped);
+        if (selfSkipped) {
+          logger.warn &&
+            logger.warn(
+              `[lifecycle] side-effect ${op} self-skipped: ${result.reason || 'unknown reason'}`
+            );
+        }
         sideEffectsAudit.push({
           operation: op,
           status: 'ok',
+          selfSkipped,
           completedAt: now(),
           metadata: result || null,
         });
@@ -569,6 +584,7 @@ function createBeneficiaryLifecycleService({
       transitionId: record.transitionId,
       sideEffectsCount: sideEffectsAudit.length,
       sideEffectsFailed: sideEffectsAudit.filter(s => s.status === 'failed').length,
+      sideEffectsSelfSkipped: sideEffectsAudit.filter(s => s.selfSkipped).length,
       anchorTxId,
     });
 

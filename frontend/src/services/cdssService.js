@@ -419,14 +419,223 @@ const withMock = async (apiFn, mockData) => {
   }
 };
 
+// ─── Backend → Frontend shape adapters ──────────────────────────────────────────
+//
+// The canonical backend (66666 `/api/v1/cdss`) returns a different shape than
+// this dashboard was written against:
+//   • lists    → { data: [...], total, page, limit }   (this file expected bare arrays)
+//   • stats    → { stats: { activeAlerts: { value }, … } } (expected flat numbers)
+//   • severity → enum ['info','warning','critical','emergency'] (UI uses critical/high/medium/low/info)
+//   • field names differ on every entity (messageAr, genericName, drugInteractions, …)
+// These adapters translate the live response into the shape the UI renders, so
+// the page shows REAL data instead of silently falling back to demo data. Each
+// adapter is fully defensive (optional chaining + Array.isArray guards) so a
+// surprising payload can never throw during render.
+
+// Pull the list out of either a bare array or the paginated envelope.
+const pickList = body => {
+  if (Array.isArray(body)) return body;
+  if (body && typeof body === 'object') {
+    for (const key of [
+      'data',
+      'items',
+      'results',
+      'alerts',
+      'rules',
+      'drugs',
+      'suggestions',
+      'logs',
+      'assessments',
+    ]) {
+      if (Array.isArray(body[key])) return body[key];
+    }
+  }
+  return [];
+};
+
+// backend severity enum → UI severity bucket
+const SEVERITY_MAP = {
+  emergency: 'critical',
+  critical: 'critical',
+  warning: 'medium',
+  info: 'info',
+  // pass-through for values the UI already understands
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+};
+const mapSeverity = s => SEVERITY_MAP[s] || 'info';
+
+// backend rule category enum → UI category bucket (RULE_CATEGORIES keys)
+const CATEGORY_MAP = {
+  drug_interaction: 'medication',
+  contraindication: 'medication',
+  allergy: 'safety',
+  lab_alert: 'assessment',
+  lab_critical: 'assessment',
+  risk_assessment: 'assessment',
+  risk_flag: 'assessment',
+  guideline: 'quality',
+  protocol: 'compliance',
+};
+const mapCategory = c => CATEGORY_MAP[c] || c || 'safety';
+
+const refName = ref =>
+  ref && typeof ref === 'object' ? ref.fullNameAr || ref.fullName || ref.name || '' : '';
+
+const toText = v => {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string') return v;
+  if (Array.isArray(v)) {
+    return v
+      .map(x =>
+        x && typeof x === 'object'
+          ? [x.field, x.operator, x.value].filter(p => p !== undefined).join(' ') ||
+            x.message ||
+            x.type ||
+            JSON.stringify(x)
+          : String(x)
+      )
+      .join(' AND ');
+  }
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v);
+};
+
+const toStringArray = v => {
+  if (!v) return [];
+  const arr = Array.isArray(v) ? v : [v];
+  return arr.map(x =>
+    x && typeof x === 'object'
+      ? x.drug_code || x.goal || x.type || x.name || x.label || x.value || JSON.stringify(x)
+      : String(x)
+  );
+};
+
+const adaptStats = body => {
+  const s = body?.stats || body || {};
+  const num = x => {
+    const v = x && typeof x === 'object' ? x.value : x;
+    return typeof v === 'number' ? v : 0;
+  };
+  return {
+    activeAlerts: num(s.activeAlerts),
+    criticalAlerts: num(s.criticalAlerts),
+    pendingSuggestions: num(s.pendingSuggestions),
+    rulesActive: num(s.activeRules ?? s.rulesActive),
+    rulesTriggeredToday: num(s.rulesTriggeredToday),
+    highRiskPatients: num(s.highRiskPatients),
+    riskAssessmentsToday: num(s.riskAssessmentsToday),
+    decisionLogToday: num(s.decisionLogToday),
+    resolvedToday: num(s.resolvedToday),
+    drugChecksToday: num(s.drugChecksToday),
+    avgRiskScore: num(s.avgRiskScore),
+    trend: s.trend, // backend may omit; chart degrades gracefully to zeros
+  };
+};
+
+const adaptAlert = a => ({
+  _id: a?._id || a?.id,
+  severity: mapSeverity(a?.severity),
+  type: a?.alertType || a?.type,
+  message: a?.messageAr || a?.message || '',
+  beneficiaryName: refName(a?.beneficiaryId) || a?.beneficiaryName || '—',
+  beneficiaryId:
+    (a?.beneficiaryId && typeof a.beneficiaryId === 'object'
+      ? a.beneficiaryId._id
+      : a?.beneficiaryId) || '',
+  triggeredAt: a?.triggeredAt || a?.createdAt,
+  status: a?.status || 'active',
+  ruleCode:
+    (a?.ruleId && typeof a.ruleId === 'object' ? a.ruleId.code || a.ruleId.name : a?.ruleCode) ||
+    a?.alertType ||
+    '',
+});
+
+const adaptRule = r => ({
+  _id: r?._id || r?.id,
+  code: r?.code || '',
+  name: r?.nameAr || r?.name || '',
+  category: mapCategory(r?.category),
+  severity: mapSeverity(r?.severity),
+  condition: toText(r?.conditions ?? r?.condition),
+  action: toText(r?.actions ?? r?.action),
+  isActive: r?.isActive !== false,
+  triggerCount: typeof r?.triggerCount === 'number' ? r.triggerCount : 0,
+  evidenceLevel: r?.evidenceLevel || r?.guidelineSource || '—',
+});
+
+const adaptDrug = d => ({
+  _id: d?._id || d?.id,
+  code: d?.code || '',
+  name: d?.genericNameAr || d?.genericName || d?.name || '',
+  category: d?.drugClassAr || d?.drugClass || d?.category || '',
+  interactions: toStringArray(d?.drugInteractions ?? d?.interactions),
+  contraindications: toStringArray(d?.contraindications),
+  highRisk: d?.highRisk !== undefined ? !!d.highRisk : !!d?.isControlled,
+});
+
+const adaptSuggestion = s => {
+  const plan = s?.suggestedPlan || {};
+  const conf = typeof s?.confidenceScore === 'number' ? s.confidenceScore : 0;
+  return {
+    _id: s?._id || s?.id,
+    beneficiaryId:
+      (s?.beneficiaryId && typeof s.beneficiaryId === 'object'
+        ? s.beneficiaryId._id
+        : s?.beneficiaryId) || '',
+    beneficiaryName: refName(s?.beneficiaryId) || s?.beneficiaryName || '—',
+    diagnosis: s?.diagnosis || plan.diagnosis || 'غير محدد',
+    suggestedPlan: {
+      sessions: s?.suggestedFrequency?.sessionsPerWeek ?? plan.sessions ?? 0,
+      frequency: plan.frequency || 'أسبوعياً',
+      modalities: toStringArray(s?.suggestedInterventions ?? plan.modalities),
+      goals: toStringArray(s?.suggestedGoals ?? plan.goals),
+      duration:
+        plan.duration || (s?.estimatedDurationWeeks ? `${s.estimatedDurationWeeks} أسابيع` : ''),
+      evidenceBased:
+        plan.evidenceBased ??
+        !!(Array.isArray(s?.evidenceReferences) && s.evidenceReferences.length),
+      referencedGuideline: plan.referencedGuideline || s?.guidelineSource || '',
+    },
+    // backend stores 0–1; UI renders a percentage
+    confidenceScore: conf > 0 && conf <= 1 ? Math.round(conf * 100) : Math.round(conf),
+    status: s?.status || 'pending',
+  };
+};
+
+const DECISION_ACTION_MAP = {
+  alert_override: 'override',
+  suggestion_accepted: 'accept',
+  suggestion_rejected: 'reject',
+  risk_acknowledged: 'acknowledge',
+  rule_evaluated: 'evaluate',
+};
+const adaptDecision = l => ({
+  _id: l?._id || l?.id,
+  action: DECISION_ACTION_MAP[l?.decisionType] || l?.action || l?.decisionType || '',
+  alertCode: l?.alertCode || l?.contextType || '',
+  clinician: refName(l?.userId) || l?.clinician || '',
+  reason: l?.rationale || l?.outcome || l?.reason || '',
+  timestamp: l?.decisionAt || l?.timestamp || l?.createdAt,
+});
+
+const adaptList = (body, fn) => {
+  try {
+    return pickList(body).map(fn);
+  } catch {
+    return [];
+  }
+};
+
 // ─── Exported API Functions ───────────────────────────────────────────────────
 
 export const getStats = () =>
-  withMock(() => apiClient.get(`${BASE}/stats`).then(r => r.data), MOCK_STATS);
+  withMock(() => apiClient.get(`${BASE}/stats`).then(r => adaptStats(r.data)), MOCK_STATS);
 
 export const getAlerts = (params = {}) =>
   withMock(
-    () => apiClient.get(`${BASE}/alerts`, { params }).then(r => r.data?.alerts || r.data),
+    () => apiClient.get(`${BASE}/alerts`, { params }).then(r => adaptList(r.data, adaptAlert)),
     MOCK_ALERTS
   );
 
@@ -436,9 +645,13 @@ export const acknowledgeAlert = id =>
   });
 
 export const overrideAlert = (id, reason) =>
-  withMock(() => apiClient.patch(`${BASE}/alerts/${id}/override`, { reason }).then(r => r.data), {
-    success: true,
-  });
+  withMock(
+    () =>
+      apiClient
+        .patch(`${BASE}/alerts/${id}/override`, { overrideReason: reason })
+        .then(r => r.data),
+    { success: true }
+  );
 
 export const resolveAlert = id =>
   withMock(() => apiClient.patch(`${BASE}/alerts/${id}/resolve`).then(r => r.data), {
@@ -447,34 +660,55 @@ export const resolveAlert = id =>
 
 export const getRules = (params = {}) =>
   withMock(
-    () => apiClient.get(`${BASE}/rules`, { params }).then(r => r.data?.rules || r.data),
+    () => apiClient.get(`${BASE}/rules`, { params }).then(r => adaptList(r.data, adaptRule)),
     MOCK_RULES
   );
 
+// Map the dashboard's flat rule form back onto the backend ClinicalRule schema
+// (nameAr / conditions / actions are required server-side).
+const toBackendRule = data => ({
+  code: data.code,
+  name: data.name,
+  nameAr: data.nameAr || data.name,
+  category: data.category,
+  severity: data.severity,
+  description: data.action || '',
+  descriptionAr: data.action || '',
+  conditions: data.condition ? [{ expression: data.condition }] : [],
+  actions: data.action ? [{ message: data.action }] : [],
+  isActive: data.isActive !== false,
+});
+
 export const createRule = data =>
-  withMock(() => apiClient.post(`${BASE}/rules`, data).then(r => r.data), {
-    ...data,
-    _id: Date.now().toString(),
-  });
-
-export const updateRule = (id, data) =>
-  withMock(() => apiClient.put(`${BASE}/rules/${id}`, data).then(r => r.data), {
-    ...data,
-    _id: id,
-  });
-
-export const getRiskAssessments = (params = {}) =>
   withMock(
     () =>
       apiClient
-        .get(`${BASE}/risk-assessments`, { params })
-        .then(r => r.data?.assessments || r.data),
+        .post(`${BASE}/rules`, toBackendRule(data))
+        .then(r => adaptRule(r.data?.data || r.data)),
+    { ...data, _id: Date.now().toString() }
+  );
+
+export const updateRule = (id, data) =>
+  withMock(
+    () =>
+      apiClient
+        .put(`${BASE}/rules/${id}`, toBackendRule(data))
+        .then(r => adaptRule(r.data?.data || r.data)),
+    { ...data, _id: id }
+  );
+
+export const getRiskAssessments = (params = {}) =>
+  withMock(
+    () => apiClient.get(`${BASE}/risk-assessments`, { params }).then(r => pickList(r.data)),
     MOCK_RISK_ASSESSMENTS
   );
 
-export const generateAutoRiskAssessment = beneficiaryId =>
+export const generateAutoRiskAssessment = (beneficiaryId, assessmentType = 'fall_risk') =>
   withMock(
-    () => apiClient.post(`${BASE}/risk-assessments/auto`, { beneficiaryId }).then(r => r.data),
+    () =>
+      apiClient
+        .post(`${BASE}/risk-assessments/auto`, { beneficiaryId, assessmentType })
+        .then(r => r.data?.data || r.data),
     MOCK_RISK_ASSESSMENTS[0]
   );
 
@@ -483,7 +717,7 @@ export const getRehabSuggestions = (params = {}) =>
     () =>
       apiClient
         .get(`${BASE}/rehab-suggestions`, { params })
-        .then(r => r.data?.suggestions || r.data),
+        .then(r => adaptList(r.data, adaptSuggestion)),
     MOCK_REHAB_SUGGESTIONS
   );
 
@@ -500,24 +734,36 @@ export const rejectRehabSuggestion = (id, reason) =>
 
 export const getDrugLibrary = (params = {}) =>
   withMock(
-    () => apiClient.get(`${BASE}/drugs`, { params }).then(r => r.data?.drugs || r.data),
+    () => apiClient.get(`${BASE}/drugs`, { params }).then(r => adaptList(r.data, adaptDrug)),
     MOCK_DRUG_LIBRARY
   );
 
-export const checkDrugInteractions = drugIds =>
+// `drugRefs` are the selected drugs' codes (falling back to ids for demo data).
+export const checkDrugInteractions = drugRefs =>
   withMock(
-    () => apiClient.post(`${BASE}/drugs/check-interactions`, { drugIds }).then(r => r.data),
+    () =>
+      apiClient.post(`${BASE}/drugs/check-interactions`, { drugCodes: drugRefs }).then(r => {
+        const interactions = Array.isArray(r.data?.interactions) ? r.data.interactions : [];
+        return { interactions, safe: !r.data?.hasCritical && interactions.length === 0 };
+      }),
     { interactions: [], safe: true }
   );
 
 export const getDecisionLog = (params = {}) =>
   withMock(
-    () => apiClient.get(`${BASE}/decision-log`, { params }).then(r => r.data?.logs || r.data),
+    () =>
+      apiClient.get(`${BASE}/decision-log`, { params }).then(r => adaptList(r.data, adaptDecision)),
     MOCK_DECISION_LOG
   );
 
-export const evaluateRules = beneficiaryId =>
-  withMock(() => apiClient.post(`${BASE}/alerts/evaluate`, { beneficiaryId }).then(r => r.data), {
-    triggered: 2,
-    alerts: MOCK_ALERTS.slice(0, 2),
-  });
+export const evaluateRules = (beneficiaryId, contextType = 'manual', contextData = {}) =>
+  withMock(
+    () =>
+      apiClient
+        .post(`${BASE}/alerts/evaluate`, { beneficiaryId, contextType, contextData })
+        .then(r => ({
+          triggered: r.data?.data?.length ?? 0,
+          alerts: adaptList(r.data, adaptAlert),
+        })),
+    { triggered: 2, alerts: MOCK_ALERTS.slice(0, 2) }
+  );

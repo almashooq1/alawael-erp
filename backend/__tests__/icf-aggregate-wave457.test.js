@@ -235,3 +235,46 @@ describe('W457 — disaggregateByDemographic', () => {
     expect(r.unknown).toBeDefined();
   });
 });
+
+describe('W655 — small-sample reliability flag', () => {
+  it('exports a documented MIN_RELIABLE_SAMPLE threshold of 5', () => {
+    expect(lib.MIN_RELIABLE_SAMPLE).toBe(5);
+  });
+
+  it('flags a low-n top-impaired code as not reliable and a high-n one as reliable', () => {
+    // 'b110' scored once (qualifier 4); 'b280' scored 5 times (qualifier 2 each).
+    const assessments = [
+      { beneficiaryId: 'A', icfCodes: [{ code: 'b110', qualifier: 4 }] },
+      ...Array.from({ length: 5 }, (_, i) => ({
+        beneficiaryId: `P${i}`,
+        icfCodes: [{ code: 'b280', qualifier: 2 }],
+      })),
+    ];
+    const r = lib.aggregateByBranch(assessments);
+    const byCode = Object.fromEntries(r.topImpaired.map(c => [c.code, c]));
+    // The n=1 code ranks highest by average (4 > 2) — exactly the misleading
+    // ordering the flag exists to qualify.
+    expect(r.topImpaired[0].code).toBe('b110');
+    expect(byCode.b110.reliable).toBe(false);
+    expect(byCode.b280.reliable).toBe(true);
+  });
+
+  it('flags improvement deltas by paired sample size', () => {
+    const lowN = {
+      beneficiaryId: 'A',
+      before: { icfCodes: [{ code: 'd450', qualifier: 3 }] },
+      after: { icfCodes: [{ code: 'd450', qualifier: 1 }] },
+    };
+    const highN = Array.from({ length: 5 }, (_, i) => ({
+      beneficiaryId: `P${i}`,
+      before: { icfCodes: [{ code: 'd550', qualifier: 3 }] },
+      after: { icfCodes: [{ code: 'd550', qualifier: 2 }] },
+    }));
+    const r = lib.aggregateImprovements([lowN, ...highN]);
+    const byCode = Object.fromEntries(r.improvedCodes.map(c => [c.code, c]));
+    expect(byCode.d450.paired).toBe(1);
+    expect(byCode.d450.reliable).toBe(false);
+    expect(byCode.d550.paired).toBe(5);
+    expect(byCode.d550.reliable).toBe(true);
+  });
+});

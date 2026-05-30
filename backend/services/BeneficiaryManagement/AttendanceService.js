@@ -5,6 +5,12 @@
  *
  * @module services/AttendanceService
  * @requires mongoose
+ *
+ * ⚠️ DORMANT + TENANT-UNSAFE (R4 audit, 2026-05-30). NOT wired to any
+ * route. Reads via the RAW driver (`this.db.collection(...)`) with NO
+ * branchId filter → BYPASSES the tenantScope plugin. If you wire it,
+ * thread branch scope into every query first. See
+ * `npm run audit:untenanted-aggregations`.
  */
 
 const EventEmitter = require('events');

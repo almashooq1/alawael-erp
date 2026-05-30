@@ -115,7 +115,10 @@ function loadSvc(rel) {
 
 const beneficiarySvc = loadSvc('./BeneficiaryService');
 const progressSvc = loadSvc('./beneficiaryProgressService');
-const analyticsService = loadSvc('./BeneficiaryManagement/AnalyticsService');
+// R4 (2026-05-30): removed dead `analyticsService` require — the loaded
+// class was never instantiated, and it is DORMANT + tenant-unsafe (raw
+// driver, no branch scope). Re-add only with branch threading. See the
+// header warning in services/BeneficiaryManagement/AnalyticsService.js.
 
 // ── Shared helpers ─────────────────────────────────────────────────
 const safe = (fn, fallback = null) => {

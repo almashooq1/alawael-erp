@@ -418,3 +418,4 @@ __tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js
 __tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js
 __tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js
 __tests__/beneficiary-lifecycle-summarize-results-wave595.test.js
+__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js

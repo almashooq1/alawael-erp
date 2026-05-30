@@ -57,6 +57,11 @@ const REASON = Object.freeze({
 // the lookup-by-tier shape (used by checkMfaTier below) stays the same.
 const sensitivityGrade = require('./sensitivity-grade.lib');
 const evidenceSnapshot = require('./evidence-snapshot.lib');
+// Wave 596 — actionable summary reducer over the dispatched side-effect
+// results. Pure + total; used to enrich the execute audit and return.
+const {
+  summarizeSideEffectResults,
+} = require('./beneficiary-lifecycle-side-effects.service');
 const MFA_FRESHNESS_MIN = Object.freeze({
   2: Math.round(sensitivityGrade.SENSITIVITY_GRADES.HIGH.mfaFreshnessMs / 60_000),
   3: Math.round(sensitivityGrade.SENSITIVITY_GRADES.CRITICAL.mfaFreshnessMs / 60_000),
@@ -579,16 +584,27 @@ function createBeneficiaryLifecycleService({
       }
     }
 
+    // Wave 596 — derive an actionable summary from the dispatched rows.
+    // Each ok row carries the handler result in `metadata`; flatten so the
+    // pure reducer can bucket categories and total the real data mutations.
+    const sideEffectsSummary = summarizeSideEffectResults(
+      sideEffectsAudit.map(s => ({
+        ...(s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+        status: s.status,
+      }))
+    );
+
     await _audit('beneficiary.lifecycle.transition.executed', actor, {
       transitionRecordId: record._id,
       transitionId: record.transitionId,
       sideEffectsCount: sideEffectsAudit.length,
       sideEffectsFailed: sideEffectsAudit.filter(s => s.status === 'failed').length,
       sideEffectsSelfSkipped: sideEffectsAudit.filter(s => s.selfSkipped).length,
+      sideEffectsSummary,
       anchorTxId,
     });
 
-    return { ok: true, transitionRecord: record, sideEffectsAudit };
+    return { ok: true, transitionRecord: record, sideEffectsAudit, sideEffectsSummary };
   }
 
   // ─── cancelTransition ──────────────────────────────────────

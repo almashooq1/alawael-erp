@@ -754,6 +754,8 @@ on:
       - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-authz-consolidation-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1491,6 +1493,8 @@ on:
       - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-authz-consolidation-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

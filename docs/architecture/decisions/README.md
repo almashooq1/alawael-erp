@@ -76,8 +76,9 @@ backfilled.
 
 ### Enterprise authorization target (ADR 035, dated 2026-05-30)
 
-35. [Enterprise Multi-Branch Authorization — target layered design](035-enterprise-authorization-design.md) — 🟡 Proposed; RBAC + branch/unit/service/shift scope + deny + delegation + maker-checker + RLS, as a PostgreSQL north-star with the live-Mongo realization noted. Companion design: [`ENTERPRISE_AUTHORIZATION_DESIGN.md`](../ENTERPRISE_AUTHORIZATION_DESIGN.md) + rule catalog [`authz-risk-rules.json`](../authz-risk-rules.json)
+35. [Enterprise Multi-Branch Authorization — target layered design](035-enterprise-authorization-design.md) — 🟡 Proposed; RBAC + branch/unit/service/shift scope + deny + delegation + maker-checker + RLS, as a PostgreSQL north-star with the live-Mongo realization noted. Companion design: [`ENTERPRISE_AUTHORIZATION_DESIGN.md`](../ENTERPRISE_AUTHORIZATION_DESIGN.md) + rule catalog [`authz-risk-rules.json`](../authz-risk-rules.json) + permissions matrix [`PERMISSIONS_MATRIX.md`](../PERMISSIONS_MATRIX.md) + seed [`role-permissions.seed.json`](../role-permissions.seed.json)
+36. [Role-Archetype Reconciliation](036-role-archetype-reconciliation.md) — 🟡 Proposed; maps the live 46-role `rbac.config.js` to the 9 authorization archetypes via an additive tag (do NOT flatten). Validated map: [`role-archetype-map.json`](../role-archetype-map.json)
 
 ---
 
-**Last Updated:** May 30, 2026 (ADR-035 added; 020-034 noted as un-indexed)
+**Last Updated:** May 30, 2026 (ADR-035 + ADR-036 added; 020-034 noted as un-indexed)

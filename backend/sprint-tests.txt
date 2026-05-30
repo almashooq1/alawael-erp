@@ -410,3 +410,10 @@ __tests__/measure-recommendations-routes-behavioral-wave570.test.js
 __tests__/measure-recommendation-population-gate-wave571.test.js
 __tests__/measure-recommendation-trend-aware-wave576.test.js
 __tests__/visitor-auth-httponly-cookie-wave584.test.js
+# W579 money-type migration guards (halalas integer-money). Wired into the
+# sprint gate W585 — the float-money drift guard + lib + expand tests shipped
+# but were left un-enumerated, so the ratchet was inert in CI until now.
+__tests__/money-lib-wave579.test.js
+__tests__/no-float-money-fields-finance-wave579.test.js
+__tests__/invoice-halalas-expand-wave579.test.js
+__tests__/finance-models-halalas-expand-wave579.test.js

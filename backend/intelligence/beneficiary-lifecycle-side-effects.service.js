@@ -318,14 +318,19 @@ function createBeneficiaryLifecycleSideEffectHandlers({
  *   skipped: number,
  *   failed: number,
  *   real: number,
- *   health: { ok: boolean, failedRatio: number },
+ *   health: { ok: boolean, clean: boolean, failedRatio: number, skippedRatio: number },
  * }}
  *
  * Wave 651 adds a read-only `health` signal so the audit / dashboard layer can
  * flag a degraded side-effects run at a glance instead of re-deriving it:
  * `ok` is true only when nothing failed, and `failedRatio` is the share of
- * results stamped `failed` (0 when there are no results). Purely additive — the
- * existing keys are unchanged.
+ * results stamped `failed` (0 when there are no results).
+ *
+ * Wave 652 closes the silent-skip blind spot: a `skipped` data handler (e.g.
+ * `appointment-model-unavailable`) means a real cleanup never ran, which is a
+ * degradation `ok` alone hides. `clean` is true only when nothing failed AND
+ * nothing was skipped, and `skippedRatio` is the share of skipped results.
+ * Purely additive — the existing keys are unchanged.
  */
 function summarizeSideEffectResults(results) {
   const list = Array.isArray(results) ? results : [];
@@ -342,7 +347,7 @@ function summarizeSideEffectResults(results) {
   let failed = 0;
   let real = 0;
 
-  const addNum = (v) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
+  const addNum = v => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
 
   for (const r of list) {
     if (!r || typeof r !== 'object') {
@@ -376,7 +381,9 @@ function summarizeSideEffectResults(results) {
   const total = list.length;
   const health = {
     ok: failed === 0,
+    clean: failed === 0 && skipped === 0,
     failedRatio: total ? Number((failed / total).toFixed(4)) : 0,
+    skippedRatio: total ? Number((skipped / total).toFixed(4)) : 0,
   };
 
   return {

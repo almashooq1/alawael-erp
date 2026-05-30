@@ -55,8 +55,18 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
 
   test('self-skipped data handlers count as real but contribute no mutations', () => {
     const results = [
-      { name: OP.END_ACTIVE_SCHEDULES, category: 'data', skipped: true, reason: 'appointment-model-unavailable' },
-      { name: OP.CLOSE_OPEN_EPISODES, category: 'data', skipped: true, reason: 'episode-model-unavailable' },
+      {
+        name: OP.END_ACTIVE_SCHEDULES,
+        category: 'data',
+        skipped: true,
+        reason: 'appointment-model-unavailable',
+      },
+      {
+        name: OP.CLOSE_OPEN_EPISODES,
+        category: 'data',
+        skipped: true,
+        reason: 'episode-model-unavailable',
+      },
     ];
     const s = summarizeSideEffectResults(results);
     expect(s.real).toBe(2);
@@ -88,9 +98,9 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
     expect(s.emitted).toBe(results.length - 3);
     expect(s.emitted).toBe(emittedCount);
     // every deferred op is one of the three downstream categories
-    expect(
-      s.byCategory.notification + s.byCategory.compliance + s.byCategory.workflow
-    ).toBe(s.deferred);
+    expect(s.byCategory.notification + s.byCategory.compliance + s.byCategory.workflow).toBe(
+      s.deferred
+    );
     expect(s.byCategory.unknown).toBe(0);
   });
 
@@ -127,7 +137,7 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
       { category: 'notification', emitted: true },
     ];
     const s = summarizeSideEffectResults(results);
-    expect(s.health).toEqual({ ok: true, failedRatio: 0 });
+    expect(s.health).toEqual({ ok: true, clean: true, failedRatio: 0, skippedRatio: 0 });
   });
 
   test('W651 — health flags a degraded run with a rounded failedRatio', () => {
@@ -144,6 +154,29 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
 
   test('W651 — empty input yields ok:true and failedRatio 0 (no divide-by-zero)', () => {
     const s = summarizeSideEffectResults([]);
-    expect(s.health).toEqual({ ok: true, failedRatio: 0 });
+    expect(s.health).toEqual({ ok: true, clean: true, failedRatio: 0, skippedRatio: 0 });
+  });
+
+  test('W652 — health.clean is false when a handler was skipped even with no failures', () => {
+    const results = [
+      { name: OP.END_ACTIVE_SCHEDULES, category: 'data', skipped: true, reason: 'appointment-model-unavailable' },
+      { category: 'data', cancelledAppointments: 1 },
+    ];
+    const s = summarizeSideEffectResults(results);
+    expect(s.health.ok).toBe(true); // nothing failed
+    expect(s.health.clean).toBe(false); // but a real cleanup was skipped
+    expect(s.health.failedRatio).toBe(0);
+    expect(s.health.skippedRatio).toBeCloseTo(0.5, 4);
+  });
+
+  test('W652 — health.skippedRatio is rounded and clean stays true on a fully-executed run', () => {
+    const results = [
+      { category: 'data', cancelledAppointments: 2 },
+      { category: 'notification', emitted: true },
+      { category: 'compliance', deferred: true },
+    ];
+    const s = summarizeSideEffectResults(results);
+    expect(s.health.clean).toBe(true);
+    expect(s.health.skippedRatio).toBe(0);
   });
 });

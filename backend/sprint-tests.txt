@@ -390,6 +390,7 @@ __tests__/check-authz-consolidation-script.test.js
 __tests__/check-role-registry-divergence-script.test.js
 __tests__/check-can-scope-contract-script.test.js
 __tests__/check-risk-rule-keys-script.test.js
+__tests__/branch-denial-audit-c4.test.js
 __tests__/authz-permissions-registry-wave666.test.js
 __tests__/authz-role-archetype-map-wave666.test.js
 __tests__/clinical-crisis-routes-wave524.test.js

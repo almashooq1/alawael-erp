@@ -43,6 +43,15 @@ const isSecondmentScopeEnabled = () =>
   String(process.env.ENABLE_USER_BRANCH_ROLE_SCOPE || '').toLowerCase() === 'true';
 const isBranchScopeFailClosed = () =>
   String(process.env.BRANCH_SCOPE_FAIL_CLOSED || '').toLowerCase() === 'true';
+// C4 — durable audit of cross-branch ACCESS DENIALS. A restricted user actively
+// requesting another branch's data is the tenant-probing security signal; today
+// it only hits logger.warn (invisible to alerting/forensics). When enabled this
+// writes a fire-and-forget AuditLog row on the denial path. Env-gated DEFAULT
+// OFF — inert on deploy AND in the middleware unit tests (where Mongoose has no
+// connection and an un-gated .create() would buffer/hang per the CLAUDE.md
+// gotcha). Lazy process.env read (Dynatrace doctrine).
+const isBranchDenialAuditEnabled = () =>
+  String(process.env.ENABLE_BRANCH_DENIAL_AUDIT || '').toLowerCase() === 'true';
 
 /**
  * Resolve the set of branch IDs a user is actively seconded into via
@@ -64,6 +73,43 @@ async function resolveSecondedBranchIds(user) {
   } catch (err) {
     logger.error('[BranchScope] secondment expansion failed (fail-safe → []):', err.message);
     return [];
+  }
+}
+
+/**
+ * C4 — fire-and-forget durable audit of a cross-branch access denial. NEVER
+ * awaited, NEVER throws (wrapped + .catch), NEVER blocks the 403. No-op unless
+ * ENABLE_BRANCH_DENIAL_AUDIT=true, so existing tests + un-migrated deploys are
+ * unaffected. This is the "separate write, not the request txn" C4 prescribes:
+ * an Express middleware denial is not inside a Mongo txn, so the row survives.
+ *
+ * @param {object} req
+ * @param {string|number} attemptedBranchId - the foreign branch the user asked for
+ * @param {string} reason - machine code, e.g. 'foreign_branch_request'
+ */
+function auditBranchDenial(req, attemptedBranchId, reason) {
+  if (!isBranchDenialAuditEnabled()) return;
+  try {
+    const AuditLog = require('../models/AuditLog');
+    const userId = (req.user && (req.user.id || req.user._id)) || null;
+    AuditLog.create({
+      action: 'branch.access.denied',
+      userId,
+      performedBy: userId,
+      details: {
+        reason,
+        attemptedBranchId: String(attemptedBranchId || ''),
+        userBranchId: String((req.user && (req.user.branchId || req.user.branch_id)) || ''),
+        role: resolveRole((req.user && (req.user.role || req.user.roles?.[0])) || ''),
+        path: req.originalUrl || req.path || '',
+      },
+      timestamp: new Date(),
+      ip: (req.ip || (req.headers && req.headers['x-forwarded-for']) || '').toString(),
+    }).catch(err =>
+      logger.error('[BranchScope] denial audit write failed (non-blocking):', err.message)
+    );
+  } catch (err) {
+    logger.error('[BranchScope] denial audit setup failed (non-blocking):', err.message);
   }
 }
 
@@ -166,6 +212,7 @@ const requireBranchAccess = async (req, res, next) => {
     logger.warn(
       `[BranchScope] Access denied: user ${req.user.id} (branch ${userBranchId}) tried to access branch ${requestedBranchId}`
     );
+    auditBranchDenial(req, requestedBranchId, 'foreign_branch_request'); // C4 (fire-and-forget, env-gated)
     return res.status(403).json({
       success: false,
       message: 'غير مسموح — لا يمكنك الوصول لبيانات فرع آخر',

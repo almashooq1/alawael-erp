@@ -56,6 +56,7 @@ const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { applyRawBranchScope } = require('../utils/rawBranchScope');
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
@@ -681,10 +682,9 @@ router.get('/analytics/clinical', authenticate, requireBranchAccess, async (req,
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
 
-    const matchBase = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      matchBase.branch_id = new mongoose.Types.ObjectId(branch_id);
-    }
+    // W269 C3a fix: restricted caller is FORCED to their own branch (ignores
+    // ?branch_id omit/spoof); HQ may optionally filter. Was: trust req.query.
+    const matchBase = applyRawBranchScope({ deleted_at: null }, req, branch_id);
     if (date_from || date_to) {
       matchBase.createdAt = {};
       if (date_from) matchBase.createdAt.$gte = new Date(date_from);

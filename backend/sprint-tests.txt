@@ -391,6 +391,7 @@ __tests__/check-role-registry-divergence-script.test.js
 __tests__/check-can-scope-contract-script.test.js
 __tests__/check-risk-rule-keys-script.test.js
 __tests__/branch-denial-audit-c4.test.js
+__tests__/raw-branch-scope-c3a.test.js
 __tests__/authz-permissions-registry-wave666.test.js
 __tests__/authz-role-archetype-map-wave666.test.js
 __tests__/authz-permission-taxonomy-map-wave669.test.js

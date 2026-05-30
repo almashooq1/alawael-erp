@@ -594,6 +594,21 @@ function createBeneficiaryLifecycleService({
       }))
     );
 
+    // Wave 654 — surface a degraded run to the operator at runtime instead of
+    // only in the audit payload. `health.clean` is false when a real cleanup
+    // was skipped (e.g. a model was unavailable) or a handler failed — a silent
+    // gap if it only lives in the audit log. Warn once with the actionable
+    // ratios so ops can react without querying audit events.
+    if (sideEffectsSummary.health && !sideEffectsSummary.health.clean) {
+      const h = sideEffectsSummary.health;
+      logger.warn &&
+        logger.warn(
+          `[lifecycle] degraded side-effects for transition ${record.transitionId} ` +
+            `(beneficiary ${record.beneficiaryId}): failedRatio=${h.failedRatio} ` +
+            `skippedRatio=${h.skippedRatio} mutated=${h.mutated}`
+        );
+    }
+
     await _audit('beneficiary.lifecycle.transition.executed', actor, {
       transitionRecordId: record._id,
       transitionId: record.transitionId,

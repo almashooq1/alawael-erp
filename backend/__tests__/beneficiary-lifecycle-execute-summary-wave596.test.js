@@ -158,3 +158,61 @@ describe('W596 executeTransition — actionable sideEffectsSummary wiring', () =
     expect(exec.meta.sideEffectsFailed).toBe(0);
   });
 });
+
+describe('W654 executeTransition — degraded run is surfaced as an operator warning', () => {
+  /** @type {any} */
+  let result;
+  /** @type {jest.Mock} */
+  let warn;
+  /** @type {string[]} */
+  let warnMessages;
+
+  beforeAll(async () => {
+    warn = jest.fn();
+    // appointmentModel intentionally omitted → end-active-schedules self-skips
+    // ('appointment-model-unavailable'), so the run is !clean even though
+    // nothing failed — exactly the silent-skip degradation W652/W654 target.
+    const handlers = createBeneficiaryLifecycleSideEffectHandlers({
+      episodeModel: { updateMany: jest.fn().mockResolvedValue({ modifiedCount: 2 }) },
+      eventSink: () => {},
+      now: () => FIXED_NOW,
+    });
+    let stored = null;
+    const transitionLog = {
+      async findById(id) {
+        return stored && stored._id === id ? stored : null;
+      },
+    };
+    const svc = createBeneficiaryLifecycleService({
+      transitionLog,
+      beneficiaryModel: { updateOne: jest.fn().mockResolvedValue({}) },
+      sideEffectHandlers: handlers,
+      auditLogger: { log: async () => {} },
+      logger: { warn },
+      now: () => FIXED_NOW,
+    });
+    const record = makeApprovedRecord('record_deceased', reg.LIFECYCLE_STATES.DECEASED);
+    stored = record;
+    result = await svc.executeTransition({
+      transitionRecordId: record._id,
+      actor: ACTOR,
+    });
+    // Snapshot now — jest.config `clearMocks:true` wipes mock.calls before the
+    // first `it()` runs, after this beforeAll has executed.
+    warnMessages = warn.mock.calls.map(c => c[0]);
+  });
+
+  it('marks the run as not clean when a real cleanup was skipped (no failures)', () => {
+    expect(result.ok).toBe(true);
+    expect(result.sideEffectsSummary.failed).toBe(0);
+    expect(result.sideEffectsSummary.health.clean).toBe(false);
+  });
+
+  it('emits an operator warning naming the transition and the actionable ratios', () => {
+    const degraded = warnMessages.find(m => /degraded side-effects/.test(m));
+    expect(degraded).toBeDefined();
+    expect(degraded).toContain('record_deceased');
+    expect(degraded).toContain('skippedRatio=');
+  });
+});
+

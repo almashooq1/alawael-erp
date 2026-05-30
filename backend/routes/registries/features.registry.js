@@ -417,9 +417,13 @@ module.exports = function registerFeatureRoutes(
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
   // ── Gap-fill: alerts, approvals, rehab-licenses — auth required ──────
-  dualMount(app, 'alerts', safeRequire('../routes/alerts.routes'));
+  // W658 — alerts + rehab-licenses were dualMount (NO auth) despite the
+  // "auth required" note + neither route file calls authenticate → both were
+  // anonymous-reachable. Promoted to dualMountAuth (surfaced by
+  // `npm run audit:unauthenticated-routes`).
+  dualMountAuth(app, 'alerts', safeRequire('../routes/alerts.routes'));
   dualMountAuth(app, 'approvals', safeRequire('../routes/approvals.routes'));
-  dualMount(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
+  dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
   logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
 
   logger.info('[Features] All prompt feature modules mounted successfully');

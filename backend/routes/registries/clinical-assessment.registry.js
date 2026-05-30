@@ -48,7 +48,10 @@ module.exports = function registerClinicalAssessmentRoutes(
 
   // Independent Living Transition System (نظام الانتقال للحياة المستقلة)
   const independentLivingRoutes = safeRequire('../routes/independentLiving.routes');
-  dualMount(app, 'independent-living', independentLivingRoutes);
+  // W658 — was dualMount (NO auth); the route file (clinical /assessments,
+  // 31 routes) never calls authenticate → anonymous-reachable. Promoted to
+  // dualMountAuth (surfaced by `npm run audit:unauthenticated-routes`).
+  dualMountAuth(app, 'independent-living', independentLivingRoutes);
   logger.info(
     'Independent Living Transition routes mounted (30+ endpoints — 4 modules: ADL assessments, individual training plans (cooking/cleaning/shopping/transportation), independence progress tracking, supported/rehabilitative housing programs)'
   );

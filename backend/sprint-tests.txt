@@ -393,6 +393,7 @@ __tests__/check-risk-rule-keys-script.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/authz-permissions-registry-wave666.test.js
 __tests__/authz-role-archetype-map-wave666.test.js
+__tests__/authz-permission-taxonomy-map-wave669.test.js
 __tests__/clinical-crisis-routes-wave524.test.js
 __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
 __tests__/attendance-mgmt-dashboard-wave528.test.js

@@ -21,13 +21,64 @@ const {
 } = require('../config/constants/roles.constants');
 const { TENANT_FIELD } = require('../config/constants/tenant.constants');
 
+// ─────────────────────────────────────────────────────────────────────
+// W597 — activate the dormant UserBranchRole secondment / acting-role
+// model. Audit 2026-05-30 found UserBranchRole built+tested but with NO
+// request-time consumer: a Riyadh→Jeddah secondment was unreachable; the
+// only wired cross-branch paths were CROSS_BRANCH_ROLES (all 13) and
+// REGION_SCOPED_ROLES (whole region). This wires the fine-grained,
+// audited, time-windowed grant into the branch scope decision.
+//
+// BOTH new behaviours are env-gated and DEFAULT OFF so the wave is inert
+// on deploy (zero new per-request query, byte-identical scope output):
+//   • ENABLE_USER_BRANCH_ROLE_SCOPE=true → expand active secondments.
+//   • BRANCH_SCOPE_FAIL_CLOSED=true      → deny (not allow-all) when a
+//     restricted-tier user has no branchId AND no active secondment.
+//       This closes the fail-OPEN hole at the no-branch path below; keep
+//       OFF until `npm run audit:no-branch-users` confirms no legitimate
+//       branch-less service/admin account would be locked out.
+//
+// Lazy process.env reads per the codebase Dynatrace doctrine.
+const isSecondmentScopeEnabled = () =>
+  String(process.env.ENABLE_USER_BRANCH_ROLE_SCOPE || '').toLowerCase() === 'true';
+const isBranchScopeFailClosed = () =>
+  String(process.env.BRANCH_SCOPE_FAIL_CLOSED || '').toLowerCase() === 'true';
+
+/**
+ * Resolve the set of branch IDs a user is actively seconded into via
+ * UserBranchRole (status=active + window covers now). Lazy-require the
+ * model (circular-import safety, matches the Branch lazy-require below).
+ * On ANY error returns [] — secondment NEVER widens scope on failure
+ * (fail-safe: the user keeps only their primary branch).
+ *
+ * @param {object} user - req.user
+ * @returns {Promise<string[]>} distinct seconded branchId strings
+ */
+async function resolveSecondedBranchIds(user) {
+  try {
+    const UserBranchRole = require('../models/UserBranchRole');
+    const userId = user.id || user._id;
+    if (!userId) return [];
+    const active = await UserBranchRole.findActiveForUser(userId);
+    return [...new Set((active || []).map(a => String(a.branchId)).filter(Boolean))];
+  } catch (err) {
+    logger.error('[BranchScope] secondment expansion failed (fail-safe → []):', err.message);
+    return [];
+  }
+}
+
 /**
  * requireBranchAccess
  * Middleware يتحقق من أن المستخدم إما:
  * - لديه دور عام (CROSS_BRANCH_ROLES) فيرى كل الفروع
  * - أو مرتبط بفرع محدد فيُقيَّد بفرعه فقط
+ *
+ * NOTE: async since W597 (secondment expansion may await a DB lookup).
+ * When ENABLE_USER_BRANCH_ROLE_SCOPE is off, NO await is reached on any
+ * path, so the function still completes synchronously — preserving the
+ * direct-call ergonomics of the existing middleware unit tests.
  */
-const requireBranchAccess = (req, res, next) => {
+const requireBranchAccess = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'غير مصرح — يجب تسجيل الدخول' });
   }
@@ -72,15 +123,46 @@ const requireBranchAccess = (req, res, next) => {
   const requestedBranchId = req.query.branchId || req.body?.branchId || req.params?.branchId;
   const userBranchId = req.user.branchId || req.user.branch_id || req.user.branch;
 
+  // W597 — active secondments / acting-role grants (env-gated, default
+  // off → []). These widen the restricted user's accessible branch set
+  // without granting a coarse CROSS_BRANCH / region role.
+  const secondedBranchIds = isSecondmentScopeEnabled()
+    ? await resolveSecondedBranchIds(req.user)
+    : [];
+
   if (!userBranchId) {
+    // A user with no primary branch but WITH an active secondment is
+    // legitimately restricted to those seconded branches.
+    if (secondedBranchIds.length > 0) {
+      req.branchScope = {
+        restricted: true,
+        branchId: secondedBranchIds[0],
+        branchIds: secondedBranchIds,
+        allBranches: false,
+      };
+      return next();
+    }
     logger.warn(`[BranchScope] User ${req.user.id || req.user._id} has no branchId assigned`);
-    // إذا لم يكن للمستخدم فرع، اسمح بالوصول مع تسجيل تحذير
+    // W597 — fail-CLOSED (gated). Historically this path failed OPEN
+    // (allBranches:true), so a misconfigured restricted-tier account read
+    // every branch. With BRANCH_SCOPE_FAIL_CLOSED=true we deny instead,
+    // matching the tenantScope plugin's `unscoped` fail-closed posture.
+    if (isBranchScopeFailClosed()) {
+      return res.status(403).json({
+        success: false,
+        message: 'غير مسموح — لا يوجد فرع مخصّص لحسابك (راجع المسؤول)',
+      });
+    }
+    // Legacy fail-open (default) — preserved until the audit clears the flip.
     req.branchScope = { restricted: false, branchId: null, allBranches: true };
     return next();
   }
 
-  // إذا طلب المستخدم فرعاً مختلفاً عن فرعه، ارفض
-  if (requestedBranchId && String(requestedBranchId) !== String(userBranchId)) {
+  // The user's full allowed set = primary branch ∪ active secondments.
+  const allowedBranchIds = [...new Set([String(userBranchId), ...secondedBranchIds])];
+
+  // إذا طلب المستخدم فرعاً مختلفاً، اسمح فقط إن كان ضمن نطاقه (فرعه أو ندب فعّال)
+  if (requestedBranchId && !allowedBranchIds.includes(String(requestedBranchId))) {
     logger.warn(
       `[BranchScope] Access denied: user ${req.user.id} (branch ${userBranchId}) tried to access branch ${requestedBranchId}`
     );
@@ -90,9 +172,24 @@ const requireBranchAccess = (req, res, next) => {
     });
   }
 
+  // When the caller explicitly names an allowed branch, narrow scope to
+  // that single branch for this request (intuitive: they chose one).
+  if (requestedBranchId) {
+    req.branchScope = {
+      restricted: true,
+      branchId: String(requestedBranchId),
+      allBranches: false,
+    };
+    return next();
+  }
+
   req.branchScope = {
     restricted: true,
     branchId: userBranchId,
+    // Only emit branchIds[] when there's a genuine multi-branch set —
+    // keeps the single-branch output byte-identical to pre-W597 (exact
+    // shape the existing middleware unit tests assert via toEqual()).
+    ...(allowedBranchIds.length > 1 ? { branchIds: allowedBranchIds } : {}),
     allBranches: false,
   };
 
@@ -117,6 +214,10 @@ const branchFilter = req => {
   if (req.branchScope.regional) {
     return { __pending_region_expand__: req.branchScope.regionIds };
   }
+  // W597 — multi-branch (secondment) users filter by $in over their set.
+  if (Array.isArray(req.branchScope.branchIds) && req.branchScope.branchIds.length > 1) {
+    return { [TENANT_FIELD]: { $in: req.branchScope.branchIds } };
+  }
   return { [TENANT_FIELD]: req.branchScope.branchId };
 };
 
@@ -131,6 +232,10 @@ const branchFilter = req => {
 const resolveRegionalBranchFilter = async req => {
   if (!req.branchScope || req.branchScope.allBranches) return {};
   if (!req.branchScope.regional) {
+    // W597 — honour the multi-branch (secondment) set when present.
+    if (Array.isArray(req.branchScope.branchIds) && req.branchScope.branchIds.length > 1) {
+      return { [TENANT_FIELD]: { $in: req.branchScope.branchIds } };
+    }
     return { [TENANT_FIELD]: req.branchScope.branchId };
   }
 

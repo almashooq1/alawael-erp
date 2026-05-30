@@ -52,6 +52,7 @@
     "gov:status:json": "node scripts/gov-status.js --json",
     "lint:duplication": "node scripts/anti-duplication-check.js",
     "lint:duplication:json": "node scripts/anti-duplication-check.js --json",
+    "audit:no-branch-users": "node scripts/audit-no-branch-users.js",
     "preflight": "node scripts/preflight.js",
     "preflight:prod": "CI_PREFLIGHT=1 node scripts/preflight.js",
     "dsar:hash": "node scripts/dsar-hash.js",

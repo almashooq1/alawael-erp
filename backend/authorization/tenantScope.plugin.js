@@ -97,13 +97,20 @@ function tenantScopePlugin(schema, options = {}) {
       return;
     }
 
+    // W597 — multi-branch (active secondment) users: filter by $in over
+    // their resolved branch set. requireBranchAccess only populates
+    // branchScope.branchIds[] when ENABLE_USER_BRANCH_ROLE_SCOPE is on
+    // AND the set has >1 member, so the common single-branch path below
+    // is unchanged (and keeps the equality index).
+    const branchIds = ctx.branchScope?.branchIds;
+    if (Array.isArray(branchIds) && branchIds.length > 1) {
+      this.where({ [field]: { $in: branchIds } });
+      return;
+    }
+
     const branchId = ctx.branchScope?.branchId;
     if (!branchId) return;
 
-    // Support multi-branch users (secondment, regional_director who
-    // only has regionIds). For simple single-branch we just equality-
-    // match. If branchIds[] includes the current branch, it's the
-    // same result — we keep the simple shape.
     this.where({ [field]: branchId });
   };
   for (const method of QUERY_METHODS) {

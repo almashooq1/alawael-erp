@@ -681,7 +681,7 @@ app.get('/api/barcode/statistics', async (req, res) => {
 
 // ==================== SUPPLIERS ====================
 
-app.get('/api/suppliers', async (req, res) => {
+app.get('/api/suppliers', authRequired, async (req, res) => {
   try {
     const suppliers = await Supplier.find();
     res.json({ success: true, data: suppliers });
@@ -745,7 +745,7 @@ app.delete('/api/suppliers/:id', authRequired, async (req, res) => {
 
 // ==================== PRODUCTS ====================
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', authRequired, async (req, res) => {
   try {
     const products = await Product.find();
     res.json({ success: true, data: products });
@@ -808,7 +808,7 @@ app.delete('/api/products/:id', authRequired, async (req, res) => {
 
 // ==================== INVENTORY ====================
 
-app.get('/api/inventory', async (req, res) => {
+app.get('/api/inventory', authRequired, async (req, res) => {
   try {
     const inventory = await Inventory.find();
     res.json({ success: true, data: inventory });
@@ -869,7 +869,7 @@ app.delete('/api/inventory/:id', authRequired, async (req, res) => {
 
 // ==================== ORDERS ====================
 
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', authRequired, async (req, res) => {
   try {
     const orders = await Order.find();
     res.json({ success: true, data: orders });
@@ -931,7 +931,7 @@ app.delete('/api/orders/:id', authRequired, async (req, res) => {
 
 // ==================== SHIPMENTS ====================
 
-app.get('/api/shipments', async (req, res) => {
+app.get('/api/shipments', authRequired, async (req, res) => {
   try {
     const shipments = await Shipment.find();
     res.json({ success: true, data: shipments });

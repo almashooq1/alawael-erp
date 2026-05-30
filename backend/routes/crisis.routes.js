@@ -12,7 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   EmergencyPlan,
   CrisisIncident,
@@ -519,13 +519,17 @@ router.get('/dashboard', async (req, res) => {
         status: 'scheduled',
         scheduledDate: { $gte: new Date() },
       }),
+      // R4: aggregate() bypasses the tenantScope plugin. CrisisIncident is
+      // beneficiary-clinical (ADR-033) + carries branchId → scope it.
+      // branchFilter(req) = {} for cross-branch/HQ roles, so emergency-ops
+      // oversight keeps all-branch visibility; single-branch users see theirs.
       CrisisIncident.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: { ...branchFilter(req), isDeleted: { $ne: true } } },
         { $group: { _id: '$type', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
       CrisisIncident.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: { ...branchFilter(req), isDeleted: { $ne: true } } },
         { $group: { _id: '$severity', count: { $sum: 1 } } },
       ]),
       CrisisIncident.find({ isDeleted: { $ne: true } })

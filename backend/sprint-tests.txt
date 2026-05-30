@@ -416,3 +416,4 @@ __tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js
 __tests__/branch-secondment-wiring-wave597.test.js
 __tests__/access-grant-model-canonical-wave599.test.js
 __tests__/beneficiaries-statistics-branch-scope-wave605.test.js
+__tests__/crisis-incident-aggregate-branch-scope-wave608.test.js

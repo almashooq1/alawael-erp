@@ -16,7 +16,14 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+
+// W651 — finance/Invoice uses snake_case `branch_id`; translate the camelCase
+// branchFilter envelope. = {} for cross-branch/HQ → org-wide finance preserved.
+const branchScopeSnake = req => {
+  const bf = branchFilter(req);
+  return bf.branchId !== undefined ? { branch_id: bf.branchId } : {};
+};
 const { stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 
@@ -382,7 +389,7 @@ router.get(
 
     // إحصاءات سريعة
     const stats = await Invoice.aggregate([
-      { $match: { deleted_at: null } },
+      { $match: { ...branchScopeSnake(req), deleted_at: null } }, // W651
       {
         $group: {
           _id: '$status',
@@ -1000,7 +1007,7 @@ router.get(
   '/reports/revenue',
   asyncHandler(async (req, res) => {
     const { from_date, to_date, group_by = 'month' } = req.query;
-    const filter = { deleted_at: null, status: { $in: ['paid', 'partial'] } };
+    const filter = { ...branchScopeSnake(req), deleted_at: null, status: { $in: ['paid', 'partial'] } }; // W651
     if (from_date || to_date) {
       filter.invoice_date = {};
       if (from_date) filter.invoice_date.$gte = new Date(from_date);

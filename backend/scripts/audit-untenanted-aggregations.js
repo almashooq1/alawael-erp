@@ -45,7 +45,7 @@ const SCAN_DIRS = ['routes', 'services'];
 const WINDOW = 600; // chars after .aggregate( to scan for a branch token
 
 const BRANCH_TOKENS =
-  /\b(branchId|branch_id|branchFilter|effectiveBranchScope|branchScope|bypassTenantScope|resolveRegionalBranchFilter|assertBranchIdsAllowed)\b/;
+  /\b(branchId|branch_id|branchFilter|effectiveBranchScope|branchScope\w*|bypassTenantScope|resolveRegionalBranchFilter|assertBranchIdsAllowed)\b/;
 
 // ── --pii-routes narrowing: high-confidence active-leak shortlist ─────
 // PII / branch-sensitive model or collection names. An aggregate on one of

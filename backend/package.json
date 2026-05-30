@@ -60,6 +60,7 @@
     "backfill:referralticket-branchid": "node scripts/backfill-referralticket-branchid.js",
     "backfill:meeting-branchid": "node scripts/backfill-meeting-branchid.js",
     "backfill:session-branchid": "node scripts/backfill-session-branchid.js",
+    "backfill:invoice-branchid": "node scripts/backfill-invoice-branchid.js",
     "preflight": "node scripts/preflight.js",
     "preflight:prod": "CI_PREFLIGHT=1 node scripts/preflight.js",
     "dsar:hash": "node scripts/dsar-hash.js",

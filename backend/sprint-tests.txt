@@ -443,3 +443,6 @@ __tests__/quality-parentcomplaint-branch-scope-wave662.test.js
 __tests__/risk-appointment-branch-scope-wave663.test.js
 __tests__/safetyincident-branch-tenancy-wave664.test.js
 __tests__/maintenancerequest-branch-tenancy-wave665.test.js
+__tests__/dysphagia-assessment-wave670.test.js
+__tests__/pain-assessment-wave671.test.js
+__tests__/physiotherapy-assessment-wave672.test.js

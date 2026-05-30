@@ -206,6 +206,7 @@
     "check:authz-consolidation": "node scripts/check-authz-consolidation.js",
     "check:authz-consolidation:json": "node scripts/check-authz-consolidation.js --json",
     "check:authz-consolidation:bare": "node scripts/check-authz-consolidation.js --bare",
+    "gen:permissions-registry": "node scripts/gen-permissions-registry.js",
     "check:role-divergence": "node scripts/check-role-registry-divergence.js",
     "check:role-divergence:json": "node scripts/check-role-registry-divergence.js --json",
     "check:role-divergence:bare": "node scripts/check-role-registry-divergence.js --bare",

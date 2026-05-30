@@ -169,16 +169,20 @@ router.get('/sessions', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /beneficiaries — demographics ────────────────────────────────────
 router.get('/beneficiaries', requireRole(READ_ROLES), async (req, res) => {
   try {
+    // W656 — branch-scope demographics (Beneficiary carries branchId).
+    // branchFilter(req) = {} for cross-branch/HQ analysts → org-wide preserved.
+    const scope = branchFilter(req);
     const [byGender, byDisability, byStatus, byAgeGroup, enrollment90d] = await Promise.all([
-      Beneficiary.aggregate([{ $group: { _id: '$gender', count: { $sum: 1 } } }]),
+      Beneficiary.aggregate([{ $match: { ...scope } }, { $group: { _id: '$gender', count: { $sum: 1 } } }]),
       Beneficiary.aggregate([
+        { $match: { ...scope } },
         { $group: { _id: '$disability.primaryType', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 15 },
       ]),
-      Beneficiary.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Beneficiary.aggregate([{ $match: { ...scope } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
       Beneficiary.aggregate([
-        { $match: { dateOfBirth: { $exists: true, $ne: null } } },
+        { $match: { ...scope, dateOfBirth: { $exists: true, $ne: null } } },
         {
           $project: {
             ageYears: {
@@ -201,7 +205,7 @@ router.get('/beneficiaries', requireRole(READ_ROLES), async (req, res) => {
         },
       ]),
       Beneficiary.aggregate([
-        { $match: { createdAt: { $gte: daysAgo(90) } } },
+        { $match: { ...scope, createdAt: { $gte: daysAgo(90) } } },
         {
           $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -329,11 +333,13 @@ router.get('/branches', requireRole(READ_ROLES), async (req, res) => {
 
     const [benCounts, assessCounts] = await Promise.all([
       Beneficiary.aggregate([
-        { $match: { branchId: { $in: branchIds } } },
+        // W656 — restricted user → only their branch in the comparison; HQ ({}) → all.
+        { $match: { branchId: { $in: branchIds }, ...branchFilter(req) } },
         { $group: { _id: '$branchId', count: { $sum: 1 } } },
       ]),
       ClinicalAssessment.aggregate([
-        { $match: { branchId: { $in: branchIds } } },
+        // W656 — restricted user → only their branch in the comparison; HQ ({}) → all.
+        { $match: { branchId: { $in: branchIds }, ...branchFilter(req) } },
         { $group: { _id: '$branchId', count: { $sum: 1 } } },
       ]),
     ]);

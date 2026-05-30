@@ -401,6 +401,55 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
     }
   });
 
+  // ─── GET /beneficiaries/:beneficiaryId/side-effects-summary ─
+  // Wave 599 — beneficiary-level actionable roll-up. Aggregates the
+  // persisted side-effect audit rows across EVERY transition in the
+  // beneficiary's lifecycle history and feeds them through the same
+  // W595 reducer used by the per-transition endpoint, so a single panel
+  // can show the real clinical-mutation totals + category buckets a
+  // beneficiary accumulated over their whole journey. Cross-branch
+  // isolation (W269) is enforced upstream by the `beneficiaryId`
+  // `branchScopedBeneficiaryParam` middleware registered above — a
+  // restricted caller can only resolve a beneficiary owned by their
+  // branch, so no per-row branch filtering is needed (and filtering by
+  // sourceBranchId would wrongly hide a transferred beneficiary's
+  // pre-transfer journey from their current branch).
+  router.get('/beneficiaries/:beneficiaryId/side-effects-summary', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+      const records = await service.getTransitionHistory(req.params.beneficiaryId);
+      const all = Array.isArray(records) ? records : [];
+
+      const flatRows = [];
+      let transitionsWithSideEffects = 0;
+      for (const record of all) {
+        const auditRows = record && Array.isArray(record.sideEffectsAudit)
+          ? record.sideEffectsAudit
+          : [];
+        if (auditRows.length > 0) transitionsWithSideEffects += 1;
+        for (const s of auditRows) {
+          flatRows.push({
+            ...(s && s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+            status: s ? s.status : undefined,
+          });
+        }
+      }
+
+      const sideEffectsSummary = summarizeSideEffectResults(flatRows);
+      return res.json({
+        success: true,
+        data: {
+          beneficiaryId: req.params.beneficiaryId,
+          transitionsConsidered: all.length,
+          transitionsWithSideEffects,
+          sideEffectsSummary,
+        },
+      });
+    } catch (err) {
+      return safeError(res, err, 'lifecycle.beneficiary.side-effects-summary');
+    }
+  });
+
   // ─── GET /beneficiaries/:beneficiaryId/allowed-transitions ─
   router.get('/beneficiaries/:beneficiaryId/allowed-transitions', (req, res) => {
     try {

@@ -420,6 +420,7 @@ __tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js
 __tests__/beneficiary-lifecycle-summarize-results-wave595.test.js
 __tests__/beneficiary-lifecycle-execute-summary-wave596.test.js
 __tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js
+__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js
 # W579 money-type migration guards (halalas integer-money). Wired into the
 # sprint gate — the float-money drift guard + lib + expand tests shipped but
 # were left un-enumerated, so the ratchet was inert in CI until now.

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authorization risk-rule catalog (ADR-035 D7)",
+  "description": "Dangerous-combination rules as DATA, not code. Evaluated by a pure deny-biased function on the client preview (POST /evaluate-risk) and re-run on the server gate + at approve-time (TOCTOU). The 'sod' kind maps to the sod_constraint table; the rest are engine invariants. Adding a rule is an INSERT, not a deploy. Design target — the live Mongo realization is the severity-graded generalization of authorization/sod/domain-rules.js + the maker-checker engine + requireMfaTier (ADR-019).",
+  "version": 1,
+  "severityRank": { "info": 0, "warn": 1, "block": 2 },
+  "decisionRule": "worst==='block' -> blocked; else any requiresApproval -> requires_approval; else apply_direct",
+  "rules": [
+    {
+      "code": "SOD_MAKER_CHECKER",
+      "kind": "sod",
+      "severity": "block",
+      "match": { "grantingAny": ["invoice:approve"], "conflictsWith": ["invoice:create"], "sameBranch": true },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "hq_security",
+      "message_en": "Segregation-of-duties: the same person would both create and approve invoices.",
+      "message_ar": "تعارض في الفصل بين المهام: سيتمكّن نفس الشخص من إنشاء الفواتير واعتمادها.",
+      "remediation_ar": "امنح الاعتماد لمستخدم آخر، أو اطلب استثناء فصل المهام باعتماد أمن المعلومات."
+    },
+    {
+      "code": "SOD_CLINICAL_BILLING",
+      "kind": "sod",
+      "severity": "block",
+      "match": { "grantingAny": ["billing:*"], "conflictsWith": ["clinical:write"] },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "hq_security",
+      "message_en": "Segregation-of-duties: clinical write authority must not be combined with billing authority.",
+      "message_ar": "تعارض في الفصل بين المهام: لا يجوز الجمع بين صلاحية الكتابة السريرية وصلاحية الفوترة."
+    },
+    {
+      "code": "SOD_AUDIT_WRITE",
+      "kind": "sod",
+      "severity": "block",
+      "match": { "grantingAny": ["*:write", "*:create", "*:update", "*:delete"], "heldRoleAny": ["auditor"] },
+      "requiresApproval": false,
+      "requiresJustification": true,
+      "approverTier": "hq_security",
+      "message_en": "An auditor must not hold write authority over the records they audit.",
+      "message_ar": "لا يجوز أن يملك المدقّق صلاحية الكتابة على السجلات التي يدقّقها."
+    },
+    {
+      "code": "ESC_BRANCH_TO_HQ",
+      "kind": "escalation",
+      "severity": "warn",
+      "match": { "targetTier": "global", "actorTier": "branch", "crossesBranch": true },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "senior",
+      "message_en": "Privilege escalation: a global / all-branch role is being granted to a branch-tier user.",
+      "message_ar": "تصعيد صلاحيات: يتم منح دور عام (كل الفروع) لمستخدم على مستوى فرع.",
+      "remediation_ar": "حدّد فرعاً أو منطقة بدلاً من (كل الفروع)، أو أرسل الطلب للاعتماد."
+    },
+    {
+      "code": "ESC_GRANT_OF_GRANT",
+      "kind": "escalation",
+      "severity": "warn",
+      "match": { "grantingAny": ["role:assign", "permission:grant"] },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "hq_security",
+      "message_en": "Granting the power to grant (role:assign). The recipient could escalate others.",
+      "message_ar": "منح صلاحية المنح (إسناد الأدوار) — قد يتمكّن المستلِم من تصعيد صلاحيات الآخرين."
+    },
+    {
+      "code": "SCOPE_ALL_BRANCHES",
+      "kind": "scope_breadth",
+      "severity": "warn",
+      "match": { "branchIsNull": true },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "senior",
+      "message_en": "All-branches (HQ) scope grant. Confirm the user genuinely needs cross-branch reach.",
+      "message_ar": "تخويل بنطاق (كل الفروع / المقر). تأكّد من حاجة المستخدم فعلاً لوصول عابر للفروع.",
+      "remediation_ar": "هل يكفي نطاق منطقة بدلاً من كل الفروع؟"
+    },
+    {
+      "code": "SCOPE_ACCUMULATION",
+      "kind": "scope_breadth",
+      "severity": "info",
+      "match": { "branchCountAfterGrantGreaterThan": 4 },
+      "requiresApproval": false,
+      "requiresJustification": false,
+      "approverTier": "peer",
+      "message_en": "This user would hold roles at more than 4 branches. Review accumulated reach.",
+      "message_ar": "سيملك هذا المستخدم أدواراً في أكثر من 4 فروع — راجع اتساع الوصول المتراكم."
+    },
+    {
+      "code": "SELF_ESCALATION",
+      "kind": "self",
+      "severity": "block",
+      "match": { "selfTarget": true },
+      "requiresApproval": true,
+      "requiresJustification": true,
+      "approverTier": "senior",
+      "message_en": "You cannot modify your own access. This change must be applied by another administrator.",
+      "message_ar": "لا يمكنك تعديل صلاحياتك الخاصة — يجب أن يطبّق هذا التغيير مسؤول آخر."
+    },
+    {
+      "code": "STANDING_PRIVILEGE",
+      "kind": "standing",
+      "severity": "warn",
+      "match": { "isSensitive": true, "noExpiry": true },
+      "requiresApproval": false,
+      "requiresJustification": true,
+      "approverTier": "peer",
+      "message_en": "Sensitive grant with no expiry. Set a validity window unless permanence is intended.",
+      "message_ar": "تخويل حسّاس بلا تاريخ انتهاء — حدّد مدة صلاحية ما لم يكن الدوام مقصوداً.",
+      "remediation_ar": "اقترح: 30 / 90 يوماً، أو حدّد تاريخ انتهاء صريح."
+    },
+    {
+      "code": "DENY_ORPHANS_WORKFLOW",
+      "kind": "deny_orphan",
+      "severity": "warn",
+      "match": { "op": "deny", "removesPermissionNeededByActiveWorkflow": true },
+      "requiresApproval": false,
+      "requiresJustification": true,
+      "approverTier": "peer",
+      "message_en": "This deny removes a permission an active workflow assignment still needs.",
+      "message_ar": "هذا المنع يزيل صلاحية ما زالت مطلوبة لمهمة سير عمل نشطة."
+    },
+    {
+      "code": "CRITICAL_GRANT_EXPIRING",
+      "kind": "expiry",
+      "severity": "info",
+      "match": { "gatesActiveWork": true, "expiresWithinDays": 7 },
+      "requiresApproval": false,
+      "requiresJustification": false,
+      "approverTier": "peer",
+      "message_en": "A grant gating live work expires within 7 days. Extend to avoid disruption.",
+      "message_ar": "تخويل يحكم عملاً جارياً ينتهي خلال 7 أيام — مدّده لتفادي التعطّل."
+    }
+  ]
+}

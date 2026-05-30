@@ -30,6 +30,15 @@
  *                          (EpisodeOfCare.status planned/active/on_hold/
  *                           suspended → completed, actualEndDate = now). Fires on
  *                          `record_deceased`. Idempotent.
+ *   release-care-team    → deactivate the active care-team members embedded in
+ *                          the beneficiary's episodes (EpisodeOfCare.careTeam[]
+ *                          isActive true → false, removedAt = now). Fires on
+ *                          `discharge` and `record_deceased`. Idempotent.
+ *
+ * NOTE on ordering: `close-open-episodes` and `release-care-team` both touch
+ * EpisodeOfCare. They target DISJOINT fields (`status`/`actualEndDate` vs the
+ * embedded `careTeam[]` flags), use independent `updateMany` filters, and are
+ * each individually idempotent, so dispatch order does not matter.
  *
  * Every other op is routed through a categorized **deferred** handler: it
  * records a structured `{ name, category, deferred: true }` result (so the
@@ -47,10 +56,11 @@
 
 const reg = require('./beneficiary-lifecycle.registry');
 
-/** Canonical op-name constants for the two real data handlers. */
+/** Canonical op-name constants for the real data handlers. */
 const OP = Object.freeze({
   END_ACTIVE_SCHEDULES: 'end-active-schedules',
   CLOSE_OPEN_EPISODES: 'close-open-episodes',
+  RELEASE_CARE_TEAM: 'release-care-team',
 });
 
 /** Appointment statuses that represent a still-actionable future booking. */
@@ -214,6 +224,32 @@ function createBeneficiaryLifecycleSideEffectHandlers({
     };
   }
 
+  // ── Real data handler: release (deactivate) care-team members ──────────
+  async function releaseCareTeam(ctx) {
+    if (!episodeModel || typeof episodeModel.updateMany !== 'function') {
+      return {
+        name: OP.RELEASE_CARE_TEAM,
+        category: 'data',
+        skipped: true,
+        reason: 'episode-model-unavailable',
+      };
+    }
+    // Care team is an embedded `careTeam[]` subdocument on EpisodeOfCare (there
+    // is no standalone CareTeam model). Releasing = flipping every still-active
+    // member to isActive:false + stamping removedAt, via a positional
+    // arrayFilter so only the active members are touched.
+    const res = await episodeModel.updateMany(
+      { beneficiaryId: ctx.beneficiaryId, 'careTeam.isActive': true },
+      { $set: { 'careTeam.$[m].isActive': false, 'careTeam.$[m].removedAt': now() } },
+      { arrayFilters: [{ 'm.isActive': true }] }
+    );
+    return {
+      name: OP.RELEASE_CARE_TEAM,
+      category: 'data',
+      releasedFromEpisodes: modifiedCount(res),
+    };
+  }
+
   /** Build a deferred handler that records intent + emits an event. */
   function deferredHandler(op, category) {
     return async function (ctx) {
@@ -237,6 +273,7 @@ function createBeneficiaryLifecycleSideEffectHandlers({
   const handlers = {
     [OP.END_ACTIVE_SCHEDULES]: endActiveSchedules,
     [OP.CLOSE_OPEN_EPISODES]: closeOpenEpisodes,
+    [OP.RELEASE_CARE_TEAM]: releaseCareTeam,
   };
 
   for (const op of allRegistryOps()) {

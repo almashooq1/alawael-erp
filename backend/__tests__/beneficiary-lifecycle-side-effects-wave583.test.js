@@ -50,10 +50,11 @@ describe('W583 beneficiary lifecycle side-effects — registry completeness', ()
     expect(fromHelper).toEqual(fromRegistry);
   });
 
-  test('the two critical record_deceased data ops are covered', () => {
+  test('the three critical discharge/record_deceased data ops are covered', () => {
     const handlers = createBeneficiaryLifecycleSideEffectHandlers();
     expect(typeof handlers[OP.END_ACTIVE_SCHEDULES]).toBe('function');
     expect(typeof handlers[OP.CLOSE_OPEN_EPISODES]).toBe('function');
+    expect(typeof handlers[OP.RELEASE_CARE_TEAM]).toBe('function');
   });
 });
 
@@ -171,6 +172,53 @@ describe('W583 close-open-episodes handler', () => {
   test('self-skips when episode model unavailable', async () => {
     const handlers = createBeneficiaryLifecycleSideEffectHandlers({ episodeModel: null });
     const res = await handlers[OP.CLOSE_OPEN_EPISODES]({ beneficiaryId: 'b1' });
+    expect(res.skipped).toBe(true);
+    expect(res.reason).toBe('episode-model-unavailable');
+  });
+});
+
+describe('W584 release-care-team handler', () => {
+  test('deactivates active team members via positional arrayFilter', async () => {
+    const calls = [];
+    const episodeModel = {
+      updateMany: jest.fn(async (filter, update, opts) => {
+        calls.push({ filter, update, opts });
+        return { modifiedCount: 2 };
+      }),
+    };
+    const handlers = createBeneficiaryLifecycleSideEffectHandlers({
+      episodeModel,
+      now: () => new Date('2026-03-03T00:00:00.000Z'),
+    });
+    const res = await handlers[OP.RELEASE_CARE_TEAM]({
+      beneficiaryId: 'b7',
+      toState: 'discharged',
+    });
+    expect(res).toEqual({
+      name: 'release-care-team',
+      category: 'data',
+      releasedFromEpisodes: 2,
+    });
+    const { filter, update, opts } = calls[0];
+    expect(filter.beneficiaryId).toBe('b7');
+    expect(filter['careTeam.isActive']).toBe(true);
+    expect(update.$set['careTeam.$[m].isActive']).toBe(false);
+    expect(update.$set['careTeam.$[m].removedAt']).toEqual(new Date('2026-03-03T00:00:00.000Z'));
+    expect(opts.arrayFilters).toEqual([{ 'm.isActive': true }]);
+  });
+
+  test('release-care-team is a REAL data handler, not deferred', async () => {
+    const episodeModel = { updateMany: async () => ({ nModified: 0 }) };
+    const handlers = createBeneficiaryLifecycleSideEffectHandlers({ episodeModel });
+    const res = await handlers[OP.RELEASE_CARE_TEAM]({ beneficiaryId: 'b1' });
+    expect(res.deferred).toBeUndefined();
+    expect(res.category).toBe('data');
+    expect(res.releasedFromEpisodes).toBe(0);
+  });
+
+  test('self-skips when episode model unavailable', async () => {
+    const handlers = createBeneficiaryLifecycleSideEffectHandlers({ episodeModel: null });
+    const res = await handlers[OP.RELEASE_CARE_TEAM]({ beneficiaryId: 'b1' });
     expect(res.skipped).toBe(true);
     expect(res.reason).toBe('episode-model-unavailable');
   });

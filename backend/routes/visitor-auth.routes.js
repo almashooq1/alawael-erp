@@ -75,6 +75,36 @@ function isPhone(c) {
   return /^\+?\d[\d\s-]{6,}$/.test(c);
 }
 
+// ── httpOnly cookie for the visitor JWT (audit #23) ─────────────────────────
+// web-admin and this API share the same site (alaweal.org), so SameSite=Lax is
+// sufficient and needs no CORS change. Secure in prod; relaxed in dev for
+// http://localhost. The cookie is httpOnly so page JS can't read/exfiltrate it
+// (the prior localStorage token was XSS-exfiltratable). No cookie-parser
+// dependency — we read the one cookie we care about directly off the header.
+const VISITOR_COOKIE = 'visitor_jwt';
+const COOKIE_PATH = '/api/v1/public/visitor';
+function cookieOpts() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: COOKIE_PATH,
+    maxAge: 24 * 60 * 60 * 1000, // 24h — matches the JWT expiry
+  };
+}
+function readVisitorCookie(req) {
+  const raw = req.headers.cookie;
+  if (!raw) return null;
+  for (const part of raw.split(';')) {
+    const i = part.indexOf('=');
+    if (i === -1) continue;
+    if (part.slice(0, i).trim() === VISITOR_COOKIE) {
+      return decodeURIComponent(part.slice(i + 1).trim());
+    }
+  }
+  return null;
+}
+
 router.post('/request-otp', rateLimit, async (req, res) => {
   try {
     const contact = normalize(req.body?.contact);
@@ -158,6 +188,10 @@ router.post('/verify-otp', rateLimit, async (req, res) => {
     const effectiveSecret = secret || 'dev-fallback-do-not-use-in-production';
     const token = jwt.sign({ contact, role: 'visitor' }, effectiveSecret, { expiresIn: '24h' });
 
+    // audit #23: deliver the JWT as an httpOnly cookie (XSS-safe). The body
+    // `token` is retained for ONE transition release so a not-yet-updated
+    // frontend keeps working; drop it once all clients read the cookie.
+    res.cookie(VISITOR_COOKIE, token, cookieOpts());
     res.json({ ok: true, token, contact });
   } catch (err) {
     return safeError(res, err, 'visitorAuth', { shape: 'ok' });
@@ -168,7 +202,10 @@ router.get('/my-submissions', async (req, res) => {
   try {
     const auth = req.headers.authorization || '';
     const m = /^Bearer (.+)$/.exec(auth);
-    if (!m) return res.status(401).json({ ok: false, error: 'NO_TOKEN' });
+    // audit #23: prefer the httpOnly cookie; fall back to the Bearer header for
+    // transitional clients and non-browser API callers.
+    const rawToken = readVisitorCookie(req) || (m ? m[1] : null);
+    if (!rawToken) return res.status(401).json({ ok: false, error: 'NO_TOKEN' });
     // W457: refuse to fall back to 'dev-fallback' in production —
     // attacker knowing the literal could forge any visitor token.
     const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
@@ -183,7 +220,7 @@ router.get('/my-submissions', async (req, res) => {
     const effectiveSecret = secret || 'dev-fallback-do-not-use-in-production';
     let payload;
     try {
-      payload = jwt.verify(m[1], effectiveSecret, { algorithms: ['HS256'] });
+      payload = jwt.verify(rawToken, effectiveSecret, { algorithms: ['HS256'] });
     } catch {
       return res.status(401).json({ ok: false, error: 'INVALID_TOKEN' });
     }
@@ -204,6 +241,12 @@ router.get('/my-submissions', async (req, res) => {
   } catch (err) {
     return safeError(res, err, 'visitorAuth', { shape: 'ok' });
   }
+});
+
+// audit #23: clear the httpOnly cookie (the page JS can't, since it's httpOnly).
+router.post('/logout', (req, res) => {
+  res.clearCookie(VISITOR_COOKIE, { path: COOKIE_PATH });
+  res.json({ ok: true });
 });
 
 module.exports = router;

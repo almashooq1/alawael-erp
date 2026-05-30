@@ -432,3 +432,4 @@ __tests__/unauthenticated-routes-wave658.test.js
 __tests__/bi-dashboard-branch-scope-wave661.test.js
 __tests__/quality-parentcomplaint-branch-scope-wave662.test.js
 __tests__/risk-appointment-branch-scope-wave663.test.js
+__tests__/safetyincident-branch-tenancy-wave664.test.js

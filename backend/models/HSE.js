@@ -41,6 +41,12 @@ const incidentSchema = new mongoose.Schema(
     department: { type: String, default: '' },
     incidentDate: { type: Date, required: true },
     reportedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // W664 — branch tenancy denormalization (R4). An incident belongs to the
+    // branch where it was filed; derived from the (required) reporter's
+    // User.branchId in the pre-save hook below (the `location` field is free
+    // text, not a Branch ref). Additive; backfill via npm run
+    // backfill:safetyincident-branchid.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     assignedInvestigator: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     injuredPersons: [
       {
@@ -70,12 +76,29 @@ const incidentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-incidentSchema.pre('validate', async function (next) {
+// W664 — was `async function (next){…next()}` (Mongoose-9 mixed async+callback:
+// dispatched as a Promise → next undefined → "next is not a function" on save;
+// surfaced by the W664 behavioral test). Converted to pure async (W483 form).
+incidentSchema.pre('validate', async function () {
   if (!this.incidentNumber) {
     const count = await mongoose.model('SafetyIncident').countDocuments();
     this.incidentNumber = `INC-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
+});
+
+// W664 — branch-scoped incident stats (R4)
+incidentSchema.index({ branchId: 1, status: 1 });
+// W664 — denormalize branchId from the (required) reporter's User.branchId.
+// async pre('save') — distinct event from the pre('validate') above.
+incidentSchema.pre('save', async function deriveBranchFromReporter() {
+  if (this.branchId || !this.reportedBy) return;
+  try {
+    const User = mongoose.model('User');
+    const u = await User.findById(this.reportedBy).select('branchId').lean();
+    if (u && u.branchId) this.branchId = u.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
 });
 
 // ── جولة تفتيش — Safety Inspection ──────────────────────────────────
@@ -115,12 +138,12 @@ const inspectionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-inspectionSchema.pre('validate', async function (next) {
+// W664 — same Mongoose-9 mixed async+callback fix as the incident hook above.
+inspectionSchema.pre('validate', async function () {
   if (!this.inspectionNumber) {
     const count = await mongoose.model('SafetyInspection').countDocuments();
     this.inspectionNumber = `INSP-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 const SafetyIncident = safeModel('SafetyIncident', incidentSchema);

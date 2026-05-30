@@ -318,7 +318,10 @@ function createBeneficiaryLifecycleSideEffectHandlers({
  *   skipped: number,
  *   failed: number,
  *   real: number,
- *   health: { ok: boolean, clean: boolean, failedRatio: number, skippedRatio: number },
+ *   health: {
+ *     ok: boolean, clean: boolean, mutated: boolean,
+ *     failedRatio: number, skippedRatio: number,
+ *   },
  * }}
  *
  * Wave 651 adds a read-only `health` signal so the audit / dashboard layer can
@@ -330,6 +333,12 @@ function createBeneficiaryLifecycleSideEffectHandlers({
  * `appointment-model-unavailable`) means a real cleanup never ran, which is a
  * degradation `ok` alone hides. `clean` is true only when nothing failed AND
  * nothing was skipped, and `skippedRatio` is the share of skipped results.
+ *
+ * Wave 653 adds `mutated` so the dashboard can tell a healthy-but-empty run
+ * apart from one that actually changed beneficiary data: `mutated` is true only
+ * when at least one real data handler produced a non-zero mutation
+ * (`dataMutations.total > 0`). A `clean && !mutated` run is a benign no-op (or a
+ * silent logic gap worth a glance); `clean && mutated` did real work.
  * Purely additive — the existing keys are unchanged.
  */
 function summarizeSideEffectResults(results) {
@@ -382,6 +391,7 @@ function summarizeSideEffectResults(results) {
   const health = {
     ok: failed === 0,
     clean: failed === 0 && skipped === 0,
+    mutated: dataMutations.total > 0,
     failedRatio: total ? Number((failed / total).toFixed(4)) : 0,
     skippedRatio: total ? Number((skipped / total).toFixed(4)) : 0,
   };

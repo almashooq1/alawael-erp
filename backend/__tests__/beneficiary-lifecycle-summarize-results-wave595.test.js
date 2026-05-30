@@ -137,7 +137,13 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
       { category: 'notification', emitted: true },
     ];
     const s = summarizeSideEffectResults(results);
-    expect(s.health).toEqual({ ok: true, clean: true, failedRatio: 0, skippedRatio: 0 });
+    expect(s.health).toEqual({
+      ok: true,
+      clean: true,
+      mutated: true,
+      failedRatio: 0,
+      skippedRatio: 0,
+    });
   });
 
   test('W651 — health flags a degraded run with a rounded failedRatio', () => {
@@ -154,7 +160,13 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
 
   test('W651 — empty input yields ok:true and failedRatio 0 (no divide-by-zero)', () => {
     const s = summarizeSideEffectResults([]);
-    expect(s.health).toEqual({ ok: true, clean: true, failedRatio: 0, skippedRatio: 0 });
+    expect(s.health).toEqual({
+      ok: true,
+      clean: true,
+      mutated: false,
+      failedRatio: 0,
+      skippedRatio: 0,
+    });
   });
 
   test('W652 — health.clean is false when a handler was skipped even with no failures', () => {
@@ -178,5 +190,34 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
     const s = summarizeSideEffectResults(results);
     expect(s.health.clean).toBe(true);
     expect(s.health.skippedRatio).toBe(0);
+  });
+
+  test('W653 — health.mutated is true only when real data mutations occurred', () => {
+    const withImpact = summarizeSideEffectResults([
+      { category: 'data', closedEpisodes: 2 },
+      { category: 'notification', emitted: true },
+    ]);
+    expect(withImpact.dataMutations.total).toBe(2);
+    expect(withImpact.health.mutated).toBe(true);
+    expect(withImpact.health.clean).toBe(true);
+  });
+
+  test('W653 — a clean run that touched no beneficiary data is flagged mutated:false (benign no-op)', () => {
+    const noOp = summarizeSideEffectResults([
+      { category: 'notification', emitted: true },
+      { category: 'compliance', deferred: true },
+    ]);
+    expect(noOp.health.ok).toBe(true);
+    expect(noOp.health.clean).toBe(true);
+    expect(noOp.dataMutations.total).toBe(0);
+    expect(noOp.health.mutated).toBe(false);
+  });
+
+  test('W653 — a deferred data op does not count as a mutation', () => {
+    const deferredData = summarizeSideEffectResults([
+      { category: 'data', deferred: true, closedEpisodes: 5 },
+    ]);
+    expect(deferredData.dataMutations.total).toBe(0);
+    expect(deferredData.health.mutated).toBe(false);
   });
 });

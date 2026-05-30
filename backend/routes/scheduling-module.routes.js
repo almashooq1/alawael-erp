@@ -13,7 +13,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
@@ -1037,7 +1037,11 @@ router.get(
   '/reports/therapist-workload',
   asyncHandler(async (req, res) => {
     const { from_date, to_date } = req.query;
+    // W663 — models/scheduling/Appointment uses snake_case `branch_id` (required);
+    // translate the camelCase branchFilter envelope. {} for cross-branch/HQ.
+    const _bf = branchFilter(req);
     const filter = {
+      ...(_bf.branchId !== undefined ? { branch_id: _bf.branchId } : {}),
       deleted_at: null,
       status: { $nin: ['cancelled'] },
     };

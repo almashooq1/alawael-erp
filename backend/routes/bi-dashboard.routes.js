@@ -518,7 +518,8 @@ router.get('/operations/analytics', async (req, res) => {
         : [],
       MaintenanceRequest
         ? MaintenanceRequest.aggregate([
-            { $match: { createdAt: { $gte: monthStart } } },
+            // W665 — branch-scope (MaintenanceRequest now carries branchId).
+            { $match: { ...branchFilter(req), createdAt: { $gte: monthStart } } },
             { $group: { _id: '$status', count: { $sum: 1 } } },
             { $limit: 1000 },
           ])

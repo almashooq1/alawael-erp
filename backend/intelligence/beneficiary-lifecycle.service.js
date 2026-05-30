@@ -706,6 +706,15 @@ function createBeneficiaryLifecycleService({
     return docs;
   }
 
+  // Wave 597 — single-record read helper. Activates the Wave-40
+  // `GET /transitions/:id` route (previously 501 GET_BY_ID_NOT_WIRED)
+  // and backs the side-effects-summary endpoint. Returns a lean doc
+  // or null.
+  async function getTransitionById(transitionRecordId) {
+    if (!transitionRecordId) return null;
+    return transitionLog.findById(transitionRecordId).lean();
+  }
+
   return {
     requestTransition,
     approveTransition,
@@ -714,6 +723,7 @@ function createBeneficiaryLifecycleService({
     reverseTransition,
     getAllowedTransitionsFor,
     getTransitionHistory,
+    getTransitionById,
     REASON,
   };
 }

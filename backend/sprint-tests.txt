@@ -412,3 +412,4 @@ __tests__/measure-recommendation-trend-aware-wave576.test.js
 __tests__/beneficiary-lifecycle-execute-side-effects-wave585.test.js
 __tests__/beneficiary-lifecycle-side-effect-payload-wave586.test.js
 __tests__/beneficiary-lifecycle-self-skip-observability-wave587.test.js
+__tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js

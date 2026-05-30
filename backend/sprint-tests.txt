@@ -425,3 +425,4 @@ __tests__/meeting-branch-tenancy-wave635.test.js
 __tests__/mdt-coordination-branch-scope-wave639.test.js
 __tests__/session-branch-tenancy-wave647.test.js
 __tests__/invoice-branch-tenancy-wave651.test.js
+__tests__/careplan-branch-tenancy-wave654.test.js

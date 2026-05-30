@@ -233,7 +233,8 @@ router.get('/beneficiaries', requireRole(READ_ROLES), async (req, res) => {
 router.get('/goals', requireRole(READ_ROLES), async (req, res) => {
   try {
     const result = await CarePlan.aggregate([
-      { $match: { status: 'ACTIVE' } },
+      // W654 — branch-scope (CarePlan now carries branchId).
+      { $match: { ...branchFilter(req), status: 'ACTIVE' } },
       {
         $project: {
           allGoals: {

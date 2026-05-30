@@ -11,7 +11,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 
 // jsdom lacks the browser APIs the dashboard's KPI counter (IntersectionObserver)
 // and recharts ResponsiveContainer (ResizeObserver) touch on mount.
@@ -47,6 +47,8 @@ const mockData = {
   suggestions: [],
   drugs: [],
   decisionLog: [],
+  riskAssessments: [],
+  diagnoses: [],
 };
 
 jest.mock('services/cdssService', () => {
@@ -60,6 +62,8 @@ jest.mock('services/cdssService', () => {
     getRehabSuggestions: jest.fn(() => Promise.resolve(mockData.suggestions)),
     getDrugLibrary: jest.fn(() => Promise.resolve(mockData.drugs)),
     getDecisionLog: jest.fn(() => Promise.resolve(mockData.decisionLog)),
+    getRiskAssessments: jest.fn(() => Promise.resolve(mockData.riskAssessments)),
+    getDifferentialDiagnoses: jest.fn(() => Promise.resolve(mockData.diagnoses)),
   };
 });
 
@@ -141,6 +145,36 @@ const POPULATED = {
       timestamp: new Date().toISOString(),
     },
   ],
+  riskAssessments: [
+    {
+      _id: 'ra1',
+      beneficiaryId: 'b1',
+      beneficiaryName: 'أحمد',
+      assessmentType: 'fall_risk',
+      toolUsed: 'Morse Scale',
+      overallScore: 78,
+      riskLevel: 'very_high',
+      domains: [{ domain: 'سلامة الدواء', score: 92, flag: true }],
+      recommendedInterventions: ['مراقبة مكثفة'],
+      generatedBy: 'AI-Auto',
+      mlAssisted: true,
+      mlConfidenceScore: 0.82,
+      generatedAt: new Date().toISOString(),
+    },
+  ],
+  diagnoses: [
+    {
+      _id: 'dd1',
+      beneficiaryId: 'b2',
+      beneficiaryName: 'نورة',
+      symptoms: ['ضعف عضلي'],
+      clinicalFindings: ['رنح'],
+      candidates: [{ icdCode: 'G35', name: 'التصلب المتعدد', probability: 62, reasoning: 'نمط الأعراض' }],
+      investigations: ['رنين مغناطيسي'],
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    },
+  ],
 };
 
 const EMPTY = {
@@ -150,6 +184,8 @@ const EMPTY = {
   suggestions: [],
   drugs: [],
   decisionLog: [],
+  riskAssessments: [],
+  diagnoses: [],
 };
 
 afterEach(() => {
@@ -160,6 +196,8 @@ afterEach(() => {
     suggestions: [],
     drugs: [],
     decisionLog: [],
+    riskAssessments: [],
+    diagnoses: [],
   });
 });
 
@@ -179,5 +217,24 @@ describe('CDSSDashboard renders without throwing', () => {
     expect(await screen.findByText('نظام دعم القرار السريري')).toBeTruthy();
     // overview tab panels render (KPIs + severity breakdown), not an error boundary
     expect(await screen.findByText('توزيع التنبيهات')).toBeTruthy();
+  });
+
+  test('Risk Assessments tab renders the new surface', async () => {
+    Object.assign(mockData, POPULATED);
+    render(<CDSSDashboard />);
+    await screen.findByText('نظام دعم القرار السريري');
+    fireEvent.click(screen.getByText('تقييمات المخاطر'));
+    // the auto-generate tool + a risk card both prove the new tab mounted
+    expect(await screen.findByText('توليد تقييم مخاطر آلي')).toBeTruthy();
+    expect(await screen.findByText('مراقبة مكثفة')).toBeTruthy();
+  });
+
+  test('Differential Diagnoses tab renders the new surface', async () => {
+    Object.assign(mockData, POPULATED);
+    render(<CDSSDashboard />);
+    await screen.findByText('نظام دعم القرار السريري');
+    fireEvent.click(screen.getByText('التشخيصات التفريقية'));
+    expect(await screen.findByText('التصلب المتعدد')).toBeTruthy();
+    expect(await screen.findByText('G35')).toBeTruthy();
   });
 });

@@ -74,6 +74,10 @@ import {
   TrendingDown as _RegressionIcon,
   PlayArrow as RunIcon,
   Cancel as CancelIcon,
+  HealthAndSafety as RiskIcon,
+  Biotech as DiagnosisIcon,
+  FactCheck as ValidateIcon,
+  AutoAwesome as AutoIcon,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -102,8 +106,16 @@ import {
   getDrugLibrary,
   checkDrugInteractions,
   getDecisionLog,
+  getRiskAssessments,
+  generateAutoRiskAssessment,
+  getDifferentialDiagnoses,
+  confirmDifferentialDiagnosis,
+  validatePrescription,
   ALERT_SEVERITIES,
   RULE_CATEGORIES,
+  RISK_LEVELS,
+  RISK_ASSESSMENT_TYPES,
+  DIAGNOSIS_STATUSES,
 } from 'services/cdssService';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -245,6 +257,8 @@ export default function CDSSDashboard() {
   const [suggestions, setSuggestions] = useState([]);
   const [drugs, setDrugs] = useState([]);
   const [decisionLog, setDecisionLog] = useState([]);
+  const [riskAssessments, setRiskAssessments] = useState([]);
+  const [diagnoses, setDiagnoses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // filters
@@ -259,19 +273,25 @@ export default function CDSSDashboard() {
   const [interactionResult, setInteractionResult] = useState(null);
   const [selectedDrugsForCheck, setSelectedDrugsForCheck] = useState([]);
   const [interactionLoading, setInteractionLoading] = useState(false);
+  const [riskTypeFilter, setRiskTypeFilter] = useState('all');
+  const [genRisk, setGenRisk] = useState({ loading: false, beneficiaryId: '', type: 'fall_risk' });
+  const [confirmDdDialog, setConfirmDdDialog] = useState({ open: false, id: null, note: '' });
+  const [rxCheck, setRxCheck] = useState({ result: null, loading: false });
 
   // ─── Fetch All ───────────────────────────────────────────────────────────
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [s, a, r, sg, d, dl] = await Promise.all([
+      const [s, a, r, sg, d, dl, ra, dd] = await Promise.all([
         getStats(),
         getAlerts(),
         getRules(),
         getRehabSuggestions(),
         getDrugLibrary(),
         getDecisionLog(),
+        getRiskAssessments(),
+        getDifferentialDiagnoses(),
       ]);
       setStats(s);
       setAlerts(Array.isArray(a) ? a : []);
@@ -279,6 +299,8 @@ export default function CDSSDashboard() {
       setSuggestions(Array.isArray(sg) ? sg : []);
       setDrugs(Array.isArray(d) ? d : []);
       setDecisionLog(Array.isArray(dl) ? dl : []);
+      setRiskAssessments(Array.isArray(ra) ? ra : []);
+      setDiagnoses(Array.isArray(dd) ? dd : []);
     } catch (err) {
       console.error('CDSS fetch error', err);
     } finally {
@@ -347,6 +369,38 @@ export default function CDSSDashboard() {
     setInteractionLoading(false);
   };
 
+  // ─── Risk assessment / diagnosis / prescription actions ─────────────────────
+
+  const handleGenerateRisk = async () => {
+    if (!genRisk.beneficiaryId.trim()) return;
+    setGenRisk(p => ({ ...p, loading: true }));
+    const created = await generateAutoRiskAssessment(genRisk.beneficiaryId.trim(), genRisk.type);
+    if (created && created._id) setRiskAssessments(prev => [created, ...prev]);
+    setGenRisk({ loading: false, beneficiaryId: '', type: 'fall_risk' });
+  };
+
+  const handleConfirmDd = async () => {
+    const { id, note } = confirmDdDialog;
+    await confirmDifferentialDiagnosis(id, { clinicianAssessment: note });
+    setDiagnoses(prev =>
+      prev.map(d =>
+        d._id === id
+          ? { ...d, status: 'confirmed', clinicianAssessment: note, confirmedAt: new Date().toISOString() }
+          : d
+      )
+    );
+    setConfirmDdDialog({ open: false, id: null, note: '' });
+  };
+
+  const handleValidateRx = async () => {
+    if (selectedDrugsForCheck.length < 1) return;
+    setRxCheck({ result: null, loading: true });
+    const result = await validatePrescription({
+      drugCodes: selectedDrugsForCheck.map(d => d.code || d._id),
+    });
+    setRxCheck({ result, loading: false });
+  };
+
   // ─── Derived data ─────────────────────────────────────────────────────────
 
   const filteredAlerts = alerts.filter(a => {
@@ -360,6 +414,15 @@ export default function CDSSDashboard() {
 
   const filteredRules =
     ruleCategory === 'all' ? rules : rules.filter(r => r.category === ruleCategory);
+
+  const filteredRisk =
+    riskTypeFilter === 'all'
+      ? riskAssessments
+      : riskAssessments.filter(r => r.assessmentType === riskTypeFilter);
+  const highRiskCount = riskAssessments.filter(
+    r => r.riskLevel === 'very_high' || r.riskLevel === 'high'
+  ).length;
+  const activeDdCount = diagnoses.filter(d => d.status === 'active').length;
 
   const alertCountBySeverity = alerts.reduce((acc, a) => {
     acc[a.severity] = (acc[a.severity] || 0) + 1;
@@ -475,6 +538,24 @@ export default function CDSSDashboard() {
           />
           <Tab icon={<DrugIcon />} iconPosition="start" label="مكتبة الأدوية" />
           <Tab icon={<LogIcon />} iconPosition="start" label="سجل القرارات" />
+          <Tab
+            icon={
+              <Badge badgeContent={highRiskCount} color="error" max={99}>
+                <RiskIcon />
+              </Badge>
+            }
+            iconPosition="start"
+            label="تقييمات المخاطر"
+          />
+          <Tab
+            icon={
+              <Badge badgeContent={activeDdCount} color="warning" max={99}>
+                <DiagnosisIcon />
+              </Badge>
+            }
+            iconPosition="start"
+            label="التشخيصات التفريقية"
+          />
         </Tabs>
       </Paper>
 
@@ -1162,6 +1243,15 @@ export default function CDSSDashboard() {
             >
               فحص التفاعلات
             </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={rxCheck.loading ? <CircularProgress size={16} /> : <ValidateIcon />}
+              onClick={handleValidateRx}
+              disabled={selectedDrugsForCheck.length < 1 || rxCheck.loading}
+            >
+              التحقق من الوصفة
+            </Button>
           </Stack>
 
           {interactionResult && (
@@ -1176,6 +1266,44 @@ export default function CDSSDashboard() {
                   محتمل — راجع طبيب الفريق
                 </Alert>
               )}
+            </Box>
+          )}
+
+          {rxCheck.result && (
+            <Box mt={2}>
+              <Alert
+                severity={
+                  rxCheck.result.status === 'failed'
+                    ? 'error'
+                    : rxCheck.result.status === 'warnings'
+                      ? 'warning'
+                      : 'success'
+                }
+                icon={
+                  rxCheck.result.status === 'failed' ? (
+                    <CriticalIcon />
+                  ) : rxCheck.result.status === 'warnings' ? (
+                    <WarnIcon />
+                  ) : (
+                    <OkIcon />
+                  )
+                }
+              >
+                <strong>
+                  نتيجة التحقق من الوصفة:{' '}
+                  {rxCheck.result.status === 'failed'
+                    ? 'فشل — أخطاء حرجة'
+                    : rxCheck.result.status === 'warnings'
+                      ? 'تحذيرات'
+                      : 'مطابِقة'}
+                </strong>
+                {(rxCheck.result.errors.length > 0 || rxCheck.result.warnings.length > 0) && (
+                  <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                    {rxCheck.result.errors.length} خطأ • {rxCheck.result.warnings.length} تحذير •{' '}
+                    {rxCheck.result.interactions.length} تفاعل
+                  </Typography>
+                )}
+              </Alert>
             </Box>
           )}
         </Paper>
@@ -1324,8 +1452,334 @@ export default function CDSSDashboard() {
       </TabPanel>
 
       {/* ════════════════════════════════════════════════════════════════════
+          TAB 6 — RISK ASSESSMENTS
+      ════════════════════════════════════════════════════════════════════ */}
+      <TabPanel value={tab} index={6}>
+        {/* Auto-generate tool */}
+        <Paper
+          elevation={0}
+          sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}
+        >
+          <Typography fontWeight={700} mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AutoIcon color="primary" fontSize="small" /> توليد تقييم مخاطر آلي
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+            <TextField
+              size="small"
+              label="معرّف المستفيد"
+              value={genRisk.beneficiaryId}
+              onChange={e => setGenRisk(p => ({ ...p, beneficiaryId: e.target.value }))}
+              placeholder="BNF-XXXXX"
+              sx={{ minWidth: 200 }}
+            />
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <InputLabel>نوع التقييم</InputLabel>
+              <Select
+                value={genRisk.type}
+                label="نوع التقييم"
+                onChange={e => setGenRisk(p => ({ ...p, type: e.target.value }))}
+              >
+                {Object.entries(RISK_ASSESSMENT_TYPES).map(([k, v]) => (
+                  <MenuItem key={k} value={k}>
+                    {v.label} — {v.tool}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={genRisk.loading ? <CircularProgress size={16} color="inherit" /> : <RunIcon />}
+              onClick={handleGenerateRisk}
+              disabled={!genRisk.beneficiaryId.trim() || genRisk.loading}
+            >
+              توليد بالذكاء الاصطناعي
+            </Button>
+          </Stack>
+        </Paper>
+
+        {/* Type filter */}
+        <Stack direction="row" spacing={1} mb={2} flexWrap="wrap" useFlexGap>
+          <Chip
+            label={`الكل (${riskAssessments.length})`}
+            onClick={() => setRiskTypeFilter('all')}
+            variant={riskTypeFilter === 'all' ? 'filled' : 'outlined'}
+            size="small"
+          />
+          {Object.entries(RISK_ASSESSMENT_TYPES).map(([k, v]) => (
+            <Chip
+              key={k}
+              label={`${v.label} (${riskAssessments.filter(r => r.assessmentType === k).length})`}
+              onClick={() => setRiskTypeFilter(k)}
+              variant={riskTypeFilter === k ? 'filled' : 'outlined'}
+              size="small"
+            />
+          ))}
+        </Stack>
+
+        <Grid container spacing={2}>
+          {filteredRisk.map(ra => {
+            const lvl = RISK_LEVELS[ra.riskLevel] || RISK_LEVELS.low;
+            return (
+              <Grid item xs={12} md={6} key={ra._id}>
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2.5,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor:
+                        ra.riskLevel === 'very_high' || ra.riskLevel === 'high'
+                          ? 'error.light'
+                          : 'divider',
+                    }}
+                  >
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                      <Box>
+                        <Typography fontWeight={700}>{ra.beneficiaryName}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {ra.beneficiaryId} •{' '}
+                          {RISK_ASSESSMENT_TYPES[ra.assessmentType]?.label || ra.assessmentType} •{' '}
+                          {ra.toolUsed}
+                        </Typography>
+                      </Box>
+                      <Stack alignItems="flex-end" spacing={0.5}>
+                        <Chip label={lvl.label} size="small" color={lvl.color} sx={{ fontWeight: 700 }} />
+                        <Typography variant="h5" fontWeight={800} sx={{ color: `${lvl.color}.main` }}>
+                          {ra.overallScore}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+
+                    {ra.domains?.length > 0 && (
+                      <Stack spacing={1} mt={1.5}>
+                        {ra.domains.map((dm, i) => (
+                          <Box key={i}>
+                            <Stack direction="row" justifyContent="space-between" mb={0.3}>
+                              <Typography variant="caption" fontWeight={600}>
+                                {dm.domain} {dm.flag && <WarnIcon sx={{ fontSize: 13, color: '#f59e0b' }} />}
+                              </Typography>
+                              <Typography variant="caption" fontWeight={700}>
+                                {dm.score}
+                              </Typography>
+                            </Stack>
+                            <LinearProgress
+                              variant="determinate"
+                              value={Math.min(dm.score, 100)}
+                              color={dm.flag ? 'error' : 'primary'}
+                              sx={{ height: 6, borderRadius: 3 }}
+                            />
+                          </Box>
+                        ))}
+                      </Stack>
+                    )}
+
+                    {ra.recommendedInterventions?.length > 0 && (
+                      <Box mt={1.5}>
+                        <Typography variant="caption" fontWeight={700} color="text.secondary">
+                          التدخلات الموصى بها:
+                        </Typography>
+                        <Stack direction="row" flexWrap="wrap" gap={0.5} mt={0.5}>
+                          {ra.recommendedInterventions.map(iv => (
+                            <Chip key={iv} label={iv} size="small" variant="outlined" sx={{ fontSize: '0.65rem' }} />
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" mt={1.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        {ra.mlAssisted && (
+                          <Chip
+                            icon={<AutoIcon sx={{ fontSize: 14 }} />}
+                            label={`AI ${ra.mlConfidenceScore ? `${Math.round(ra.mlConfidenceScore * 100)}%` : ''}`}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ fontSize: '0.6rem', mr: 0.5 }}
+                          />
+                        )}
+                        {ra.generatedBy}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {fmtTime(ra.generatedAt)}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                </motion.div>
+              </Grid>
+            );
+          })}
+          {filteredRisk.length === 0 && (
+            <Grid item xs={12}>
+              <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
+                <RiskIcon sx={{ fontSize: 48, mb: 1, opacity: 0.3 }} />
+                <Typography>لا توجد تقييمات مخاطر</Typography>
+              </Box>
+            </Grid>
+          )}
+        </Grid>
+      </TabPanel>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          TAB 7 — DIFFERENTIAL DIAGNOSES
+      ════════════════════════════════════════════════════════════════════ */}
+      <TabPanel value={tab} index={7}>
+        <Grid container spacing={2}>
+          {diagnoses.map(dd => {
+            const st = DIAGNOSIS_STATUSES[dd.status] || DIAGNOSIS_STATUSES.active;
+            return (
+              <Grid item xs={12} md={6} key={dd._id}>
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2.5,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: dd.status === 'confirmed' ? 'success.main' : 'divider',
+                    }}
+                  >
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                      <Box>
+                        <Typography fontWeight={700}>{dd.beneficiaryName}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {dd.beneficiaryId} • {fmtTime(dd.createdAt)}
+                        </Typography>
+                      </Box>
+                      <Chip label={st.label} size="small" color={st.color} sx={{ fontWeight: 700 }} />
+                    </Stack>
+
+                    <Typography variant="caption" fontWeight={700} color="text.secondary">
+                      الأعراض:
+                    </Typography>
+                    <Stack direction="row" flexWrap="wrap" gap={0.5} mt={0.5} mb={1.5}>
+                      {dd.symptoms.map(s => (
+                        <Chip key={s} label={s} size="small" sx={{ fontSize: '0.65rem' }} />
+                      ))}
+                    </Stack>
+
+                    <Typography variant="caption" fontWeight={700} color="primary">
+                      التشخيصات المحتملة:
+                    </Typography>
+                    <Stack spacing={1} mt={0.5}>
+                      {dd.candidates.map((c, i) => (
+                        <Box key={i}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Typography variant="body2" fontWeight={i === 0 ? 700 : 500}>
+                              {c.icdCode && (
+                                <Chip
+                                  label={c.icdCode}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.6rem', mr: 0.5, fontFamily: 'monospace' }}
+                                />
+                              )}
+                              {c.name}
+                            </Typography>
+                            {c.probability != null && (
+                              <Typography variant="caption" fontWeight={700}>
+                                {c.probability}%
+                              </Typography>
+                            )}
+                          </Stack>
+                          {c.probability != null && (
+                            <LinearProgress
+                              variant="determinate"
+                              value={c.probability}
+                              color={i === 0 ? 'primary' : 'inherit'}
+                              sx={{ height: 5, borderRadius: 3, mt: 0.3 }}
+                            />
+                          )}
+                          {c.reasoning && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {c.reasoning}
+                            </Typography>
+                          )}
+                        </Box>
+                      ))}
+                    </Stack>
+
+                    {dd.investigations?.length > 0 && (
+                      <Box mt={1.5}>
+                        <Typography variant="caption" fontWeight={700} color="text.secondary">
+                          الفحوصات الموصى بها:
+                        </Typography>
+                        <Box component="ul" sx={{ m: 0, pl: 2.5, mt: 0.3 }}>
+                          {dd.investigations.map((iv, i) => (
+                            <Typography key={i} component="li" variant="caption">
+                              {iv}
+                            </Typography>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {dd.status === 'confirmed' && dd.clinicianAssessment && (
+                      <Alert severity="success" sx={{ mt: 1.5, py: 0.2 }}>
+                        <Typography variant="caption">{dd.clinicianAssessment}</Typography>
+                      </Alert>
+                    )}
+
+                    {dd.status === 'active' && (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        startIcon={<OkIcon />}
+                        sx={{ mt: 1.5 }}
+                        onClick={() => setConfirmDdDialog({ open: true, id: dd._id, note: '' })}
+                      >
+                        تأكيد التشخيص
+                      </Button>
+                    )}
+                  </Paper>
+                </motion.div>
+              </Grid>
+            );
+          })}
+          {diagnoses.length === 0 && (
+            <Grid item xs={12}>
+              <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
+                <DiagnosisIcon sx={{ fontSize: 48, mb: 1, opacity: 0.3 }} />
+                <Typography>لا توجد تشخيصات تفريقية</Typography>
+              </Box>
+            </Grid>
+          )}
+        </Grid>
+      </TabPanel>
+
+      {/* ════════════════════════════════════════════════════════════════════
           DIALOGS
       ════════════════════════════════════════════════════════════════════ */}
+
+      {/* Confirm Differential Diagnosis Dialog */}
+      <Dialog
+        open={confirmDdDialog.open}
+        onClose={() => setConfirmDdDialog({ open: false, id: null, note: '' })}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>تأكيد التشخيص التفريقي</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="التقييم السريري"
+            value={confirmDdDialog.note}
+            onChange={e => setConfirmDdDialog(p => ({ ...p, note: e.target.value }))}
+            placeholder="ملاحظات الطبيب حول التشخيص المؤكَّد..."
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDdDialog({ open: false, id: null, note: '' })}>إلغاء</Button>
+          <Button variant="contained" color="success" onClick={handleConfirmDd}>
+            تأكيد
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Override Alert Dialog */}
       <Dialog

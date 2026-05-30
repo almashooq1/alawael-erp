@@ -416,3 +416,4 @@ __tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js
 __tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js
 __tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js
 __tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js
+__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js

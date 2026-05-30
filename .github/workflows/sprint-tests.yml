@@ -718,6 +718,8 @@ on:
       - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1419,6 +1421,8 @@ on:
       - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

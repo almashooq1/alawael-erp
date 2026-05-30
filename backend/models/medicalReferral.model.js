@@ -27,6 +27,12 @@ const MedicalReferralSchema = new Schema(
       },
     },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
+    // W621 — branch tenancy denormalization (R4). A referral belongs to its
+    // beneficiary's branch; derived in the pre-save hook below. Required so
+    // /dashboard/stats aggregates can branch-scope (aggregate() bypasses the
+    // tenantScope plugin). Additive/non-breaking; backfill via
+    // `npm run backfill:referral-branchid`.
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
     referralType: {
       type: String,
       enum: [
@@ -226,6 +232,19 @@ const MedicalReferralSchema = new Schema(
 );
 
 MedicalReferralSchema.index({ beneficiary: 1, status: 1 });
+// W621 — branch-scoped dashboard stats (R4)
+MedicalReferralSchema.index({ branchId: 1, status: 1 });
+// W621 — denormalize branchId from the (required) beneficiary. async style.
+MedicalReferralSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 MedicalReferralSchema.index({ 'referringProvider.practitioner': 1 });
 MedicalReferralSchema.index({ 'referredTo.practitioner': 1 });
 MedicalReferralSchema.index({ status: 1, createdAt: -1 });

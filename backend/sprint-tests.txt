@@ -418,3 +418,4 @@ __tests__/access-grant-model-canonical-wave599.test.js
 __tests__/beneficiaries-statistics-branch-scope-wave605.test.js
 __tests__/crisis-incident-aggregate-branch-scope-wave608.test.js
 __tests__/complaint-branch-tenancy-wave613.test.js
+__tests__/referral-branch-tenancy-wave621.test.js

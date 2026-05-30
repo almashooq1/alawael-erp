@@ -13,7 +13,7 @@ const { MedicalReferral, ReferralFollowUp } = require('../models/medicalReferral
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
@@ -36,7 +36,8 @@ router.get('/', async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    // W621 — branch-scope the list (MedicalReferral has no tenantScope plugin).
+    const filter = { ...branchFilter(req), isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (status) filter.status = status;
     if (referralType) filter.referralType = referralType;
@@ -279,6 +280,10 @@ router.get('/dashboard/stats', async (req, res) => {
     thisMonth.setDate(1);
     thisMonth.setHours(0, 0, 0, 0);
 
+    // W621 — branch-scope every dashboard stat. aggregate() bypasses the
+    // tenantScope plugin; branchFilter(req) = {} for cross-branch/HQ roles
+    // → org-wide dashboard preserved for them, single-branch users restricted.
+    const scope = branchFilter(req);
     const [
       totalReferrals,
       pendingApproval,
@@ -290,20 +295,20 @@ router.get('/dashboard/stats', async (req, res) => {
       byType,
       bySpecialty,
     ] = await Promise.all([
-      MedicalReferral.countDocuments({ isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ status: 'pending_approval', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ status: 'sent', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ status: 'in_progress', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ status: 'completed', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ status: 'expired', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ createdAt: { $gte: thisMonth }, isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, status: 'pending_approval', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, status: 'sent', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, status: 'in_progress', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, status: 'completed', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, status: 'expired', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({ ...scope, createdAt: { $gte: thisMonth }, isDeleted: { $ne: true } }),
       MedicalReferral.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: { ...scope, isDeleted: { $ne: true } } },
         { $group: { _id: '$referralType', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
       MedicalReferral.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: { ...scope, isDeleted: { $ne: true } } },
         { $group: { _id: '$referredTo.specialty', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 10 },

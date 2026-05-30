@@ -446,3 +446,4 @@ __tests__/maintenancerequest-branch-tenancy-wave665.test.js
 __tests__/dysphagia-assessment-wave670.test.js
 __tests__/pain-assessment-wave671.test.js
 __tests__/physiotherapy-assessment-wave672.test.js
+__tests__/clinical-assessment-trio-behavioral-wave673.test.js

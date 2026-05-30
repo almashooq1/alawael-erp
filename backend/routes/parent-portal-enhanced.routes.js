@@ -52,7 +52,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { jwtSecret } = require('../config/secrets');
 
@@ -1001,7 +1001,8 @@ router.get('/admin/complaints', async (req, res) => {
     ]);
 
     const stats = await ParentComplaint.aggregate([
-      { $match: { deletedAt: null } },
+      // W662 — branch-scope (ParentComplaint carries branchId).
+      { $match: { ...branchFilter(req), deletedAt: null } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
 

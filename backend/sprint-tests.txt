@@ -430,3 +430,4 @@ __tests__/bi-analytics-branch-scope-wave656.test.js
 __tests__/therapy-sessions-analytics-branch-scope-wave657.test.js
 __tests__/unauthenticated-routes-wave658.test.js
 __tests__/bi-dashboard-branch-scope-wave661.test.js
+__tests__/quality-parentcomplaint-branch-scope-wave662.test.js

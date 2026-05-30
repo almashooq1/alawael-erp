@@ -39,12 +39,51 @@ const path = require('path');
 
 const JSON_OUT = process.argv.includes('--json');
 const FILES_OUT = process.argv.includes('--files');
+const PII_ROUTES = process.argv.includes('--pii-routes');
 const BACKEND = path.join(__dirname, '..');
 const SCAN_DIRS = ['routes', 'services'];
 const WINDOW = 600; // chars after .aggregate( to scan for a branch token
 
 const BRANCH_TOKENS =
   /\b(branchId|branch_id|branchFilter|effectiveBranchScope|branchScope|bypassTenantScope|resolveRegionalBranchFilter|assertBranchIdsAllowed)\b/;
+
+// ── --pii-routes narrowing: high-confidence active-leak shortlist ─────
+// PII / branch-sensitive model or collection names. An aggregate on one of
+// these, inside a WIRED route handler, with no branch token AND no admin /
+// cross-branch gate in the enclosing window, is a high-confidence leak.
+const PII_RE =
+  /\b\w*(beneficiar|patient|student|episode|assessment|careplan|care_plan|session|attendance|goal|measure|clinical|therapy|diagnos|prescription|vital|incident|complaint|invoice|payroll|salary|medical|consent|safeguard|behavior|behaviour|seizure)\w*/i;
+const ADMIN_GATE_RE =
+  /requireRole\s*\([^)]*(admin|super_admin|head_office|ceo|group_|compliance|auditor|dpo)|CROSS_BRANCH|allBranches|requireMfaTier/i;
+const WIDE = 1500; // chars each side — approximates the enclosing handler
+
+function receiverOf(src, idx) {
+  // token immediately before `.aggregate(`
+  const before = src.slice(Math.max(0, idx - 60), idx);
+  const m = before.match(/([A-Za-z_$][\w$]*)\s*$/);
+  return m ? m[1] : '(unknown)';
+}
+
+function piiRouteScan() {
+  const hits = [];
+  for (const file of walkJs(path.join(BACKEND, 'routes'))) {
+    if (file.includes(`${path.sep}_archived${path.sep}`)) continue; // skip archived
+    const src = fs.readFileSync(file, 'utf8');
+    let m;
+    const aggRe = /\.aggregate\s*\(/g;
+    while ((m = aggRe.exec(src))) {
+      const wide = src.slice(Math.max(0, m.index - WIDE), m.index + WIDE);
+      if (BRANCH_TOKENS.test(wide)) continue; // scoped somewhere in the handler
+      if (ADMIN_GATE_RE.test(wide)) continue; // legitimately cross-branch/admin
+      const receiver = receiverOf(src, m.index);
+      const nearAgg = src.slice(m.index, m.index + WINDOW);
+      const isPii = PII_RE.test(receiver) || PII_RE.test(nearAgg);
+      if (!isPii) continue;
+      hits.push({ file: rel(file), line: lineOf(src, m.index), receiver });
+    }
+  }
+  return hits;
+}
 
 function walkJs(dir) {
   const out = [];
@@ -117,6 +156,23 @@ if (JSON_OUT) {
 
 if (FILES_OUT) {
   candidateFiles.forEach(f => console.log(`${byFile[f]}\t${f}`));
+  process.exit(0);
+}
+
+if (PII_ROUTES) {
+  const hits = piiRouteScan();
+  console.log('');
+  console.log('High-confidence shortlist — PII aggregate in a wired route, no branch');
+  console.log('scope + no admin/cross-branch gate in the enclosing handler:');
+  console.log('═══════════════════════════════════════════════════════════════════');
+  if (hits.length === 0) {
+    console.log('✅ none — every PII aggregate in routes/ is branch-scoped or admin-gated.');
+  } else {
+    hits.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    console.log('');
+    console.log(`${hits.length} site(s) to review by hand. Still heuristic — confirm each.`);
+  }
+  console.log('');
   process.exit(0);
 }
 

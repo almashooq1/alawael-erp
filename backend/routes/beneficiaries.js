@@ -165,7 +165,15 @@ router.get('/statistics', async (req, res) => {
     const now = new Date();
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
     const monthlyReg = await Beneficiary.aggregate([
-      { $match: { isArchived: { $ne: true }, createdAt: { $gte: sixMonthsAgo } } },
+      // R4: aggregate() bypasses the tenantScope plugin — branchFilter(req)
+      // is REQUIRED here or a single-branch caller sees all-branch counts.
+      {
+        $match: {
+          ...branchFilter(req),
+          isArchived: { $ne: true },
+          createdAt: { $gte: sixMonthsAgo },
+        },
+      },
       {
         $group: {
           _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
@@ -198,7 +206,14 @@ router.get('/statistics', async (req, res) => {
 
     // Age distribution
     const ageDist = await Beneficiary.aggregate([
-      { $match: { isArchived: { $ne: true }, dateOfBirth: { $exists: true, $ne: null } } },
+      // R4: branch-scope the aggregate (plugin can't see pipelines).
+      {
+        $match: {
+          ...branchFilter(req),
+          isArchived: { $ne: true },
+          dateOfBirth: { $exists: true, $ne: null },
+        },
+      },
       {
         $project: {
           age: {
@@ -229,7 +244,8 @@ router.get('/statistics', async (req, res) => {
 
     // Progress distribution
     const progDist = await Beneficiary.aggregate([
-      { $match: { isArchived: { $ne: true } } },
+      // R4: branch-scope the aggregate (plugin can't see pipelines).
+      { $match: { ...branchFilter(req), isArchived: { $ne: true } } },
       {
         $bucket: {
           groupBy: { $ifNull: ['$progress', 0] },

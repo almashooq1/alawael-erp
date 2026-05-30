@@ -33,7 +33,7 @@ function safeModel(name) {
 
 // ── Auth middleware ────────────────────────────────────────────────
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // W468: role gate. Pre-W468 every BI dashboard endpoint was open to
@@ -391,7 +391,8 @@ router.get('/hr/analytics', async (req, res) => {
       Employee ? Employee.countDocuments({ status: { $in: ['active', 'ACTIVE'] } }) : 0,
       Employee
         ? Employee.aggregate([
-            { $match: { status: { $in: ['active', 'ACTIVE'] } } },
+            // W661 — branch-scope headcount (Employee carries branchId).
+            { $match: { ...branchFilter(req), status: { $in: ['active', 'ACTIVE'] } } },
             { $group: { _id: '$department', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 },
@@ -509,7 +510,8 @@ router.get('/operations/analytics', async (req, res) => {
         : [],
       Complaint
         ? Complaint.aggregate([
-            { $match: { createdAt: { $gte: monthStart } } },
+            // W661 — branch-scope (Complaint carries branchId, W613).
+            { $match: { ...branchFilter(req), createdAt: { $gte: monthStart } } },
             { $group: { _id: '$status', count: { $sum: 1 } } },
             { $limit: 1000 },
           ])
@@ -770,7 +772,8 @@ router.get('/departments/comparison', async (req, res) => {
     }
 
     const departments = await Employee.aggregate([
-      { $match: { status: { $in: ['active', 'ACTIVE'] } } },
+      // W661 — branch-scope headcount (Employee carries branchId).
+      { $match: { ...branchFilter(req), status: { $in: ['active', 'ACTIVE'] } } },
       { $group: { _id: '$department', headcount: { $sum: 1 } } },
       { $sort: { headcount: -1 } },
       { $limit: 10 },

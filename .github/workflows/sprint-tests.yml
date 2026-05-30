@@ -728,6 +728,8 @@ on:
       - 'backend/__tests__/rehabplan-branch-tenancy-wave629.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1439,6 +1441,8 @@ on:
       - 'backend/__tests__/rehabplan-branch-tenancy-wave629.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

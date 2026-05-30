@@ -421,3 +421,4 @@ __tests__/complaint-branch-tenancy-wave613.test.js
 __tests__/referral-branch-tenancy-wave621.test.js
 __tests__/rehabplan-branch-tenancy-wave629.test.js
 __tests__/referralticket-branch-tenancy-wave633.test.js
+__tests__/meeting-branch-tenancy-wave635.test.js

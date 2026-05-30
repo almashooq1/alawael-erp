@@ -281,7 +281,9 @@ router.post(
 router.get('/meetings-stats', async (req, res) => {
   try {
     const { year, month } = req.query;
-    const dateFilter = {};
+    // W635 — branch-scope the meeting stats (MDTMeeting now carries branchId,
+    // derived from the organizer). branchFilter(req) = {} for cross-branch/HQ.
+    const dateFilter = { ...branchFilter(req) };
     if (year) {
       const start = new Date(+year, month ? +month - 1 : 0, 1);
       const end = month

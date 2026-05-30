@@ -33,6 +33,11 @@ const therapySessionSchema = new mongoose.Schema(
     carePlan: { type: mongoose.Schema.Types.ObjectId, ref: 'CarePlan', index: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', index: true },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+    // W647 — branch tenancy denormalization (R4). beneficiary is optional, so
+    // derive from beneficiary (preferred) else the therapist's Employee branch
+    // in the pre-save hook below. Additive; backfill via
+    // `npm run backfill:session-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
 
     // Scheduling
     date: { type: Date, required: true },
@@ -189,6 +194,31 @@ therapySessionSchema.pre('save', function () {
   }
 });
 
+// W647 — denormalize branchId: beneficiary's branch, else the therapist's
+// Employee branch. async style (matches the sibling 0-arg pre-save hook).
+therapySessionSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId) return;
+  try {
+    if (this.beneficiary) {
+      const Beneficiary = mongoose.model('Beneficiary');
+      const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+      if (ben && ben.branchId) {
+        this.branchId = ben.branchId;
+        return;
+      }
+    }
+    if (this.therapist) {
+      const Employee = mongoose.model('Employee');
+      const emp = await Employee.findById(this.therapist).select('branchId').lean();
+      if (emp && emp.branchId) this.branchId = emp.branchId;
+    }
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
+
+// W647 — branch-scoped session stats (R4)
+therapySessionSchema.index({ branchId: 1, date: 1 });
 // Index for conflict detection
 therapySessionSchema.index({ therapist: 1, date: 1, startTime: 1 });
 therapySessionSchema.index({ beneficiary: 1, date: 1, startTime: 1 });

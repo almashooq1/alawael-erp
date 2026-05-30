@@ -92,6 +92,17 @@ const complaintSchema = new mongoose.Schema(
     // Beneficiary linkage (when source='student' or 'parent' and the
     // complaint is about a specific beneficiary's care)
     beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary' },
+
+    // ─── W613 — branch tenancy denormalization (R4) ───────────────────
+    // Complaint is multi-source (employee / student / customer), so its
+    // branch is the branch of WHOEVER filed it (set at the route from
+    // req.branchScope), with a pre-save fallback to the linked
+    // beneficiary's branch. Required so /stats aggregates + the list
+    // filter can branch-scope (aggregate() bypasses the tenantScope
+    // plugin; the plugin also couldn't scope a model with no branchId).
+    // Optional/defaulted → additive, non-breaking on existing docs;
+    // backfill via `npm run backfill:complaint-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
@@ -112,6 +123,23 @@ complaintSchema.index({ createdAt: -1 });
 // W465 — fast lookup by beneficiary + advocate-required filter
 complaintSchema.index({ beneficiaryId: 1, status: 1 });
 complaintSchema.index({ advocateInvolved: 1, status: 1 });
+// W613 — branch-scoped stats/list (R4)
+complaintSchema.index({ branchId: 1, status: 1 });
+
+// W613 — denormalize branchId from the linked beneficiary when the route
+// didn't set it (e.g. a beneficiary-linked complaint created outside the
+// HTTP path). async to match the two sibling pre-save hooks (W483 — mixed
+// async/callback dispatch silently breaks the chain).
+complaintSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiaryId) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiaryId).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable / lookup failed — leave branchId unset (safe) */
+  }
+});
 
 // W465 Wave-18 invariant — when a complaint is about a beneficiary
 // (beneficiaryId set OR source in {student, parent}) and goes beyond

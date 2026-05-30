@@ -73,6 +73,10 @@ const CASELOAD_SCOPE_RE =
   /getScoped\w*|beneficiary:\s*\{\s*\$in|beneficiaryIds|cases\.beneficiary/;
 const ENTITY_SCOPE_RE =
   /\$match[^]*?(therapist|beneficiary|employee|user|assignedTo|createdBy)\s*:\s*[\w.[\]'"]+\._id|\$match[^]*?:\s*new\s*\(?\s*(require\(['"]mongoose['"]\)\.)?Types\.ObjectId/;
+// A $match pinned to a named filter VARIABLE (commonly built by a scoped
+// helper like baseQuery(req)/branchFilter — verify, don't auto-trust).
+const VAR_MATCH_RE =
+  /\$match:\s*(q|filter|base|scope|dateFilter|matchStage|sessionFilter)\s*[\},]/;
 
 function piiRouteScan() {
   const hits = [];
@@ -91,7 +95,9 @@ function piiRouteScan() {
       if (!isPii) continue;
       // Secondary classification: probable real leak vs likely-already-scoped
       const likelyScoped =
-        CASELOAD_SCOPE_RE.test(wide) || ENTITY_SCOPE_RE.test(nearAgg);
+        CASELOAD_SCOPE_RE.test(wide) ||
+        ENTITY_SCOPE_RE.test(nearAgg) ||
+        VAR_MATCH_RE.test(nearAgg);
       hits.push({ file: rel(file), line: lineOf(src, m.index), receiver, likelyScoped });
     }
   }

@@ -427,3 +427,4 @@ __tests__/session-branch-tenancy-wave647.test.js
 __tests__/invoice-branch-tenancy-wave651.test.js
 __tests__/careplan-branch-tenancy-wave654.test.js
 __tests__/bi-analytics-branch-scope-wave656.test.js
+__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js

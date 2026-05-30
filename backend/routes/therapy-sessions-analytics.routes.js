@@ -26,6 +26,15 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+
+// W657 — this analytics router had NO router-level auth; mounts in this repo
+// are per-route, so isolation can't be assumed. Authenticate + populate
+// req.branchScope so baseQuery(req) can branch-scope every ClinicalSession
+// aggregate (ClinicalSession already carries branchId). branchFilter = {} for
+// cross-branch/HQ analysts → org-wide analytics preserved.
+router.use(authenticateToken, requireBranchAccess);
 
 // ── Lazy model ────────────────────────────────────────────────────────────────
 function Session() {
@@ -74,8 +83,9 @@ function buildDateFilter(from, to) {
   return { scheduledDate: f };
 }
 
-function baseQuery(extra = {}) {
-  return { isDeleted: { $ne: true }, ...extra };
+function baseQuery(req, extra = {}) {
+  // W657 — branch-scope every analytics query at the single shared helper.
+  return { isDeleted: { $ne: true }, ...branchFilter(req), ...extra };
 }
 
 /* ══════════════════════ ANALYTICS OVERVIEW ════════════════════════════════ */
@@ -86,7 +96,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: {} });
     const { from, to, therapistId } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
     if (therapistId) q.therapistId = new mongoose.Types.ObjectId(therapistId);
 
     const [total, byStatus, byModality, byType] = await Promise.all([
@@ -126,7 +136,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: [] });
     const { from, to, granularity = 'day' } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
     const groupId = {
       day: {
@@ -166,7 +176,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: [] });
     const { from, to } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
     const stats = await S.aggregate([
       { $match: q },
@@ -195,7 +205,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: [] });
     const { from, to } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to), room: { $exists: true, $ne: null } });
+    const q = baseQuery(req, { ...buildDateFilter(from, to), room: { $exists: true, $ne: null } });
 
     const utilization = await S.aggregate([
       { $match: q },
@@ -221,7 +231,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: {} });
     const { from, to } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
     const byStatus = await S.aggregate([
       { $match: q },
@@ -254,7 +264,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: {} });
     const { from, to } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
     const billing = await S.aggregate([
       { $match: q },
@@ -286,7 +296,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: {} });
     const { from, to } = req.query;
-    const q = baseQuery({
+    const q = baseQuery(req, {
       ...buildDateFilter(from, to),
       status: 'completed',
       'goalProgress.0': { $exists: true },
@@ -316,7 +326,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: {} });
     const { from, to } = req.query;
-    const q = baseQuery({
+    const q = baseQuery(req, {
       ...buildDateFilter(from, to),
       status: { $in: ['cancelled', 'no_show'] },
     });
@@ -343,7 +353,7 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: [] });
     const { from, to, therapistId, beneficiaryId, limit = 200 } = req.query;
-    const q = baseQuery({ ...buildDateFilter(from, to) });
+    const q = baseQuery(req, { ...buildDateFilter(from, to) });
     if (therapistId) q.therapistId = new mongoose.Types.ObjectId(therapistId);
     if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
 

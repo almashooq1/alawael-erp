@@ -67,14 +67,14 @@ let m;
 // Variable → route-file map: `const fooRoutes = safeRequire('../routes/foo.routes')`
 const varToFile = {};
 const varRe =
-  /(?:const|let|var)\s+(\w+)\s*=\s*(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w-]+)\.routes['"]/g;
+  /(?:const|let|var)\s+(\w+)\s*=\s*(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w/-]+)\.routes['"]/g;
 while ((m = varRe.exec(registrySrc))) varToFile[m[1]] = `${m[2]}.routes.js`;
 
 const mark = (authed, file) => (authed ? authedAtMount : noAuthAtMount).add(file);
 
 // (A) dualMount(Auth)?(app, 'name', safeRequire('../routes/X.routes')) — literal, bounded span
 const literalRe =
-  /dualMount(Auth)?\s*\([^]{0,200}?(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w-]+)\.routes['"]/g;
+  /dualMount(Auth)?\s*\([^]{0,200}?(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w/-]+)\.routes['"]/g;
 while ((m = literalRe.exec(registrySrc))) mark(!!m[1], `${m[2]}.routes.js`);
 
 // (B) dualMount(Auth)?(app, 'name', preAssignedVar) — resolve the variable
@@ -84,7 +84,7 @@ while ((m = varMountRe.exec(registrySrc))) {
 }
 
 // (C) safeMount(app, paths, './X.routes' | var) → NO auth (app.use without authenticate)
-const safeMountRe = /safeMount\s*\(\s*app\s*,[^]{0,160}?['"]\.\/([\w-]+)\.routes['"]/g;
+const safeMountRe = /safeMount\s*\(\s*app\s*,[^]{0,160}?['"]\.\/([\w/-]+)\.routes['"]/g;
 while ((m = safeMountRe.exec(registrySrc))) mark(false, `${m[1]}.routes.js`);
 const safeMountVarRe = /safeMount\s*\(\s*app\s*,\s*[^,]+,\s*(\w+)\s*\)/g;
 while ((m = safeMountVarRe.exec(registrySrc))) {
@@ -93,9 +93,46 @@ while ((m = safeMountVarRe.exec(registrySrc))) {
 
 // (D) app.use('/api/..', [authenticate,] require('../routes/X')) → authed iff `authenticate` present before the require
 const appUseRe =
-  /app\.use\(\s*(\[[^\]]*\]|['"][^'"]*['"])\s*,([^]{0,120}?)(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w-]+)/g;
+  /app\.use\(\s*(\[[^\]]*\]|['"][^'"]*['"])\s*,([^]{0,120}?)(?:safeRequire|require)\(\s*['"]\.\.\/routes\/([\w/-]+?)(?:\.routes)?['"]/g;
 while ((m = appUseRe.exec(registrySrc))) {
   mark(/\bauthenticate\b/.test(m[2]), `${m[3]}.routes.js`);
+}
+
+// ── 1b. app.js factory-pattern mounts (./routes/, createXRouter) ─────
+// app.js mounts via `const {createX}=require('./routes/Y.routes'); const r=
+// createX(...); app.use('/path', authenticate, r)` — a pattern the registry
+// passes (which expect ../routes + dualMount) don't see.
+const appSrc = readSafe(path.join(BACKEND, 'app.js'));
+const symToFile = {}; // factory name OR direct var → route file
+const factoryRe =
+  /\{\s*([\w,\s]+?)\s*\}\s*=\s*require\(\s*['"]\.\/routes\/([\w/-]+?)(?:\.routes)?['"]\s*\)/g;
+while ((m = factoryRe.exec(appSrc))) {
+  const file = `${m[2]}.routes.js`;
+  m[1].split(',').forEach(s => (symToFile[s.trim()] = file));
+}
+const directRe2 =
+  /(?:const|let)\s+(\w+)\s*=\s*require\(\s*['"]\.\/routes\/([\w/-]+?)(?:\.routes)?['"]\s*\)/g;
+while ((m = directRe2.exec(appSrc))) symToFile[m[1]] = `${m[2]}.routes.js`;
+// router var = createX(...) → inherits createX's file
+const routerVarRe = /(?:const|let)\s+(\w+)\s*=\s*(\w+)\s*\(/g;
+while ((m = routerVarRe.exec(appSrc))) if (symToFile[m[2]]) symToFile[m[1]] = symToFile[m[2]];
+// app.use('/path', <args up to the statement-ending ;>) — single-statement
+const appUseStmtRe = /app\.use\(\s*(['"][^'"]+['"]|\[[^\]]*\])\s*,([^;]{0,300}?)\)\s*;/g;
+while ((m = appUseStmtRe.exec(appSrc))) {
+  const args = m[2];
+  // broad: app.use middleware may be a custom-named auth wrapper (e.g.
+  // `_authPerfMw`, `requireRole(...)`, `verifyToken`) — not just `authenticate`.
+  const authed = /auth|requireRole|requireMfa|verifyToken|guard|protect|jwt/i.test(args);
+  // resolve a referenced route file: any symbol in args that maps to a file,
+  // a createX(...) factory call, or an inline ./routes require
+  let file = null;
+  const syms = args.match(/\b\w+\b/g) || [];
+  for (const s of syms) if (symToFile[s]) { file = symToFile[s]; break; }
+  if (!file) {
+    const inl = args.match(/require\(\s*['"]\.\/routes\/([\w/-]+?)(?:\.routes)?['"]/);
+    if (inl) file = `${inl[1]}.routes.js`;
+  }
+  if (file) mark(authed, file);
 }
 
 // ── 2. In-file auth signal per route file ────────────────────────────
@@ -106,12 +143,23 @@ const PUBLIC_HINT = /public|webhook|health|status|nps|nafath|callback/i;
 // from high-confidence so the audit stays actionable.
 //   setup.routes.js — first-run bootstrap; /init-admin self-guards with 403
 //   once an admin exists (you cannot authenticate before the first admin).
-const KNOWN_PUBLIC = new Set(['setup.routes.js']);
+const KNOWN_PUBLIC = new Set([
+  'setup.routes.js',
+  // OpenAPI/Swagger spec (/api/docs) — documentation only, no data or mutations.
+  'openapi-integration.routes.js',
+  // Stub catch-all (/api/v1/measures…) — returns empty {data:[]} placeholders
+  // for unimplemented endpoints so the SPA doesn't 404. No real data.
+  'stub-missing.routes.js',
+  // Visitor self check-in/login (/api/v1/public/visitor) — pre-auth by design.
+  'visitor-auth.routes.js',
+]);
 
 const findings = [];
 for (const file of walkJs(path.join(BACKEND, 'routes'))) {
   if (path.basename(file).startsWith('_')) continue;
-  const base = path.basename(file);
+  // key on the path RELATIVE TO routes/ (forward slashes) so subdir files
+  // (hr/hr-dashboard.routes.js, cctv/webhooks.routes.js) match the mount keys.
+  const base = path.relative(path.join(BACKEND, 'routes'), file).split(path.sep).join('/');
   const src = readSafe(file);
   if (!ROUTE_DEF.test(src)) continue; // no HTTP routes defined
   if (KNOWN_PUBLIC.has(base)) continue; // verified intentionally public

@@ -2105,7 +2105,9 @@ require('./startup/auditChainArchiverBootstrap').wireAuditChainArchiver(app, { l
 // alongside other ops-level reads). If you need RBAC, wrap with `authenticate`.
 try {
   const { createOpsSchedulersRouter } = require('./routes/ops-schedulers.routes');
-  app.use('/api/ops', createOpsSchedulersRouter());
+  // W660 — was anonymous-reachable (no middleware); /api/ops/schedulers exposes
+  // internal scheduler config + health. Require auth (audit:unauthenticated-routes).
+  app.use('/api/ops', authenticate, createOpsSchedulersRouter());
   logger.info('[OpsSchedulers] ✓ /api/ops/schedulers mounted (W310)');
 } catch (err) {
   logger.warn(`[OpsSchedulers] failed to mount /api/ops/schedulers: ${err.message}`);

@@ -257,6 +257,16 @@ function createBeneficiaryLifecycleSideEffectHandlers({
         op,
         category,
         beneficiaryId: ctx.beneficiaryId ? String(ctx.beneficiaryId) : null,
+        // Wave 586 — branch + actor attribution so downstream notification /
+        // compliance consumers can route the event by branch (W269 tenant
+        // doctrine) and attribute it without re-querying the transition log.
+        // The actor is reduced to userId + role only — never the full object —
+        // so no PII / token material leaks onto the event bus.
+        sourceBranchId: ctx.sourceBranchId ? String(ctx.sourceBranchId) : null,
+        destinationBranchId: ctx.destinationBranchId ? String(ctx.destinationBranchId) : null,
+        actor: ctx.actor
+          ? { userId: ctx.actor.userId || null, role: ctx.actor.role || null }
+          : null,
         transitionId: ctx.transitionId || null,
         fromState: ctx.fromState || null,
         toState: ctx.toState || null,

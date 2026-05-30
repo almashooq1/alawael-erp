@@ -372,6 +372,10 @@ const referralTicketSchema = new mongoose.Schema(
     ticketNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
+    // W633 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook. Additive; backfill via
+    // `npm run backfill:referralticket-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     referredByName: { type: String },
     fromDepartment: { type: String, required: true },
@@ -459,6 +463,18 @@ const referralTicketSchema = new mongoose.Schema(
 );
 
 referralTicketSchema.index({ beneficiary: 1, status: 1 });
+// W633 — branch-scoped referral stats (R4)
+referralTicketSchema.index({ branchId: 1, status: 1 });
+referralTicketSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 referralTicketSchema.index({ referredBy: 1 });
 referralTicketSchema.index({ toDepartment: 1, status: 1 });
 referralTicketSchema.index({ priority: 1, status: 1 });

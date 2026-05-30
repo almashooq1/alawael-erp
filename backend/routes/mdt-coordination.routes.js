@@ -903,24 +903,30 @@ router.delete('/referrals/:id', authorize(['admin']), async (req, res) => {
 // ─── Referral Statistics ─────────────────────────────────────────────────────
 router.get('/referrals-stats', async (req, res) => {
   try {
+    // W633 — branch-scope every referral stat. aggregate() bypasses the
+    // tenantScope plugin; branchFilter(req) = {} for cross-branch/HQ roles.
+    const scope = branchFilter(req);
     const [total, statusCounts, priorityCounts, departmentStats, avgResponseTime] =
       await Promise.all([
-        ReferralTicket.countDocuments(),
+        ReferralTicket.countDocuments({ ...scope }),
         ReferralTicket.aggregate([
+          { $match: { ...scope } },
           { $group: { _id: '$status', count: { $sum: 1 } } },
           { $limit: 1000 },
         ]),
         ReferralTicket.aggregate([
+          { $match: { ...scope } },
           { $group: { _id: '$priority', count: { $sum: 1 } } },
           { $limit: 1000 },
         ]),
         ReferralTicket.aggregate([
+          { $match: { ...scope } },
           { $group: { _id: '$toDepartment', count: { $sum: 1 } } },
           { $sort: { count: -1 } },
           { $limit: 10 },
         ]),
         ReferralTicket.aggregate([
-          { $match: { 'response.respondedAt': { $exists: true } } },
+          { $match: { ...scope, 'response.respondedAt': { $exists: true } } },
           {
             $project: {
               responseTime: {

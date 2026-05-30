@@ -57,6 +57,7 @@
     "backfill:complaint-branchid": "node scripts/backfill-complaint-branchid.js",
     "backfill:referral-branchid": "node scripts/backfill-referral-branchid.js",
     "backfill:rehabplan-branchid": "node scripts/backfill-rehabplan-branchid.js",
+    "backfill:referralticket-branchid": "node scripts/backfill-referralticket-branchid.js",
     "preflight": "node scripts/preflight.js",
     "preflight:prod": "CI_PREFLIGHT=1 node scripts/preflight.js",
     "dsar:hash": "node scripts/dsar-hash.js",

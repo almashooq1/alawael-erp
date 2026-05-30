@@ -59,7 +59,15 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/beneficiary-lifecycle.registry');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  assertBranchMatch,
+} = require('../middleware/assertBranchMatch');
+// Wave 597 — actionable roll-up over a transition's persisted side-effect
+// audit rows (W595 reducer, wired live into executeTransition in W596).
+const {
+  summarizeSideEffectResults,
+} = require('../intelligence/beneficiary-lifecycle-side-effects.service');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -319,6 +327,63 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
       });
     } catch (err) {
       return safeError(res, err, 'lifecycle.transition.get');
+    }
+  });
+
+  // ─── GET /transitions/:id/side-effects-summary ────────────
+  // Wave 597 — actionable operational roll-up of the side-effects that
+  // ran when this transition was executed. Recomputes the W595 summary
+  // from the persisted `sideEffectsAudit` rows so dashboards/operators
+  // see real clinical-mutation totals + category buckets without
+  // re-aggregating the raw audit array.
+  router.get('/transitions/:id/side-effects-summary', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+      if (typeof service.getTransitionById !== 'function') {
+        return res.status(501).json({
+          success: false,
+          message: 'GET_BY_ID_NOT_WIRED',
+          reason: 'GET_BY_ID_NOT_WIRED',
+        });
+      }
+      const record = await service.getTransitionById(req.params.id);
+      if (!record) {
+        return res.status(404).json({
+          success: false,
+          message: 'TRANSITION_NOT_FOUND',
+          reason: 'TRANSITION_NOT_FOUND',
+        });
+      }
+      // Cross-branch isolation (W269 doctrine): a restricted caller may
+      // only read a transition owned by their branch. No-op for
+      // cross-branch roles + test contexts without req.branchScope.
+      assertBranchMatch(req, record.sourceBranchId, 'lifecycle transition');
+
+      const auditRows = Array.isArray(record.sideEffectsAudit)
+        ? record.sideEffectsAudit
+        : [];
+      const sideEffectsSummary = summarizeSideEffectResults(
+        auditRows.map(s => ({
+          ...(s && s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+          status: s ? s.status : undefined,
+        }))
+      );
+      return res.json({
+        success: true,
+        data: {
+          transitionRecordId: record._id,
+          transitionId: record.transitionId,
+          status: record.status,
+          sideEffectsSummary,
+          sideEffectsAudit: auditRows,
+        },
+      });
+    } catch (err) {
+      // assertBranchMatch throws Error & { status: 403|404 } — honor it.
+      if (err && Number.isInteger(err.status)) {
+        return res.status(err.status).json({ success: false, error: err.message });
+      }
+      return safeError(res, err, 'lifecycle.transition.side-effects-summary');
     }
   });
 

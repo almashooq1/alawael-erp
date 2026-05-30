@@ -318,7 +318,14 @@ function createBeneficiaryLifecycleSideEffectHandlers({
  *   skipped: number,
  *   failed: number,
  *   real: number,
+ *   health: { ok: boolean, failedRatio: number },
  * }}
+ *
+ * Wave 651 adds a read-only `health` signal so the audit / dashboard layer can
+ * flag a degraded side-effects run at a glance instead of re-deriving it:
+ * `ok` is true only when nothing failed, and `failedRatio` is the share of
+ * results stamped `failed` (0 when there are no results). Purely additive — the
+ * existing keys are unchanged.
  */
 function summarizeSideEffectResults(results) {
   const list = Array.isArray(results) ? results : [];
@@ -366,8 +373,14 @@ function summarizeSideEffectResults(results) {
     }
   }
 
+  const total = list.length;
+  const health = {
+    ok: failed === 0,
+    failedRatio: total ? Number((failed / total).toFixed(4)) : 0,
+  };
+
   return {
-    total: list.length,
+    total,
     byCategory,
     dataMutations,
     deferred,
@@ -375,6 +388,7 @@ function summarizeSideEffectResults(results) {
     skipped,
     failed,
     real,
+    health,
   };
 }
 

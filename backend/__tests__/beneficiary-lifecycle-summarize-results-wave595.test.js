@@ -120,4 +120,30 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
     expect(s.dataMutations.total).toBe(0);
     expect(s.real).toBe(3);
   });
+
+  test('W651 — health.ok is true and failedRatio 0 when nothing failed', () => {
+    const results = [
+      { category: 'data', cancelledAppointments: 2 },
+      { category: 'notification', emitted: true },
+    ];
+    const s = summarizeSideEffectResults(results);
+    expect(s.health).toEqual({ ok: true, failedRatio: 0 });
+  });
+
+  test('W651 — health flags a degraded run with a rounded failedRatio', () => {
+    const results = [
+      { category: 'data', cancelledAppointments: 1 },
+      { status: 'failed' },
+      { failed: true },
+    ];
+    const s = summarizeSideEffectResults(results);
+    expect(s.failed).toBe(2);
+    expect(s.health.ok).toBe(false);
+    expect(s.health.failedRatio).toBeCloseTo(0.6667, 4);
+  });
+
+  test('W651 — empty input yields ok:true and failedRatio 0 (no divide-by-zero)', () => {
+    const s = summarizeSideEffectResults([]);
+    expect(s.health).toEqual({ ok: true, failedRatio: 0 });
+  });
 });

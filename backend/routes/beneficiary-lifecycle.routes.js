@@ -416,8 +416,42 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
   router.get('/beneficiaries/:beneficiaryId/side-effects-summary', async (req, res) => {
     try {
       if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+
+      // Wave 607 — optional `?windowDays=N` bounds the scan to the
+      // beneficiary's transitions within the last N days (mirrors the
+      // branch endpoint W604). Omitted/invalid => whole journey (backward
+      // compatible with W599). Best-effort age uses executedAt then
+      // requestedAt then the mongoose timestamps; records without ANY
+      // timestamp are kept (never silently drop a transition).
+      let windowDays = null;
+      if (req.query.windowDays != null && req.query.windowDays !== '') {
+        const parsed = Number(req.query.windowDays);
+        if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0 || parsed > 3650) {
+          return res.status(400).json({
+            success: false,
+            message: 'INVALID_WINDOW_DAYS',
+            reason: 'INVALID_WINDOW_DAYS',
+          });
+        }
+        windowDays = parsed;
+      }
+      const cutoffMs = windowDays != null ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : null;
+      const recordTimeMs = r => {
+        const raw = r && (r.executedAt || r.requestedAt || r.createdAt || r.updatedAt);
+        if (raw == null) return null;
+        const t = new Date(raw).getTime();
+        return Number.isFinite(t) ? t : null;
+      };
+
       const records = await service.getTransitionHistory(req.params.beneficiaryId);
-      const all = Array.isArray(records) ? records : [];
+      const history = Array.isArray(records) ? records : [];
+      const all =
+        cutoffMs == null
+          ? history
+          : history.filter(r => {
+              const t = recordTimeMs(r);
+              return t == null || t >= cutoffMs; // keep undateable rows
+            });
 
       const flatRows = [];
       let transitionsWithSideEffects = 0;
@@ -438,6 +472,7 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
         success: true,
         data: {
           beneficiaryId: req.params.beneficiaryId,
+          windowDays: windowDays || null,
           transitionsConsidered: all.length,
           transitionsWithSideEffects,
           sideEffectsSummary,
@@ -485,8 +520,7 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
         }
         windowDays = parsed;
       }
-      const cutoffMs =
-        windowDays != null ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : null;
+      const cutoffMs = windowDays != null ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : null;
       const recordTimeMs = r => {
         const raw = r && (r.executedAt || r.requestedAt || r.createdAt || r.updatedAt);
         if (raw == null) return null;
@@ -496,7 +530,9 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
 
       const records = await service.getTransitionHistory(null);
       const all = Array.isArray(records) ? records : [];
-      const branchScoped = branchScope ? all.filter(r => r && r.sourceBranchId === branchScope) : all;
+      const branchScoped = branchScope
+        ? all.filter(r => r && r.sourceBranchId === branchScope)
+        : all;
       const scoped =
         cutoffMs == null
           ? branchScoped

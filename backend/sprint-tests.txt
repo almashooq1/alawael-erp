@@ -430,3 +430,4 @@ __tests__/invoice-halalas-expand-wave579.test.js
 __tests__/finance-models-halalas-expand-wave579.test.js
 __tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js
 __tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js
+__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js

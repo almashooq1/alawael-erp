@@ -414,3 +414,4 @@ __tests__/beneficiary-lifecycle-side-effect-payload-wave586.test.js
 __tests__/beneficiary-lifecycle-self-skip-observability-wave587.test.js
 __tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js
 __tests__/branch-secondment-wiring-wave597.test.js
+__tests__/access-grant-model-canonical-wave599.test.js

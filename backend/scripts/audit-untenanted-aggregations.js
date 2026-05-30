@@ -295,8 +295,10 @@ console.log(`Total .aggregate( sites:        ${totalAgg}`);
 console.log(
   `No branch token within ${WINDOW}ch:   ${aggCandidates.length}  (across ${candidateFiles.length} files)`
 );
+const rawUnscoped = rawCollection.filter(c => !c.scoped);
 console.log(
-  `Raw .db.collection( sites:      ${rawCollection.length}  (HIGHER severity — bypass ALL plugins)`
+  `Raw collection() sites:         ${rawCollection.length}  (HIGHER severity — bypass ALL plugins)` +
+    `\n  └─ no branch token nearby:    ${rawUnscoped.length}  (UNSCOPED leak candidates)`
 );
 console.log('');
 console.log('HEURISTIC — a candidate may be a legitimate admin/cross-branch read,');
@@ -307,10 +309,10 @@ candidateFiles.slice(0, 20).forEach(f => console.log(`  ${byFile[f]}\t${f}`));
 if (candidateFiles.length > 20) {
   console.log(`  … +${candidateFiles.length - 20} more (use --files for the full list)`);
 }
-if (rawCollection.length) {
+if (rawUnscoped.length) {
   console.log('');
-  console.log('Raw .db.collection( sites (review first):');
-  rawCollection.forEach(c => console.log(`  ${c.file}:${c.line}`));
+  console.log('Raw collection() sites with NO branch token nearby (review FIRST — C3a class):');
+  rawUnscoped.forEach(c => console.log(`  ${c.file}:${c.line}`));
 }
 console.log('');
 console.log('Next step (when scoped): promote to a W340-style ratchet drift guard —');

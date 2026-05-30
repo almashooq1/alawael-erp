@@ -64,19 +64,65 @@ function receiverOf(src, idx) {
   return m ? m[1] : '(unknown)';
 }
 
+// ── model-has-branchId index (false-positive reducer) ────────────────
+// An aggregate is only branch-scopable if its MODEL actually declares a
+// branchId/branch_id field. RiskAssessment (organizationId-scoped),
+// Strategic*/Fleet* (no tenant field) etc. are flagged by the heuristic but
+// CANNOT be fixed with a one-line branchFilter — they need denormalization
+// first (a W613-style model change) or are legitimately non-branch data.
+// Build a one-time index: registered-model-name → declares a branch field?
+// Keyed by the lowercased model name so the receiver (`Payment`, `Expense`,
+// the `M`/`S` minified aliases won't resolve — reported as unknown).
+const BRANCH_FIELD_RE = /\b(branchId|branch_id)\b/;
+let _modelBranchIndex = null;
+function modelBranchIndex() {
+  if (_modelBranchIndex) return _modelBranchIndex;
+  const idx = new Map(); // lowercased model name → boolean (declares branch field)
+  const modelsRoot = path.join(BACKEND, 'models');
+  for (const file of walkJs(modelsRoot)) {
+    let src;
+    try {
+      src = fs.readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
+    const declaresBranch = BRANCH_FIELD_RE.test(src);
+    // Every mongoose.model('Name', …) registration in this file gets the verdict.
+    const re = /mongoose\.model\(\s*['"]([^'"]+)['"]/g;
+    let mm;
+    let found = false;
+    while ((mm = re.exec(src))) {
+      idx.set(mm[1].toLowerCase(), declaresBranch);
+      found = true;
+    }
+    // Fallback: file with no explicit registration → key by basename.
+    if (!found) idx.set(path.basename(file, '.js').toLowerCase(), declaresBranch);
+  }
+  _modelBranchIndex = idx;
+  return idx;
+}
+
+// Verdict for a receiver token: 'has' | 'missing' | 'unknown' (alias/unresolved).
+function branchVerdict(receiver) {
+  if (!receiver || receiver === '(unknown)') return 'unknown';
+  // single-letter / minified aliases (M, S, …) can't be resolved to a model.
+  if (receiver.length <= 2) return 'unknown';
+  const idx = modelBranchIndex();
+  const v = idx.get(receiver.toLowerCase());
+  return v === undefined ? 'unknown' : v ? 'has' : 'missing';
+}
+
 // Signals that the aggregate is ALREADY isolated by a NON-branchFilter
 // mechanism the BRANCH_TOKENS regex can't see — caseload scoping (a
 // $in over a branch-scoped beneficiary-id list) or entity scoping (a
 // $match pinned to a single resolved id). These are LIKELY false positives;
 // flagged for verification, not auto-trusted (a $in could be unscoped).
-const CASELOAD_SCOPE_RE =
-  /getScoped\w*|beneficiary:\s*\{\s*\$in|beneficiaryIds|cases\.beneficiary/;
+const CASELOAD_SCOPE_RE = /getScoped\w*|beneficiary:\s*\{\s*\$in|beneficiaryIds|cases\.beneficiary/;
 const ENTITY_SCOPE_RE =
   /\$match[^]*?(therapist|beneficiary|employee|user|assignedTo|createdBy)\s*:\s*[\w.[\]'"]+\._id|\$match[^]*?:\s*new\s*\(?\s*(require\(['"]mongoose['"]\)\.)?Types\.ObjectId/;
 // A $match pinned to a named filter VARIABLE (commonly built by a scoped
 // helper like baseQuery(req)/branchFilter — verify, don't auto-trust).
-const VAR_MATCH_RE =
-  /\$match:\s*(q|filter|base|scope|dateFilter|matchStage|sessionFilter)\s*[\},]/;
+const VAR_MATCH_RE = /\$match:\s*(q|filter|base|scope|dateFilter|matchStage|sessionFilter)\s*[\},]/;
 
 function piiRouteScan() {
   const hits = [];
@@ -95,10 +141,14 @@ function piiRouteScan() {
       if (!isPii) continue;
       // Secondary classification: probable real leak vs likely-already-scoped
       const likelyScoped =
-        CASELOAD_SCOPE_RE.test(wide) ||
-        ENTITY_SCOPE_RE.test(nearAgg) ||
-        VAR_MATCH_RE.test(nearAgg);
-      hits.push({ file: rel(file), line: lineOf(src, m.index), receiver, likelyScoped });
+        CASELOAD_SCOPE_RE.test(wide) || ENTITY_SCOPE_RE.test(nearAgg) || VAR_MATCH_RE.test(nearAgg);
+      hits.push({
+        file: rel(file),
+        line: lineOf(src, m.index),
+        receiver,
+        likelyScoped,
+        branch: branchVerdict(receiver),
+      });
     }
   }
   return hits;
@@ -180,16 +230,37 @@ if (FILES_OUT) {
 
 if (PII_ROUTES) {
   const hits = piiRouteScan();
-  const real = hits.filter(h => !h.likelyScoped);
+  const notScoped = hits.filter(h => !h.likelyScoped);
   const scoped = hits.filter(h => h.likelyScoped);
+  // Split the not-already-scoped hits by whether the MODEL can even be
+  // branch-filtered (declares branchId). 'has' → fix now; 'missing' → needs
+  // denormalization first; 'unknown' → receiver is an alias, resolve by hand.
+  const real = notScoped.filter(h => h.branch === 'has');
+  const needsDenorm = notScoped.filter(h => h.branch === 'missing');
+  const unknown = notScoped.filter(h => h.branch === 'unknown');
   console.log('');
   console.log('PII aggregate in a wired route, no branchFilter + no admin gate:');
   console.log('═══════════════════════════════════════════════════════════════════');
   if (hits.length === 0) {
     console.log('✅ none.');
   } else {
-    console.log(`PROBABLE REAL LEAKS (${real.length}) — branch-scope these:`);
+    console.log(`REAL LEAKS — model HAS branchId, scope these now (${real.length}):`);
     real.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    if (needsDenorm.length) {
+      console.log('');
+      console.log(`NEEDS DENORMALIZATION — model has NO branch field; a branchFilter`);
+      console.log(`would scope on a missing field (return nothing). Denormalize branchId`);
+      console.log(
+        `first (W613-style) OR confirm it's legitimately org/HQ-level (${needsDenorm.length}):`
+      );
+      needsDenorm.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    }
+    if (unknown.length) {
+      console.log('');
+      console.log(`UNRESOLVED RECEIVER — alias/minified (e.g. M, S) or unregistered;`);
+      console.log(`resolve the model by hand before deciding (${unknown.length}):`);
+      unknown.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    }
     if (scoped.length) {
       console.log('');
       console.log(`LIKELY ALREADY-SCOPED (${scoped.length}) — via caseload ($in over a`);
@@ -198,7 +269,10 @@ if (PII_ROUTES) {
       scoped.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
     }
     console.log('');
-    console.log(`Total ${hits.length}: ${real.length} probable real, ${scoped.length} likely-scoped. Still heuristic.`);
+    console.log(
+      `Total ${hits.length}: ${real.length} real (fix now), ${needsDenorm.length} needs-denorm, ` +
+        `${unknown.length} unresolved, ${scoped.length} likely-scoped. Still heuristic.`
+    );
   }
   console.log('');
   process.exit(0);

@@ -213,6 +213,8 @@
     "check:can-scope-contract": "node scripts/check-can-scope-contract.js",
     "check:can-scope-contract:json": "node scripts/check-can-scope-contract.js --json",
     "check:can-scope-contract:bare": "node scripts/check-can-scope-contract.js --bare",
+    "check:risk-rule-keys": "node scripts/check-risk-rule-keys.js",
+    "check:risk-rule-keys:json": "node scripts/check-risk-rule-keys.js --json",
     "check:memory-health": "node scripts/check-memory-health.js",
     "check:memory-health:json": "node scripts/check-memory-health.js --json",
     "check:memory-health:strict": "node scripts/check-memory-health.js --strict",

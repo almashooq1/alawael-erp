@@ -419,3 +419,4 @@ __tests__/beneficiaries-statistics-branch-scope-wave605.test.js
 __tests__/crisis-incident-aggregate-branch-scope-wave608.test.js
 __tests__/complaint-branch-tenancy-wave613.test.js
 __tests__/referral-branch-tenancy-wave621.test.js
+__tests__/rehabplan-branch-tenancy-wave629.test.js

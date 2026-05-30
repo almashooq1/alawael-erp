@@ -15,7 +15,7 @@ const router = express.Router();
 const { body, _param, _query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -618,23 +618,29 @@ router.post('/plans/:id/approve', authorize(['admin', 'manager']), async (req, r
 // ─── Plans Statistics ────────────────────────────────────────────────────────
 router.get('/plans-stats', async (req, res) => {
   try {
+    // W629 — branch-scope every stat. aggregate() bypasses the tenantScope
+    // plugin; branchFilter(req) = {} for cross-branch/HQ → org-wide preserved.
+    const scope = branchFilter(req);
     const [total, statusCounts, avgProgress, avgGoals, overdueReviews] = await Promise.all([
-      UnifiedRehabPlan.countDocuments(),
+      UnifiedRehabPlan.countDocuments({ ...scope }),
       UnifiedRehabPlan.aggregate([
+        { $match: { ...scope } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
         { $limit: 1000 },
       ]),
       UnifiedRehabPlan.aggregate([
-        { $match: { status: 'ACTIVE' } },
+        { $match: { ...scope, status: 'ACTIVE' } },
         { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
         { $limit: 1000 },
       ]),
       UnifiedRehabPlan.aggregate([
+        { $match: { ...scope } },
         { $project: { goalCount: { $size: { $ifNull: ['$goals', []] } } } },
         { $group: { _id: null, avg: { $avg: '$goalCount' } } },
         { $limit: 1000 },
       ]),
       UnifiedRehabPlan.countDocuments({
+        ...scope,
         reviewDate: { $lte: new Date() },
         status: { $in: ['ACTIVE', 'PENDING_APPROVAL'] },
       }),
@@ -974,6 +980,7 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
       UnifiedRehabPlan.aggregate([
         {
           $match: {
+            ...branchFilter(req), // W629 — defense-in-depth: foreign-branch beneficiary → empty
             beneficiary: new (require('mongoose').Types.ObjectId)(beneficiaryId),
             status: 'ACTIVE',
           },
@@ -1021,15 +1028,18 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
 // ─── Team Workload Dashboard ─────────────────────────────────────────────────
 router.get('/dashboard/team-workload', authorize(['admin', 'manager']), async (req, res) => {
   try {
+    // W629 — branch-scope UnifiedRehabPlan stats ('manager' is a branch-level
+    // role, so this dashboard otherwise leaks all-branch workload).
+    const scope = branchFilter(req);
     const [activePlans, pendingReferrals, upcomingMeetings, teamLoad] = await Promise.all([
-      UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
+      UnifiedRehabPlan.countDocuments({ ...scope, status: 'ACTIVE' }),
       ReferralTicket.countDocuments({ status: { $in: ['PENDING', 'ACCEPTED'] } }),
       MDTMeeting.countDocuments({
         date: { $gte: new Date() },
         status: 'SCHEDULED',
       }),
       UnifiedRehabPlan.aggregate([
-        { $match: { status: 'ACTIVE' } },
+        { $match: { ...scope, status: 'ACTIVE' } },
         { $unwind: '$teamMembers' },
         {
           $group: {
@@ -1419,16 +1429,18 @@ router.get('/dashboard/overview', async (req, res) => {
         .limit(5)
         .select('title date startTime type attendees')
         .lean(),
-      UnifiedRehabPlan.countDocuments(),
-      UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
+      // W629 — branch-scope UnifiedRehabPlan stats (sibling MDTMeeting /
+      // ReferralTicket lack branchId → separate future denormalization wave).
+      UnifiedRehabPlan.countDocuments({ ...branchFilter(req) }),
+      UnifiedRehabPlan.countDocuments({ ...branchFilter(req), status: 'ACTIVE' }),
       UnifiedRehabPlan.aggregate([
-        { $match: { status: 'ACTIVE' } },
+        { $match: { ...branchFilter(req), status: 'ACTIVE' } },
         { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
         { $limit: 1000 },
       ]),
       ReferralTicket.countDocuments(),
       ReferralTicket.countDocuments({ status: 'PENDING' }),
-      UnifiedRehabPlan.countDocuments({ reviewDate: { $lt: now }, status: 'ACTIVE' }),
+      UnifiedRehabPlan.countDocuments({ ...branchFilter(req), reviewDate: { $lt: now }, status: 'ACTIVE' }),
       ReferralTicket.countDocuments({ responseDeadline: { $lt: now }, status: 'PENDING' }),
       MDTMeeting.find({ date: { $gte: thirtyDaysAgo } })
         .sort({ date: -1 })

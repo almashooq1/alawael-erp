@@ -267,6 +267,10 @@ const unifiedRehabPlanSchema = new mongoose.Schema(
     planNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
+    // W629 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook. Additive; backfill via
+    // `npm run backfill:rehabplan-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     title: { type: String, required: true },
     status: {
       type: String,
@@ -328,12 +332,17 @@ const unifiedRehabPlanSchema = new mongoose.Schema(
 );
 
 unifiedRehabPlanSchema.index({ beneficiary: 1, status: 1 });
+// W629 — branch-scoped stats (R4)
+unifiedRehabPlanSchema.index({ branchId: 1, status: 1 });
 unifiedRehabPlanSchema.index({ leadTherapist: 1 });
 unifiedRehabPlanSchema.index({ 'teamMembers.therapist': 1 });
 unifiedRehabPlanSchema.index({ reviewDate: 1 });
 
 // Auto-compute overall progress
-unifiedRehabPlanSchema.pre('save', function (next) {
+// W629: converted callback → async so the sibling derive hook below can be
+// async too (Mongoose-9 mixed async/callback dispatch on one event silently
+// breaks the chain — check:hook-style gate + W483 doctrine).
+unifiedRehabPlanSchema.pre('save', async function computeOverallProgress() {
   if (this.goals && this.goals.length > 0) {
     const activeGoals = this.goals.filter(g => !['DISCONTINUED'].includes(g.status));
     if (activeGoals.length > 0) {
@@ -342,7 +351,18 @@ unifiedRehabPlanSchema.pre('save', function (next) {
       );
     }
   }
-  next();
+});
+
+// W629 — denormalize branchId from the (required) beneficiary. R4.
+unifiedRehabPlanSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
 });
 
 // ─── 3. Internal Referral Ticket (تذكرة الإحالة الداخلية) ────────────────────

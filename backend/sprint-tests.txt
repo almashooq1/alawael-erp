@@ -409,3 +409,4 @@ __tests__/assessment-goal-from-suggestion-wave568.test.js
 __tests__/measure-recommendations-routes-behavioral-wave570.test.js
 __tests__/measure-recommendation-population-gate-wave571.test.js
 __tests__/measure-recommendation-trend-aware-wave576.test.js
+__tests__/visitor-auth-httponly-cookie-wave584.test.js

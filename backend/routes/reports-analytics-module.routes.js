@@ -1141,7 +1141,10 @@ router.get('/analytics/quality', authenticate, requireBranchAccess, async (req, 
     const { date_from, date_to } = req.query;
     const db = mongoose.connection.db;
 
-    const matchBase = { deleted_at: null };
+    // W269 C3a fix: this handler previously had NO branch scope — every
+    // restricted caller read ALL branches' quality_indicators / measurements /
+    // incident_reports. Force the caller's own branch (HQ may pass ?branch_id).
+    const matchBase = applyRawBranchScope({ deleted_at: null }, req, req.query.branch_id);
     if (date_from || date_to) {
       matchBase.createdAt = {};
       if (date_from) matchBase.createdAt.$gte = new Date(date_from);

@@ -131,11 +131,26 @@ module.exports = { P, META, ROLE_GRANTS, ROLE_DENY, ARCHETYPES, ALL, can };
 `;
 }
 
-const out = build();
-fs.writeFileSync(OUT_PATH, out);
-const denyTotal = seed.permissions.reduce((n, p) => n + (p.deny || []).length, 0);
-console.log('✓ generated backend/authorization/permissions.registry.js');
-console.log(
-  `  permissions: ${seed.permissions.length} · archetypes: ${ROLE_CODES.length} · grant cells: ` +
-    `${seed.permissions.reduce((n, p) => n + (p.grants || []).reduce((m, g) => m + g.roles.length, 0), 0)} · deny cells: ${denyTotal}`
-);
+(async () => {
+  const raw = build();
+  // Format through the project's prettier config so regen output is identical to
+  // what lint-staged writes at commit time — i.e. re-running the generator
+  // produces ZERO diff against the committed registry (enables a future
+  // "registry is stale" CI guard). Falls back to the raw string if prettier is
+  // unavailable for any reason.
+  let out = raw;
+  try {
+    const prettier = require('prettier');
+    const cfg = (await prettier.resolveConfig(OUT_PATH)) || {};
+    out = await prettier.format(raw, { ...cfg, parser: 'babel', filepath: OUT_PATH });
+  } catch (e) {
+    console.warn('  (prettier unavailable — wrote raw output:', e.message, ')');
+  }
+  fs.writeFileSync(OUT_PATH, out);
+  const denyTotal = seed.permissions.reduce((n, p) => n + (p.deny || []).length, 0);
+  console.log('✓ generated backend/authorization/permissions.registry.js');
+  console.log(
+    `  permissions: ${seed.permissions.length} · archetypes: ${ROLE_CODES.length} · grant cells: ` +
+      `${seed.permissions.reduce((n, p) => n + (p.grants || []).reduce((m, g) => m + g.roles.length, 0), 0)} · deny cells: ${denyTotal}`
+  );
+})();

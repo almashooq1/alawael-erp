@@ -342,7 +342,7 @@ export default function CDSSDashboard() {
   const handleCheckInteractions = async () => {
     if (selectedDrugsForCheck.length < 2) return;
     setInteractionLoading(true);
-    const result = await checkDrugInteractions(selectedDrugsForCheck.map(d => d._id));
+    const result = await checkDrugInteractions(selectedDrugsForCheck.map(d => d.code || d._id));
     setInteractionResult(result);
     setInteractionLoading(false);
   };
@@ -1361,7 +1361,7 @@ export default function CDSSDashboard() {
           <Button
             variant="contained"
             color="warning"
-            disabled={!overrideDialog.reason.trim()}
+            disabled={overrideDialog.reason.trim().length < 10}
             onClick={handleOverrideSubmit}
           >
             تجاوز وتسجيل

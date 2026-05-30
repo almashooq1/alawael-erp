@@ -64,6 +64,16 @@ function receiverOf(src, idx) {
   return m ? m[1] : '(unknown)';
 }
 
+// Signals that the aggregate is ALREADY isolated by a NON-branchFilter
+// mechanism the BRANCH_TOKENS regex can't see — caseload scoping (a
+// $in over a branch-scoped beneficiary-id list) or entity scoping (a
+// $match pinned to a single resolved id). These are LIKELY false positives;
+// flagged for verification, not auto-trusted (a $in could be unscoped).
+const CASELOAD_SCOPE_RE =
+  /getScoped\w*|beneficiary:\s*\{\s*\$in|beneficiaryIds|cases\.beneficiary/;
+const ENTITY_SCOPE_RE =
+  /\$match[^]*?(therapist|beneficiary|employee|user|assignedTo|createdBy)\s*:\s*[\w.[\]'"]+\._id|\$match[^]*?:\s*new\s*\(?\s*(require\(['"]mongoose['"]\)\.)?Types\.ObjectId/;
+
 function piiRouteScan() {
   const hits = [];
   for (const file of walkJs(path.join(BACKEND, 'routes'))) {
@@ -73,13 +83,16 @@ function piiRouteScan() {
     const aggRe = /\.aggregate\s*\(/g;
     while ((m = aggRe.exec(src))) {
       const wide = src.slice(Math.max(0, m.index - WIDE), m.index + WIDE);
-      if (BRANCH_TOKENS.test(wide)) continue; // scoped somewhere in the handler
+      if (BRANCH_TOKENS.test(wide)) continue; // scoped via branchFilter family
       if (ADMIN_GATE_RE.test(wide)) continue; // legitimately cross-branch/admin
       const receiver = receiverOf(src, m.index);
       const nearAgg = src.slice(m.index, m.index + WINDOW);
       const isPii = PII_RE.test(receiver) || PII_RE.test(nearAgg);
       if (!isPii) continue;
-      hits.push({ file: rel(file), line: lineOf(src, m.index), receiver });
+      // Secondary classification: probable real leak vs likely-already-scoped
+      const likelyScoped =
+        CASELOAD_SCOPE_RE.test(wide) || ENTITY_SCOPE_RE.test(nearAgg);
+      hits.push({ file: rel(file), line: lineOf(src, m.index), receiver, likelyScoped });
     }
   }
   return hits;
@@ -161,16 +174,25 @@ if (FILES_OUT) {
 
 if (PII_ROUTES) {
   const hits = piiRouteScan();
+  const real = hits.filter(h => !h.likelyScoped);
+  const scoped = hits.filter(h => h.likelyScoped);
   console.log('');
-  console.log('High-confidence shortlist — PII aggregate in a wired route, no branch');
-  console.log('scope + no admin/cross-branch gate in the enclosing handler:');
+  console.log('PII aggregate in a wired route, no branchFilter + no admin gate:');
   console.log('═══════════════════════════════════════════════════════════════════');
   if (hits.length === 0) {
-    console.log('✅ none — every PII aggregate in routes/ is branch-scoped or admin-gated.');
+    console.log('✅ none.');
   } else {
-    hits.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    console.log(`PROBABLE REAL LEAKS (${real.length}) — branch-scope these:`);
+    real.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    if (scoped.length) {
+      console.log('');
+      console.log(`LIKELY ALREADY-SCOPED (${scoped.length}) — via caseload ($in over a`);
+      console.log(`branch-scoped id-list) or entity ($match on a resolved id). VERIFY,`);
+      console.log(`do not auto-fix (a $in could itself be unscoped):`);
+      scoped.forEach(h => console.log(`  ${h.file}:${h.line}  (on \`${h.receiver}\`)`));
+    }
     console.log('');
-    console.log(`${hits.length} site(s) to review by hand. Still heuristic — confirm each.`);
+    console.log(`Total ${hits.length}: ${real.length} probable real, ${scoped.length} likely-scoped. Still heuristic.`);
   }
   console.log('');
   process.exit(0);

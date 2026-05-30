@@ -205,7 +205,14 @@ for (const d of SCAN_DIRS) {
     const colRe =
       /\.db\.collection\s*\(|\b(?:db|conn|database|mongoConn|nativeDb)\.collection\s*\(/g;
     while ((m = colRe.exec(src))) {
-      rawCollection.push({ file: rel(file), line: lineOf(src, m.index) });
+      // Classify like .aggregate(): a branch token in the ±WIDE window ⇒ likely
+      // scoped; NONE ⇒ unscoped (C3a-class) leak candidate.
+      const rawWide = src.slice(Math.max(0, m.index - WIDE), m.index + WIDE);
+      rawCollection.push({
+        file: rel(file),
+        line: lineOf(src, m.index),
+        scoped: BRANCH_TOKENS.test(rawWide),
+      });
     }
   }
 }

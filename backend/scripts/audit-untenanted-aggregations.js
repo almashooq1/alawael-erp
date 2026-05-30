@@ -193,8 +193,17 @@ for (const d of SCAN_DIRS) {
       }
     }
 
-    // raw driver .db.collection( call sites (any context)
-    const colRe = /\.db\.collection\s*\(/g;
+    // raw driver collection() call sites (bypass ALL Mongoose plugins). Two
+    // forms, both real C3a-class leaks:
+    //   (a) `…connection.db.collection(`  — the chained form (always a db handle)
+    //   (b) `db.collection(` / `conn.collection(` / `database.collection(` — the
+    //       local-var form (`const db = mongoose.connection.db; db.collection(…)`).
+    //       The C3a leak used (b); the old `/\.db\.collection\(/` regex matched
+    //       ONLY (a), so every reports-analytics raw aggregate was invisible to
+    //       this high-severity list. Lowercase db-handle var names avoid matching
+    //       Mongoose's `Model.collection` property (model receivers are PascalCase).
+    const colRe =
+      /\.db\.collection\s*\(|\b(?:db|conn|database|mongoConn|nativeDb)\.collection\s*\(/g;
     while ((m = colRe.exec(src))) {
       rawCollection.push({ file: rel(file), line: lineOf(src, m.index) });
     }

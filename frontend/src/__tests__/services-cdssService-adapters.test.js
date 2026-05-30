@@ -243,3 +243,99 @@ describe('lists never throw on a surprising payload', () => {
     expect(alerts).toEqual([]);
   });
 });
+
+describe('getRiskAssessments — totalScore/scoreBreakdown + risk-level map', () => {
+  test('maps backend assessment onto the UI shape', async () => {
+    mockApi.get.mockReturnValueOnce(
+      ok({
+        data: [
+          {
+            _id: 'ra1',
+            beneficiaryId: { _id: 'b1', fullNameAr: 'أحمد' },
+            assessmentType: 'fall_risk',
+            toolUsed: 'Morse',
+            totalScore: 78,
+            riskLevel: 'moderate', // → medium
+            scoreBreakdown: [{ domain: 'تنقل', score: 40, flag: true }],
+            recommendedInterventions: ['مراقبة'],
+            mlAssisted: true,
+            mlConfidenceScore: 0.82,
+            assessmentDate: '2026-05-30T10:00:00Z',
+          },
+        ],
+      })
+    );
+    const ra = await svc.getRiskAssessments();
+    expect(ra[0].beneficiaryName).toBe('أحمد');
+    expect(ra[0].overallScore).toBe(78); // totalScore → overallScore
+    expect(ra[0].riskLevel).toBe('medium'); // moderate → medium
+    expect(ra[0].domains).toEqual([{ domain: 'تنقل', score: 40, flag: true }]);
+    expect(ra[0].recommendedInterventions).toEqual(['مراقبة']);
+    expect(ra[0].generatedBy).toBe('AI-Auto'); // mlAssisted
+  });
+
+  test('generateAutoRiskAssessment sends { beneficiaryId, assessmentType }', async () => {
+    mockApi.post.mockReturnValueOnce(ok({ data: { _id: 'x', totalScore: 14, riskLevel: 'high' } }));
+    await svc.generateAutoRiskAssessment('BNF-1', 'pressure_ulcer');
+    expect(mockApi.post).toHaveBeenCalledWith(expect.stringContaining('/risk-assessments/auto'), {
+      beneficiaryId: 'BNF-1',
+      assessmentType: 'pressure_ulcer',
+    });
+  });
+});
+
+describe('getDifferentialDiagnoses — symptoms + ICD candidates', () => {
+  test('maps presentingSymptoms + suggestedDiagnoses (0–1 probability → %)', async () => {
+    mockApi.get.mockReturnValueOnce(
+      ok({
+        data: [
+          {
+            _id: 'dd1',
+            beneficiaryId: { _id: 'b9', fullNameAr: 'نورة' },
+            presentingSymptoms: ['ضعف عضلي', 'رنح'],
+            suggestedDiagnoses: [
+              { icd_code: 'G35', name: 'التصلب المتعدد', probability: 0.62, reasoning: 'نمط' },
+            ],
+            recommendedInvestigations: ['MRI'],
+            status: 'active',
+          },
+        ],
+      })
+    );
+    const dd = await svc.getDifferentialDiagnoses();
+    expect(dd[0].beneficiaryName).toBe('نورة');
+    expect(dd[0].symptoms).toEqual(['ضعف عضلي', 'رنح']);
+    expect(dd[0].candidates[0].icdCode).toBe('G35'); // icd_code → icdCode
+    expect(dd[0].candidates[0].probability).toBe(62); // 0.62 → 62
+    expect(dd[0].investigations).toEqual(['MRI']);
+  });
+});
+
+describe('validatePrescription — status + hasCritical', () => {
+  test('sends drugCodes and adapts the validation envelope', async () => {
+    mockApi.post.mockReturnValueOnce(
+      ok({
+        data: { status: 'warnings', warnings: [{ type: 'x' }], errors: [], drugInteractionResults: [] },
+        hasCritical: false,
+      })
+    );
+    const res = await svc.validatePrescription({ drugCodes: ['A', 'B'] });
+    expect(mockApi.post).toHaveBeenCalledWith(expect.stringContaining('/prescriptions/validate'), {
+      beneficiaryId: undefined,
+      prescriptionId: undefined,
+      drugCodes: ['A', 'B'],
+    });
+    expect(res.status).toBe('warnings');
+    expect(res.hasCritical).toBe(false);
+    expect(res.warnings).toHaveLength(1);
+  });
+
+  test('failed status when backend reports critical errors', async () => {
+    mockApi.post.mockReturnValueOnce(
+      ok({ data: { status: 'failed', errors: [{ type: 'interaction' }] }, hasCritical: true })
+    );
+    const res = await svc.validatePrescription({ drugCodes: ['A', 'B'] });
+    expect(res.status).toBe('failed');
+    expect(res.hasCritical).toBe(true);
+  });
+});

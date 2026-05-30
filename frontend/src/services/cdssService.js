@@ -50,6 +50,19 @@ export const RISK_LEVELS = {
   low: { label: 'منخفض', color: 'success', score: [0, 39] },
 };
 
+export const RISK_ASSESSMENT_TYPES = {
+  fall_risk: { label: 'خطر السقوط', tool: 'Morse Scale' },
+  pressure_ulcer: { label: 'قرحة الفراش', tool: 'Braden Scale' },
+  malnutrition: { label: 'سوء التغذية', tool: 'MUST' },
+  deterioration: { label: 'التدهور السريري', tool: 'NEWS' },
+};
+
+export const DIAGNOSIS_STATUSES = {
+  active: { label: 'قيد التقييم', color: 'warning' },
+  confirmed: { label: 'مؤكَّد', color: 'success' },
+  dismissed: { label: 'مستبعَد', color: 'default' },
+};
+
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const MOCK_STATS = {
@@ -273,6 +286,40 @@ const MOCK_RISK_ASSESSMENTS = [
     ],
     generatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     generatedBy: 'Dr. سلمى العمري',
+  },
+];
+
+const MOCK_DIAGNOSES = [
+  {
+    _id: 'dd1',
+    beneficiaryId: 'BNF-00412',
+    beneficiaryName: 'أحمد محمد العتيبي',
+    symptoms: ['ضعف عضلي تدريجي', 'صعوبة في البلع', 'تشنجات ليلية'],
+    clinicalFindings: ['انخفاض المنعكسات الوترية', 'رنح في المشية'],
+    candidates: [
+      { icdCode: 'G35', name: 'التصلب المتعدد', probability: 62, reasoning: 'نمط الأعراض العصبية + التصوير' },
+      { icdCode: 'G12.2', name: 'التصلب الجانبي الضموري', probability: 24, reasoning: 'ضعف حركي بلا فقد حسي' },
+      { icdCode: 'G70.0', name: 'الوهن العضلي الوبيل', probability: 14, reasoning: 'تعب عضلي متذبذب' },
+    ],
+    investigations: ['رنين مغناطيسي للدماغ والنخاع', 'تخطيط كهربية العضل', 'تحليل السائل الدماغي الشوكي'],
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
+  },
+  {
+    _id: 'dd2',
+    beneficiaryId: 'BNF-00298',
+    beneficiaryName: 'نورة خالد الغامدي',
+    symptoms: ['تأخر في النطق', 'ضعف تواصل بصري', 'سلوكيات نمطية'],
+    clinicalFindings: ['درجة CARS-2 = 34', 'محدودية اللعب التخيلي'],
+    candidates: [
+      { icdCode: 'F84.0', name: 'اضطراب طيف التوحد', probability: 78, reasoning: 'استيفاء معايير DSM-5 الأساسية' },
+      { icdCode: 'F80.2', name: 'اضطراب اللغة الاستقبالية', probability: 16, reasoning: 'ضعف فهم لغوي معزول' },
+    ],
+    investigations: ['تقييم سمعي شامل', 'تقييم تطوري متعدد التخصصات'],
+    status: 'confirmed',
+    clinicianAssessment: 'تم تأكيد التشخيص بعد التقييم متعدد التخصصات',
+    confirmedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(),
   },
 ];
 
@@ -620,6 +667,84 @@ const adaptDecision = l => ({
   timestamp: l?.decisionAt || l?.timestamp || l?.createdAt,
 });
 
+// backend risk level (low/moderate/high/very_high) → UI bucket (low/medium/high/very_high)
+const RISK_LEVEL_MAP = {
+  low: 'low',
+  moderate: 'medium',
+  medium: 'medium',
+  high: 'high',
+  very_high: 'very_high',
+};
+const mapRiskLevel = r => RISK_LEVEL_MAP[r] || 'low';
+
+const adaptRiskAssessment = a => ({
+  _id: a?._id || a?.id,
+  beneficiaryId:
+    (a?.beneficiaryId && typeof a.beneficiaryId === 'object' ? a.beneficiaryId._id : a?.beneficiaryId) || '',
+  beneficiaryName: refName(a?.beneficiaryId) || a?.beneficiaryName || '—',
+  assessmentType: a?.assessmentType || '',
+  toolUsed: a?.toolUsed || '',
+  overallScore:
+    typeof a?.overallScore === 'number'
+      ? a.overallScore
+      : typeof a?.totalScore === 'number'
+        ? a.totalScore
+        : 0,
+  riskLevel: mapRiskLevel(a?.riskLevel),
+  // backend stores domain detail in scoreBreakdown; mock data already uses `domains`
+  domains: Array.isArray(a?.domains)
+    ? a.domains
+    : Array.isArray(a?.scoreBreakdown)
+      ? a.scoreBreakdown.map(d => ({
+          domain: d?.domain || d?.name || d?.label || '',
+          score: typeof d?.score === 'number' ? d.score : (d?.value ?? 0),
+          flag: !!d?.flag,
+        }))
+      : [],
+  recommendedInterventions: toStringArray(a?.recommendedInterventions),
+  generatedAt: a?.generatedAt || a?.assessmentDate || a?.createdAt,
+  generatedBy: a?.generatedBy || (a?.mlAssisted ? 'AI-Auto' : refName(a?.assessedBy)) || '—',
+  mlAssisted: !!a?.mlAssisted,
+  mlConfidenceScore: typeof a?.mlConfidenceScore === 'number' ? a.mlConfidenceScore : null,
+  nextAssessmentDate: a?.nextAssessmentDate,
+});
+
+const adaptDiagnosis = d => ({
+  _id: d?._id || d?.id,
+  beneficiaryId:
+    (d?.beneficiaryId && typeof d.beneficiaryId === 'object' ? d.beneficiaryId._id : d?.beneficiaryId) || '',
+  beneficiaryName: refName(d?.beneficiaryId) || d?.beneficiaryName || '—',
+  symptoms: toStringArray(d?.presentingSymptoms ?? d?.symptoms),
+  clinicalFindings: toStringArray(d?.clinicalFindings),
+  candidates: (Array.isArray(d?.suggestedDiagnoses) ? d.suggestedDiagnoses : d?.candidates || []).map(c => ({
+    icdCode: c?.icd_code || c?.icdCode || '',
+    name: c?.name || c?.diagnosis || '',
+    probability:
+      typeof c?.probability === 'number'
+        ? c.probability <= 1
+          ? Math.round(c.probability * 100)
+          : Math.round(c.probability)
+        : null,
+    reasoning: c?.reasoning || '',
+  })),
+  investigations: toStringArray(d?.recommendedInvestigations ?? d?.investigations),
+  status: d?.status || 'active',
+  clinicianAssessment: d?.clinicianAssessment || '',
+  confirmedAt: d?.confirmedAt,
+  createdAt: d?.createdAt,
+});
+
+const adaptValidation = v => {
+  const errors = Array.isArray(v?.errors) ? v.errors : [];
+  return {
+    status: v?.status || (errors.length ? 'failed' : 'passed'),
+    hasCritical: !!v?.hasCritical || errors.length > 0,
+    warnings: Array.isArray(v?.warnings) ? v.warnings : [],
+    errors,
+    interactions: Array.isArray(v?.drugInteractionResults) ? v.drugInteractionResults : [],
+  };
+};
+
 const adaptList = (body, fn) => {
   try {
     return pickList(body).map(fn);
@@ -699,7 +824,10 @@ export const updateRule = (id, data) =>
 
 export const getRiskAssessments = (params = {}) =>
   withMock(
-    () => apiClient.get(`${BASE}/risk-assessments`, { params }).then(r => pickList(r.data)),
+    () =>
+      apiClient
+        .get(`${BASE}/risk-assessments`, { params })
+        .then(r => adaptList(r.data, adaptRiskAssessment)),
     MOCK_RISK_ASSESSMENTS
   );
 
@@ -708,7 +836,7 @@ export const generateAutoRiskAssessment = (beneficiaryId, assessmentType = 'fall
     () =>
       apiClient
         .post(`${BASE}/risk-assessments/auto`, { beneficiaryId, assessmentType })
-        .then(r => r.data?.data || r.data),
+        .then(r => adaptRiskAssessment(r.data?.data || r.data)),
     MOCK_RISK_ASSESSMENTS[0]
   );
 
@@ -766,4 +894,44 @@ export const evaluateRules = (beneficiaryId, contextType = 'manual', contextData
           alerts: adaptList(r.data, adaptAlert),
         })),
     { triggered: 2, alerts: MOCK_ALERTS.slice(0, 2) }
+  );
+
+// ─── Differential Diagnoses ────────────────────────────────────────────────────
+
+export const getDifferentialDiagnoses = (params = {}) =>
+  withMock(
+    () =>
+      apiClient
+        .get(`${BASE}/differential-diagnoses`, { params })
+        .then(r => adaptList(r.data, adaptDiagnosis)),
+    MOCK_DIAGNOSES
+  );
+
+export const createDifferentialDiagnosis = data =>
+  withMock(
+    () =>
+      apiClient
+        .post(`${BASE}/differential-diagnoses`, data)
+        .then(r => adaptDiagnosis(r.data?.data || r.data)),
+    { ...data, _id: Date.now().toString(), status: 'active' }
+  );
+
+export const confirmDifferentialDiagnosis = (id, payload = {}) =>
+  withMock(
+    () =>
+      apiClient
+        .patch(`${BASE}/differential-diagnoses/${id}/confirm`, payload)
+        .then(r => adaptDiagnosis(r.data?.data || r.data)),
+    { success: true }
+  );
+
+// ─── Prescription Validation ────────────────────────────────────────────────────
+
+export const validatePrescription = ({ beneficiaryId, prescriptionId, drugCodes } = {}) =>
+  withMock(
+    () =>
+      apiClient
+        .post(`${BASE}/prescriptions/validate`, { beneficiaryId, prescriptionId, drugCodes })
+        .then(r => adaptValidation({ ...(r.data?.data || {}), hasCritical: r.data?.hasCritical })),
+    { status: 'passed', hasCritical: false, warnings: [], errors: [], interactions: [] }
   );

@@ -57,6 +57,7 @@ const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { applyRawBranchScope } = require('../utils/rawBranchScope');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
@@ -68,28 +69,9 @@ const safeError = require('../utils/safeError');
 //  مساعدات داخلية
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * تنفيذ Aggregation pipeline ديناميكي على أي مجموعة
- * مع دعم فلاتر التاريخ، الفرع، والحالة
- */
-async function _runPipeline(collection, basePipeline = [], params = {}) {
-  const db = mongoose.connection.db;
-  const { date_from, date_to, branch_id, date_field = 'createdAt' } = params;
-
-  const matchStage = { deleted_at: null };
-  if (date_from || date_to) {
-    matchStage[date_field] = {};
-    if (date_from) matchStage[date_field].$gte = new Date(date_from);
-    if (date_to) matchStage[date_field].$lte = new Date(date_to + 'T23:59:59.999Z');
-  }
-  if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-    matchStage.branch_id = new mongoose.Types.ObjectId(branch_id);
-  }
-
-  const pipeline = [{ $match: matchStage }, ...basePipeline];
-  const result = await db.collection(collection).aggregate(pipeline).toArray();
-  return result;
-}
+// NOTE: `_runPipeline` helper removed (C3a cleanup) — ZERO callers (dead code)
+// and one of the last unscoped raw-aggregate sites. Deleting it removes the
+// risk outright rather than scoping a function nobody calls.
 
 /**
  * بناء pipeline بسيط للتجميع حسب حقل
@@ -221,6 +203,14 @@ router.post('/jobs', authenticate, requireBranchAccess, async (req, res) => {
     if (!template_id) {
       return res.status(400).json({ success: false, message: 'template_id مطلوب' });
     }
+
+    // W269 C3a: executeReport() is req-less and trusts parameters.branch_id, so a
+    // restricted caller could omit it (→ all branches) or spoof another branch.
+    // Force the caller's own branch HERE (the handler has req) before it flows
+    // into both the ReportJob record and executeReport's $match. effectiveBranchScope
+    // returns the restricted user's branch (ignoring spoof/omit), or null for HQ.
+    const scopedBranch = effectiveBranchScope(req);
+    if (scopedBranch) parameters.branch_id = String(scopedBranch);
 
     const template = await ReportTemplate.findById(template_id);
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });

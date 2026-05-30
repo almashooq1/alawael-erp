@@ -29,6 +29,7 @@ const CLINICAL = fs.readFileSync(
   path.join(__dirname, '..', 'routes', 'registries', 'clinical-assessment.registry.js'),
   'utf8'
 );
+const REGISTRY = fs.readFileSync(path.join(__dirname, '..', 'routes', '_registry.js'), 'utf8');
 
 describe('W658 — the three anon-reachable routes are now mounted with auth', () => {
   it("alerts is dualMountAuth (not bare dualMount)", () => {
@@ -42,6 +43,10 @@ describe('W658 — the three anon-reachable routes are now mounted with auth', (
   it('independent-living is dualMountAuth', () => {
     expect(CLINICAL).toMatch(/dualMountAuth\(app,\s*'independent-living'/);
     expect(CLINICAL).not.toMatch(/dualMount\(app,\s*'independent-living'/);
+  });
+  it('mobile is dualMountAuth (W659 — user device/sync ops)', () => {
+    expect(REGISTRY).toMatch(/dualMountAuth\(app,\s*'mobile'/);
+    expect(REGISTRY).not.toMatch(/dualMount\(app,\s*'mobile'/);
   });
 });
 

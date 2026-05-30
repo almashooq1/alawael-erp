@@ -1,0 +1,75 @@
+# Authorization Remediation Backlog — consolidated, prioritized
+
+> Single actionable backlog tying together every finding from the 2026-05-30
+> authorization design + review arc. Sources: the production-readiness review
+> (C-issues), the GRC governance adversarial review (F-findings, baked into
+> [AUTHZ_GOVERNANCE_DESIGN.md](AUTHZ_GOVERNANCE_DESIGN.md)), the W666 live-code
+> review (D-issues), and [ADR-037](decisions/037-role-registry-reconciliation.md)
+> (role gaps). **Target stack PostgreSQL+Node; live system is Mongo** — each item
+> notes its live-Mongo realization where it differs.
+>
+> Status legend: ☐ open · ◐ partially shipped · ✅ done. "Guard" = the CI check
+> that proves it stays fixed.
+
+---
+
+## P0 — must close before onboarding a new isolated multi-branch tenant
+
+| #         | Finding                                                                                                                                | Source      | Fix                                                                                       | Live-Mongo realization                                              | Guard                                                                          | Status |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------ |
+| **C1**    | Branch scope defaults **fail-open** (`branchScope.middleware.js:157` → `allBranches:true` when no `branchId`)                          | readiness   | Flip `BRANCH_SCOPE_FAIL_CLOSED=true` after audit                                          | run `npm run audit:no-branch-users`; flip env                       | a fail-closed-isolation test (does **not** exist yet)                          | ☐      |
+| **C4**    | Cross-branch **denials are logged, not audited** (`logger.warn` only)                                                                  | readiness   | Durable audit row on every branch denial                                                  | write to `AuditLog` on a **separate write**, not the request txn    | alert on `authz.access.denied` rate                                            | ☐      |
+| **F5/F7** | Deny / blocked-attempt audits **roll back** with the throwing txn → security signal lost                                               | governance  | `audit_outbox` committed on a separate connection **before** the throw                    | same: never write must-survive audit on the client you'll roll back | test: deny → row survives rollback                                             | ☐      |
+| **D2**    | The 9 const-only roles (`dpo`, `nurse`, `independent_advocate`, `cultural_officer`, …) are **unmapped → `can()` denies them entirely** | W666 review | Map the 9 into `role-archetype.map.json` (or alias) before wiring `can()` to their routes | n/a (additive)                                                      | `check:role-divergence` (already freezes the gap)                              | ☐      |
+| **D1**    | `can()` is **capability-only**; wiring without a scope filter leaks every branch                                                       | W666 review | Mandate `requirePermission(P.X)` + `branchFilter`/`scoped()` at every call site           | same contract                                                       | drift guard: any file importing `authorization/can` must import a scope helper | ☐      |
+
+## P1 — high
+
+| #           | Finding                                                                                                   | Source     | Fix                                                                          | Guard                                                                             | Status |
+| ----------- | --------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| **C2**      | Tenant isolation is **opt-in** (`tenantScope` plugin per-schema) — forgotten models have none             | readiness  | Make `tenantScope` **default-on**; allow-list exemptions                     | test: every tenant model opts in                                                  | ☐      |
+| **C3**      | ~710 inline `{branchId:…}` filters bypass canonical helpers; some pass user-supplied `req.query.branchId` | readiness  | Ratchet to `branchFilter`/`effectiveBranchScope`; scope every `.aggregate()` | extend W269h → `check:branchid-filters` (W269i) + `audit:untenanted-aggregations` | ◐      |
+| **H1**      | `ROLE_LEVELS` gap — 26 live roles absent → `levelOf()` falls back to 6 → managers fail `hasLevel()`       | readiness  | Add the 26 to `roles.constants` `ROLE_LEVELS` with correct levels            | `check:role-divergence` + a level-coverage test                                   | ☐      |
+| **F4/F13**  | Break-glass **PHI IDOR** (guessable session id, no actor binding)                                         | governance | UUID session id + `invoked_by = current_user` in the RLS disjunct            | test: foreign session id → no PHI                                                 | ☐ (PG) |
+| **F10**     | SoD rules keyed to dead permission namespace (`invoice:*`) → silently never fire                          | governance | Reconcile risk-rule keys to real seed keys + CI guard                        | guard: every risk-rule token resolves to a seed key                               | ☐      |
+| **F11/F15** | Fail-open on NULL author; break-glass HQ-exclusion from self-declared column                              | governance | NULL = deny; DB-derive archetype                                             | n/a                                                                               | ☐ (PG) |
+
+## P2 — medium / refactor
+
+| #                  | Finding                                                                                                | Source         | Fix                                                                                           | Guard                                                | Status |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------ |
+| **H3**             | 13 resolver-shaped impls; `can()` PDP exists but **dormant**                                           | readiness/W666 | Wire `can()` per-domain (finance/HR/user-mgmt first); collapse the 13                         | `check:authz-consolidation` (freezes; ratchets down) | ◐      |
+| **H4**             | Authz leaks into ~104 business-logic sites                                                             | readiness      | `scopedFind()` + middleware boundary; services role-check-free                                | per-domain ratchet                                   | ☐      |
+| **H5**             | ~1006 `requireRole([literal])`, typo-class                                                             | readiness      | Codemod → `requirePermission(P.X)`                                                            | registry-membership lint                             | ☐      |
+| **ADR-037**        | 26+9 role-registry **bidirectional divergence**                                                        | ADR-037        | Union into `roles.constants`: D2 add 26 (safe), D3 map 9 (needs sign-off), D4 re-export shim  | `check:role-divergence` (ratchet to 0)               | ◐      |
+| **D3**             | `can()` `approver` gate currently **inert**                                                            | W666 review    | Pin with a test (non-approver in approving archetype → deny)                                  | the test itself                                      | ☐      |
+| **D4**             | `can()` doesn't normalize role aliases → legacy `super-admin` etc. denied                              | W666 review    | `archetypeOf(resolveRole(role))`                                                              | alias-resolution test                                | ☐      |
+| **F1/F16/F18/F19** | Hash-chain: per-request lock deadlock; forgeable concat preimage; detach blind spot; in-DB-only anchor | governance     | async single-writer sealer + canonical JSON preimage + partition checkpoints + off-box anchor | chain-verify test (1000 rows, 0 false breaks)        | ☐ (PG) |
+| **F23**            | `SECURITY DEFINER` without pinned `search_path`                                                        | governance     | `SET search_path` on every definer fn                                                         | CI: no definer without `SET search_path`             | ☐ (PG) |
+| **M-naming**       | `branchId`/`branch_id`/`branch`/`branch_code`; `role`/`roles[]`                                        | readiness      | Converge on `branchId` + canonical role; map legacy at the edge                               | naming lint                                          | ☐      |
+
+---
+
+## Sequencing (lowest-risk first)
+
+1. **C1 + C4 + F5** — close the live isolation holes (fail-closed flip + durable denial audit + outbox). Highest security value, smallest change.
+2. **D2 + D1** — before `can()` is wired anywhere: map the 9 roles, lock the scope-helper contract. Prevents the consumption regressions.
+3. **C2 + C3 + H1** — make isolation the default (tenantScope default-on, ratchet inline filters, fix `ROLE_LEVELS`).
+4. **ADR-037 D2** — add the 26 roles to `roles.constants` (additive, `check:role-divergence` ratchets 26→0).
+5. **H3/H4/H5** — per-domain `can()` consumption + de-leak services (the long tail; one domain per wave).
+6. **PG-target items (F-series)** — only on the funded Postgres cutover.
+
+## Verification posture
+
+Each closed item must ship with its **guard** (the CI check that fails if it
+regresses) — the project doctrine: a fix without a guard re-rots. Two guards
+already exist (`check:authz-consolidation`, `check:role-divergence`); the rest
+are listed per row. Promote both existing guards to **pre-push gates** once their
+baselines stop moving.
+
+Cross-refs: [ADR-035](decisions/035-enterprise-authorization-design.md) ·
+[ADR-036](decisions/036-role-archetype-reconciliation.md) ·
+[ADR-037](decisions/037-role-registry-reconciliation.md) ·
+[AUTHZ_GOVERNANCE_DESIGN.md](AUTHZ_GOVERNANCE_DESIGN.md) ·
+[AUTHZ_MODERNIZATION_PLAN.md](AUTHZ_MODERNIZATION_PLAN.md) ·
+[PERMISSIONS_MATRIX.md](PERMISSIONS_MATRIX.md).

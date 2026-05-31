@@ -118,23 +118,46 @@ class FinanceOperationsService {
   }
 
   async cancelInvoice(id, userId) {
-    const invoice = await Invoice.findById(id);
-    if (!invoice) throw Object.assign(new Error('الفاتورة غير موجودة'), { status: 404 });
-    invoice.status = 'CANCELLED';
-    invoice.cancelledBy = userId;
-    await invoice.save();
+    // Atomic guarded transition: only cancel an invoice that is not already
+    // PAID or CANCELLED. Two concurrent pay/cancel requests can no longer
+    // both succeed (replaces the read-modify-write that double-applied).
+    const invoice = await Invoice.findOneAndUpdate(
+      { _id: id, status: { $nin: ['PAID', 'CANCELLED'] } },
+      { $set: { status: 'CANCELLED', cancelledBy: userId } },
+      { new: true }
+    );
+    if (!invoice) {
+      const exists = await Invoice.exists({ _id: id });
+      if (!exists) throw Object.assign(new Error('الفاتورة غير موجودة'), { status: 404 });
+      throw Object.assign(new Error('لا يمكن إلغاء فاتورة مدفوعة أو ملغاة بالفعل'), {
+        status: 409,
+      });
+    }
     logger.info(`Invoice cancelled: ${invoice.invoiceNumber}`);
     return invoice;
   }
 
   async markInvoicePaid(id, paymentData, userId) {
-    const invoice = await Invoice.findById(id);
-    if (!invoice) throw Object.assign(new Error('الفاتورة غير موجودة'), { status: 404 });
-    invoice.status = 'PAID';
-    invoice.paymentMethod = paymentData.paymentMethod || invoice.paymentMethod;
-    invoice.paidBy = userId;
-    invoice.paidAt = new Date();
-    await invoice.save();
+    // Atomic guarded transition: only mark PAID an invoice that is not
+    // already PAID or CANCELLED — prevents double-payment records and
+    // paying a cancelled invoice under a race.
+    const invoice = await Invoice.findOneAndUpdate(
+      { _id: id, status: { $nin: ['PAID', 'CANCELLED'] } },
+      {
+        $set: {
+          status: 'PAID',
+          ...(paymentData.paymentMethod ? { paymentMethod: paymentData.paymentMethod } : {}),
+          paidBy: userId,
+          paidAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+    if (!invoice) {
+      const exists = await Invoice.exists({ _id: id });
+      if (!exists) throw Object.assign(new Error('الفاتورة غير موجودة'), { status: 404 });
+      throw Object.assign(new Error('الفاتورة مدفوعة أو ملغاة بالفعل'), { status: 409 });
+    }
     logger.info(`Invoice paid: ${invoice.invoiceNumber}`);
     return invoice;
   }

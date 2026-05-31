@@ -4,6 +4,7 @@ const router = require('express').Router();
 const walletService = require('../services/digitalWallet.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -34,10 +35,9 @@ router.get(
   '/',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
-    const data = await walletService.list({ ...req.query, branchId: req.user.branchId });
+    const data = await walletService.list({ ...req.query, branchId: effectiveBranchScope(req) });
     res.json({ success: true, ...data });
   })
 );
@@ -47,10 +47,9 @@ router.get(
   '/stats',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
-    const data = await walletService.getStats(req.user.branchId);
+    const data = await walletService.getStats(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -60,12 +59,11 @@ router.post(
   '/',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const wallet = await walletService.createWallet({
       ...req.body,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, data: wallet });
@@ -76,7 +74,6 @@ router.post(
 router.get(
   '/:id',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
@@ -91,7 +88,6 @@ router.get(
 router.post(
   '/:id/topup',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
@@ -108,7 +104,6 @@ router.post(
   '/:id/debit',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.debit(req.params.id, {
@@ -124,7 +119,6 @@ router.post(
   '/:id/transfer',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.transfer(req.params.id, req.body.targetWalletId, {
@@ -139,7 +133,6 @@ router.post(
 router.post(
   '/:id/apply-coupon',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
@@ -158,7 +151,6 @@ router.post(
   '/:id/redeem-loyalty',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.redeemLoyaltyPoints(req.params.id, req.body.points, {
@@ -173,7 +165,6 @@ router.get(
   '/:id/statement',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.getStatement(req.params.id, req.query);
@@ -186,7 +177,6 @@ router.post(
   '/:id/block',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await walletService.blockWallet(req.params.id, req.body.reason);
@@ -197,7 +187,6 @@ router.post(
 router.post(
   '/:id/unblock',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
@@ -210,7 +199,6 @@ router.post(
 router.get(
   '/coupons/list',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
@@ -235,7 +223,6 @@ router.post(
   '/coupons',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const DiscountCoupon = require('../models/DiscountCoupon');
@@ -248,7 +235,6 @@ router.post(
 router.get(
   '/:id/loyalty-history',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   wrap(async (req, res) => {
     const LoyaltyPointsTransaction = require('../models/LoyaltyPointsTransaction');

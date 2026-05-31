@@ -56,6 +56,25 @@ function IcfAssessment() {
   }
 }
 
+// ── ICF code-reference model (W448 catalog, seeded via npm run seed:icf-codes) ──
+// W692: /codes + /codes/tree were placeholders returning 5 hard-coded entries
+// that SHADOWED the real DB-backed controller (this file mounts at
+// _registry.js:663, before clinical-assessment.registry's controller route, so
+// Express first-match wins). Both now query the canonical ICFCodeReference
+// collection. The model registers itself on require; fall back gracefully when
+// the model file is unavailable so the route never 500s on a cold module.
+function IcfCodeReference() {
+  try {
+    return mongoose.model('ICFCodeReference');
+  } catch (_e) {
+    try {
+      return require('../models/icf/ICFCodeReference.model');
+    } catch (_e2) {
+      return null;
+    }
+  }
+}
+
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ══════════════════════ CRUD ═══════════════════════════════════════════════ */
@@ -145,31 +164,59 @@ router.get(
   })
 );
 
+// ── GET /codes — search the seeded ICF code catalog ─────────────────────────
+// Filters: ?component=bodyFunctions|bodyStructures|activitiesParticipation|
+//          environmentalFactors  ?chapter=N  ?level=1-4  ?parentCode=bN
+//          ?coreSet=generic_brief  ?search=<text|code>  ?limit=N (default 200)
 router.get(
   '/codes',
-  asyncHandler(async (_req, res) => {
-    // Static ICF code reference — returns placeholder structure
-    res.json({
-      success: true,
-      data: [
-        { code: 'b130', title: 'Energy and drive functions', component: 'body_functions' },
-        { code: 'b140', title: 'Attention functions', component: 'body_functions' },
-        { code: 'd410', title: 'Changing basic body position', component: 'activities' },
-        { code: 'd450', title: 'Walking', component: 'activities' },
-        {
-          code: 'e115',
-          title: 'Products and technology for personal use',
-          component: 'environment',
-        },
-      ],
-    });
+  asyncHandler(async (req, res) => {
+    const M = IcfCodeReference();
+    if (!M) return res.json({ success: true, data: [], total: 0 });
+
+    const { component, chapter, level, parentCode, coreSet, search, limit = 200 } = req.query;
+    const filter = { isActive: { $ne: false } };
+    if (component) filter.component = component;
+    if (chapter) filter.chapter = Number(chapter);
+    if (level) filter.level = Number(level);
+    if (parentCode) filter.parentCode = parentCode;
+    if (coreSet) filter['coreSetMemberships.setName'] = coreSet;
+    if (search) {
+      const safe = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(safe, 'i');
+      filter.$or = [{ code: rx }, { title: rx }, { titleAr: rx }, { description: rx }];
+    }
+
+    const data = await M.find(filter)
+      .sort({ code: 1 })
+      .limit(Math.min(Number(limit) || 200, 2000))
+      .lean();
+    res.json({ success: true, data, total: data.length });
   })
 );
 
+// ── GET /codes/tree/:component — hierarchical tree (parentCode → children) ───
 router.get(
   '/codes/tree/:component',
   asyncHandler(async (req, res) => {
-    res.json({ success: true, data: { component: req.params.component, codes: [] } });
+    const M = IcfCodeReference();
+    const { component } = req.params;
+    if (!M) return res.json({ success: true, data: { component, codes: [] } });
+
+    const codes = await M.find({ component, isActive: { $ne: false } })
+      .sort({ code: 1 })
+      .lean();
+
+    const byCode = {};
+    codes.forEach(c => {
+      byCode[c.code] = { ...c, children: [] };
+    });
+    const roots = [];
+    codes.forEach(c => {
+      if (c.parentCode && byCode[c.parentCode]) byCode[c.parentCode].children.push(byCode[c.code]);
+      else roots.push(byCode[c.code]);
+    });
+    res.json({ success: true, data: { component, codes: roots, total: codes.length } });
   })
 );
 

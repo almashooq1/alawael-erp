@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "setName": "reference_chapters",
+  "setVersion": "2017",
+  "displayName": {
+    "en": "ICF Reference — Chapter Headers (all 4 components)",
+    "ar": "مرجع ICF — رؤوس الفصول (المكوّنات الأربعة)"
+  },
+  "description": {
+    "en": "The 30 first-level chapter headers of the WHO ICF taxonomy across all four components (b/s/d/e). Seeded as level-1 reference nodes so /codes/tree/:component returns a complete navigable root tree. Condition-specific Brief/Comprehensive Core Sets hang their level-3 codes under these chapters via parentCode.",
+    "ar": "رؤوس الفصول الثلاثون من المستوى الأول لتصنيف ICF لمنظمة الصحة العالمية عبر المكوّنات الأربعة (b/s/d/e). تُزرع كعُقد مرجعية من المستوى الأول حتى تُرجع /codes/tree/:component شجرة جذرية كاملة قابلة للتصفّح. المجموعات الأساسية الخاصة بالحالات تُعلّق رموزها من المستوى الثالث تحت هذه الفصول عبر parentCode."
+  },
+  "source": {
+    "publication": "WHO International Classification of Functioning, Disability and Health (ICF), 2017 update",
+    "url": "https://icd.who.int/browse/2024-01/icf/en"
+  },
+  "codes": [
+    {
+      "code": "b1",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 1,
+      "title": "Mental functions",
+      "titleAr": "الوظائف العقلية"
+    },
+    {
+      "code": "b2",
+      "component": "bodyFunctions",
+      "chapter": 2,
+      "level": 1,
+      "title": "Sensory functions and pain",
+      "titleAr": "الوظائف الحسية والألم"
+    },
+    {
+      "code": "b3",
+      "component": "bodyFunctions",
+      "chapter": 3,
+      "level": 1,
+      "title": "Voice and speech functions",
+      "titleAr": "وظائف الصوت والكلام"
+    },
+    {
+      "code": "b4",
+      "component": "bodyFunctions",
+      "chapter": 4,
+      "level": 1,
+      "title": "Functions of the cardiovascular, haematological, immunological and respiratory systems",
+      "titleAr": "وظائف الأجهزة القلبية الوعائية والدموية والمناعية والتنفسية"
+    },
+    {
+      "code": "b5",
+      "component": "bodyFunctions",
+      "chapter": 5,
+      "level": 1,
+      "title": "Functions of the digestive, metabolic and endocrine systems",
+      "titleAr": "وظائف الجهاز الهضمي والأيضي والغدد الصماء"
+    },
+    {
+      "code": "b6",
+      "component": "bodyFunctions",
+      "chapter": 6,
+      "level": 1,
+      "title": "Genitourinary and reproductive functions",
+      "titleAr": "الوظائف البولية التناسلية والإنجابية"
+    },
+    {
+      "code": "b7",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 1,
+      "title": "Neuromusculoskeletal and movement-related functions",
+      "titleAr": "الوظائف العصبية العضلية الهيكلية والمتعلقة بالحركة"
+    },
+    {
+      "code": "b8",
+      "component": "bodyFunctions",
+      "chapter": 8,
+      "level": 1,
+      "title": "Functions of the skin and related structures",
+      "titleAr": "وظائف الجلد والبنى ذات الصلة"
+    },
+
+    {
+      "code": "s1",
+      "component": "bodyStructures",
+      "chapter": 1,
+      "level": 1,
+      "title": "Structures of the nervous system",
+      "titleAr": "بنى الجهاز العصبي"
+    },
+    {
+      "code": "s2",
+      "component": "bodyStructures",
+      "chapter": 2,
+      "level": 1,
+      "title": "The eye, ear and related structures",
+      "titleAr": "العين والأذن والبنى ذات الصلة"
+    },
+    {
+      "code": "s3",
+      "component": "bodyStructures",
+      "chapter": 3,
+      "level": 1,
+      "title": "Structures involved in voice and speech",
+      "titleAr": "البنى المشاركة في الصوت والكلام"
+    },
+    {
+      "code": "s4",
+      "component": "bodyStructures",
+      "chapter": 4,
+      "level": 1,
+      "title": "Structures of the cardiovascular, immunological and respiratory systems",
+      "titleAr": "بنى الأجهزة القلبية الوعائية والمناعية والتنفسية"
+    },
+    {
+      "code": "s5",
+      "component": "bodyStructures",
+      "chapter": 5,
+      "level": 1,
+      "title": "Structures related to the digestive, metabolic and endocrine systems",
+      "titleAr": "البنى المتعلقة بالجهاز الهضمي والأيضي والغدد الصماء"
+    },
+    {
+      "code": "s6",
+      "component": "bodyStructures",
+      "chapter": 6,
+      "level": 1,
+      "title": "Structures related to the genitourinary and reproductive systems",
+      "titleAr": "البنى المتعلقة بالجهاز البولي التناسلي والإنجابي"
+    },
+    {
+      "code": "s7",
+      "component": "bodyStructures",
+      "chapter": 7,
+      "level": 1,
+      "title": "Structures related to movement",
+      "titleAr": "البنى المتعلقة بالحركة"
+    },
+    {
+      "code": "s8",
+      "component": "bodyStructures",
+      "chapter": 8,
+      "level": 1,
+      "title": "Skin and related structures",
+      "titleAr": "الجلد والبنى ذات الصلة"
+    },
+
+    {
+      "code": "d1",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 1,
+      "title": "Learning and applying knowledge",
+      "titleAr": "التعلّم وتطبيق المعرفة"
+    },
+    {
+      "code": "d2",
+      "component": "activitiesParticipation",
+      "chapter": 2,
+      "level": 1,
+      "title": "General tasks and demands",
+      "titleAr": "المهام والمتطلبات العامة"
+    },
+    {
+      "code": "d3",
+      "component": "activitiesParticipation",
+      "chapter": 3,
+      "level": 1,
+      "title": "Communication",
+      "titleAr": "التواصل"
+    },
+    {
+      "code": "d4",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 1,
+      "title": "Mobility",
+      "titleAr": "التنقّل والحركة"
+    },
+    {
+      "code": "d5",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 1,
+      "title": "Self-care",
+      "titleAr": "العناية الذاتية"
+    },
+    {
+      "code": "d6",
+      "component": "activitiesParticipation",
+      "chapter": 6,
+      "level": 1,
+      "title": "Domestic life",
+      "titleAr": "الحياة المنزلية"
+    },
+    {
+      "code": "d7",
+      "component": "activitiesParticipation",
+      "chapter": 7,
+      "level": 1,
+      "title": "Interpersonal interactions and relationships",
+      "titleAr": "التفاعلات والعلاقات الشخصية"
+    },
+    {
+      "code": "d8",
+      "component": "activitiesParticipation",
+      "chapter": 8,
+      "level": 1,
+      "title": "Major life areas",
+      "titleAr": "مجالات الحياة الرئيسية"
+    },
+    {
+      "code": "d9",
+      "component": "activitiesParticipation",
+      "chapter": 9,
+      "level": 1,
+      "title": "Community, social and civic life",
+      "titleAr": "الحياة المجتمعية والاجتماعية والمدنية"
+    },
+
+    {
+      "code": "e1",
+      "component": "environmentalFactors",
+      "chapter": 1,
+      "level": 1,
+      "title": "Products and technology",
+      "titleAr": "المنتجات والتقنية"
+    },
+    {
+      "code": "e2",
+      "component": "environmentalFactors",
+      "chapter": 2,
+      "level": 1,
+      "title": "Natural environment and human-made changes to environment",
+      "titleAr": "البيئة الطبيعية والتغييرات التي أحدثها الإنسان عليها"
+    },
+    {
+      "code": "e3",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 1,
+      "title": "Support and relationships",
+      "titleAr": "الدعم والعلاقات"
+    },
+    {
+      "code": "e4",
+      "component": "environmentalFactors",
+      "chapter": 4,
+      "level": 1,
+      "title": "Attitudes",
+      "titleAr": "الاتجاهات"
+    },
+    {
+      "code": "e5",
+      "component": "environmentalFactors",
+      "chapter": 5,
+      "level": 1,
+      "title": "Services, systems and policies",
+      "titleAr": "الخدمات والأنظمة والسياسات"
+    }
+  ]
+}

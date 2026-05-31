@@ -793,7 +793,6 @@ on:
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/mawid-wave687.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dtt-session-wave689.test.js'
       - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
@@ -1601,7 +1600,6 @@ on:
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/mawid-wave687.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dtt-session-wave689.test.js'
       - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'

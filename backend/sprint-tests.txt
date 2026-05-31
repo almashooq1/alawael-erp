@@ -453,6 +453,7 @@ __tests__/transition-plan-wave361.test.js
 __tests__/unauthenticated-routes-wave658.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/utilization-digest-script.test.js
+__tests__/visitor-auth-httponly-cookie-wave584.test.js
 __tests__/voice-log-routes-wave513.test.js
 __tests__/waiting-list-service.test.js
 __tests__/waitlist-digest-script.test.js

@@ -59,6 +59,7 @@ module.exports = function registerFeatureRoutes(
   const sponsorshipRoutes = safeRequire('../routes/sponsorship.routes');
   const instrumentalSwallowRoutes = safeRequire('../routes/instrumental-swallow.routes');
   const artsTherapyRoutes = safeRequire('../routes/arts-therapy.routes');
+  const mawidRoutes = safeRequire('../routes/mawid.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -180,6 +181,10 @@ module.exports = function registerFeatureRoutes(
   // Closes the gap where music/art therapy existed only as TherapySession enum values with no
   // modality-specific data (materials, engagement, mood shift, creative-output artifact).
   dualMountAuth(app, 'arts-therapy', artsTherapyRoutes, authenticate);
+  // Wave 687: Mawid (موعد) appointment-pull integration — mock-first adapter (live gated behind
+  // MAWID_* env), mirrors the Sehhaty W280 pattern. Closes the schema-only Mawid gap (it was an
+  // enum value in Telehealth.platformSource with no adapter).
+  dualMountAuth(app, 'mawid', mawidRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

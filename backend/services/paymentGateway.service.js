@@ -519,19 +519,26 @@ class PaymentGatewayService {
    * معالجة الاسترداد
    */
   async processRefund(transactionId, amount, reason, userId) {
+    // Validate the amount up front — defends against the prior caller bug
+    // that passed an object here (NaN comparison silently bypassed the cap).
+    const refundAmount = Number(amount);
+    if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+      throw new Error('مبلغ الاسترداد غير صالح');
+    }
+
     const transaction = await PaymentTransaction.findById(transactionId);
     if (!transaction) throw new Error('المعاملة غير موجودة');
     if (transaction.status !== 'paid') throw new Error('لا يمكن استرداد معاملة غير مدفوعة');
 
     const maxRefund = transaction.amount - transaction.refundedAmount;
-    if (amount > maxRefund) throw new Error(`الحد الأقصى للاسترداد: ${maxRefund} SAR`);
+    if (refundAmount > maxRefund) throw new Error(`الحد الأقصى للاسترداد: ${maxRefund} SAR`);
 
     const refund = await PaymentRefund.create({
       branchId: transaction.branchId,
       refundNumber: `REF-${Date.now()}`,
       uuid: uuidv4(),
       transactionId: transaction._id,
-      amount,
+      amount: refundAmount,
       reason,
       status: 'processing',
       requestedBy: userId,
@@ -539,25 +546,63 @@ class PaymentGatewayService {
     });
 
     try {
-      const gatewayResult = await this._processGatewayRefund(transaction, amount);
-      const newRefunded = transaction.refundedAmount + amount;
-      const newStatus = newRefunded >= transaction.amount ? 'refunded' : 'partially_refunded';
+      const gatewayResult = await this._processGatewayRefund(transaction, refundAmount);
 
-      await PaymentTransaction.findByIdAndUpdate(transaction._id, {
-        refundedAmount: newRefunded,
-        isRefunded: newStatus === 'refunded',
-        status: newStatus,
-      });
+      if (gatewayResult && gatewayResult.status === 'completed') {
+        // Atomic, race-safe settlement: only increment refundedAmount when
+        // the running total would still fit within the original amount.
+        // Concurrent refunds therefore can never over-refund (the $expr
+        // guard rejects the second writer). Replaces the prior
+        // read-then-findByIdAndUpdate that two requests could both pass.
+        const updatedTx = await PaymentTransaction.findOneAndUpdate(
+          {
+            _id: transaction._id,
+            $expr: { $lte: [{ $add: ['$refundedAmount', refundAmount] }, '$amount'] },
+          },
+          [
+            {
+              $set: {
+                refundedAmount: { $add: ['$refundedAmount', refundAmount] },
+                isRefunded: {
+                  $gte: [{ $add: ['$refundedAmount', refundAmount] }, '$amount'],
+                },
+                status: {
+                  $cond: [
+                    { $gte: [{ $add: ['$refundedAmount', refundAmount] }, '$amount'] },
+                    'refunded',
+                    'partially_refunded',
+                  ],
+                },
+              },
+            },
+          ],
+          { new: true }
+        );
 
+        if (!updatedTx) {
+          // Lost a concurrent race — another refund consumed the headroom.
+          await PaymentRefund.findByIdAndUpdate(refund._id, { status: 'failed' });
+          throw new Error('تعذّر الاسترداد: تم تجاوز الحد الأقصى بسبب عملية متزامنة');
+        }
+
+        await PaymentRefund.findByIdAndUpdate(refund._id, {
+          status: 'completed',
+          processedAt: new Date(),
+          gatewayRefundId: gatewayResult.id,
+          gatewayResponse: gatewayResult,
+          processedBy: userId,
+        });
+        return PaymentRefund.findById(refund._id);
+      }
+
+      // No automated gateway refund was executed — DO NOT claim the money
+      // was returned and DO NOT touch the transaction's refundedAmount.
+      // Leave the refund in PROCESSING for manual finance reconciliation.
       await PaymentRefund.findByIdAndUpdate(refund._id, {
-        status: 'completed',
-        processedAt: new Date(),
-        gatewayRefundId: gatewayResult.id,
-        gatewayResponse: gatewayResult,
-        processedBy: userId,
+        status: 'processing',
+        gatewayResponse: gatewayResult || { status: 'pending', requiresManualReconciliation: true },
       });
-
-      return refund;
+      return PaymentRefund.findById(refund._id);
     } catch (err) {
       await PaymentRefund.findByIdAndUpdate(refund._id, { status: 'failed' });
       throw err;
@@ -566,10 +611,23 @@ class PaymentGatewayService {
 
   /**
    * استرداد عبر البوابة
+   *
+   * No provider-side refund API is wired for any gateway yet. Rather than
+   * falsely reporting a completed refund (the money is never actually
+   * returned), this returns a PENDING result so the caller records the
+   * refund as awaiting manual reconciliation. When a live per-gateway
+   * refund integration is added, return { status: 'completed', id } from it.
    */
-  async _processGatewayRefund(_transaction, _amount) {
-    // تكامل مع بوابة الدفع للاسترداد
-    return { id: `REFUND-${Date.now()}`, status: 'completed' };
+  async _processGatewayRefund(transaction, amount) {
+    return {
+      id: null,
+      status: 'pending',
+      requiresManualReconciliation: true,
+      note:
+        `Refund of ${amount} ${transaction.currency || 'SAR'} via ` +
+        `${transaction.gateway} requires manual processing — no automated ` +
+        `refund integration is configured for this gateway.`,
+    };
   }
 
   /**

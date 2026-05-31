@@ -1,10 +1,10 @@
 'use strict';
 
 /**
- * measure-recommendation-trend-aware-wave575.test.js — W575 pure-core.
+ * measure-recommendation-trend-aware-wave576.test.js — W576 pure-core.
  *
  * The recommendation engine now factors the LAST administration's clinical
- * trajectory into priority (W575): a declining trend — or a severe/critical
+ * trajectory into priority (W576): a declining trend — or a severe/critical
  * last result — raises a measure's priority, and can promote an otherwise
  * up-to-date measure to an EARLY reassessment (a worsening beneficiary
  * shouldn't wait out the full cadence). This is the data-driven "intelligence"
@@ -13,7 +13,11 @@
  * once a measure is administered its trend/severity IS available).
  */
 
-const { rankMeasures, _scoreCandidate, reassessmentStatus } = require('../services/measureRecommendation.service');
+const {
+  rankMeasures,
+  _scoreCandidate,
+  reassessmentStatus,
+} = require('../services/measureRecommendation.service');
 
 const NOW = Date.UTC(2026, 4, 29);
 const daysAgo = n => NOW - n * 86400000;
@@ -26,7 +30,7 @@ const cand = (code, interval = 90) => ({
   reassessment: { standardIntervalDays: interval },
 });
 
-describe('W575 — clinical-urgency promotes priority', () => {
+describe('W576 — clinical-urgency promotes priority', () => {
   test('a recently-administered measure that is DECLINING is still surfaced (medium, not not_now)', () => {
     const ranked = rankMeasures({
       candidates: [cand('PEDSQL')],
@@ -63,19 +67,20 @@ describe('W575 — clinical-urgency promotes priority', () => {
 
   test('declining trend adds score on top of an overdue measure', () => {
     const base = _scoreCandidate(cand('X'), { status: 'overdue', dueInDays: -10 }, false, {});
-    const declining = _scoreCandidate(
-      cand('X'),
-      { status: 'overdue', dueInDays: -10 },
-      false,
-      { trend: 'declining' },
-    );
+    const declining = _scoreCandidate(cand('X'), { status: 'overdue', dueInDays: -10 }, false, {
+      trend: 'declining',
+    });
     expect(declining.score).toBeGreaterThan(base.score);
     expect(declining.score - base.score).toBe(18);
   });
 
   test('declining > severe in priority weight (worsening trajectory dominates)', () => {
-    const declining = _scoreCandidate(cand('X'), { status: 'current', dueInDays: 60 }, false, { trend: 'declining' });
-    const severe = _scoreCandidate(cand('X'), { status: 'current', dueInDays: 60 }, false, { severity: 'critical' });
+    const declining = _scoreCandidate(cand('X'), { status: 'current', dueInDays: 60 }, false, {
+      trend: 'declining',
+    });
+    const severe = _scoreCandidate(cand('X'), { status: 'current', dueInDays: 60 }, false, {
+      severity: 'critical',
+    });
     expect(declining.priority).toBe('medium');
     expect(severe.priority).toBe('low');
   });

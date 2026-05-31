@@ -713,73 +713,98 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/money-lib-wave579.test.js'
-      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
-      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
-      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/branch-secondment-wiring-wave597.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-grant-model-canonical-wave599.test.js'
-      - 'backend/__tests__/authz-permission-taxonomy-map-wave669.test.js'
-      - 'backend/__tests__/authz-permissions-registry-wave666.test.js'
-      - 'backend/__tests__/authz-role-archetype-map-wave666.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiaries-statistics-branch-scope-wave605.test.js'
-      - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
-      - 'backend/__tests__/bi-dashboard-branch-scope-wave661.test.js'
-      - 'backend/__tests__/branch-denial-audit-c4.test.js'
-      - 'backend/__tests__/branch-secondment-wiring-wave597.test.js'
-      - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
-      - 'backend/__tests__/check-authz-consolidation-script.test.js'
-      - 'backend/__tests__/check-can-scope-contract-script.test.js'
-      - 'backend/__tests__/check-risk-rule-keys-script.test.js'
-      - 'backend/__tests__/check-role-registry-divergence-script.test.js'
-      - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
-      - 'backend/__tests__/complaint-branch-tenancy-wave613.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crisis-incident-aggregate-branch-scope-wave608.test.js'
-      - 'backend/__tests__/dysphagia-assessment-wave670.test.js'
-      - 'backend/__tests__/invoice-branch-tenancy-wave651.test.js'
-      - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
-      - 'backend/__tests__/mdt-coordination-branch-scope-wave639.test.js'
-      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
-      - 'backend/__tests__/pain-assessment-wave671.test.js'
-      - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
-      - 'backend/__tests__/quality-parentcomplaint-branch-scope-wave662.test.js'
-      - 'backend/__tests__/raw-branch-scope-c3a.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-branch-tenancy-wave613.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referral-branch-tenancy-wave621.test.js'
-      - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehabplan-branch-tenancy-wave629.test.js'
-      - 'backend/__tests__/risk-appointment-branch-scope-wave663.test.js'
-      - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mdt-coordination-branch-scope-wave639.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/session-branch-tenancy-wave647.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/invoice-branch-tenancy-wave651.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bi-dashboard-branch-scope-wave661.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-parentcomplaint-branch-scope-wave662.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/risk-appointment-branch-scope-wave663.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-authz-consolidation-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-role-registry-divergence-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/authz-permissions-registry-wave666.test.js'
+      - 'backend/__tests__/authz-role-archetype-map-wave666.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-can-scope-contract-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-risk-rule-keys-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-denial-audit-c4.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/authz-permission-taxonomy-map-wave669.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/raw-branch-scope-c3a.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dysphagia-assessment-wave670.test.js'
+      - 'backend/__tests__/pain-assessment-wave671.test.js'
+      - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/prosthetic-orthotic-wave680.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-behavioral-wave680.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seat-allocation-wave681.test.js'
+      - 'backend/__tests__/seat-allocation-behavioral-wave681.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sponsorship-wave682.test.js'
+      - 'backend/__tests__/sponsorship-behavioral-wave682.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
+      - 'backend/__tests__/db-backup-cron-wave676.test.js'
+      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/money-lib-wave579.test.js'
+      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
       - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/db-backup-cron-wave676.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -1477,73 +1502,98 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-bootstrap-wiring-wave589.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/money-lib-wave579.test.js'
-      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
-      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
-      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/branch-secondment-wiring-wave597.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-grant-model-canonical-wave599.test.js'
-      - 'backend/__tests__/authz-permission-taxonomy-map-wave669.test.js'
-      - 'backend/__tests__/authz-permissions-registry-wave666.test.js'
-      - 'backend/__tests__/authz-role-archetype-map-wave666.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiaries-statistics-branch-scope-wave605.test.js'
-      - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
-      - 'backend/__tests__/bi-dashboard-branch-scope-wave661.test.js'
-      - 'backend/__tests__/branch-denial-audit-c4.test.js'
-      - 'backend/__tests__/branch-secondment-wiring-wave597.test.js'
-      - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
-      - 'backend/__tests__/check-authz-consolidation-script.test.js'
-      - 'backend/__tests__/check-can-scope-contract-script.test.js'
-      - 'backend/__tests__/check-risk-rule-keys-script.test.js'
-      - 'backend/__tests__/check-role-registry-divergence-script.test.js'
-      - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
-      - 'backend/__tests__/complaint-branch-tenancy-wave613.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crisis-incident-aggregate-branch-scope-wave608.test.js'
-      - 'backend/__tests__/dysphagia-assessment-wave670.test.js'
-      - 'backend/__tests__/invoice-branch-tenancy-wave651.test.js'
-      - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
-      - 'backend/__tests__/mdt-coordination-branch-scope-wave639.test.js'
-      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
-      - 'backend/__tests__/pain-assessment-wave671.test.js'
-      - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
-      - 'backend/__tests__/quality-parentcomplaint-branch-scope-wave662.test.js'
-      - 'backend/__tests__/raw-branch-scope-c3a.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-branch-tenancy-wave613.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referral-branch-tenancy-wave621.test.js'
-      - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehabplan-branch-tenancy-wave629.test.js'
-      - 'backend/__tests__/risk-appointment-branch-scope-wave663.test.js'
-      - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/referralticket-branch-tenancy-wave633.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meeting-branch-tenancy-wave635.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mdt-coordination-branch-scope-wave639.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/session-branch-tenancy-wave647.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/invoice-branch-tenancy-wave651.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bi-dashboard-branch-scope-wave661.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-parentcomplaint-branch-scope-wave662.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/risk-appointment-branch-scope-wave663.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safetyincident-branch-tenancy-wave664.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenancerequest-branch-tenancy-wave665.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-authz-consolidation-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-role-registry-divergence-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/authz-permissions-registry-wave666.test.js'
+      - 'backend/__tests__/authz-role-archetype-map-wave666.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-can-scope-contract-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-risk-rule-keys-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-denial-audit-c4.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/authz-permission-taxonomy-map-wave669.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/raw-branch-scope-c3a.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dysphagia-assessment-wave670.test.js'
+      - 'backend/__tests__/pain-assessment-wave671.test.js'
+      - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/prosthetic-orthotic-wave680.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-behavioral-wave680.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seat-allocation-wave681.test.js'
+      - 'backend/__tests__/seat-allocation-behavioral-wave681.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sponsorship-wave682.test.js'
+      - 'backend/__tests__/sponsorship-behavioral-wave682.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
+      - 'backend/__tests__/db-backup-cron-wave676.test.js'
+      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/money-lib-wave579.test.js'
+      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
       - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/db-backup-cron-wave676.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'

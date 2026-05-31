@@ -354,6 +354,8 @@ __tests__/productivity-features-wave25.test.js
 __tests__/productivity-models-behavioral-wave27.test.js
 __tests__/productivity-persistence-wave27.test.js
 __tests__/progress-history-wave248.test.js
+__tests__/prosthetic-orthotic-behavioral-wave680.test.js
+__tests__/prosthetic-orthotic-wave680.test.js
 __tests__/provider-registry-consistency.test.js
 __tests__/quality-incident-mfa-tier-wave277b.test.js
 __tests__/quality-parentcomplaint-branch-scope-wave662.test.js
@@ -409,6 +411,8 @@ __tests__/scoring-cp-motor-classifications-wave566.test.js
 __tests__/scoring-item-bank-contract-wave553.test.js
 __tests__/scoring-mchat-r-wave554.test.js
 __tests__/scoring-sdq-wave565.test.js
+__tests__/seat-allocation-behavioral-wave681.test.js
+__tests__/seat-allocation-wave681.test.js
 __tests__/seating-postural-assessment-behavioral-wave675.test.js
 __tests__/seating-postural-assessment-wave675.test.js
 __tests__/seed-rag-policies-wave283d.test.js
@@ -431,6 +435,8 @@ __tests__/sod-domain-rules.test.js
 __tests__/speech-analysis-wave284.test.js
 __tests__/speech-bootstrap-wave284b.test.js
 __tests__/speech-retention-sweeper-wave284c.test.js
+__tests__/sponsorship-behavioral-wave682.test.js
+__tests__/sponsorship-wave682.test.js
 __tests__/sprint-test-files-exist.test.js
 __tests__/stories-routes-wave491.test.js
 __tests__/story-builder-wave479.test.js

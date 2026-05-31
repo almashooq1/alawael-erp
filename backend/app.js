@@ -2086,6 +2086,11 @@ require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 // → no_show after 24h with no check-in). All others query + log.
 require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logger });
 
+// W676 — DB backup producer cron (env-gated, default OFF). Closes the DR-drill
+// `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).
+// Inert until ENABLE_DB_BACKUP_CRON=true + mongodump present on host.
+require('./startup/databaseBackupBootstrap').wireDatabaseBackup(app, { logger });
+
 // W455 — GAS T-score weekly snapshot cron (env-gated, default OFF).
 // ENABLE_GAS_SNAPSHOT_CRON=true + GAS_SNAPSHOT_BRANCH_IDS=b1,b2
 require('./startup/gasSnapshotBootstrap').wireGasSnapshots(app, { logger });
@@ -2107,7 +2112,8 @@ try {
   const { createOpsSchedulersRouter } = require('./routes/ops-schedulers.routes');
   // W660 — was anonymous-reachable (no middleware); /api/ops/schedulers exposes
   // internal scheduler config + health. Require auth (audit:unauthenticated-routes).
-  app.use('/api/ops', authenticate, createOpsSchedulersRouter());
+  const { authenticate: opsAuthMw } = require('./middleware/auth');
+  app.use('/api/ops', opsAuthMw, createOpsSchedulersRouter());
   logger.info('[OpsSchedulers] ✓ /api/ops/schedulers mounted (W310)');
 } catch (err) {
   logger.warn(`[OpsSchedulers] failed to mount /api/ops/schedulers: ${err.message}`);

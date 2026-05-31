@@ -173,14 +173,20 @@ router.get('/beneficiaries', requireRole(READ_ROLES), async (req, res) => {
     // branchFilter(req) = {} for cross-branch/HQ analysts → org-wide preserved.
     const scope = branchFilter(req);
     const [byGender, byDisability, byStatus, byAgeGroup, enrollment90d] = await Promise.all([
-      Beneficiary.aggregate([{ $match: { ...scope } }, { $group: { _id: '$gender', count: { $sum: 1 } } }]),
+      Beneficiary.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$gender', count: { $sum: 1 } } },
+      ]),
       Beneficiary.aggregate([
         { $match: { ...scope } },
         { $group: { _id: '$disability.primaryType', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 15 },
       ]),
-      Beneficiary.aggregate([{ $match: { ...scope } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Beneficiary.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
       Beneficiary.aggregate([
         { $match: { ...scope, dateOfBirth: { $exists: true, $ne: null } } },
         {

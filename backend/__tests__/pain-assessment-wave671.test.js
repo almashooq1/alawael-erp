@@ -111,7 +111,7 @@ describe('W671 PainAssessment — Wave-18 invariants', () => {
   });
   it('observational scale ⇒ observerType not self_report', () => {
     expect(MODEL_SRC).toMatch(
-      /observerType === 'self_report'[\s\S]{0,120}invalidate\(['"]observerType['"]/
+      /observerType === 'self_report'[\s\S]{0,120}invalidate\(\s*['"]observerType['"]/
     );
   });
   it('reassessmentScore ⇒ reassessmentAt', () => {

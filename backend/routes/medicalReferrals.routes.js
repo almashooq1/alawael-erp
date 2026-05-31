@@ -296,12 +296,20 @@ router.get('/dashboard/stats', async (req, res) => {
       bySpecialty,
     ] = await Promise.all([
       MedicalReferral.countDocuments({ ...scope, isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ ...scope, status: 'pending_approval', isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({
+        ...scope,
+        status: 'pending_approval',
+        isDeleted: { $ne: true },
+      }),
       MedicalReferral.countDocuments({ ...scope, status: 'sent', isDeleted: { $ne: true } }),
       MedicalReferral.countDocuments({ ...scope, status: 'in_progress', isDeleted: { $ne: true } }),
       MedicalReferral.countDocuments({ ...scope, status: 'completed', isDeleted: { $ne: true } }),
       MedicalReferral.countDocuments({ ...scope, status: 'expired', isDeleted: { $ne: true } }),
-      MedicalReferral.countDocuments({ ...scope, createdAt: { $gte: thisMonth }, isDeleted: { $ne: true } }),
+      MedicalReferral.countDocuments({
+        ...scope,
+        createdAt: { $gte: thisMonth },
+        isDeleted: { $ne: true },
+      }),
       MedicalReferral.aggregate([
         { $match: { ...scope, isDeleted: { $ne: true } } },
         { $group: { _id: '$referralType', count: { $sum: 1 } } },

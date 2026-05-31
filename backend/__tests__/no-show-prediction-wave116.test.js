@@ -605,3 +605,51 @@ describe('dailyScanAllBranches', () => {
     expect(predModel._store).toHaveLength(0);
   });
 });
+
+// ─── W656 — accuracy reliability flag ──────────────────────────────
+
+describe('W656 — accuracyReliable on summaries', () => {
+  function seedValidated(predModel, count) {
+    for (let i = 0; i < count; i++) {
+      seedPrediction(predModel, {
+        _id: `acc-${i}`,
+        predicted_value: 0.1,
+        actual_value: 0, // |0 - 0.1| ≤ 0.15 → accurate + validated
+        branch_id: 'br-1',
+      });
+    }
+  }
+
+  test('registry exposes MIN_VALIDATED_FOR_ACCURACY = 10', () => {
+    expect(reg.MIN_VALIDATED_FOR_ACCURACY).toBe(10);
+  });
+
+  test('summarizeByBranch flags a low-sample accuracy as not reliable', async () => {
+    const predModel = buildPredictionModel();
+    seedValidated(predModel, 2);
+    const svc = createNoShowPredictionService({
+      appointmentModel: buildAppointmentModel(),
+      predictionModel: predModel,
+      logger: SILENT,
+    });
+    const r = await svc.summarizeByBranch({ branchId: 'br-1' });
+    expect(r.ok).toBe(true);
+    expect(r.validatedCount).toBe(2);
+    expect(r.accuracy).toBe(1); // misleadingly perfect off 2 samples
+    expect(r.accuracyReliable).toBe(false);
+  });
+
+  test('summarizeByBranch flags a sufficient-sample accuracy as reliable', async () => {
+    const predModel = buildPredictionModel();
+    seedValidated(predModel, 10);
+    const svc = createNoShowPredictionService({
+      appointmentModel: buildAppointmentModel(),
+      predictionModel: predModel,
+      logger: SILENT,
+    });
+    const r = await svc.summarizeByBranch({ branchId: 'br-1' });
+    expect(r.ok).toBe(true);
+    expect(r.validatedCount).toBe(10);
+    expect(r.accuracyReliable).toBe(true);
+  });
+});

@@ -52,6 +52,9 @@ module.exports = function registerFeatureRoutes(
   const dysphagiaAssessmentRoutes = safeRequire('../routes/dysphagia-assessment.routes');
   const painAssessmentRoutes = safeRequire('../routes/pain-assessment.routes');
   const physiotherapyAssessmentRoutes = safeRequire('../routes/physiotherapy-assessment.routes');
+  const seatingPosturalAssessmentRoutes = safeRequire(
+    '../routes/seating-postural-assessment.routes'
+  );
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -59,7 +62,6 @@ module.exports = function registerFeatureRoutes(
   const sponsorshipRoutes = safeRequire('../routes/sponsorship.routes');
   const instrumentalSwallowRoutes = safeRequire('../routes/instrumental-swallow.routes');
   const artsTherapyRoutes = safeRequire('../routes/arts-therapy.routes');
-  const mawidRoutes = safeRequire('../routes/mawid.routes');
   const dttSessionRoutes = safeRequire('../routes/dtt-session.routes');
   const sensoryDietRoutes = safeRequire('../routes/sensory-diet.routes');
   const adjunctTherapyRoutes = safeRequire('../routes/adjunct-therapy.routes');
@@ -160,6 +162,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'pain-assessment', painAssessmentRoutes, authenticate);
   // Wave 672: Physiotherapy assessment (تقييم العلاج الطبيعي) — ROM/Ashworth/strength/gait + initial-progress-discharge
   dualMountAuth(app, 'physiotherapy-assessment', physiotherapyAssessmentRoutes, authenticate);
+  // Wave 675: Seating & postural assessment (تقييم الجلوس والوضعية) — wheelchair/seating + postural risk + pressure-care
+  dualMountAuth(app, 'seating-postural-assessment', seatingPosturalAssessmentRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence
@@ -184,10 +188,6 @@ module.exports = function registerFeatureRoutes(
   // Closes the gap where music/art therapy existed only as TherapySession enum values with no
   // modality-specific data (materials, engagement, mood shift, creative-output artifact).
   dualMountAuth(app, 'arts-therapy', artsTherapyRoutes, authenticate);
-  // Wave 687: Mawid (موعد) appointment-pull integration — mock-first adapter (live gated behind
-  // MAWID_* env), mirrors the Sehhaty W280 pattern. Closes the schema-only Mawid gap (it was an
-  // enum value in Telehealth.platformSource with no adapter).
-  dualMountAuth(app, 'mawid', mawidRoutes, authenticate);
   // Wave 689: ABA discrete-trial training sessions (جلسات التدريب بالمحاولات المنفصلة) —
   // trial-by-trial data (prompt level + response) → independent-correct rate trend. Closes the
   // granular-DTT gap (BehaviorPlan/ABC/RehabSession only held aggregate counts).

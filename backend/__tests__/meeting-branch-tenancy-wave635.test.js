@@ -34,7 +34,9 @@ describe('W635 static — MDTMeeting model carries organizer-derived branch tena
   it('declares branchId reffing Branch + index + organizer-derive hook', () => {
     expect(MODEL_SRC).toMatch(/branchId:\s*\{[^}]*ref:\s*'Branch'/);
     expect(MODEL_SRC).toMatch(/mdtMeetingSchema\.index\(\{\s*branchId:\s*1,\s*status:\s*1/);
-    expect(MODEL_SRC).toMatch(/mdtMeetingSchema\.pre\(\s*'save',\s*async function deriveBranchFromOrganizer/);
+    expect(MODEL_SRC).toMatch(
+      /mdtMeetingSchema\.pre\(\s*'save',\s*async function deriveBranchFromOrganizer/
+    );
   });
 });
 

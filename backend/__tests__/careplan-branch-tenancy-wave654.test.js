@@ -42,7 +42,9 @@ describe('W654 static — care-plan dashboards are branch-scoped', () => {
     expect(bodies.every(b => /(scope|branchFilter)/.test(b))).toBe(true);
   });
   it('bi-analytics /goals scopes its CarePlan aggregate', () => {
-    expect(BIA_SRC).toMatch(/CarePlan\.aggregate\s*\(\s*\[\s*[^]*?\$match:\s*\{\s*\.\.\.branchFilter\(req\)/);
+    expect(BIA_SRC).toMatch(
+      /CarePlan\.aggregate\s*\(\s*\[\s*[^]*?\$match:\s*\{\s*\.\.\.branchFilter\(req\)/
+    );
   });
 });
 

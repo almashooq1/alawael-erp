@@ -2090,6 +2090,10 @@ require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logge
 // `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).
 // Inert until ENABLE_DB_BACKUP_CRON=true + mongodump present on host.
 require('./startup/databaseBackupBootstrap').wireDatabaseBackup(app, { logger });
+// W695 — module-gap overdue/review sweepers for the W680-W693 arc (P&O follow-ups,
+// sensory-diet review-due, sponsorship expiry, VFSS pending results). All read-only,
+// independently env-gated (ENABLE_*_SWEEPER), default OFF.
+require('./startup/moduleGapSweepersBootstrap').wireModuleGapSweepers(app, { logger });
 
 // W455 — GAS T-score weekly snapshot cron (env-gated, default OFF).
 // ENABLE_GAS_SNAPSHOT_CRON=true + GAS_SNAPSHOT_BRANCH_IDS=b1,b2
@@ -2112,6 +2116,9 @@ try {
   const { createOpsSchedulersRouter } = require('./routes/ops-schedulers.routes');
   // W660 — was anonymous-reachable (no middleware); /api/ops/schedulers exposes
   // internal scheduler config + health. Require auth (audit:unauthenticated-routes).
+  // W695 fix: `authenticate` is not in this outer scope — require it locally (matches
+  // the alerts/insights blocks above). Pre-fix the bare ref threw ReferenceError, which
+  // the try/catch swallowed → the route silently failed to mount at all.
   const { authenticate: opsAuthMw } = require('./middleware/auth');
   app.use('/api/ops', opsAuthMw, createOpsSchedulersRouter());
   logger.info('[OpsSchedulers] ✓ /api/ops/schedulers mounted (W310)');

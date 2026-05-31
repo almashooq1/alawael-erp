@@ -56,6 +56,7 @@ module.exports = function registerFeatureRoutes(
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
   const seatAllocationRoutes = safeRequire('../routes/seat-allocation.routes');
+  const sponsorshipRoutes = safeRequire('../routes/sponsorship.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -165,6 +166,10 @@ module.exports = function registerFeatureRoutes(
   // gate vs Branch.capacity.max_patients; release surfaces next waitlist candidate. Complements
   // the existing waitlist (WaitlistEntry) + daily rollcall (beneficiary-day-attendance).
   dualMountAuth(app, 'seat-allocation', seatAllocationRoutes, authenticate);
+  // Wave 682: Kafala / sponsorship (الكفالة) — links Donor↔Beneficiary with a monthly
+  // commitment + payment ledger (cross-links Donation receipts). Closes the donor-to-
+  // beneficiary gap the existing Donor/Donation/Campaign models couldn't express.
+  dualMountAuth(app, 'sponsorship', sponsorshipRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

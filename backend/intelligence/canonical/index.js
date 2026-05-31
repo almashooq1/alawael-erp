@@ -46,6 +46,8 @@ const ENTRIES = [
   require('./schemas/prosthetic-orthotic-order.canonical'),
   // W681 seat allocation / daily occupancy (2026-05-31):
   require('./schemas/seat-allocation.canonical'),
+  // W682 kafala / sponsorship donor↔beneficiary link (2026-05-31):
+  require('./schemas/sponsorship.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

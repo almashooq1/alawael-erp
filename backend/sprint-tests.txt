@@ -260,6 +260,8 @@ __tests__/prosthetic-orthotic-wave680.test.js
 __tests__/prosthetic-orthotic-behavioral-wave680.test.js
 __tests__/seat-allocation-wave681.test.js
 __tests__/seat-allocation-behavioral-wave681.test.js
+__tests__/sponsorship-wave682.test.js
+__tests__/sponsorship-behavioral-wave682.test.js
 __tests__/seizure-log-behavioral-wave356.test.js
 __tests__/safeguarding-behavioral-wave357.test.js
 __tests__/communication-aid-behavioral-wave358.test.js

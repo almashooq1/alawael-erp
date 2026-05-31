@@ -254,7 +254,7 @@
     "archiver": "7.0.1",
     "axios": "^1.16.1",
     "bcryptjs": "^3.0.3",
-    "bwip-js": "4.10.1",
+    "bwip-js": "4.11.1",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "csv-parse": "^6.2.1",

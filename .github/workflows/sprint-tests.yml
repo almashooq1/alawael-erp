@@ -787,6 +787,12 @@ on:
       - 'backend/__tests__/sponsorship-wave682.test.js'
       - 'backend/__tests__/sponsorship-behavioral-wave682.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/instrumental-swallow-wave683.test.js'
+      - 'backend/__tests__/instrumental-swallow-behavioral-wave683.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/arts-therapy-wave685.test.js'
+      - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
@@ -1575,6 +1581,12 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sponsorship-wave682.test.js'
       - 'backend/__tests__/sponsorship-behavioral-wave682.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/instrumental-swallow-wave683.test.js'
+      - 'backend/__tests__/instrumental-swallow-behavioral-wave683.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/arts-therapy-wave685.test.js'
+      - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'

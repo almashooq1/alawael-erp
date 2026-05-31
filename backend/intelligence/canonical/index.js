@@ -48,6 +48,10 @@ const ENTRIES = [
   require('./schemas/seat-allocation.canonical'),
   // W682 kafala / sponsorship donor↔beneficiary link (2026-05-31):
   require('./schemas/sponsorship.canonical'),
+  // W683 instrumental swallow study (VFSS/FEES) results (2026-05-31):
+  require('./schemas/instrumental-swallow-study.canonical'),
+  // W685 creative-arts therapy session (music/art/drama) (2026-05-31):
+  require('./schemas/creative-arts-therapy-session.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

@@ -273,6 +273,8 @@ __tests__/sensory-diet-wave691.test.js
 __tests__/sensory-diet-behavioral-wave691.test.js
 __tests__/icf-codes-endpoint-wave692.test.js
 __tests__/icf-codes-endpoint-behavioral-wave692.test.js
+__tests__/adjunct-therapy-wave693.test.js
+__tests__/adjunct-therapy-behavioral-wave693.test.js
 __tests__/seizure-log-behavioral-wave356.test.js
 __tests__/safeguarding-behavioral-wave357.test.js
 __tests__/communication-aid-behavioral-wave358.test.js

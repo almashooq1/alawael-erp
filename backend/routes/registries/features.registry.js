@@ -62,6 +62,7 @@ module.exports = function registerFeatureRoutes(
   const mawidRoutes = safeRequire('../routes/mawid.routes');
   const dttSessionRoutes = safeRequire('../routes/dtt-session.routes');
   const sensoryDietRoutes = safeRequire('../routes/sensory-diet.routes');
+  const adjunctTherapyRoutes = safeRequire('../routes/adjunct-therapy.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -195,6 +196,10 @@ module.exports = function registerFeatureRoutes(
   // structured scheduled sensory activities by system/purpose + multisensory-room session log
   // with regulation outcome. Closes the "sensory diet was a free field in AutismProfile" gap.
   dualMountAuth(app, 'sensory-diet', sensoryDietRoutes, authenticate);
+  // Wave 693: Adjunct therapy sessions (العلاج المساند — مائي/خيل/حيوان) — PERSISTED model with a
+  // medical-clearance gate (completed ⇒ medicalCleared). Production path superseding the unconsumed
+  // in-memory rehabilitation-services/{hydrotherapy,animal-assisted-therapy}-service.js.
+  dualMountAuth(app, 'adjunct-therapy', adjunctTherapyRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

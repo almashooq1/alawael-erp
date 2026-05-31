@@ -17,11 +17,13 @@ describe('startup/financeBootstrap', () => {
     expect(typeof m.startChequeExpiryScheduler).toBe('function');
   });
 
-  test('bootstrapFinance({ isTestEnv: true }) returns { scheduler: null } without throwing', () => {
+  test('bootstrapFinance({ isTestEnv: true }) returns null scheduler handles without throwing', () => {
     const { bootstrapFinance } = require('../startup/financeBootstrap');
     const silentLogger = { info: () => {}, warn: () => {}, error: () => {} };
     const result = bootstrapFinance({ logger: silentLogger, isTestEnv: true });
-    expect(result).toEqual({ scheduler: null });
+    // W401 added budgetThresholdScheduler to the bootstrap result; in test
+    // mode every scheduler handle is null (no crons started).
+    expect(result).toEqual({ scheduler: null, budgetThresholdScheduler: null });
   });
 
   test('startChequeExpiryScheduler returns a stoppable handle', () => {

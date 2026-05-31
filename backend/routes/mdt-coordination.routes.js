@@ -1096,7 +1096,11 @@ router.get(
       // all 3 models carry branchId). branchFilter(req) = {} for cross-branch/HQ.
       const scope = branchFilter(req);
       const [incomingReferrals, outgoingReferrals, departmentMeetings] = await Promise.all([
-        ReferralTicket.find({ ...scope, toDepartment: department, status: { $in: ['PENDING', 'ACCEPTED'] } })
+        ReferralTicket.find({
+          ...scope,
+          toDepartment: department,
+          status: { $in: ['PENDING', 'ACCEPTED'] },
+        })
           .sort({ createdAt: -1 })
           .limit(20)
           .populate('beneficiary', 'name mrn')
@@ -1454,7 +1458,11 @@ router.get('/dashboard/overview', async (req, res) => {
       // cross-branch/HQ roles → org-wide overview preserved.
       MDTMeeting.countDocuments({ ...branchFilter(req) }),
       MDTMeeting.countDocuments({ ...branchFilter(req), status: 'COMPLETED' }),
-      MDTMeeting.find({ ...branchFilter(req), date: { $gte: now, $lte: sevenDaysAhead }, status: 'SCHEDULED' })
+      MDTMeeting.find({
+        ...branchFilter(req),
+        date: { $gte: now, $lte: sevenDaysAhead },
+        status: 'SCHEDULED',
+      })
         .sort({ date: 1 })
         .limit(5)
         .select('title date startTime type attendees')
@@ -1468,8 +1476,16 @@ router.get('/dashboard/overview', async (req, res) => {
       ]),
       ReferralTicket.countDocuments({ ...branchFilter(req) }),
       ReferralTicket.countDocuments({ ...branchFilter(req), status: 'PENDING' }),
-      UnifiedRehabPlan.countDocuments({ ...branchFilter(req), reviewDate: { $lt: now }, status: 'ACTIVE' }),
-      ReferralTicket.countDocuments({ ...branchFilter(req), responseDeadline: { $lt: now }, status: 'PENDING' }),
+      UnifiedRehabPlan.countDocuments({
+        ...branchFilter(req),
+        reviewDate: { $lt: now },
+        status: 'ACTIVE',
+      }),
+      ReferralTicket.countDocuments({
+        ...branchFilter(req),
+        responseDeadline: { $lt: now },
+        status: 'PENDING',
+      }),
       MDTMeeting.find({ ...branchFilter(req), date: { $gte: thirtyDaysAgo } })
         .sort({ date: -1 })
         .limit(5)

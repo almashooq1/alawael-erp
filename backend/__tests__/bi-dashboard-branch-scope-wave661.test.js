@@ -17,10 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = fs.readFileSync(
-  path.join(__dirname, '..', 'routes', 'bi-dashboard.routes.js'),
-  'utf8'
-);
+const SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'bi-dashboard.routes.js'), 'utf8');
 
 describe('W661 — bi-dashboard branch-scopes its branchId-bearing aggregates', () => {
   it('imports branchFilter + keeps requireBranchAccess', () => {

@@ -28,7 +28,9 @@ describe('W664 static — SafetyIncident model carries reporter-derived branch t
   it('declares branchId reffing Branch + index + reporter-derive hook', () => {
     expect(MODEL_SRC).toMatch(/branchId:\s*\{[^}]*ref:\s*'Branch'/);
     expect(MODEL_SRC).toMatch(/incidentSchema\.index\(\{\s*branchId:\s*1,\s*status:\s*1/);
-    expect(MODEL_SRC).toMatch(/incidentSchema\.pre\(\s*'save',\s*async function deriveBranchFromReporter/);
+    expect(MODEL_SRC).toMatch(
+      /incidentSchema\.pre\(\s*'save',\s*async function deriveBranchFromReporter/
+    );
   });
 });
 

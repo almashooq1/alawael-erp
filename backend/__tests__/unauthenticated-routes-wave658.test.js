@@ -32,7 +32,7 @@ const CLINICAL = fs.readFileSync(
 const REGISTRY = fs.readFileSync(path.join(__dirname, '..', 'routes', '_registry.js'), 'utf8');
 
 describe('W658 — the three anon-reachable routes are now mounted with auth', () => {
-  it("alerts is dualMountAuth (not bare dualMount)", () => {
+  it('alerts is dualMountAuth (not bare dualMount)', () => {
     expect(FEATURES).toMatch(/dualMountAuth\(app,\s*'alerts'/);
     expect(FEATURES).not.toMatch(/dualMount\(app,\s*'alerts'/);
   });

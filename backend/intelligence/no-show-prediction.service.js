@@ -405,6 +405,9 @@ function createNoShowPredictionService({
       byBand,
       accuracy: validated > 0 ? round4(accurate / validated) : null,
       validatedCount: validated,
+      // Wave 656 — is the accuracy proportion above backed by enough validated
+      // outcomes to be trusted? Lets consumers qualify a low-n accuracy.
+      accuracyReliable: validated >= reg.MIN_VALIDATED_FOR_ACCURACY,
     };
   }
 
@@ -638,6 +641,8 @@ function createNoShowPredictionService({
       since: sinceDate.toISOString(),
       stats,
       accuracy: stats.validated > 0 ? round4(stats.accurate / stats.validated) : null,
+      // Wave 656 — same small-sample honesty as summarizeByBranch.
+      accuracyReliable: stats.validated >= reg.MIN_VALIDATED_FOR_ACCURACY,
       results,
     };
   }

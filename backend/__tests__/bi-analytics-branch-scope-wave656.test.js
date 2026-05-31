@@ -19,10 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = fs.readFileSync(
-  path.join(__dirname, '..', 'routes', 'bi-analytics.routes.js'),
-  'utf8'
-);
+const SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'bi-analytics.routes.js'), 'utf8');
 
 const MODELS = ['Beneficiary', 'TherapySession', 'CarePlan', 'ClinicalAssessment'];
 

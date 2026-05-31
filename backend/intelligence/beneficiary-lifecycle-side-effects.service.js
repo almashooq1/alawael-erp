@@ -294,10 +294,126 @@ function createBeneficiaryLifecycleSideEffectHandlers({
   return handlers;
 }
 
+/**
+ * Wave 595 — operational summary of a side-effects dispatch run.
+ *
+ * The lifecycle service runs every declared handler and collects an array of
+ * per-op result objects (the shapes returned by the handlers above + the
+ * `status:'failed'` rows the service stamps when a handler throws). This pure
+ * reducer turns that raw array into an actionable summary the audit / dashboard
+ * / decision-support layer can render directly — honouring the project rule
+ * that every indicator must be actionable, not just a number for display.
+ *
+ * It is total and side-effect-free: unknown / malformed entries are counted
+ * under `unknown` rather than throwing, so a future handler shape can never
+ * crash the reporting path.
+ *
+ * @param {Array<object>} results  per-op handler results (any shape)
+ * @returns {{
+ *   total: number,
+ *   byCategory: { data: number, notification: number, compliance: number, workflow: number, unknown: number },
+ *   dataMutations: { cancelledAppointments: number, closedEpisodes: number, releasedFromEpisodes: number, total: number },
+ *   deferred: number,
+ *   emitted: number,
+ *   skipped: number,
+ *   failed: number,
+ *   real: number,
+ *   health: {
+ *     ok: boolean, clean: boolean, mutated: boolean,
+ *     failedRatio: number, skippedRatio: number,
+ *   },
+ * }}
+ *
+ * Wave 651 adds a read-only `health` signal so the audit / dashboard layer can
+ * flag a degraded side-effects run at a glance instead of re-deriving it:
+ * `ok` is true only when nothing failed, and `failedRatio` is the share of
+ * results stamped `failed` (0 when there are no results).
+ *
+ * Wave 652 closes the silent-skip blind spot: a `skipped` data handler (e.g.
+ * `appointment-model-unavailable`) means a real cleanup never ran, which is a
+ * degradation `ok` alone hides. `clean` is true only when nothing failed AND
+ * nothing was skipped, and `skippedRatio` is the share of skipped results.
+ *
+ * Wave 653 adds `mutated` so the dashboard can tell a healthy-but-empty run
+ * apart from one that actually changed beneficiary data: `mutated` is true only
+ * when at least one real data handler produced a non-zero mutation
+ * (`dataMutations.total > 0`). A `clean && !mutated` run is a benign no-op (or a
+ * silent logic gap worth a glance); `clean && mutated` did real work.
+ * Purely additive — the existing keys are unchanged.
+ */
+function summarizeSideEffectResults(results) {
+  const list = Array.isArray(results) ? results : [];
+  const byCategory = { data: 0, notification: 0, compliance: 0, workflow: 0, unknown: 0 };
+  const dataMutations = {
+    cancelledAppointments: 0,
+    closedEpisodes: 0,
+    releasedFromEpisodes: 0,
+    total: 0,
+  };
+  let deferred = 0;
+  let emitted = 0;
+  let skipped = 0;
+  let failed = 0;
+  let real = 0;
+
+  const addNum = v => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
+
+  for (const r of list) {
+    if (!r || typeof r !== 'object') {
+      byCategory.unknown += 1;
+      continue;
+    }
+    const cat = r.category;
+    if (cat === 'data' || cat === 'notification' || cat === 'compliance' || cat === 'workflow') {
+      byCategory[cat] += 1;
+    } else {
+      byCategory.unknown += 1;
+    }
+
+    if (r.deferred === true) deferred += 1;
+    if (r.emitted === true) emitted += 1;
+    if (r.skipped === true) skipped += 1;
+    if (r.status === 'failed' || r.failed === true) failed += 1;
+
+    if (cat === 'data' && r.deferred !== true) {
+      real += 1;
+      const c = addNum(r.cancelledAppointments);
+      const e = addNum(r.closedEpisodes);
+      const t = addNum(r.releasedFromEpisodes);
+      dataMutations.cancelledAppointments += c;
+      dataMutations.closedEpisodes += e;
+      dataMutations.releasedFromEpisodes += t;
+      dataMutations.total += c + e + t;
+    }
+  }
+
+  const total = list.length;
+  const health = {
+    ok: failed === 0,
+    clean: failed === 0 && skipped === 0,
+    mutated: dataMutations.total > 0,
+    failedRatio: total ? Number((failed / total).toFixed(4)) : 0,
+    skippedRatio: total ? Number((skipped / total).toFixed(4)) : 0,
+  };
+
+  return {
+    total,
+    byCategory,
+    dataMutations,
+    deferred,
+    emitted,
+    skipped,
+    failed,
+    real,
+    health,
+  };
+}
+
 module.exports = {
   createBeneficiaryLifecycleSideEffectHandlers,
   classifyOp,
   allRegistryOps,
+  summarizeSideEffectResults,
   OP,
   CANCELLABLE_APPOINTMENT_STATUSES,
   OPEN_EPISODE_STATUSES,

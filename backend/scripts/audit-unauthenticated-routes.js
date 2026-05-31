@@ -127,7 +127,11 @@ while ((m = appUseStmtRe.exec(appSrc))) {
   // a createX(...) factory call, or an inline ./routes require
   let file = null;
   const syms = args.match(/\b\w+\b/g) || [];
-  for (const s of syms) if (symToFile[s]) { file = symToFile[s]; break; }
+  for (const s of syms)
+    if (symToFile[s]) {
+      file = symToFile[s];
+      break;
+    }
   if (!file) {
     const inl = args.match(/require\(\s*['"]\.\/routes\/([\w/-]+?)(?:\.routes)?['"]/);
     if (inl) file = `${inl[1]}.routes.js`;
@@ -188,20 +192,30 @@ if (JSON_OUT) {
 console.log('');
 console.log('Unauthenticated-route audit (mounted via dualMount + no in-file auth)');
 console.log('═══════════════════════════════════════════════════════════════════');
-console.log(`Mount map: ${authedAtMount.size} authed-at-mount, ${noAuthAtMount.size} no-auth-at-mount.`);
+console.log(
+  `Mount map: ${authedAtMount.size} authed-at-mount, ${noAuthAtMount.size} no-auth-at-mount.`
+);
 console.log('');
 if (confirmed.length === 0) {
   console.log('✅ No high-confidence unauthenticated route files.');
 } else {
-  console.log(`HIGH CONFIDENCE — anonymous-reachable (${confirmed.length}) — add auth at mount or in-file:`);
+  console.log(
+    `HIGH CONFIDENCE — anonymous-reachable (${confirmed.length}) — add auth at mount or in-file:`
+  );
   confirmed.forEach(f => console.log(`  ${f.file}   [${f.mount}]`));
 }
 if (review.length) {
   console.log('');
-  console.log(`REVIEW (${review.length}) — no in-file auth, mount not modeled or looks intentionally public:`);
-  review.forEach(f => console.log(`  ${f.file}   [${f.mount}${f.likelyPublic ? ', public-ish name' : ''}]`));
+  console.log(
+    `REVIEW (${review.length}) — no in-file auth, mount not modeled or looks intentionally public:`
+  );
+  review.forEach(f =>
+    console.log(`  ${f.file}   [${f.mount}${f.likelyPublic ? ', public-ish name' : ''}]`)
+  );
 }
 console.log('');
-console.log('Heuristic — a file may be authed by a bespoke app.use this scan does not model. Verify each.');
+console.log(
+  'Heuristic — a file may be authed by a bespoke app.use this scan does not model. Verify each.'
+);
 console.log('');
 process.exit(0);

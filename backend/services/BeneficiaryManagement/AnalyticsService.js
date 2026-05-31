@@ -5,6 +5,16 @@
  *
  * @module services/AnalyticsService
  * @requires mongoose
+ *
+ * ⚠️ DORMANT + TENANT-UNSAFE (R4 audit, 2026-05-30). This service is NOT
+ * wired to any route (its only reference was a dead `loadSvc` require in
+ * beneficiaryCore.service.js, removed in the same commit). It reads
+ * beneficiary PHI via the RAW driver (`this.db.collection('beneficiaries')`)
+ * with NO branchId filter, so it BYPASSES the tenantScope plugin. If you
+ * wire it, you MUST thread branch scope into every query (pass a
+ * `branchId` and add it to each filter / pipeline `$match`) — otherwise a
+ * branch-scoped caller reads beneficiaries across all 13 branches. See
+ * `npm run audit:untenanted-aggregations` + ADR-034/W597 doctrine.
  */
 
 const EventEmitter = require('events');

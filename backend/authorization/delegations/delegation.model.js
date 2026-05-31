@@ -5,6 +5,16 @@
  *   - acting_branch_manager for 2 weeks
  *   - cross-branch read access for an auditor for 48h
  *   - approval-step delegate while primary is on leave
+ *
+ * ⚠️ DEPRECATED (ADR-034, 2026-05-30) — this is an ACCESS-SCOPE GRANT that
+ * overlaps the canonical `models/UserBranchRole.js`. UserBranchRole is the
+ * primitive actually wired into request-time enforcement (requireBranchAccess,
+ * W597); this model's `findActiveFor` has NO enforcement consumer. Do NOT
+ * build new request-time grant logic here. Pending D2 migration into
+ * UserBranchRole (gated on ADR-034 Q1–Q2: prod-row count + whether the
+ * `roles[]` multi-role capability is needed). The W599 drift guard allowlists
+ * this file ONLY during the deprecation window — remove the allowlist entry
+ * when D2 deletes it.
  */
 
 'use strict';

@@ -1,6 +1,14 @@
 /**
  * Delegation.js — التفويضات الإدارية
  * Delegation management model for authority delegation tracking.
+ *
+ * BOUNDARY (ADR-034): this is an ADMINISTRATIVE AUTHORITY-DELEGATION
+ * governance record (signing / financial authority with `maxTransactionAmount`,
+ * approval workflow, usageLogs, auditTrail) — it is NOT a request-time access
+ * primitive. Do not confuse with `models/UserBranchRole.js` (access-scope
+ * grant — who-can-work-where) or `WorkflowDelegation` in WorkflowEnhanced.js
+ * (workflow task / out-of-office routing). Three distinct concerns; keep
+ * separate. See docs/architecture/decisions/034-delegation-surface-consolidation.md
  */
 const mongoose = require('mongoose');
 

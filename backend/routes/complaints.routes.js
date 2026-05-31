@@ -7,7 +7,7 @@ const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const Complaint = require('../models/Complaint');
 const validateObjectId = require('../middleware/validateObjectId');
@@ -48,7 +48,8 @@ function pick(src, fields) {
 router.get('/', async (req, res) => {
   try {
     const { type, source, status, priority, category, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    // W613 — branch-scope the list (Complaint has no tenantScope plugin).
+    const filter = { ...branchFilter(req) };
     if (type) filter.type = type;
     if (source) filter.source = source;
     if (status) filter.status = status;
@@ -80,17 +81,37 @@ router.get('/', async (req, res) => {
 // GET /stats — Summary statistics
 router.get('/stats', async (req, res) => {
   try {
+    // W613 — branch-scope every stat. aggregate() bypasses the tenantScope
+    // plugin, so each pipeline needs an explicit branchFilter $match; the
+    // countDocuments calls compose it directly. branchFilter(req) = {} for
+    // cross-branch/HQ roles → org-wide stats preserved for them.
+    const scope = branchFilter(req);
     const [byStatus, byType, byPriority, bySource, total] = await Promise.all([
-      Complaint.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Complaint.aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]),
-      Complaint.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
-      Complaint.aggregate([{ $group: { _id: '$source', count: { $sum: 1 } } }]),
-      Complaint.countDocuments(),
+      Complaint.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      Complaint.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$type', count: { $sum: 1 } } },
+      ]),
+      Complaint.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$priority', count: { $sum: 1 } } },
+      ]),
+      Complaint.aggregate([
+        { $match: { ...scope } },
+        { $group: { _id: '$source', count: { $sum: 1 } } },
+      ]),
+      Complaint.countDocuments({ ...scope }),
     ]);
 
-    const resolved = await Complaint.countDocuments({ status: { $in: ['resolved', 'closed'] } });
+    const resolved = await Complaint.countDocuments({
+      ...scope,
+      status: { $in: ['resolved', 'closed'] },
+    });
     const avgRating = await Complaint.aggregate([
-      { $match: { rating: { $exists: true, $ne: null } } },
+      { $match: { ...scope, rating: { $exists: true, $ne: null } } },
       { $group: { _id: null, avg: { $avg: '$rating' } } },
     ]);
 
@@ -143,6 +164,10 @@ router.post(
         ...pick(req.body, CREATE_FIELDS),
         submittedBy: req.user._id || req.userId,
         createdBy: req.user._id || req.userId,
+        // W613 — stamp the filer's branch (restricted users only; for
+        // cross-branch roles this is null and the pre-save hook falls back
+        // to the linked beneficiary's branch). Never trust a body branchId.
+        ...(req.branchScope?.branchId ? { branchId: req.branchScope.branchId } : {}),
       });
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم تقديم الشكوى بنجاح' });

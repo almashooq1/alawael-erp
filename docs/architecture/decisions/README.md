@@ -67,6 +67,19 @@ What becomes easier or more difficult to do because of this change?
 
 19. [MFA Tier Enforcement — Three-Layer Architecture](019-mfa-tier-enforcement-three-layer.md) — route middleware + service-layer factory + drift guards (Waves 273-275z)
 
+### Consolidation, boundaries & disposition (ADR 020-034, dated 2026-05-24 → 2026-05-30)
+
+ADRs **020-034** exist on disk but are not yet itemized in this index (model
+consolidation, dependency rules, event-contract reconciliation, lifecycle v3,
+delegation-surface boundary, etc.). See the files directly until this index is
+backfilled.
+
+### Enterprise authorization target (ADR 035, dated 2026-05-30)
+
+35. [Enterprise Multi-Branch Authorization — target layered design](035-enterprise-authorization-design.md) — 🟡 Proposed; RBAC + branch/unit/service/shift scope + deny + delegation + maker-checker + RLS, as a PostgreSQL north-star with the live-Mongo realization noted. Companion design: [`ENTERPRISE_AUTHORIZATION_DESIGN.md`](../ENTERPRISE_AUTHORIZATION_DESIGN.md) + rule catalog [`authz-risk-rules.json`](../authz-risk-rules.json) + permissions matrix [`PERMISSIONS_MATRIX.md`](../PERMISSIONS_MATRIX.md) + seed [`role-permissions.seed.json`](../role-permissions.seed.json)
+36. [Role-Archetype Reconciliation](036-role-archetype-reconciliation.md) — 🟡 Proposed; maps the live 46-role `rbac.config.js` to the 9 authorization archetypes via an additive tag (do NOT flatten). Validated map: [`role-archetype-map.json`](../role-archetype-map.json)
+37. [Role-Registry Reconciliation](037-role-registry-reconciliation.md) — 🟡 Proposed; closes the 26+9 bidirectional divergence between `rbac.config.js` and `roles.constants.js` into one canonical union, unblocking the modernization Phase-1 roles-shim. Frozen by the `check:role-divergence` guard.
+
 ---
 
-**Last Updated:** May 22, 2026 (ADRs 17-19 added)
+**Last Updated:** May 30, 2026 (ADR-035/036/037 added; 020-034 noted as un-indexed)

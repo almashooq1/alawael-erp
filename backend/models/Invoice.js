@@ -4,6 +4,10 @@ const invoiceSchema = new mongoose.Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true }, // INV-2024-0001
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
+    // W651 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook below. Additive; backfill via
+    // `npm run backfill:invoice-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     issuer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Employee who created it
 
     issueDate: { type: Date, default: Date.now },
@@ -122,6 +126,19 @@ invoiceSchema.post('save', function (doc) {
 // ─── Compound Indexes ────────────────────────────────────────────────────────
 // Beneficiary invoices filtered by status (most common query pattern)
 invoiceSchema.index({ beneficiary: 1, status: 1 });
+// W651 — branch-scoped finance stats (R4)
+invoiceSchema.index({ branchId: 1, status: 1 });
+// W651 — denormalize branchId from the (required) beneficiary. async style.
+invoiceSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 // Dashboard: list invoices by status sorted by date
 invoiceSchema.index({ status: 1, issueDate: -1 });
 // Overdue invoice detection batch job

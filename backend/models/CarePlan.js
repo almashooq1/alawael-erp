@@ -45,6 +45,10 @@ const sectionSchema = new mongoose.Schema({
 const carePlanSchema = new mongoose.Schema(
   {
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
+    // W654 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook below. Additive; backfill via
+    // `npm run backfill:careplan-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
 
     // Meta
     planNumber: { type: String },
@@ -99,6 +103,19 @@ const carePlanSchema = new mongoose.Schema(
 
 // ─── Compound Indexes ────────────────────────────────────────────────────────
 carePlanSchema.index({ beneficiary: 1, status: 1 });
+// W654 — branch-scoped care-plan stats (R4)
+carePlanSchema.index({ branchId: 1, status: 1 });
+// W654 — denormalize branchId from the (required) beneficiary. async style.
+carePlanSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 carePlanSchema.index({ status: 1, startDate: -1 });
 carePlanSchema.index({ reviewDate: 1, status: 1 });
 carePlanSchema.index({ planNumber: 1 }, { unique: true, sparse: true });

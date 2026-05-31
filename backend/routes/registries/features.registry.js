@@ -49,6 +49,9 @@ module.exports = function registerFeatureRoutes(
   const adaptiveSportsRoutes = safeRequire('../routes/adaptive-sports.routes');
   const respiteRoutes = safeRequire('../routes/respite.routes');
   const dietPrescriptionRoutes = safeRequire('../routes/diet-prescription.routes');
+  const dysphagiaAssessmentRoutes = safeRequire('../routes/dysphagia-assessment.routes');
+  const painAssessmentRoutes = safeRequire('../routes/pain-assessment.routes');
+  const physiotherapyAssessmentRoutes = safeRequire('../routes/physiotherapy-assessment.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
@@ -142,6 +145,12 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'respite', respiteRoutes, authenticate);
   // Wave 368: Beneficiary diet prescription (وصفة النظام الغذائي) — IDDSI dysphagia + NPO + enteral
   dualMountAuth(app, 'diet-prescription', dietPrescriptionRoutes, authenticate);
+  // Wave 670: Dysphagia assessment (تقييم البلع) — SLP swallow-safety exam (IDDSI + aspiration risk + NPO)
+  dualMountAuth(app, 'dysphagia-assessment', dysphagiaAssessmentRoutes, authenticate);
+  // Wave 671: Pain assessment (تقييم الألم) — scale-aware (FACES/FLACC/NCCPC-R) + functional impact + reassessment
+  dualMountAuth(app, 'pain-assessment', painAssessmentRoutes, authenticate);
+  // Wave 672: Physiotherapy assessment (تقييم العلاج الطبيعي) — ROM/Ashworth/strength/gait + initial-progress-discharge
+  dualMountAuth(app, 'physiotherapy-assessment', physiotherapyAssessmentRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence
@@ -417,9 +426,13 @@ module.exports = function registerFeatureRoutes(
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
   // ── Gap-fill: alerts, approvals, rehab-licenses — auth required ──────
-  dualMount(app, 'alerts', safeRequire('../routes/alerts.routes'));
+  // W658 — alerts + rehab-licenses were dualMount (NO auth) despite the
+  // "auth required" note + neither route file calls authenticate → both were
+  // anonymous-reachable. Promoted to dualMountAuth (surfaced by
+  // `npm run audit:unauthenticated-routes`).
+  dualMountAuth(app, 'alerts', safeRequire('../routes/alerts.routes'));
   dualMountAuth(app, 'approvals', safeRequire('../routes/approvals.routes'));
-  dualMount(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
+  dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
   logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
 
   logger.info('[Features] All prompt feature modules mounted successfully');

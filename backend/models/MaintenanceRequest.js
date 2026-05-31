@@ -36,6 +36,11 @@ const maintenanceRequestSchema = new mongoose.Schema(
     photos: [{ url: String, caption: String }],
     notes: { type: String },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // W665 — branch tenancy denormalization (R4). A maintenance request belongs
+    // to the branch where it was raised; derived from createdBy → requestedBy
+    // User.branchId in the pre-save hook below. Additive; backfill via
+    // npm run backfill:maintenancerequest-branchid.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
@@ -48,6 +53,23 @@ maintenanceRequestSchema.pre('save', async function () {
   }
 });
 
+// W665 — denormalize branchId from createdBy → requestedBy User.branchId.
+// async, distinct work from the requestId hook above (both pre-save async).
+maintenanceRequestSchema.pre('save', async function deriveBranchFromUser() {
+  if (this.branchId) return;
+  const userId = this.createdBy || this.requestedBy;
+  if (!userId) return;
+  try {
+    const User = mongoose.model('User');
+    const u = await User.findById(userId).select('branchId').lean();
+    if (u && u.branchId) this.branchId = u.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
+
+// W665 — branch-scoped maintenance stats (R4)
+maintenanceRequestSchema.index({ branchId: 1, status: 1 });
 maintenanceRequestSchema.index({ room: 1, status: 1 });
 maintenanceRequestSchema.index({ priority: 1 });
 maintenanceRequestSchema.index({ assignedTo: 1 });

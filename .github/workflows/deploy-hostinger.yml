@@ -515,11 +515,23 @@ jobs:
             cd /home/alawael/app/backend
             echo "🌱 Seeding insurance tariffs (idempotent)..."
             sudo -u alawael node scripts/seed-insurance-tariffs.js --json 2>&1 | tail -10
-            EXIT=$?
-            if [ "$EXIT" -ne 0 ]; then
-              echo "⚠️  Tariff seed exited $EXIT — investigate but deploy succeeded"
+            T_EXIT=$?
+            if [ "$T_EXIT" -ne 0 ]; then
+              echo "⚠️  Tariff seed exited $T_EXIT — investigate but deploy succeeded"
             else
               echo "✅ Tariff seed applied"
+            fi
+            # W556 — measures catalog (8 standardized instruments). The script
+            # reads MONGODB_URI from .env; run with `-r dotenv/config` so the
+            # standalone node call sees it. Idempotent (Created → Unchanged on
+            # re-runs), best-effort.
+            echo "🌱 Seeding measures catalog (idempotent)..."
+            sudo -u alawael node -r dotenv/config scripts/seed-measures-catalog.js --json 2>&1 | tail -10
+            M_EXIT=$?
+            if [ "$M_EXIT" -ne 0 ]; then
+              echo "⚠️  Measures seed exited $M_EXIT — engine may stay dormant; investigate"
+            else
+              echo "✅ Measures catalog applied"
             fi
           SEED_SCRIPT
 

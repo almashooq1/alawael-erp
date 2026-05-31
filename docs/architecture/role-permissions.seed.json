@@ -1,0 +1,636 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Role-permissions seed (enforceable source of truth)",
+  "description": "Machine-readable companion to PERMISSIONS_MATRIX.md. Consumers: permissions.registry drift-guard (build), PDP can() (request-time), admin-console risk evaluator (grant-time). Predicate tokens: G global, B own-branch, U own-unit, S own-caseload, SELF self-record. Conditions: <=lim threshold-escalate, !=req maker-not-checker, BG break-glass, states[] lifecycle gate. tier 1/2/3 = assurance (ADR-019). 'deny' is a HARD override of inheritance.",
+  "version": "1.0.0",
+  "roles": [
+    { "code": "HQA", "name": "HQ_ADMIN", "scopeLevel": "global", "kind": "technical" },
+    { "code": "EXD", "name": "EXECUTIVE_DIRECTOR", "scopeLevel": "global", "kind": "business" },
+    { "code": "BRM", "name": "BRANCH_MANAGER", "scopeLevel": "branch" },
+    { "code": "UNS", "name": "UNIT_SUPERVISOR", "scopeLevel": "branch", "unitBound": true },
+    { "code": "THR", "name": "THERAPIST", "scopeLevel": "service" },
+    { "code": "REC", "name": "RECEPTIONIST", "scopeLevel": "branch" },
+    { "code": "HRO", "name": "HR_OFFICER", "scopeLevel": "branch", "hqVariantGlobal": true },
+    { "code": "FIN", "name": "FINANCE_OFFICER", "scopeLevel": "branch", "hqVariantGlobal": true },
+    { "code": "AUD", "name": "AUDITOR", "scopeLevel": "global", "readOnly": true }
+  ],
+  "tiers": {
+    "1": { "label": "normal", "reauthSeconds": null },
+    "2": { "label": "sensitive", "reauthSeconds": 900 },
+    "3": { "label": "critical", "reauthSeconds": 300 }
+  },
+  "predicates": {
+    "G": "all branches",
+    "B": "actor.branch",
+    "U": "actor.unit",
+    "S": "actor.caseload",
+    "SELF": "actor's own record"
+  },
+  "permissions": [
+    {
+      "key": "dashboard:view:read",
+      "tier": 1,
+      "grants": [{ "roles": ["HQA", "EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN", "AUD"], "scope": "own" }]
+    },
+
+    {
+      "key": "branch:org:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+    { "key": "branch:org:create", "tier": 3, "hqOnly": true, "grants": [{ "roles": ["HQA"], "scope": "G" }] },
+    { "key": "branch:org:update", "tier": 2, "grants": [{ "roles": ["HQA"], "scope": "G" }] },
+    {
+      "key": "branch:org:delete",
+      "tier": 3,
+      "hqOnly": true,
+      "softDelete": true,
+      "requiresApproval": true,
+      "grants": [{ "roles": ["HQA"], "scope": "G" }]
+    },
+    {
+      "key": "branch:settings:update",
+      "tier": 2,
+      "grants": [
+        { "roles": ["HQA"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+
+    {
+      "key": "beneficiary:demographics:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" },
+        { "roles": ["BRM", "REC", "FIN"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "beneficiary:demographics:create",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC", "BRM"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "beneficiary:demographics:update",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC", "BRM"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "beneficiary:clinical:read",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["EXD"], "scope": "G", "condition": "BG" },
+        { "roles": ["AUD"], "scope": "G" }
+      ],
+      "deny": ["HQA", "REC", "HRO", "FIN"]
+    },
+    {
+      "key": "beneficiary:billing:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["FIN", "BRM"], "scope": "B" },
+        { "roles": ["HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    { "key": "beneficiary:billing:create", "tier": 2, "grants": [{ "roles": ["FIN"], "scope": "B" }], "deny": ["THR", "UNS", "REC"] },
+    { "key": "beneficiary:billing:update", "tier": 2, "grants": [{ "roles": ["FIN"], "scope": "B" }], "deny": ["THR", "UNS", "REC"] },
+    {
+      "key": "beneficiary:billing:approve",
+      "tier": 2,
+      "grants": [
+        { "roles": ["BRM"], "scope": "B", "condition": "<=lim,!=req" },
+        { "roles": ["EXD"], "scope": "G", "condition": "!=req" }
+      ]
+    },
+    {
+      "key": "beneficiary:record:deactivate",
+      "tier": 2,
+      "softDelete": true,
+      "grants": [
+        { "roles": ["BRM"], "scope": "B", "condition": "!=req" },
+        { "roles": ["HQA"], "scope": "G" }
+      ]
+    },
+
+    {
+      "key": "assessment:record:read",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["EXD", "AUD"], "scope": "G" }
+      ],
+      "deny": ["REC", "HRO", "FIN", "HQA"]
+    },
+    {
+      "key": "assessment:record:create",
+      "tier": 2,
+      "phi": true,
+      "lifecycleTo": "draft",
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+    {
+      "key": "assessment:record:update",
+      "tier": 2,
+      "phi": true,
+      "states": ["draft", "in_review"],
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+    {
+      "key": "assessment:record:approve",
+      "tier": 2,
+      "states": ["in_review"],
+      "lifecycleTo": "finalized",
+      "grants": [{ "roles": ["UNS"], "scope": "U", "condition": "!=author" }]
+    },
+
+    {
+      "key": "treatment_plan:plan:read",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["EXD", "AUD"], "scope": "G" }
+      ],
+      "deny": ["REC", "HRO", "FIN", "HQA"]
+    },
+    { "key": "treatment_plan:plan:create", "tier": 2, "phi": true, "lifecycleTo": "draft", "grants": [{ "roles": ["THR"], "scope": "S" }] },
+    {
+      "key": "treatment_plan:plan:update",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S", "states": ["draft"] },
+        { "roles": ["UNS"], "scope": "U", "states": ["draft", "pending"] }
+      ]
+    },
+    {
+      "key": "treatment_plan:plan:approve",
+      "tier": 2,
+      "states": ["pending"],
+      "lifecycleTo": "active",
+      "grants": [{ "roles": ["UNS"], "scope": "U", "condition": "!=author" }],
+      "sod": "S2"
+    },
+    {
+      "key": "treatment_plan:plan:supersede",
+      "tier": 2,
+      "phi": true,
+      "states": ["active"],
+      "grants": [{ "roles": ["THR"], "scope": "S" }]
+    },
+
+    {
+      "key": "session:note:read",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["EXD", "AUD"], "scope": "G" }
+      ],
+      "deny": ["REC", "HRO", "FIN", "HQA"]
+    },
+    { "key": "session:note:create", "tier": 2, "phi": true, "lifecycleTo": "draft", "grants": [{ "roles": ["THR"], "scope": "S" }] },
+    {
+      "key": "session:note:update",
+      "tier": 2,
+      "phi": true,
+      "grants": [
+        { "roles": ["THR"], "scope": "S", "states": ["draft"] },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+    {
+      "key": "session:note:approve",
+      "tier": 2,
+      "states": ["draft"],
+      "lifecycleTo": "signed",
+      "grants": [{ "roles": ["UNS"], "scope": "U", "condition": "!=author" }]
+    },
+
+    {
+      "key": "session:schedule:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["REC", "BRM"], "scope": "B" },
+        { "roles": ["AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "session:schedule:create",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+    {
+      "key": "session:schedule:update",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+
+    {
+      "key": "appointment:booking:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC", "BRM", "FIN"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "appointment:booking:create",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "appointment:booking:update",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    { "key": "appointment:booking:delete", "tier": 1, "softDelete": true, "grants": [{ "roles": ["REC", "BRM"], "scope": "B" }] },
+
+    {
+      "key": "attendance:record:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC", "HRO", "BRM"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "attendance:record:create",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "attendance:record:update",
+      "tier": 1,
+      "grants": [
+        { "roles": ["REC"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+
+    {
+      "key": "employee:profile:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HRO", "BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" },
+        { "roles": ["THR", "REC"], "scope": "SELF" }
+      ]
+    },
+    { "key": "employee:profile:create", "tier": 2, "grants": [{ "roles": ["HRO"], "scope": "B" }] },
+    { "key": "employee:profile:update", "tier": 2, "grants": [{ "roles": ["HRO"], "scope": "B", "condition": "!=self" }] },
+    {
+      "key": "employee:profile:delete",
+      "tier": 3,
+      "requiresApproval": true,
+      "grants": [
+        { "roles": ["HRO"], "scope": "B", "condition": "!=req" },
+        { "roles": ["HQA"], "scope": "G" }
+      ]
+    },
+
+    {
+      "key": "hr:leave:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HRO", "BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["AUD"], "scope": "G" },
+        { "roles": ["THR", "REC", "FIN"], "scope": "SELF" }
+      ]
+    },
+    {
+      "key": "hr:leave:create",
+      "tier": 1,
+      "grants": [{ "roles": ["HQA", "EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN"], "scope": "SELF" }]
+    },
+    {
+      "key": "hr:leave:approve",
+      "tier": 2,
+      "grants": [
+        { "roles": ["UNS"], "scope": "U", "condition": "<=3d,!=req" },
+        { "roles": ["BRM"], "scope": "B", "condition": "<=14d,!=req" },
+        { "roles": ["EXD"], "scope": "G", "condition": "!=req" }
+      ],
+      "sod": "S3"
+    },
+    {
+      "key": "hr:payroll:read",
+      "tier": 2,
+      "grants": [
+        { "roles": ["HRO", "FIN"], "scope": "B" },
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" }
+      ]
+    },
+    { "key": "hr:payroll:process", "tier": 2, "grants": [{ "roles": ["HRO"], "scope": "B" }], "sod": "S4" },
+    {
+      "key": "hr:payroll:approve",
+      "tier": 2,
+      "grants": [
+        { "roles": ["BRM"], "scope": "B", "condition": "!=processor" },
+        { "roles": ["EXD"], "scope": "G", "condition": "!=processor" }
+      ],
+      "sod": "S4"
+    },
+    {
+      "key": "hr:performance:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HRO", "BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["AUD"], "scope": "G" },
+        { "roles": ["THR", "REC"], "scope": "SELF" }
+      ]
+    },
+    {
+      "key": "hr:performance:create",
+      "tier": 2,
+      "grants": [
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+    {
+      "key": "hr:performance:approve",
+      "tier": 2,
+      "grants": [
+        { "roles": ["BRM"], "scope": "B", "condition": "!=author" },
+        { "roles": ["EXD"], "scope": "G" }
+      ]
+    },
+
+    {
+      "key": "report:operational:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["BRM", "REC"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "report:operational:export",
+      "tier": 1,
+      "grants": [
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "report:clinical:read",
+      "tier": 2,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["EXD", "AUD"], "scope": "G" }
+      ],
+      "deny": ["REC", "HRO", "FIN", "HQA"]
+    },
+    {
+      "key": "report:clinical:export",
+      "tier": 2,
+      "deidentifiedBelow": "BRM",
+      "grants": [
+        { "roles": ["BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["EXD", "AUD"], "scope": "G" }
+      ],
+      "deny": ["REC", "HRO", "FIN", "HQA"]
+    },
+    {
+      "key": "report:financial:read",
+      "tier": 2,
+      "grants": [
+        { "roles": ["FIN", "BRM"], "scope": "B" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "report:financial:export",
+      "tier": 2,
+      "grants": [
+        { "roles": ["FIN", "BRM"], "scope": "B" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "report:hr:read",
+      "tier": 2,
+      "grants": [
+        { "roles": ["HRO", "BRM"], "scope": "B" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    {
+      "key": "report:hr:export",
+      "tier": 2,
+      "grants": [
+        { "roles": ["HRO", "BRM"], "scope": "B" },
+        { "roles": ["EXD", "HQA", "AUD"], "scope": "G" }
+      ]
+    },
+    { "key": "report:audit:read", "tier": 2, "grants": [{ "roles": ["AUD", "HQA", "EXD"], "scope": "G" }] },
+    { "key": "report:audit:export", "tier": 2, "grants": [{ "roles": ["AUD", "HQA"], "scope": "G" }] },
+
+    {
+      "key": "approval:request:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" },
+        { "roles": ["BRM", "REC", "HRO", "FIN"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" },
+        { "roles": ["THR"], "scope": "S" }
+      ]
+    },
+    {
+      "key": "approval:request:create",
+      "tier": 1,
+      "grants": [
+        { "roles": ["THR"], "scope": "S" },
+        { "roles": ["REC", "HRO", "FIN", "BRM"], "scope": "B" },
+        { "roles": ["UNS"], "scope": "U" }
+      ]
+    },
+    {
+      "key": "approval:decision:approve",
+      "tier": 2,
+      "grants": [
+        { "roles": ["UNS"], "scope": "U", "condition": "!=req" },
+        { "roles": ["BRM"], "scope": "B", "condition": "<=lim,!=req" },
+        { "roles": ["EXD"], "scope": "G", "condition": "!=req" }
+      ],
+      "sod": "S8"
+    },
+
+    {
+      "key": "user:account:read",
+      "tier": 1,
+      "grants": [
+        { "roles": ["HQA", "EXD", "AUD"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+    {
+      "key": "user:account:create",
+      "tier": 3,
+      "hqOnly": true,
+      "grants": [{ "roles": ["HQA"], "scope": "G" }],
+      "deny": ["EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN", "AUD"]
+    },
+    { "key": "user:account:update", "tier": 2, "grants": [{ "roles": ["HQA"], "scope": "G" }] },
+    { "key": "user:account:disable", "tier": 3, "hqOnly": true, "grants": [{ "roles": ["HQA"], "scope": "G" }] },
+    {
+      "key": "user:role_grant:assign",
+      "tier": 3,
+      "grants": [
+        { "roles": ["HQA"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B", "tier": 2, "condition": "existing-roles,via-approval" }
+      ],
+      "sod": "S6",
+      "denySelfGrant": true
+    },
+    {
+      "key": "user:role_grant:revoke",
+      "tier": 2,
+      "grants": [
+        { "roles": ["HQA"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+    {
+      "key": "rbac:policy:manage",
+      "tier": 3,
+      "hqOnly": true,
+      "makerChecker": true,
+      "grants": [{ "roles": ["HQA"], "scope": "G" }],
+      "deny": ["EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN", "AUD"]
+    },
+
+    {
+      "key": "audit:log:read",
+      "tier": 2,
+      "grants": [
+        { "roles": ["AUD", "HQA", "EXD"], "scope": "G" },
+        { "roles": ["BRM"], "scope": "B" }
+      ]
+    },
+    { "key": "audit:log:export", "tier": 2, "grants": [{ "roles": ["AUD", "HQA"], "scope": "G" }] },
+    {
+      "key": "audit:log:update",
+      "tier": null,
+      "grants": [],
+      "deny": ["HQA", "EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN", "AUD"],
+      "note": "append-only — no actor may modify audit history"
+    },
+    {
+      "key": "audit:log:delete",
+      "tier": null,
+      "grants": [],
+      "deny": ["HQA", "EXD", "BRM", "UNS", "THR", "REC", "HRO", "FIN", "AUD"],
+      "note": "append-only — no actor may delete audit history"
+    }
+  ],
+  "sodConstraints": [
+    { "id": "S1", "rule": "beneficiary:billing:create XOR beneficiary:billing:approve (same entity)", "severity": "block" },
+    { "id": "S2", "rule": "treatment_plan author XOR treatment_plan:plan:approve (same plan)", "severity": "block" },
+    { "id": "S3", "rule": "hr:leave:create(self) XOR hr:leave:approve(self)", "severity": "block" },
+    { "id": "S4", "rule": "hr:payroll:process XOR hr:payroll:approve (same run)", "severity": "block" },
+    { "id": "S5", "rule": "AUDITOR XOR any create/update/delete/approve", "severity": "block" },
+    { "id": "S6", "rule": "user:role_grant:assign XOR being the grantee", "severity": "block" },
+    { "id": "S7", "rule": "clinical:approve XOR being the author", "severity": "warn->block" },
+    { "id": "S8", "rule": "approval:request:create XOR approval:decision:approve (same request)", "severity": "block" }
+  ],
+  "approvalChains": [
+    { "type": "clinical_signoff", "ladder": ["THR:submit", "UNS:approve", "BRM:dispute"] },
+    { "type": "leave", "ladder": ["employee:create", "UNS:<=3d", "BRM:<=14d", "EXD:>14d"] },
+    { "type": "billing", "ladder": ["FIN:submit", "BRM:<=limit", "EXD:>limit"] },
+    { "type": "payroll", "ladder": ["HRO:process", "BRM|EXD:approve(!=processor)"] },
+    { "type": "branch_role_grant", "ladder": ["BRM:request", "HQA:approve"] },
+    { "type": "cross_branch_or_policy", "ladder": ["requester", "HQA+EXD:dual"] }
+  ],
+  "hqOnly": [
+    "branch:org:create",
+    "branch:org:delete",
+    "user:account:create",
+    "user:account:disable",
+    "user:role_grant:assign(cross-branch)",
+    "rbac:policy:manage",
+    "report:*:export(consolidated-cross-branch)",
+    "audit:log:export(global)"
+  ],
+  "delegation": {
+    "subsetOnly": true,
+    "alwaysTimeBoxed": true,
+    "neverIncludes": ["user:role_grant:assign", "user:role_grant:revoke", "rbac:policy:manage"],
+    "audited": "both delegator and actor identities recorded"
+  },
+  "breakGlass": {
+    "tier": 3,
+    "appliesTo": ["beneficiary:clinical:read", "assessment:record:read", "session:note:read"],
+    "eligibleRoles": ["EXD"],
+    "excludedRoles": ["HQA"],
+    "autoExpireMinutes": 15,
+    "requiresJustification": true,
+    "postHocReview": true
+  },
+  "governance": {
+    "changeProcess": "rbac:policy:manage change-request (maker-checker)",
+    "driftGuard": "permissions.registry MUST equal this seed; CI fails on divergence",
+    "reviewCadence": "quarterly re-attestation; non-default grants expire if not re-justified",
+    "leastPrivilegeDefault": ["dashboard:view:read"]
+  }
+}

@@ -10,7 +10,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const _logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
@@ -162,7 +162,8 @@ router.get('/trends', async (req, res) => {
       const TherapySession = safeModel('TherapySession');
       if (TherapySession) {
         trendData = await TherapySession.aggregate([
-          { $match: { date: { $gte: startDate } } },
+          // W647 — branch-scope (TherapySession carries branchId).
+          { $match: { ...branchFilter(req), date: { $gte: startDate } } },
           {
             $group: {
               _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
@@ -271,7 +272,11 @@ router.get('/reports/summary', async (req, res) => {
     // Sessions summary
     const TherapySession = safeModel('TherapySession');
     if (TherapySession) {
-      const sessionFilter = Object.keys(dateFilter).length ? { date: dateFilter } : {};
+      // W647 — branch-scope (TherapySession carries branchId).
+      const sessionFilter = {
+        ...branchFilter(req),
+        ...(Object.keys(dateFilter).length ? { date: dateFilter } : {}),
+      };
       const sessionStats = await TherapySession.aggregate([
         { $match: sessionFilter },
         {

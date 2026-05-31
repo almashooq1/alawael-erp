@@ -114,6 +114,13 @@ const mdtMeetingSchema = new mongoose.Schema(
     meetingNumber: { type: String, unique: true, required: true },
     title: { type: String, required: true, minlength: 3, maxlength: 300 },
     description: { type: String, maxlength: 2000 },
+    // W635 — branch tenancy denormalization (R4). DECISION: a meeting's branch
+    // is its ORGANIZER's branch (an MDT meeting is held by an organizer at a
+    // branch). NOT derived from cases[].beneficiary — a meeting may discuss
+    // beneficiaries from several cases, so the organizer is the single
+    // unambiguous source. Derived in the pre-save hook below. Additive;
+    // backfill via `npm run backfill:meeting-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     type: {
       type: String,
       enum: [
@@ -184,6 +191,19 @@ const mdtMeetingSchema = new mongoose.Schema(
 
 mdtMeetingSchema.index({ date: 1, status: 1 });
 mdtMeetingSchema.index({ organizer: 1 });
+// W635 — branch-scoped meeting stats (R4)
+mdtMeetingSchema.index({ branchId: 1, status: 1 });
+// W635 — denormalize branchId from the (required) organizer's User.branchId.
+mdtMeetingSchema.pre('save', async function deriveBranchFromOrganizer() {
+  if (this.branchId || !this.organizer) return;
+  try {
+    const User = mongoose.model('User');
+    const u = await User.findById(this.organizer).select('branchId').lean();
+    if (u && u.branchId) this.branchId = u.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 mdtMeetingSchema.index({ 'cases.beneficiary': 1 });
 mdtMeetingSchema.index({ department: 1, date: -1 });
 
@@ -267,6 +287,10 @@ const unifiedRehabPlanSchema = new mongoose.Schema(
     planNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
+    // W629 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook. Additive; backfill via
+    // `npm run backfill:rehabplan-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     title: { type: String, required: true },
     status: {
       type: String,
@@ -328,12 +352,17 @@ const unifiedRehabPlanSchema = new mongoose.Schema(
 );
 
 unifiedRehabPlanSchema.index({ beneficiary: 1, status: 1 });
+// W629 — branch-scoped stats (R4)
+unifiedRehabPlanSchema.index({ branchId: 1, status: 1 });
 unifiedRehabPlanSchema.index({ leadTherapist: 1 });
 unifiedRehabPlanSchema.index({ 'teamMembers.therapist': 1 });
 unifiedRehabPlanSchema.index({ reviewDate: 1 });
 
 // Auto-compute overall progress
-unifiedRehabPlanSchema.pre('save', function (next) {
+// W629: converted callback → async so the sibling derive hook below can be
+// async too (Mongoose-9 mixed async/callback dispatch on one event silently
+// breaks the chain — check:hook-style gate + W483 doctrine).
+unifiedRehabPlanSchema.pre('save', async function computeOverallProgress() {
   if (this.goals && this.goals.length > 0) {
     const activeGoals = this.goals.filter(g => !['DISCONTINUED'].includes(g.status));
     if (activeGoals.length > 0) {
@@ -342,7 +371,18 @@ unifiedRehabPlanSchema.pre('save', function (next) {
       );
     }
   }
-  next();
+});
+
+// W629 — denormalize branchId from the (required) beneficiary. R4.
+unifiedRehabPlanSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
 });
 
 // ─── 3. Internal Referral Ticket (تذكرة الإحالة الداخلية) ────────────────────
@@ -352,6 +392,10 @@ const referralTicketSchema = new mongoose.Schema(
     ticketNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
+    // W633 — branch tenancy denormalization (R4). Derived from the (required)
+    // beneficiary in the pre-save hook. Additive; backfill via
+    // `npm run backfill:referralticket-branchid`.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     referredByName: { type: String },
     fromDepartment: { type: String, required: true },
@@ -439,6 +483,18 @@ const referralTicketSchema = new mongoose.Schema(
 );
 
 referralTicketSchema.index({ beneficiary: 1, status: 1 });
+// W633 — branch-scoped referral stats (R4)
+referralTicketSchema.index({ branchId: 1, status: 1 });
+referralTicketSchema.pre('save', async function deriveBranchFromBeneficiary() {
+  if (this.branchId || !this.beneficiary) return;
+  try {
+    const Beneficiary = mongoose.model('Beneficiary');
+    const ben = await Beneficiary.findById(this.beneficiary).select('branchId').lean();
+    if (ben && ben.branchId) this.branchId = ben.branchId;
+  } catch {
+    /* model unavailable — leave unset (safe) */
+  }
+});
 referralTicketSchema.index({ referredBy: 1 });
 referralTicketSchema.index({ toDepartment: 1, status: 1 });
 referralTicketSchema.index({ priority: 1, status: 1 });

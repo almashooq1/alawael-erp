@@ -74,10 +74,18 @@ function assertBranchMatch(req, docBranchId, label = 'document') {
     throw err;
   }
 
-  const actorBranchId = String(req.branchScope.branchId || '');
   const docBranchIdStr = String(docBranchId);
 
-  if (actorBranchId !== docBranchIdStr) {
+  // W597 — when the caller is multi-branch (active secondment), membership
+  // in their branch set grants access. When branchIds[] is absent (the
+  // default — secondment scope off), this collapses to the original strict
+  // equality against the single primary branchId.
+  const allowed =
+    Array.isArray(req.branchScope.branchIds) && req.branchScope.branchIds.length
+      ? req.branchScope.branchIds.map(String)
+      : [String(req.branchScope.branchId || '')];
+
+  if (!allowed.includes(docBranchIdStr)) {
     const err = new Error(`cross-branch access denied for ${label}`);
     err.status = 403;
     throw err;
@@ -211,8 +219,13 @@ async function loadBeneficiaryAndAssertBranch(req, beneficiaryId) {
 function assertBranchIdsAllowed(req, branchIds) {
   if (!req || !req.branchScope || !req.branchScope.restricted) return;
   if (!Array.isArray(branchIds) || branchIds.length === 0) return;
-  const own = String(req.branchScope.branchId || '');
-  if (!own) {
+  // W597 — allowed set = secondment branchIds[] when present, else the
+  // single primary branchId (back-compat default).
+  const ownSet =
+    Array.isArray(req.branchScope.branchIds) && req.branchScope.branchIds.length
+      ? new Set(req.branchScope.branchIds.map(String))
+      : new Set([String(req.branchScope.branchId || '')]);
+  if (ownSet.size === 1 && ownSet.has('')) {
     const err = new Error(
       'cross-branch access denied: restricted user has no branchId (fail-closed)'
     );
@@ -220,7 +233,7 @@ function assertBranchIdsAllowed(req, branchIds) {
     throw err;
   }
   for (const id of branchIds) {
-    if (String(id) !== own) {
+    if (!ownSet.has(String(id))) {
       const err = new Error(`cross-branch access denied: branchId ${id} outside caller scope`);
       err.status = 403;
       throw err;

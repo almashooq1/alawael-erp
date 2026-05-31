@@ -475,7 +475,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'montessori', montessoriRoutes);
   dualMount(app, 'montessori/auth', montessoriAuthRoutes);
   dualMount(app, 'measurements', measurementsRoutes);
-  dualMount(app, 'mobile', mobileAppRoutes);
+  // W659 — was dualMount (NO auth); mobileApp exposes user-specific device +
+  // sync ops (getUserDevices/syncOperations/trustDevice) with no in-file auth →
+  // anonymous-reachable. Promoted to dualMountAuth (audit:unauthenticated-routes).
+  dualMountAuth(app, 'mobile', mobileAppRoutes);
 
   // ── Education System Routes (نظام التعليم) — delegated to registries/education.registry.js
   registerEducationRoutes(app, { safeRequire, dualMount, dualMountAuth, logger, authenticate });

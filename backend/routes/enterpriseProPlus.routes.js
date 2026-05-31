@@ -14,7 +14,7 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const { authenticateToken } = require('../middleware/auth');
 
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   JobPosting,
   Candidate,
@@ -1084,11 +1084,18 @@ router.get(
   requireBranchAccess,
   async (req, res) => {
     try {
+      // W664 — branch-scope incident stats (SafetyIncident carries branchId,
+      // derived from the reporter). branchFilter(req) = {} for cross-branch/HQ
+      // safety officers → org-wide HSE oversight preserved.
+      const scope = branchFilter(req);
       const [total, open, critical, lostDays] = await Promise.all([
-        SafetyIncident.countDocuments(),
-        SafetyIncident.countDocuments({ status: { $in: ['reported', 'investigating'] } }),
-        SafetyIncident.countDocuments({ severity: 'critical' }),
-        SafetyIncident.aggregate([{ $group: { _id: null, total: { $sum: '$lostWorkDays' } } }]),
+        SafetyIncident.countDocuments({ ...scope }),
+        SafetyIncident.countDocuments({ ...scope, status: { $in: ['reported', 'investigating'] } }),
+        SafetyIncident.countDocuments({ ...scope, severity: 'critical' }),
+        SafetyIncident.aggregate([
+          { $match: { ...scope } },
+          { $group: { _id: null, total: { $sum: '$lostWorkDays' } } },
+        ]),
       ]);
       res.json({
         success: true,

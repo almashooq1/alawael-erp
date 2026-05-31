@@ -812,6 +812,8 @@ on:
       - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mawid-wave687.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1607,6 +1609,8 @@ on:
       - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mawid-wave687.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

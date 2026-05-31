@@ -308,7 +308,7 @@ export default function EpisodesPage() {
       };
       const [epRes, stRes] = await Promise.allSettled([
         episodesAPI.list(params),
-        episodesAPI.stats(),
+        episodesAPI.getStatistics(),
       ]);
       if (epRes.status === 'fulfilled') {
         const data = epRes.value?.data;
@@ -364,9 +364,23 @@ export default function EpisodesPage() {
     [loadData]
   );
 
+  // Backend `getStatistics` returns byPhase as an array of { _id, count }
+  // (active episodes only). Normalize to a { phaseKey: count } map; tolerate
+  // an object-map shape too in case the contract changes.
+  const phaseCounts = (() => {
+    const bp = stats?.byPhase;
+    if (Array.isArray(bp)) {
+      return bp.reduce((acc, row) => {
+        if (row && row._id != null) acc[row._id] = row.count ?? 0;
+        return acc;
+      }, {});
+    }
+    return bp && typeof bp === 'object' ? bp : null;
+  })();
+
   const phaseStats = PHASES.map(p => ({
     ...p,
-    count: stats?.byPhase?.[p.key] ?? episodes.filter(e => e.currentPhase === p.key).length,
+    count: phaseCounts?.[p.key] ?? episodes.filter(e => e.currentPhase === p.key).length,
   }));
   const pageCount = Math.ceil(total / perPage);
 

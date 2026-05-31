@@ -29,7 +29,18 @@
  * The branchScope middleware queries `findActiveForUser(userId)`
  * to expand the user's effective branch set before applying the
  * tenant filter. Result is cached on `req.branchScope` for the
- * request's lifetime.
+ * request's lifetime. (WIRED as of W597 — `requireBranchAccess`
+ * unions these branches into req.branchScope.branchIds[] when
+ * ENABLE_USER_BRANCH_ROLE_SCOPE=true.)
+ *
+ * ✅ CANONICAL access-scope grant primitive (ADR-034). This is THE
+ * model for request-time "who-can-work-where + role-at-branch + window"
+ * grants. The overlapping `authorization/delegations/delegation.model.js`
+ * (DelegationGrant) is DEPRECATED and pending migration here. Distinct
+ * concerns that share the word "delegation" — `models/Delegation.js`
+ * (authority governance) + `WorkflowDelegation` (workflow routing) — are
+ * intentionally separate. A W599 drift guard prevents a 5th access-grant
+ * model from appearing outside this file.
  */
 
 'use strict';

@@ -99,6 +99,9 @@ WorkflowFavoriteSchema.index({ user: 1, targetType: 1, targetId: 1 }, { unique: 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3) WORKFLOW DELEGATION — التفويض والنيابة
 // ═══════════════════════════════════════════════════════════════════════════════
+// BOUNDARY (ADR-034): workflow TASK / out-of-office routing (who handles my
+// approval steps while I'm away). NOT an access-scope grant (UserBranchRole)
+// and NOT authority governance (models/Delegation.js). Keep separate.
 const WorkflowDelegationSchema = new Schema(
   {
     // The user who is delegating

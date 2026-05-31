@@ -21,6 +21,7 @@ const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const CarePlan = require('../models/CarePlan');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
@@ -28,6 +29,9 @@ const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticateToken);
+// W654 — populate req.branchScope so branchFilter(req) works. = {} for
+// cross-branch/HQ roles (org-wide care-plan stats preserved); branch-id else.
+router.use(requireBranchAccess);
 
 const STAFF_ROLES = [
   'admin',
@@ -109,23 +113,30 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
     const soon = new Date(now);
     soon.setDate(soon.getDate() + 30);
 
+    // W654 — branch-scope every stat (CarePlan now carries branchId).
+    // branchFilter(req) = {} for cross-branch/HQ → org-wide stats preserved.
+    const scope = branchFilter(req);
     const [total, byStatus, dueReview, active, withEducation, withTherapy, withLifeSkills] =
       await Promise.all([
-        CarePlan.countDocuments({}),
-        CarePlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        CarePlan.countDocuments({ ...scope }),
+        CarePlan.aggregate([
+          { $match: { ...scope } },
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+        ]),
         CarePlan.countDocuments({
+          ...scope,
           reviewDate: { $gte: now, $lte: soon },
           status: 'ACTIVE',
         }),
-        CarePlan.countDocuments({ status: 'ACTIVE' }),
-        CarePlan.countDocuments({ 'educational.enabled': true }),
-        CarePlan.countDocuments({ 'therapeutic.enabled': true }),
-        CarePlan.countDocuments({ 'lifeSkills.enabled': true }),
+        CarePlan.countDocuments({ ...scope, status: 'ACTIVE' }),
+        CarePlan.countDocuments({ ...scope, 'educational.enabled': true }),
+        CarePlan.countDocuments({ ...scope, 'therapeutic.enabled': true }),
+        CarePlan.countDocuments({ ...scope, 'lifeSkills.enabled': true }),
       ]);
 
     // Goal aggregate across all plans
     const goalStats = await CarePlan.aggregate([
-      { $match: { status: 'ACTIVE' } },
+      { $match: { ...scope, status: 'ACTIVE' } },
       {
         $project: {
           allGoals: {

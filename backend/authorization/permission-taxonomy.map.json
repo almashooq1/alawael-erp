@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Seed permission-key → live rbac.config (resource:action) taxonomy map",
+  "description": "Bridges the 3-segment field-level seed/registry keys (module:resource:action, authored per ADR-035/seed) to the 2-segment live rbac.config.js capability model (resource:action). This is the MISSING input a resolver-collapse needs (AUTHZ_MODERNIZATION_PLAN §5.1): the seed is a strict MANY-TO-ONE REFINEMENT of rbac.config (e.g. beneficiary:demographics:read + beneficiary:clinical:read both → beneficiaries:read), so can() and the legacy hasPermission() cannot be compared key-for-key without this map. PURE DATA — additive, nothing consumes it yet; it is the analog of role-archetype.map.json (roles) for permission KEYS. 'rbac' = { resource, action } in rbac.config; null = no 2-segment equivalent (the refinement is finer than the live model can express — these are the field-level distinctions the live model is BLIND to, the main reason the new matrix is more granular). 'note' records refinement collisions + intent.",
+  "version": "1.0.0",
+  "rbacActions": ["create", "read", "update", "delete", "export", "import", "approve", "manage"],
+  "map": [
+    { "key": "dashboard:view:read", "rbac": { "resource": "dashboard", "action": "read" } },
+
+    {
+      "key": "branch:org:read",
+      "rbac": null,
+      "note": "NO live equivalent — rbac.config has no 'branches' resource (branch CRUD is not a capability in the 2-segment model). Candidate new resource on collapse."
+    },
+    { "key": "branch:org:create", "rbac": null, "note": "no rbac 'branches' resource" },
+    { "key": "branch:org:update", "rbac": null, "note": "no rbac 'branches' resource" },
+    { "key": "branch:org:delete", "rbac": null, "note": "no rbac 'branches' resource" },
+    {
+      "key": "branch:settings:update",
+      "rbac": { "resource": "settings", "action": "update" },
+      "note": "branch-scoped settings → settings:update (no branch-settings resource in rbac)"
+    },
+
+    {
+      "key": "beneficiary:demographics:read",
+      "rbac": { "resource": "beneficiaries", "action": "read" },
+      "note": "REFINEMENT: collapses with beneficiary:clinical:read onto beneficiaries:read — rbac is blind to the demographics/clinical field split"
+    },
+    {
+      "key": "beneficiary:demographics:create",
+      "rbac": { "resource": "beneficiaries", "action": "create" }
+    },
+    {
+      "key": "beneficiary:demographics:update",
+      "rbac": { "resource": "beneficiaries", "action": "update" }
+    },
+    {
+      "key": "beneficiary:clinical:read",
+      "rbac": { "resource": "beneficiaries", "action": "read" },
+      "note": "REFINEMENT: PHI-gated read; rbac cannot distinguish from demographics:read"
+    },
+    {
+      "key": "beneficiary:billing:read",
+      "rbac": { "resource": "invoices", "action": "read" },
+      "note": "seed 'billing' = live 'invoices' (also 'finance' exists — invoices is the per-beneficiary billing resource)"
+    },
+    { "key": "beneficiary:billing:create", "rbac": { "resource": "invoices", "action": "create" } },
+    { "key": "beneficiary:billing:update", "rbac": { "resource": "invoices", "action": "update" } },
+    {
+      "key": "beneficiary:billing:approve",
+      "rbac": { "resource": "invoices", "action": "approve" }
+    },
+    {
+      "key": "beneficiary:record:deactivate",
+      "rbac": { "resource": "beneficiaries", "action": "delete" },
+      "note": "soft-delete/deactivate → beneficiaries:delete (rbac has no deactivate action)"
+    },
+
+    { "key": "assessment:record:read", "rbac": { "resource": "assessments", "action": "read" } },
+    {
+      "key": "assessment:record:create",
+      "rbac": { "resource": "assessments", "action": "create" }
+    },
+    {
+      "key": "assessment:record:update",
+      "rbac": { "resource": "assessments", "action": "update" }
+    },
+    {
+      "key": "assessment:record:approve",
+      "rbac": { "resource": "assessments", "action": "approve" }
+    },
+
+    {
+      "key": "treatment_plan:plan:read",
+      "rbac": { "resource": "care_plans", "action": "read" },
+      "note": "seed 'treatment_plan' = live 'care_plans' (underscore; care_plans_ddd is the V4 twin)"
+    },
+    {
+      "key": "treatment_plan:plan:create",
+      "rbac": { "resource": "care_plans", "action": "create" }
+    },
+    {
+      "key": "treatment_plan:plan:update",
+      "rbac": { "resource": "care_plans", "action": "update" }
+    },
+    {
+      "key": "treatment_plan:plan:approve",
+      "rbac": { "resource": "care_plans", "action": "approve" }
+    },
+    {
+      "key": "treatment_plan:plan:supersede",
+      "rbac": { "resource": "care_plans", "action": "update" },
+      "note": "supersede (versioning) → care_plans:update (no supersede action in rbac)"
+    },
+
+    {
+      "key": "session:note:read",
+      "rbac": { "resource": "sessions", "action": "read" },
+      "note": "REFINEMENT: collapses with session:schedule:read onto sessions:read"
+    },
+    { "key": "session:note:create", "rbac": { "resource": "sessions", "action": "create" } },
+    { "key": "session:note:update", "rbac": { "resource": "sessions", "action": "update" } },
+    { "key": "session:note:approve", "rbac": { "resource": "sessions", "action": "approve" } },
+    { "key": "session:schedule:read", "rbac": { "resource": "sessions", "action": "read" } },
+    { "key": "session:schedule:create", "rbac": { "resource": "sessions", "action": "create" } },
+    { "key": "session:schedule:update", "rbac": { "resource": "sessions", "action": "update" } },
+
+    {
+      "key": "appointment:booking:read",
+      "rbac": { "resource": "schedules", "action": "read" },
+      "note": "seed 'appointment' = live 'schedules' (no 'appointments' resource in rbac)"
+    },
+    {
+      "key": "appointment:booking:create",
+      "rbac": { "resource": "schedules", "action": "create" }
+    },
+    {
+      "key": "appointment:booking:update",
+      "rbac": { "resource": "schedules", "action": "update" }
+    },
+    {
+      "key": "appointment:booking:delete",
+      "rbac": { "resource": "schedules", "action": "delete" }
+    },
+
+    { "key": "attendance:record:read", "rbac": { "resource": "attendance", "action": "read" } },
+    { "key": "attendance:record:create", "rbac": { "resource": "attendance", "action": "create" } },
+    { "key": "attendance:record:update", "rbac": { "resource": "attendance", "action": "update" } },
+
+    { "key": "employee:profile:read", "rbac": { "resource": "employees", "action": "read" } },
+    { "key": "employee:profile:create", "rbac": { "resource": "employees", "action": "create" } },
+    { "key": "employee:profile:update", "rbac": { "resource": "employees", "action": "update" } },
+    { "key": "employee:profile:delete", "rbac": { "resource": "employees", "action": "delete" } },
+
+    {
+      "key": "hr:leave:read",
+      "rbac": { "resource": "hr", "action": "read" },
+      "note": "REFINEMENT: hr:leave / hr:payroll / hr:performance all collapse onto the single 'hr' resource — rbac is blind to the HR sub-domain split"
+    },
+    { "key": "hr:leave:create", "rbac": { "resource": "hr", "action": "create" } },
+    { "key": "hr:leave:approve", "rbac": { "resource": "hr", "action": "approve" } },
+    {
+      "key": "hr:payroll:read",
+      "rbac": { "resource": "payroll", "action": "read" },
+      "note": "payroll has its OWN rbac resource (unlike leave/performance) — finer than the generic hr resource"
+    },
+    {
+      "key": "hr:payroll:process",
+      "rbac": { "resource": "payroll", "action": "update" },
+      "note": "process → payroll:update (no process action in rbac)"
+    },
+    { "key": "hr:payroll:approve", "rbac": { "resource": "payroll", "action": "approve" } },
+    { "key": "hr:performance:read", "rbac": { "resource": "hr", "action": "read" } },
+    { "key": "hr:performance:create", "rbac": { "resource": "hr", "action": "create" } },
+    { "key": "hr:performance:approve", "rbac": { "resource": "hr", "action": "approve" } },
+
+    {
+      "key": "report:operational:read",
+      "rbac": { "resource": "reports", "action": "read" },
+      "note": "REFINEMENT: all 5 report:* sub-domains collapse onto reports:read/export — rbac is blind to operational/clinical/financial/hr/audit report split (the field-level confidentiality the new matrix adds)"
+    },
+    { "key": "report:operational:export", "rbac": { "resource": "reports", "action": "export" } },
+    { "key": "report:clinical:read", "rbac": { "resource": "reports", "action": "read" } },
+    { "key": "report:clinical:export", "rbac": { "resource": "reports", "action": "export" } },
+    { "key": "report:financial:read", "rbac": { "resource": "reports", "action": "read" } },
+    { "key": "report:financial:export", "rbac": { "resource": "reports", "action": "export" } },
+    { "key": "report:hr:read", "rbac": { "resource": "reports", "action": "read" } },
+    { "key": "report:hr:export", "rbac": { "resource": "reports", "action": "export" } },
+    { "key": "report:audit:read", "rbac": { "resource": "reports", "action": "read" } },
+    { "key": "report:audit:export", "rbac": { "resource": "reports", "action": "export" } },
+
+    {
+      "key": "approval:request:read",
+      "rbac": { "resource": "workflow", "action": "read" },
+      "note": "no dedicated 'approvals' resource in rbac; approval workflow rides on the 'workflow' resource (closest live equivalent)"
+    },
+    { "key": "approval:request:create", "rbac": { "resource": "workflow", "action": "create" } },
+    { "key": "approval:decision:approve", "rbac": { "resource": "workflow", "action": "approve" } },
+
+    { "key": "user:account:read", "rbac": { "resource": "users", "action": "read" } },
+    { "key": "user:account:create", "rbac": { "resource": "users", "action": "create" } },
+    { "key": "user:account:update", "rbac": { "resource": "users", "action": "update" } },
+    {
+      "key": "user:account:disable",
+      "rbac": { "resource": "users", "action": "delete" },
+      "note": "disable = soft-delete → users:delete"
+    },
+    {
+      "key": "user:role_grant:assign",
+      "rbac": { "resource": "users", "action": "manage" },
+      "note": "role grant/revoke is a user-administration op → users:manage (rbac has no 'roles' resource)"
+    },
+    { "key": "user:role_grant:revoke", "rbac": { "resource": "users", "action": "manage" } },
+    {
+      "key": "rbac:policy:manage",
+      "rbac": null,
+      "note": "NO live equivalent — rbac.config has no 'permissions'/'rbac' resource; policy management is a genuine gap in the 2-segment model. Candidate new resource on collapse."
+    },
+
+    { "key": "audit:log:read", "rbac": { "resource": "audit_logs", "action": "read" } },
+    { "key": "audit:log:export", "rbac": { "resource": "audit_logs", "action": "export" } },
+    {
+      "key": "audit:log:update",
+      "rbac": { "resource": "audit_logs", "action": "update" },
+      "note": "audit logs are append-only by design (D9); update/delete exist as keys only to be explicitly DENIED to everyone in the seed"
+    },
+    {
+      "key": "audit:log:delete",
+      "rbac": { "resource": "audit_logs", "action": "delete" },
+      "note": "append-only — deny-to-all permission"
+    }
+  ],
+  "rules": {
+    "coverage": "every key in permissions.registry.js ALL[] MUST appear exactly once in map[].key; a new seed permission with no taxonomy mapping fails the W669 drift guard",
+    "targetIntegrity": "every map[].rbac.resource MUST be a value in rbac.config.RESOURCES and every map[].rbac.action a value in rbac.config.ACTIONS (null allowed for keys with no 2-segment equivalent — currently none)",
+    "refinement": "the seed→rbac direction is MANY-TO-ONE: multiple field-level seed keys legitimately map to the same rbac (resource,action). This is expected and is the whole reason the new matrix is more granular. The REVERSE (rbac→seed) is therefore one-to-many and is NOT a function — a resolver-collapse must keep can() (3-seg) as the authority and treat rbac as the coarse legacy view.",
+    "doNotCollapseYet": "this map ENABLES a future resolver-collapse but does not perform it; wiring can() into the live gates is owner-gated (ADR-037)."
+  }
+}

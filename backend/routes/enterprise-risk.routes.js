@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
@@ -35,7 +35,7 @@ router.get(
   authenticate,
   requireBranchAccess,
   authorize(RISK_READ_ROLES) /* W465 */,
-  async (_req, res) => {
+  async (req, res) => {
     try {
       const Risk = safeModel('EnterpriseRisk');
       const Assessment = safeModel('RiskAssessment');
@@ -47,16 +47,21 @@ router.get(
         Assessment.countDocuments().catch(() => 0),
       ]);
 
+      // W663 — branch-scope (Risk carries branchId). {} for cross-branch/HQ.
+      const _rs = branchFilter(req);
       const byCategory = await Risk.aggregate([
+        { $match: { ..._rs } },
         { $group: { _id: '$category', count: { $sum: 1 } } },
       ]).catch(() => []);
       const byStatus = await Risk.aggregate([
+        { $match: { ..._rs } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]).catch(() => []);
       const byPriority = await Risk.aggregate([
+        { $match: { ..._rs } },
         { $group: { _id: '$priority', count: { $sum: 1 } } },
       ]).catch(() => []);
-      const topRisks = await Risk.find({ priority: { $in: ['critical', 'high'] } })
+      const topRisks = await Risk.find({ ..._rs, priority: { $in: ['critical', 'high'] } })
         .sort({ riskScore: -1 })
         .limit(5)
         .lean()

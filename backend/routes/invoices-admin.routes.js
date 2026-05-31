@@ -20,6 +20,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const Invoice = require('../models/Invoice');
 const { buildEnvelope } = require('../services/zatcaEnvelope');
@@ -30,6 +31,9 @@ const idempotency = require('../middleware/idempotency.middleware');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
+// W651 — populate req.branchScope so branchFilter(req) works. = {} for
+// cross-branch/HQ finance roles (org-wide invoicing preserved); branch-id else.
+router.use(requireBranchAccess);
 
 // Tenant-scoped idempotency for ZATCA issuance — duplicate POSTs with the
 // same Idempotency-Key return the cached envelope instead of submitting a
@@ -136,19 +140,26 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
 
+    // W651 — branch-scope every stat (Invoice carries branchId). aggregate()
+    // bypasses the tenantScope plugin; branchFilter(req) = {} for cross-branch/HQ.
+    const scope = branchFilter(req);
     const [total, byStatus, revenueMonth, overdueCount, pendingAmount] = await Promise.all([
-      Invoice.countDocuments({}),
-      Invoice.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Invoice.countDocuments({ ...scope }),
       Invoice.aggregate([
-        { $match: { status: 'PAID', issueDate: { $gte: monthStart } } },
+        { $match: { ...scope } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      Invoice.aggregate([
+        { $match: { ...scope, status: 'PAID', issueDate: { $gte: monthStart } } },
         { $group: { _id: null, sum: { $sum: '$totalAmount' } } },
       ]),
       Invoice.countDocuments({
+        ...scope,
         dueDate: { $lt: new Date() },
         status: { $nin: ['PAID', 'CANCELLED'] },
       }),
       Invoice.aggregate([
-        { $match: { status: { $in: ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'] } } },
+        { $match: { ...scope, status: { $in: ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'] } } },
         { $group: { _id: null, sum: { $sum: '$totalAmount' } } },
       ]),
     ]);

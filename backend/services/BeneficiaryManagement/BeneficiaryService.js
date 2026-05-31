@@ -8,6 +8,12 @@
  * التاريخ: فبراير 15، 2026
  * الإصدار: 1.0
  * الحالة: عملي وشامل
+ *
+ * ⚠️ DORMANT + TENANT-UNSAFE (R4 audit, 2026-05-30). NOT wired to any
+ * route. Reads beneficiary PHI via the RAW driver (`this.db.collection(...)`)
+ * with NO branchId filter → BYPASSES the tenantScope plugin. If you wire
+ * it, thread branch scope into every query first, else a branch-scoped
+ * caller reads all-branch beneficiaries. See `npm run audit:untenanted-aggregations`.
  */
 
 const mongoose = require('mongoose');

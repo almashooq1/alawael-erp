@@ -127,7 +127,9 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/Incident.js',
   'models/InsuranceTariff.js',
   'models/LearningPath.js',
-  'models/MDTCoordination.js',
+  // models/MDTCoordination.js — removed W629: unifiedRehabPlanSchema callback
+  // hook converted to async (ratchet-DOWN) so the sibling
+  // deriveBranchFromBeneficiary hook can be async on the same event.
   'models/Maintenance.js',
   'models/MaintenancePrediction.js',
   'models/ModuleProgress.js',

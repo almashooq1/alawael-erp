@@ -67,9 +67,19 @@ echo "[pre-push] route-shadowing check (literal route after :param sibling)…"
 cd backend && npm run check:route-shadowing
 cd ..
 
-echo "[pre-push] backend quality:push…"
-cd backend && npm run quality:push
-cd ..
+# 2026-05-30: heavy `quality:push` (test:guard + test:domains + test:phase2,
+# ~10–13 min) MOVED to the "CI Pipeline" GitHub Actions job — it already
+# runs the full test:sprint on every push to main. Keeping it locally
+# turned every push into a 13-min wait + a flaky-test-equals-blocked-push
+# loop, and was the root reason for the `cannot lock ref HEAD` cross-agent
+# commit races (long-running pre-push window). To run the heavy gate
+# locally on demand: `cd backend && npm run quality:push`.
+# Override (run locally anyway): RUN_HEAVY_GATE=1 git push
+if [ "${RUN_HEAVY_GATE:-0}" = "1" ]; then
+  echo "[pre-push] backend quality:push (RUN_HEAVY_GATE=1)…"
+  cd backend && npm run quality:push
+  cd ..
+fi
 
 echo "[pre-push] frontend lint (--max-warnings=0)…"
 cd frontend && npm run lint

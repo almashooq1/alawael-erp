@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 const {
@@ -1138,6 +1138,8 @@ router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => 
 
     // Open findings count
     const openFindings = await QualityAudit.aggregate([
+      // W662 — branch-scope (QualityAudit carries branchId) before unwind.
+      { $match: { ...branchFilter(req) } },
       { $unwind: '$findings' },
       { $match: { 'findings.status': { $in: ['open', 'in_progress'] } } },
       { $count: 'total' },
@@ -1229,7 +1231,8 @@ router.get('/reports/findings-trend', authenticate, requireBranchAccess, async (
   try {
     const { fromDate, toDate } = req.query;
 
-    const matchFilter = {};
+    // W662 — branch-scope the trend aggregate (QualityAudit carries branchId).
+    const matchFilter = { ...branchFilter(req) };
     if (fromDate || toDate) {
       matchFilter.auditDate = {};
       if (fromDate) matchFilter.auditDate.$gte = new Date(fromDate);

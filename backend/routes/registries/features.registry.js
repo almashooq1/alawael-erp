@@ -58,6 +58,7 @@ module.exports = function registerFeatureRoutes(
   const seatAllocationRoutes = safeRequire('../routes/seat-allocation.routes');
   const sponsorshipRoutes = safeRequire('../routes/sponsorship.routes');
   const instrumentalSwallowRoutes = safeRequire('../routes/instrumental-swallow.routes');
+  const artsTherapyRoutes = safeRequire('../routes/arts-therapy.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -175,6 +176,10 @@ module.exports = function registerFeatureRoutes(
   // findings the W670 bedside DysphagiaAssessment can only refer for (PAS, impaired phases,
   // safe IDDSI consistencies). Completes the dysphagia → instrumental → diet (W368) loop.
   dualMountAuth(app, 'instrumental-swallow', instrumentalSwallowRoutes, authenticate);
+  // Wave 685: Creative-arts therapy sessions (العلاج بالفنون التعبيرية — موسيقى/فن/دراما/حركة/لعب).
+  // Closes the gap where music/art therapy existed only as TherapySession enum values with no
+  // modality-specific data (materials, engagement, mood shift, creative-output artifact).
+  dualMountAuth(app, 'arts-therapy', artsTherapyRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

@@ -52,6 +52,12 @@ const ENTRIES = [
   require('./schemas/instrumental-swallow-study.canonical'),
   // W685 creative-arts therapy session (music/art/drama) (2026-05-31):
   require('./schemas/creative-arts-therapy-session.canonical'),
+  // W689 ABA discrete-trial training session (2026-05-31):
+  require('./schemas/dtt-session.canonical'),
+  // W691 sensory-diet program + Snoezelen sessions (2026-05-31):
+  require('./schemas/sensory-diet-program.canonical'),
+  // W693 adjunct therapy (hydro/hippo/animal-assisted) sessions (2026-05-31):
+  require('./schemas/adjunct-therapy-session.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

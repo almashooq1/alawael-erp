@@ -793,6 +793,18 @@ on:
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dtt-session-wave689.test.js'
+      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sensory-diet-wave691.test.js'
+      - 'backend/__tests__/sensory-diet-behavioral-wave691.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/icf-codes-endpoint-wave692.test.js'
+      - 'backend/__tests__/icf-codes-endpoint-behavioral-wave692.test.js'
+      - 'backend/__tests__/adjunct-therapy-wave693.test.js'
+      - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
@@ -1587,6 +1599,18 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dtt-session-wave689.test.js'
+      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sensory-diet-wave691.test.js'
+      - 'backend/__tests__/sensory-diet-behavioral-wave691.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/icf-codes-endpoint-wave692.test.js'
+      - 'backend/__tests__/icf-codes-endpoint-behavioral-wave692.test.js'
+      - 'backend/__tests__/adjunct-therapy-wave693.test.js'
+      - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
       - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'

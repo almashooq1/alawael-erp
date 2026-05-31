@@ -15,6 +15,8 @@ __tests__/adapter-public-interface.test.js
 __tests__/adapter-rate-limiter.test.js
 __tests__/adaptive-sports-behavioral-wave362.test.js
 __tests__/adaptive-sports-wave362.test.js
+__tests__/adjunct-therapy-behavioral-wave693.test.js
+__tests__/adjunct-therapy-wave693.test.js
 __tests__/admin-anomaly-wiring-wave257e.test.js
 __tests__/admin-pages-routed.test.js
 __tests__/admin-routes-auth-wiring.test.js
@@ -174,6 +176,8 @@ __tests__/document-expiry-radar-service.test.js
 __tests__/domain-sod-policy.test.js
 __tests__/dpia-lifecycle-wave285.test.js
 __tests__/dsar-hash-script.test.js
+__tests__/dtt-session-behavioral-wave689.test.js
+__tests__/dtt-session-wave689.test.js
 __tests__/dual-mount-auth-locked.test.js
 __tests__/dysphagia-assessment-wave670.test.js
 __tests__/embedding-provider-live-wave283f.test.js
@@ -229,6 +233,8 @@ __tests__/hikvision-fraud-models-behavioral-wave100.test.js
 __tests__/hikvision-job-and-event-behavioral-wave108-109.test.js
 __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
 __tests__/icf-aggregate-wave457.test.js
+__tests__/icf-codes-endpoint-behavioral-wave692.test.js
+__tests__/icf-codes-endpoint-wave692.test.js
 __tests__/icf-core-sets-seeding-wave448.test.js
 __tests__/icf-qualifier-mapping-wave453.test.js
 __tests__/idor-crm-enhanced-branch-filter-wave508.test.js
@@ -427,6 +433,8 @@ __tests__/seizure-log-wave356.test.js
 __tests__/self-advocacy-behavioral-wave462.test.js
 __tests__/self-advocacy-routes-wave518.test.js
 __tests__/self-advocacy-wave462.test.js
+__tests__/sensory-diet-behavioral-wave691.test.js
+__tests__/sensory-diet-wave691.test.js
 __tests__/services-use-defensive-guard-wave412.test.js
 __tests__/session-branch-tenancy-wave647.test.js
 __tests__/sibling-adjustment-behavioral-wave468.test.js

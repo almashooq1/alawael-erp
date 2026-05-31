@@ -128,6 +128,13 @@ const BASELINE_CONFIDENCE = 0.6;
 // Matches progressPrediction.service.js convention.
 const ACCURACY_TOLERANCE = 0.15;
 
+// Wave 656 — minimum number of *validated* predictions below which a reported
+// accuracy proportion is statistically unstable. A "100% accuracy" off a
+// single validated outcome must not be shown with the same authority as one
+// off hundreds; reports carry `accuracyReliable` keyed on this threshold so
+// dashboards can footnote/grey-out low-sample accuracy instead of trumpeting it.
+const MIN_VALIDATED_FOR_ACCURACY = 10;
+
 const REASON = Object.freeze({
   NO_SHOW_PREDICTION_UNAVAILABLE: 'NO_SHOW_PREDICTION_UNAVAILABLE',
   NO_SHOW_APPOINTMENT_NOT_FOUND: 'NO_SHOW_APPOINTMENT_NOT_FOUND',
@@ -171,6 +178,7 @@ module.exports = {
   DEFAULT_BATCH_HORIZON_HOURS,
   BASELINE_CONFIDENCE,
   ACCURACY_TOLERANCE,
+  MIN_VALIDATED_FOR_ACCURACY,
   REASON,
   MODEL_VERSION,
   bandForScore,

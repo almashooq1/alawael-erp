@@ -22,7 +22,10 @@ jest.setTimeout(30000);
 const fs = require('fs');
 const path = require('path');
 
-const MODEL_SRC = fs.readFileSync(path.join(__dirname, '..', 'models', 'TherapySession.js'), 'utf8');
+const MODEL_SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'models', 'TherapySession.js'),
+  'utf8'
+);
 const BIA_SRC = fs.readFileSync(
   path.join(__dirname, '..', 'routes', 'bi-analytics.routes.js'),
   'utf8'
@@ -40,13 +43,13 @@ describe('W647 static — TherapySession model carries branch tenancy', () => {
 describe('W647 static — BI session aggregates are branch-scoped', () => {
   it('bi-analytics adds requireBranchAccess + scopes every TherapySession aggregate', () => {
     expect(BIA_SRC).toMatch(/requireBranchAccess/);
-    const bodies = (BIA_SRC.match(/TherapySession\.aggregate\s*\(\s*\[[^]*?\$match[^]*?\}/g) || []);
+    const bodies = BIA_SRC.match(/TherapySession\.aggregate\s*\(\s*\[[^]*?\$match[^]*?\}/g) || [];
     expect(bodies.length).toBeGreaterThanOrEqual(4);
     expect(bodies.every(b => /(scope|branchFilter)/.test(b))).toBe(true);
   });
   it('bi.routes scopes its TherapySession aggregates', () => {
     expect(BI_SRC).toMatch(/branchFilter/);
-    const bodies = (BI_SRC.match(/TherapySession\.aggregate\s*\(\s*\[[^]*?\$match[^]*?\}/g) || []);
+    const bodies = BI_SRC.match(/TherapySession\.aggregate\s*\(\s*\[[^]*?\$match[^]*?\}/g) || [];
     expect(bodies.length).toBeGreaterThanOrEqual(1);
     expect(bodies.every(b => /branchFilter|sessionFilter/.test(b))).toBe(true);
   });

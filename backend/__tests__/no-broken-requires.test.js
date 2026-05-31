@@ -72,6 +72,12 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // Not a real require — the scanner matches the literal string-fixture pattern
   // through the surrounding quotes.
   path.join('__tests__', 'check-dormant-modules-script.test.js'),
+  // Authz check-script self-tests assert REGEXes against require(...) strings
+  // embedded in quoted test fixtures (e.g. ROLES_DEF_RE.test("... require('./constants/roles.constants') ...")
+  // and IMPORTS_CAN_RE.test("... require('./can') ...")). These are literal
+  // fixture strings, not real imports — the scanner is fooled by the quotes.
+  path.join('__tests__', 'check-authz-consolidation-script.test.js'),
+  path.join('__tests__', 'check-can-scope-contract-script.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

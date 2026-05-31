@@ -59,7 +59,16 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/beneficiary-lifecycle.registry');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  assertBranchMatch,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
+// Wave 597 — actionable roll-up over a transition's persisted side-effect
+// audit rows (W595 reducer, wired live into executeTransition in W596).
+const {
+  summarizeSideEffectResults,
+} = require('../intelligence/beneficiary-lifecycle-side-effects.service');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -322,6 +331,61 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
     }
   });
 
+  // ─── GET /transitions/:id/side-effects-summary ────────────
+  // Wave 597 — actionable operational roll-up of the side-effects that
+  // ran when this transition was executed. Recomputes the W595 summary
+  // from the persisted `sideEffectsAudit` rows so dashboards/operators
+  // see real clinical-mutation totals + category buckets without
+  // re-aggregating the raw audit array.
+  router.get('/transitions/:id/side-effects-summary', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+      if (typeof service.getTransitionById !== 'function') {
+        return res.status(501).json({
+          success: false,
+          message: 'GET_BY_ID_NOT_WIRED',
+          reason: 'GET_BY_ID_NOT_WIRED',
+        });
+      }
+      const record = await service.getTransitionById(req.params.id);
+      if (!record) {
+        return res.status(404).json({
+          success: false,
+          message: 'TRANSITION_NOT_FOUND',
+          reason: 'TRANSITION_NOT_FOUND',
+        });
+      }
+      // Cross-branch isolation (W269 doctrine): a restricted caller may
+      // only read a transition owned by their branch. No-op for
+      // cross-branch roles + test contexts without req.branchScope.
+      assertBranchMatch(req, record.sourceBranchId, 'lifecycle transition');
+
+      const auditRows = Array.isArray(record.sideEffectsAudit) ? record.sideEffectsAudit : [];
+      const sideEffectsSummary = summarizeSideEffectResults(
+        auditRows.map(s => ({
+          ...(s && s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+          status: s ? s.status : undefined,
+        }))
+      );
+      return res.json({
+        success: true,
+        data: {
+          transitionRecordId: record._id,
+          transitionId: record.transitionId,
+          status: record.status,
+          sideEffectsSummary,
+          sideEffectsAudit: auditRows,
+        },
+      });
+    } catch (err) {
+      // assertBranchMatch throws Error & { status: 403|404 } — honor it.
+      if (err && Number.isInteger(err.status)) {
+        return res.status(err.status).json({ success: false, error: err.message });
+      }
+      return safeError(res, err, 'lifecycle.transition.side-effects-summary');
+    }
+  });
+
   // ─── GET /beneficiaries/:beneficiaryId/transitions ────────
   router.get('/beneficiaries/:beneficiaryId/transitions', async (req, res) => {
     try {
@@ -333,6 +397,182 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
       });
     } catch (err) {
       return safeError(res, err, 'lifecycle.transition.history');
+    }
+  });
+
+  // ─── GET /beneficiaries/:beneficiaryId/side-effects-summary ─
+  // Wave 599 — beneficiary-level actionable roll-up. Aggregates the
+  // persisted side-effect audit rows across EVERY transition in the
+  // beneficiary's lifecycle history and feeds them through the same
+  // W595 reducer used by the per-transition endpoint, so a single panel
+  // can show the real clinical-mutation totals + category buckets a
+  // beneficiary accumulated over their whole journey. Cross-branch
+  // isolation (W269) is enforced upstream by the `beneficiaryId`
+  // `branchScopedBeneficiaryParam` middleware registered above — a
+  // restricted caller can only resolve a beneficiary owned by their
+  // branch, so no per-row branch filtering is needed (and filtering by
+  // sourceBranchId would wrongly hide a transferred beneficiary's
+  // pre-transfer journey from their current branch).
+  router.get('/beneficiaries/:beneficiaryId/side-effects-summary', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+
+      // Wave 607 — optional `?windowDays=N` bounds the scan to the
+      // beneficiary's transitions within the last N days (mirrors the
+      // branch endpoint W604). Omitted/invalid => whole journey (backward
+      // compatible with W599). Best-effort age uses executedAt then
+      // requestedAt then the mongoose timestamps; records without ANY
+      // timestamp are kept (never silently drop a transition).
+      let windowDays = null;
+      if (req.query.windowDays != null && req.query.windowDays !== '') {
+        const parsed = Number(req.query.windowDays);
+        if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0 || parsed > 3650) {
+          return res.status(400).json({
+            success: false,
+            message: 'INVALID_WINDOW_DAYS',
+            reason: 'INVALID_WINDOW_DAYS',
+          });
+        }
+        windowDays = parsed;
+      }
+      const cutoffMs = windowDays != null ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : null;
+      const recordTimeMs = r => {
+        const raw = r && (r.executedAt || r.requestedAt || r.createdAt || r.updatedAt);
+        if (raw == null) return null;
+        const t = new Date(raw).getTime();
+        return Number.isFinite(t) ? t : null;
+      };
+
+      const records = await service.getTransitionHistory(req.params.beneficiaryId);
+      const history = Array.isArray(records) ? records : [];
+      const all =
+        cutoffMs == null
+          ? history
+          : history.filter(r => {
+              const t = recordTimeMs(r);
+              return t == null || t >= cutoffMs; // keep undateable rows
+            });
+
+      const flatRows = [];
+      let transitionsWithSideEffects = 0;
+      for (const record of all) {
+        const auditRows =
+          record && Array.isArray(record.sideEffectsAudit) ? record.sideEffectsAudit : [];
+        if (auditRows.length > 0) transitionsWithSideEffects += 1;
+        for (const s of auditRows) {
+          flatRows.push({
+            ...(s && s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+            status: s ? s.status : undefined,
+          });
+        }
+      }
+
+      const sideEffectsSummary = summarizeSideEffectResults(flatRows);
+      return res.json({
+        success: true,
+        data: {
+          beneficiaryId: req.params.beneficiaryId,
+          windowDays: windowDays || null,
+          transitionsConsidered: all.length,
+          transitionsWithSideEffects,
+          sideEffectsSummary,
+        },
+      });
+    } catch (err) {
+      return safeError(res, err, 'lifecycle.beneficiary.side-effects-summary');
+    }
+  });
+
+  // ─── GET /side-effects-summary (branch-level) ──────────────
+  // Wave 601 — branch-scoped operational roll-up. Aggregates the
+  // persisted side-effect audit rows across EVERY transition of EVERY
+  // beneficiary, scoped to the caller's branch, and feeds them through
+  // the same W595 reducer. Powers a quality/ops dashboard tile showing
+  // how many real clinical mutations (cancelled appointments, closed
+  // episodes, episode-releases) the branch accumulated.
+  //
+  // Cross-branch isolation (W269): `effectiveBranchScope` returns the
+  // restricted caller's OWN branch (ignoring any `?branchId=` spoof);
+  // an unrestricted cross-branch role may pass `?branchId=` to scope,
+  // or omit it to aggregate every branch. Records are filtered by
+  // `sourceBranchId` — the branch that owned the beneficiary when the
+  // transition executed.
+  router.get('/side-effects-summary', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+      const branchScope = effectiveBranchScope(req);
+
+      // Wave 604 — optional `?windowDays=N` bounds the operational scan to
+      // transitions that occurred within the last N days. Omitted/invalid =>
+      // whole history (backward compatible with W601). Best-effort age uses
+      // executedAt (side effects fire at execution) then requestedAt then the
+      // mongoose timestamps; records without ANY timestamp are kept (cannot
+      // prove they are old — never silently drop data).
+      let windowDays = null;
+      if (req.query.windowDays != null && req.query.windowDays !== '') {
+        const parsed = Number(req.query.windowDays);
+        if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0 || parsed > 3650) {
+          return res.status(400).json({
+            success: false,
+            message: 'INVALID_WINDOW_DAYS',
+            reason: 'INVALID_WINDOW_DAYS',
+          });
+        }
+        windowDays = parsed;
+      }
+      const cutoffMs = windowDays != null ? Date.now() - windowDays * 24 * 60 * 60 * 1000 : null;
+      const recordTimeMs = r => {
+        const raw = r && (r.executedAt || r.requestedAt || r.createdAt || r.updatedAt);
+        if (raw == null) return null;
+        const t = new Date(raw).getTime();
+        return Number.isFinite(t) ? t : null;
+      };
+
+      const records = await service.getTransitionHistory(null);
+      const all = Array.isArray(records) ? records : [];
+      const branchScoped = branchScope
+        ? all.filter(r => r && r.sourceBranchId === branchScope)
+        : all;
+      const scoped =
+        cutoffMs == null
+          ? branchScoped
+          : branchScoped.filter(r => {
+              const t = recordTimeMs(r);
+              return t == null || t >= cutoffMs; // keep undateable rows
+            });
+
+      const flatRows = [];
+      const beneficiaries = new Set();
+      let transitionsWithSideEffects = 0;
+      for (const record of scoped) {
+        if (record && record.beneficiaryId != null) {
+          beneficiaries.add(String(record.beneficiaryId));
+        }
+        const auditRows =
+          record && Array.isArray(record.sideEffectsAudit) ? record.sideEffectsAudit : [];
+        if (auditRows.length > 0) transitionsWithSideEffects += 1;
+        for (const s of auditRows) {
+          flatRows.push({
+            ...(s && s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+            status: s ? s.status : undefined,
+          });
+        }
+      }
+
+      const sideEffectsSummary = summarizeSideEffectResults(flatRows);
+      return res.json({
+        success: true,
+        data: {
+          branchId: branchScope || null,
+          windowDays: windowDays || null,
+          beneficiariesConsidered: beneficiaries.size,
+          transitionsConsidered: scoped.length,
+          transitionsWithSideEffects,
+          sideEffectsSummary,
+        },
+      });
+    } catch (err) {
+      return safeError(res, err, 'lifecycle.branch.side-effects-summary');
     }
   });
 

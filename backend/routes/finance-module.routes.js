@@ -1007,7 +1007,11 @@ router.get(
   '/reports/revenue',
   asyncHandler(async (req, res) => {
     const { from_date, to_date, group_by = 'month' } = req.query;
-    const filter = { ...branchScopeSnake(req), deleted_at: null, status: { $in: ['paid', 'partial'] } }; // W651
+    const filter = {
+      ...branchScopeSnake(req),
+      deleted_at: null,
+      status: { $in: ['paid', 'partial'] },
+    }; // W651
     if (from_date || to_date) {
       filter.invoice_date = {};
       if (from_date) filter.invoice_date.$gte = new Date(from_date);

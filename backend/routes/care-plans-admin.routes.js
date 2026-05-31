@@ -119,7 +119,10 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
     const [total, byStatus, dueReview, active, withEducation, withTherapy, withLifeSkills] =
       await Promise.all([
         CarePlan.countDocuments({ ...scope }),
-        CarePlan.aggregate([{ $match: { ...scope } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+        CarePlan.aggregate([
+          { $match: { ...scope } },
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+        ]),
         CarePlan.countDocuments({
           ...scope,
           reviewDate: { $gte: now, $lte: soon },

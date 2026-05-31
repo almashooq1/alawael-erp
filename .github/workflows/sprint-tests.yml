@@ -774,6 +774,9 @@ on:
       - 'backend/__tests__/session-branch-tenancy-wave647.test.js'
       - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
+      - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1531,6 +1534,9 @@ on:
       - 'backend/__tests__/session-branch-tenancy-wave647.test.js'
       - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
+      - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

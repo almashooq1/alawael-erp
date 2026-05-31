@@ -1,0 +1,544 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "setName": "reference_common",
+  "setVersion": "2017",
+  "displayName": {
+    "en": "ICF Reference — Common second-level codes (rehab day-care)",
+    "ar": "مرجع ICF — الرموز الشائعة من المستوى الثاني (الرعاية النهارية التأهيلية)"
+  },
+  "description": {
+    "en": "Curated set of the standard second-level ICF categories most used in a developmental / disability day-rehabilitation centre (intellectual disability, cerebral palsy, autism). Each code is parented (parentCode) to its first-level chapter so /codes/tree returns a real chapter→category hierarchy. Codes already shipped in generic_brief are intentionally omitted to avoid duplication (the seed merges memberships by code).",
+    "ar": "مجموعة منتقاة من فئات ICF القياسية من المستوى الثاني الأكثر استخداماً في مركز رعاية نهارية تأهيلية نمائي (الإعاقة الذهنية، الشلل الدماغي، التوحّد). كل رمز مرتبط بفصله من المستوى الأول عبر parentCode حتى تُرجع /codes/tree تسلسلاً هرمياً حقيقياً فصل←فئة. الرموز المشحونة سابقاً في generic_brief محذوفة عمداً لتجنّب التكرار."
+  },
+  "source": {
+    "publication": "WHO International Classification of Functioning, Disability and Health (ICF), 2017 update — second-level categories",
+    "url": "https://icd.who.int/browse/2024-01/icf/en"
+  },
+  "codes": [
+    {
+      "code": "b110",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Consciousness functions",
+      "titleAr": "وظائف الوعي"
+    },
+    {
+      "code": "b114",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Orientation functions",
+      "titleAr": "وظائف التوجّه"
+    },
+    {
+      "code": "b140",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Attention functions",
+      "titleAr": "وظائف الانتباه"
+    },
+    {
+      "code": "b144",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Memory functions",
+      "titleAr": "وظائف الذاكرة"
+    },
+    {
+      "code": "b156",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Perceptual functions",
+      "titleAr": "الوظائف الإدراكية"
+    },
+    {
+      "code": "b164",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Higher-level cognitive functions",
+      "titleAr": "الوظائف المعرفية العليا"
+    },
+    {
+      "code": "b167",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Mental functions of language",
+      "titleAr": "الوظائف العقلية للغة"
+    },
+    {
+      "code": "b176",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "b1",
+      "title": "Mental function of sequencing complex movements",
+      "titleAr": "الوظيفة العقلية لتسلسل الحركات المعقّدة"
+    },
+    {
+      "code": "b210",
+      "component": "bodyFunctions",
+      "chapter": 2,
+      "level": 2,
+      "parentCode": "b2",
+      "title": "Seeing functions",
+      "titleAr": "وظائف الإبصار"
+    },
+    {
+      "code": "b230",
+      "component": "bodyFunctions",
+      "chapter": 2,
+      "level": 2,
+      "parentCode": "b2",
+      "title": "Hearing functions",
+      "titleAr": "وظائف السمع"
+    },
+    {
+      "code": "b235",
+      "component": "bodyFunctions",
+      "chapter": 2,
+      "level": 2,
+      "parentCode": "b2",
+      "title": "Vestibular functions",
+      "titleAr": "الوظائف الدهليزية (التوازن)"
+    },
+    {
+      "code": "b310",
+      "component": "bodyFunctions",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "b3",
+      "title": "Voice functions",
+      "titleAr": "وظائف الصوت"
+    },
+    {
+      "code": "b320",
+      "component": "bodyFunctions",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "b3",
+      "title": "Articulation functions",
+      "titleAr": "وظائف النطق"
+    },
+    {
+      "code": "b330",
+      "component": "bodyFunctions",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "b3",
+      "title": "Fluency and rhythm of speech functions",
+      "titleAr": "وظائف طلاقة وإيقاع الكلام"
+    },
+    {
+      "code": "b710",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "b7",
+      "title": "Mobility of joint functions",
+      "titleAr": "وظائف حركة المفاصل"
+    },
+    {
+      "code": "b730",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "b7",
+      "title": "Muscle power functions",
+      "titleAr": "وظائف قوة العضلات"
+    },
+    {
+      "code": "b735",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "b7",
+      "title": "Muscle tone functions",
+      "titleAr": "وظائف التوتر العضلي"
+    },
+    {
+      "code": "b760",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "b7",
+      "title": "Control of voluntary movement functions",
+      "titleAr": "وظائف التحكم في الحركة الإرادية"
+    },
+    {
+      "code": "b765",
+      "component": "bodyFunctions",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "b7",
+      "title": "Involuntary movement functions",
+      "titleAr": "وظائف الحركة اللاإرادية"
+    },
+
+    {
+      "code": "s110",
+      "component": "bodyStructures",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "s1",
+      "title": "Structure of brain",
+      "titleAr": "بنية الدماغ"
+    },
+    {
+      "code": "s730",
+      "component": "bodyStructures",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "s7",
+      "title": "Structure of upper extremity",
+      "titleAr": "بنية الطرف العلوي"
+    },
+    {
+      "code": "s750",
+      "component": "bodyStructures",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "s7",
+      "title": "Structure of lower extremity",
+      "titleAr": "بنية الطرف السفلي"
+    },
+
+    {
+      "code": "d110",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Watching",
+      "titleAr": "المشاهدة"
+    },
+    {
+      "code": "d115",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Listening",
+      "titleAr": "الاستماع"
+    },
+    {
+      "code": "d130",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Copying",
+      "titleAr": "التقليد"
+    },
+    {
+      "code": "d140",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Learning to read",
+      "titleAr": "تعلّم القراءة"
+    },
+    {
+      "code": "d145",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Learning to write",
+      "titleAr": "تعلّم الكتابة"
+    },
+    {
+      "code": "d150",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Learning to calculate",
+      "titleAr": "تعلّم الحساب"
+    },
+    {
+      "code": "d166",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Reading",
+      "titleAr": "القراءة"
+    },
+    {
+      "code": "d170",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Writing",
+      "titleAr": "الكتابة"
+    },
+    {
+      "code": "d177",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "d1",
+      "title": "Making decisions",
+      "titleAr": "اتخاذ القرارات"
+    },
+    {
+      "code": "d310",
+      "component": "activitiesParticipation",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "d3",
+      "title": "Communicating with — receiving — spoken messages",
+      "titleAr": "تلقّي الرسائل المنطوقة"
+    },
+    {
+      "code": "d330",
+      "component": "activitiesParticipation",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "d3",
+      "title": "Speaking",
+      "titleAr": "التحدّث"
+    },
+    {
+      "code": "d335",
+      "component": "activitiesParticipation",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "d3",
+      "title": "Producing nonverbal messages",
+      "titleAr": "إنتاج الرسائل غير اللفظية"
+    },
+    {
+      "code": "d415",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "d4",
+      "title": "Maintaining a body position",
+      "titleAr": "المحافظة على وضعية الجسم"
+    },
+    {
+      "code": "d440",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "d4",
+      "title": "Fine hand use",
+      "titleAr": "الاستخدام الدقيق لليد"
+    },
+    {
+      "code": "d445",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "d4",
+      "title": "Hand and arm use",
+      "titleAr": "استخدام اليد والذراع"
+    },
+    {
+      "code": "d455",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "d4",
+      "title": "Moving around",
+      "titleAr": "التنقّل من مكان لآخر"
+    },
+    {
+      "code": "d520",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "d5",
+      "title": "Caring for body parts",
+      "titleAr": "العناية بأجزاء الجسم"
+    },
+    {
+      "code": "d540",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "d5",
+      "title": "Dressing",
+      "titleAr": "ارتداء الملابس"
+    },
+    {
+      "code": "d560",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "d5",
+      "title": "Drinking",
+      "titleAr": "الشرب"
+    },
+    {
+      "code": "d720",
+      "component": "activitiesParticipation",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "d7",
+      "title": "Complex interpersonal interactions",
+      "titleAr": "التفاعلات الشخصية المعقّدة"
+    },
+    {
+      "code": "d750",
+      "component": "activitiesParticipation",
+      "chapter": 7,
+      "level": 2,
+      "parentCode": "d7",
+      "title": "Informal social relationships",
+      "titleAr": "العلاقات الاجتماعية غير الرسمية"
+    },
+    {
+      "code": "d820",
+      "component": "activitiesParticipation",
+      "chapter": 8,
+      "level": 2,
+      "parentCode": "d8",
+      "title": "School education",
+      "titleAr": "التعليم المدرسي"
+    },
+    {
+      "code": "d880",
+      "component": "activitiesParticipation",
+      "chapter": 8,
+      "level": 2,
+      "parentCode": "d8",
+      "title": "Engagement in play",
+      "titleAr": "الانخراط في اللعب"
+    },
+    {
+      "code": "d920",
+      "component": "activitiesParticipation",
+      "chapter": 9,
+      "level": 2,
+      "parentCode": "d9",
+      "title": "Recreation and leisure",
+      "titleAr": "الترفيه والاستجمام"
+    },
+
+    {
+      "code": "e115",
+      "component": "environmentalFactors",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "e1",
+      "title": "Products and technology for personal use in daily living",
+      "titleAr": "المنتجات والتقنية للاستخدام الشخصي في الحياة اليومية"
+    },
+    {
+      "code": "e120",
+      "component": "environmentalFactors",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "e1",
+      "title": "Products and technology for personal indoor and outdoor mobility and transportation",
+      "titleAr": "منتجات وتقنية التنقّل والمواصلات الشخصية"
+    },
+    {
+      "code": "e125",
+      "component": "environmentalFactors",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "e1",
+      "title": "Products and technology for communication",
+      "titleAr": "منتجات وتقنية التواصل"
+    },
+    {
+      "code": "e130",
+      "component": "environmentalFactors",
+      "chapter": 1,
+      "level": 2,
+      "parentCode": "e1",
+      "title": "Products and technology for education",
+      "titleAr": "منتجات وتقنية التعليم"
+    },
+    {
+      "code": "e320",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "e3",
+      "title": "Friends",
+      "titleAr": "الأصدقاء"
+    },
+    {
+      "code": "e330",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "e3",
+      "title": "People in positions of authority",
+      "titleAr": "الأشخاص في مواقع السلطة"
+    },
+    {
+      "code": "e340",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 2,
+      "parentCode": "e3",
+      "title": "Personal care providers and personal assistants",
+      "titleAr": "مقدّمو الرعاية الشخصية والمساعدون الشخصيون"
+    },
+    {
+      "code": "e425",
+      "component": "environmentalFactors",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "e4",
+      "title": "Individual attitudes of acquaintances, peers, colleagues and community members",
+      "titleAr": "اتجاهات المعارف والأقران والزملاء وأفراد المجتمع"
+    },
+    {
+      "code": "e460",
+      "component": "environmentalFactors",
+      "chapter": 4,
+      "level": 2,
+      "parentCode": "e4",
+      "title": "Societal attitudes",
+      "titleAr": "الاتجاهات المجتمعية"
+    },
+    {
+      "code": "e570",
+      "component": "environmentalFactors",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "e5",
+      "title": "Social security services, systems and policies",
+      "titleAr": "خدمات وأنظمة وسياسات الضمان الاجتماعي"
+    },
+    {
+      "code": "e575",
+      "component": "environmentalFactors",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "e5",
+      "title": "General social support services, systems and policies",
+      "titleAr": "خدمات وأنظمة الدعم الاجتماعي العامة"
+    },
+    {
+      "code": "e585",
+      "component": "environmentalFactors",
+      "chapter": 5,
+      "level": 2,
+      "parentCode": "e5",
+      "title": "Education and training services, systems and policies",
+      "titleAr": "خدمات وأنظمة وسياسات التعليم والتدريب"
+    }
+  ]
+}

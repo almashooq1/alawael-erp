@@ -101,7 +101,13 @@ const basePlan = (o = {}) => ({
   beneficiary: oid(),
   ...o,
 });
-const goal = (o = {}) => ({ title: 'هدف', domain: 'PHYSICAL', status: 'ACTIVE', progress: 0, ...o });
+const goal = (o = {}) => ({
+  title: 'هدف',
+  domain: 'PHYSICAL',
+  status: 'ACTIVE',
+  progress: 0,
+  ...o,
+});
 
 describe('W629 behavioral — branchId derivation + async hook coexistence', () => {
   it('derives branchId from the beneficiary when unset', async () => {

@@ -42,6 +42,17 @@ const COMPONENT_PREFIX = {
 };
 
 /**
+ * Minimum number of scored observations below which a per-code average is
+ * statistically unreliable AND a small-cell re-identification risk for
+ * national submissions. Each ranked code entry carries a boolean `reliable`
+ * (Wave 655) so governance dashboards can footnote / grey-out low-n rows and
+ * Disability-Authority exports can suppress cells below this threshold,
+ * instead of presenting an n=1 average with the same authority as an n=50 one.
+ * Exported so callers apply one consistent suppression threshold.
+ */
+const MIN_RELIABLE_SAMPLE = 5;
+
+/**
  * Aggregate ICF assessments into a branch-level summary.
  *
  * @param {Array} assessments
@@ -126,6 +137,9 @@ function aggregateByBranch(assessments, opts = {}) {
     count: s.count,
     averageQualifier:
       s.qualifierCount > 0 ? Number((s.qualifierSum / s.qualifierCount).toFixed(2)) : null,
+    // Wave 655 — the average is only meaningful over its scored sample; flag
+    // low-n codes so consumers never rank an n=1 average beside an n=50 one.
+    reliable: s.qualifierCount >= MIN_RELIABLE_SAMPLE,
     component: s.component,
   }));
   const topImpaired = codeList
@@ -193,6 +207,9 @@ function aggregateImprovements(pairs) {
     code,
     averageDelta: Number((s.sumDelta / s.count).toFixed(2)),
     paired: s.count,
+    // Wave 655 — same small-sample honesty: a delta averaged over 1 pair must
+    // not rank beside one averaged over many.
+    reliable: s.count >= MIN_RELIABLE_SAMPLE,
     improvements: s.improvements,
     declines: s.declines,
     stable: s.stable,
@@ -282,4 +299,5 @@ module.exports = Object.freeze({
   // Constants
   VALID_COMPONENTS,
   COMPONENT_PREFIX,
+  MIN_RELIABLE_SAMPLE,
 });

@@ -34,7 +34,9 @@ describe('W633 static — ReferralTicket model carries branch tenancy', () => {
   it('declares branchId reffing Branch + index + derive hook', () => {
     expect(MODEL_SRC).toMatch(/branchId:\s*\{[^}]*ref:\s*'Branch'/);
     expect(MODEL_SRC).toMatch(/referralTicketSchema\.index\(\{\s*branchId:\s*1,\s*status:\s*1/);
-    expect(MODEL_SRC).toMatch(/referralTicketSchema\.pre\(\s*'save',\s*async function deriveBranchFromBeneficiary/);
+    expect(MODEL_SRC).toMatch(
+      /referralTicketSchema\.pre\(\s*'save',\s*async function deriveBranchFromBeneficiary/
+    );
   });
 });
 

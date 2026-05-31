@@ -57,6 +57,11 @@ const REASON = Object.freeze({
 // the lookup-by-tier shape (used by checkMfaTier below) stays the same.
 const sensitivityGrade = require('./sensitivity-grade.lib');
 const evidenceSnapshot = require('./evidence-snapshot.lib');
+// Wave 596 — actionable summary reducer over the dispatched side-effect
+// results. Pure + total; used to enrich the execute audit and return.
+const {
+  summarizeSideEffectResults,
+} = require('./beneficiary-lifecycle-side-effects.service');
 const MFA_FRESHNESS_MIN = Object.freeze({
   2: Math.round(sensitivityGrade.SENSITIVITY_GRADES.HIGH.mfaFreshnessMs / 60_000),
   3: Math.round(sensitivityGrade.SENSITIVITY_GRADES.CRITICAL.mfaFreshnessMs / 60_000),
@@ -579,16 +584,42 @@ function createBeneficiaryLifecycleService({
       }
     }
 
+    // Wave 596 — derive an actionable summary from the dispatched rows.
+    // Each ok row carries the handler result in `metadata`; flatten so the
+    // pure reducer can bucket categories and total the real data mutations.
+    const sideEffectsSummary = summarizeSideEffectResults(
+      sideEffectsAudit.map(s => ({
+        ...(s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+        status: s.status,
+      }))
+    );
+
+    // Wave 654 — surface a degraded run to the operator at runtime instead of
+    // only in the audit payload. `health.clean` is false when a real cleanup
+    // was skipped (e.g. a model was unavailable) or a handler failed — a silent
+    // gap if it only lives in the audit log. Warn once with the actionable
+    // ratios so ops can react without querying audit events.
+    if (sideEffectsSummary.health && !sideEffectsSummary.health.clean) {
+      const h = sideEffectsSummary.health;
+      logger.warn &&
+        logger.warn(
+          `[lifecycle] degraded side-effects for transition ${record.transitionId} ` +
+            `(beneficiary ${record.beneficiaryId}): failedRatio=${h.failedRatio} ` +
+            `skippedRatio=${h.skippedRatio} mutated=${h.mutated}`
+        );
+    }
+
     await _audit('beneficiary.lifecycle.transition.executed', actor, {
       transitionRecordId: record._id,
       transitionId: record.transitionId,
       sideEffectsCount: sideEffectsAudit.length,
       sideEffectsFailed: sideEffectsAudit.filter(s => s.status === 'failed').length,
       sideEffectsSelfSkipped: sideEffectsAudit.filter(s => s.selfSkipped).length,
+      sideEffectsSummary,
       anchorTxId,
     });
 
-    return { ok: true, transitionRecord: record, sideEffectsAudit };
+    return { ok: true, transitionRecord: record, sideEffectsAudit, sideEffectsSummary };
   }
 
   // ─── cancelTransition ──────────────────────────────────────
@@ -690,6 +721,15 @@ function createBeneficiaryLifecycleService({
     return docs;
   }
 
+  // Wave 597 — single-record read helper. Activates the Wave-40
+  // `GET /transitions/:id` route (previously 501 GET_BY_ID_NOT_WIRED)
+  // and backs the side-effects-summary endpoint. Returns a lean doc
+  // or null.
+  async function getTransitionById(transitionRecordId) {
+    if (!transitionRecordId) return null;
+    return transitionLog.findById(transitionRecordId).lean();
+  }
+
   return {
     requestTransition,
     approveTransition,
@@ -698,6 +738,7 @@ function createBeneficiaryLifecycleService({
     reverseTransition,
     getAllowedTransitionsFor,
     getTransitionHistory,
+    getTransitionById,
     REASON,
   };
 }

@@ -35,7 +35,7 @@ router.get(
   authenticate,
   requireBranchAccess,
   authorize(RISK_READ_ROLES) /* W465 */,
-  async (_req, res) => {
+  async (req, res) => {
     try {
       const Risk = safeModel('EnterpriseRisk');
       const Assessment = safeModel('RiskAssessment');

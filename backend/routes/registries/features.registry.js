@@ -52,6 +52,9 @@ module.exports = function registerFeatureRoutes(
   const dysphagiaAssessmentRoutes = safeRequire('../routes/dysphagia-assessment.routes');
   const painAssessmentRoutes = safeRequire('../routes/pain-assessment.routes');
   const physiotherapyAssessmentRoutes = safeRequire('../routes/physiotherapy-assessment.routes');
+  const seatingPosturalAssessmentRoutes = safeRequire(
+    '../routes/seating-postural-assessment.routes'
+  );
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
@@ -151,6 +154,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'pain-assessment', painAssessmentRoutes, authenticate);
   // Wave 672: Physiotherapy assessment (تقييم العلاج الطبيعي) — ROM/Ashworth/strength/gait + initial-progress-discharge
   dualMountAuth(app, 'physiotherapy-assessment', physiotherapyAssessmentRoutes, authenticate);
+  // Wave 675: Seating & postural assessment (تقييم الجلوس والوضعية) — wheelchair/seating + postural risk + pressure-care
+  dualMountAuth(app, 'seating-postural-assessment', seatingPosturalAssessmentRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

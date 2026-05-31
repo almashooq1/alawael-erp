@@ -835,6 +835,19 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
       - 'backend/__tests__/adjunct-therapy-api-wave699.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/iq-assessments-routes-wave714.test.js'
+      - 'backend/__tests__/iq-report-service-wave714.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sponsorship-api-wave699.test.js'
+      - 'backend/__tests__/dtt-session-api-wave699.test.js'
+      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
+      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
+      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
+      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
+      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1653,6 +1666,19 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
       - 'backend/__tests__/adjunct-therapy-api-wave699.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/iq-assessments-routes-wave714.test.js'
+      - 'backend/__tests__/iq-report-service-wave714.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sponsorship-api-wave699.test.js'
+      - 'backend/__tests__/dtt-session-api-wave699.test.js'
+      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
+      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
+      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
+      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
+      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -6,10 +6,14 @@ const { authenticate, authorize } = require('../middleware/auth');
 const idempotency = require('../middleware/idempotency.middleware');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const paymentIdempotency = idempotency({
-  scope: req => (req.user && (req.user.tenantId || req.user.branchId)) || 'global',
+  // branchId is NOT in the JWT payload — fall back to per-user scoping so
+  // idempotency keys never collide across users (was collapsing to 'global').
+  scope: req =>
+    (req.user && (req.user.tenantId || (req.user._id && String(req.user._id)))) || 'global',
 });
 
 // ── قائمة المعاملات ─────────────────────────────────────────────────────────
@@ -17,10 +21,12 @@ router.get(
   '/transactions',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
-    const data = await paymentGatewayService.list({ ...req.query, branchId: req.user.branchId });
+    const data = await paymentGatewayService.list({
+      ...req.query,
+      branchId: effectiveBranchScope(req),
+    });
     res.json({ success: true, ...data });
   })
 );
@@ -30,10 +36,9 @@ router.get(
   '/stats',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
-    const data = await paymentGatewayService.getStats(req.user.branchId);
+    const data = await paymentGatewayService.getStats(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -43,12 +48,11 @@ router.get(
   '/reconciliation',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const { dateFrom, dateTo, gateway } = req.query;
     const data = await paymentGatewayService.getReconciliationReport(
-      req.user.branchId,
+      effectiveBranchScope(req),
       dateFrom,
       dateTo,
       gateway
@@ -62,12 +66,11 @@ router.post(
   '/initiate',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   paymentIdempotency,
   wrap(async (req, res) => {
     const data = await paymentGatewayService.initiatePayment({
       ...req.body,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       userId: req.user._id,
     });
     res.status(201).json({ success: true, data });
@@ -79,14 +82,15 @@ router.post(
   '/:id/refund',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   paymentIdempotency,
   wrap(async (req, res) => {
-    const data = await paymentGatewayService.processRefund(req.params.id, {
-      ...req.body,
-      userId: req.user._id,
-    });
+    const data = await paymentGatewayService.processRefund(
+      req.params.id,
+      req.body.amount,
+      req.body.reason,
+      req.user._id
+    );
     res.json({ success: true, data });
   })
 );
@@ -96,10 +100,9 @@ router.post(
   '/retry-failed',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
-    const data = await paymentGatewayService.retryFailedPayments(req.user.branchId);
+    const data = await paymentGatewayService.retryFailedPayments(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -108,7 +111,6 @@ router.post(
 router.get(
   '/transactions/:id',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {

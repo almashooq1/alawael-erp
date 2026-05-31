@@ -60,6 +60,7 @@ module.exports = function registerFeatureRoutes(
   const instrumentalSwallowRoutes = safeRequire('../routes/instrumental-swallow.routes');
   const artsTherapyRoutes = safeRequire('../routes/arts-therapy.routes');
   const mawidRoutes = safeRequire('../routes/mawid.routes');
+  const dttSessionRoutes = safeRequire('../routes/dtt-session.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -185,6 +186,10 @@ module.exports = function registerFeatureRoutes(
   // MAWID_* env), mirrors the Sehhaty W280 pattern. Closes the schema-only Mawid gap (it was an
   // enum value in Telehealth.platformSource with no adapter).
   dualMountAuth(app, 'mawid', mawidRoutes, authenticate);
+  // Wave 689: ABA discrete-trial training sessions (جلسات التدريب بالمحاولات المنفصلة) —
+  // trial-by-trial data (prompt level + response) → independent-correct rate trend. Closes the
+  // granular-DTT gap (BehaviorPlan/ABC/RehabSession only held aggregate counts).
+  dualMountAuth(app, 'dtt-session', dttSessionRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

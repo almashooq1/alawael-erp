@@ -267,6 +267,8 @@ __tests__/instrumental-swallow-behavioral-wave683.test.js
 __tests__/arts-therapy-wave685.test.js
 __tests__/arts-therapy-behavioral-wave685.test.js
 __tests__/mawid-wave687.test.js
+__tests__/dtt-session-wave689.test.js
+__tests__/dtt-session-behavioral-wave689.test.js
 __tests__/seizure-log-behavioral-wave356.test.js
 __tests__/safeguarding-behavioral-wave357.test.js
 __tests__/communication-aid-behavioral-wave358.test.js

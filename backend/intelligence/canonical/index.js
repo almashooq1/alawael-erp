@@ -52,6 +52,8 @@ const ENTRIES = [
   require('./schemas/instrumental-swallow-study.canonical'),
   // W685 creative-arts therapy session (music/art/drama) (2026-05-31):
   require('./schemas/creative-arts-therapy-session.canonical'),
+  // W689 ABA discrete-trial training session (2026-05-31):
+  require('./schemas/dtt-session.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

@@ -154,6 +154,7 @@ __tests__/cultural-profile-wave475.test.js
 __tests__/da-periodic-cron-wave286.test.js
 __tests__/data-quality-wave22.test.js
 __tests__/day-rehab-section-bus-trip-behavioral-wave175-183-202b.test.js
+__tests__/db-backup-cron-wave676.test.js
 __tests__/decision-rights-behavioral-wave461.test.js
 __tests__/decision-rights-routes-wave515.test.js
 __tests__/decision-rights-wave461.test.js

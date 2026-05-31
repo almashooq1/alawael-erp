@@ -162,6 +162,7 @@ __tests__/db-backup-cron-wave676.test.js
 __tests__/decision-rights-behavioral-wave461.test.js
 __tests__/decision-rights-routes-wave515.test.js
 __tests__/decision-rights-wave461.test.js
+__tests__/deterioration-intelligence-wave709.test.js
 __tests__/diet-prescription-behavioral-wave368.test.js
 __tests__/diet-prescription-wave368.test.js
 __tests__/digital-assessment-behavioral-wave557.test.js
@@ -421,12 +422,16 @@ __tests__/scheduler-handlers-resolve-wave275z.test.js
 __tests__/scheduler-registry.test.js
 __tests__/scheduler-snapshots-bootstrap-order.test.js
 __tests__/scheduler-snapshots-persistence.test.js
+__tests__/scoring-adl-spasticity-wave706.test.js
 __tests__/scoring-cars2-pedsql-wave555.test.js
 __tests__/scoring-cfcs-edacs-wave567.test.js
 __tests__/scoring-cp-motor-classifications-wave566.test.js
 __tests__/scoring-item-bank-contract-wave553.test.js
 __tests__/scoring-mchat-r-wave554.test.js
 __tests__/scoring-mental-health-pain-wave698.test.js
+__tests__/scoring-mental-health-pain-wave706.test.js
+__tests__/scoring-mobility-caregiver-wave708.test.js
+__tests__/scoring-neuro-disability-wave707.test.js
 __tests__/scoring-sdq-wave565.test.js
 __tests__/seat-allocation-behavioral-wave681.test.js
 __tests__/seat-allocation-wave681.test.js
@@ -472,6 +477,7 @@ __tests__/test-script-dedupe.test.js
 __tests__/therapist-portal-caseload-guard-wave269d.test.js
 __tests__/therapist-utilization-service.test.js
 __tests__/therapist-workbench-admin-viewer-wave232.test.js
+__tests__/therapy-activity-wave697.test.js
 __tests__/therapy-sessions-analytics-branch-scope-wave657.test.js
 __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-wave361.test.js

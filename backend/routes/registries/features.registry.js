@@ -65,8 +65,10 @@ module.exports = function registerFeatureRoutes(
   const dttSessionRoutes = safeRequire('../routes/dtt-session.routes');
   const sensoryDietRoutes = safeRequire('../routes/sensory-diet.routes');
   const adjunctTherapyRoutes = safeRequire('../routes/adjunct-therapy.routes');
+  const therapyActivityRoutes = safeRequire('../routes/therapy-activity.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
+  const measuresAnalyzeRoutes = safeRequire('../routes/measures-analyze.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
   const decisionRightsRoutes = safeRequire('../routes/decision-rights.routes');
   const selfAdvocacyRoutes = safeRequire('../routes/self-advocacy.routes');
@@ -200,6 +202,9 @@ module.exports = function registerFeatureRoutes(
   // medical-clearance gate (completed ⇒ medicalCleared). Production path superseding the unconsumed
   // in-memory rehabilitation-services/{hydrotherapy,animal-assisted-therapy}-service.js.
   dualMountAuth(app, 'adjunct-therapy', adjunctTherapyRoutes, authenticate);
+  // Wave 697: Unified therapy-activity rollup (لوحة المخرجات العلاجية الموحّدة) — read-only
+  // cross-module aggregation over the W680-W693 session models per beneficiary + branch summary.
+  dualMountAuth(app, 'therapy-activity', therapyActivityRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal
@@ -211,6 +216,11 @@ module.exports = function registerFeatureRoutes(
   // (eligibility × coverage gap × reassessment cadence), flagging the digitally
   // administrable ones. Intelligence layer on top of W210/W212/W553–W559.
   dualMountAuth(app, 'measure-recommendations', measureRecommendationRoutes, authenticate);
+  // Wave 697 (unified measure-intelligence REST surface): read-only / stateless
+  // facade over W696 analyze() — fuses scoring → governance → psychometrics →
+  // trend → explainability for a supplied raw administration. No DB writes, no
+  // PHI persisted. GET /:code/capabilities + POST /:code/analyze.
+  dualMountAuth(app, 'measures', measuresAnalyzeRoutes, authenticate);
   // Wave 513 (Phase B Rights & Voice — REST surface): voice-log on top of W460 BeneficiaryVoiceLog
   // model. CRPD Article 7+12+21 — beneficiary's persistent voice channel (preferences / dreams /
   // fears / dislikes / daily+session ratings / complaints / consent changes / requests). 9

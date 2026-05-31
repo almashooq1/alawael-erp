@@ -777,6 +777,9 @@ on:
       - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/prosthetic-orthotic-wave680.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-behavioral-wave680.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1537,6 +1540,9 @@ on:
       - 'backend/__tests__/physiotherapy-assessment-wave672.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-assessment-trio-behavioral-wave673.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/prosthetic-orthotic-wave680.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-behavioral-wave680.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

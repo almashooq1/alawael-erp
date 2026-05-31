@@ -54,6 +54,7 @@ module.exports = function registerFeatureRoutes(
   const physiotherapyAssessmentRoutes = safeRequire('../routes/physiotherapy-assessment.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
+  const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -155,6 +156,10 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence
   dualMountAuth(app, 'caregiver-support', caregiverSupportProgramRoutes, authenticate);
+  // Wave 680: Prosthetics/Orthotics & Seating clinic (عيادة الأطراف والأجهزة التقويمية والجلوس) —
+  // custom-device fabrication/fitting lifecycle (prescribe → measure → fabricate → fit → deliver →
+  // follow-up). Distinct from /assistive-device (W359 loan+maintenance inventory).
+  dualMountAuth(app, 'prosthetic-orthotic', prostheticOrthoticRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

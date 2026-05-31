@@ -42,6 +42,8 @@ const ENTRIES = [
   require('./schemas/facility-asset.canonical'),
   // W384 family support (2026-05-25):
   require('./schemas/caregiver-support-program.canonical'),
+  // W680 P&O fabrication/fitting clinic (2026-05-31):
+  require('./schemas/prosthetic-orthotic-order.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

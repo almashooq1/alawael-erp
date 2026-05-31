@@ -61,6 +61,7 @@ module.exports = function registerFeatureRoutes(
   const artsTherapyRoutes = safeRequire('../routes/arts-therapy.routes');
   const mawidRoutes = safeRequire('../routes/mawid.routes');
   const dttSessionRoutes = safeRequire('../routes/dtt-session.routes');
+  const sensoryDietRoutes = safeRequire('../routes/sensory-diet.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
@@ -190,6 +191,10 @@ module.exports = function registerFeatureRoutes(
   // trial-by-trial data (prompt level + response) → independent-correct rate trend. Closes the
   // granular-DTT gap (BehaviorPlan/ABC/RehabSession only held aggregate counts).
   dualMountAuth(app, 'dtt-session', dttSessionRoutes, authenticate);
+  // Wave 691: Sensory-diet program + Snoezelen sessions (الحمية الحسية + غرفة سنوزلين) —
+  // structured scheduled sensory activities by system/purpose + multisensory-room session log
+  // with regulation outcome. Closes the "sensory diet was a free field in AutismProfile" gap.
+  dualMountAuth(app, 'sensory-diet', sensoryDietRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

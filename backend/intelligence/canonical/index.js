@@ -54,6 +54,8 @@ const ENTRIES = [
   require('./schemas/creative-arts-therapy-session.canonical'),
   // W689 ABA discrete-trial training session (2026-05-31):
   require('./schemas/dtt-session.canonical'),
+  // W691 sensory-diet program + Snoezelen sessions (2026-05-31):
+  require('./schemas/sensory-diet-program.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

@@ -847,9 +847,11 @@ on:
       - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
       - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/module-gap-alerts-subscriber-wave717.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
       - 'backend/__tests__/vision-screening-wave720.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hearing-screening-behavioral-wave724.test.js'
       - 'backend/__tests__/hearing-screening-wave724.test.js'
       - 'backend/package.json'
@@ -1682,9 +1684,11 @@ on:
       - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
       - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/module-gap-alerts-subscriber-wave717.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
       - 'backend/__tests__/vision-screening-wave720.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hearing-screening-behavioral-wave724.test.js'
       - 'backend/__tests__/hearing-screening-wave724.test.js'
       - 'backend/package.json'

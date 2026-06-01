@@ -389,6 +389,35 @@ function mergeMembers(target, source) {
   };
 }
 
+/**
+ * removeMembers — drop every member whose phone matches one in `phones` (any
+ * format; normalized before comparison). Returns the kept list plus how many
+ * were removed and how many of the requested phones were not present. Pure &
+ * read-only — the route decides whether to persist `remaining` (W755).
+ *
+ * @param {Array<object>} members
+ * @param {Array<string>} phones
+ * @returns {{ remaining: Array<object>, removedCount:number, notFoundCount:number }}
+ */
+function removeMembers(members, phones) {
+  const list = Array.isArray(members) ? members : [];
+  const targets = new Set(
+    (Array.isArray(phones) ? phones : [])
+      .map(p => normalizePhone(p))
+      .filter(Boolean)
+  );
+  const remaining = [];
+  const removed = new Set();
+  for (const m of list) {
+    const phone = normalizePhone(m && m.phone);
+    if (phone && targets.has(phone)) removed.add(phone);
+    else remaining.push(m);
+  }
+  let notFoundCount = 0;
+  for (const t of targets) if (!removed.has(t)) notFoundCount += 1;
+  return { remaining, removedCount: removed.size, notFoundCount };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -422,3 +451,4 @@ module.exports.parseCsvMembers = parseCsvMembers;
 module.exports.diffMembers = diffMembers;
 module.exports.searchMembers = searchMembers;
 module.exports.mergeMembers = mergeMembers;
+module.exports.removeMembers = removeMembers;

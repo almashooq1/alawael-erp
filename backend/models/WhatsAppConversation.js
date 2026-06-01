@@ -255,6 +255,20 @@ function byIdScopedFilter(id, orgId) {
   return filter;
 }
 
+// Aggregation $group accumulators for a full 4-tier urgency breakdown. Before
+// W745 getAnalytics only emitted `criticalCount`, so the queue dashboard had
+// no way to size the high/medium/low tiers. Returns an object spreadable into
+// the $group stage: { criticalCount, highCount, mediumCount, lowCount }, each a
+// counting $sum over $urgencyLevel. Pure + unit-testable.
+const URGENCY_LEVELS = ['critical', 'high', 'medium', 'low'];
+function urgencyCountAccumulators() {
+  const acc = {};
+  for (const level of URGENCY_LEVELS) {
+    acc[`${level}Count`] = { $sum: { $cond: [{ $eq: ['$urgencyLevel', level] }, 1, 0] } };
+  }
+  return acc;
+}
+
 whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
@@ -286,7 +300,7 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
         totalConversations: { $sum: 1 },
         totalMessages: { $sum: { $size: '$messages' } },
         avgUnread: { $avg: '$unreadCount' },
-        criticalCount: { $sum: { $cond: [{ $eq: ['$urgencyLevel', 'critical'] }, 1, 0] } },
+        ...urgencyCountAccumulators(),
         resolvedCount: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } },
         pendingReview: { $sum: { $cond: ['$requiresHumanReview', 1, 0] } },
         byIntent: { $push: '$lastIntent' },
@@ -335,3 +349,4 @@ module.exports.urgencyRankFor = urgencyRankFor;
 module.exports.queueCountFilters = queueCountFilters;
 // Exported so the by-id org-isolation filter stays testable + consistent.
 module.exports.byIdScopedFilter = byIdScopedFilter;
+module.exports.urgencyCountAccumulators = urgencyCountAccumulators; // W745

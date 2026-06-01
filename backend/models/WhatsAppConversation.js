@@ -155,6 +155,11 @@ const whatsappConversationSchema = new mongoose.Schema(
     lastIntent: String,
     lastSentiment: String,
     requiresHumanReview: { type: Boolean, default: false, index: true },
+    // Why the bot handed this conversation to a human (set on escalation).
+    // Surfaces in the staff pending-review queue so the reason is actionable
+    // without re-deriving it from the message log.
+    escalationReason: String,
+    escalatedAt: Date,
     urgencyLevel: {
       type: String,
       enum: ['low', 'medium', 'high', 'critical'],

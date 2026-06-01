@@ -459,9 +459,21 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     // would only fire a notification but leave the conversation un-flagged
     // when classified.requiresHumanReview was false. Never throws.
     if (Conversation && conv) {
+      const escalationReason =
+        decision.reason ||
+        (classified.urgencyLevel === 'critical'
+          ? `critical_urgency:${classified.intent}`
+          : `requires_human_review:${classified.intent}`);
       await Conversation.updateOne(
         { _id: conv._id },
-        { $set: { requiresHumanReview: true, status: 'escalated' } }
+        {
+          $set: {
+            requiresHumanReview: true,
+            status: 'escalated',
+            escalationReason,
+            escalatedAt: new Date(),
+          },
+        }
       ).catch(err =>
         logger.warn(`[WhatsApp Webhook] escalation flag update failed: ${err.message}`)
       );

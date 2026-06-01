@@ -16,7 +16,7 @@
 
 // ─── Mocks (declared before requiring the unit under test) ──────────────────
 jest.mock('../services/whatsapp/whatsappService', () => ({
-  normalizePhone: (p) => p,
+  normalizePhone: p => p,
   markAsRead: jest.fn().mockResolvedValue(undefined),
   sendText: jest.fn().mockResolvedValue({ success: true, messageId: 'm-text' }),
   sendTemplate: jest.fn().mockResolvedValue({ success: true, messageId: 'm-tpl' }),
@@ -140,6 +140,20 @@ describe('W739 — escalation flags the conversation for the staff review queue'
     );
     expect(flagUpdate).toBeDefined();
     expect(flagUpdate[1].$set.status).toBe('escalated');
+  });
+
+  test('W740: the escalation records a reason + timestamp for the staff queue', async () => {
+    templateSync.getTemplateStatus.mockResolvedValue('REJECTED');
+
+    await webhook.handleIncomingMessage(MSG, CONTACT, 'pnid');
+
+    const flagUpdate = ConvModel.updateOne.mock.calls.find(
+      ([, update]) => update?.$set?.requiresHumanReview === true
+    );
+    expect(flagUpdate).toBeDefined();
+    // The W738 gate sets decision.reason = template_not_approved:<status>.
+    expect(flagUpdate[1].$set.escalationReason).toMatch(/template_not_approved/);
+    expect(flagUpdate[1].$set.escalatedAt).toBeInstanceOf(Date);
   });
 
   test('an APPROVED deliverable auto-reply does NOT flag the conversation', async () => {

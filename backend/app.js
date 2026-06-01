@@ -256,6 +256,14 @@ try {
   logger.warn('[NPHIES] webhook mount skipped:', err.message);
 }
 
+// W714 — IQ Assessments (SB5 / Wechsler) — Score-entry-only, copyright-compliant
+try {
+  require('./models/IQAssessment');
+  logger.debug('[IQAssessment] ✓ model registered');
+} catch (err) {
+  logger.warn('[IQAssessment] model load skipped:', err.message);
+}
+
 // Phase 19 — Forms Catalog (32 ready-to-use FormTemplate seeds across
 // beneficiary / hr / management audiences). Read endpoints are
 // authenticated-any; instantiate is gated to admin / forms_admin.
@@ -2517,6 +2525,16 @@ try {
   logger.warn('[Complaints] routes skipped:', complaintsErr.message);
 }
 
+// ─── IQ Assessments (SB5 / Wechsler) — W714 ───────────────────────────────────
+try {
+  const iqAssessmentsRouter = require('./routes/iq-assessments.routes');
+  app.use('/api/iq-assessments', iqAssessmentsRouter);
+  app.use('/api/v1/iq-assessments', iqAssessmentsRouter);
+  logger.info('[IQAssessments] ✓ /api/(v1/)?iq-assessments mounted');
+} catch (iqErr) {
+  logger.warn('[IQAssessments] routes skipped:', iqErr.message);
+}
+
 // ─── Auto-mount all remaining route files ────────────────────────────────────
 // Mounts every routes/*.js file not already individually registered above.
 // Filename → /api/v1/<kebab-case> (e.g. academicYear.routes.js → /api/v1/academic-year)
@@ -2548,6 +2566,7 @@ try {
     'hr-insurance.routes',
     'hrSystem.routes',
     'insurance.routes',
+    'iq-assessments.routes',
     'kpi-dashboard.routes',
     'landing-config.routes',
     'leave-requests.routes',

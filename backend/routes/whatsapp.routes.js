@@ -1175,10 +1175,7 @@ router.get(
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     const safeName = String(doc.name || 'group').replace(/[^a-zA-Z0-9_-]+/g, '_');
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="contact-group-${safeName}.csv"`
-    );
+    res.setHeader('Content-Disposition', `attachment; filename="contact-group-${safeName}.csv"`);
     res.send(Group.membersToCsv(doc));
   })
 );
@@ -1233,9 +1230,7 @@ router.post(
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     const parsed = Group.parseCsvMembers(req.body && req.body.csv);
     if (!parsed.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'No valid members found in CSV' });
+      return res.status(400).json({ success: false, message: 'No valid members found in CSV' });
     }
     const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
@@ -1293,9 +1288,7 @@ router.post(
       return res.status(400).json({ success: false, message: 'sourceId is required' });
     }
     if (String(sourceId) === String(req.params.id)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Cannot merge a group into itself' });
+      return res.status(400).json({ success: false, message: 'Cannot merge a group into itself' });
     }
     const [target, source] = await Promise.all([
       Group.findOne(Group.groupScopedFilter(req.params.id, orgId)),
@@ -1352,9 +1345,7 @@ router.post(
     const phones = req.body && req.body.phones;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     if (!Array.isArray(phones) || phones.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'phones must be a non-empty array' });
+      return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
     }
     const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
@@ -1403,9 +1394,7 @@ router.post(
     const phones = req.body && req.body.phones;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     if (!Array.isArray(phones) || phones.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'phones must be a non-empty array' });
+      return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
     }
     const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
@@ -1482,6 +1471,36 @@ router.post(
 );
 
 /**
+ * PATCH /contact-groups/:id/members/:phone — rename a single member (W758).
+ *
+ * Updates the member's displayName (body `{ displayName }`); a null/blank value
+ * clears it. The phone path segment is normalized before matching, so any
+ * format works. 404 when the group or member is not found.
+ */
+router.patch(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const displayName = req.body ? req.body.displayName : null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.renameMember(doc.members || [], req.params.phone, displayName);
+    if (!result.updated) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    doc.members = result.members;
+    await doc.save();
+    res.json({
+      success: true,
+      data: { id: String(doc._id), phone: Group.normalizePhone(req.params.phone) },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a
@@ -1502,9 +1521,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { templateKey, args, text } = req.body;
     if (!templateKey && !text) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Missing: templateKey or text' });
+      return res.status(400).json({ success: false, message: 'Missing: templateKey or text' });
     }
 
     const Group = getContactGroupModel();

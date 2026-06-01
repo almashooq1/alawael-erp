@@ -44,7 +44,12 @@ const memberSchema = new mongoose.Schema(
 const whatsappContactGroupSchema = new mongoose.Schema(
   {
     /** Owning tenant — required for cross-branch isolation. */
-    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', index: true, default: null },
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Organization',
+      index: true,
+      default: null,
+    },
 
     name: { type: String, required: true, trim: true },
     description: { type: String, default: null, trim: true },
@@ -307,8 +312,7 @@ function parseCsvMembers(csv) {
     const fields = parseCsvLine(lines[i]);
     const phone = normalizePhone(fields[phoneIdx]);
     if (!phone) continue;
-    const displayName =
-      nameIdx !== -1 && fields[nameIdx] ? String(fields[nameIdx]).trim() : null;
+    const displayName = nameIdx !== -1 && fields[nameIdx] ? String(fields[nameIdx]).trim() : null;
     members.push({ phone, displayName: displayName || null });
   }
   return dedupeMembers(members);
@@ -326,9 +330,7 @@ function parseCsvMembers(csv) {
  */
 function diffMembers(existing, incoming) {
   const have = new Set(
-    (Array.isArray(existing) ? existing : [])
-      .map(m => normalizePhone(m && m.phone))
-      .filter(Boolean)
+    (Array.isArray(existing) ? existing : []).map(m => normalizePhone(m && m.phone)).filter(Boolean)
   );
   const toAdd = [];
   const duplicates = [];
@@ -356,7 +358,9 @@ function diffMembers(existing, incoming) {
  */
 function searchMembers(members, query) {
   const list = Array.isArray(members) ? members : [];
-  const q = String(query == null ? '' : query).trim().toLowerCase();
+  const q = String(query == null ? '' : query)
+    .trim()
+    .toLowerCase();
   if (!q) return list;
   const qDigits = q.replace(/[^\d]/g, '');
   return list.filter(m => {
@@ -402,9 +406,7 @@ function mergeMembers(target, source) {
 function removeMembers(members, phones) {
   const list = Array.isArray(members) ? members : [];
   const targets = new Set(
-    (Array.isArray(phones) ? phones : [])
-      .map(p => normalizePhone(p))
-      .filter(Boolean)
+    (Array.isArray(phones) ? phones : []).map(p => normalizePhone(p)).filter(Boolean)
   );
   const remaining = [];
   const removed = new Set();
@@ -465,6 +467,38 @@ function dedupeReport(members) {
   return { deduped, removedCount: list.length - deduped.length };
 }
 
+/**
+ * renameMember — set the displayName of the member whose phone matches `phone`
+ * (any format; normalized before comparison). A null/blank name clears it.
+ * Returns the (possibly new) member list and whether a row was updated. Pure &
+ * read-only — the route decides whether to persist `members` (W758).
+ *
+ * @param {Array<object>} members
+ * @param {string} phone
+ * @param {string} [displayName]
+ * @returns {{ members: Array<object>, updated:boolean }}
+ */
+function renameMember(members, phone, displayName) {
+  const list = Array.isArray(members) ? members : [];
+  const target = normalizePhone(phone);
+  const name = displayName == null || String(displayName).trim() === ''
+    ? null
+    : String(displayName).trim();
+  let updated = false;
+  if (!target) return { members: list, updated };
+  const next = list.map(m => {
+    if (!updated && m && normalizePhone(m.phone) === target) {
+      updated = true;
+      if (typeof m.toObject === 'function') {
+        return { ...m.toObject(), displayName: name };
+      }
+      return { ...m, displayName: name };
+    }
+    return m;
+  });
+  return { members: next, updated };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -501,3 +535,4 @@ module.exports.mergeMembers = mergeMembers;
 module.exports.removeMembers = removeMembers;
 module.exports.addMembers = addMembers;
 module.exports.dedupeReport = dedupeReport;
+module.exports.renameMember = renameMember;

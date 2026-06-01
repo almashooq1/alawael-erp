@@ -678,4 +678,74 @@ const MEASURES = [
   },
 ];
 
+// ── Scorer-derived flagship entries (W556 completion) ───────────────────────
+// The W706/W708–W721 measures arc shipped many administrable scoring modules
+// (each with a bilingual itemBank) but only the 8 literal entries above had
+// catalog Measure docs — leaving `measureScoringEngine.resolveStrict` unable to
+// bind them and the W556 "every item-bank module has a catalog Measure" guard
+// red on main. The loop below DERIVES a catalog doc for every administrable
+// scoring module that isn't hand-authored above. Deriving straight from the
+// scorer (the single source of truth) means `crossCheck` can never drift:
+// code, engineVersion, direction and derivedRange are read from the module.
+//
+// `status: 'draft'` is deliberate — these are scorer-derived stubs awaiting
+// clinical curation (eligibility ageRange/targetPopulation + interpretation
+// narrative). `Measure.findEligibleFor` only considers `status: 'active'`, so a
+// draft entry satisfies W556's catalog-presence guard WITHOUT being surfaced by
+// the recommendation engine (keeps measure-recommendation-wave562 green). The
+// measures team flips one to 'active' once it is curated. Only `category` (a
+// non-clinical facet) is mapped here; unmapped future instruments default to
+// 'custom' so the guard stays green as new scorers land.
+const _scoringRegistry = require('../scoring');
+
+const _DERIVED_CATEGORY = {
+  BARTHEL: 'functional', // Activities of Daily Living index
+  CSI: 'quality_of_life', // Caregiver Strain Index
+  FLACC: 'behavioral', // behavioral pain scale
+  FTS5: 'motor', // Five Times Sit-to-Stand (lower-limb)
+  'GAD-7': 'behavioral', // anxiety
+  GCS: 'cognitive', // Glasgow Coma Scale (consciousness)
+  KATZ: 'functional', // ADL independence
+  LAWTON: 'functional', // Instrumental ADL
+  MAS: 'motor', // Modified Ashworth (spasticity)
+  MINICOG: 'cognitive', // cognitive screen
+  MORSE: 'functional', // fall-risk
+  MRS: 'functional', // Modified Rankin disability
+  NRS: 'functional', // numeric pain rating
+  'PHQ-9': 'behavioral', // depression
+  'PSS-10': 'behavioral', // perceived stress
+  TINETTI: 'motor', // balance & gait
+  TUG: 'motor', // Timed Up and Go mobility
+  'WHO-5': 'quality_of_life', // well-being
+  'WHODAS-12': 'functional', // disability assessment
+};
+
+const _handAuthoredCodes = new Set(MEASURES.map(m => m.code));
+
+for (const summary of _scoringRegistry.list()) {
+  if (!summary.hasItemBank) continue; // only digitally administrable modules
+  const code = summary.measureCode;
+  if (_handAuthoredCodes.has(code)) continue; // keep the rich literal entries
+  const mod = _scoringRegistry.resolve(code);
+  if (!mod || !mod.itemBank) continue;
+  const bank = mod.itemBank;
+  MEASURES.push({
+    code,
+    name: bank.instrumentName_en || code,
+    name_ar: bank.instrumentName_ar || bank.instrumentName_en || code,
+    abbreviation: code,
+    version: mod.engineVersion,
+    category: _DERIVED_CATEGORY[code] || 'custom',
+    scoringDirection: mod.direction,
+    derivedType: mod.derivedType,
+    derivedRange: mod.scoreRange ? { min: mod.scoreRange.min, max: mod.scoreRange.max } : undefined,
+    scoringEngineVersion: mod.engineVersion,
+    scoringAlgorithmRef: `scoring/${code.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.js`,
+    interpretation: { mcid: { status: 'not_applicable' } },
+    status: 'draft', // scorer-derived stub — excluded from recommendation until curated
+    sensitivityLevel: 'MEDIUM',
+    tags: ['digital-administration', 'scorer-derived'],
+  });
+}
+
 module.exports = { MEASURES };

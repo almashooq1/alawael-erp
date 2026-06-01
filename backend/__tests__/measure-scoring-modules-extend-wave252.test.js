@@ -44,21 +44,45 @@ describe('W252 — registry picks up new modules', () => {
       .map(m => m.measureCode)
       .sort();
     // W554 added M-CHAT-R; W555 added CARS-2 + PEDSQL; W565 added SDQ;
-    // W566 added GMFCS + MACS; W567 added CFCS + EDACS (all with item banks).
+    // W566 added GMFCS + MACS; W567 added CFCS + EDACS; the W706/W708–W721
+    // measures arc added the functional/cognitive/QoL clinical instruments
+    // below (BARTHEL, KATZ, LAWTON, PHQ-9, GAD-7, WHO-5, GCS, MAS, … — all
+    // with item banks) plus the IQ scales (SB5, WECHSLER, WHODAS-12).
     expect(codes).toEqual([
+      'BARTHEL',
       'BERG',
       'CARS-2',
       'CFCS',
+      'CSI',
       'EDACS',
       'FIM',
+      'FLACC',
+      'FTS5',
+      'GAD-7',
+      'GCS',
       'GMFCS',
+      'KATZ',
+      'LAWTON',
       'M-CHAT-R',
       'MACS',
+      'MAS',
+      'MINICOG',
+      'MORSE',
+      'MRS',
+      'NRS',
       'PEDSQL',
+      'PHQ-9',
+      'PSS-10',
+      'SB5',
       'SCQ',
       'SDQ',
+      'TINETTI',
+      'TUG',
       'VINELAND-3',
+      'WECHSLER',
       'WEEFIM',
+      'WHO-5',
+      'WHODAS-12',
     ]);
   });
 });

@@ -164,4 +164,5 @@ iqAssessmentSchema.path('fullScaleIQ').validate(function (v) {
   return true;
 });
 
-module.exports = mongoose.model('IQAssessment', iqAssessmentSchema);
+module.exports =
+  mongoose.models.IQAssessment || mongoose.model('IQAssessment', iqAssessmentSchema);

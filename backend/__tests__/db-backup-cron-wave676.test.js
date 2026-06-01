@@ -73,3 +73,20 @@ describe('W676 — wired into app.js', () => {
     );
   });
 });
+
+describe('W737 — backup failure fires a durable ops alert', () => {
+  it('both failure branches call safeOpsAlert (no more silent log-only failure)', () => {
+    // the soft-fail (res.success false) branch + the thrown-exception branch
+    const alertCalls = (BOOT_SRC.match(/safeOpsAlert\(/g) || []).length;
+    expect(alertCalls).toBeGreaterThanOrEqual(3); // 1 def + 2 call sites
+  });
+  it('safeOpsAlert lazy-requires ops-alerter and is fully swallowed', () => {
+    expect(BOOT_SRC).toMatch(/require\(\s*'\.\.\/services\/ops-alerter'\s*\)/);
+    expect(BOOT_SRC).toMatch(/async function safeOpsAlert/);
+    expect(BOOT_SRC).toMatch(/ops-alert dispatch failed \(swallowed\)/);
+  });
+  it('alerts are critical severity + kind=backup_failed', () => {
+    expect(BOOT_SRC).toMatch(/kind:\s*'backup_failed'/);
+    expect(BOOT_SRC).toMatch(/severity:\s*'critical'/);
+  });
+});

@@ -15,10 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = fs.readFileSync(
-  path.join(__dirname, '..', 'routes', 'whatsapp.routes.js'),
-  'utf8'
-);
+const SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'whatsapp.routes.js'), 'utf8');
 
 /** Extract the body of the POST /contact-groups/:id/broadcast handler. */
 function broadcastBlock(src) {

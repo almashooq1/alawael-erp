@@ -13,7 +13,7 @@ const { sortPendingReview } = require('../models/WhatsAppConversation');
 
 describe('W741 — pending-review queue urgency ordering', () => {
   test('ranks by true urgency (critical→high→medium→low), not lexically', () => {
-    const t = (d) => new Date(d);
+    const t = d => new Date(d);
     const rows = [
       { _id: 'low-1', urgencyLevel: 'low', lastMessageAt: t('2026-01-03') },
       { _id: 'crit-1', urgencyLevel: 'critical', lastMessageAt: t('2026-01-01') },
@@ -25,7 +25,7 @@ describe('W741 — pending-review queue urgency ordering', () => {
     const out = sortPendingReview(rows);
 
     // critical, high, then the two mediums by recency (new before old), then low.
-    expect(out.map((r) => r._id)).toEqual(['crit-1', 'high-1', 'med-new', 'med-old', 'low-1']);
+    expect(out.map(r => r._id)).toEqual(['crit-1', 'high-1', 'med-new', 'med-old', 'low-1']);
   });
 
   test('does not mutate the input array', () => {
@@ -33,9 +33,9 @@ describe('W741 — pending-review queue urgency ordering', () => {
       { _id: 'a', urgencyLevel: 'low', lastMessageAt: new Date('2026-01-01') },
       { _id: 'b', urgencyLevel: 'critical', lastMessageAt: new Date('2026-01-01') },
     ];
-    const before = rows.map((r) => r._id);
+    const before = rows.map(r => r._id);
     sortPendingReview(rows);
-    expect(rows.map((r) => r._id)).toEqual(before);
+    expect(rows.map(r => r._id)).toEqual(before);
   });
 
   test('tolerates empty / missing input and unknown urgency values', () => {
@@ -46,6 +46,6 @@ describe('W741 — pending-review queue urgency ordering', () => {
       { _id: 'unknown', urgencyLevel: 'weird', lastMessageAt: new Date('2026-01-02') },
     ];
     // Unknown urgency sinks below all known ranks.
-    expect(sortPendingReview(rows).map((r) => r._id)).toEqual(['known', 'unknown']);
+    expect(sortPendingReview(rows).map(r => r._id)).toEqual(['known', 'unknown']);
   });
 });

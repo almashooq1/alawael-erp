@@ -481,9 +481,8 @@ function dedupeReport(members) {
 function renameMember(members, phone, displayName) {
   const list = Array.isArray(members) ? members : [];
   const target = normalizePhone(phone);
-  const name = displayName == null || String(displayName).trim() === ''
-    ? null
-    : String(displayName).trim();
+  const name =
+    displayName == null || String(displayName).trim() === '' ? null : String(displayName).trim();
   let updated = false;
   if (!target) return { members: list, updated };
   const next = list.map(m => {

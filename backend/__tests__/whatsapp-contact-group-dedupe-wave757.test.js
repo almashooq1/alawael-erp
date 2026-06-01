@@ -21,10 +21,7 @@ describe('W757 WhatsAppContactGroup — dedupeReport', () => {
   });
 
   it('treats differently-formatted phones as the same', () => {
-    const r = Group.dedupeReport([
-      { phone: '966500000001' },
-      { phone: '+966 50 000 0001' },
-    ]);
+    const r = Group.dedupeReport([{ phone: '966500000001' }, { phone: '+966 50 000 0001' }]);
     expect(r.removedCount).toBe(1);
     expect(r.deduped).toHaveLength(1);
   });
@@ -38,10 +35,7 @@ describe('W757 WhatsAppContactGroup — dedupeReport', () => {
   });
 
   it('reports zero removals for an already-clean list', () => {
-    const r = Group.dedupeReport([
-      { phone: '966500000001' },
-      { phone: '966500000002' },
-    ]);
+    const r = Group.dedupeReport([{ phone: '966500000001' }, { phone: '966500000002' }]);
     expect(r.removedCount).toBe(0);
     expect(r.deduped).toHaveLength(2);
   });

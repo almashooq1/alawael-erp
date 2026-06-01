@@ -18,11 +18,7 @@ const MEMBERS = [
 describe('W760 WhatsAppContactGroup — sortMembers', () => {
   it('sorts by phone by default', () => {
     const out = Group.sortMembers(MEMBERS);
-    expect(out.map(m => m.phone)).toEqual([
-      '966500000001',
-      '966500000002',
-      '966500000003',
-    ]);
+    expect(out.map(m => m.phone)).toEqual(['966500000001', '966500000002', '966500000003']);
   });
 
   it('sorts by displayName with blanks last', () => {

@@ -42,10 +42,7 @@ describe('W751 WhatsAppContactGroup — parseCsvMembers / parseCsvLine', () => {
       'y',
     ]);
     // leading guard quote (csvCell output) is removed on parse
-    expect(Group.parseCsvLine("966500000005,'=SUM(A1)")).toEqual([
-      '966500000005',
-      '=SUM(A1)',
-    ]);
+    expect(Group.parseCsvLine("966500000005,'=SUM(A1)")).toEqual(['966500000005', '=SUM(A1)']);
   });
 
   it('round-trips with membersToCsv (export → import)', () => {

@@ -40,7 +40,11 @@ describe('W746 WhatsAppContactGroup — normalizeMember', () => {
   });
 
   it('preserves beneficiaryId / familyMemberId links when supplied', () => {
-    const m = Group.normalizeMember({ phone: '966500000001', beneficiaryId: 'b1', familyMemberId: 'f1' });
+    const m = Group.normalizeMember({
+      phone: '966500000001',
+      beneficiaryId: 'b1',
+      familyMemberId: 'f1',
+    });
     expect(m.beneficiaryId).toBe('b1');
     expect(m.familyMemberId).toBe('f1');
   });

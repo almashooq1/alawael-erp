@@ -29,6 +29,7 @@
  *
  *   Templates:
  *     GET  /api/whatsapp/templates         — list available templates
+ *     GET  /api/whatsapp/event-bindings    — core event → template map (W727)
  *     POST /api/whatsapp/templates/session-reminder  — send session reminder
  *     POST /api/whatsapp/templates/progress-report   — send progress report
  *     POST /api/whatsapp/templates/homework          — send homework
@@ -705,6 +706,12 @@ router.get(
 /** GET /templates */
 router.get('/templates', (_req, res) => {
   res.json({ success: true, data: whatsappTemplates.listTemplates() });
+});
+
+/** GET /event-bindings — W727: core event → template binding map (admin UI) */
+router.get('/event-bindings', (_req, res) => {
+  const whatsappEventBindings = require('../services/whatsapp/whatsappEventBindings.service');
+  res.json({ success: true, data: whatsappEventBindings.listBindings() });
 });
 
 /** GET /templates/meta — from Meta Business Manager (raw passthrough) */

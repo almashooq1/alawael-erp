@@ -58,6 +58,12 @@ const REF_ALLOWLIST = new Set([
   // domain has IndividualizedPlan + multiple program-style models but no single canonical "program"
   // entity. Deferred pending product decision: link to IndividualizedPlan vs CarePlan vs domain enum.
   'DisabilityRehabilitation',
+  // W696 — StoryBook.prideMomentIds[] refs 'PrideMoment'. DEFERRED internal model: the
+  // `intelligence/pride-moment-extractor.lib.js` derives "pride moments" but no Mongoose
+  // PrideMoment model is registered yet (stories vertical). Allow-listed (not baselined) so the
+  // guard is green; remove this entry when the stories vertical builds the canonical PrideMoment
+  // model (W337 CapaItem precedent — build-to-close).
+  'PrideMoment',
 ]);
 
 // ─── Baseline ratchet: phantom refs that EXIST as of W325 Pass 3 ────────────

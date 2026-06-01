@@ -237,6 +237,7 @@ __tests__/icf-codes-endpoint-behavioral-wave692.test.js
 __tests__/icf-codes-endpoint-wave692.test.js
 __tests__/icf-core-sets-seeding-wave448.test.js
 __tests__/icf-qualifier-mapping-wave453.test.js
+__tests__/icf-reference-common-wave705.test.js
 __tests__/idor-crm-enhanced-branch-filter-wave508.test.js
 __tests__/idor-student-assignment-submit-wave504.test.js
 __tests__/import-export-data-quality-extract-wave278g.test.js
@@ -313,6 +314,7 @@ __tests__/medication-administration-record-behavioral-wave191b.test.js
 __tests__/meeting-branch-tenancy-wave635.test.js
 __tests__/messaging-threads-real-impl-wave276c.test.js
 __tests__/models-use-defensive-guard-wave411.test.js
+__tests__/module-gap-sweepers-wave695.test.js
 __tests__/money-lib-wave579.test.js
 __tests__/mudad-wps-bootstrap-wave282b.test.js
 __tests__/mudad-wps-orchestrator-wave282.test.js
@@ -465,6 +467,7 @@ __tests__/test-script-dedupe.test.js
 __tests__/therapist-portal-caseload-guard-wave269d.test.js
 __tests__/therapist-utilization-service.test.js
 __tests__/therapist-workbench-admin-viewer-wave232.test.js
+__tests__/therapy-activity-wave697.test.js
 __tests__/therapy-sessions-analytics-branch-scope-wave657.test.js
 __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-wave361.test.js

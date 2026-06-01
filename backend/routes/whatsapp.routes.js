@@ -997,6 +997,25 @@ router.post(
   })
 );
 
+/**
+ * GET /contact-groups/stats — org-scoped roll-up (W749).
+ *
+ * Read-only summary across all of the caller's active groups: total groups,
+ * total members, per-tag member distribution, and the largest group. Declared
+ * BEFORE /contact-groups/:id so the literal "stats" segment is not captured as
+ * an :id param.
+ */
+router.get(
+  '/contact-groups/stats',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const filter = Group.listScopedFilter(orgId, {});
+    const groups = await Group.find(filter).select('name tags members').lean();
+    res.json({ success: true, data: Group.summarizeGroups(groups) });
+  })
+);
+
 /** GET /contact-groups/:id — single group (org-scoped). */
 router.get(
   '/contact-groups/:id',

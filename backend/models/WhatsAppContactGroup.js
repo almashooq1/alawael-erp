@@ -180,6 +180,35 @@ function partitionByEligibility(members, eligibilityByPhone = {}) {
   return { eligible, blocked, total: eligible.length + blocked.length };
 }
 
+/**
+ * Aggregate a set of (lean) groups into a read-only summary: total groups,
+ * total members across them, a per-tag member-count distribution, and the
+ * largest group. Pure / read-only — backs the contact-groups stats endpoint.
+ * Robust to missing `members` / `tags` arrays.
+ *
+ * @param {Array<object>} groups
+ * @returns {{ totalGroups:number, totalMembers:number, byTag:Record<string,number>, largest:(null|{id:string,name:string,memberCount:number}) }}
+ */
+function summarizeGroups(groups) {
+  const list = Array.isArray(groups) ? groups : [];
+  const byTag = {};
+  let totalMembers = 0;
+  let largest = null;
+  for (const g of list) {
+    const memberCount = Array.isArray(g && g.members) ? g.members.length : 0;
+    totalMembers += memberCount;
+    if (!largest || memberCount > largest.memberCount) {
+      largest = { id: String(g && g._id), name: (g && g.name) || null, memberCount };
+    }
+    for (const tag of Array.isArray(g && g.tags) ? g.tags : []) {
+      if (typeof tag === 'string' && tag.length) {
+        byTag[tag] = (byTag[tag] || 0) + memberCount;
+      }
+    }
+  }
+  return { totalGroups: list.length, totalMembers, byTag, largest };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -205,3 +234,4 @@ module.exports.dedupeMembers = dedupeMembers;
 module.exports.groupScopedFilter = groupScopedFilter;
 module.exports.listScopedFilter = listScopedFilter;
 module.exports.partitionByEligibility = partitionByEligibility;
+module.exports.summarizeGroups = summarizeGroups;

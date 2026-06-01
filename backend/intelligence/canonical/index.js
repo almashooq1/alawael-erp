@@ -58,6 +58,8 @@ const ENTRIES = [
   require('./schemas/sensory-diet-program.canonical'),
   // W693 adjunct therapy (hydro/hippo/animal-assisted) sessions (2026-05-31):
   require('./schemas/adjunct-therapy-session.canonical'),
+  // W715 spasticity / botulinum-toxin injection procedure (2026-06-01):
+  require('./schemas/spasticity-injection.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

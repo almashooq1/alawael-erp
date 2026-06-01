@@ -65,7 +65,7 @@ describe('W737 — GET /event-bindings HTTP contract', () => {
     const whatsappRoutes = require('../routes/whatsapp.routes');
     app.use('/api/whatsapp', whatsappRoutes);
     // Minimal error handler so asyncHandler-forwarded errors surface as 500.
-    // eslint-disable-next-line no-unused-vars
+
     app.use((err, _req, res, _next) => {
       res.status(err.status || 500).json({ success: false, error: err.message });
     });
@@ -93,9 +93,9 @@ describe('W737 — GET /event-bindings HTTP contract', () => {
       expect(row).toHaveProperty('deliverable');
       expect(typeof row.deliverable).toBe('boolean');
     }
-    const reminder = res.body.data.find((r) => r.eventType === 'session.reminder');
+    const reminder = res.body.data.find(r => r.eventType === 'session.reminder');
     expect(reminder.deliverable).toBe(true);
-    const survey = res.body.data.find((r) => r.eventType === 'survey.requested');
+    const survey = res.body.data.find(r => r.eventType === 'survey.requested');
     expect(survey.deliverable).toBe(false);
     expect(survey.templateStatus).toBe('REJECTED');
   });

@@ -74,13 +74,9 @@ describe('W727 — WhatsApp event → template bindings', () => {
   });
 
   test('listBindingsWithStatus augments each row with live deliverability', async () => {
-    const sync = require(path.join(
-      __dirname,
-      '..',
-      'services',
-      'whatsapp',
-      'templateSync.service.js'
-    ));
+    const sync = require(
+      path.join(__dirname, '..', 'services', 'whatsapp', 'templateSync.service.js')
+    );
     const statusSpy = jest
       .spyOn(sync, 'getTemplateStatus')
       .mockImplementation(async name =>
@@ -99,13 +95,9 @@ describe('W727 — WhatsApp event → template bindings', () => {
   });
 
   test('listBindingsWithStatus fails open when status is unknown', async () => {
-    const sync = require(path.join(
-      __dirname,
-      '..',
-      'services',
-      'whatsapp',
-      'templateSync.service.js'
-    ));
+    const sync = require(
+      path.join(__dirname, '..', 'services', 'whatsapp', 'templateSync.service.js')
+    );
     const statusSpy = jest.spyOn(sync, 'getTemplateStatus').mockResolvedValue(null);
     const fresh = require(BINDINGS_PATH);
     const rows = await fresh.listBindingsWithStatus();
@@ -170,16 +162,10 @@ describe('W727 — WhatsApp event → template bindings', () => {
   test('dispatchForEvent refuses when the bound template is not APPROVED in Meta', async () => {
     process.env.WHATSAPP_ENABLED = 'true';
     jest.resetModules();
-    const sync = require(path.join(
-      __dirname,
-      '..',
-      'services',
-      'whatsapp',
-      'templateSync.service.js'
-    ));
-    const statusSpy = jest
-      .spyOn(sync, 'getTemplateStatus')
-      .mockResolvedValue('REJECTED');
+    const sync = require(
+      path.join(__dirname, '..', 'services', 'whatsapp', 'templateSync.service.js')
+    );
+    const statusSpy = jest.spyOn(sync, 'getTemplateStatus').mockResolvedValue('REJECTED');
     const tmpl = require(TEMPLATES_PATH);
     const sendSpy = jest.spyOn(tmpl, 'sendSessionReminder');
     const fresh = require(BINDINGS_PATH);
@@ -204,13 +190,9 @@ describe('W727 — WhatsApp event → template bindings', () => {
   test('dispatchForEvent delivers a transactional event through the bound sender', async () => {
     process.env.WHATSAPP_ENABLED = 'true';
     jest.resetModules();
-    const sync = require(path.join(
-      __dirname,
-      '..',
-      'services',
-      'whatsapp',
-      'templateSync.service.js'
-    ));
+    const sync = require(
+      path.join(__dirname, '..', 'services', 'whatsapp', 'templateSync.service.js')
+    );
     jest.spyOn(sync, 'getTemplateStatus').mockResolvedValue('APPROVED');
     const tmpl = require(TEMPLATES_PATH);
     const spy = jest

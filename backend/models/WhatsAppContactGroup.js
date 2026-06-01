@@ -344,6 +344,30 @@ function diffMembers(existing, incoming) {
   };
 }
 
+/**
+ * searchMembers — case-insensitive read-only filter of a group's members by a
+ * free-text query matched against phone (digits) and displayName. An empty /
+ * blank query returns all members unchanged. Used to make large groups
+ * navigable without loading every row into the client (W753).
+ *
+ * @param {Array<object>} members
+ * @param {string} [query]
+ * @returns {Array<object>}
+ */
+function searchMembers(members, query) {
+  const list = Array.isArray(members) ? members : [];
+  const q = String(query == null ? '' : query).trim().toLowerCase();
+  if (!q) return list;
+  const qDigits = q.replace(/[^\d]/g, '');
+  return list.filter(m => {
+    if (!m) return false;
+    const phone = normalizePhone(m.phone);
+    const name = String(m.displayName == null ? '' : m.displayName).toLowerCase();
+    const phoneHit = qDigits ? phone.includes(qDigits) : false;
+    return phoneHit || name.includes(q);
+  });
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -375,3 +399,4 @@ module.exports.membersToCsv = membersToCsv;
 module.exports.parseCsvLine = parseCsvLine;
 module.exports.parseCsvMembers = parseCsvMembers;
 module.exports.diffMembers = diffMembers;
+module.exports.searchMembers = searchMembers;

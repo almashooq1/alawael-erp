@@ -1184,6 +1184,36 @@ router.get(
 );
 
 /**
+ * GET /contact-groups/:id/members/search?q=… — search members within a group.
+ *
+ * Read-only. Filters the group's members case-insensitively by phone digits or
+ * displayName via the model helper. A blank query returns all members. Keeps
+ * large groups navigable without shipping every row to the client.
+ */
+router.get(
+  '/contact-groups/:id/members/search',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId))
+      .select('name members')
+      .lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const matches = Group.searchMembers(doc.members || [], req.query.q);
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        query: String(req.query.q == null ? '' : req.query.q),
+        total: (doc.members || []).length,
+        count: matches.length,
+        members: matches,
+      },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/members/import-csv — bulk-add members from CSV (W751).
  *
  * Round-trips with the W750 export: accepts a CSV body (header with a `phone`

@@ -162,7 +162,37 @@ describe('W553 — registry + engine item-bank surface', () => {
       .listAdministrable()
       .map(m => m.measureCode)
       .sort();
-    expect(codes).toEqual(['CARS-2', 'CFCS', 'EDACS', 'GMFCS', 'M-CHAT-R', 'MACS', 'PEDSQL', 'SDQ']);
+    // The original 8 (W554–W567) plus the W706/W708–W721 clinical-instrument
+    // arc — every administrable module here ships a bilingual itemBank.
+    expect(codes).toEqual([
+      'BARTHEL',
+      'CARS-2',
+      'CFCS',
+      'CSI',
+      'EDACS',
+      'FLACC',
+      'FTS5',
+      'GAD-7',
+      'GCS',
+      'GMFCS',
+      'KATZ',
+      'LAWTON',
+      'M-CHAT-R',
+      'MACS',
+      'MAS',
+      'MINICOG',
+      'MORSE',
+      'MRS',
+      'NRS',
+      'PEDSQL',
+      'PHQ-9',
+      'PSS-10',
+      'SDQ',
+      'TINETTI',
+      'TUG',
+      'WHO-5',
+      'WHODAS-12',
+    ]);
   });
 
   test('every item-bank item carries bilingual text', () => {

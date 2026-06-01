@@ -55,6 +55,23 @@ const ROLES = {
   TEACHER: 'teacher',
   SPECIAL_ED_TEACHER: 'special_ed_teacher',
   THERAPY_ASSISTANT: 'therapy_assistant',
+  // ── ADR-037 D3 (W731, 2026-06-01): the 9 roles that lived ONLY in
+  //    roles.constants.js and resolved to NOTHING here. Given real hierarchy +
+  //    permission maps below, least-privilege, each modelled on a sibling.
+  //    Nursing clinical ladder:
+  NURSE: 'nurse',
+  HEAD_NURSE: 'head_nurse',
+  NURSING_SUPERVISOR: 'nursing_supervisor',
+  // PDPL / data protection:
+  DPO: 'dpo',
+  // Family wellbeing (THERAPIST archetype):
+  FAMILY_COUNSELLOR: 'family_counsellor',
+  // CRPD rights (conflict-of-interest-free):
+  INDEPENDENT_ADVOCATE: 'independent_advocate',
+  CULTURAL_OFFICER: 'cultural_officer',
+  // CRM / patient relations:
+  PATIENT_RELATIONS_OFFICER: 'patient_relations_officer',
+  CRM_SUPERVISOR: 'crm_supervisor',
 
   // Level 5 — Support
   HR: 'hr',
@@ -303,6 +320,62 @@ const ROLE_HIERARCHY = {
 
   // — External —
   [ROLES.GUARDIAN]: { level: 30, inherits: [ROLES.GUEST], label: 'ولي أمر', labelEn: 'Guardian' },
+
+  // — ADR-037 D3 (W731): the 9 const-only roles, least-privilege —
+  // Nursing clinical ladder (line → head → supervisor).
+  [ROLES.NURSE]: { level: 45, inherits: [ROLES.VIEWER], label: 'ممرض/ة', labelEn: 'Nurse' },
+  [ROLES.HEAD_NURSE]: {
+    level: 52,
+    inherits: [ROLES.NURSE],
+    label: 'رئيس/ة تمريض',
+    labelEn: 'Head Nurse',
+  },
+  [ROLES.NURSING_SUPERVISOR]: {
+    level: 58,
+    inherits: [ROLES.HEAD_NURSE],
+    label: 'مشرف/ة تمريض',
+    labelEn: 'Nursing Supervisor',
+  },
+  // Data Protection Officer — AUDITOR-like (read/export) + PDPL surfaces.
+  [ROLES.DPO]: {
+    level: 60,
+    inherits: [ROLES.VIEWER],
+    label: 'مسؤول حماية البيانات',
+    labelEn: 'Data Protection Officer',
+  },
+  // Family counsellor — THERAPIST archetype (ADR-037).
+  [ROLES.FAMILY_COUNSELLOR]: {
+    level: 50,
+    inherits: [ROLES.THERAPIST],
+    label: 'مرشد أسري',
+    labelEn: 'Family Counsellor',
+  },
+  // CRPD rights roles — conflict-of-interest-free (own direct maps below).
+  [ROLES.INDEPENDENT_ADVOCATE]: {
+    level: 45,
+    inherits: [ROLES.VIEWER],
+    label: 'مناصر مستقل',
+    labelEn: 'Independent Advocate',
+  },
+  [ROLES.CULTURAL_OFFICER]: {
+    level: 40,
+    inherits: [ROLES.VIEWER],
+    label: 'مسؤول التكيّف الثقافي',
+    labelEn: 'Cultural Officer',
+  },
+  // CRM / patient-relations line → supervisor.
+  [ROLES.PATIENT_RELATIONS_OFFICER]: {
+    level: 42,
+    inherits: [ROLES.VIEWER],
+    label: 'مسؤول علاقات المستفيدين',
+    labelEn: 'Patient Relations Officer',
+  },
+  [ROLES.CRM_SUPERVISOR]: {
+    level: 55,
+    inherits: [ROLES.PATIENT_RELATIONS_OFFICER],
+    label: 'مشرف علاقات العملاء',
+    labelEn: 'CRM Supervisor',
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -809,6 +882,79 @@ const ROLE_PERMISSIONS = {
   [ROLES.BUS_ASSISTANT]: {
     [RESOURCES.VEHICLES]: [ACTIONS.READ],
     [RESOURCES.ATTENDANCE]: [ACTIONS.CREATE, ACTIONS.READ],
+  },
+
+  // ── ADR-037 D3 (W731, 2026-06-01): real permission maps for the 9 roles that
+  //    previously resolved to nothing. Least-privilege; resources limited to the
+  //    canonical RESOURCES set (no dedicated complaints/voice_log/dpia resource
+  //    exists, so those map to MESSAGES / FAMILY / DOCUMENTS / QUALITY / AUDIT_LOGS).
+
+  // Nursing clinical line: read+document clinical care, no approve/delete.
+  [ROLES.NURSE]: {
+    [RESOURCES.PATIENTS]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.SESSIONS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.CLINICAL_ASSESSMENTS]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.CARE_PLANS]: [ACTIONS.READ],
+    [RESOURCES.DOCUMENTS]: [ACTIONS.CREATE, ACTIONS.READ],
+    [RESOURCES.SCHEDULES]: [ACTIONS.READ],
+    [RESOURCES.TIMELINE]: [ACTIONS.READ],
+  },
+  // Head nurse: nurse (inherited) + approve clinical sessions, see unit schedules.
+  [ROLES.HEAD_NURSE]: {
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.SCHEDULES]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.REPORTS]: [ACTIONS.READ],
+  },
+  // Nursing supervisor: + staff/attendance oversight (UNIT_SUPERVISOR archetype).
+  [ROLES.NURSING_SUPERVISOR]: {
+    [RESOURCES.EMPLOYEES]: [ACTIONS.READ],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.DASHBOARD]: [ACTIONS.READ],
+  },
+  // DPO — PDPL Art.30: read/export across the board (auditor-like) + DPIA docs.
+  // Mirrors compliance_officer but PDPL-scoped; no write to clinical data.
+  [ROLES.DPO]: {
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.DOCUMENTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.QUALITY]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.SETTINGS]: [ACTIONS.READ],
+  },
+  // Family counsellor: inherits therapist; family-engagement focus (no extra
+  //   direct grant needed beyond inheritance, but pin family create explicitly).
+  [ROLES.FAMILY_COUNSELLOR]: {
+    [RESOURCES.FAMILY]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+  },
+  // Independent advocate (CRPD Art.12, conflict-of-interest-free): read the
+  //   beneficiary file; write to Rights surfaces (voice/decision → FAMILY +
+  //   complaints → MESSAGES). CANNOT touch clinical decisions.
+  [ROLES.INDEPENDENT_ADVOCATE]: {
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ],
+    [RESOURCES.TIMELINE]: [ACTIONS.READ],
+    [RESOURCES.FAMILY]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.MESSAGES]: [ACTIONS.CREATE, ACTIONS.READ],
+    [RESOURCES.DOCUMENTS]: [ACTIONS.READ],
+  },
+  // Cultural officer: narrow advisory — read beneficiary/family context + docs.
+  [ROLES.CULTURAL_OFFICER]: {
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ],
+    [RESOURCES.FAMILY]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.DOCUMENTS]: [ACTIONS.READ],
+  },
+  // Patient relations officer: CRM line — handle complaints/messages + family.
+  [ROLES.PATIENT_RELATIONS_OFFICER]: {
+    [RESOURCES.MESSAGES]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.FAMILY]: [ACTIONS.READ, ACTIONS.CREATE],
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ],
+    [RESOURCES.NOTIFICATIONS]: [ACTIONS.READ],
+  },
+  // CRM supervisor: inherits patient_relations + approve/escalate + analytics.
+  [ROLES.CRM_SUPERVISOR]: {
+    [RESOURCES.MESSAGES]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.REPORTS]: [ACTIONS.READ],
+    [RESOURCES.ANALYTICS]: [ACTIONS.READ],
   },
 
   // — External (Guardian is a dedicated role so ABAC can differentiate

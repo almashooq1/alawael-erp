@@ -382,35 +382,60 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
         }
       }
     } else if (decision.action === autoReply.ACTION.TEMPLATE && decision.templateName) {
-      const params = autoReply.buildTemplateParams(decision, {
-        beneficiaryName,
-        guardianName: ctxName,
-      });
-      autoReplySent = await whatsappService.sendTemplate(
-        fromPhone,
-        decision.templateName,
-        'ar',
-        params || []
-      );
-      if (autoReplySent?.success && Conversation && conv) {
-        await Conversation.updateOne(
-          { _id: conv._id },
-          {
-            $push: {
-              messages: {
-                direction: 'outgoing',
-                type: 'template',
-                text: `[template: ${decision.templateName}]`,
-                providerMessageId: autoReplySent.messageId,
-                timestamp: new Date(),
-                isAutoReply: true,
-                autoReplyDecision: decision,
-                deliveryStatus: 'sent',
-              },
-            },
-            $set: { lastMessageAt: new Date(), unreadCount: 0 },
-          }
+      // W738: gate auto-reply templates through the same approval check the
+      // event dispatcher uses (W731). Meta silently drops an unapproved
+      // template, so the inbound user would get nothing. Better to skip the
+      // auto-reply and force escalation so a human follows up. Fail OPEN: a
+      // null status (no cached row / DB error) means "don't block".
+      let templateStatus = null;
+      try {
+        templateStatus = await require('./templateSync.service').getTemplateStatus(
+          decision.templateName
         );
+      } catch (_e) {
+        templateStatus = null;
+      }
+
+      if (templateStatus && templateStatus !== 'APPROVED') {
+        logger.warn(
+          `[WhatsApp AutoReply] template "${decision.templateName}" not deliverable ` +
+            `(status=${templateStatus}); skipping auto-reply, forcing escalation.`
+        );
+        // Convert this turn into an escalation so the block below alerts staff.
+        decision.action = autoReply.ACTION.ESCALATE;
+        decision.severity = decision.severity || 'high';
+        decision.reason = `${decision.reason};template_not_approved:${templateStatus}`;
+      } else {
+        const params = autoReply.buildTemplateParams(decision, {
+          beneficiaryName,
+          guardianName: ctxName,
+        });
+        autoReplySent = await whatsappService.sendTemplate(
+          fromPhone,
+          decision.templateName,
+          'ar',
+          params || []
+        );
+        if (autoReplySent?.success && Conversation && conv) {
+          await Conversation.updateOne(
+            { _id: conv._id },
+            {
+              $push: {
+                messages: {
+                  direction: 'outgoing',
+                  type: 'template',
+                  text: `[template: ${decision.templateName}]`,
+                  providerMessageId: autoReplySent.messageId,
+                  timestamp: new Date(),
+                  isAutoReply: true,
+                  autoReplyDecision: decision,
+                  deliveryStatus: 'sent',
+                },
+              },
+              $set: { lastMessageAt: new Date(), unreadCount: 0 },
+            }
+          );
+        }
       }
     }
     // ACTION.ESCALATE and ACTION.NONE fall through to escalation block below.

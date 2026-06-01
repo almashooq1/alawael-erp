@@ -55,6 +55,8 @@
     "audit:no-branch-users": "node scripts/audit-no-branch-users.js",
     "audit:untenanted-aggregations": "node scripts/audit-untenanted-aggregations.js",
     "audit:unauthenticated-routes": "node scripts/audit-unauthenticated-routes.js",
+    "audit:stub-routes": "node scripts/audit-stub-routes.js",
+    "audit:stub-routes:json": "node scripts/audit-stub-routes.js --json",
     "backfill:complaint-branchid": "node scripts/backfill-complaint-branchid.js",
     "backfill:referral-branchid": "node scripts/backfill-referral-branchid.js",
     "backfill:rehabplan-branchid": "node scripts/backfill-rehabplan-branchid.js",

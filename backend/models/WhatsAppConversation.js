@@ -205,6 +205,20 @@ whatsappConversationSchema.virtual('latestMessage').get(function () {
 });
 
 // ─── Statics ─────────────────────────────────────────────────────────────────
+// Rank order for the pending-review queue. urgencyLevel is a string enum, so a
+// plain Mongo `.sort({ urgencyLevel: 1 })` orders it LEXICALLY
+// (critical, high, low, medium) — which wrongly ranks `low` above `medium` and
+// `high`. Rank explicitly so the most urgent surfaces first, ties broken by
+// most-recent activity. Pure + side-effect free so it is unit-testable.
+const URGENCY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
+function sortPendingReview(rows) {
+  return (rows || []).slice().sort((a, b) => {
+    const r = (URGENCY_RANK[a?.urgencyLevel] ?? 9) - (URGENCY_RANK[b?.urgencyLevel] ?? 9);
+    if (r !== 0) return r;
+    return new Date(b?.lastMessageAt || 0).getTime() - new Date(a?.lastMessageAt || 0).getTime();
+  });
+}
+
 whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
@@ -213,10 +227,10 @@ whatsappConversationSchema.statics.findPendingReview = function (orgId) {
   const q = { requiresHumanReview: true, status: { $ne: 'resolved' }, isDeleted: false };
   if (orgId) q.organizationId = orgId;
   return this.find(q)
-    .sort({ urgencyLevel: 1, lastMessageAt: -1 })
     .populate('beneficiaryId', 'personalInfo.firstName personalInfo.lastName fileNumber')
     .populate('familyMemberId', 'firstName lastName relationship')
-    .lean();
+    .lean()
+    .then(sortPendingReview);
 };
 
 whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, endDate) {
@@ -249,3 +263,6 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
 module.exports =
   mongoose.models.WhatsAppConversation ||
   mongoose.model('WhatsAppConversation', whatsappConversationSchema);
+
+// Pure helper exported for unit tests (the queue sort logic must stay correct).
+module.exports.sortPendingReview = sortPendingReview;

@@ -512,3 +512,4 @@ __tests__/otp-hash-at-rest-wave726.test.js
 __tests__/whatsapp-event-bindings-wave727.test.js
 __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
+__tests__/whatsapp-pending-review-sort-wave741.test.js

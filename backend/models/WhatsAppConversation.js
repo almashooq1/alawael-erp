@@ -166,6 +166,11 @@ const whatsappConversationSchema = new mongoose.Schema(
       default: 'low',
       index: true,
     },
+    // Numeric mirror of urgencyLevel (higher = more urgent) so paginated DB
+    // queries can `.sort({ urgencyRank: -1 })` correctly. Sorting on the string
+    // enum orders lexically (critical, high, low, medium) and mis-ranks `low`.
+    // Kept in sync via the hooks below — never set this directly.
+    urgencyRank: { type: Number, default: 1, index: true },
     autoReplyEnabled: { type: Boolean, default: true },
 
     // Timestamps
@@ -191,6 +196,7 @@ const whatsappConversationSchema = new mongoose.Schema(
 whatsappConversationSchema.index({ phone: 1, beneficiaryId: 1 }, { unique: true, sparse: true });
 whatsappConversationSchema.index({ requiresHumanReview: 1, status: 1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ urgencyLevel: 1, status: 1 });
+whatsappConversationSchema.index({ urgencyRank: -1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ organizationId: 1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ assignedTo: 1, status: 1 });
 
@@ -210,6 +216,13 @@ whatsappConversationSchema.virtual('latestMessage').get(function () {
 // (critical, high, low, medium) — which wrongly ranks `low` above `medium` and
 // `high`. Rank explicitly so the most urgent surfaces first, ties broken by
 // most-recent activity. Pure + side-effect free so it is unit-testable.
+// Numeric urgency rank used both for the stored `urgencyRank` field (higher =
+// more urgent) and to keep one canonical mapping. Unknown levels sink to 0.
+const URGENCY_RANK_DB = { critical: 4, high: 3, medium: 2, low: 1 };
+function urgencyRankFor(level) {
+  return URGENCY_RANK_DB[level] ?? 0;
+}
+
 const URGENCY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
 function sortPendingReview(rows) {
   return (rows || []).slice().sort((a, b) => {
@@ -260,9 +273,38 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
   ]);
 };
 
+// ─── Hooks: keep urgencyRank in sync with urgencyLevel ───────────────────────
+whatsappConversationSchema.pre('save', function (next) {
+  if (this.isModified('urgencyLevel') || this.isNew) {
+    this.urgencyRank = urgencyRankFor(this.urgencyLevel);
+  }
+  next();
+});
+
+// Covers the webhook upsert (findOneAndUpdate) + any update*-family write that
+// changes urgencyLevel via $set or a top-level field.
+function syncUrgencyRankOnUpdate(next) {
+  const update = this.getUpdate() || {};
+  const level =
+    (update.$set && update.$set.urgencyLevel) !== undefined
+      ? update.$set.urgencyLevel
+      : update.urgencyLevel;
+  if (level !== undefined) {
+    update.$set = update.$set || {};
+    update.$set.urgencyRank = urgencyRankFor(level);
+    this.setUpdate(update);
+  }
+  next();
+}
+whatsappConversationSchema.pre('findOneAndUpdate', syncUrgencyRankOnUpdate);
+whatsappConversationSchema.pre('updateOne', syncUrgencyRankOnUpdate);
+whatsappConversationSchema.pre('updateMany', syncUrgencyRankOnUpdate);
+
 module.exports =
   mongoose.models.WhatsAppConversation ||
   mongoose.model('WhatsAppConversation', whatsappConversationSchema);
 
 // Pure helper exported for unit tests (the queue sort logic must stay correct).
 module.exports.sortPendingReview = sortPendingReview;
+// Exported so the urgency→rank mapping has a single, testable source of truth.
+module.exports.urgencyRankFor = urgencyRankFor;

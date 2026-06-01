@@ -223,7 +223,7 @@ router.get(
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
       Conversation.find(filter)
-        .sort({ urgencyLevel: 1, lastMessageAt: -1 })
+        .sort({ urgencyRank: -1, lastMessageAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .select('-messages') // exclude messages array for list view

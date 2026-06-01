@@ -2098,6 +2098,10 @@ require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logge
 // `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).
 // Inert until ENABLE_DB_BACKUP_CRON=true + mongodump present on host.
 require('./startup/databaseBackupBootstrap').wireDatabaseBackup(app, { logger });
+// W762 — activate the DORMANT Phase-10 reporting platform (engine + scheduler were
+// fully built but never .start()'d → scheduled reports never ran, ReportSchedule
+// had no consumer). Env-gated, default OFF (ENABLE_REPORT_SCHEDULER=true).
+require('./startup/reportingSchedulerBootstrap').wireReportingScheduler(app, { logger });
 // W695 — module-gap overdue/review sweepers for the W680-W693 arc (P&O follow-ups,
 // sensory-diet review-due, sponsorship expiry, VFSS pending results). All read-only,
 // independently env-gated (ENABLE_*_SWEEPER), default OFF.

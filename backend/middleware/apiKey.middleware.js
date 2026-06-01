@@ -6,11 +6,6 @@ const safeError = require('../utils/safeError');
  * Useful for automated services, mobile apps, or external integrations
  */
 const apiKeyAuth = async (req, res, next) => {
-  // Skip auth for public Phase 29-33 endpoints (dev mode)
-  if (req.isPhase2933Public) {
-    return next();
-  }
-
   const key = req.header('X-API-KEY');
 
   if (!key) {

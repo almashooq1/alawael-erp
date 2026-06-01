@@ -57,19 +57,6 @@ module.exports = function registerPhaseRoutes(
   // Phase 4: Health Monitoring
   safeMount(app, ['/api/health', '/api/v1/health'], '../routes/health.routes');
 
-  // Phase 21-28
-  safeMount(app, ['/api/phases-21-28', '/api/v1/phases-21-28'], '../routes/phases-21-28.routes');
-
-  // Phase 17 (namespaced to avoid collisions with analytics/integrations)
-  if (process.env.SKIP_PHASE17 === 'true') {
-    logger.warn('Phase 17 routes skipped (SKIP_PHASE17=true)');
-  } else {
-    safeMount(app, ['/api/phase17', '/api/v1/phase17'], '../routes/phase17-advanced.routes');
-  }
-
-  // Phases 18-20 (namespaced to avoid collisions with tenants/compliance)
-  safeMount(app, ['/api/phases-18-20', '/api/v1/phases-18-20'], '../routes/phases-18-20.routes');
-
   // ── Phase 21: New Feature Services (individual safeMount for resilience) ──
   safeMount(app, ['/api/contracts', '/api/v1/contracts'], '../routes/contracts.routes');
   safeMount(
@@ -201,9 +188,6 @@ module.exports = function registerPhaseRoutes(
   logger.info(
     'Administrative systems routes mounted (strategic planning, complaints, facilities, meetings, visitors, knowledge center)'
   );
-
-  // Phase 29-33
-  safeMount(app, ['/api/phases-29-33', '/api/v1/phases-29-33'], '../routes/phases-29-33.routes');
 
   // ── New Systems — Phase 4 (الأنظمة المضافة — المرحلة الرابعة) ─────────
   safeMount(app, ['/api/kitchen', '/api/v1/kitchen'], '../routes/kitchen.routes');

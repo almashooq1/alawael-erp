@@ -793,7 +793,6 @@ on:
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/mawid-wave687.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dtt-session-wave689.test.js'
       - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
@@ -806,53 +805,55 @@ on:
       - 'backend/__tests__/adjunct-therapy-wave693.test.js'
       - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
+      - 'backend/__tests__/db-backup-cron-wave676.test.js'
+      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/money-lib-wave579.test.js'
+      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
+      - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
+      - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
+      - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/icf-reference-common-wave705.test.js'
       - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
-      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-activity-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-cognition-adl-wave710.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-core-linking-wave711.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-disability-fallrisk-wave712.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
       - 'backend/__tests__/adjunct-therapy-api-wave699.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
+      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
+      - 'backend/__tests__/dtt-session-api-wave699.test.js'
+      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
       - 'backend/__tests__/iq-assessments-routes-wave714.test.js'
       - 'backend/__tests__/iq-report-service-wave714.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/sponsorship-api-wave699.test.js'
-      - 'backend/__tests__/dtt-session-api-wave699.test.js'
-      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
-      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
-      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
-      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
-      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/spasticity-injection-wave715.test.js'
-      - 'backend/__tests__/spasticity-injection-behavioral-wave715.test.js'
-      - 'backend/__tests__/spasticity-injection-api-wave715.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-governance-wave716.test.js'
-      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
-      - 'backend/__tests__/measures-explain-wave718.test.js'
-      - 'backend/__tests__/measures-intelligence-wave719.test.js'
       - 'backend/__tests__/measures-analyze-routes-wave720.test.js'
+      - 'backend/__tests__/measures-core-linking-wave711.test.js'
+      - 'backend/__tests__/measures-explain-wave718.test.js'
+      - 'backend/__tests__/measures-governance-wave716.test.js'
+      - 'backend/__tests__/measures-intelligence-wave719.test.js'
+      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
+      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
+      - 'backend/__tests__/scoring-cognition-adl-wave710.test.js'
+      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
+      - 'backend/__tests__/scoring-disability-fallrisk-wave712.test.js'
+      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
+      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
+      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
+      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
+      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
+      - 'backend/__tests__/sponsorship-api-wave699.test.js'
+      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1629,7 +1630,6 @@ on:
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/mawid-wave687.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dtt-session-wave689.test.js'
       - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
@@ -1642,53 +1642,55 @@ on:
       - 'backend/__tests__/adjunct-therapy-wave693.test.js'
       - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-summary-route-wave599.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-beneficiary-side-effects-window-route-wave607.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-summary-route-wave601.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-branch-side-effects-window-route-wave604.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-classify-op-exhaustive-wave593.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-execute-summary-wave596.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-handler-map-completeness-wave594.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-mutation-shape-wave592.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-real-handler-registry-binding-wave591.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-side-effects-summary-route-wave597.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-summarize-results-wave595.test.js'
+      - 'backend/__tests__/db-backup-cron-wave676.test.js'
+      - 'backend/__tests__/finance-models-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/invoice-halalas-expand-wave579.test.js'
+      - 'backend/__tests__/money-lib-wave579.test.js'
+      - 'backend/__tests__/no-float-money-fields-finance-wave579.test.js'
+      - 'backend/__tests__/seating-postural-assessment-behavioral-wave675.test.js'
+      - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
+      - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/icf-reference-common-wave705.test.js'
       - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
-      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-activity-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-cognition-adl-wave710.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-core-linking-wave711.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-disability-fallrisk-wave712.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
       - 'backend/__tests__/adjunct-therapy-api-wave699.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
+      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
+      - 'backend/__tests__/dtt-session-api-wave699.test.js'
+      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
       - 'backend/__tests__/iq-assessments-routes-wave714.test.js'
       - 'backend/__tests__/iq-report-service-wave714.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/sponsorship-api-wave699.test.js'
-      - 'backend/__tests__/dtt-session-api-wave699.test.js'
-      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
-      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
-      - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
-      - 'backend/__tests__/arts-therapy-api-wave699.test.js'
-      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/spasticity-injection-wave715.test.js'
-      - 'backend/__tests__/spasticity-injection-behavioral-wave715.test.js'
-      - 'backend/__tests__/spasticity-injection-api-wave715.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-governance-wave716.test.js'
-      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
-      - 'backend/__tests__/measures-explain-wave718.test.js'
-      - 'backend/__tests__/measures-intelligence-wave719.test.js'
       - 'backend/__tests__/measures-analyze-routes-wave720.test.js'
+      - 'backend/__tests__/measures-core-linking-wave711.test.js'
+      - 'backend/__tests__/measures-explain-wave718.test.js'
+      - 'backend/__tests__/measures-governance-wave716.test.js'
+      - 'backend/__tests__/measures-intelligence-wave719.test.js'
+      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
+      - 'backend/__tests__/prosthetic-orthotic-api-wave699.test.js'
+      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
+      - 'backend/__tests__/scoring-cognition-adl-wave710.test.js'
+      - 'backend/__tests__/scoring-cognitive-iq-wave713.test.js'
+      - 'backend/__tests__/scoring-disability-fallrisk-wave712.test.js'
+      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
+      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
+      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
+      - 'backend/__tests__/seat-allocation-api-wave699.test.js'
+      - 'backend/__tests__/sensory-diet-api-wave699.test.js'
+      - 'backend/__tests__/sponsorship-api-wave699.test.js'
+      - 'backend/__tests__/therapy-activity-api-wave699.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

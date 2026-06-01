@@ -509,3 +509,5 @@ __tests__/scoring-mental-health-pain-wave706.test.js
 __tests__/scoring-mobility-caregiver-wave708.test.js
 __tests__/scoring-neuro-disability-wave721.test.js
 __tests__/tenant-routes-wiring-wave721.test.js
+__tests__/ops-alert-model-wave733.test.js
+tests/unit/ops-alerter.test.js

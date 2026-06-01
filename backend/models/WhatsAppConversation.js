@@ -311,11 +311,10 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
 };
 
 // ─── Hooks: keep urgencyRank in sync with urgencyLevel ───────────────────────
-whatsappConversationSchema.pre('save', function (next) {
+whatsappConversationSchema.pre('save', async function () {
   if (this.isModified('urgencyLevel') || this.isNew) {
     this.urgencyRank = urgencyRankFor(this.urgencyLevel);
   }
-  next();
 });
 
 // Covers the webhook upsert (findOneAndUpdate) + any update*-family write that

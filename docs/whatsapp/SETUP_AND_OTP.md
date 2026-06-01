@@ -102,6 +102,15 @@ auth/otp-service.js
 `expiryMinutes` is derived from `otp.expirySeconds` config. On send failure in
 development it logs the OTP and continues; in production it throws.
 
+### OTP-at-rest security (W726)
+
+The raw OTP code is **never persisted**. `otp-service.js` stores an
+HMAC-SHA256 digest keyed by a server-side pepper (`OTP_HASH_SECRET`, falling
+back to `JWT_SECRET`/`SESSION_SECRET`; **required in production**). Verification
+re-hashes the supplied code and timing-safe-compares the hex digests. Combined
+with `maxAttempts` (3–5 per purpose), rate limiting, and short expiry, this
+gives defense-in-depth against store leakage, replay, and brute force.
+
 ---
 
 ## 4. End-to-end test (manual)
@@ -117,6 +126,8 @@ Automated regression guards (run via `npm run test:sprint`):
 
 - `__tests__/whatsapp-canonical-consolidation-wave725.test.js` — asserts the
   legacy file stays an adapter and OTP uses the canonical `sendOtp`.
+- `__tests__/otp-hash-at-rest-wave726.test.js` — proves OTP is hashed at rest
+  and still round-trips verification.
 - `__tests__/whatsapp-webhook-signature.test.js` — HMAC verification.
 - `__tests__/whatsapp-activation-phase-a.*`, `-hardening-phase-b.*`,
   `-gap-closure-phase-e.*` — canonical service behavior.

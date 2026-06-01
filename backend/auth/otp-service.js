@@ -129,6 +129,34 @@ class OTPService {
   }
 
   /**
+   * Hash an OTP for at-rest storage.
+   *
+   * OTPs are short-lived secrets that grant account access, so the raw code
+   * is NEVER persisted (DB row or in-memory map). We store an HMAC-SHA256
+   * digest keyed by a server-side pepper so a leaked OTP store cannot be
+   * replayed and an offline brute force needs the pepper too. Verification
+   * re-hashes the supplied code and timing-safe-compares the hex digests
+   * (always equal length → timingSafeEqual stays constant-time).
+   * @param {string} otp
+   * @returns {string} hex HMAC-SHA256 digest
+   */
+  hashOtp(otp) {
+    const secret =
+      process.env.OTP_HASH_SECRET || process.env.JWT_SECRET || process.env.SESSION_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('OTP_HASH_SECRET (or JWT_SECRET) must be set in production');
+      }
+      // Dev-only deterministic fallback so the flow still works locally.
+      logger.warn('[otp] OTP_HASH_SECRET not set — using dev fallback pepper');
+    }
+    return crypto
+      .createHmac('sha256', secret || 'dev-otp-pepper')
+      .update(String(otp))
+      .digest('hex');
+  }
+
+  /**
    * Format phone number for Saudi Arabia
    */
   formatPhoneNumber(phone) {
@@ -258,7 +286,8 @@ class OTPService {
       otpId,
       identifier,
       identifierType,
-      otp,
+      // Stored hashed (HMAC-SHA256 + server pepper) — never the raw code.
+      otp: this.hashOtp(otp),
       purpose,
       method: actualMethod,
       status: 'pending',
@@ -488,9 +517,10 @@ class OTPService {
       };
     }
 
-    // التحقق من صحة OTP — timing-safe comparison to prevent timing attacks
+    // التحقق من صحة OTP — hash the supplied code with the same pepper and
+    // timing-safe-compare the hex digests (constant length → constant time).
     const storedBuf = Buffer.from(String(otpRecord.otp), 'utf8');
-    const providedBuf = Buffer.from(String(otp), 'utf8');
+    const providedBuf = Buffer.from(this.hashOtp(otp), 'utf8');
     const otpMatch =
       storedBuf.length === providedBuf.length && crypto.timingSafeEqual(storedBuf, providedBuf);
     if (!otpMatch) {

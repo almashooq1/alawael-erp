@@ -514,3 +514,4 @@ __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
 __tests__/whatsapp-pending-review-sort-wave741.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js
+__tests__/whatsapp-queue-count-filters-wave743.test.js

@@ -845,18 +845,11 @@ router.get(
     const { startDate, endDate } = req.query;
     const orgId = req.user?.organizationId;
 
+    const filters = Conversation.queueCountFilters(orgId);
     const [analytics, pendingReview, critical] = await Promise.all([
       Conversation.getAnalytics(orgId, startDate, endDate),
-      Conversation.countDocuments({
-        requiresHumanReview: true,
-        status: { $ne: 'resolved' },
-        isDeleted: false,
-      }),
-      Conversation.countDocuments({
-        urgencyLevel: 'critical',
-        status: { $ne: 'resolved' },
-        isDeleted: false,
-      }),
+      Conversation.countDocuments(filters.pendingReview),
+      Conversation.countDocuments(filters.critical),
     ]);
 
     res.json({

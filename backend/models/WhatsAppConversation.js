@@ -232,6 +232,18 @@ function sortPendingReview(rows) {
   });
 }
 
+// Filters for the dashboard queue-count tiles. Org-scoped so multi-tenant
+// deployments don't over-count across organizations (the sibling analytics
+// aggregation is already org-scoped — these must match). Pure + unit-testable.
+function queueCountFilters(orgId) {
+  const base = { status: { $ne: 'resolved' }, isDeleted: false };
+  if (orgId) base.organizationId = orgId;
+  return {
+    pendingReview: { ...base, requiresHumanReview: true },
+    critical: { ...base, urgencyLevel: 'critical' },
+  };
+}
+
 whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
@@ -308,3 +320,5 @@ module.exports =
 module.exports.sortPendingReview = sortPendingReview;
 // Exported so the urgency→rank mapping has a single, testable source of truth.
 module.exports.urgencyRankFor = urgencyRankFor;
+// Exported so the org-scoped queue-count filters stay testable + consistent.
+module.exports.queueCountFilters = queueCountFilters;

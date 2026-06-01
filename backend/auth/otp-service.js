@@ -11,7 +11,11 @@ const {
   sendOTP: sendSMSOTP,
   verifyOTP: verifySMSOTP,
 } = require('../communication/sms-service');
-const { whatsappService, sendWhatsAppOTP } = require('../communication/whatsapp-service');
+// W725: migrated to the canonical hardened WhatsApp service
+// (services/whatsapp) — HMAC webhook verification, consent gate (PDPL Art.13),
+// exponential back-off retry, phone normalization, idempotency + DLQ.
+// Replaces the retired legacy `../communication/whatsapp-service`.
+const { whatsappService } = require('../services/whatsapp');
 const logger = require('../utils/logger');
 
 /**
@@ -389,29 +393,28 @@ class OTPService {
     const expiryMinutes = Math.floor(this.config.otp.expirySeconds / 60);
 
     try {
-      // استخدام قالب الواتساب
-      if (whatsappService && whatsappService.sendTemplate) {
-        const template = {
-          name: 'otp_verification',
-          language: { code: 'ar' },
-          components: [
-            {
-              type: 'body',
-              parameters: [
-                { type: 'text', text: otp },
-                { type: 'text', text: String(expiryMinutes) },
-              ],
-            },
-          ],
+      // Canonical OTP path: sends the approved `otp_verification` template
+      // (Arabic) via the hardened service. Signature: (to, otp, expiryMinutes).
+      if (whatsappService && typeof whatsappService.sendOtp === 'function') {
+        const res = await whatsappService.sendOtp(phone, otp, expiryMinutes);
+        return {
+          success: res.success !== false,
+          method: 'whatsapp',
+          messageId: res.messageId,
+          ...res,
         };
-
-        return await whatsappService.sendTemplate(phone, template.name, template.components);
       }
 
-      // إرسال كرسالة نصية عادية
-      if (whatsappService && whatsappService.sendText) {
-        const message = `🔐 رمز التحقق الخاص بك هو: ${otp}\n⏰ صالح لمدة ${expiryMinutes} دقيقة\n\n@الأهداف`;
-        return await whatsappService.sendText(phone, message);
+      // Fallback: plain text message when the template path is unavailable.
+      if (whatsappService && typeof whatsappService.sendText === 'function') {
+        const message = `🔐 رمز التحقق الخاص بك هو: ${otp}\n⏰ صالح لمدة ${expiryMinutes} دقيقة\n\n@الأوائل`;
+        const res = await whatsappService.sendText(phone, message);
+        return {
+          success: res.success !== false,
+          method: 'whatsapp',
+          messageId: res.messageId,
+          ...res,
+        };
       }
     } catch (error) {
       logger.error('WhatsApp Error:', error);

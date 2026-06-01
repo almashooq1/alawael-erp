@@ -507,3 +507,4 @@ __tests__/scoring-mental-health-pain-wave706.test.js
 __tests__/scoring-mobility-caregiver-wave708.test.js
 __tests__/scoring-neuro-disability-wave721.test.js
 __tests__/tenant-routes-wiring-wave721.test.js
+__tests__/whatsapp-canonical-consolidation-wave725.test.js

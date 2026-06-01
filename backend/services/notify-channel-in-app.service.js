@@ -48,7 +48,7 @@ function _modelOrNull(name, fallbackPath) {
 // Per-recipient title + message helpers. We render in Arabic since the
 // dashboard is Arabic-first; the message body carries the salient fields
 // so the recipient knows what changed without opening the link.
-function _renderForRecipient({ payload, recipientId, isFrom, isTo }) {
+function _renderForRecipient({ payload, recipientId: _recipientId, isFrom, isTo }) {
   const direction = isFrom
     ? 'تم نقل حالة من قائمتك'
     : isTo

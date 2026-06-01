@@ -200,7 +200,7 @@ function buildLlmRefiner(options = {}) {
 
     const expectedIds = new Set(goalsWithIds.map(g => g._id));
     let response = null;
-    let lastErr = null;
+    let _lastErr = null;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         response = await withTimeout(
@@ -217,7 +217,7 @@ function buildLlmRefiner(options = {}) {
         );
         break;
       } catch (err) {
-        lastErr = err;
+        _lastErr = err;
         if (logger && logger.warn) {
           logger.warn(`[assessment-llm] attempt ${attempt + 1} failed: ${err.message}`);
         }

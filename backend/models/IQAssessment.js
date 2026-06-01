@@ -159,10 +159,9 @@ iqAssessmentSchema.path('edition').validate(function (v) {
 }, 'Invalid edition for this instrument type');
 
 // FSIQ < 70 → intellectual disability range; flag for urgent review
-iqAssessmentSchema.path('fullScaleIQ').validate(function (v) {
+iqAssessmentSchema.path('fullScaleIQ').validate(function (_v) {
   // No hard reject; just allow but flag in severe tier
   return true;
 });
 
-module.exports =
-  mongoose.models.IQAssessment || mongoose.model('IQAssessment', iqAssessmentSchema);
+module.exports = mongoose.models.IQAssessment || mongoose.model('IQAssessment', iqAssessmentSchema);

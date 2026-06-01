@@ -19,7 +19,7 @@
  */
 module.exports = function registerClinicalTherapyRoutes(
   app,
-  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
+  { safeRequire, dualMount, safeMount, logger }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Therapist Portal (5 Tiers) ──────────────────────────────────────────

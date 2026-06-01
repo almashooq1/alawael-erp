@@ -114,7 +114,7 @@ function generateInterpretation_EN(assessment, interp) {
   return text;
 }
 
-function generateRecommendations_AR(assessment, interp) {
+function generateRecommendations_AR(assessment, _interp) {
   const score = assessment.fullScaleIQ;
   const recs = [];
 
@@ -138,7 +138,7 @@ function generateRecommendations_AR(assessment, interp) {
   return recs.join('\n');
 }
 
-function generateRecommendations_EN(assessment, interp) {
+function generateRecommendations_EN(assessment, _interp) {
   const score = assessment.fullScaleIQ;
   const recs = [];
 

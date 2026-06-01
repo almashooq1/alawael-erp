@@ -15,21 +15,21 @@
  */
 
 const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
+const _path = require('path');
+const _fs = require('fs');
 const crypto = require('crypto');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // ── Lazy model loaders ────────────────────────────────────────────
 const Doc = () => mongoose.model('Document');
-const User = () => {
+const _User = () => {
   try {
     return mongoose.model('User');
   } catch {
     return null;
   }
 };
-const Beneficiary = () => {
+const _Beneficiary = () => {
   try {
     return mongoose.model('Beneficiary');
   } catch {
@@ -47,12 +47,12 @@ function loadService(rel) {
 }
 
 const intelligenceSvc = loadService('./documents/documentIntelligence.service');
-const workflowEngine = loadService('./documents/documentWorkflow.engine');
+const _workflowEngine = loadService('./documents/documentWorkflow.engine');
 const searchEngine = loadService('./documents/documentSearch.engine');
-const ocrSvc = loadService('./documents/documentOCR.service');
-const versioningSvc = loadService('./documents/documentVersioning.service');
-const notifSvc = loadService('./documents/documentNotification.service');
-const auditSvc = loadService('./documents/documentAudit.service');
+const _ocrSvc = loadService('./documents/documentOCR.service');
+const _versioningSvc = loadService('./documents/documentVersioning.service');
+const _notifSvc = loadService('./documents/documentNotification.service');
+const _auditSvc = loadService('./documents/documentAudit.service');
 
 // ── Constants ──────────────────────────────────────────────────────
 const CATEGORIES = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'];
@@ -85,7 +85,7 @@ function fmtBytes(bytes) {
 // ─────────────────────────────────────────────────────────────────
 // Helper: content fingerprint (SHA-256 of file path + size)
 // ─────────────────────────────────────────────────────────────────
-function makeFingerprint(filePath, fileSize) {
+function _makeFingerprint(filePath, fileSize) {
   return crypto.createHash('sha256').update(`${filePath}:${fileSize}`).digest('hex');
 }
 
@@ -108,7 +108,7 @@ async function logActivity(doc, action, userId, userName, details = '') {
 // ═════════════════════════════════════════════════════════════════
 // § 1 — DASHBOARD
 // ═════════════════════════════════════════════════════════════════
-async function getDashboard(userId, options = {}) {
+async function getDashboard(userId, _options = {}) {
   const Document = Doc();
   const now = new Date();
   const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -338,7 +338,7 @@ async function listDocuments(filters = {}, pagination = {}) {
 // ═════════════════════════════════════════════════════════════════
 // § 3 — GET SINGLE DOCUMENT
 // ═════════════════════════════════════════════════════════════════
-async function getDocument(id, userId) {
+async function getDocument(id, _userId) {
   const Document = Doc();
   const doc = await Document.findById(id).lean();
   if (!doc) throw Object.assign(new Error('المستند غير موجود'), { status: 404 });
@@ -690,7 +690,7 @@ async function checkDuplicates(id) {
   };
 }
 
-async function getAIInsights(filters = {}) {
+async function getAIInsights(_filters = {}) {
   const Document = Doc();
   const q = { status: { $ne: 'محذوف' } };
 

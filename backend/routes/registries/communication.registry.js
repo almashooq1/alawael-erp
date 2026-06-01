@@ -20,7 +20,7 @@
  */
 module.exports = function registerCommunicationRoutes(
   app,
-  { safeRequire, dualMount, dualMountAuth, _safeMount, logger, authenticate }
+  { safeRequire, dualMount, _safeMount, logger }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────

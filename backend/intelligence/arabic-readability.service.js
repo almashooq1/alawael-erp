@@ -200,7 +200,7 @@ const PASSIVE_VERB_PATTERNS = [/^أ.+ت$/, /يُ[ا-ي]{2,}/, /تُ[ا-ي]{2,}/]
 // ─── Tokenization helpers ────────────────────────────────────────
 
 const SENTENCE_DELIMITERS = /[.!؟?\n]+/;
-const WORD_DELIMITERS = /[\s،,;:()،""«»\-\/\\\[\]{}]+/;
+const WORD_DELIMITERS = /[\s،,;:()،""«»\-/\\[\]{}]+/;
 
 const ARABIC_LETTER_RE = /[؀-ۿ]/;
 

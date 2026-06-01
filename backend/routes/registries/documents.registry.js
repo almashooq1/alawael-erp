@@ -20,7 +20,7 @@
  */
 module.exports = function registerDocumentRoutes(
   app,
-  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
+  { safeRequire, dualMount, safeMount, logger }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────

@@ -54,7 +54,7 @@ describe('W456 — error-message suppression on 500 responses', () => {
           expect(src).toMatch(/logger\.error\(['"]?\[notificationLog\] bus unavailable/);
         } else {
           expect(src).toMatch(/safeError/);
-          expect(src).toMatch(/require\(['"][\.\/]+utils\/safeError['"]\)/);
+          expect(src).toMatch(/require\(['"][./]+utils\/safeError['"]\)/);
         }
       });
 
@@ -63,7 +63,7 @@ describe('W456 — error-message suppression on 500 responses', () => {
         expect(src).not.toMatch(/res\.status\(500\)\.json\(\{[^}]*message:\s*err\.message/);
       });
 
-      test('NO bare ${err.message} interpolation in 500 response body', () => {
+      test('NO bare err.message interpolation in 500 response body', () => {
         // notificationLog had `bus_unavailable: ${err.message}` — strip
         // err.message from any literal string used in a 500 res.
         // Conservative check: just ensure no `err.message}` shows up

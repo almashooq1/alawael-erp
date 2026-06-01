@@ -510,7 +510,7 @@ measureApplicationSchema.pre('validate', function () {
 // status field itself is being changed.
 measureApplicationSchema.pre('save', function () {
   if (!this.isNew && this.isModified('status')) {
-    const original = this.$__.activePaths.getStatePaths('modify');
+    const _original = this.$__.activePaths.getStatePaths('modify');
     // Original status comes from the unmodified pre-image — Mongoose
     // exposes it via .get(path, null, {getters: false}) on the doc's
     // internal _doc. Cheaper: rely on the persisted document.

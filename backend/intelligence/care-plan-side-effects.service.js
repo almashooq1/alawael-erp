@@ -302,7 +302,7 @@ function createCarePlanSideEffectHandlers({
     };
   }
 
-  async function onNotifyFamily({ planVersion, actor, metadata }) {
+  async function onNotifyFamily({ planVersion, actor: _actor, metadata }) {
     const planVersionId = String(planVersion?._id || '');
     const channel = metadata?.channel || 'manual';
     const recipient = clampMessage(metadata?.recipient, 500) || null;

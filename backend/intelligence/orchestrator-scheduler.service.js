@@ -25,7 +25,7 @@
  * Off by default so test environments don't tick.
  */
 
-const KSA_OFFSET_MIN = 180; // UTC+3, no DST
+const _KSA_OFFSET_MIN = 180; // UTC+3, no DST
 
 // Cadence types
 const CADENCE_INTERVAL_MIN = 'interval-min'; // every N minutes

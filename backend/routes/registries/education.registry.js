@@ -15,10 +15,7 @@
  * @param {Express.Application} app
  * @param {object} helpers – { safeRequire, dualMount, logger }
  */
-module.exports = function registerEducationRoutes(
-  app,
-  { safeRequire, dualMount, dualMountAuth, logger, authenticate }
-) {
+module.exports = function registerEducationRoutes(app, { safeRequire, dualMount, logger }) {
   // ── Imports ──────────────────────────────────────────────────────────────
   const academicYearRoutes = safeRequire('../routes/academicYear.routes');
   const subjectsRoutes = safeRequire('../routes/subjects.routes');

@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // W277g — MFA tier-2 on calibration lifecycle. Status changes

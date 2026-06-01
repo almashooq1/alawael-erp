@@ -220,7 +220,7 @@ function reset(phone) {
 async function getStats(phone, at) {
   const keys = bucketKeys(phone, at);
   const client = getRedisClient();
-  return client ? await redisGet(client, keys) : memGet(keys);
+  return client ? redisGet(client, keys) : memGet(keys);
 }
 
 module.exports = {

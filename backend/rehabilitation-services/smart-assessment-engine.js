@@ -380,7 +380,7 @@ class SmartAssessmentEngine {
       case 'rating_scale': {
         if (measure.domains) {
           // Flatten domain items
-          const allItems = Object.values(measure.domains).flatMap(d => d.items || []);
+          const _allItems = Object.values(measure.domains).flatMap(d => d.items || []);
           const result = ScoringAlgorithms.sumByDomain(responses, measure.domains);
           domainScores = result.domainScores;
           raw = result.total;

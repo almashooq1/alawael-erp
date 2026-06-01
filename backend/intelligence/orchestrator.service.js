@@ -29,7 +29,7 @@
 
 const DefaultInsightsService = require('./insights.service');
 
-const DEFAULT_TICK_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+const _DEFAULT_TICK_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const DEFAULT_MAX_PER_GENERATOR = 500; // safety bound on payloads/tick
 
 function nowDate() {

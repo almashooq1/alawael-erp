@@ -154,7 +154,7 @@ describe('W427 — bootstrap + wiring sentinel', () => {
 // ──────────────────────────────────────────────────────────────────
 
 describe('W427 — bridge fan-out (integration envelope → broker)', () => {
-  test('integration envelope topic format = `${domain}.${eventType}`', () => {
+  test('integration envelope topic format = domain.eventType', () => {
     const src = READ(BOOTSTRAP_JS);
     // The bridge constructs topic from envelope.domain + envelope.eventType
     expect(src).toMatch(/`\$\{envelope\.domain\}\.\$\{envelope\.eventType\}`/);

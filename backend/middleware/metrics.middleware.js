@@ -121,7 +121,7 @@ const metricsHandler = (req, res) => {
 
   // ── W302: gov adapter counters + latency (adapterMetricsRegistry) ─────
   try {
-    // eslint-disable-next-line global-require -- lazy: optional in tests
+    // lazy require: optional in tests
     const adapter = require('../services/adapterMetricsRegistry');
     const adapterCounters = adapter.snapshotCounters?.() || {};
     const adapterLatency = adapter.snapshotLatency?.() || {};
@@ -160,7 +160,7 @@ const metricsHandler = (req, res) => {
 
   // ── W302: risk lifecycle counters (risk-metrics.registry, W297) ──────
   try {
-    // eslint-disable-next-line global-require -- lazy: optional in tests
+    // lazy require: optional in tests
     const risk = require('../intelligence/risk-metrics.registry');
     const grouped = risk.snapshotGrouped?.() || {};
     if (Object.keys(grouped).length) {

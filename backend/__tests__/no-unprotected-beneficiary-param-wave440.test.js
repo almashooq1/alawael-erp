@@ -68,7 +68,7 @@ const ENFORCEMENT_SIGNALS = [
   // + beneficiary scoping
   {
     name: 'caseload guard (Appointment count)',
-    regex: /Appointment\([^\)]*\)\.countDocuments\s*\(\s*\{[^}]*\btherapist\b[^}]*\bbeneficiary\b/m,
+    regex: /Appointment\([^)]*\)\.countDocuments\s*\(\s*\{[^}]*\btherapist\b[^}]*\bbeneficiary\b/m,
   },
   // Alternative caseload signal — _ownsCaseloadItem helper used in
   // therapist-portal mutations

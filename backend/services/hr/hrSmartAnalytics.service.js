@@ -97,7 +97,7 @@ class HrSmartAnalyticsService {
     const scope = branchId ? { branch_id: branchId } : {};
     const today = this.now();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const _startOfYear = new Date(today.getFullYear(), 0, 1);
     const last30 = new Date(today - 30 * MS_PER_DAY);
     const last12Start = new Date(today.getFullYear() - 1, today.getMonth(), 1);
 
@@ -615,7 +615,7 @@ class HrSmartAnalyticsService {
     const y = year ?? today.getFullYear();
     const yearStart = new Date(y, 0, 1);
     const yearEnd = new Date(y, 11, 31);
-    const scope = branchId ? { branch_id: branchId } : {};
+    const _scope = branchId ? { branch_id: branchId } : {};
 
     if (!this.m.PerformanceReview) return null;
 
@@ -714,7 +714,7 @@ class HrSmartAnalyticsService {
   // ───────────────────────────────────────────────────────────────────
   // 6. فاعلية التدريب
   // ───────────────────────────────────────────────────────────────────
-  async getTrainingEffectiveness({ branchId, year } = {}) {
+  async getTrainingEffectiveness({ branchId: _branchId, year } = {}) {
     const today = this.now();
     const y = year ?? today.getFullYear();
     const yearStart = new Date(y, 0, 1);

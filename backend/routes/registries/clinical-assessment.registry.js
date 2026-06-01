@@ -19,7 +19,7 @@
  */
 module.exports = function registerClinicalAssessmentRoutes(
   app,
-  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Specialized Clinical Services — التخصصات السريرية المتقدمة ──────────

@@ -99,7 +99,7 @@ async function sweepOnce() {
   return { processed: 1, id: item._id, ...r };
 }
 
-function dispatchByType(svc, sendType, payload, opts) {
+function dispatchByType(svc, sendType, payload, _opts) {
   switch (sendType) {
     case 'text':
       return svc.sendText(payload.to, payload.text, payload.meta || {});

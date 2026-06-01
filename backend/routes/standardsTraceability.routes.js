@@ -7,7 +7,7 @@
  */
 
 const express = require('express');
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');

@@ -21,7 +21,7 @@
  */
 module.exports = function registerGovernmentRoutes(
   app,
-  { safeRequire, dualMount, dualMountAuth, logger, authenticate }
+  { safeRequire, dualMount, dualMountAuth, logger }
 ) {
   // ── Imports ──────────────────────────────────────────────────────────────
   const mudadRoutes = safeRequire('../routes/mudad.routes');

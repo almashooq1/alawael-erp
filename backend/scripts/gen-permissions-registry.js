@@ -53,7 +53,7 @@ function cellFor(perm, role) {
 }
 
 function constName(key) {
-  return key.replace(/[:\-]/g, '_').toUpperCase();
+  return key.replace(/[:-]/g, '_').toUpperCase();
 }
 
 function build() {

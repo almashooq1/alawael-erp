@@ -20,10 +20,7 @@
  * @param {Express.Application} app
  * @param {object} helpers – { safeRequire, dualMount, safeMount, logger }
  */
-module.exports = function registerHrRoutes(
-  app,
-  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
-) {
+module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMount, logger }) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports (all via safeRequire) ───────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════

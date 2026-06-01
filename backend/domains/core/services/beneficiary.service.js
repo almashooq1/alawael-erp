@@ -45,7 +45,7 @@ class BeneficiaryService extends BaseService {
     }
   }
 
-  async afterCreate(entity, context) {
+  async afterCreate(entity, _context) {
     logger.info(
       `[BeneficiaryService] New beneficiary created: ${entity._id} (${entity.fullNameArabic || entity.firstName})`
     );

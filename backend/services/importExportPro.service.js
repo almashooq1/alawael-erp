@@ -18,7 +18,7 @@
  */
 
 const ExcelJS = require('exceljs');
-const { parse: csvParse } = require('csv-parse/sync');
+const { parse: _csvParse } = require('csv-parse/sync');
 const { stringify: csvStringify } = require('csv-stringify/sync');
 const mongoose = require('mongoose');
 const _crypto = require('crypto');

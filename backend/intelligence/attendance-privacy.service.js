@@ -68,7 +68,7 @@ function createAttendancePrivacyService({
   models = {}, // { sourceEvent, dailyRecord, exception, correctionRequest, baseline, outbox, importBatch }
   retentionPolicyModel = null,
   legalHoldChecker = null, // optional ({collection, doc}) → Promise<bool>
-  lockGuard = null, // optional ({branchId, shiftDate}) → Promise<bool>
+  lockGuard: _lockGuard = null, // optional ({branchId, shiftDate}) → Promise<bool>
   logger = console,
   now = () => new Date(),
 } = {}) {

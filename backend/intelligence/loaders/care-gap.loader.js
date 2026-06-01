@@ -63,7 +63,7 @@ function createCareGapLoader({
 
   return async function load() {
     const tickAt = now();
-    const stalledCutoff = new Date(tickAt.getTime() - stalledDays * 86_400_000);
+    const _stalledCutoff = new Date(tickAt.getTime() - stalledDays * 86_400_000);
 
     // 1. Pull active beneficiaries (capped)
     let beneficiaryDocs;

@@ -41,8 +41,8 @@ async function main({ dryRun = false, reset = false } = {}) {
   const facilitator = new mongoose.Types.ObjectId();
   const owner = new mongoose.Types.ObjectId();
   const vendorA = new mongoose.Types.ObjectId();
-  const reviewer = new mongoose.Types.ObjectId();
-  const approver = new mongoose.Types.ObjectId();
+  const _reviewer = new mongoose.Types.ObjectId();
+  const _approver = new mongoose.Types.ObjectId();
   const branchId = new mongoose.Types.ObjectId();
 
   const summary = {
@@ -62,7 +62,7 @@ async function main({ dryRun = false, reset = false } = {}) {
 
   if (reset && !dryRun) {
     console.log('Clearing existing DEMO-Q29-* records…');
-    const filter = { createdBy: facilitator };
+    const _filter = { createdBy: facilitator };
     if (FmeaWorksheet) await FmeaWorksheet.deleteMany({ title: /^DEMO-Q29/ });
     if (RcaInvestigation) await RcaInvestigation.deleteMany({ title: /^DEMO-Q29/ });
     if (SpcChart) await SpcChart.deleteMany({ title: /^DEMO-Q29/ });
@@ -352,7 +352,7 @@ async function main({ dryRun = false, reset = false } = {}) {
       { name: 'DEMO-Q29 — جهاز سكر C3', type: 'glucometer', freq: 3, unit: 'months' },
       { name: 'DEMO-Q29 — ثلاجة أدوية D4', type: 'refrigerator', freq: 12, unit: 'months' },
     ]) {
-      const asset = await CalibrationAsset.create({
+      const _asset = await CalibrationAsset.create({
         name: cfg.name,
         type: cfg.type,
         calibrationFrequency: cfg.freq,

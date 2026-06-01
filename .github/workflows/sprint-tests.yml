@@ -847,6 +847,8 @@ on:
       - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
       - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
+      - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
+      - 'backend/__tests__/vision-screening-wave720.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1677,6 +1679,8 @@ on:
       - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
       - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
+      - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
+      - 'backend/__tests__/vision-screening-wave720.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

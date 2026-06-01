@@ -437,10 +437,10 @@ function evaluateDigitization(code, ctx = {}) {
       record: null,
     };
   }
-  const hasPermission = Boolean(ctx.permissionRef);
+  const hasLicensePermission = Boolean(ctx.permissionRef);
   // Public / free instruments are allowed by default. Restricted instruments
   // need an explicit center permission to flip the default false → true.
-  const allowed = record.digitizationDefault || hasPermission;
+  const allowed = record.digitizationDefault || hasLicensePermission;
   let reason;
   if (allowed) {
     reason = record.digitizationDefault ? 'DEFAULT_PERMITTED' : 'PERMISSION_ON_FILE';

@@ -9,6 +9,7 @@ const whatsappService = require('./whatsappService');
 const whatsappAI = require('./whatsappAI.service');
 const whatsappWebhook = require('./whatsappWebhook.service');
 const whatsappTemplates = require('./whatsappTemplates.service');
+const whatsappEventBindings = require('./whatsappEventBindings.service');
 
 // Top-level helper exports — backwards-compatible names for callers that
 // previously imported from the legacy `backend/communication/whatsapp-service.js`.
@@ -24,6 +25,7 @@ module.exports = {
   whatsappAI,
   whatsappWebhook,
   whatsappTemplates,
+  whatsappEventBindings,
   sendWhatsAppOTP,
   sendWhatsAppNotification,
   sendWhatsAppText,

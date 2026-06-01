@@ -66,6 +66,7 @@ module.exports = function registerFeatureRoutes(
   const sensoryDietRoutes = safeRequire('../routes/sensory-diet.routes');
   const adjunctTherapyRoutes = safeRequire('../routes/adjunct-therapy.routes');
   const therapyActivityRoutes = safeRequire('../routes/therapy-activity.routes');
+  const spasticityInjectionRoutes = safeRequire('../routes/spasticity-injection.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const measuresAnalyzeRoutes = safeRequire('../routes/measures-analyze.routes');
@@ -205,6 +206,10 @@ module.exports = function registerFeatureRoutes(
   // Wave 697: Unified therapy-activity rollup (لوحة المخرجات العلاجية الموحّدة) — read-only
   // cross-module aggregation over the W680-W693 session models per beneficiary + branch summary.
   dualMountAuth(app, 'therapy-activity', therapyActivityRoutes, authenticate);
+  // Wave 715: Spasticity / botulinum-toxin tone-management clinic (عيادة التشنّج وحقن البوتوكس) —
+  // per-muscle injection map + MAS + consent gate + reassessment clock. Procedure record,
+  // distinct from the PhysiotherapyAssessment (W670) spasticity FIELD.
+  dualMountAuth(app, 'spasticity-injection', spasticityInjectionRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

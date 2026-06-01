@@ -1160,6 +1160,30 @@ router.get(
 );
 
 /**
+ * GET /contact-groups/:id/members.csv — export members as CSV (W750).
+ *
+ * Read-only. Streams the group's members (phone, displayName, addedAt) as a
+ * downloadable CSV. Cells are escaped and formula-injection-neutralised by the
+ * model helper, so the file is safe to open in spreadsheet software.
+ */
+router.get(
+  '/contact-groups/:id/members.csv',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const safeName = String(doc.name || 'group').replace(/[^a-zA-Z0-9_-]+/g, '_');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="contact-group-${safeName}.csv"`
+    );
+    res.send(Group.membersToCsv(doc));
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

@@ -521,3 +521,4 @@ __tests__/whatsapp-contact-group-wave746.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-group-broadcast-wave748.test.js
 __tests__/whatsapp-contact-group-stats-wave749.test.js
+__tests__/whatsapp-contact-group-csv-wave750.test.js

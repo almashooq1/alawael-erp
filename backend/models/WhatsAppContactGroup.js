@@ -209,6 +209,42 @@ function summarizeGroups(groups) {
   return { totalGroups: list.length, totalMembers, byTag, largest };
 }
 
+/**
+ * Escape a single CSV cell: wrap in quotes when it contains a delimiter / quote
+ * / newline, and neutralise spreadsheet formula-injection by prefixing a value
+ * that begins with `= + - @ \t \r` with a single quote. Pure / read-only.
+ *
+ * @param {*} value
+ * @returns {string}
+ */
+function csvCell(value) {
+  let s = value == null ? '' : String(value);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  if (/[",\n\r]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+/**
+ * Render a group's members as a CSV document (header + one row per member).
+ * Columns: phone, displayName, addedAt. Pure / read-only — backs the members
+ * CSV export endpoint. Robust to a missing `members` array.
+ *
+ * @param {object} group
+ * @returns {string}
+ */
+function membersToCsv(group) {
+  const members = Array.isArray(group && group.members) ? group.members : [];
+  const header = ['phone', 'displayName', 'addedAt'].join(',');
+  const rows = members.map(m =>
+    [
+      csvCell(normalizePhone(m && m.phone)),
+      csvCell(m && m.displayName),
+      csvCell(m && m.addedAt ? new Date(m.addedAt).toISOString() : ''),
+    ].join(',')
+  );
+  return [header, ...rows].join('\n');
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -235,3 +271,5 @@ module.exports.groupScopedFilter = groupScopedFilter;
 module.exports.listScopedFilter = listScopedFilter;
 module.exports.partitionByEligibility = partitionByEligibility;
 module.exports.summarizeGroups = summarizeGroups;
+module.exports.csvCell = csvCell;
+module.exports.membersToCsv = membersToCsv;

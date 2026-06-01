@@ -1274,6 +1274,69 @@ router.post(
 );
 
 /**
+ * POST /contact-groups/:id/merge — fold another group's members into this one (W754).
+ *
+ * Body: { sourceId: "<group id>", dryRun?: boolean }. Both groups must belong to
+ * the caller's org. Members are de-duped by phone (target wins on conflict). The
+ * source group is left untouched. Pass `dryRun` to preview the impact without
+ * persisting.
+ */
+router.post(
+  '/contact-groups/:id/merge',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const sourceId = req.body && req.body.sourceId;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    if (!sourceId) {
+      return res.status(400).json({ success: false, message: 'sourceId is required' });
+    }
+    if (String(sourceId) === String(req.params.id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Cannot merge a group into itself' });
+    }
+    const [target, source] = await Promise.all([
+      Group.findOne(Group.groupScopedFilter(req.params.id, orgId)),
+      Group.findOne(Group.groupScopedFilter(sourceId, orgId)).lean(),
+    ]);
+    if (!target) return res.status(404).json({ success: false, message: 'Group not found' });
+    if (!source) {
+      return res.status(404).json({ success: false, message: 'Source group not found' });
+    }
+
+    const result = Group.mergeMembers(target.members || [], source.members || []);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(target._id),
+          sourceId: String(source._id),
+          dryRun: true,
+          wouldAdd: result.addCount,
+          duplicates: result.duplicateCount,
+          total: result.merged.length,
+        },
+      });
+    }
+
+    target.members = result.merged.map(m => (m.addedBy ? m : { ...m, addedBy: actorId }));
+    await target.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(target._id),
+        sourceId: String(source._id),
+        added: result.addCount,
+        duplicates: result.duplicateCount,
+        total: target.members.length,
+      },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

@@ -368,6 +368,27 @@ function searchMembers(members, query) {
   });
 }
 
+/**
+ * mergeMembers — fold a source group's members into a target list, de-duped by
+ * phone (target wins on conflict). Returns the merged list plus how many were
+ * newly added vs already-present. Pure & read-only — the route decides whether
+ * to persist the `merged` list (W754).
+ *
+ * @param {Array<object>} target
+ * @param {Array<object>} source
+ * @returns {{ merged: Array<object>, addCount:number, duplicateCount:number }}
+ */
+function mergeMembers(target, source) {
+  const base = Array.isArray(target) ? target : [];
+  const diff = diffMembers(base, source);
+  const merged = dedupeMembers([...base, ...diff.toAdd]);
+  return {
+    merged,
+    addCount: diff.addCount,
+    duplicateCount: diff.duplicateCount,
+  };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -400,3 +421,4 @@ module.exports.parseCsvLine = parseCsvLine;
 module.exports.parseCsvMembers = parseCsvMembers;
 module.exports.diffMembers = diffMembers;
 module.exports.searchMembers = searchMembers;
+module.exports.mergeMembers = mergeMembers;

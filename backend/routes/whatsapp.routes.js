@@ -1388,6 +1388,59 @@ router.post(
 );
 
 /**
+ * POST /contact-groups/:id/members/bulk-add — add members by phone list (W756).
+ *
+ * Body: { phones: ["966…" | { phone, displayName }, …], dryRun?: boolean }.
+ * Phones are normalized; entries already present are skipped, invalid entries
+ * (no digits) are counted. Pass `dryRun` to preview without persisting.
+ */
+router.post(
+  '/contact-groups/:id/members/bulk-add',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?._id || null;
+    const phones = req.body && req.body.phones;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    if (!Array.isArray(phones) || phones.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'phones must be a non-empty array' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.addMembers(doc.members || [], phones);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          wouldAdd: result.addedCount,
+          duplicates: result.duplicateCount,
+          invalid: result.invalidCount,
+          total: result.merged.length,
+        },
+      });
+    }
+
+    doc.members = result.merged.map(m => (m.addedBy ? m : { ...m, addedBy: actorId }));
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        added: result.addedCount,
+        duplicates: result.duplicateCount,
+        invalid: result.invalidCount,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

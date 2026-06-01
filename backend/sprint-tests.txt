@@ -527,3 +527,4 @@ __tests__/whatsapp-contact-group-diff-wave752.test.js
 __tests__/whatsapp-contact-group-search-wave753.test.js
 __tests__/whatsapp-contact-group-merge-wave754.test.js
 __tests__/whatsapp-contact-group-remove-wave755.test.js
+__tests__/whatsapp-contact-group-add-wave756.test.js

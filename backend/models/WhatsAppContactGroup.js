@@ -418,6 +418,38 @@ function removeMembers(members, phones) {
   return { remaining, removedCount: removed.size, notFoundCount };
 }
 
+/**
+ * addMembers — fold a plain list of phone numbers (any format) into an existing
+ * member list, de-duped by normalized phone (existing wins). Entries may be a
+ * raw phone string or an object `{ phone, displayName }`. Returns the merged
+ * list plus how many were newly added vs already-present and how many inputs
+ * were skipped as invalid (no digits). Pure & read-only — the route decides
+ * whether to persist `merged` (W756).
+ *
+ * @param {Array<object>} existing
+ * @param {Array<string|object>} phones
+ * @returns {{ merged: Array<object>, addedCount:number, duplicateCount:number, invalidCount:number }}
+ */
+function addMembers(existing, phones) {
+  const base = Array.isArray(existing) ? existing : [];
+  const raw = Array.isArray(phones) ? phones : [];
+  let invalidCount = 0;
+  const incoming = [];
+  for (const p of raw) {
+    const member = normalizeMember(typeof p === 'string' ? { phone: p } : p);
+    if (member) incoming.push(member);
+    else invalidCount += 1;
+  }
+  const diff = diffMembers(base, incoming);
+  const merged = dedupeMembers([...base, ...diff.toAdd]);
+  return {
+    merged,
+    addedCount: diff.addCount,
+    duplicateCount: diff.duplicateCount,
+    invalidCount,
+  };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -452,3 +484,4 @@ module.exports.diffMembers = diffMembers;
 module.exports.searchMembers = searchMembers;
 module.exports.mergeMembers = mergeMembers;
 module.exports.removeMembers = removeMembers;
+module.exports.addMembers = addMembers;

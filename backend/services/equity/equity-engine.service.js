@@ -174,7 +174,7 @@ async function _autoCreateCapaForAlert({ alert, audit }) {
     return null;
   }
 
-  const svc = createCapaService({ enforceMfa: false });
+  const svc = createCapaService({ enforceMfa: true });
 
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 30); // 30-day default SLA

@@ -506,3 +506,12 @@ __tests__/scoring-mental-health-pain-wave706.test.js
 __tests__/scoring-mobility-caregiver-wave708.test.js
 __tests__/scoring-neuro-disability-wave721.test.js
 __tests__/tenant-routes-wiring-wave721.test.js
+__tests__/adjunct-therapy-api-wave699.test.js
+__tests__/arts-therapy-api-wave699.test.js
+__tests__/dtt-session-api-wave699.test.js
+__tests__/instrumental-swallow-api-wave699.test.js
+__tests__/prosthetic-orthotic-api-wave699.test.js
+__tests__/seat-allocation-api-wave699.test.js
+__tests__/sensory-diet-api-wave699.test.js
+__tests__/sponsorship-api-wave699.test.js
+__tests__/therapy-activity-api-wave699.test.js

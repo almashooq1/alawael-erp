@@ -314,6 +314,7 @@ __tests__/medication-administration-record-behavioral-wave191b.test.js
 __tests__/meeting-branch-tenancy-wave635.test.js
 __tests__/messaging-threads-real-impl-wave276c.test.js
 __tests__/models-use-defensive-guard-wave411.test.js
+__tests__/module-gap-alerts-subscriber-wave717.test.js
 __tests__/module-gap-sweepers-wave695.test.js
 __tests__/money-lib-wave579.test.js
 __tests__/mudad-wps-bootstrap-wave282b.test.js

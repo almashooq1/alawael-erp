@@ -245,6 +245,75 @@ function membersToCsv(group) {
   return [header, ...rows].join('\n');
 }
 
+/**
+ * Parse a single CSV line into an array of fields, honouring double-quoted
+ * cells (with `""` escaping) and the formula-injection guard prefix (a leading
+ * `'` added by csvCell is stripped on the way back). Pure / read-only.
+ *
+ * @param {string} line
+ * @returns {string[]}
+ */
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          cur += '"';
+          i += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      out.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur);
+  return out.map(c => c.replace(/^'(?=[=+\-@\t\r])/, ''));
+}
+
+/**
+ * Parse a CSV document (as produced by membersToCsv, or any sheet with a
+ * `phone` column) into normalized member objects. Header-driven: locates the
+ * `phone` and `displayName` columns by name (case-insensitive), skips rows with
+ * no usable phone, and de-duplicates by phone. Pure / read-only — backs the
+ * members CSV-import endpoint.
+ *
+ * @param {string} csv
+ * @returns {Array<{phone:string, displayName:(string|null)}>}
+ */
+function parseCsvMembers(csv) {
+  const lines = String(csv == null ? '' : csv)
+    .split(/\r?\n/)
+    .filter(l => l.trim().length);
+  if (lines.length < 2) return [];
+  const header = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const phoneIdx = header.indexOf('phone');
+  const nameIdx = header.indexOf('displayname');
+  if (phoneIdx === -1) return [];
+  const members = [];
+  for (let i = 1; i < lines.length; i += 1) {
+    const fields = parseCsvLine(lines[i]);
+    const phone = normalizePhone(fields[phoneIdx]);
+    if (!phone) continue;
+    const displayName =
+      nameIdx !== -1 && fields[nameIdx] ? String(fields[nameIdx]).trim() : null;
+    members.push({ phone, displayName: displayName || null });
+  }
+  return dedupeMembers(members);
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -273,3 +342,5 @@ module.exports.partitionByEligibility = partitionByEligibility;
 module.exports.summarizeGroups = summarizeGroups;
 module.exports.csvCell = csvCell;
 module.exports.membersToCsv = membersToCsv;
+module.exports.parseCsvLine = parseCsvLine;
+module.exports.parseCsvMembers = parseCsvMembers;

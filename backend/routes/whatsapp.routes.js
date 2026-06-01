@@ -1184,6 +1184,46 @@ router.get(
 );
 
 /**
+ * POST /contact-groups/:id/members/import-csv — bulk-add members from CSV (W751).
+ *
+ * Round-trips with the W750 export: accepts a CSV body (header with a `phone`
+ * column, optional `displayName`), parses + de-dupes via the model helper, then
+ * merges into the group (last-wins by phone). Returns how many rows parsed and
+ * how many were newly added. Body: { csv: "<csv text>" }.
+ */
+router.post(
+  '/contact-groups/:id/members/import-csv',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const parsed = Group.parseCsvMembers(req.body && req.body.csv);
+    if (!parsed.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'No valid members found in CSV' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const before = (doc.members || []).length;
+    doc.members = Group.dedupeMembers([
+      ...(doc.members || []),
+      ...parsed.map(m => ({ ...m, addedBy: actorId })),
+    ]);
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        parsed: parsed.length,
+        added: doc.members.length - before,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

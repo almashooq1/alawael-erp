@@ -532,3 +532,4 @@ __tests__/whatsapp-contact-group-dedupe-wave757.test.js
 __tests__/whatsapp-contact-group-rename-wave758.test.js
 __tests__/whatsapp-contact-group-find-wave759.test.js
 __tests__/whatsapp-contact-group-sort-wave760.test.js
+__tests__/whatsapp-contact-group-paginate-wave761.test.js

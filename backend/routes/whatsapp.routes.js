@@ -1524,7 +1524,8 @@ router.get(
 /**
  * GET /contact-groups/:id/members — list a group's members as JSON (W760).
  *
- * Optional `?sort=name|phone` (defaults to phone). Read-only.
+ * Optional `?sort=name|phone` (defaults to phone) and `?page=&limit=`
+ * pagination (W761; limit clamped to 200). Read-only.
  */
 router.get(
   '/contact-groups/:id/members',
@@ -1535,10 +1536,19 @@ router.get(
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const sort = req.query.sort === 'name' ? 'name' : 'phone';
-    const members = Group.sortMembers(doc.members || [], sort);
+    const sorted = Group.sortMembers(doc.members || [], sort);
+    const paged = Group.paginateMembers(sorted, req.query.page, req.query.limit);
     res.json({
       success: true,
-      data: { id: String(doc._id), sort, total: members.length, members },
+      data: {
+        id: String(doc._id),
+        sort,
+        page: paged.page,
+        limit: paged.limit,
+        total: paged.total,
+        totalPages: paged.totalPages,
+        members: paged.items,
+      },
     });
   })
 );

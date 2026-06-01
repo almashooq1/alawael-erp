@@ -545,6 +545,26 @@ function sortMembers(members, by) {
   });
 }
 
+/**
+ * paginateMembers — slice a member list into a page. `page` is 1-based; `limit`
+ * is clamped to [1, 200]. Returns the page items plus pagination metadata. Pure
+ * & read-only; backs the JSON members-listing route (W761).
+ *
+ * @param {Array<object>} members
+ * @param {number} [page]
+ * @param {number} [limit]
+ * @returns {{ items: Array<object>, page:number, limit:number, total:number, totalPages:number }}
+ */
+function paginateMembers(members, page, limit) {
+  const list = Array.isArray(members) ? members : [];
+  const total = list.length;
+  const lim = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
+  const totalPages = Math.max(1, Math.ceil(total / lim));
+  const pg = Math.min(totalPages, Math.max(1, parseInt(page, 10) || 1));
+  const start = (pg - 1) * lim;
+  return { items: list.slice(start, start + lim), page: pg, limit: lim, total, totalPages };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -584,3 +604,4 @@ module.exports.dedupeReport = dedupeReport;
 module.exports.renameMember = renameMember;
 module.exports.findMember = findMember;
 module.exports.sortMembers = sortMembers;
+module.exports.paginateMembers = paginateMembers;

@@ -806,20 +806,14 @@ on:
       - 'backend/__tests__/adjunct-therapy-wave693.test.js'
       - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-governance-wave692.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave694.test.js'
-      - 'backend/__tests__/measures-explain-wave695.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-intelligence-wave696.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-analyze-routes-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
       - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-neuro-disability-wave707.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-activity-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -848,6 +842,17 @@ on:
       - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
       - 'backend/__tests__/arts-therapy-api-wave699.test.js'
       - 'backend/__tests__/sensory-diet-api-wave699.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/spasticity-injection-wave715.test.js'
+      - 'backend/__tests__/spasticity-injection-behavioral-wave715.test.js'
+      - 'backend/__tests__/spasticity-injection-api-wave715.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measures-governance-wave716.test.js'
+      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
+      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
+      - 'backend/__tests__/measures-explain-wave718.test.js'
+      - 'backend/__tests__/measures-intelligence-wave719.test.js'
+      - 'backend/__tests__/measures-analyze-routes-wave720.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1637,20 +1642,14 @@ on:
       - 'backend/__tests__/adjunct-therapy-wave693.test.js'
       - 'backend/__tests__/adjunct-therapy-behavioral-wave693.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-governance-wave692.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave694.test.js'
-      - 'backend/__tests__/measures-explain-wave695.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-intelligence-wave696.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-analyze-routes-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
       - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/scoring-neuro-disability-wave707.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-activity-wave697.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -1679,6 +1678,17 @@ on:
       - 'backend/__tests__/instrumental-swallow-api-wave699.test.js'
       - 'backend/__tests__/arts-therapy-api-wave699.test.js'
       - 'backend/__tests__/sensory-diet-api-wave699.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/spasticity-injection-wave715.test.js'
+      - 'backend/__tests__/spasticity-injection-behavioral-wave715.test.js'
+      - 'backend/__tests__/spasticity-injection-api-wave715.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measures-governance-wave716.test.js'
+      - 'backend/__tests__/scoring-neuro-disability-wave721.test.js'
+      - 'backend/__tests__/measures-psychometrics-wave717.test.js'
+      - 'backend/__tests__/measures-explain-wave718.test.js'
+      - 'backend/__tests__/measures-intelligence-wave719.test.js'
+      - 'backend/__tests__/measures-analyze-routes-wave720.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

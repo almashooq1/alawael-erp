@@ -75,6 +75,29 @@ function IcfCodeReference() {
   }
 }
 
+// ── ICF normative-benchmark model (W706 — was a stub returning []/null) ──────
+function IcfBenchmark() {
+  try {
+    return mongoose.model('ICFBenchmark');
+  } catch (_e) {
+    try {
+      return require('../models/icf/ICFBenchmark.model');
+    } catch (_e2) {
+      return null;
+    }
+  }
+}
+
+// Empirical-rule z-score → percentile rank (matches icfAssessment.service).
+function zToPercentile(z) {
+  if (z <= -2) return 2;
+  if (z <= -1) return 16;
+  if (z <= 0) return 50;
+  if (z <= 1) return 84;
+  if (z <= 2) return 98;
+  return 99;
+}
+
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ══════════════════════ CRUD ═══════════════════════════════════════════════ */
@@ -220,24 +243,54 @@ router.get(
   })
 );
 
+// ── GET /benchmarks — list normative benchmarks (filters: code, component, ageGroup) ──
 router.get(
   '/benchmarks',
   asyncHandler(async (req, res) => {
-    res.json({ success: true, data: [] });
+    const B = IcfBenchmark();
+    if (!B) return res.json({ success: true, data: [], total: 0 });
+    const { code, population, ageGroup, region } = req.query;
+    const filter = { isActive: { $ne: false } };
+    if (code) filter.code = code;
+    if (population) filter.population = population;
+    if (ageGroup) filter.ageGroup = ageGroup;
+    if (region) filter.region = region;
+    const data = await B.find(filter).sort({ code: 1 }).lean();
+    res.json({ success: true, data, total: data.length });
   })
 );
 
+// ── POST /benchmarks — create one normative benchmark ───────────────────────
 router.post(
   '/benchmarks',
   asyncHandler(async (req, res) => {
-    res.status(201).json({ success: true, data: req.body });
+    const B = IcfBenchmark();
+    if (!B) return res.status(503).json({ success: false, message: 'Benchmark store unavailable' });
+    const doc = await B.create(stripUpdateMeta(req.body));
+    res.status(201).json({ success: true, data: doc });
   })
 );
 
+// ── POST /benchmarks/import — bulk upsert by code (idempotent) ──────────────
 router.post(
   '/benchmarks/import',
   asyncHandler(async (req, res) => {
-    res.json({ success: true, data: { imported: 0 } });
+    const B = IcfBenchmark();
+    if (!B) return res.status(503).json({ success: false, message: 'Benchmark store unavailable' });
+    const rows = Array.isArray(req.body) ? req.body : req.body.benchmarks || [];
+    if (!rows.length) return res.json({ success: true, data: { imported: 0 } });
+    const ops = rows.map(r => ({
+      updateOne: {
+        filter: { code: r.code, population: r.population, ageGroup: r.ageGroup || null },
+        update: { $set: stripUpdateMeta(r) },
+        upsert: true,
+      },
+    }));
+    const result = await B.bulkWrite(ops, { ordered: false });
+    res.json({
+      success: true,
+      data: { imported: (result.upsertedCount || 0) + (result.modifiedCount || 0) },
+    });
   })
 );
 
@@ -319,10 +372,67 @@ router.get(
   })
 );
 
+// ── GET /:id/benchmark — compare this assessment's qualifiers to ICF norms ───
+// Self-contained: reads the assessment's own component arrays + joins ICFBenchmark
+// by code (qualifier vs mean/SD → z-score → percentile). Empty when unseeded.
 router.get(
   '/:id/benchmark',
   asyncHandler(async (req, res) => {
-    res.json({ success: true, data: { score: null, percentile: null } });
+    const M = IcfAssessment();
+    const B = IcfBenchmark();
+    const doc = await M.findById(req.params.id).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
+
+    const components = [
+      'bodyFunctions',
+      'bodyStructures',
+      'activities',
+      'participation',
+      'environmentalFactors',
+    ];
+    const items = [];
+    for (const comp of components) {
+      for (const entry of doc[comp] || []) {
+        // qualifier 8 (not specified) / 9 (not applicable) are excluded from norms
+        if (entry && entry.code && entry.qualifier != null && entry.qualifier < 8) {
+          items.push({ code: entry.code, qualifier: entry.qualifier, component: comp });
+        }
+      }
+    }
+
+    if (!B || !items.length) {
+      return res.json({ success: true, data: { comparisons: [], benchmarkedCount: 0 } });
+    }
+
+    const norms = await B.find({
+      code: { $in: [...new Set(items.map(i => i.code))] },
+      isActive: { $ne: false },
+    }).lean();
+    const normByCode = Object.fromEntries(norms.map(n => [n.code, n]));
+
+    const comparisons = items
+      .filter(i => normByCode[i.code])
+      .map(i => {
+        const n = normByCode[i.code];
+        const sd = n.standardDeviation;
+        const z = sd ? (i.qualifier - n.mean) / sd : null;
+        return {
+          code: i.code,
+          component: i.component,
+          qualifier: i.qualifier,
+          normMean: n.mean,
+          standardDeviation: sd ?? null,
+          zScore: z != null ? Number(z.toFixed(2)) : null,
+          percentileRank: z != null ? zToPercentile(z) : null,
+          ageGroup: n.ageGroup || null,
+          dataSource: n.dataSource || null,
+        };
+      });
+
+    res.json({
+      success: true,
+      data: { comparisons, benchmarkedCount: comparisons.length, totalCodes: items.length },
+    });
   })
 );
 

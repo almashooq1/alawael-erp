@@ -61,6 +61,20 @@ function wireDatabaseBackup(app, deps = {}) {
   const schedule = process.env.DB_BACKUP_CRON_SCHEDULE || '0 2 * * *';
   const TZ = { timezone: 'Asia/Riyadh' };
 
+  // W737: fire a durable ops alert (OpsAlert row + best-effort email/SMS) on a
+  // backup failure. Lazy-required + fully guarded — alerting must NEVER throw
+  // inside the cron and mask the original backup failure.
+  async function safeOpsAlert(payload) {
+    try {
+      const { sendOpsAlert } = require('../services/ops-alerter');
+      await sendOpsAlert(payload);
+    } catch (alertErr) {
+      logger.error('[db-backup] ops-alert dispatch failed (swallowed)', {
+        error: alertErr && alertErr.message,
+      });
+    }
+  }
+
   cron.schedule(
     schedule,
     async () => {
@@ -74,7 +88,16 @@ function wireDatabaseBackup(app, deps = {}) {
             `[db-backup] backup complete: ${(res.meta && res.meta.backupName) || res.backupPath}`
           );
         } else {
-          logger.error(`[db-backup] backup failed: ${(res && res.error) || 'unknown error'}`);
+          const reason = (res && res.error) || 'unknown error';
+          logger.error(`[db-backup] backup failed: ${reason}`);
+          // W737: durable + on-call alert (never silently lost — see W733/W735).
+          await safeOpsAlert({
+            kind: 'backup_failed',
+            severity: 'critical',
+            subject: 'Nightly DB backup FAILED',
+            body: `The scheduled MongoDB backup did not complete.\nReason: ${reason}\nSchedule: ${schedule} Asia/Riyadh.\nAction: verify mongodump + disk space on the VPS, then re-run npm run db:backup.`,
+            metadata: { reason, schedule, stage: 'createBackup' },
+          });
         }
         try {
           const pruned = cleanupOldBackups();
@@ -84,6 +107,14 @@ function wireDatabaseBackup(app, deps = {}) {
         }
       } catch (err) {
         logger.error('[db-backup] scheduled backup failed', err);
+        // W737: a thrown backup error is the worst case — alert durably.
+        await safeOpsAlert({
+          kind: 'backup_failed',
+          severity: 'critical',
+          subject: 'Nightly DB backup CRASHED',
+          body: `The scheduled MongoDB backup threw an exception.\nError: ${err && err.message}\nSchedule: ${schedule} Asia/Riyadh.`,
+          metadata: { error: err && err.message, schedule, stage: 'exception' },
+        });
       }
     },
     TZ

@@ -825,22 +825,9 @@ on:
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-analyze-routes-wave697.test.js'
-      - 'backend/__tests__/measures-explain-wave695.test.js'
-      - 'backend/__tests__/measures-governance-wave692.test.js'
-      - 'backend/__tests__/measures-intelligence-wave696.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave694.test.js'
-      - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
-      - 'backend/__tests__/scoring-mental-health-pain-wave698.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
-      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
-      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
-      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
-      - 'backend/__tests__/scoring-neuro-disability-wave707.test.js'
-      - 'backend/__tests__/therapy-activity-wave697.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/icf-reference-common-wave705.test.js'
+      - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
+      - 'backend/__tests__/therapy-activity-wave697.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1649,22 +1636,9 @@ on:
       - 'backend/__tests__/seating-postural-assessment-wave675.test.js'
       - 'backend/__tests__/visitor-auth-httponly-cookie-wave584.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measures-analyze-routes-wave697.test.js'
-      - 'backend/__tests__/measures-explain-wave695.test.js'
-      - 'backend/__tests__/measures-governance-wave692.test.js'
-      - 'backend/__tests__/measures-intelligence-wave696.test.js'
-      - 'backend/__tests__/measures-psychometrics-wave694.test.js'
-      - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
-      - 'backend/__tests__/scoring-mental-health-pain-wave698.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/deterioration-intelligence-wave709.test.js'
-      - 'backend/__tests__/scoring-adl-spasticity-wave706.test.js'
-      - 'backend/__tests__/scoring-mental-health-pain-wave706.test.js'
-      - 'backend/__tests__/scoring-mobility-caregiver-wave708.test.js'
-      - 'backend/__tests__/scoring-neuro-disability-wave707.test.js'
-      - 'backend/__tests__/therapy-activity-wave697.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/icf-reference-common-wave705.test.js'
+      - 'backend/__tests__/module-gap-sweepers-wave695.test.js'
+      - 'backend/__tests__/therapy-activity-wave697.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

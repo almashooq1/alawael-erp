@@ -678,46 +678,59 @@ const MEASURES = [
   },
 ];
 
-// ── Scorer-derived flagship entries (W556 completion) ───────────────────────
+// ── Scorer-derived flagship entries (W556 catalog + activation) ─────────────
 // The W706/W708–W721 measures arc shipped many administrable scoring modules
 // (each with a bilingual itemBank) but only the 8 literal entries above had
 // catalog Measure docs — leaving `measureScoringEngine.resolveStrict` unable to
 // bind them and the W556 "every item-bank module has a catalog Measure" guard
 // red on main. The loop below DERIVES a catalog doc for every administrable
-// scoring module that isn't hand-authored above. Deriving straight from the
-// scorer (the single source of truth) means `crossCheck` can never drift:
-// code, engineVersion, direction and derivedRange are read from the module.
+// scoring module not hand-authored above, straight from the scorer (the single
+// source of truth) so `crossCheck` can never drift (code/engineVersion/
+// direction/derivedRange read from the module).
 //
-// `status: 'draft'` is deliberate — these are scorer-derived stubs awaiting
-// clinical curation (eligibility ageRange/targetPopulation + interpretation
-// narrative). `Measure.findEligibleFor` only considers `status: 'active'`, so a
-// draft entry satisfies W556's catalog-presence guard WITHOUT being surfaced by
-// the recommendation engine (keeps measure-recommendation-wave562 green). The
-// measures team flips one to 'active' once it is curated. Only `category` (a
-// non-clinical facet) is mapped here; unmapped future instruments default to
-// 'custom' so the guard stays green as new scorers land.
+// ACTIVATION: each entry in `_ACTIVATION` carries clinically-documented
+// eligibility (ageRange + optional ICD-10 gate) + governance facets, and is
+// emitted as `status: 'active'` so the instrument is surfaced by the
+// recommendation engine AND digitally administrable. The age windows /
+// condition gates are chosen from each instrument's published clinical use AND
+// keep adult / condition-specific scales out of young-child recommendation
+// lists — e.g. the autism toddler in measure-recommendation-wave562 (24 mo,
+// F84.0) matches NONE of these (adult scales excluded by age; GCS/MAS excluded
+// by ICD requirement), so that behavioral test stays green.
+//
+// A code NOT in `_ACTIVATION` stays `status: 'draft'` (catalog-present, so W556
+// passes, but excluded from `Measure.findEligibleFor` which is active-only).
+// FLACC is intentionally draft: a context-triggered pain tool administered when
+// pain is suspected, not a routine never-administered screen — activating it on
+// age alone would surface it for every young child. The measures team can
+// activate it once a context trigger (not age/ICD) is modelled.
 const _scoringRegistry = require('../scoring');
 
-const _DERIVED_CATEGORY = {
-  BARTHEL: 'functional', // Activities of Daily Living index
-  CSI: 'quality_of_life', // Caregiver Strain Index
-  FLACC: 'behavioral', // behavioral pain scale
-  FTS5: 'motor', // Five Times Sit-to-Stand (lower-limb)
-  'GAD-7': 'behavioral', // anxiety
-  GCS: 'cognitive', // Glasgow Coma Scale (consciousness)
-  KATZ: 'functional', // ADL independence
-  LAWTON: 'functional', // Instrumental ADL
-  MAS: 'motor', // Modified Ashworth (spasticity)
-  MINICOG: 'cognitive', // cognitive screen
-  MORSE: 'functional', // fall-risk
-  MRS: 'functional', // Modified Rankin disability
-  NRS: 'functional', // numeric pain rating
-  'PHQ-9': 'behavioral', // depression
-  'PSS-10': 'behavioral', // perceived stress
-  TINETTI: 'motor', // balance & gait
-  TUG: 'motor', // Timed Up and Go mobility
-  'WHO-5': 'quality_of_life', // well-being
-  'WHODAS-12': 'functional', // disability assessment
+// code → { category, purpose, interpretationStyle, ageRange, targetPopulation, icd10Required? }
+const _ACTIVATION = {
+  BARTHEL: { category: 'functional', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 16, max: 120, unit: 'years' }, targetPopulation: ['adults', 'physical_disability'] },
+  CSI: { category: 'quality_of_life', purpose: 'risk_stratification', interpretationStyle: 'cutoff', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  FTS5: { category: 'motor', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  'GAD-7': { category: 'behavioral', purpose: 'screening', interpretationStyle: 'cutoff', ageRange: { min: 12, max: 120, unit: 'years' }, targetPopulation: ['adolescents', 'adults'] },
+  GCS: { category: 'cognitive', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 2, max: 120, unit: 'years' }, targetPopulation: ['all'], icd10Required: ['S06.*', 'R40.*', 'I60.*', 'I61.*', 'I63.*'] },
+  KATZ: { category: 'functional', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  LAWTON: { category: 'functional', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  MAS: { category: 'motor', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 2, max: 120, unit: 'years' }, targetPopulation: ['all'], icd10Required: ['G80.*', 'G81.*', 'G82.*', 'G35', 'I69.*'] },
+  MINICOG: { category: 'cognitive', purpose: 'screening', interpretationStyle: 'cutoff', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  MORSE: { category: 'functional', purpose: 'risk_stratification', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  MRS: { category: 'functional', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  NRS: { category: 'functional', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 8, max: 120, unit: 'years' }, targetPopulation: ['children', 'adolescents', 'adults'] },
+  'PHQ-9': { category: 'behavioral', purpose: 'screening', interpretationStyle: 'cutoff', ageRange: { min: 12, max: 120, unit: 'years' }, targetPopulation: ['adolescents', 'adults'] },
+  'PSS-10': { category: 'behavioral', purpose: 'outcome', interpretationStyle: 'tier', ageRange: { min: 14, max: 120, unit: 'years' }, targetPopulation: ['adolescents', 'adults'] },
+  TINETTI: { category: 'motor', purpose: 'risk_stratification', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  TUG: { category: 'motor', purpose: 'functional_status', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+  'WHO-5': { category: 'quality_of_life', purpose: 'outcome', interpretationStyle: 'tier', ageRange: { min: 9, max: 120, unit: 'years' }, targetPopulation: ['adolescents', 'adults'] },
+  'WHODAS-12': { category: 'functional', purpose: 'outcome', interpretationStyle: 'tier', ageRange: { min: 18, max: 120, unit: 'years' }, targetPopulation: ['adults'] },
+};
+
+// codes derived but kept draft (context-triggered — see header note)
+const _DRAFT_CATEGORY = {
+  FLACC: 'behavioral', // behavioral pain scale — administered on suspicion of pain
 };
 
 const _handAuthoredCodes = new Set(MEASURES.map(m => m.code));
@@ -729,23 +742,42 @@ for (const summary of _scoringRegistry.list()) {
   const mod = _scoringRegistry.resolve(code);
   if (!mod || !mod.itemBank) continue;
   const bank = mod.itemBank;
-  MEASURES.push({
+  const act = _ACTIVATION[code];
+  const base = {
     code,
     name: bank.instrumentName_en || code,
     name_ar: bank.instrumentName_ar || bank.instrumentName_en || code,
     abbreviation: code,
     version: mod.engineVersion,
-    category: _DERIVED_CATEGORY[code] || 'custom',
+    category: act ? act.category : _DRAFT_CATEGORY[code] || 'custom',
     scoringDirection: mod.direction,
     derivedType: mod.derivedType,
     derivedRange: mod.scoreRange ? { min: mod.scoreRange.min, max: mod.scoreRange.max } : undefined,
     scoringEngineVersion: mod.engineVersion,
     scoringAlgorithmRef: `scoring/${code.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.js`,
     interpretation: { mcid: { status: 'not_applicable' } },
-    status: 'draft', // scorer-derived stub — excluded from recommendation until curated
     sensitivityLevel: 'MEDIUM',
     tags: ['digital-administration', 'scorer-derived'],
-  });
+  };
+  if (act) {
+    MEASURES.push({
+      ...base,
+      purpose: act.purpose,
+      interpretationStyle: act.interpretationStyle,
+      ageRange: act.ageRange,
+      targetPopulation: act.targetPopulation,
+      eligibility: {
+        languages: ['ar', 'en'],
+        ...(act.icd10Required ? { icd10Required: act.icd10Required } : {}),
+      },
+      reporting: { showInFamilyReport: true },
+      engine: { feedsSmartEngine: true },
+      status: 'active',
+    });
+  } else {
+    // scorer-derived stub — present for W556, excluded from recommendation
+    MEASURES.push({ ...base, status: 'draft' });
+  }
 }
 
 module.exports = { MEASURES };

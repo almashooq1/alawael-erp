@@ -709,10 +709,14 @@ router.get('/templates', (_req, res) => {
 });
 
 /** GET /event-bindings — W727: core event → template binding map (admin UI) */
-router.get('/event-bindings', (_req, res) => {
-  const whatsappEventBindings = require('../services/whatsapp/whatsappEventBindings.service');
-  res.json({ success: true, data: whatsappEventBindings.listBindings() });
-});
+router.get(
+  '/event-bindings',
+  asyncHandler(async (_req, res) => {
+    const whatsappEventBindings = require('../services/whatsapp/whatsappEventBindings.service');
+    const data = await whatsappEventBindings.listBindingsWithStatus();
+    res.json({ success: true, data });
+  })
+);
 
 /** GET /templates/meta — from Meta Business Manager (raw passthrough) */
 router.get(

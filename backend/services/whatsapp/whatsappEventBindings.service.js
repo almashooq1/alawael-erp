@@ -179,6 +179,34 @@ function hasBinding(eventType) {
   return Object.prototype.hasOwnProperty.call(EVENT_BINDINGS, eventType);
 }
 
+/**
+ * Like `listBindings()`, but augments each row with the LIVE Meta approval
+ * status of its bound template + a `deliverable` flag. This makes the admin
+ * `GET /event-bindings` endpoint the authoritative source of deliverability
+ * (instead of the UI cross-referencing the synced-template list itself).
+ *
+ * Fails OPEN per binding: when the status is unknown (template not in the
+ * local cache / DB unavailable) `templateStatus` is null and `deliverable`
+ * is true — we never flag a send as blocked on a sync glitch.
+ *
+ * @returns {Promise<Array<{eventType,templateKey,templateName,consentRequired,templateStatus:(string|null),deliverable:boolean}>>}
+ */
+async function listBindingsWithStatus() {
+  const rows = listBindings();
+  return Promise.all(
+    rows.map(async row => {
+      const templateStatus = row.templateName
+        ? await templateSync.getTemplateStatus(row.templateName)
+        : null;
+      return {
+        ...row,
+        templateStatus,
+        deliverable: templateStatus == null || templateStatus === 'APPROVED',
+      };
+    })
+  );
+}
+
 // ─── Dispatch ───────────────────────────────────────────────────────────────
 
 /**
@@ -249,6 +277,7 @@ async function dispatchForEvent(eventType, ctx = {}) {
 module.exports = {
   EVENT_BINDINGS,
   listBindings,
+  listBindingsWithStatus,
   hasBinding,
   dispatchForEvent,
 };

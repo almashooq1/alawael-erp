@@ -73,6 +73,50 @@ describe('W727 — WhatsApp event → template bindings', () => {
     expect(bindings.hasBinding('does.not.exist')).toBe(false);
   });
 
+  test('listBindingsWithStatus augments each row with live deliverability', async () => {
+    const sync = require(path.join(
+      __dirname,
+      '..',
+      'services',
+      'whatsapp',
+      'templateSync.service.js'
+    ));
+    const statusSpy = jest
+      .spyOn(sync, 'getTemplateStatus')
+      .mockImplementation(async name =>
+        name === templates.TEMPLATES.session_reminder.name ? 'REJECTED' : 'APPROVED'
+      );
+    const fresh = require(BINDINGS_PATH);
+    const rows = await fresh.listBindingsWithStatus();
+    expect(rows.length).toBe(Object.keys(fresh.EVENT_BINDINGS).length);
+    const reminder = rows.find(r => r.eventType === 'session.reminder');
+    expect(reminder.templateStatus).toBe('REJECTED');
+    expect(reminder.deliverable).toBe(false);
+    const confirmed = rows.find(r => r.eventType === 'appointment.confirmed');
+    expect(confirmed.deliverable).toBe(true);
+    statusSpy.mockRestore();
+    jest.resetModules();
+  });
+
+  test('listBindingsWithStatus fails open when status is unknown', async () => {
+    const sync = require(path.join(
+      __dirname,
+      '..',
+      'services',
+      'whatsapp',
+      'templateSync.service.js'
+    ));
+    const statusSpy = jest.spyOn(sync, 'getTemplateStatus').mockResolvedValue(null);
+    const fresh = require(BINDINGS_PATH);
+    const rows = await fresh.listBindingsWithStatus();
+    for (const r of rows) {
+      expect(r.templateStatus).toBeNull();
+      expect(r.deliverable).toBe(true);
+    }
+    statusSpy.mockRestore();
+    jest.resetModules();
+  });
+
   test('dispatchForEvent refuses unknown events', async () => {
     const res = await bindings.dispatchForEvent('no.such.event', {});
     expect(res).toEqual({ delivered: false, reason: 'no_binding' });

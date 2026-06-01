@@ -50,34 +50,13 @@ const BARE = ARGS.includes('--bare');
 
 // ── BASELINE (2026-05-30). Roles present in exactly one registry. Ratchet DOWN
 //    as the registries are reconciled (a role added to BOTH leaves the gap). ──
-const ONLY_IN_RBAC_BASELINE = new Set([
-  'branch_manager',
-  'bus_assistant',
-  'clinical_director',
-  'compliance_officer',
-  'driver',
-  'finance_supervisor',
-  'group_cfo',
-  'group_chro',
-  'group_gm',
-  'group_quality_officer',
-  'guardian',
-  'hr_officer',
-  'hr_supervisor',
-  'internal_auditor',
-  'it_admin',
-  'quality_coordinator',
-  'regional_director',
-  'regional_quality',
-  'special_ed_supervisor',
-  'special_ed_teacher',
-  'therapist_ot',
-  'therapist_psych',
-  'therapist_pt',
-  'therapist_slp',
-  'therapy_assistant',
-  'therapy_supervisor',
-]);
+// ADR-037 D2/D5 (W730, 2026-06-01): all 26 rbac-only roles were reconciled INTO
+// roles.constants.js (additive union — identical values) and pruned from this
+// baseline in the same commit per the ratchet-DOWN contract. rbac-only gap now 0.
+// The 9 const-only roles remain below — their reconciliation is D3, gated on
+// ADR-037 Q1–Q2 (assigning real permission maps is a security decision, not a
+// mechanical merge), so they stay baselined until those grants are signed off.
+const ONLY_IN_RBAC_BASELINE = new Set([]);
 const ONLY_IN_CONST_BASELINE = new Set([
   'crm_supervisor',
   'cultural_officer',

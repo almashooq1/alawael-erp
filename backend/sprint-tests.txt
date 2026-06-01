@@ -503,3 +503,6 @@ __tests__/scoring-mental-health-pain-wave706.test.js
 __tests__/scoring-mobility-caregiver-wave708.test.js
 __tests__/scoring-neuro-disability-wave721.test.js
 __tests__/tenant-routes-wiring-wave721.test.js
+__tests__/audiology-screening-api-wave722.test.js
+__tests__/audiology-screening-behavioral-wave722.test.js
+__tests__/audiology-screening-wave722.test.js

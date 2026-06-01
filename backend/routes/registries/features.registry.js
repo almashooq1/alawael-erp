@@ -67,6 +67,7 @@ module.exports = function registerFeatureRoutes(
   const adjunctTherapyRoutes = safeRequire('../routes/adjunct-therapy.routes');
   const therapyActivityRoutes = safeRequire('../routes/therapy-activity.routes');
   const spasticityInjectionRoutes = safeRequire('../routes/spasticity-injection.routes');
+  const audiologyScreeningRoutes = safeRequire('../routes/audiology-screening.routes');
   const digitalAssessmentRoutes = safeRequire('../routes/digital-assessment.routes');
   const measureRecommendationRoutes = safeRequire('../routes/measure-recommendations.routes');
   const measuresAnalyzeRoutes = safeRequire('../routes/measures-analyze.routes');
@@ -210,6 +211,10 @@ module.exports = function registerFeatureRoutes(
   // per-muscle injection map + MAS + consent gate + reassessment clock. Procedure record,
   // distinct from the PhysiotherapyAssessment (W670) spasticity FIELD.
   dualMountAuth(app, 'spasticity-injection', spasticityInjectionRoutes, authenticate);
+  // Wave 722: Functional hearing-screening (فحص السمع الوظيفي) — per-ear level estimate +
+  // tympanometry + JCIH risk cluster → ENT/audiology referral. Sibling of vision-screening
+  // (W720) on the sensory-screening axis; SCREEN, not a diagnostic audiology work-up.
+  dualMountAuth(app, 'audiology-screening', audiologyScreeningRoutes, authenticate);
   // Wave 557: Digital standardized-assessment administration (التطبيق الرقمي للمقاييس).
   // Item-bank-driven administration (M-CHAT-R/CARS-2/PedsQL — W553–W556) → auto-score via
   // the W212 registry → persist a MeasureApplication so it flows into outcome rollups, goal

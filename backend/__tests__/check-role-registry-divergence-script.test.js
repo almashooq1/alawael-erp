@@ -48,18 +48,21 @@ describe('role-registry divergence — diff() ratchet logic', () => {
 describe('role-registry divergence — real-tree computeDivergence()', () => {
   const div = computeDivergence();
 
-  it('rbac.config has more roles than roles.constants (superset-ish)', () => {
-    expect(div.rcCount).toBeGreaterThan(div.conCount);
+  // ADR-037 D2 (W730, 2026-06-01): the 26 rbac-only roles were reconciled INTO
+  // roles.constants (additive union). The rbac-only side is now EMPTY; only the
+  // 9 const-only roles remain (their permission-map reconciliation is D3, gated
+  // on Q1–Q2). These assertions track the post-D2 / pre-D3 state.
+  it('rbac-only side is fully reconciled (ADR-037 D2 — gap now 0)', () => {
+    expect(div.onlyInRbac).toHaveLength(0);
+    // the formerly rbac-only roles now live in BOTH registries
+    expect(div.onlyInRbac).not.toContain('branch_manager');
+    expect(div.onlyInRbac).not.toContain('clinical_director');
   });
 
-  it('the known bidirectional divergence is present (rbac-only incl. branch_manager)', () => {
-    expect(div.onlyInRbac).toContain('branch_manager');
-    expect(div.onlyInRbac).toContain('clinical_director');
-  });
-
-  it('const-only side present (incl. the W464 CRPD + DPO roles)', () => {
+  it('const-only side still present (the 9, pending ADR-037 D3 grants)', () => {
     expect(div.onlyInConst).toContain('independent_advocate');
     expect(div.onlyInConst).toContain('dpo');
+    expect(div.onlyInConst.length).toBe(9);
   });
 
   it('current divergence exactly equals the committed baseline (no pre-existing drift)', () => {

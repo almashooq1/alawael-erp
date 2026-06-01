@@ -939,6 +939,161 @@ router.get(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CONTACT GROUPS — org-scoped recipient segmentation (W746)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function getContactGroupModel() {
+  return mongoose.models.WhatsAppContactGroup || require('../models/WhatsAppContactGroup');
+}
+
+/** GET /contact-groups — list groups for the caller's org. */
+router.get(
+  '/contact-groups',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const { search, tag, page = 1, limit = 50 } = req.query;
+    const filter = Group.listScopedFilter(orgId, { search, tag });
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
+    const [items, total] = await Promise.all([
+      Group.find(filter)
+        .sort({ updatedAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum)
+        .lean(),
+      Group.countDocuments(filter),
+    ]);
+    res.json({
+      success: true,
+      data: items.map(g => ({ ...g, memberCount: (g.members || []).length })),
+      pagination: { page: pageNum, limit: limitNum, total },
+    });
+  })
+);
+
+/** POST /contact-groups — create a new group. */
+router.post(
+  '/contact-groups',
+  asyncHandler(async (req, res) => {
+    validate(['name'], req.body);
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const members = Group.dedupeMembers(req.body.members).map(m => ({
+      ...m,
+      addedBy: actorId,
+    }));
+    const doc = await Group.create({
+      organizationId: orgId,
+      name: String(req.body.name).trim(),
+      description: req.body.description || null,
+      tags: Array.isArray(req.body.tags) ? req.body.tags : [],
+      color: req.body.color || null,
+      members,
+      createdBy: actorId,
+    });
+    res.status(201).json({ success: true, data: doc });
+  })
+);
+
+/** GET /contact-groups/:id — single group (org-scoped). */
+router.get(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: { ...doc, memberCount: (doc.members || []).length } });
+  })
+);
+
+/** PATCH /contact-groups/:id — update name/description/tags/color. */
+router.patch(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const update = {};
+    if (req.body.name != null) update.name = String(req.body.name).trim();
+    if (req.body.description !== undefined) update.description = req.body.description || null;
+    if (Array.isArray(req.body.tags)) update.tags = req.body.tags;
+    if (req.body.color !== undefined) update.color = req.body.color || null;
+    const doc = await Group.findOneAndUpdate(
+      Group.groupScopedFilter(req.params.id, orgId),
+      { $set: update },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** DELETE /contact-groups/:id — soft delete. */
+router.delete(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOneAndUpdate(
+      Group.groupScopedFilter(req.params.id, orgId),
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: { id: req.params.id, deleted: true } });
+  })
+);
+
+/** POST /contact-groups/:id/members — add (deduped) members. */
+router.post(
+  '/contact-groups/:id/members',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const incoming = Array.isArray(req.body.members)
+      ? req.body.members
+      : req.body.phone
+        ? [{ phone: req.body.phone, displayName: req.body.displayName }]
+        : [];
+    const additions = Group.dedupeMembers(incoming);
+    if (!additions.length) {
+      return res.status(400).json({ success: false, message: 'No valid members supplied' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Merge existing + incoming, dedupe by phone (last-wins).
+    doc.members = Group.dedupeMembers([
+      ...(doc.members || []),
+      ...additions.map(m => ({ ...m, addedBy: actorId })),
+    ]);
+    await doc.save();
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** DELETE /contact-groups/:id/members/:phone — remove one member. */
+router.delete(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const target = Group.normalizePhone(req.params.phone);
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const before = (doc.members || []).length;
+    doc.members = (doc.members || []).filter(m => Group.normalizePhone(m.phone) !== target);
+    if (doc.members.length === before) {
+      return res.status(404).json({ success: false, message: 'Member not in group' });
+    }
+    await doc.save();
+    res.json({ success: true, data: doc });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
 // RATE LIMIT + DLQ — operational visibility & manual control
 // ═══════════════════════════════════════════════════════════════════════════
 

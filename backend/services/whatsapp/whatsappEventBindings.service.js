@@ -30,6 +30,7 @@
 const logger = require('../../utils/logger');
 const templates = require('./whatsappTemplates.service');
 const whatsappService = require('./whatsappService');
+const templateSync = require('./templateSync.service');
 
 // ─── Event → Template binding registry ──────────────────────────────────────
 // Each binding maps a canonical core event to exactly one template, plus a
@@ -211,6 +212,22 @@ async function dispatchForEvent(eventType, ctx = {}) {
   }
   if (recipient.whatsappOptIn === false) {
     return { delivered: false, reason: 'opted_out' };
+  }
+
+  // Deliverability gate: refuse early when the bound template isn't APPROVED
+  // in Meta. The downstream sender would also reject, but surfacing a precise
+  // `template_not_approved` reason here (instead of a generic `send_failed`)
+  // matches the admin UI's deliverability indicator and avoids a wasted call.
+  // Fails open (proceeds) when the status is unknown / DB unavailable.
+  const metaName = templates.TEMPLATES[binding.templateKey]?.name;
+  if (metaName) {
+    const status = await templateSync.getTemplateStatus(metaName);
+    if (status && status !== 'APPROVED') {
+      logger.warn(
+        `[WhatsApp Events] ${eventType} skipped — template '${metaName}' is ${status}, not APPROVED`
+      );
+      return { delivered: false, reason: 'template_not_approved', status };
+    }
   }
 
   const sender = templates[binding.senderFn];

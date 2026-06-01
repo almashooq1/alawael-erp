@@ -11,8 +11,12 @@
  *
  * W364 INVARIANT preserved: these sweepers are READ-ONLY (log/observe only) —
  * zero state mutation (no persistence writes). A drift guard (W695 test)
- * asserts no mutation creeps in. Wiring an alert/notification channel is later;
- * for now they emit structured `logger.warn` lines a log-drain can alert on.
+ * asserts no mutation creeps in. W717: in addition to the structured
+ * `logger.warn` lines, each sweep now EMITS a `module_gap.<x>.overdue` event on
+ * the QualityEventBus → module-gap-alerts-subscriber → downstream
+ * `notification.module_gap.overdue.alert` (consumed by the notification
+ * channels). Emitting an event is not a persistence write — the read-only
+ * invariant still holds. Bus is optional; absent → log-only (original W695).
  *
  * Sweepers (all default OFF):
  *   ENABLE_PANDO_FOLLOWUP_SWEEPER       — P&O orders past followUpDueDate
@@ -52,6 +56,35 @@ function wireModuleGapSweepers(app, deps = {}) {
 
   let scheduled = 0;
 
+  // W717: resolve the QualityEventBus once + wire the alerts subscriber so each
+  // sweep raises a real `notification.module_gap.overdue.alert` (consumed by the
+  // notification channels), not just a log line. Bus is optional — if absent the
+  // sweepers degrade to log-only (their original W695 behaviour). Emitting a bus
+  // event is NOT a persistence write, so the W695 read-only invariant holds.
+  const busModule = loadOptional('../services/quality/qualityEventBus.service');
+  const bus =
+    busModule && typeof busModule.getDefault === 'function' ? busModule.getDefault() : null;
+  if (bus) {
+    try {
+      const { wireModuleGapAlerts } = require('../services/module-gap-alerts-subscriber.service');
+      const wired = wireModuleGapAlerts({ bus, logger });
+      logger.info?.(`[startup] W717 module-gap alerts subscriber wired → ${wired.downstreamEvent}`);
+    } catch (err) {
+      logger.warn?.(`[startup] W717 module-gap alerts subscriber failed: ${err.message}`);
+    }
+  }
+  const daysSince = d => Math.floor((Date.now() - new Date(d).getTime()) / DAY_MS);
+  async function emitOverdue(eventName, items, mapFn) {
+    if (!bus || typeof bus.emit !== 'function') return;
+    for (const it of items.slice(0, 100)) {
+      try {
+        await bus.emit(eventName, mapFn(it));
+      } catch {
+        /* bus self-guards each listener; never let alerting break the sweep */
+      }
+    }
+  }
+
   // ── P&O overdue follow-ups (W680) ──────────────────────────────────────
   if (process.env.ENABLE_PANDO_FOLLOWUP_SWEEPER === 'true') {
     cron.schedule(
@@ -73,6 +106,15 @@ function wireModuleGapSweepers(app, deps = {}) {
               `[W695 pando-followup] order=${o._id} beneficiary=${o.beneficiaryId} category=${o.deviceCategory} due=${o.followUpDueDate}`
             );
           }
+          await emitOverdue('module_gap.pando_followup.overdue', overdue, o => ({
+            kind: 'pando_followup',
+            beneficiaryId: o.beneficiaryId ? String(o.beneficiaryId) : null,
+            branchId: o.branchId ? String(o.branchId) : null,
+            recordId: String(o._id),
+            dueDate: o.followUpDueDate,
+            daysOverdue: daysSince(o.followUpDueDate),
+            detail: o.deviceCategory,
+          }));
         } catch (err) {
           logger.error?.('[W695 pando-followup] sweep failed', err);
         }
@@ -104,6 +146,15 @@ function wireModuleGapSweepers(app, deps = {}) {
               `[W695 sensory-review] program=${d._id} beneficiary=${d.beneficiaryId} reviewDate=${d.reviewDate}`
             );
           }
+          await emitOverdue('module_gap.sensory_review.due', due, d => ({
+            kind: 'sensory_review',
+            beneficiaryId: d.beneficiaryId ? String(d.beneficiaryId) : null,
+            branchId: d.branchId ? String(d.branchId) : null,
+            recordId: String(d._id),
+            dueDate: d.reviewDate,
+            daysOverdue: daysSince(d.reviewDate),
+            detail: 'sensory_diet_review',
+          }));
         } catch (err) {
           logger.error?.('[W695 sensory-review] sweep failed', err);
         }
@@ -137,6 +188,15 @@ function wireModuleGapSweepers(app, deps = {}) {
               `[W695 sponsorship-expiry] sponsorship=${s._id} donor=${s.donorId} beneficiary=${s.beneficiaryId} endDate=${s.endDate}`
             );
           }
+          await emitOverdue('module_gap.sponsorship.expired', expired, s => ({
+            kind: 'sponsorship_expired',
+            beneficiaryId: s.beneficiaryId ? String(s.beneficiaryId) : null,
+            branchId: s.branchId ? String(s.branchId) : null,
+            recordId: String(s._id),
+            dueDate: s.endDate,
+            daysOverdue: daysSince(s.endDate),
+            detail: s.donorId ? `donor:${s.donorId}` : null,
+          }));
         } catch (err) {
           logger.error?.('[W695 sponsorship-expiry] sweep failed', err);
         }
@@ -172,6 +232,15 @@ function wireModuleGapSweepers(app, deps = {}) {
               `[W695 vfss-pending] study=${a._id} beneficiary=${a.beneficiaryId} type=${a.studyType} ordered=${a.orderedDate}`
             );
           }
+          await emitOverdue('module_gap.vfss_pending.aging', aging, a => ({
+            kind: 'vfss_pending',
+            beneficiaryId: a.beneficiaryId ? String(a.beneficiaryId) : null,
+            branchId: a.branchId ? String(a.branchId) : null,
+            recordId: String(a._id),
+            dueDate: a.orderedDate,
+            daysOverdue: daysSince(a.orderedDate),
+            detail: a.studyType,
+          }));
         } catch (err) {
           logger.error?.('[W695 vfss-pending] sweep failed', err);
         }

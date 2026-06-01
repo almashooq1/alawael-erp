@@ -1522,6 +1522,28 @@ router.get(
 );
 
 /**
+ * GET /contact-groups/:id/members — list a group's members as JSON (W760).
+ *
+ * Optional `?sort=name|phone` (defaults to phone). Read-only.
+ */
+router.get(
+  '/contact-groups/:id/members',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const sort = req.query.sort === 'name' ? 'name' : 'phone';
+    const members = Group.sortMembers(doc.members || [], sort);
+    res.json({
+      success: true,
+      data: { id: String(doc._id), sort, total: members.length, members },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

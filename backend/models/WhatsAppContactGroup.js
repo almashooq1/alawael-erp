@@ -517,6 +517,34 @@ function findMember(members, phone) {
   return typeof hit.toObject === 'function' ? hit.toObject() : hit;
 }
 
+/**
+ * sortMembers — return a new, sorted copy of the member list. `by` accepts
+ * 'name' (displayName, blanks last) or 'phone' (default). Pure & stable-ish;
+ * never mutates the input. Backs the JSON members-listing route (W760).
+ *
+ * @param {Array<object>} members
+ * @param {'name'|'phone'} [by]
+ * @returns {Array<object>}
+ */
+function sortMembers(members, by) {
+  const list = Array.isArray(members) ? members.slice() : [];
+  if (by === 'name') {
+    return list.sort((a, b) => {
+      const an = (a && a.displayName ? String(a.displayName) : '').trim();
+      const bn = (b && b.displayName ? String(b.displayName) : '').trim();
+      if (!an && !bn) return 0;
+      if (!an) return 1;
+      if (!bn) return -1;
+      return an.localeCompare(bn);
+    });
+  }
+  return list.sort((a, b) => {
+    const ap = a ? normalizePhone(a.phone) : '';
+    const bp = b ? normalizePhone(b.phone) : '';
+    return ap.localeCompare(bp);
+  });
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -555,3 +583,4 @@ module.exports.addMembers = addMembers;
 module.exports.dedupeReport = dedupeReport;
 module.exports.renameMember = renameMember;
 module.exports.findMember = findMember;
+module.exports.sortMembers = sortMembers;

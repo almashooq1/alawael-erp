@@ -48,21 +48,37 @@ describe('role-registry divergence — diff() ratchet logic', () => {
 describe('role-registry divergence — real-tree computeDivergence()', () => {
   const div = computeDivergence();
 
-  // ADR-037 D2 (W730, 2026-06-01): the 26 rbac-only roles were reconciled INTO
-  // roles.constants (additive union). The rbac-only side is now EMPTY; only the
-  // 9 const-only roles remain (their permission-map reconciliation is D3, gated
-  // on Q1–Q2). These assertions track the post-D2 / pre-D3 state.
-  it('rbac-only side is fully reconciled (ADR-037 D2 — gap now 0)', () => {
+  // ADR-037 FULLY RECONCILED (W730 D2 + W731 D3, 2026-06-01): BOTH sides now 0.
+  // D2 added the 26 rbac-only roles to roles.constants; D3 gave the 9 const-only
+  // roles real hierarchy + permission maps in rbac.config (they previously
+  // resolved to nothing). The two registries now agree exactly.
+  it('rbac-only side fully reconciled (ADR-037 D2 — gap 0)', () => {
     expect(div.onlyInRbac).toHaveLength(0);
-    // the formerly rbac-only roles now live in BOTH registries
     expect(div.onlyInRbac).not.toContain('branch_manager');
-    expect(div.onlyInRbac).not.toContain('clinical_director');
   });
 
-  it('const-only side still present (the 9, pending ADR-037 D3 grants)', () => {
-    expect(div.onlyInConst).toContain('independent_advocate');
-    expect(div.onlyInConst).toContain('dpo');
-    expect(div.onlyInConst.length).toBe(9);
+  it('const-only side fully reconciled (ADR-037 D3 — gap 0)', () => {
+    expect(div.onlyInConst).toHaveLength(0);
+    expect(div.onlyInConst).not.toContain('independent_advocate');
+    expect(div.onlyInConst).not.toContain('dpo');
+  });
+
+  it('the formerly-unresolvable 9 const-only roles now resolve to real grants', () => {
+    const rbac = require('../config/rbac.config.js');
+    for (const role of [
+      'nurse',
+      'head_nurse',
+      'nursing_supervisor',
+      'dpo',
+      'family_counsellor',
+      'independent_advocate',
+      'cultural_officer',
+      'patient_relations_officer',
+      'crm_supervisor',
+    ]) {
+      const perms = rbac.resolvePermissions(role);
+      expect(perms && typeof perms === 'object' && Object.keys(perms).length).toBeGreaterThan(0);
+    }
   });
 
   it('current divergence exactly equals the committed baseline (no pre-existing drift)', () => {

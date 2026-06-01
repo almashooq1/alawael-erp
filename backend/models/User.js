@@ -134,6 +134,17 @@ const userSchema = new mongoose.Schema({
       'teacher',
       'special_ed_teacher',
       'therapy_assistant',
+      // ADR-037 D3 (W731, 2026-06-01): the 9 const-only roles, now resolvable in
+      // rbac.config — must be assignable on a User too (rbac-roles-consistency).
+      'nurse',
+      'head_nurse',
+      'nursing_supervisor',
+      'dpo',
+      'family_counsellor',
+      'independent_advocate',
+      'cultural_officer',
+      'patient_relations_officer',
+      'crm_supervisor',
       // Level 5 — Support
       'hr',
       'hr_manager',

@@ -48,26 +48,19 @@ const ARGS = process.argv.slice(2);
 const JSON_MODE = ARGS.includes('--json');
 const BARE = ARGS.includes('--bare');
 
-// ── BASELINE (2026-05-30). Roles present in exactly one registry. Ratchet DOWN
-//    as the registries are reconciled (a role added to BOTH leaves the gap). ──
-// ADR-037 D2/D5 (W730, 2026-06-01): all 26 rbac-only roles were reconciled INTO
-// roles.constants.js (additive union — identical values) and pruned from this
-// baseline in the same commit per the ratchet-DOWN contract. rbac-only gap now 0.
-// The 9 const-only roles remain below — their reconciliation is D3, gated on
-// ADR-037 Q1–Q2 (assigning real permission maps is a security decision, not a
-// mechanical merge), so they stay baselined until those grants are signed off.
+// ── BASELINE. Roles present in exactly one registry. ──
+// ADR-037 FULLY RECONCILED 2026-06-01 — BOTH SIDES NOW ZERO:
+//   • D2 (W730): the 26 rbac-only roles added to roles.constants.js (additive
+//     union, identical values).
+//   • D3 (W731): the 9 const-only roles (nursing ladder, dpo, family_counsellor,
+//     CRPD advocate/cultural, CRM line) given real ROLE_HIERARCHY + least-
+//     privilege ROLE_PERMISSIONS maps in rbac.config.js — they previously
+//     resolved to NOTHING. Q1 answered by evidence (none were aliases of an
+//     existing role — all 9 truly absent), Q2 mapped per ADR-036 archetypes.
+// Both baselines emptied per the D5 ratchet-DOWN-in-same-commit contract. The
+// guard now ENFORCES PARITY FOREVER: any role added to one registry only fails CI.
 const ONLY_IN_RBAC_BASELINE = new Set([]);
-const ONLY_IN_CONST_BASELINE = new Set([
-  'crm_supervisor',
-  'cultural_officer',
-  'dpo',
-  'family_counsellor',
-  'head_nurse',
-  'independent_advocate',
-  'nurse',
-  'nursing_supervisor',
-  'patient_relations_officer',
-]);
+const ONLY_IN_CONST_BASELINE = new Set([]);
 
 /** Compute the current divergence by requiring the two config modules. */
 function computeDivergence() {

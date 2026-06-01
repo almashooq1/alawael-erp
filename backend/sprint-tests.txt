@@ -512,3 +512,4 @@ __tests__/tenant-routes-wiring-wave721.test.js
 __tests__/ops-alert-model-wave733.test.js
 tests/unit/ops-alerter.test.js
 __tests__/email-transport-wave735.test.js
+__tests__/reporting-scheduler-bootstrap-wave762.test.js

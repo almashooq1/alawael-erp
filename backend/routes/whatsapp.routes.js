@@ -1140,6 +1140,128 @@ router.get(
   })
 );
 
+/**
+ * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
+ *
+ * Sends a template (or service-window text) to every ELIGIBLE member of a
+ * group. Eligibility is resolved automatically via WhatsAppConsent.canMessage,
+ * so consent/opt-out filtering is built in (PDPL-safe) — blocked members are
+ * never contacted. Each eligible recipient is fanned out through
+ * `withSendGuards`, inheriting the same rate-limit / idempotency / DLQ
+ * hardening as single + bulk sends.
+ *
+ * Body: { templateKey, args? } OR { text }. Optional { broadcastId } for
+ * idempotent re-issue (per-recipient key derived from it).
+ *
+ * Distinct from POST /bulk: that takes an explicit phone list with no consent
+ * gate; this resolves a saved segment and enforces consent automatically.
+ */
+router.post(
+  '/contact-groups/:id/broadcast',
+  asyncHandler(async (req, res) => {
+    const { templateKey, args, text } = req.body;
+    if (!templateKey && !text) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Missing: templateKey or text' });
+    }
+
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const Consent = getConsentModel();
+    const members = doc.members || [];
+    const verdicts = await Promise.all(
+      members.map(async m => {
+        const phone = Group.normalizePhone(m.phone);
+        try {
+          const v = await Consent.canMessage(phone);
+          return [phone, v || { allowed: false, reason: 'unknown' }];
+        } catch {
+          return [phone, { allowed: false, reason: 'consent_check_failed' }];
+        }
+      })
+    );
+    const eligibilityByPhone = Object.fromEntries(verdicts);
+    const { eligible, blocked } = Group.partitionByEligibility(members, eligibilityByPhone);
+
+    const broadcastId =
+      req.body.broadcastId ||
+      `bcast-${doc._id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const results = [];
+    const targets = eligible.slice(0, 100); // cap per call
+
+    for (let i = 0; i < targets.length; i++) {
+      const phone = Group.normalizePhone(targets[i].phone);
+      const idemKey = `bcast:${broadcastId}:${phone}:${i}`;
+      const localReq = {
+        ...req,
+        get(name) {
+          if (typeof name === 'string' && name.toLowerCase() === 'idempotency-key') {
+            return idemKey;
+          }
+          return req.get(name);
+        },
+        body: { ...req.body, beneficiaryId: targets[i].beneficiaryId || null },
+      };
+
+      let outcome;
+      if (templateKey) {
+        outcome = await withSendGuards(
+          localReq,
+          'template',
+          phone,
+          { to: phone, templateKey, args: args || [] },
+          () => whatsappTemplates.sendTemplate(templateKey, phone, args || [])
+        );
+      } else {
+        outcome = await withSendGuards(localReq, 'text', phone, { to: phone, text }, () =>
+          whatsappService.sendText(phone, text)
+        );
+      }
+
+      if (outcome.status === 429) {
+        results.push({ phone, success: false, rateLimited: true, code: outcome.body.code });
+      } else if (outcome.status === 202) {
+        results.push({ phone, success: false, queued: true, code: outcome.body.code });
+      } else if (outcome.body?.data?.success) {
+        results.push({
+          phone,
+          success: true,
+          messageId: outcome.body.data.messageId,
+          replayed: !!outcome.replayed,
+        });
+      } else {
+        results.push({ phone, success: false, code: outcome.body?.code || 'UNKNOWN' });
+      }
+
+      await new Promise(r => setTimeout(r, 15));
+    }
+
+    const succeeded = results.filter(r => r.success).length;
+    const queued = results.filter(r => r.queued).length;
+    const rateLimited = results.filter(r => r.rateLimited).length;
+    res.json({
+      success: true,
+      data: {
+        broadcastId,
+        groupId: String(doc._id),
+        name: doc.name,
+        total: members.length,
+        eligibleCount: eligible.length,
+        blockedCount: blocked.length,
+        succeeded,
+        queued,
+        rateLimited,
+        failed: results.length - succeeded - queued - rateLimited,
+        results,
+      },
+    });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // RATE LIMIT + DLQ — operational visibility & manual control
 // ═══════════════════════════════════════════════════════════════════════════

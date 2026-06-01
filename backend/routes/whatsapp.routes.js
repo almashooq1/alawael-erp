@@ -1441,6 +1441,47 @@ router.post(
 );
 
 /**
+ * POST /contact-groups/:id/members/dedupe — collapse duplicate members (W757).
+ *
+ * Removes redundant rows sharing the same normalized phone (last-wins). Pass
+ * `dryRun` (query or body) to preview the removal count without persisting.
+ */
+router.post(
+  '/contact-groups/:id/members/dedupe',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.dedupeReport(doc.members || []);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          wouldRemove: result.removedCount,
+          total: result.deduped.length,
+        },
+      });
+    }
+
+    doc.members = result.deduped;
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        removed: result.removedCount,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

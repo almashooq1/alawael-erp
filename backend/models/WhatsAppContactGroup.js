@@ -450,6 +450,21 @@ function addMembers(existing, phones) {
   };
 }
 
+/**
+ * dedupeReport — collapse a member list to one entry per normalized phone
+ * (last-wins, preserving the dedupeMembers contract) and report how many
+ * duplicate rows were removed. Pure & read-only — the route decides whether to
+ * persist `deduped` (W757).
+ *
+ * @param {Array<object>} members
+ * @returns {{ deduped: Array<object>, removedCount:number }}
+ */
+function dedupeReport(members) {
+  const list = Array.isArray(members) ? members : [];
+  const deduped = dedupeMembers(list);
+  return { deduped, removedCount: list.length - deduped.length };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -485,3 +500,4 @@ module.exports.searchMembers = searchMembers;
 module.exports.mergeMembers = mergeMembers;
 module.exports.removeMembers = removeMembers;
 module.exports.addMembers = addMembers;
+module.exports.dedupeReport = dedupeReport;

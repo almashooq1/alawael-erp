@@ -1093,6 +1093,53 @@ router.delete(
   })
 );
 
+/**
+ * GET /contact-groups/:id/broadcast-preview — eligibility preview (W747).
+ *
+ * Read-only. Runs each member's phone through WhatsAppConsent.canMessage and
+ * partitions into eligible vs blocked, so staff can see who a broadcast would
+ * actually reach (and why the rest are excluded) BEFORE any message is sent.
+ * No send is performed here.
+ */
+router.get(
+  '/contact-groups/:id/broadcast-preview',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const Consent = getConsentModel();
+    const members = doc.members || [];
+    const verdicts = await Promise.all(
+      members.map(async m => {
+        const phone = Group.normalizePhone(m.phone);
+        try {
+          const v = await Consent.canMessage(phone);
+          return [phone, v || { allowed: false, reason: 'unknown' }];
+        } catch {
+          return [phone, { allowed: false, reason: 'consent_check_failed' }];
+        }
+      })
+    );
+    const eligibilityByPhone = Object.fromEntries(verdicts);
+    const { eligible, blocked, total } = Group.partitionByEligibility(members, eligibilityByPhone);
+
+    res.json({
+      success: true,
+      data: {
+        groupId: String(doc._id),
+        name: doc.name,
+        total,
+        eligibleCount: eligible.length,
+        blockedCount: blocked.length,
+        eligible,
+        blocked,
+      },
+    });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // RATE LIMIT + DLQ — operational visibility & manual control
 // ═══════════════════════════════════════════════════════════════════════════

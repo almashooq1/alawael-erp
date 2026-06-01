@@ -150,6 +150,36 @@ function listScopedFilter(orgId, opts = {}) {
   return filter;
 }
 
+/**
+ * Split a group's members into messageable vs blocked using a consent-result
+ * map (W269/PDPL: only message contacts who can be messaged). Pure / read-only
+ * — used by the broadcast-preview route so staff see eligibility BEFORE any
+ * send is attempted. A member with no entry in the map is treated as blocked
+ * with reason `unknown` (fail-closed).
+ *
+ * @param {Array<object>} members
+ * @param {Record<string, {allowed:boolean, reason?:string}>} eligibilityByPhone
+ * @returns {{ eligible: Array<object>, blocked: Array<object>, total:number }}
+ */
+function partitionByEligibility(members, eligibilityByPhone = {}) {
+  const eligible = [];
+  const blocked = [];
+  for (const m of Array.isArray(members) ? members : []) {
+    const phone = normalizePhone(m && m.phone);
+    if (!phone) {
+      blocked.push({ ...m, phone, reason: 'no_phone' });
+      continue;
+    }
+    const verdict = eligibilityByPhone[phone];
+    if (verdict && verdict.allowed) {
+      eligible.push({ ...m, phone, reason: verdict.reason || 'allowed' });
+    } else {
+      blocked.push({ ...m, phone, reason: (verdict && verdict.reason) || 'unknown' });
+    }
+  }
+  return { eligible, blocked, total: eligible.length + blocked.length };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -174,3 +204,4 @@ module.exports.normalizeMember = normalizeMember;
 module.exports.dedupeMembers = dedupeMembers;
 module.exports.groupScopedFilter = groupScopedFilter;
 module.exports.listScopedFilter = listScopedFilter;
+module.exports.partitionByEligibility = partitionByEligibility;

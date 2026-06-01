@@ -12,6 +12,14 @@ jest.mock('../../services/unifiedNotifier', () => ({
   notify: (...args) => mockNotify(...args),
 }));
 
+// W733: durable OpsAlert sink. Mock the model so unit tests assert the
+// persist-first behavior without a live mongoose connection.
+const mockCreate = jest.fn();
+const mockSave = jest.fn();
+jest.mock('../../models/OpsAlert', () => ({
+  create: (...args) => mockCreate(...args),
+}));
+
 describe('services/ops-alerter', () => {
   let sendOpsAlert;
   const origEnv = { ...process.env };
@@ -19,6 +27,10 @@ describe('services/ops-alerter', () => {
   beforeEach(() => {
     jest.resetModules();
     mockNotify.mockReset();
+    mockCreate.mockReset();
+    mockSave.mockReset();
+    mockSave.mockResolvedValue(undefined);
+    mockCreate.mockResolvedValue({ _id: 'ops-1', save: mockSave });
     process.env = { ...origEnv };
     delete process.env.OPS_ALERT_EMAIL;
     delete process.env.OPS_ALERT_PHONE;
@@ -30,10 +42,34 @@ describe('services/ops-alerter', () => {
     process.env = origEnv;
   });
 
-  test('drops alert with no_recipients reason when env unset', async () => {
+  test('persists durably + reports no_recipients when env unset (no silent drop)', async () => {
     const r = await sendOpsAlert({ kind: 'k', subject: 's', body: 'b' });
-    expect(r).toEqual({ success: false, reason: 'no_recipients' });
+    expect(r.success).toBe(false);
+    expect(r.reason).toBe('no_recipients');
+    expect(r.persisted).toBe(true);
+    expect(r.opsAlertId).toBe('ops-1');
+    expect(mockCreate).toHaveBeenCalledTimes(1);
     expect(mockNotify).not.toHaveBeenCalled();
+    expect(mockSave).toHaveBeenCalledTimes(1); // delivery outcome stamped back
+  });
+
+  test('persists the alert with normalized fields even with no external sink', async () => {
+    await sendOpsAlert({ kind: 'backup_failed', severity: 'critical', subject: 's', body: 'b' });
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+    const arg = mockCreate.mock.calls[0][0];
+    expect(arg.kind).toBe('backup_failed');
+    expect(arg.severity).toBe('critical');
+    expect(arg.status).toBe('open');
+  });
+
+  test('never throws when the durable persist itself fails', async () => {
+    mockCreate.mockRejectedValue(new Error('db-down'));
+    process.env.OPS_ALERT_EMAIL = 'a@x.com';
+    mockNotify.mockResolvedValue({ success: true, results: [] });
+    const r = await sendOpsAlert({ kind: 'k', subject: 's', body: 'b' });
+    expect(r.persisted).toBe(false);
+    expect(r.success).toBe(true);
+    expect(mockNotify).toHaveBeenCalledTimes(1);
   });
 
   test('dispatches to each configured email + phone', async () => {

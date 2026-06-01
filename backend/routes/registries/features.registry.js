@@ -56,6 +56,7 @@ module.exports = function registerFeatureRoutes(
     '../routes/seating-postural-assessment.routes'
   );
   const visionScreeningRoutes = safeRequire('../routes/vision-screening.routes');
+  const hearingScreeningRoutes = safeRequire('../routes/hearing-screening.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -170,6 +171,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'seating-postural-assessment', seatingPosturalAssessmentRoutes, authenticate);
   // Wave 720: Vision screening (فحص النظر الوظيفي) — functional vision + CVI cluster + acuity + ophthalmology referral
   dualMountAuth(app, 'vision-screening', visionScreeningRoutes, authenticate);
+  // Wave 724: Hearing screening (فحص السمع) — functional hearing + WHO grade + loss type + ENT/audiology referral
+  dualMountAuth(app, 'hearing-screening', hearingScreeningRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

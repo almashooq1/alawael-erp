@@ -244,6 +244,17 @@ function queueCountFilters(orgId) {
   };
 }
 
+// Query filter for a by-ID lookup that also enforces org isolation. Path-based
+// `/conversations/:id` routes would otherwise let a foreign-org staff member
+// read/resolve/assign another tenant's conversation (W269 doctrine). Returning
+// the org in the filter means a cross-org id simply yields a clean 404 (no
+// existence leak). Pure + unit-testable.
+function byIdScopedFilter(id, orgId) {
+  const filter = { _id: id };
+  if (orgId) filter.organizationId = orgId;
+  return filter;
+}
+
 whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
@@ -322,3 +333,5 @@ module.exports.sortPendingReview = sortPendingReview;
 module.exports.urgencyRankFor = urgencyRankFor;
 // Exported so the org-scoped queue-count filters stay testable + consistent.
 module.exports.queueCountFilters = queueCountFilters;
+// Exported so the by-id org-isolation filter stays testable + consistent.
+module.exports.byIdScopedFilter = byIdScopedFilter;

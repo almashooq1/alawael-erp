@@ -253,7 +253,9 @@ router.get(
   '/conversations/:id',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    const conv = await Conversation.findById(req.params.id)
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId)
+    )
       .populate('beneficiaryId', 'personalInfo fileNumber')
       .populate('familyMemberId', 'firstName lastName relationship contactInfo')
       .populate('assignedTo', 'name email')
@@ -287,8 +289,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const staffId = req.user?._id || req.user?.id;
-    const data = await Conversation.findByIdAndUpdate(
-      req.params.id,
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
       {
         status: 'resolved',
         requiresHumanReview: false,
@@ -309,8 +311,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     validate(['staffId'], req.body);
-    const data = await Conversation.findByIdAndUpdate(
-      req.params.id,
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
       { assignedTo: req.body.staffId, status: 'pending_review' },
       { returnDocument: 'after' }
     ).lean();
@@ -324,7 +326,10 @@ router.post(
   '/conversations/:id/mark-read',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    await Conversation.findByIdAndUpdate(req.params.id, { unreadCount: 0 });
+    await Conversation.updateOne(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
+      { unreadCount: 0 }
+    );
     res.json({ success: true });
   })
 );
@@ -683,7 +688,11 @@ router.get(
   '/ai/insights/:conversationId',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    const conv = await Conversation.findById(req.params.conversationId).select('messages').lean();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.conversationId, req.user?.organizationId)
+    )
+      .select('messages')
+      .lean();
     if (!conv) return res.status(404).json({ success: false, message: 'Not found' });
 
     const insights = whatsappAI.analyzeEngagementPatterns(

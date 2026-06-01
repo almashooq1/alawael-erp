@@ -314,6 +314,36 @@ function parseCsvMembers(csv) {
   return dedupeMembers(members);
 }
 
+/**
+ * Diff an incoming member set against the existing members of a group by phone.
+ * Returns which incoming members are new vs already present (de-duped). Pure /
+ * read-only — backs the CSV-import dry-run preview so staff can see the impact
+ * before committing.
+ *
+ * @param {Array<object>} existing
+ * @param {Array<object>} incoming
+ * @returns {{ toAdd: Array<object>, duplicates: Array<object>, addCount:number, duplicateCount:number }}
+ */
+function diffMembers(existing, incoming) {
+  const have = new Set(
+    (Array.isArray(existing) ? existing : [])
+      .map(m => normalizePhone(m && m.phone))
+      .filter(Boolean)
+  );
+  const toAdd = [];
+  const duplicates = [];
+  for (const m of dedupeMembers(Array.isArray(incoming) ? incoming : [])) {
+    if (have.has(m.phone)) duplicates.push(m);
+    else toAdd.push(m);
+  }
+  return {
+    toAdd,
+    duplicates,
+    addCount: toAdd.length,
+    duplicateCount: duplicates.length,
+  };
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -344,3 +374,4 @@ module.exports.csvCell = csvCell;
 module.exports.membersToCsv = membersToCsv;
 module.exports.parseCsvLine = parseCsvLine;
 module.exports.parseCsvMembers = parseCsvMembers;
+module.exports.diffMembers = diffMembers;

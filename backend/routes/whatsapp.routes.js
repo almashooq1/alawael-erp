@@ -1190,6 +1190,9 @@ router.get(
  * column, optional `displayName`), parses + de-dupes via the model helper, then
  * merges into the group (last-wins by phone). Returns how many rows parsed and
  * how many were newly added. Body: { csv: "<csv text>" }.
+ *
+ * Pass `?dryRun=true` (or body `{ dryRun: true }`) to PREVIEW the diff against
+ * existing members (new vs already-present) WITHOUT persisting anything (W752).
  */
 router.post(
   '/contact-groups/:id/members/import-csv',
@@ -1197,6 +1200,7 @@ router.post(
     const Group = getContactGroupModel();
     const orgId = req.user?.organizationId || null;
     const actorId = req.user?.userId || req.user?.id || null;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     const parsed = Group.parseCsvMembers(req.body && req.body.csv);
     if (!parsed.length) {
       return res
@@ -1205,6 +1209,22 @@ router.post(
     }
     const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const diff = Group.diffMembers(doc.members || [], parsed);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          parsed: parsed.length,
+          wouldAdd: diff.addCount,
+          duplicates: diff.duplicateCount,
+          toAdd: diff.toAdd,
+        },
+      });
+    }
+
     const before = (doc.members || []).length;
     doc.members = Group.dedupeMembers([
       ...(doc.members || []),

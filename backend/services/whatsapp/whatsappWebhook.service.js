@@ -452,6 +452,21 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     classified.requiresHumanReview;
 
   if (shouldEscalate) {
+    // W739: flag the conversation itself so it surfaces in the staff
+    // "pending review" queue (Conversation.findPendingReview filters on
+    // requiresHumanReview). Without this, an explicit ESCALATE decision
+    // (emergency/complaint) or a W738 template-not-deliverable escalation
+    // would only fire a notification but leave the conversation un-flagged
+    // when classified.requiresHumanReview was false. Never throws.
+    if (Conversation && conv) {
+      await Conversation.updateOne(
+        { _id: conv._id },
+        { $set: { requiresHumanReview: true, status: 'escalated' } }
+      ).catch(err =>
+        logger.warn(`[WhatsApp Webhook] escalation flag update failed: ${err.message}`)
+      );
+    }
+
     try {
       const notifService = require('../notifications/notification-enhanced.service');
       if (notifService?.send) {

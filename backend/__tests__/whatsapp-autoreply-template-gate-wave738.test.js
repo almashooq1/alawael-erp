@@ -41,7 +41,6 @@ jest.mock('../models/WhatsAppConversation', () => ({
   findOneAndUpdate: jest.fn().mockResolvedValue({ _id: 'conv-1' }),
   updateOne: jest.fn().mockResolvedValue({}),
 }));
-
 jest.mock('../models/WhatsAppConsent', () => ({
   recordInbound: jest.fn().mockResolvedValue(undefined),
 }));
@@ -54,6 +53,8 @@ const whatsappService = require('../services/whatsapp/whatsappService');
 const templateSync = require('../services/whatsapp/templateSync.service');
 const notifService = require('../services/notifications/notification-enhanced.service');
 const webhook = require('../services/whatsapp/whatsappWebhook.service');
+
+const mongoose = require('mongoose');
 
 const MSG = {
   from: '966500000000',
@@ -111,5 +112,44 @@ describe('W738 — auto-reply template deliverability gate', () => {
     await webhook.handleIncomingMessage(MSG, CONTACT, 'pnid');
 
     expect(whatsappService.sendTemplate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('W739 — escalation flags the conversation for the staff review queue', () => {
+  let ConvModel;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // The webhook handler resolves the conversation model via mongoose.model()
+    // (see getConversationModel). Configure that instance so the upsert returns
+    // a doc and the escalation flag-update is observable.
+    ConvModel = mongoose.model('WhatsAppConversation');
+    ConvModel.findOneAndUpdate = jest.fn().mockResolvedValue({ _id: 'conv-1' });
+    ConvModel.updateOne = jest.fn().mockResolvedValue({});
+  });
+
+  test('a template-not-approved escalation sets requiresHumanReview + status=escalated', async () => {
+    templateSync.getTemplateStatus.mockResolvedValue('REJECTED');
+
+    await webhook.handleIncomingMessage(MSG, CONTACT, 'pnid');
+
+    // The conversation record is updated so Conversation.findPendingReview
+    // (which filters requiresHumanReview:true) surfaces it to staff.
+    const flagUpdate = ConvModel.updateOne.mock.calls.find(
+      ([, update]) => update?.$set?.requiresHumanReview === true
+    );
+    expect(flagUpdate).toBeDefined();
+    expect(flagUpdate[1].$set.status).toBe('escalated');
+  });
+
+  test('an APPROVED deliverable auto-reply does NOT flag the conversation', async () => {
+    templateSync.getTemplateStatus.mockResolvedValue('APPROVED');
+
+    await webhook.handleIncomingMessage(MSG, CONTACT, 'pnid');
+
+    const flagUpdate = ConvModel.updateOne.mock.calls.find(
+      ([, update]) => update?.$set?.requiresHumanReview === true
+    );
+    expect(flagUpdate).toBeUndefined();
   });
 });

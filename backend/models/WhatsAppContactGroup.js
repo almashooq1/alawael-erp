@@ -499,6 +499,24 @@ function renameMember(members, phone, displayName) {
   return { members: next, updated };
 }
 
+/**
+ * findMember — locate a single member by phone (any format; normalized before
+ * comparison). Returns the member (plain object) or null. Pure & read-only,
+ * backs the GET single-member route (W759).
+ *
+ * @param {Array<object>} members
+ * @param {string} phone
+ * @returns {object|null}
+ */
+function findMember(members, phone) {
+  const list = Array.isArray(members) ? members : [];
+  const target = normalizePhone(phone);
+  if (!target) return null;
+  const hit = list.find(m => m && normalizePhone(m.phone) === target);
+  if (!hit) return null;
+  return typeof hit.toObject === 'function' ? hit.toObject() : hit;
+}
+
 // ─── Statics ─────────────────────────────────────────────────────────────────
 
 whatsappContactGroupSchema.statics.listForOrg = function (orgId, opts = {}) {
@@ -536,3 +554,4 @@ module.exports.removeMembers = removeMembers;
 module.exports.addMembers = addMembers;
 module.exports.dedupeReport = dedupeReport;
 module.exports.renameMember = renameMember;
+module.exports.findMember = findMember;

@@ -1501,6 +1501,27 @@ router.patch(
 );
 
 /**
+ * GET /contact-groups/:id/members/:phone — fetch a single member (W759).
+ *
+ * Returns the member matching the (normalized) phone, or 404 when the group or
+ * member is not found. Read-only.
+ */
+router.get(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const member = Group.findMember(doc.members || [], req.params.phone);
+    if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
+    res.json({ success: true, data: { id: String(doc._id), member } });
+  })
+);
+
+/**
  * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
  *
  * Sends a template (or service-window text) to every ELIGIBLE member of a

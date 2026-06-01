@@ -849,6 +849,9 @@ on:
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
       - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
       - 'backend/__tests__/vision-screening-wave720.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hearing-screening-behavioral-wave724.test.js'
+      - 'backend/__tests__/hearing-screening-wave724.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1681,6 +1684,9 @@ on:
       - 'backend/__tests__/tenant-routes-wiring-wave721.test.js'
       - 'backend/__tests__/vision-screening-behavioral-wave720.test.js'
       - 'backend/__tests__/vision-screening-wave720.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hearing-screening-behavioral-wave724.test.js'
+      - 'backend/__tests__/hearing-screening-wave724.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

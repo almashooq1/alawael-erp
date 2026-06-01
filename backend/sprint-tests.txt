@@ -429,6 +429,8 @@ __tests__/seating-postural-assessment-behavioral-wave675.test.js
 __tests__/seating-postural-assessment-wave675.test.js
 __tests__/vision-screening-behavioral-wave720.test.js
 __tests__/vision-screening-wave720.test.js
+__tests__/hearing-screening-behavioral-wave724.test.js
+__tests__/hearing-screening-wave724.test.js
 __tests__/seed-rag-policies-wave283d.test.js
 __tests__/sehhaty-adapter-wave280.test.js
 __tests__/sehhaty-bootstrap-wave280b.test.js

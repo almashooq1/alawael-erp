@@ -1,6 +1,6 @@
 /**
  * Purchasing Routes — /api/v1/purchasing/*
- * W773 — PR adapter; W780 — vendors/orders; W781 — receipts + vendor contracts.
+ * W773 — PR adapter; W780 — vendors/orders; W781 — receipts + vendor contracts; W785 — PO receipts.
  */
 'use strict';
 
@@ -293,6 +293,21 @@ router.patch(
       return res.status(404).json({ success: false, message: 'order_not_found' });
     }
     const data = await adapter.getOrder(req.params.id);
+    res.json({ success: true, data });
+  })
+);
+
+router.get(
+  '/orders/:id/receipts',
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const scope = branchFilter(req);
+    const data = await adapter.listReceiptsForOrder(req.params.id, {
+      ...req.query,
+      branchId: scope.branchId || req.query.branchId,
+    });
     res.json({ success: true, data });
   })
 );

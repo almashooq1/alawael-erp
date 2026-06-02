@@ -943,6 +943,8 @@ on:
       - 'backend/__tests__/inventory-mount-alias-wave783.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-po-receipt-bridge-wave784.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/purchasing-order-receipts-wave785.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1869,6 +1871,8 @@ on:
       - 'backend/__tests__/inventory-mount-alias-wave783.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-po-receipt-bridge-wave784.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/purchasing-order-receipts-wave785.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -6,6 +6,7 @@
  * W780: vendors → Vendor model; orders → InventoryModulePurchaseOrder.
  * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
  * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
+ * W785: list receipts by PO + dashboard receipt count.
  */
 
 function getVendorModel() {
@@ -483,6 +484,7 @@ function mapReceiptToLegacy(doc) {
     _id: o._id,
     receiptNumber: o.receiptNumber || o.receipt_number,
     purchaseOrder: o.purchaseOrder || o.po_number || '',
+    purchaseOrderId: o.purchaseOrderId || o.purchase_order_id || null,
     vendor: o.vendor || o.vendor_name || '',
     warehouse: o.warehouse || o.warehouse_name || '',
     branch: o.branch || (o.branch_id ? String(o.branch_id) : ''),
@@ -528,6 +530,10 @@ async function listReceipts(query = {}) {
   const filter = { deleted_at: null };
   if (query.branchId) filter.branch_id = query.branchId;
   if (query.status) filter.status = query.status;
+  const poId = query.purchaseOrderId || query.purchase_order_id;
+  if (poId && require('mongoose').Types.ObjectId.isValid(poId)) {
+    filter.purchase_order_id = poId;
+  }
   const rows = await Receipt.find(filter)
     .sort({ receipt_date: -1 })
     .limit(query.limit ? Number(query.limit) : 200)
@@ -651,9 +657,19 @@ async function createContract(body) {
   return mapContractToLegacy(doc);
 }
 
+async function listReceiptsForOrder(orderId, query = {}) {
+  if (!require('mongoose').Types.ObjectId.isValid(orderId)) {
+    const err = new Error('invalid_order_id');
+    err.status = 400;
+    throw err;
+  }
+  return listReceipts({ ...query, purchaseOrderId: orderId });
+}
+
 async function getStats() {
   const Vendor = getVendorModel();
   const Po = getPoModel();
+  const Receipt = getReceiptModel();
   const rows = await listRequests({ limit: 500 });
   const pendingStatuses = new Set([
     'draft',
@@ -662,12 +678,13 @@ async function getStats() {
     'returned_for_clarification',
   ]);
   const pendingRequests = rows.filter(r => pendingStatuses.has(r.status)).length;
-  const [totalVendors, activeOrders, spendAgg] = await Promise.all([
+  const [totalVendors, activeOrders, totalReceipts, spendAgg] = await Promise.all([
     Vendor.countDocuments({ isDeleted: { $ne: true }, status: 'active' }),
     Po.countDocuments({
       deleted_at: null,
       status: { $in: ['approved', 'sent', 'partial', 'received', 'closed'] },
     }),
+    Receipt.countDocuments({ deleted_at: null }),
     Po.aggregate([
       { $match: { deleted_at: null, status: { $in: ['received', 'closed', 'approved', 'sent'] } } },
       { $group: { _id: null, total: { $sum: '$total_amount' } } },
@@ -677,6 +694,7 @@ async function getStats() {
   return {
     totalVendors,
     activeOrders,
+    totalReceipts,
     pendingRequests,
     totalSpend,
     monthlyBudget: 0,
@@ -704,6 +722,7 @@ module.exports = {
   approveOrder,
   receiveOrder,
   listReceipts,
+  listReceiptsForOrder,
   getReceipt,
   createReceipt,
   listContracts,

@@ -61,6 +61,7 @@ describe('W775 — registry no longer mounts deleted stubs', () => {
     expect(REG).not.toMatch(/social-media\.routes/);
     expect(REG).not.toMatch(/system-settings\.routes/);
     expect(REG).not.toMatch(/form-templates\.routes/);
+    expect(REG).not.toMatch(/conversations\.routes/);
   });
 
   it('_registry wires specialized-programs to programs domain (single mount)', () => {

@@ -311,8 +311,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'payroll', require('../routes/payroll.routes'));
   dualMount(app, 'notifications', notificationsRoutes);
   dualMount(app, 'messages', messagingRoutes);
-  dualMount(app, 'threads', require('../routes/threads.routes'));
-  dualMount(app, 'conversations', require('../routes/conversations.routes'));
+  dualMount(app, 'threads', safeRequire('../routes/threads.routes'));
+  // W778: conversations stub deleted in W775 — real surface is chat.routes at
+  // /api/(v1/)?chat/conversations via phases.registry.js
   // ── Finance (delegated to registries/finance.registry.js) ─────────────
   registerFinanceRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
   dualMount(app, 'integrations', integrationRoutes);

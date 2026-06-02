@@ -491,6 +491,10 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
+  // ── Purchasing — legacy /purchasing adapter to ops PR engine (W773) ───
+  dualMountAuth(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
+  logger.info('✅ Purchasing routes mounted (ops PR adapter): /api/(v1/)purchasing');
+
   // ── Rehab-licenses — Mongo-backed License engine (W772) ───────────────
   // W658 promoted to dualMountAuth; W772 replaced the 92-handler hollow stub
   // with services/rehabLicenses.service.js (entityType=rehab_center_license).

@@ -101,6 +101,8 @@ __tests__/break-glass-route-mounted-wave770.test.js
 __tests__/stub-surface-cleanup-wave771.test.js
 __tests__/rehab-licenses-behavioral-wave772.test.js
 __tests__/rehab-licenses-route-wired-wave772.test.js
+__tests__/stub-surface-cleanup-wave773.test.js
+__tests__/purchasing-adapter-behavioral-wave773.test.js
 __tests__/build-info-internals.test.js
 __tests__/calibration-mgmtreview-mfa-tier-wave277g.test.js
 __tests__/canonical-schemas-wave366.test.js

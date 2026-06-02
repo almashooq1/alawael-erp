@@ -11,6 +11,16 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const _crypto = require('crypto');
 const safeError = require('../utils/safeError');
+const IntegrationService = require('../services/integrationService');
+
+// W773 — routes expected req.app.locals.integrationService but nothing ever
+// assigned it at boot. Lazy-bind the module singleton on first request.
+router.use((req, _res, next) => {
+  if (!req.app.locals.integrationService) {
+    req.app.locals.integrationService = IntegrationService.instance || new IntegrationService();
+  }
+  next();
+});
 
 // Apply authentication to all routes
 router.use(authenticate);

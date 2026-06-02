@@ -267,16 +267,8 @@ module.exports = function registerPhaseRoutes(
   // ── Phase 10: Unmounted Route Files — ملفات مسارات غير مُثبّتة ─────
   // High priority — auth & executive
   safeMount(app, ['/api/otp-auth', '/api/v1/otp-auth'], '../routes/otp-auth.routes');
-  safeMount(
-    app,
-    ['/api/executive-dashboard', '/api/v1/executive-dashboard'],
-    '../routes/executive-dashboard'
-  );
-  safeMount(
-    app,
-    ['/api/executive-dashboard-enhanced', '/api/v1/executive-dashboard-enhanced'],
-    '../routes/executive-dashboard-enhanced'
-  );
+  // W773 — executive-dashboard ×2 deleted (zero UI consumers; live surfaces:
+  // /api/v1/ceo-dashboard + domains/dashboards for DDD executive UI).
   safeMount(app, ['/api/incidents', '/api/v1/incidents'], '../routes/incidentRoutes');
   safeMount(app, ['/api/policies', '/api/v1/policies'], '../routes/policyRoutes');
   safeMount(app, ['/api/fcm', '/api/v1/fcm'], '../routes/fcm');
@@ -287,7 +279,7 @@ module.exports = function registerPhaseRoutes(
   );
   safeMount(app, ['/api/tenants', '/api/v1/tenants'], '../routes/tenant.routes');
   logger.info(
-    'Phase 10-A mounted (8 modules: otp-auth, executive-dashboard ×2, incidents, policies, fcm, cache-management, tenants)'
+    'Phase 10-A mounted (6 modules: otp-auth, incidents, policies, fcm, cache-management, tenants)'
   );
 
   // Medium priority — analytics & AI

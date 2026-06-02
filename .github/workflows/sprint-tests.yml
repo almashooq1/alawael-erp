@@ -922,6 +922,8 @@ on:
       - 'backend/__tests__/stub-surface-cleanup-wave775.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dashboard-mount-wave776.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/duplicate-mount-cleanup-wave777.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1827,6 +1829,8 @@ on:
       - 'backend/__tests__/stub-surface-cleanup-wave775.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dashboard-mount-wave776.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/duplicate-mount-cleanup-wave777.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

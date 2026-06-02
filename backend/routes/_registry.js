@@ -551,7 +551,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     'admin/complaints-analytics',
     require('../routes/complaints-analytics-admin.routes')
   );
-  dualMount(app, 'admin/document-expiry', require('../routes/document-expiry-admin.routes'));
+  // W777: document-expiry mounted once via documents.registry.js (phases.registry)
   dualMount(
     app,
     'admin/incidents-analytics',
@@ -592,8 +592,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
   // Family Engagement Portal
   dualMountAuth(app, 'family', safeRequire('../domains/family/routes/family.routes'));
-  // WhatsApp AI Integration
-  dualMount(app, 'whatsapp', safeRequire('../routes/whatsapp.routes'));
+  // W777: WhatsApp mounted once via communication.registry.js (phases.registry)
   // Group Therapy
   dualMount(
     app,

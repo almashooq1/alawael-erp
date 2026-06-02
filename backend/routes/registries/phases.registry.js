@@ -324,11 +324,6 @@ module.exports = function registerPhaseRoutes(
   // Dashboard, integrations, utilities
   safeMount(
     app,
-    ['/api/dashboard-unified', '/api/v1/dashboard-unified'],
-    '../routes/dashboard.routes.unified'
-  );
-  safeMount(
-    app,
     ['/api/dashboard/widgets', '/api/v1/dashboard/widgets'],
     '../routes/dashboardWidget.routes'
   );
@@ -343,7 +338,7 @@ module.exports = function registerPhaseRoutes(
     '../routes/branch-integration.routes'
   );
   logger.info(
-    'Phase 10-D mounted (4 modules: dashboard-unified, dashboard-widgets, integrations-hub, branch-integration)'
+    'Phase 10-D mounted (3 modules: dashboard-widgets, integrations-hub, branch-integration)'
   );
 
   // Admin utilities & government
@@ -673,15 +668,6 @@ module.exports = function registerPhaseRoutes(
   safeMount(app, ['/api/visitor-auth', '/api/v1/visitor-auth'], '../routes/visitor-auth.routes');
 
   logger.info('Phase 35 mounted (32 previously unmounted route modules)');
-  // The smart-attendance.routes.js (hyphen) provides additional CRUD sub-modules
-  safeMount(
-    app,
-    ['/api/smart-attendance-crud', '/api/v1/smart-attendance-crud'],
-    '../routes/smart-attendance.routes'
-  );
-  logger.info(
-    'Phase 34 mounted (12 sub-modules: records, behavior-patterns, appeals, parent-notification-preferences, biometric-enrollments, anomaly-alerts, summary-reports, camera-devices, biometric-devices, face-recognition, fingerprint-data, camera-attendance)'
-  );
 
   // ── Phase 35: Beneficiary Management — إدارة المستفيدين ──────────────────
   safeMount(

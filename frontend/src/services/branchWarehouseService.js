@@ -231,9 +231,25 @@ export const purchaseRequestService = {
     const r = await apiClient.post(`/api/v1/purchasing/requests/${id}/reject`, data);
     return r.data;
   }),
+  convertToPo: safe(async (id, data = {}) => {
+    const r = await apiClient.post(`/api/v1/purchasing/requests/${id}/convert-to-po`, data);
+    return unwrapApiOne(r.data);
+  }),
 
   getMockPRs: () => MOCK_PURCHASE_REQUESTS,
   getMockStats: () => MOCK_PR_STATS,
+};
+
+// ═══════════════════════════════════════════
+// 7a. INVENTORY MODULE ITEMS — أصناف المخزون (W789 picker)
+// ═══════════════════════════════════════════
+export const inventoryModuleItemService = {
+  getAll: safe(async (params = {}) => {
+    const r = await apiClient.get('/api/v1/inventory-module/items', {
+      params: { limit: 100, ...params },
+    });
+    return r.data?.items || [];
+  }),
 };
 
 // ═══════════════════════════════════════════

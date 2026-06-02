@@ -62,6 +62,7 @@ import {
   purchaseReceiptService,
   vendorContractService,
   branchService,
+  inventoryModuleItemService,
 } from 'services/branchWarehouseService';
 
 const prStatusConfig = {
@@ -128,6 +129,7 @@ const BranchPurchasing = () => {
   const [receipts, setReceipts] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -147,19 +149,28 @@ const BranchPurchasing = () => {
     priority: 'medium',
     notes: '',
     items: [
-      { product: '', description: '', quantity: 1, unit: 'حبة', estimatedPrice: 0, notes: '' },
+      {
+        itemId: '',
+        product: '',
+        description: '',
+        quantity: 1,
+        unit: 'حبة',
+        estimatedPrice: 0,
+        notes: '',
+      },
     ],
   });
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [prData, poData, rcData, ctData, brData] = await Promise.all([
+      const [prData, poData, rcData, ctData, brData, invItems] = await Promise.all([
         purchaseRequestService.getAll(),
         purchaseOrderService.getAll(),
         purchaseReceiptService.getAll(),
         vendorContractService.getAll(),
         branchService.getAll(),
+        inventoryModuleItemService.getAll().catch(() => []),
       ]);
       const prRows = prData || purchaseRequestService.getMockPRs();
       setRequests(prRows);
@@ -167,6 +178,7 @@ const BranchPurchasing = () => {
       setReceipts(rcData || purchaseReceiptService.getMockReceipts());
       setContracts(ctData || vendorContractService.getMockContracts());
       setBranches(brData || branchService.getMockBranches());
+      setInventoryItems(Array.isArray(invItems) ? invItems : []);
       setStats(computePrStats(prRows));
     } catch {
       setRequests(purchaseRequestService.getMockPRs());
@@ -272,6 +284,22 @@ const BranchPurchasing = () => {
     }
   };
 
+  const handleConvertToPo = async id => {
+    try {
+      const result = await purchaseRequestService.convertToPo(id);
+      showSnackbar(
+        result?.order?.orderNumber
+          ? `تم إنشاء أمر الشراء ${result.order.orderNumber}`
+          : 'تم تحويل الطلب إلى أمر شراء',
+        'success'
+      );
+      setTabValue(1);
+      loadData();
+    } catch {
+      showSnackbar('فشل تحويل الطلب إلى أمر شراء', 'error');
+    }
+  };
+
   const handleApprovePO = async id => {
     try {
       await purchaseOrderService.approve(id);
@@ -311,7 +339,15 @@ const BranchPurchasing = () => {
       priority: 'medium',
       notes: '',
       items: [
-        { product: '', description: '', quantity: 1, unit: 'حبة', estimatedPrice: 0, notes: '' },
+        {
+          itemId: '',
+          product: '',
+          description: '',
+          quantity: 1,
+          unit: 'حبة',
+          estimatedPrice: 0,
+          notes: '',
+        },
       ],
     });
   const addItem = () =>
@@ -319,7 +355,15 @@ const BranchPurchasing = () => {
       ...prForm,
       items: [
         ...prForm.items,
-        { product: '', description: '', quantity: 1, unit: 'حبة', estimatedPrice: 0, notes: '' },
+        {
+          itemId: '',
+          product: '',
+          description: '',
+          quantity: 1,
+          unit: 'حبة',
+          estimatedPrice: 0,
+          notes: '',
+        },
       ],
     });
   const removeItem = idx =>
@@ -327,6 +371,15 @@ const BranchPurchasing = () => {
   const updateItem = (idx, field, val) => {
     const items = [...prForm.items];
     items[idx] = { ...items[idx], [field]: val };
+    if (field === 'itemId' && val) {
+      const inv = inventoryItems.find(it => String(it._id) === String(val));
+      if (inv) {
+        items[idx].product = inv.name_ar || inv.name_en || items[idx].product;
+        items[idx].description = inv.description || items[idx].description;
+        items[idx].unit = inv.unit_of_measure || items[idx].unit;
+        if (inv.unit_cost != null) items[idx].estimatedPrice = inv.unit_cost;
+      }
+    }
     setPrForm({ ...prForm, items });
   };
 
@@ -605,7 +658,7 @@ const BranchPurchasing = () => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      {pr.status === 'submitted' && (
+                      {['submitted', 'under_review'].includes(pr.status) && (
                         <>
                           <Tooltip title="اعتماد">
                             <IconButton
@@ -626,6 +679,17 @@ const BranchPurchasing = () => {
                             </IconButton>
                           </Tooltip>
                         </>
+                      )}
+                      {pr.status === 'approved' && (
+                        <Tooltip title="تحويل لأمر شراء">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleConvertToPo(pr._id)}
+                          >
+                            <PurchaseIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       )}
                     </Box>
                   </TableCell>
@@ -903,43 +967,67 @@ const BranchPurchasing = () => {
 
             {prForm.items.map((item, idx) => (
               <React.Fragment key={idx}>
-                <Grid item xs={3}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>صنف المخزون (اختياري)</InputLabel>
+                    <Select
+                      value={item.itemId || ''}
+                      onChange={e => updateItem(idx, 'itemId', e.target.value)}
+                      label="صنف المخزون (اختياري)"
+                    >
+                      <MenuItem value="">
+                        <em>بدون ربط</em>
+                      </MenuItem>
+                      {inventoryItems.map(inv => (
+                        <MenuItem key={inv._id} value={inv._id}>
+                          {inv.name_ar || inv.name_en || inv.item_code}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     label={`الصنف ${idx + 1}`}
                     value={item.product}
                     onChange={e => updateItem(idx, 'product', e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     label="الوصف"
                     value={item.description}
                     onChange={e => updateItem(idx, 'description', e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4} sm={2}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="الكمية"
                     value={item.quantity}
                     onChange={e => updateItem(idx, 'quantity', Number(e.target.value))}
                   />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4} sm={2}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="السعر التقديري"
                     value={item.estimatedPrice}
                     onChange={e => updateItem(idx, 'estimatedPrice', Number(e.target.value))}
                   />
                 </Grid>
-                <Grid item xs={2} display="flex" alignItems="center" gap={0.5}>
+                <Grid item xs={4} sm={2} display="flex" alignItems="center" gap={0.5}>
                   <TextField
                     fullWidth
+                    size="small"
                     label="الوحدة"
                     value={item.unit}
                     onChange={e => updateItem(idx, 'unit', e.target.value)}

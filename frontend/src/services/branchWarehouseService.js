@@ -237,6 +237,34 @@ export const purchaseRequestService = {
 };
 
 // ═══════════════════════════════════════════
+// 7b. PURCHASE ORDERS — أوامر الشراء (W788)
+// ═══════════════════════════════════════════
+export const purchaseOrderService = {
+  getAll: safe(async (params = {}) => {
+    const r = await apiClient.get('/api/v1/purchasing/orders', { params });
+    return unwrapApiList(r.data);
+  }),
+  getById: safe(async id => {
+    const r = await apiClient.get(`/api/v1/purchasing/orders/${id}`);
+    return unwrapApiOne(r.data);
+  }),
+  getReceipts: safe(async id => {
+    const r = await apiClient.get(`/api/v1/purchasing/orders/${id}/receipts`);
+    return unwrapApiList(r.data);
+  }),
+  approve: safe(async id => {
+    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/approve`);
+    return unwrapApiOne(r.data);
+  }),
+  receive: safe(async id => {
+    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/receive`);
+    return unwrapApiOne(r.data);
+  }),
+
+  getMockOrders: () => MOCK_PURCHASE_ORDERS,
+};
+
+// ═══════════════════════════════════════════
 // 7. PURCHASE RECEIPTS — استلام المشتريات
 // ═══════════════════════════════════════════
 export const purchaseReceiptService = {
@@ -878,6 +906,31 @@ const MOCK_PR_STATS = {
   urgentPending: 4,
 };
 
+const MOCK_PURCHASE_ORDERS = [
+  {
+    _id: 'po-m1',
+    orderNumber: 'PO-2026-000101',
+    vendor: 'مورد المستلزمات الطبية',
+    date: '2026-05-28',
+    deliveryDate: '2026-06-05',
+    items: 3,
+    totalAmount: 12500,
+    status: 'approved',
+    department: 'المستودع',
+  },
+  {
+    _id: 'po-m2',
+    orderNumber: 'PO-2026-000102',
+    vendor: 'شركة الأثاث المكتبي',
+    date: '2026-05-20',
+    deliveryDate: '2026-05-30',
+    items: 2,
+    totalAmount: 8900,
+    status: 'received',
+    department: 'الإدارة',
+  },
+];
+
 const MOCK_RECEIPTS = [
   {
     _id: 'rc1',
@@ -972,6 +1025,7 @@ export default {
   stockMovementService,
   stockTakeService,
   purchaseRequestService,
+  purchaseOrderService,
   purchaseReceiptService,
   vendorContractService,
 };

@@ -52,11 +52,13 @@ import {
   Edit as EditIcon,
   PriorityHigh as UrgentIcon,
   Schedule as PendingIcon,
+  LocalShipping as ReceiveIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
 import {
   purchaseRequestService,
+  purchaseOrderService,
   purchaseReceiptService,
   vendorContractService,
   branchService,
@@ -95,6 +97,14 @@ const priorityConfig = {
   medium: { label: 'متوسط', color: 'info' },
   low: { label: 'منخفض', color: 'default' },
 };
+const poStatusConfig = {
+  draft: { label: 'مسودة', color: 'default' },
+  pending: { label: 'بانتظار الموافقة', color: 'warning' },
+  approved: { label: 'معتمد', color: 'info' },
+  ordered: { label: 'تم الطلب', color: 'primary' },
+  received: { label: 'مستلم', color: 'success' },
+  cancelled: { label: 'ملغي', color: 'error' },
+};
 const receiptStatusConfig = {
   complete: { label: 'مكتمل', color: 'success' },
   partial: { label: 'جزئي', color: 'warning' },
@@ -114,6 +124,7 @@ const BranchPurchasing = () => {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const [requests, setRequests] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [receipts, setReceipts] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -125,6 +136,9 @@ const BranchPurchasing = () => {
   const [editingPR, setEditingPR] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedPR, setSelectedPR] = useState(null);
+  const [poGrnDialogOpen, setPoGrnDialogOpen] = useState(false);
+  const [selectedPO, setSelectedPO] = useState(null);
+  const [poGrns, setPoGrns] = useState([]);
 
   const [prForm, setPrForm] = useState({
     branch: '',
@@ -140,20 +154,23 @@ const BranchPurchasing = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [prData, rcData, ctData, brData] = await Promise.all([
+      const [prData, poData, rcData, ctData, brData] = await Promise.all([
         purchaseRequestService.getAll(),
+        purchaseOrderService.getAll(),
         purchaseReceiptService.getAll(),
         vendorContractService.getAll(),
         branchService.getAll(),
       ]);
       const prRows = prData || purchaseRequestService.getMockPRs();
       setRequests(prRows);
+      setOrders(poData || purchaseOrderService.getMockOrders());
       setReceipts(rcData || purchaseReceiptService.getMockReceipts());
       setContracts(ctData || vendorContractService.getMockContracts());
       setBranches(brData || branchService.getMockBranches());
       setStats(computePrStats(prRows));
     } catch {
       setRequests(purchaseRequestService.getMockPRs());
+      setOrders(purchaseOrderService.getMockOrders());
       setReceipts(purchaseReceiptService.getMockReceipts());
       setContracts(vendorContractService.getMockContracts());
       setBranches(branchService.getMockBranches());
@@ -178,6 +195,16 @@ const BranchPurchasing = () => {
     const matchBranch = branchFilter === 'all' || pr.branch === branchFilter;
     const matchStatus = statusFilter === 'all' || pr.status === statusFilter;
     return matchSearch && matchBranch && matchStatus;
+  });
+
+  const filteredOrders = orders.filter(po => {
+    const s = search.toLowerCase();
+    const matchSearch =
+      po.orderNumber?.toLowerCase().includes(s) ||
+      po.vendor?.toLowerCase().includes(s) ||
+      po.department?.toLowerCase().includes(s);
+    const matchStatus = statusFilter === 'all' || po.status === statusFilter;
+    return matchSearch && matchStatus;
   });
 
   const filteredReceipts = receipts.filter(rc => {
@@ -242,6 +269,37 @@ const BranchPurchasing = () => {
       loadData();
     } catch {
       showSnackbar('خطأ', 'error');
+    }
+  };
+
+  const handleApprovePO = async id => {
+    try {
+      await purchaseOrderService.approve(id);
+      showSnackbar('تم اعتماد أمر الشراء', 'success');
+      loadData();
+    } catch {
+      showSnackbar('فشل في اعتماد أمر الشراء', 'error');
+    }
+  };
+
+  const handleReceivePO = async id => {
+    try {
+      await purchaseOrderService.receive(id);
+      showSnackbar('تم تسجيل الاستلام وإنشاء سند GRN', 'success');
+      loadData();
+    } catch {
+      showSnackbar('فشل في تسجيل الاستلام', 'error');
+    }
+  };
+
+  const handleViewPoGrns = async po => {
+    try {
+      setSelectedPO(po);
+      const rows = await purchaseOrderService.getReceipts(po._id);
+      setPoGrns(rows?.length ? rows : []);
+      setPoGrnDialogOpen(true);
+    } catch {
+      showSnackbar('تعذر تحميل سندات الاستلام', 'error');
     }
   };
 
@@ -401,6 +459,7 @@ const BranchPurchasing = () => {
             }}
           >
             <Tab label="طلبات الشراء" icon={<RequestIcon />} iconPosition="start" />
+            <Tab label="أوامر الشراء" icon={<PurchaseIcon />} iconPosition="start" />
             <Tab label="سندات الاستلام" icon={<ReceiptIcon />} iconPosition="start" />
             <Tab label="العقود" icon={<ContractIcon />} iconPosition="start" />
           </Tabs>
@@ -420,7 +479,7 @@ const BranchPurchasing = () => {
             }}
             sx={{ minWidth: 220 }}
           />
-          {tabValue < 2 && (
+          {(tabValue === 0 || tabValue === 2) && (
             <FormControl size="small" sx={{ minWidth: 160 }}>
               <InputLabel>الفرع</InputLabel>
               <Select
@@ -447,6 +506,23 @@ const BranchPurchasing = () => {
               >
                 <MenuItem value="all">الكل</MenuItem>
                 {Object.entries(prStatusConfig).map(([k, v]) => (
+                  <MenuItem key={k} value={k}>
+                    {v.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {tabValue === 1 && (
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>الحالة</InputLabel>
+              <Select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                label="الحالة"
+              >
+                <MenuItem value="all">الكل</MenuItem>
+                {Object.entries(poStatusConfig).map(([k, v]) => (
                   <MenuItem key={k} value={k}>
                     {v.label}
                   </MenuItem>
@@ -565,8 +641,87 @@ const BranchPurchasing = () => {
         </TableContainer>
       )}
 
-      {/* ═══ TAB 1: PURCHASE RECEIPTS ═══ */}
+      {/* ═══ TAB 1: PURCHASE ORDERS ═══ */}
       {tabValue === 1 && (
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: surfaceColors?.background || '#fafafa' }}>
+                <TableCell sx={{ fontWeight: 'bold' }}>رقم الأمر</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>المورد</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>التاريخ</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>التسليم</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>الأصناف</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>المبلغ</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>إجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredOrders.map(po => (
+                <TableRow key={po._id} hover>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight="bold" color="primary">
+                      {po.orderNumber}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{po.vendor}</TableCell>
+                  <TableCell>{po.date}</TableCell>
+                  <TableCell>{po.deliveryDate}</TableCell>
+                  <TableCell>{po.items}</TableCell>
+                  <TableCell>{po.totalAmount?.toLocaleString()} ر.س</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={poStatusConfig[po.status]?.label || po.status}
+                      color={poStatusConfig[po.status]?.color || 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Box display="flex" gap={0.5}>
+                      <Tooltip title="سندات الاستلام">
+                        <IconButton size="small" onClick={() => handleViewPoGrns(po)}>
+                          <ReceiptIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      {(po.status === 'pending' || po.status === 'draft') && (
+                        <Tooltip title="اعتماد">
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleApprovePO(po._id)}
+                          >
+                            <ApproveIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {(po.status === 'approved' || po.status === 'ordered') && (
+                        <Tooltip title="تسجيل الاستلام">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleReceivePO(po._id)}
+                          >
+                            <ReceiveIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {filteredOrders.length === 0 && !loading && (
+            <Box p={4} textAlign="center">
+              <Typography color="text.secondary">لا توجد أوامر شراء</Typography>
+            </Box>
+          )}
+        </TableContainer>
+      )}
+
+      {/* ═══ TAB 2: PURCHASE RECEIPTS ═══ */}
+      {tabValue === 2 && (
         <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
           <Table>
             <TableHead>
@@ -624,8 +779,8 @@ const BranchPurchasing = () => {
         </TableContainer>
       )}
 
-      {/* ═══ TAB 2: CONTRACTS ═══ */}
-      {tabValue === 2 && (
+      {/* ═══ TAB 3: CONTRACTS ═══ */}
+      {tabValue === 3 && (
         <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
           <Table>
             <TableHead>
@@ -943,6 +1098,53 @@ const BranchPurchasing = () => {
               اعتماد
             </Button>
           )}
+        </DialogActions>
+      </Dialog>
+
+      {/* ═══ PO GRN DIALOG (W788) ═══ */}
+      <Dialog
+        open={poGrnDialogOpen}
+        onClose={() => setPoGrnDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>سندات الاستلام — {selectedPO?.orderNumber}</DialogTitle>
+        <DialogContent>
+          {poGrns.length === 0 ? (
+            <Typography color="text.secondary" sx={{ py: 2 }}>
+              لا توجد سندات استلام مرتبطة بهذا الأمر بعد.
+            </Typography>
+          ) : (
+            <Table size="small" sx={{ mt: 1 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>رقم السند</TableCell>
+                  <TableCell>التاريخ</TableCell>
+                  <TableCell>المستلم</TableCell>
+                  <TableCell>الحالة</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {poGrns.map(grn => (
+                  <TableRow key={grn._id}>
+                    <TableCell>{grn.receiptNumber}</TableCell>
+                    <TableCell>{grn.date}</TableCell>
+                    <TableCell>{grn.totalReceived ?? grn.items}</TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        label={receiptStatusConfig[grn.status]?.label || grn.status}
+                        color={receiptStatusConfig[grn.status]?.color || 'default'}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPoGrnDialogOpen(false)}>إغلاق</Button>
         </DialogActions>
       </Dialog>
     </Box>

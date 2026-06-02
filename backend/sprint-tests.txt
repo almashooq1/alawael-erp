@@ -108,6 +108,7 @@ __tests__/purchasing-vendor-order-wave780.test.js
 __tests__/purchasing-routes-real-data-wave780.test.js
 __tests__/purchasing-receipts-contracts-wave781.test.js
 __tests__/purchasing-routes-receipts-contracts-wave781.test.js
+__tests__/inventory-mount-alias-wave783.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

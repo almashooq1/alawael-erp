@@ -117,6 +117,76 @@ const contractStatusConfig = {
   expired: { label: 'منتهي', color: 'error' },
 };
 
+function resolveItemsCount(row) {
+  if (row?.itemsCount != null) return row.itemsCount;
+  if (typeof row?.items === 'number') return row.items;
+  if (Array.isArray(row?.items)) return row.items.length;
+  return 0;
+}
+
+function renderItemsCell(row) {
+  const count = resolveItemsCount(row);
+  const summary = row?.itemsSummary;
+  return (
+    <Box>
+      <Typography variant="body2">{summary || `${count} أصناف`}</Typography>
+      {row?.linkedItemCount > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          {row.linkedItemCount} مربوط بالمخزون
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+function LineItemsTable({ rows, showItemId = false }) {
+  const lines = Array.isArray(rows) ? rows : [];
+  if (!lines.length) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        لا توجد بنود
+      </Typography>
+    );
+  }
+  return (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>الصنف</TableCell>
+          {showItemId && <TableCell>معرّف المخزون</TableCell>}
+          <TableCell align="right">الكمية</TableCell>
+          <TableCell align="right">المستلم</TableCell>
+          <TableCell align="right">السعر</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {lines.map((line, idx) => (
+          <TableRow key={line._id || line.itemId || idx}>
+            <TableCell>{line.itemName || line.item_name || '—'}</TableCell>
+            {showItemId && (
+              <TableCell>
+                <Typography variant="caption" fontFamily="monospace">
+                  {line.itemId ? String(line.itemId).slice(-8) : '—'}
+                </Typography>
+              </TableCell>
+            )}
+            <TableCell align="right">
+              {line.quantity ?? line.quantityOrdered ?? line.quantity_ordered ?? '—'}
+            </TableCell>
+            <TableCell align="right">
+              {line.quantityReceived ?? line.quantity_received ?? '—'}
+            </TableCell>
+            <TableCell align="right">
+              {(line.unitCost ?? line.unit_cost ?? line.estimatedUnitPrice ?? 0).toLocaleString()}{' '}
+              ر.س
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
 const BranchPurchasing = () => {
   const { showSnackbar } = useSnackbar();
   const [tabValue, setTabValue] = useState(0);
@@ -139,6 +209,7 @@ const BranchPurchasing = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedPR, setSelectedPR] = useState(null);
   const [poGrnDialogOpen, setPoGrnDialogOpen] = useState(false);
+  const [poDetailDialogOpen, setPoDetailDialogOpen] = useState(false);
   const [selectedPO, setSelectedPO] = useState(null);
   const [poGrns, setPoGrns] = useState([]);
 
@@ -328,6 +399,17 @@ const BranchPurchasing = () => {
       setPoGrnDialogOpen(true);
     } catch {
       showSnackbar('تعذر تحميل سندات الاستلام', 'error');
+    }
+  };
+
+  const handleViewPoDetail = async po => {
+    try {
+      const detail = (await purchaseOrderService.getById(po._id)) || po;
+      setSelectedPO(detail);
+      setPoDetailDialogOpen(true);
+    } catch {
+      setSelectedPO(po);
+      setPoDetailDialogOpen(true);
     }
   };
 
@@ -618,7 +700,7 @@ const BranchPurchasing = () => {
                   <TableCell>{pr.department}</TableCell>
                   <TableCell>{pr.requestedBy}</TableCell>
                   <TableCell>{pr.date}</TableCell>
-                  <TableCell>{pr.items} أصناف</TableCell>
+                  <TableCell>{renderItemsCell(pr)}</TableCell>
                   <TableCell>{pr.totalEstimated?.toLocaleString()} ر.س</TableCell>
                   <TableCell>
                     <Chip
@@ -732,7 +814,7 @@ const BranchPurchasing = () => {
                   <TableCell>{po.vendor}</TableCell>
                   <TableCell>{po.date}</TableCell>
                   <TableCell>{po.deliveryDate}</TableCell>
-                  <TableCell>{po.items}</TableCell>
+                  <TableCell>{renderItemsCell(po)}</TableCell>
                   <TableCell>{po.totalAmount?.toLocaleString()} ر.س</TableCell>
                   <TableCell>
                     <Chip
@@ -743,6 +825,11 @@ const BranchPurchasing = () => {
                   </TableCell>
                   <TableCell>
                     <Box display="flex" gap={0.5}>
+                      <Tooltip title="تفاصيل الأمر">
+                        <IconButton size="small" onClick={() => handleViewPoDetail(po)}>
+                          <ViewIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title="سندات الاستلام">
                         <IconButton size="small" onClick={() => handleViewPoGrns(po)}>
                           <ReceiptIcon fontSize="small" />
@@ -793,6 +880,7 @@ const BranchPurchasing = () => {
                 <TableCell sx={{ fontWeight: 'bold' }}>رقم السند</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>أمر الشراء</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>المورد</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>الأصناف</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>المستودع</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>الفرع</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>التاريخ</TableCell>
@@ -811,6 +899,7 @@ const BranchPurchasing = () => {
                   </TableCell>
                   <TableCell>{rc.purchaseOrder}</TableCell>
                   <TableCell>{rc.vendor}</TableCell>
+                  <TableCell>{renderItemsCell(rc)}</TableCell>
                   <TableCell>{rc.warehouse}</TableCell>
                   <TableCell>
                     <Chip label={rc.branch} size="small" variant="outlined" />
@@ -1124,9 +1213,25 @@ const BranchPurchasing = () => {
                   عدد الأصناف
                 </Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {selectedPR.items}
+                  {resolveItemsCount(selectedPR)}
                 </Typography>
               </Grid>
+              {selectedPR.itemsSummary && (
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary">
+                    ملخص الأصناف
+                  </Typography>
+                  <Typography variant="body2">{selectedPR.itemsSummary}</Typography>
+                </Grid>
+              )}
+              {(selectedPR.lineItems?.length > 0 || Array.isArray(selectedPR.items)) && (
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 1 }}>
+                    <Chip label="بنود الطلب" size="small" />
+                  </Divider>
+                  <LineItemsTable rows={selectedPR.lineItems || selectedPR.items} showItemId />
+                </Grid>
+              )}
               <Grid item xs={6}>
                 <Typography variant="caption" color="text.secondary">
                   القيمة التقديرية
@@ -1189,6 +1294,57 @@ const BranchPurchasing = () => {
         </DialogActions>
       </Dialog>
 
+      {/* ═══ PO DETAIL DIALOG (W790) ═══ */}
+      <Dialog
+        open={poDetailDialogOpen}
+        onClose={() => setPoDetailDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>تفاصيل أمر الشراء — {selectedPO?.orderNumber}</DialogTitle>
+        <DialogContent>
+          {selectedPO && (
+            <Box sx={{ mt: 1 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    المورد
+                  </Typography>
+                  <Typography variant="body1">{selectedPO.vendor}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    الحالة
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={poStatusConfig[selectedPO.status]?.label || selectedPO.status}
+                    color={poStatusConfig[selectedPO.status]?.color || 'default'}
+                  />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    الإجمالي
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedPO.totalAmount?.toLocaleString()} ر.س
+                  </Typography>
+                </Grid>
+              </Grid>
+              {selectedPO.itemsSummary && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  {selectedPO.itemsSummary}
+                </Typography>
+              )}
+              <LineItemsTable rows={selectedPO.lineItems} showItemId />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPoDetailDialogOpen(false)}>إغلاق</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* ═══ PO GRN DIALOG (W788) ═══ */}
       <Dialog
         open={poGrnDialogOpen}
@@ -1208,6 +1364,7 @@ const BranchPurchasing = () => {
                 <TableRow>
                   <TableCell>رقم السند</TableCell>
                   <TableCell>التاريخ</TableCell>
+                  <TableCell>الأصناف</TableCell>
                   <TableCell>المستلم</TableCell>
                   <TableCell>الحالة</TableCell>
                 </TableRow>
@@ -1217,7 +1374,8 @@ const BranchPurchasing = () => {
                   <TableRow key={grn._id}>
                     <TableCell>{grn.receiptNumber}</TableCell>
                     <TableCell>{grn.date}</TableCell>
-                    <TableCell>{grn.totalReceived ?? grn.items}</TableCell>
+                    <TableCell>{grn.itemsSummary || `${resolveItemsCount(grn)} أصناف`}</TableCell>
+                    <TableCell>{grn.totalReceived ?? resolveItemsCount(grn)}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"

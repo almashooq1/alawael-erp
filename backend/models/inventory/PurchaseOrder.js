@@ -69,7 +69,7 @@ const purchaseOrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-purchaseOrderSchema.pre('save', async function (next) {
+purchaseOrderSchema.pre('save', async function () {
   if (!this.po_number) {
     const year = new Date().getFullYear();
     // Query the scoped model name so the counter is stable per-collection.
@@ -85,7 +85,6 @@ purchaseOrderSchema.pre('save', async function (next) {
   this.items.forEach(i => {
     i.total_cost = (i.quantity_ordered || 0) * (i.unit_cost || 0);
   });
-  next();
 });
 
 purchaseOrderSchema.index({ status: 1, order_date: -1 });

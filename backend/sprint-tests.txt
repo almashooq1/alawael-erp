@@ -111,6 +111,7 @@ __tests__/purchasing-routes-receipts-contracts-wave781.test.js
 __tests__/inventory-mount-alias-wave783.test.js
 __tests__/purchasing-po-receipt-bridge-wave784.test.js
 __tests__/purchasing-order-receipts-wave785.test.js
+__tests__/purchasing-receive-stock-wave786.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

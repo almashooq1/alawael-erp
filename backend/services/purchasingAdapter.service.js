@@ -7,7 +7,10 @@
  * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
  * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
  * W785: list receipts by PO + dashboard receipt count.
+ * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
  */
+
+const { applyStockReceiptForPoLines } = require('./purchasingStockReceive.lib');
 
 function getVendorModel() {
   return require('../models/Vendor');
@@ -351,6 +354,7 @@ async function getOrder(id) {
 async function createOrder(body, actorId) {
   const Po = getPoModel();
   const items = (body.items || []).map(it => ({
+    item_id: it.itemId || it.item_id,
     item_name_ar: it.itemName || it.item_name_ar || it.name || 'Item',
     item_code: it.itemCode || it.item_code,
     quantity_ordered: it.quantity || it.quantity_ordered || 1,
@@ -401,22 +405,32 @@ async function approveOrder(id, actorId) {
 
 async function applyReceiptLinesToPo(po, receiptLines, actorId) {
   if (!po || !Array.isArray(po.items)) return po;
+  const stockDeltas = [];
   receiptLines.forEach((line, idx) => {
     const poLine =
       po.items.find(i => i.item_name_ar && line.item_name && i.item_name_ar === line.item_name) ||
       po.items[idx];
     if (!poLine) return;
+    const before = poLine.quantity_received || 0;
     const received = Number(line.quantity_received) || 0;
-    poLine.quantity_received = Math.min(
-      poLine.quantity_ordered || received,
-      (poLine.quantity_received || 0) + received
-    );
+    poLine.quantity_received = Math.min(poLine.quantity_ordered || received, before + received);
+    const delta = (poLine.quantity_received || 0) - before;
+    if (poLine.item_id && delta > 0) {
+      stockDeltas.push({
+        item_id: poLine.item_id,
+        quantity_delta: delta,
+        unit_cost: poLine.unit_cost || 0,
+      });
+    }
   });
   const allReceived = po.items.every(i => (i.quantity_received || 0) >= (i.quantity_ordered || 0));
   po.status = allReceived ? 'received' : 'partial';
   if (allReceived) po.actual_delivery_date = new Date();
   if (actorId) po.updated_by = actorId;
   await po.save();
+  if (stockDeltas.length) {
+    await applyStockReceiptForPoLines({ po, deltas: stockDeltas, actorId });
+  }
   return po;
 }
 
@@ -442,13 +456,27 @@ async function receiveOrder(id, actorId) {
     unit_cost: it.unit_cost || 0,
   }));
 
+  const stockDeltas = [];
   po.items.forEach(it => {
-    it.quantity_received = it.quantity_ordered || 0;
+    const prev = it.quantity_received || 0;
+    const next = it.quantity_ordered || 0;
+    if (it.item_id && next > prev) {
+      stockDeltas.push({
+        item_id: it.item_id,
+        quantity_delta: next - prev,
+        unit_cost: it.unit_cost || 0,
+      });
+    }
+    it.quantity_received = next;
   });
   po.status = 'received';
   po.actual_delivery_date = new Date();
   po.updated_by = actorId;
   await po.save();
+
+  if (stockDeltas.length) {
+    await applyStockReceiptForPoLines({ po, deltas: stockDeltas, actorId });
+  }
 
   await Receipt.create({
     purchase_order_id: po._id,

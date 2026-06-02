@@ -81,7 +81,7 @@ const inventoryItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-inventoryItemSchema.pre('save', async function (next) {
+inventoryItemSchema.pre('save', async function () {
   if (!this.item_code) {
     const year = new Date().getFullYear();
     // Query the scoped model name so the counter is stable per-collection.
@@ -90,7 +90,6 @@ inventoryItemSchema.pre('save', async function (next) {
   }
   // حساب الكمية المتاحة
   this.quantity_available = Math.max(0, this.quantity_on_hand - this.quantity_reserved);
-  next();
 });
 
 inventoryItemSchema.index({ category: 1, is_active: 1 });
@@ -103,5 +102,4 @@ inventoryItemSchema.index({ deleted_at: 1 });
 // canonical models/InventoryItem.js (used by inventory-enhanced.routes.js).
 // Default export unchanged.
 module.exports =
-  mongoose.models.InventoryModuleItem ||
-  mongoose.model('InventoryModuleItem', inventoryItemSchema);
+  mongoose.models.InventoryModuleItem || mongoose.model('InventoryModuleItem', inventoryItemSchema);

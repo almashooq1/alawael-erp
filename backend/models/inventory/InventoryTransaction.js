@@ -62,7 +62,7 @@ const inventoryTransactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-inventoryTransactionSchema.pre('save', async function (next) {
+inventoryTransactionSchema.pre('save', async function () {
   if (!this.transaction_number) {
     const year = new Date().getFullYear();
     // Query the scoped model name so the counter is stable per-collection.
@@ -70,7 +70,6 @@ inventoryTransactionSchema.pre('save', async function (next) {
     this.transaction_number = `TXN-${year}-${String(count + 1).padStart(7, '0')}`;
   }
   this.total_cost = this.quantity * (this.unit_cost || 0);
-  next();
 });
 
 inventoryTransactionSchema.index({ item_id: 1, transaction_date: -1 });

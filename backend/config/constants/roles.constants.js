@@ -57,6 +57,45 @@ const ROLES = {
   // Family Counsellor per Phase C. Sister of Cultural Officer — reserved
   // here for forward-compat.
   FAMILY_COUNSELLOR: 'family_counsellor',
+  // ── ADR-037 D2 union (W730, 2026-06-01): the 26 roles that existed ONLY
+  //    in config/rbac.config.js (carrying real ROLE_HIERARCHY + permission
+  //    maps) but were absent here, so a role defined there yet checked via
+  //    this registry's resolver did not resolve. ADDITIVE — values are
+  //    byte-identical to rbac.config, so existing callers are unaffected; this
+  //    only makes both registries agree (drives check:role-divergence rbac-only
+  //    26 → 0). D3 (permission maps for the 9 const-only roles) stays gated on
+  //    ADR-037 Q1–Q2; this commit does NOT touch grants.
+  // Org / branch (Phase-7)
+  BRANCH_MANAGER: 'branch_manager',
+  REGIONAL_DIRECTOR: 'regional_director',
+  REGIONAL_QUALITY: 'regional_quality',
+  QUALITY_COORDINATOR: 'quality_coordinator',
+  CLINICAL_DIRECTOR: 'clinical_director',
+  // HQ exec / governance
+  GROUP_GM: 'group_gm',
+  GROUP_CFO: 'group_cfo',
+  GROUP_CHRO: 'group_chro',
+  GROUP_QUALITY_OFFICER: 'group_quality_officer',
+  COMPLIANCE_OFFICER: 'compliance_officer',
+  INTERNAL_AUDITOR: 'internal_auditor',
+  IT_ADMIN: 'it_admin',
+  // Dept supervisors
+  HR_OFFICER: 'hr_officer',
+  HR_SUPERVISOR: 'hr_supervisor',
+  FINANCE_SUPERVISOR: 'finance_supervisor',
+  THERAPY_SUPERVISOR: 'therapy_supervisor',
+  SPECIAL_ED_SUPERVISOR: 'special_ed_supervisor',
+  // Clinical specialties
+  THERAPIST_SLP: 'therapist_slp',
+  THERAPIST_OT: 'therapist_ot',
+  THERAPIST_PT: 'therapist_pt',
+  THERAPIST_PSYCH: 'therapist_psych',
+  SPECIAL_ED_TEACHER: 'special_ed_teacher',
+  THERAPY_ASSISTANT: 'therapy_assistant',
+  // Support / external (NON_MATRIX archetype — ADR-036 D5)
+  DRIVER: 'driver',
+  BUS_ASSISTANT: 'bus_assistant',
+  GUARDIAN: 'guardian',
   // ─────────────────────────────────────────────────────────────────
   PARENT: 'parent',
   STUDENT: 'student',

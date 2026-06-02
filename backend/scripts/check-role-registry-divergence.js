@@ -48,47 +48,19 @@ const ARGS = process.argv.slice(2);
 const JSON_MODE = ARGS.includes('--json');
 const BARE = ARGS.includes('--bare');
 
-// ── BASELINE (2026-05-30). Roles present in exactly one registry. Ratchet DOWN
-//    as the registries are reconciled (a role added to BOTH leaves the gap). ──
-const ONLY_IN_RBAC_BASELINE = new Set([
-  'branch_manager',
-  'bus_assistant',
-  'clinical_director',
-  'compliance_officer',
-  'driver',
-  'finance_supervisor',
-  'group_cfo',
-  'group_chro',
-  'group_gm',
-  'group_quality_officer',
-  'guardian',
-  'hr_officer',
-  'hr_supervisor',
-  'internal_auditor',
-  'it_admin',
-  'quality_coordinator',
-  'regional_director',
-  'regional_quality',
-  'special_ed_supervisor',
-  'special_ed_teacher',
-  'therapist_ot',
-  'therapist_psych',
-  'therapist_pt',
-  'therapist_slp',
-  'therapy_assistant',
-  'therapy_supervisor',
-]);
-const ONLY_IN_CONST_BASELINE = new Set([
-  'crm_supervisor',
-  'cultural_officer',
-  'dpo',
-  'family_counsellor',
-  'head_nurse',
-  'independent_advocate',
-  'nurse',
-  'nursing_supervisor',
-  'patient_relations_officer',
-]);
+// ── BASELINE. Roles present in exactly one registry. ──
+// ADR-037 FULLY RECONCILED 2026-06-01 — BOTH SIDES NOW ZERO:
+//   • D2 (W730): the 26 rbac-only roles added to roles.constants.js (additive
+//     union, identical values).
+//   • D3 (W731): the 9 const-only roles (nursing ladder, dpo, family_counsellor,
+//     CRPD advocate/cultural, CRM line) given real ROLE_HIERARCHY + least-
+//     privilege ROLE_PERMISSIONS maps in rbac.config.js — they previously
+//     resolved to NOTHING. Q1 answered by evidence (none were aliases of an
+//     existing role — all 9 truly absent), Q2 mapped per ADR-036 archetypes.
+// Both baselines emptied per the D5 ratchet-DOWN-in-same-commit contract. The
+// guard now ENFORCES PARITY FOREVER: any role added to one registry only fails CI.
+const ONLY_IN_RBAC_BASELINE = new Set([]);
+const ONLY_IN_CONST_BASELINE = new Set([]);
 
 /** Compute the current divergence by requiring the two config modules. */
 function computeDivergence() {

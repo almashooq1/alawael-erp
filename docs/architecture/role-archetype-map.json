@@ -25,7 +25,13 @@
       "approver": true,
       "note": "full technical admin; still denied PHI + audit mutation per matrix"
     },
-    { "live": "head_office_admin", "archetype": "HQ_ADMIN", "scope": "G", "seniority": "hq", "approver": true },
+    {
+      "live": "head_office_admin",
+      "archetype": "HQ_ADMIN",
+      "scope": "G",
+      "seniority": "hq",
+      "approver": true
+    },
     {
       "live": "it_admin",
       "archetype": "HQ_ADMIN",
@@ -34,10 +40,20 @@
       "approver": false,
       "note": "platform/config only; no operational approvals"
     },
-
-    { "live": "ceo", "archetype": "EXECUTIVE_DIRECTOR", "scope": "G", "seniority": "exec", "approver": true },
-    { "live": "group_gm", "archetype": "EXECUTIVE_DIRECTOR", "scope": "G", "seniority": "exec", "approver": true },
-
+    {
+      "live": "ceo",
+      "archetype": "EXECUTIVE_DIRECTOR",
+      "scope": "G",
+      "seniority": "exec",
+      "approver": true
+    },
+    {
+      "live": "group_gm",
+      "archetype": "EXECUTIVE_DIRECTOR",
+      "scope": "G",
+      "seniority": "exec",
+      "approver": true
+    },
     {
       "live": "regional_director",
       "archetype": "BRANCH_MANAGER",
@@ -46,10 +62,27 @@
       "approver": true,
       "note": "BRANCH_MANAGER grants over a region's branch set (branch_ids), not a single branch"
     },
-    { "live": "admin", "archetype": "BRANCH_MANAGER", "scope": "B", "seniority": "branch_mgr", "approver": true },
-    { "live": "manager", "archetype": "BRANCH_MANAGER", "scope": "B", "seniority": "branch_mgr", "approver": true },
-    { "live": "branch_manager", "archetype": "BRANCH_MANAGER", "scope": "B", "seniority": "branch_mgr", "approver": true },
-
+    {
+      "live": "admin",
+      "archetype": "BRANCH_MANAGER",
+      "scope": "B",
+      "seniority": "branch_mgr",
+      "approver": true
+    },
+    {
+      "live": "manager",
+      "archetype": "BRANCH_MANAGER",
+      "scope": "B",
+      "seniority": "branch_mgr",
+      "approver": true
+    },
+    {
+      "live": "branch_manager",
+      "archetype": "BRANCH_MANAGER",
+      "scope": "B",
+      "seniority": "branch_mgr",
+      "approver": true
+    },
     {
       "live": "clinical_director",
       "archetype": "UNIT_SUPERVISOR",
@@ -58,10 +91,27 @@
       "approver": true,
       "note": "branch-wide clinical authority — UNIT_SUPERVISOR grants at branch scope (all units)"
     },
-    { "live": "supervisor", "archetype": "UNIT_SUPERVISOR", "scope": "U", "seniority": "supervisor", "approver": true },
-    { "live": "therapy_supervisor", "archetype": "UNIT_SUPERVISOR", "scope": "U", "seniority": "supervisor", "approver": true },
-    { "live": "special_ed_supervisor", "archetype": "UNIT_SUPERVISOR", "scope": "U", "seniority": "supervisor", "approver": true },
-
+    {
+      "live": "supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true
+    },
+    {
+      "live": "therapy_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true
+    },
+    {
+      "live": "special_ed_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true
+    },
     {
       "live": "doctor",
       "archetype": "THERAPIST",
@@ -70,7 +120,13 @@
       "approver": false,
       "note": "clinical author; sign-off still routes to supervisor (SoD)"
     },
-    { "live": "therapist", "archetype": "THERAPIST", "scope": "S", "seniority": "line", "approver": false },
+    {
+      "live": "therapist",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false
+    },
     {
       "live": "therapist_slp",
       "archetype": "THERAPIST",
@@ -111,7 +167,13 @@
       "approver": false,
       "note": "special-ed instruction; clinical-author equivalent for educational records"
     },
-    { "live": "special_ed_teacher", "archetype": "THERAPIST", "scope": "S", "seniority": "line", "approver": false },
+    {
+      "live": "special_ed_teacher",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false
+    },
     {
       "live": "therapy_assistant",
       "archetype": "THERAPIST",
@@ -120,8 +182,13 @@
       "approver": false,
       "note": "narrower than THERAPIST — no create on finalizable records; read + assist only (tighten at registry build)"
     },
-
-    { "live": "receptionist", "archetype": "RECEPTIONIST", "scope": "B", "seniority": "support", "approver": false },
+    {
+      "live": "receptionist",
+      "archetype": "RECEPTIONIST",
+      "scope": "B",
+      "seniority": "support",
+      "approver": false
+    },
     {
       "live": "data_entry",
       "archetype": "RECEPTIONIST",
@@ -130,7 +197,6 @@
       "approver": false,
       "note": "demographics/scheduling entry; deny clinical content (same as receptionist)"
     },
-
     {
       "live": "group_chro",
       "archetype": "HR_OFFICER",
@@ -139,8 +205,20 @@
       "approver": true,
       "note": "global HR approver (the checker end of the HR maker-checker)"
     },
-    { "live": "hr_manager", "archetype": "HR_OFFICER", "scope": "B", "seniority": "manager", "approver": true },
-    { "live": "hr_supervisor", "archetype": "HR_OFFICER", "scope": "B", "seniority": "supervisor", "approver": true },
+    {
+      "live": "hr_manager",
+      "archetype": "HR_OFFICER",
+      "scope": "B",
+      "seniority": "manager",
+      "approver": true
+    },
+    {
+      "live": "hr_supervisor",
+      "archetype": "HR_OFFICER",
+      "scope": "B",
+      "seniority": "supervisor",
+      "approver": true
+    },
     {
       "live": "hr_officer",
       "archetype": "HR_OFFICER",
@@ -149,8 +227,13 @@
       "approver": false,
       "note": "the maker/processor — cannot approve own submissions (SoD S3/S4)"
     },
-    { "live": "hr", "archetype": "HR_OFFICER", "scope": "B", "seniority": "officer", "approver": false },
-
+    {
+      "live": "hr",
+      "archetype": "HR_OFFICER",
+      "scope": "B",
+      "seniority": "officer",
+      "approver": false
+    },
     {
       "live": "group_cfo",
       "archetype": "FINANCE_OFFICER",
@@ -159,8 +242,20 @@
       "approver": true,
       "note": "global finance approver (over-threshold escalation target)"
     },
-    { "live": "finance_supervisor", "archetype": "FINANCE_OFFICER", "scope": "B", "seniority": "supervisor", "approver": true },
-    { "live": "finance", "archetype": "FINANCE_OFFICER", "scope": "B", "seniority": "officer", "approver": false },
+    {
+      "live": "finance_supervisor",
+      "archetype": "FINANCE_OFFICER",
+      "scope": "B",
+      "seniority": "supervisor",
+      "approver": true
+    },
+    {
+      "live": "finance",
+      "archetype": "FINANCE_OFFICER",
+      "scope": "B",
+      "seniority": "officer",
+      "approver": false
+    },
     {
       "live": "accountant",
       "archetype": "FINANCE_OFFICER",
@@ -169,7 +264,6 @@
       "approver": false,
       "note": "the maker — billing create/update; approve routes up (SoD S1)"
     },
-
     {
       "live": "internal_auditor",
       "archetype": "AUDITOR",
@@ -178,7 +272,13 @@
       "approver": false,
       "note": "read/export only everywhere (SoD S5 — zero mutation)"
     },
-    { "live": "compliance_officer", "archetype": "AUDITOR", "scope": "G", "seniority": "assurance", "approver": false },
+    {
+      "live": "compliance_officer",
+      "archetype": "AUDITOR",
+      "scope": "G",
+      "seniority": "assurance",
+      "approver": false
+    },
     {
       "live": "group_quality_officer",
       "archetype": "AUDITOR",
@@ -187,9 +287,20 @@
       "approver": false,
       "note": "quality oversight = read/export; quality CAPA write is a separate quality role, not this read archetype"
     },
-    { "live": "regional_quality", "archetype": "AUDITOR", "scope": "regional", "seniority": "assurance", "approver": false },
-    { "live": "quality_coordinator", "archetype": "AUDITOR", "scope": "B", "seniority": "assurance", "approver": false },
-
+    {
+      "live": "regional_quality",
+      "archetype": "AUDITOR",
+      "scope": "regional",
+      "seniority": "assurance",
+      "approver": false
+    },
+    {
+      "live": "quality_coordinator",
+      "archetype": "AUDITOR",
+      "scope": "B",
+      "seniority": "assurance",
+      "approver": false
+    },
     {
       "live": "parent",
       "archetype": "NON_MATRIX",
@@ -198,11 +309,41 @@
       "approver": false,
       "note": "parent-portal — own beneficiary only; governed by a separate portal policy, not this staff matrix"
     },
-    { "live": "guardian", "archetype": "NON_MATRIX", "scope": "self", "seniority": "external", "approver": false },
-    { "live": "student", "archetype": "NON_MATRIX", "scope": "self", "seniority": "external", "approver": false },
-    { "live": "viewer", "archetype": "NON_MATRIX", "scope": "none", "seniority": "external", "approver": false },
-    { "live": "user", "archetype": "NON_MATRIX", "scope": "none", "seniority": "external", "approver": false },
-    { "live": "guest", "archetype": "NON_MATRIX", "scope": "none", "seniority": "external", "approver": false },
+    {
+      "live": "guardian",
+      "archetype": "NON_MATRIX",
+      "scope": "self",
+      "seniority": "external",
+      "approver": false
+    },
+    {
+      "live": "student",
+      "archetype": "NON_MATRIX",
+      "scope": "self",
+      "seniority": "external",
+      "approver": false
+    },
+    {
+      "live": "viewer",
+      "archetype": "NON_MATRIX",
+      "scope": "none",
+      "seniority": "external",
+      "approver": false
+    },
+    {
+      "live": "user",
+      "archetype": "NON_MATRIX",
+      "scope": "none",
+      "seniority": "external",
+      "approver": false
+    },
+    {
+      "live": "guest",
+      "archetype": "NON_MATRIX",
+      "scope": "none",
+      "seniority": "external",
+      "approver": false
+    },
     {
       "live": "driver",
       "archetype": "NON_MATRIX",
@@ -211,7 +352,85 @@
       "approver": false,
       "note": "transport ops — outside the clinical/admin matrix; governed by transport module policy"
     },
-    { "live": "bus_assistant", "archetype": "NON_MATRIX", "scope": "B", "seniority": "transport", "approver": false }
+    {
+      "live": "bus_assistant",
+      "archetype": "NON_MATRIX",
+      "scope": "B",
+      "seniority": "transport",
+      "approver": false
+    },
+    {
+      "live": "nurse",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false,
+      "note": "ADR-037 D3 — nursing line; clinical document/update, no approve"
+    },
+    {
+      "live": "head_nurse",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — nursing unit head; approves clinical sessions"
+    },
+    {
+      "live": "nursing_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — nursing supervisor; staff+attendance oversight"
+    },
+    {
+      "live": "dpo",
+      "archetype": "AUDITOR",
+      "scope": "G",
+      "seniority": "assurance",
+      "approver": false,
+      "note": "ADR-037 D3 — PDPL Art.30; read/export only, no clinical mutation (SoD)"
+    },
+    {
+      "live": "family_counsellor",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false,
+      "note": "ADR-037 D3 — family wellbeing, THERAPIST archetype"
+    },
+    {
+      "live": "independent_advocate",
+      "archetype": "NON_MATRIX",
+      "scope": "self",
+      "seniority": "external",
+      "approver": false,
+      "note": "ADR-037 D3 — CRPD Art.12 conflict-of-interest-free; rights surfaces only, cannot touch clinical decisions"
+    },
+    {
+      "live": "cultural_officer",
+      "archetype": "NON_MATRIX",
+      "scope": "B",
+      "seniority": "support",
+      "approver": false,
+      "note": "ADR-037 D3 — cultural adaptation advisory; read beneficiary/family context"
+    },
+    {
+      "live": "patient_relations_officer",
+      "archetype": "RECEPTIONIST",
+      "scope": "B",
+      "seniority": "support",
+      "approver": false,
+      "note": "ADR-037 D3 — CRM/complaints front office"
+    },
+    {
+      "live": "crm_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — CRM supervisor; approve/escalate"
+    }
   ],
   "rules": {
     "resolution": "effective grants for a live role = (archetype grants from role-permissions.seed.json) scoped to map.scope; approve-permissions apply only when map.approver=true",

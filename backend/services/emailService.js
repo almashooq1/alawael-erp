@@ -38,6 +38,8 @@ async function sendEmail({ to, subject, body, html, text, ...rest } = {}) {
 Object.assign(sendEmail, {
   sendEmail,
   setupEmailTransporter: utilsEmail.setupEmailTransporter,
+  resetEmailTransporter: utilsEmail.resetEmailTransporter,
+  emailStatus: utilsEmail.emailStatus,
   sendNewCommunicationEmail: utilsEmail.sendNewCommunicationEmail,
   sendApprovalRequestEmail: utilsEmail.sendApprovalRequestEmail,
   sendStatusChangeEmail: utilsEmail.sendStatusChangeEmail,

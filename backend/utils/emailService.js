@@ -1,44 +1,111 @@
 const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
-// إنشاء transporter
+// W735: cached transporter + a structured reason for diagnostics. The cache key
+// is the resolved provider+creds fingerprint, so a credential change at runtime
+// (e.g. after a pm2 restart that re-reads .env) rebuilds instead of serving a
+// stale/null transporter forever (the old `if (transporter) return` bug).
 let transporter = null;
+let transporterFingerprint = null;
+let lastStatus = { configured: false, provider: 'none', reason: 'not_initialized' };
+
+/** Snapshot of why email is/ isn't configured — for ops diagnostics + self-tests. */
+function emailStatus() {
+  return { ...lastStatus };
+}
+
+/** Reset the cached transporter (forces re-resolution on next setup). */
+function resetEmailTransporter() {
+  transporter = null;
+  transporterFingerprint = null;
+  lastStatus = { configured: false, provider: 'none', reason: 'reset' };
+}
+
+function currentFingerprint() {
+  // What inputs determine the transport — change ⇒ rebuild.
+  return [
+    process.env.SENDGRID_API_KEY ? 'sg:' + process.env.SENDGRID_API_KEY.slice(-6) : '',
+    process.env.SMTP_HOST || '',
+    process.env.SMTP_PORT || '',
+    process.env.SMTP_USER || '',
+    process.env.SMTP_PASS ? 'pw' : '',
+  ].join('|');
+}
 
 /**
- * إعداد البريد الإلكتروني
+ * إعداد البريد الإلكتروني — provider-aware, secret-tolerant.
+ *
+ * Resolution order:
+ *   1. SendGrid (SENDGRID_API_KEY) — API transport, easiest to credential.
+ *   2. SMTP (SMTP_USER + SMTP_PASS) — Gmail/relay; numeric port + correct
+ *      `secure` for 465.
+ *   3. none → returns null with a structured reason (caller skips gracefully).
+ *
+ * W735 fixes: string-port → Number; secure auto-derived from port; SendGrid
+ * fallback; resettable cache keyed on a creds fingerprint; no fire-and-forget
+ * verify race (verify is best-effort + non-nulling — a transient verify blip no
+ * longer discards a working transporter).
  */
 function setupEmailTransporter() {
-  if (transporter) return transporter;
+  const fp = currentFingerprint();
+  if (transporter && transporterFingerprint === fp) return transporter;
+  // inputs changed (or first call) → rebuild
+  transporter = null;
+  transporterFingerprint = fp;
 
-  const emailConfig = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  };
-
-  // إذا لم تكن الإعدادات موجودة، استخدم Ethereal (للتطوير)
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    logger.warn('⚠️  Email credentials not configured. Using test account.');
-    return null;
+  // 1) SendGrid API transport (preferred — single API key, no SMTP auth dance).
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        secure: false,
+        auth: { user: 'apikey', pass: process.env.SENDGRID_API_KEY },
+      });
+      lastStatus = { configured: true, provider: 'sendgrid', reason: 'ok' };
+      return transporter;
+    } catch (err) {
+      logger.error('[emailService] SendGrid transport build failed', { error: err.message });
+      // fall through to SMTP
+    }
   }
 
-  transporter = nodemailer.createTransport(emailConfig);
+  // 2) SMTP (Gmail / generic relay).
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const port = Number(process.env.SMTP_PORT) || 587;
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port,
+      secure: port === 465, // implicit TLS only on 465 (was hardcoded false — broke SSL)
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    lastStatus = { configured: true, provider: 'smtp', reason: 'ok' };
 
-  // التحقق من الاتصال
-  transporter.verify((error, _success) => {
-    if (error) {
-      logger.error('❌ Email configuration error:', error);
-      transporter = null;
-    } else {
-      // console.log('✅ Email server is ready to send messages');
+    // Best-effort connectivity check — log only, never null a built transporter
+    // (the old code nulled it from an async callback AFTER returning it = race).
+    if (typeof transporter.verify === 'function') {
+      Promise.resolve()
+        .then(() => transporter.verify())
+        .then(() => logger.info('[emailService] SMTP transport verified'))
+        .catch(err =>
+          logger.warn('[emailService] SMTP verify failed (transport kept; will retry on send)', {
+            error: err.message,
+          })
+        );
     }
-  });
+    return transporter;
+  }
 
-  return transporter;
+  // 3) Nothing configured.
+  lastStatus = {
+    configured: false,
+    provider: 'none',
+    reason: 'no_credentials (set SENDGRID_API_KEY, or SMTP_USER + SMTP_PASS)',
+  };
+  logger.warn(
+    '⚠️  Email transport not configured — set SENDGRID_API_KEY or SMTP_USER+SMTP_PASS. Email will be skipped (durably logged where applicable).'
+  );
+  return null;
 }
 
 /**
@@ -251,6 +318,8 @@ async function sendStatusChangeEmail(communication, recipientEmail, oldStatus, n
 
 module.exports = {
   setupEmailTransporter,
+  resetEmailTransporter,
+  emailStatus,
   sendNewCommunicationEmail,
   sendApprovalRequestEmail,
   sendStatusChangeEmail,

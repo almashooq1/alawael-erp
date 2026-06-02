@@ -48,18 +48,37 @@ describe('role-registry divergence — diff() ratchet logic', () => {
 describe('role-registry divergence — real-tree computeDivergence()', () => {
   const div = computeDivergence();
 
-  it('rbac.config has more roles than roles.constants (superset-ish)', () => {
-    expect(div.rcCount).toBeGreaterThan(div.conCount);
+  // ADR-037 FULLY RECONCILED (W730 D2 + W731 D3, 2026-06-01): BOTH sides now 0.
+  // D2 added the 26 rbac-only roles to roles.constants; D3 gave the 9 const-only
+  // roles real hierarchy + permission maps in rbac.config (they previously
+  // resolved to nothing). The two registries now agree exactly.
+  it('rbac-only side fully reconciled (ADR-037 D2 — gap 0)', () => {
+    expect(div.onlyInRbac).toHaveLength(0);
+    expect(div.onlyInRbac).not.toContain('branch_manager');
   });
 
-  it('the known bidirectional divergence is present (rbac-only incl. branch_manager)', () => {
-    expect(div.onlyInRbac).toContain('branch_manager');
-    expect(div.onlyInRbac).toContain('clinical_director');
+  it('const-only side fully reconciled (ADR-037 D3 — gap 0)', () => {
+    expect(div.onlyInConst).toHaveLength(0);
+    expect(div.onlyInConst).not.toContain('independent_advocate');
+    expect(div.onlyInConst).not.toContain('dpo');
   });
 
-  it('const-only side present (incl. the W464 CRPD + DPO roles)', () => {
-    expect(div.onlyInConst).toContain('independent_advocate');
-    expect(div.onlyInConst).toContain('dpo');
+  it('the formerly-unresolvable 9 const-only roles now resolve to real grants', () => {
+    const rbac = require('../config/rbac.config.js');
+    for (const role of [
+      'nurse',
+      'head_nurse',
+      'nursing_supervisor',
+      'dpo',
+      'family_counsellor',
+      'independent_advocate',
+      'cultural_officer',
+      'patient_relations_officer',
+      'crm_supervisor',
+    ]) {
+      const perms = rbac.resolvePermissions(role);
+      expect(perms && typeof perms === 'object' && Object.keys(perms).length).toBeGreaterThan(0);
+    }
   });
 
   it('current divergence exactly equals the committed baseline (no pre-existing drift)', () => {

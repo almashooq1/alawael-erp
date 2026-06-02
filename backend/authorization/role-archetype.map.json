@@ -40,7 +40,6 @@
       "approver": false,
       "note": "platform/config only; no operational approvals"
     },
-
     {
       "live": "ceo",
       "archetype": "EXECUTIVE_DIRECTOR",
@@ -55,7 +54,6 @@
       "seniority": "exec",
       "approver": true
     },
-
     {
       "live": "regional_director",
       "archetype": "BRANCH_MANAGER",
@@ -85,7 +83,6 @@
       "seniority": "branch_mgr",
       "approver": true
     },
-
     {
       "live": "clinical_director",
       "archetype": "UNIT_SUPERVISOR",
@@ -115,7 +112,6 @@
       "seniority": "supervisor",
       "approver": true
     },
-
     {
       "live": "doctor",
       "archetype": "THERAPIST",
@@ -186,7 +182,6 @@
       "approver": false,
       "note": "narrower than THERAPIST — no create on finalizable records; read + assist only (tighten at registry build)"
     },
-
     {
       "live": "receptionist",
       "archetype": "RECEPTIONIST",
@@ -202,7 +197,6 @@
       "approver": false,
       "note": "demographics/scheduling entry; deny clinical content (same as receptionist)"
     },
-
     {
       "live": "group_chro",
       "archetype": "HR_OFFICER",
@@ -240,7 +234,6 @@
       "seniority": "officer",
       "approver": false
     },
-
     {
       "live": "group_cfo",
       "archetype": "FINANCE_OFFICER",
@@ -271,7 +264,6 @@
       "approver": false,
       "note": "the maker — billing create/update; approve routes up (SoD S1)"
     },
-
     {
       "live": "internal_auditor",
       "archetype": "AUDITOR",
@@ -309,7 +301,6 @@
       "seniority": "assurance",
       "approver": false
     },
-
     {
       "live": "parent",
       "archetype": "NON_MATRIX",
@@ -367,6 +358,78 @@
       "scope": "B",
       "seniority": "transport",
       "approver": false
+    },
+    {
+      "live": "nurse",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false,
+      "note": "ADR-037 D3 — nursing line; clinical document/update, no approve"
+    },
+    {
+      "live": "head_nurse",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — nursing unit head; approves clinical sessions"
+    },
+    {
+      "live": "nursing_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — nursing supervisor; staff+attendance oversight"
+    },
+    {
+      "live": "dpo",
+      "archetype": "AUDITOR",
+      "scope": "G",
+      "seniority": "assurance",
+      "approver": false,
+      "note": "ADR-037 D3 — PDPL Art.30; read/export only, no clinical mutation (SoD)"
+    },
+    {
+      "live": "family_counsellor",
+      "archetype": "THERAPIST",
+      "scope": "S",
+      "seniority": "line",
+      "approver": false,
+      "note": "ADR-037 D3 — family wellbeing, THERAPIST archetype"
+    },
+    {
+      "live": "independent_advocate",
+      "archetype": "NON_MATRIX",
+      "scope": "self",
+      "seniority": "external",
+      "approver": false,
+      "note": "ADR-037 D3 — CRPD Art.12 conflict-of-interest-free; rights surfaces only, cannot touch clinical decisions"
+    },
+    {
+      "live": "cultural_officer",
+      "archetype": "NON_MATRIX",
+      "scope": "B",
+      "seniority": "support",
+      "approver": false,
+      "note": "ADR-037 D3 — cultural adaptation advisory; read beneficiary/family context"
+    },
+    {
+      "live": "patient_relations_officer",
+      "archetype": "RECEPTIONIST",
+      "scope": "B",
+      "seniority": "support",
+      "approver": false,
+      "note": "ADR-037 D3 — CRM/complaints front office"
+    },
+    {
+      "live": "crm_supervisor",
+      "archetype": "UNIT_SUPERVISOR",
+      "scope": "U",
+      "seniority": "supervisor",
+      "approver": true,
+      "note": "ADR-037 D3 — CRM supervisor; approve/escalate"
     }
   ],
   "rules": {

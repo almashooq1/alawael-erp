@@ -15,6 +15,7 @@ __tests__/adapter-public-interface.test.js
 __tests__/adapter-rate-limiter.test.js
 __tests__/adaptive-sports-behavioral-wave362.test.js
 __tests__/adaptive-sports-wave362.test.js
+__tests__/adjunct-therapy-api-wave699.test.js
 __tests__/adjunct-therapy-behavioral-wave693.test.js
 __tests__/adjunct-therapy-wave693.test.js
 __tests__/admin-anomaly-wiring-wave257e.test.js
@@ -377,6 +378,7 @@ __tests__/productivity-features-wave25.test.js
 __tests__/productivity-models-behavioral-wave27.test.js
 __tests__/productivity-persistence-wave27.test.js
 __tests__/progress-history-wave248.test.js
+__tests__/prosthetic-orthotic-api-wave699.test.js
 __tests__/prosthetic-orthotic-behavioral-wave680.test.js
 __tests__/prosthetic-orthotic-wave680.test.js
 __tests__/provider-registry-consistency.test.js
@@ -543,3 +545,7 @@ __tests__/whatsapp-contact-group-rename-wave758.test.js
 __tests__/whatsapp-contact-group-find-wave759.test.js
 __tests__/whatsapp-contact-group-sort-wave760.test.js
 __tests__/whatsapp-contact-group-paginate-wave761.test.js
+__tests__/ops-alert-model-wave733.test.js
+tests/unit/ops-alerter.test.js
+__tests__/email-transport-wave735.test.js
+__tests__/reporting-scheduler-bootstrap-wave762.test.js

@@ -8,13 +8,15 @@
  * dualMount() does not. The new audit:unauthenticated-routes tool found
  * three route files mounted via plain dualMount with NO in-file auth —
  * i.e. anonymous-reachable:
- *   - alerts.routes.js            (operational alerts)
+ *   - alerts.routes.js            (operational alerts — hollow stub removed W771;
+ *     live workflow is app.js createAlertsWorkflowRouter)
  *   - rehab-licenses.routes.js    (92 routes, compliance/admin)
  *   - independentLiving.routes.js (31 routes, clinical /assessments)
  * W658 promoted all three to dualMountAuth.
  *
- * This guard locks the fix: those mounts must stay dualMountAuth, and
- * the audit must report ZERO high-confidence unauthenticated files.
+ * This guard locks the fix: rehab-licenses + independent-living stay
+ * dualMountAuth; hollow alerts stub must not return (W771); audit reports
+ * ZERO high-confidence unauthenticated files.
  */
 
 const fs = require('fs');
@@ -30,11 +32,13 @@ const CLINICAL = fs.readFileSync(
   'utf8'
 );
 const REGISTRY = fs.readFileSync(path.join(__dirname, '..', 'routes', '_registry.js'), 'utf8');
+const APP_JS = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
 
 describe('W658 — the three anon-reachable routes are now mounted with auth', () => {
-  it('alerts is dualMountAuth (not bare dualMount)', () => {
-    expect(FEATURES).toMatch(/dualMountAuth\(app,\s*'alerts'/);
-    expect(FEATURES).not.toMatch(/dualMount\(app,\s*'alerts'/);
+  it('hollow alerts.routes stub is not remounted in features (W771 — app.js workflow)', () => {
+    expect(FEATURES).not.toMatch(/routes\/alerts\.routes/);
+    expect(FEATURES).not.toMatch(/dualMountAuth\(app,\s*'alerts'/);
+    expect(APP_JS).toMatch(/createAlertsWorkflowRouter/);
   });
   it('rehab-licenses is dualMountAuth', () => {
     expect(FEATURES).toMatch(/dualMountAuth\(app,\s*'rehab-licenses'/);

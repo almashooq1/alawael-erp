@@ -98,6 +98,7 @@ __tests__/branch-scope-region.test.js
 __tests__/branch-secondment-wiring-wave597.test.js
 __tests__/break-glass-digest-script.test.js
 __tests__/break-glass-route-mounted-wave770.test.js
+__tests__/stub-surface-cleanup-wave771.test.js
 __tests__/build-info-internals.test.js
 __tests__/calibration-mgmtreview-mfa-tier-wave277g.test.js
 __tests__/canonical-schemas-wave366.test.js

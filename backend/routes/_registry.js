@@ -700,8 +700,8 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMountAuth(app, 'transport', safeRequire('../routes/transport.routes'));
   // Form Templates — النماذج الجاهزة — auth required
   dualMountAuth(app, 'form-templates', safeRequire('../routes/form-templates.routes'));
-  // Report Builder — منشئ التقارير
-  dualMountAuth(app, 'report-builder', safeRequire('../routes/report-builder.routes'));
+  // Report Builder — mounted in phases.registry.js via reportBuilder.routes (W771
+  // removed the hollow report-builder.routes.js stub that shadowed the real surface)
   // System Settings — إعدادات النظام — auth required (exposes security config)
   dualMountAuth(app, 'system-settings', safeRequire('../routes/system-settings.routes'));
 
@@ -802,8 +802,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'rehab-equipment', safeRequire('../routes/medicalEquipment.routes'));
   // Social Media Management — إدارة وسائل التواصل الاجتماعي
   dualMountAuth(app, 'social-media', safeRequire('../routes/social-media.routes'));
-  // Break-Glass Emergency Access — الوصول الطارئ
-  dualMountAuth(app, 'break-glass', safeRequire('../routes/break-glass.routes'));
+  // Break-glass — wired in features.registry.js (real authorization engine, W770)
 
   logger.info(
     'New frontend-backend integration routes mounted (8 new + 4 dual-mounted + 17 DDD + 32 extension modules)'

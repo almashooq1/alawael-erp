@@ -491,15 +491,28 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
-  // ── Gap-fill: alerts, approvals, rehab-licenses — auth required ──────
-  // W658 — alerts + rehab-licenses were dualMount (NO auth) despite the
-  // "auth required" note + neither route file calls authenticate → both were
-  // anonymous-reachable. Promoted to dualMountAuth (surfaced by
-  // `npm run audit:unauthenticated-routes`).
-  dualMountAuth(app, 'alerts', safeRequire('../routes/alerts.routes'));
-  dualMountAuth(app, 'approvals', safeRequire('../routes/approvals.routes'));
+  // ── Gap-fill: rehab-licenses — auth required (stub until real engine) ──
+  // W658 promoted rehab-licenses to dualMountAuth (was anonymous-reachable).
+  // W771 removed hollow alerts + approvals stubs — they shadowed the live
+  // surfaces: app.js mounts measure-alert workflow at /api/v1/alerts; the real
+  // approval-chain engine is wired below (authorization/approvals).
   dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
-  logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
+  logger.info('✅ Gap-fill routes mounted: rehab-licenses');
+
+  // ── Approvals — REAL authorization chain engine (W771) ───────────────
+  // Legacy frontend calls /api/v1/approvals (inbox, approve, reject, …).
+  // The hollow routes/approvals.routes.js stub was deleted; mount the DB-backed
+  // engine from authorization/approvals (same pattern as break-glass W770).
+  try {
+    const {
+      buildRouter: buildApprovalsRouter,
+    } = require('../../authorization/approvals/approvals.routes');
+    const ApprovalRequestModel = require('../../authorization/approvals/approval-request.model');
+    dualMountAuth(app, 'approvals', buildApprovalsRouter({ ApprovalRequestModel }));
+    logger.info('✅ Approvals routes mounted (real chain engine): /api/(v1/)approvals');
+  } catch (e) {
+    logger.warn(`Approvals routes not mounted: ${e.message}`);
+  }
 
   // ── Break-glass emergency access — REAL audited engine (W770) ────────
   // The live web-admin /admin/break-glass surface calls /api/v1/break-glass,

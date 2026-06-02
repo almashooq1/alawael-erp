@@ -303,6 +303,8 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'communication/notifications', notificationEnhancedRoutes);
   dualMount(app, 'branches-enhanced', branchEnhancedRoutes);
   dualMount(app, 'inventory-enhanced', inventoryEnhancedRoutes);
+  // W783 — web-admin INV_BASE is /api/v1/inventory (not inventory-enhanced).
+  dualMount(app, 'inventory', inventoryEnhancedRoutes);
   dualMount(app, 'quality-enhanced', qualityEnhancedRoutes);
   logger.info(
     '✅ prompt_08 Enhanced Modules mounted: communication/notifications (SMS/WhatsApp/FCM/templates/escalations/broadcasts), documents-enhanced (AES-256/versioning/e-signatures/OCR/sharing/retention), branches-enhanced (settings/rooms/services/transfers/comparison), inventory-enhanced (receive/issue/transfer/PO/assets-depreciation/stock-counts), quality-enhanced (CBAHI/incidents-RCA/complaints/NPS/audits/PDCA/risks — 200+ endpoints)'

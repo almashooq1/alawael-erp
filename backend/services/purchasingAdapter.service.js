@@ -8,6 +8,7 @@
  * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
  * W785: list receipts by PO + dashboard receipt count.
  * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
+ * W787: legacy stats field aliases for PurchasingManagement.js tiles.
  */
 
 const { applyStockReceiptForPoLines } = require('./purchasingStockReceive.lib');
@@ -706,19 +707,57 @@ async function getStats() {
     'returned_for_clarification',
   ]);
   const pendingRequests = rows.filter(r => pendingStatuses.has(r.status)).length;
-  const [totalVendors, activeOrders, totalReceipts, spendAgg] = await Promise.all([
+  const [
+    totalVendors,
+    activeOrders,
+    totalReceipts,
+    totalOrders,
+    delivered,
+    pendingApproval,
+    spendAgg,
+  ] = await Promise.all([
     Vendor.countDocuments({ isDeleted: { $ne: true }, status: 'active' }),
     Po.countDocuments({
       deleted_at: null,
       status: { $in: ['approved', 'sent', 'partial', 'received', 'closed'] },
     }),
     Receipt.countDocuments({ deleted_at: null }),
+    Po.countDocuments({ deleted_at: null }),
+    Po.countDocuments({ deleted_at: null, status: { $in: ['received', 'closed'] } }),
+    Po.countDocuments({
+      deleted_at: null,
+      status: { $in: ['draft', 'pending_approval'] },
+    }),
     Po.aggregate([
-      { $match: { deleted_at: null, status: { $in: ['received', 'closed', 'approved', 'sent'] } } },
+      {
+        $match: {
+          deleted_at: null,
+          status: { $in: ['received', 'closed', 'approved', 'sent', 'partial'] },
+        },
+      },
       { $group: { _id: null, total: { $sum: '$total_amount' } } },
     ]),
   ]);
   const totalSpend = spendAgg[0]?.total || 0;
+
+  const deliveredPos = await Po.find({
+    deleted_at: null,
+    status: { $in: ['received', 'closed'] },
+    actual_delivery_date: { $ne: null },
+    order_date: { $ne: null },
+  })
+    .select('order_date actual_delivery_date')
+    .lean();
+  let avgDeliveryDays = 0;
+  if (deliveredPos.length) {
+    const sumDays = deliveredPos.reduce((acc, p) => {
+      const days =
+        (new Date(p.actual_delivery_date).getTime() - new Date(p.order_date).getTime()) / 86400000;
+      return acc + Math.max(0, days);
+    }, 0);
+    avgDeliveryDays = Math.round(sumDays / deliveredPos.length);
+  }
+
   return {
     totalVendors,
     activeOrders,
@@ -727,6 +766,12 @@ async function getStats() {
     totalSpend,
     monthlyBudget: 0,
     savingsAchieved: 0,
+    totalOrders,
+    totalAmount: totalSpend,
+    pendingApproval,
+    delivered,
+    vendors: totalVendors,
+    avgDeliveryDays,
   };
 }
 

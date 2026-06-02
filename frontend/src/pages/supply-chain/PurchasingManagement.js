@@ -40,6 +40,7 @@ import {
   Description as POIcon,
   Visibility as ViewIcon,
   Check as ApproveIcon,
+  LocalShipping as ReceiveIcon,
 } from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
@@ -126,6 +127,16 @@ const PurchasingManagement = () => {
     }
   };
 
+  const handleReceivePO = async id => {
+    try {
+      await purchasingService.receivePO(id);
+      showSnackbar('تم تسجيل استلام أمر الشراء', 'success');
+      loadData();
+    } catch {
+      showSnackbar('فشل في تسجيل الاستلام', 'error');
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header */}
@@ -178,14 +189,19 @@ const PurchasingManagement = () => {
               color: statusColors.warning,
             },
             { label: 'تم التسليم', value: stats.delivered, color: statusColors.info },
+            {
+              label: 'سجلات الاستلام',
+              value: stats.totalReceipts ?? 0,
+              color: statusColors.info,
+            },
             { label: 'الموردين', value: stats.vendors, color: brandColors.primary },
             {
               label: 'متوسط التسليم',
-              value: `${stats.avgDeliveryDays} أيام`,
+              value: `${stats.avgDeliveryDays ?? 0} أيام`,
               color: neutralColors.textSecondary,
             },
           ].map((s, i) => (
-            <Grid item xs={2} key={i}>
+            <Grid item xs={6} sm={4} md={3} lg={2} key={i}>
               <Card
                 sx={{
                   borderRadius: 2.5,
@@ -318,6 +334,17 @@ const PurchasingManagement = () => {
                               onClick={() => handleApprovePO(po._id)}
                             >
                               <ApproveIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {(po.status === 'approved' || po.status === 'ordered') && (
+                          <Tooltip title="تسجيل الاستلام">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => handleReceivePO(po._id)}
+                            >
+                              <ReceiveIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}

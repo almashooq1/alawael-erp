@@ -1,7 +1,7 @@
-# Production Cutover — W780–W792 Legacy Purchasing / Supply Chain
+# Production Cutover — W780–W795 Legacy Purchasing / Supply Chain
 
-Date: 2026-06-02  
-Scope: 13 waves (W780–W792) closing the legacy `/api/v1/purchasing/*` vertical for
+Date: 2026-06-02 (updated W796)  
+Scope: 16 waves (W780–W795) closing the legacy `/api/v1/purchasing/*` vertical for
 66666 React surfaces (`/purchasing`, `/branch-purchasing`). Zero new env flags —
 deploy-ready on next push once roles are provisioned.
 
@@ -61,7 +61,7 @@ dualMountAuth(app, 'purchasing', purchasing.routes)
 | `/stats`, `/dashboard` | GET                                        | W787 legacy tile aliases                           |
 | `/vendors`             | CRUD                                       | W780                                               |
 | `/requests`            | CRUD + submit/approve/reject/convert-to-po | W773/W789                                          |
-| `/orders`              | CRUD + approve/receive/status              | W780/W784                                          |
+| `/orders`              | CRUD + approve/receive/status              | W780/W784/W795 partial `body.items` on receive     |
 | `/orders/:id/receipts` | GET                                        | W785 — must be registered **before** `/orders/:id` |
 | `/receipts`            | CRUD                                       | W781 GRN                                           |
 | `/contracts`           | list + expiring + create                   | W781                                               |
@@ -72,19 +72,21 @@ Auth: per-route `authorize(...)` — see section 5.
 
 ## 3. Legacy UI surfaces (66666/frontend)
 
-| Route                | Page                      | Service                               | Waves                             |
-| -------------------- | ------------------------- | ------------------------------------- | --------------------------------- |
-| `/purchasing`        | `PurchasingManagement.js` | `operationsService.purchasingService` | W787 stats, W791 lineItems        |
-| `/branch-purchasing` | `BranchPurchasing.js`     | `branchWarehouseService`              | W788–W790 PO tab, convert, picker |
+| Route                | Page                      | Service                               | Waves                                           |
+| -------------------- | ------------------------- | ------------------------------------- | ----------------------------------------------- |
+| `/purchasing`        | `PurchasingManagement.js` | `operationsService.purchasingService` | W787 stats, W791 lineItems, W795 receive dialog |
+| `/branch-purchasing` | `BranchPurchasing.js`     | `branchWarehouseService`              | W788–W790 PO tab, W795 partial receive          |
 
 **End-to-end workflow (branch path):**
 
 ```text
 PR (optional itemId picker) → submit → approve → convert-to-po
-  → PO tab → approve → receive → GRN dialog + stock ↑ (if item_id)
+  → PO tab → approve → receive (full or partial via dialog) → GRN + stock ↑
 ```
 
-**Central purchasing path:** list POs → view line items (W791) → approve → receive.
+**Partial receive (W795):** `PATCH /orders/:id/receive` with `{ items: [{ itemName, quantityReceived }] }` creates a per-shipment GRN; PO status becomes `partial` until all lines fulfilled. Omit `items` for legacy full receive (idempotent per W784).
+
+**Central purchasing path:** list POs → view line items (W791) → approve → receive dialog (W795).
 
 ---
 
@@ -102,12 +104,17 @@ cd backend && npx jest --config=jest.config.js \
   __tests__/purchasing-po-line-items-wave790.test.js \
   __tests__/purchasing-routes-flow-wave791.test.js \
   __tests__/purchasing-routes-stock-wave792.test.js \
+  __tests__/purchasing-cutover-doc-wave793.test.js \
+  __tests__/purchasing-routes-auth-wave794.test.js \
+  __tests__/purchasing-partial-receive-wave795.test.js \
   --no-coverage
 
 # HTTP E2E (MongoMemoryServer — no external DB)
 cd backend && npx jest --config=jest.config.js \
   __tests__/purchasing-routes-flow-wave791.test.js \
   __tests__/purchasing-routes-stock-wave792.test.js \
+  __tests__/purchasing-routes-auth-wave794.test.js \
+  __tests__/purchasing-partial-receive-wave795.test.js \
   --no-coverage
 
 # Route load gate (pre-push)
@@ -117,8 +124,8 @@ cd backend && npm run check:routes-load
 **Manual UI checklist:**
 
 1. `/branch-purchasing` — create PR with inventory item → convert → PO tab shows `itemsSummary`.
-2. Approve + receive PO — GRN appears; inventory item qty increases if `item_id` linked.
-3. `/purchasing` — PO table shows summary; detail dialog lists `lineItems` + GRNs.
+2. Approve + receive PO — partial qty dialog (W795) or full receive; GRN appears; stock ↑ for linked `item_id`.
+3. `/purchasing` — PO table shows summary; detail dialog lists `lineItems` + GRNs; `partial` status chip when applicable.
 
 ---
 
@@ -134,36 +141,36 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ---
 
-## 6. Wave map (W780–W792)
+## 6. Wave map (W780–W795)
 
-| Wave | Deliverable                                      |
-| ---- | ------------------------------------------------ |
-| W780 | Vendors + orders adapter; real data (no stubs)   |
-| W781 | `PurchaseReceipt` + `VendorSupplyContract`       |
-| W782 | Frontend `unwrapApiList` for legacy envelopes    |
-| W783 | `/api/v1/inventory` alias for web-admin          |
-| W784 | PO receive ↔ GRN sync (idempotent)              |
-| W785 | `GET /orders/:id/receipts` + stats receipt count |
-| W786 | Stock bump via `purchasingStockReceive.lib.js`   |
-| W787 | Stats aliases for `PurchasingManagement` tiles   |
-| W788 | BranchPurchasing PO tab + GRN dialog             |
-| W789 | PR `itemId` picker + convert-to-po UI            |
-| W790 | `lineItems` / `itemsSummary` on adapter payloads |
-| W791 | `/purchasing` line items + HTTP PR→PO flow test  |
-| W792 | HTTP receive verifies stock bump (supertest)     |
+| Wave | Deliverable                                       |
+| ---- | ------------------------------------------------- |
+| W780 | Vendors + orders adapter; real data (no stubs)    |
+| W781 | `PurchaseReceipt` + `VendorSupplyContract`        |
+| W782 | Frontend `unwrapApiList` for legacy envelopes     |
+| W783 | `/api/v1/inventory` alias for web-admin           |
+| W784 | PO receive ↔ GRN sync (idempotent full receive)  |
+| W785 | `GET /orders/:id/receipts` + stats receipt count  |
+| W786 | Stock bump via `purchasingStockReceive.lib.js`    |
+| W787 | Stats aliases for `PurchasingManagement` tiles    |
+| W788 | BranchPurchasing PO tab + GRN dialog              |
+| W789 | PR `itemId` picker + convert-to-po UI             |
+| W790 | `lineItems` / `itemsSummary` on adapter payloads  |
+| W791 | `/purchasing` line items + HTTP PR→PO flow test   |
+| W792 | HTTP receive verifies stock bump (supertest)      |
+| W793 | This cutover doc + registry drift guard           |
+| W794 | Real `authorize()` 401/403 route negatives        |
+| W795 | Partial receive via `body.items` + receive dialog |
 
-**Sprint-gated drift guards:** 15+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` and `branch-purchasing-*-wave788*.test.js` (enumerated in `backend/sprint-tests.txt`).
+**Sprint-gated drift guards:** 18+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` (enumerated in `backend/sprint-tests.txt`).
 
 ---
 
-## 7. Open follow-ups (post-W792)
+## 7. Open follow-ups (post-W795)
 
 - **Web-admin PO unification** — separate `PurchaseOrder` model at
   `/api/v1/inventory/purchase-orders`; needs ADR before redirecting web-admin to
   `/api/v1/purchasing`.
-- **Behavioral supertest for auth/403 paths** — W791/W792 mock `authorize`; add
-  negative tests when auth test harness is standardized.
-- **Partial receive** — current receive marks all lines fully received (W784); partial GRN UI deferred.
 
 ---
 

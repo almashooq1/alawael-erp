@@ -43,6 +43,7 @@ import {
   LocalShipping as ReceiveIcon,
 } from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
+import PartialReceiveDialog from './PartialReceiveDialog';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
@@ -52,6 +53,7 @@ const poStatusConfig = {
   approved: { label: 'معتمد', color: 'info' },
   ordered: { label: 'تم الطلب', color: 'primary' },
   received: { label: 'مستلم', color: 'success' },
+  partial: { label: 'جزئي', color: 'warning' },
   cancelled: { label: 'ملغي', color: 'error' },
 };
 
@@ -140,6 +142,8 @@ const PurchasingManagement = () => {
   const [search, setSearch] = useState('');
   const [vendorDialog, setVendorDialog] = useState(false);
   const [viewPO, setViewPO] = useState(null);
+  const [receivePO, setReceivePO] = useState(null);
+  const [receiveSubmitting, setReceiveSubmitting] = useState(false);
   const [vendorForm, setVendorForm] = useState({
     name: '',
     email: '',
@@ -194,14 +198,34 @@ const PurchasingManagement = () => {
     }
   };
 
-  const handleReceivePO = async id => {
+  const openReceiveDialog = async po => {
     try {
-      await purchasingService.receivePO(id);
-      showSnackbar('تم تسجيل استلام أمر الشراء', 'success');
+      const detail = (await purchasingService.getPurchaseOrder(po._id)) || po;
+      setReceivePO({ ...po, ...detail });
+    } catch {
+      setReceivePO(po);
+    }
+  };
+
+  const handleConfirmReceive = async items => {
+    if (!receivePO?._id) return;
+    setReceiveSubmitting(true);
+    try {
+      const payload = items?.length ? { items } : undefined;
+      await purchasingService.receivePO(receivePO._id, payload);
+      showSnackbar('تم تسجيل الاستلام', 'success');
+      setReceivePO(null);
       loadData();
     } catch {
       showSnackbar('فشل في تسجيل الاستلام', 'error');
+    } finally {
+      setReceiveSubmitting(false);
     }
+  };
+
+  const handleReceivePO = async id => {
+    const po = orders.find(o => o._id === id);
+    if (po) await openReceiveDialog(po);
   };
 
   const handleViewPO = async po => {
@@ -720,6 +744,14 @@ const PurchasingManagement = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <PartialReceiveDialog
+        open={Boolean(receivePO)}
+        po={receivePO}
+        onClose={() => setReceivePO(null)}
+        onSubmit={handleConfirmReceive}
+        submitting={receiveSubmitting}
+      />
     </Container>
   );
 };

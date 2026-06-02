@@ -64,6 +64,7 @@ import {
   branchService,
   inventoryModuleItemService,
 } from 'services/branchWarehouseService';
+import PartialReceiveDialog from './PartialReceiveDialog';
 
 const prStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },
@@ -212,6 +213,8 @@ const BranchPurchasing = () => {
   const [poDetailDialogOpen, setPoDetailDialogOpen] = useState(false);
   const [selectedPO, setSelectedPO] = useState(null);
   const [poGrns, setPoGrns] = useState([]);
+  const [receivePO, setReceivePO] = useState(null);
+  const [receiveSubmitting, setReceiveSubmitting] = useState(false);
 
   const [prForm, setPrForm] = useState({
     branch: '',
@@ -381,14 +384,34 @@ const BranchPurchasing = () => {
     }
   };
 
-  const handleReceivePO = async id => {
+  const openReceiveDialog = async id => {
+    const po = orders.find(o => o._id === id);
     try {
-      await purchaseOrderService.receive(id);
+      const detail = (await purchaseOrderService.getById(id)) || po;
+      setReceivePO({ ...po, ...detail });
+    } catch {
+      setReceivePO(po || { _id: id });
+    }
+  };
+
+  const handleConfirmReceive = async items => {
+    if (!receivePO?._id) return;
+    setReceiveSubmitting(true);
+    try {
+      const payload = items?.length ? { items } : undefined;
+      await purchaseOrderService.receive(receivePO._id, payload);
       showSnackbar('تم تسجيل الاستلام وإنشاء سند GRN', 'success');
+      setReceivePO(null);
       loadData();
     } catch {
       showSnackbar('فشل في تسجيل الاستلام', 'error');
+    } finally {
+      setReceiveSubmitting(false);
     }
+  };
+
+  const handleReceivePO = async id => {
+    await openReceiveDialog(id);
   };
 
   const handleViewPoGrns = async po => {
@@ -1393,6 +1416,14 @@ const BranchPurchasing = () => {
           <Button onClick={() => setPoGrnDialogOpen(false)}>إغلاق</Button>
         </DialogActions>
       </Dialog>
+
+      <PartialReceiveDialog
+        open={Boolean(receivePO)}
+        po={receivePO}
+        onClose={() => setReceivePO(null)}
+        onSubmit={handleConfirmReceive}
+        submitting={receiveSubmitting}
+      />
     </Box>
   );
 };

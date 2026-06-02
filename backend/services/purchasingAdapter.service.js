@@ -6,6 +6,7 @@
  * W780: vendors → Vendor model; orders → InventoryModulePurchaseOrder.
  * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
  * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
+ * W795: optional body.items on receiveOrder for partial GRN shipments.
  * W785: list receipts by PO + dashboard receipt count.
  * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
  * W787: legacy stats field aliases for PurchasingManagement.js tiles.
@@ -49,7 +50,7 @@ const PO_STATUS_TO_LEGACY = {
   pending_approval: 'pending',
   approved: 'approved',
   sent: 'ordered',
-  partial: 'ordered',
+  partial: 'partial',
   received: 'received',
   cancelled: 'cancelled',
   closed: 'received',
@@ -505,7 +506,60 @@ async function applyReceiptLinesToPo(po, receiptLines, actorId) {
   return po;
 }
 
-async function receiveOrder(id, actorId) {
+function resolvePoLineForReceive(po, hint, index) {
+  const items = po.items || [];
+  if (hint.lineIndex != null && items[hint.lineIndex]) return items[hint.lineIndex];
+  const itemId = hint.itemId || hint.item_id;
+  if (itemId) {
+    const id = String(itemId);
+    return items.find(i => i.item_id && String(i.item_id) === id);
+  }
+  const name = hint.itemName || hint.item_name || hint.item_name_ar;
+  if (name) {
+    return items.find(i => i.item_name_ar === name || i.item_name === name);
+  }
+  if (index != null && items[index]) return items[index];
+  return null;
+}
+
+/** @returns {Array|null} receipt lines for this shipment, or null → full receive */
+function buildPartialReceiptLines(body, po) {
+  const raw = body.items || body.lineItems;
+  if (!Array.isArray(raw) || !raw.length) return null;
+
+  const receiptLines = [];
+  raw.forEach((hint, idx) => {
+    const poLine = resolvePoLineForReceive(po, hint, idx);
+    if (!poLine) return;
+    const ordered = poLine.quantity_ordered || 0;
+    const already = poLine.quantity_received || 0;
+    const remaining = Math.max(0, ordered - already);
+    const requested = Number(hint.quantityReceived ?? hint.quantity_received ?? hint.quantity ?? 0);
+    if (requested <= 0) return;
+    if (requested > remaining) {
+      const err = new Error('over_receive');
+      err.status = 400;
+      err.code = 'OVER_RECEIVE';
+      throw err;
+    }
+    receiptLines.push({
+      item_name: poLine.item_name_ar || 'Item',
+      quantity_ordered: ordered,
+      quantity_received: requested,
+      unit_cost: poLine.unit_cost || 0,
+    });
+  });
+
+  if (!receiptLines.length) {
+    const err = new Error('nothing_to_receive');
+    err.status = 400;
+    err.code = 'NOTHING_TO_RECEIVE';
+    throw err;
+  }
+  return receiptLines;
+}
+
+async function receiveOrder(id, actorId, body = {}) {
   const Po = getPoModel();
   const Receipt = getReceiptModel();
   const po = await Po.findOne({ _id: id, deleted_at: null });
@@ -513,6 +567,24 @@ async function receiveOrder(id, actorId) {
     const err = new Error('order_not_found');
     err.status = 404;
     throw err;
+  }
+
+  const partialLines = buildPartialReceiptLines(body, po);
+  if (partialLines) {
+    await Receipt.create({
+      purchase_order_id: po._id,
+      po_number: po.po_number,
+      vendor_name: po.supplier_name,
+      branch_id: po.branch_id,
+      items: partialLines,
+      received_by_name: body.receivedBy || body.received_by_name || null,
+      quality_check: body.qualityCheck || body.quality_check || 'passed',
+      notes: body.notes,
+      created_by: actorId,
+    });
+    await applyReceiptLinesToPo(po, partialLines, actorId);
+    const refreshed = await Po.findOne({ _id: id, deleted_at: null });
+    return mapPoToLegacy(refreshed);
   }
 
   const existingGrn = await Receipt.findOne({ purchase_order_id: id, deleted_at: null });

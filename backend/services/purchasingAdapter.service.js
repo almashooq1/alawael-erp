@@ -4,6 +4,7 @@
  * Legacy /api/v1/purchasing/* adapter — delegates PR workflow to Phase-16 ops.
  * W773: purchase requests → purchaseRequest.service.
  * W780: vendors → Vendor model; orders → InventoryModulePurchaseOrder.
+ * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
  */
 
 function getVendorModel() {
@@ -411,6 +412,188 @@ async function receiveOrder(id, actorId) {
   return mapPoToLegacy(doc);
 }
 
+function getReceiptModel() {
+  return require('../models/inventory/PurchaseReceipt');
+}
+
+function getContractModel() {
+  return require('../models/VendorSupplyContract');
+}
+
+function mapReceiptToLegacy(doc) {
+  if (!doc) return doc;
+  const o = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
+  const lines = o.items || [];
+  const ordered = lines.reduce((s, l) => s + (l.quantity_ordered || 0), 0);
+  const received = lines.reduce((s, l) => s + (l.quantity_received || 0), 0);
+  const d = o.receipt_date ? new Date(o.receipt_date) : new Date();
+  return {
+    ...o,
+    _id: o._id,
+    receiptNumber: o.receiptNumber || o.receipt_number,
+    purchaseOrder: o.purchaseOrder || o.po_number || '',
+    vendor: o.vendor || o.vendor_name || '',
+    warehouse: o.warehouse || o.warehouse_name || '',
+    branch: o.branch || (o.branch_id ? String(o.branch_id) : ''),
+    date: d.toISOString().slice(0, 10),
+    items: lines.length,
+    totalReceived: received,
+    totalAmount: o.totalAmount ?? o.total_amount ?? 0,
+    status: o.status,
+    receivedBy: o.receivedBy || o.received_by_name || '',
+    qualityCheck: o.qualityCheck || o.quality_check || 'pending',
+  };
+}
+
+function mapContractToLegacy(doc) {
+  if (!doc) return doc;
+  const o = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
+  const end = new Date(o.end_date || o.endDate);
+  const now = Date.now();
+  const daysLeft = (end.getTime() - now) / 86400000;
+  let status = o.status === 'active' ? 'active' : o.status;
+  if (o.status === 'active') {
+    if (daysLeft <= 0) status = 'expired';
+    else if (daysLeft <= 60) status = 'expiring_soon';
+  }
+  const start = o.start_date ? new Date(o.start_date) : null;
+  return {
+    ...o,
+    _id: o._id,
+    contractNumber: o.contractNumber || o.contract_number,
+    vendor: o.vendor || o.vendor_name,
+    type: o.type || o.contract_type || 'annual',
+    startDate: start ? start.toISOString().slice(0, 10) : '',
+    endDate: end.toISOString().slice(0, 10),
+    value: o.value ?? o.contract_value ?? 0,
+    category: o.category || '',
+    autoRenew: o.autoRenew ?? o.auto_renew ?? false,
+    status,
+  };
+}
+
+async function listReceipts(query = {}) {
+  const Receipt = getReceiptModel();
+  const filter = { deleted_at: null };
+  if (query.branchId) filter.branch_id = query.branchId;
+  if (query.status) filter.status = query.status;
+  const rows = await Receipt.find(filter)
+    .sort({ receipt_date: -1 })
+    .limit(query.limit ? Number(query.limit) : 200)
+    .lean();
+  return rows.map(mapReceiptToLegacy);
+}
+
+async function getReceipt(id) {
+  const Receipt = getReceiptModel();
+  const doc = await Receipt.findOne({ _id: id, deleted_at: null });
+  if (!doc) {
+    const err = new Error('receipt_not_found');
+    err.status = 404;
+    throw err;
+  }
+  return mapReceiptToLegacy(doc);
+}
+
+async function createReceipt(body, actorId) {
+  const Receipt = getReceiptModel();
+  const Po = getPoModel();
+  const poId = body.purchaseOrderId || body.purchase_order_id;
+  let poNumber = body.purchaseOrder || body.po_number;
+  let vendorName = body.vendor || body.vendor_name;
+  if (poId && require('mongoose').Types.ObjectId.isValid(poId)) {
+    const po = await Po.findOne({ _id: poId, deleted_at: null }).lean();
+    if (po) {
+      poNumber = po.po_number || poNumber;
+      vendorName = vendorName || po.supplier_name;
+      if (!body.items || typeof body.items === 'number') {
+        body.items = (po.items || []).map(it => ({
+          item_name: it.item_name_ar,
+          quantity_ordered: it.quantity_ordered,
+          quantity_received:
+            body.status === 'complete' ? it.quantity_ordered || it.quantity_received : 0,
+          unit_cost: it.unit_cost,
+        }));
+      }
+    }
+  }
+  const rawItems = Array.isArray(body.items)
+    ? body.items
+    : typeof body.items === 'number'
+      ? Array.from({ length: body.items }, (_, i) => ({
+          item_name: `Line ${i + 1}`,
+          quantity_ordered: body.totalReceived || 1,
+          quantity_received: body.totalReceived || 0,
+          unit_cost: 0,
+        }))
+      : [];
+  const items = rawItems.map(it => ({
+    item_name: it.item_name || it.itemName || 'Item',
+    quantity_ordered: it.quantity_ordered ?? it.quantityOrdered ?? it.quantity ?? 1,
+    quantity_received:
+      it.quantity_received ?? it.quantityReceived ?? (body.status === 'complete' ? it.quantity : 0),
+    unit_cost: it.unit_cost ?? it.unitCost ?? 0,
+  }));
+  const doc = await Receipt.create({
+    purchase_order_id: poId || null,
+    po_number: poNumber,
+    vendor_name: vendorName,
+    warehouse_name: body.warehouse || body.warehouse_name,
+    branch_id: body.branchId || body.branch_id,
+    receipt_date: body.date || body.receipt_date,
+    items,
+    received_by_name: body.receivedBy || body.received_by_name,
+    quality_check: body.qualityCheck || body.quality_check || 'pending',
+    notes: body.notes,
+    created_by: actorId,
+  });
+  return mapReceiptToLegacy(doc);
+}
+
+async function listContracts(query = {}) {
+  const Contract = getContractModel();
+  const filter = { is_deleted: { $ne: true } };
+  if (query.branchId) filter.branch_id = query.branchId;
+  if (query.status) filter.status = query.status;
+  const rows = await Contract.find(filter)
+    .sort({ end_date: 1 })
+    .limit(query.limit ? Number(query.limit) : 200)
+    .lean();
+  return rows.map(mapContractToLegacy);
+}
+
+async function listExpiringContracts(daysAhead = 60) {
+  const Contract = getContractModel();
+  const now = new Date();
+  const horizon = new Date(now.getTime() + Number(daysAhead) * 86400000);
+  const rows = await Contract.find({
+    is_deleted: { $ne: true },
+    status: 'active',
+    end_date: { $gte: now, $lte: horizon },
+  })
+    .sort({ end_date: 1 })
+    .lean();
+  return rows.map(mapContractToLegacy);
+}
+
+async function createContract(body) {
+  const Contract = getContractModel();
+  const doc = await Contract.create({
+    vendor_id: body.vendorId || body.vendor_id,
+    vendor_name: body.vendor || body.vendor_name,
+    contract_type: body.type || body.contract_type || 'annual',
+    category: body.category,
+    start_date: body.startDate || body.start_date || new Date(),
+    end_date: body.endDate || body.end_date,
+    contract_value: body.value ?? body.contract_value ?? 0,
+    status: 'active',
+    auto_renew: body.autoRenew ?? body.auto_renew ?? false,
+    branch_id: body.branchId || body.branch_id,
+    notes: body.notes,
+  });
+  return mapContractToLegacy(doc);
+}
+
 async function getStats() {
   const Vendor = getVendorModel();
   const Po = getPoModel();
@@ -463,5 +646,11 @@ module.exports = {
   createOrder,
   approveOrder,
   receiveOrder,
+  listReceipts,
+  getReceipt,
+  createReceipt,
+  listContracts,
+  listExpiringContracts,
+  createContract,
   getStats,
 };

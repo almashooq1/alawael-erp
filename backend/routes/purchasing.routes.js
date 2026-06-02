@@ -1,6 +1,6 @@
 /**
  * Purchasing Routes — /api/v1/purchasing/*
- * W773 — PR adapter; W780 — vendors (Vendor) + orders (InventoryModulePurchaseOrder).
+ * W773 — PR adapter; W780 — vendors/orders; W781 — receipts + vendor contracts.
  */
 'use strict';
 
@@ -350,6 +350,67 @@ router.delete(
       return res.status(404).json({ success: false, message: 'order_not_found' });
     }
     res.json({ success: true, data: { deleted: true, _id: doc._id } });
+  })
+);
+
+router.get(
+  '/receipts',
+  wrap(async (req, res) => {
+    const scope = branchFilter(req);
+    const data = await adapter.listReceipts({
+      ...req.query,
+      branchId: scope.branchId || req.query.branchId,
+    });
+    res.json({ success: true, data });
+  })
+);
+
+router.post(
+  '/receipts',
+  authorize('admin', 'manager', 'procurement_manager', 'warehouse_manager'),
+  wrap(async (req, res) => {
+    const { id } = actor(req);
+    const data = await adapter.createReceipt({ ...req.body, ...branchFilter(req) }, id);
+    res.status(201).json({ success: true, data });
+  })
+);
+
+router.get(
+  '/receipts/:id',
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+    const data = await adapter.getReceipt(req.params.id);
+    res.json({ success: true, data });
+  })
+);
+
+router.get(
+  '/contracts/expiring',
+  wrap(async (req, res) => {
+    const days = req.query.days ? Number(req.query.days) : 60;
+    const data = await adapter.listExpiringContracts(days);
+    res.json({ success: true, data });
+  })
+);
+
+router.get(
+  '/contracts',
+  wrap(async (req, res) => {
+    const scope = branchFilter(req);
+    const data = await adapter.listContracts({
+      ...req.query,
+      branchId: scope.branchId || req.query.branchId,
+    });
+    res.json({ success: true, data });
+  })
+);
+
+router.post(
+  '/contracts',
+  authorize('admin', 'manager', 'procurement_manager'),
+  wrap(async (req, res) => {
+    const data = await adapter.createContract({ ...req.body, ...branchFilter(req) });
+    res.status(201).json({ success: true, data });
   })
 );
 

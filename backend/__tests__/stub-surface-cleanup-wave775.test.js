@@ -76,6 +76,7 @@ describe('W775 — registry no longer mounts deleted stubs', () => {
 
   it('phases.registry keeps systemSettings.routes (no hyphen stub shadow)', () => {
     expect(PHASES).toMatch(/systemSettings\.routes/);
+    expect(PHASES).toMatch(/dualMountAuth\(app,\s*'system-settings'/);
     expect(PHASES).not.toMatch(/system-settings\.routes/);
     expect(PHASES).not.toMatch(/cache-management/);
     expect(PHASES).not.toMatch(/iot\.routes/);

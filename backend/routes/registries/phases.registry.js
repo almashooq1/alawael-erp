@@ -665,7 +665,8 @@ module.exports = function registerPhaseRoutes(
   logger.info('Phase 36 mounted (2 sub-modules: expenses, payments)');
 
   // ── System Settings, Saudi Tax, Finance Operations ─────────
-  dualMount(app, 'system-settings', systemSettingsRoutes);
+  // W779: dualMountAuth — systemSettings.routes has inline auth; registry gate is defense-in-depth
+  dualMountAuth(app, 'system-settings', systemSettingsRoutes);
   // ─── prompt_24: الإعدادات المتقدمة مع Override الفروع ────────────────────
   dualMount(app, 'advanced-settings', advancedSettingsRoutes);
   logger.info(

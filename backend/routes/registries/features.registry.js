@@ -501,5 +501,26 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
   logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
 
+  // ── Break-glass emergency access — REAL audited engine (W770) ────────
+  // The live web-admin /admin/break-glass surface calls /api/v1/break-glass,
+  // but only a hollow stub existed (unmounted) while the real DB-backed,
+  // L2-co-signed, rate-limited engine in authorization/break-glass was never
+  // wired to HTTP. Mount the REAL router here (auth-gated via dualMountAuth);
+  // the hollow routes/break-glass.routes.js stub was deleted in W770.
+  try {
+    const {
+      buildRouter: buildBreakGlassRouter,
+    } = require('../../authorization/break-glass/break-glass.routes');
+    const breakGlassSessionModel = require('../../authorization/break-glass/session.model');
+    dualMountAuth(
+      app,
+      'break-glass',
+      buildBreakGlassRouter({ SessionModel: breakGlassSessionModel })
+    );
+    logger.info('✅ Break-glass routes mounted (real audited engine): /api/(v1/)break-glass');
+  } catch (e) {
+    logger.warn(`Break-glass routes not mounted: ${e.message}`);
+  }
+
   logger.info('[Features] All prompt feature modules mounted successfully');
 };

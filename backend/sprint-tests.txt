@@ -114,6 +114,8 @@ __tests__/purchasing-order-receipts-wave785.test.js
 __tests__/purchasing-receive-stock-wave786.test.js
 __tests__/purchasing-stats-legacy-wave787.test.js
 __tests__/branch-purchasing-orders-wave788.test.js
+__tests__/branch-purchasing-convert-wave789.test.js
+__tests__/purchasing-pr-item-convert-wave789.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

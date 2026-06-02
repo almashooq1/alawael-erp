@@ -9,6 +9,7 @@
  * W785: list receipts by PO + dashboard receipt count.
  * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
  * W787: legacy stats field aliases for PurchasingManagement.js tiles.
+ * W789: PR itemId normalization (legacy product/estimatedPrice → itemName/itemId).
  */
 
 const { applyStockReceiptForPoLines } = require('./purchasingStockReceive.lib');
@@ -118,6 +119,22 @@ function mapPrToLegacyRequest(doc) {
     priority: o.priority || 'normal',
     estimatedValue: o.summary?.estimatedValue ?? o.estimatedValue ?? 0,
   };
+}
+
+/** Map BranchPurchasing.js line shape + API aliases → canonical PR item. */
+function normalizePrItem(it) {
+  const rawId = it.itemId || it.item_id || it.inventoryItemId;
+  const row = {
+    itemName: it.itemName || it.product || it.name || it.description || 'Item',
+    itemCode: it.itemCode || it.item_code,
+    quantity: it.quantity ?? 1,
+    unit: it.unit || 'ea',
+    estimatedUnitPrice:
+      it.estimatedUnitPrice ?? it.estimatedUnitCost ?? it.estimatedPrice ?? it.unitCost ?? 0,
+    notes: it.notes,
+  };
+  if (rawId) row.itemId = rawId;
+  return row;
 }
 
 async function listVendors(query = {}) {
@@ -243,14 +260,7 @@ async function updateRequest(id, body, actorId) {
   if (body.title != null) pr.justification = body.title;
   if (body.purchaseMethod != null) pr.purchaseMethod = body.purchaseMethod;
   if (Array.isArray(body.items) && body.items.length) {
-    pr.items = body.items.map(it => ({
-      itemName: it.itemName || it.name || 'Item',
-      itemCode: it.itemCode,
-      quantity: it.quantity ?? 1,
-      unit: it.unit || 'ea',
-      estimatedUnitPrice: it.estimatedUnitPrice ?? it.estimatedUnitCost ?? it.unitCost ?? 0,
-      notes: it.notes,
-    }));
+    pr.items = body.items.map(normalizePrItem);
   }
   if (actorId) pr.updatedBy = actorId;
   await pr.save();
@@ -264,15 +274,16 @@ async function createRequest(body, actorId) {
     body.deliveryDate ||
     new Date(Date.now() + 7 * 86400000).toISOString();
   const items = Array.isArray(body.items)
-    ? body.items
+    ? body.items.map(normalizePrItem)
     : [
-        {
+        normalizePrItem({
           itemName: body.itemName || body.description || body.title || 'Requested item',
+          itemId: body.itemId || body.item_id,
           quantity: body.quantity || 1,
           unit: body.unit || 'ea',
           estimatedUnitPrice:
             body.estimatedUnitPrice ?? body.estimatedUnitCost ?? body.unitCost ?? 0,
-        },
+        }),
       ];
   const draft = await getPrService().createDraft(
     {

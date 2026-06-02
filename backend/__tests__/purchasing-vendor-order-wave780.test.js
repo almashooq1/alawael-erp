@@ -40,9 +40,11 @@ beforeEach(async () => {
   const Vendor = require('../models/Vendor');
   const Po = require('../models/inventory/PurchaseOrder');
   const PR = require('../models/operations/PurchaseRequest.model');
+  const Receipt = require('../models/inventory/PurchaseReceipt');
   await Vendor.deleteMany({});
   await Po.deleteMany({});
   await PR.deleteMany({});
+  await Receipt.deleteMany({});
 });
 
 describe('W780 behavioral — vendors', () => {

@@ -50,6 +50,13 @@ describe('services/branchWarehouseService.js', () => {
     expect(source).toMatch(/purchaseRequestService/);
   });
 
+  test('unwraps purchasing API envelopes for legacy pages', () => {
+    expect(source).toMatch(/unwrapApiList/);
+    expect(source).toMatch(/purchasing\/requests.*unwrapApiList/s);
+    expect(source).toMatch(/purchasing\/receipts.*unwrapApiList/s);
+    expect(source).toMatch(/purchasing\/contracts.*unwrapApiList/s);
+  });
+
   test('makes API calls', () => {
     expect(source).toMatch(/(?:axios|api\.|fetch\(|\.get\(|\.post\(|\.put\(|\.delete\()/);
   });

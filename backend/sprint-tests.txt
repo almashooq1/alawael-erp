@@ -118,6 +118,8 @@ __tests__/branch-purchasing-convert-wave789.test.js
 __tests__/purchasing-pr-item-convert-wave789.test.js
 __tests__/purchasing-po-line-items-wave790.test.js
 __tests__/branch-purchasing-line-items-wave790.test.js
+__tests__/purchasing-routes-flow-wave791.test.js
+__tests__/purchasing-management-lines-wave791.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

@@ -63,6 +63,73 @@ const paymentTermLabels = {
   net60: 'صافي 60 يوم',
 };
 
+function resolveItemsCount(row) {
+  if (row?.itemsCount != null) return row.itemsCount;
+  if (typeof row?.items === 'number') return row.items;
+  if (Array.isArray(row?.items)) return row.items.length;
+  return 0;
+}
+
+function renderItemsCell(row) {
+  const count = resolveItemsCount(row);
+  const summary = row?.itemsSummary;
+  return (
+    <Box>
+      <Typography variant="body2">{summary || `${count} أصناف`}</Typography>
+      {row?.linkedItemCount > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          {row.linkedItemCount} مربوط بالمخزون
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+function PoLineItemsTable({ rows }) {
+  const lines = Array.isArray(rows) ? rows : [];
+  if (!lines.length) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        لا توجد بنود
+      </Typography>
+    );
+  }
+  return (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>الصنف</TableCell>
+          <TableCell>معرّف المخزون</TableCell>
+          <TableCell align="right">الكمية</TableCell>
+          <TableCell align="right">المستلم</TableCell>
+          <TableCell align="right">السعر</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {lines.map((line, idx) => (
+          <TableRow key={line._id || line.itemId || idx}>
+            <TableCell>{line.itemName || line.item_name || '—'}</TableCell>
+            <TableCell>
+              <Typography variant="caption" fontFamily="monospace">
+                {line.itemId ? String(line.itemId).slice(-8) : '—'}
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              {line.quantity ?? line.quantityOrdered ?? line.quantity_ordered ?? '—'}
+            </TableCell>
+            <TableCell align="right">
+              {line.quantityReceived ?? line.quantity_received ?? '—'}
+            </TableCell>
+            <TableCell align="right">
+              {(line.unitCost ?? line.unit_cost ?? 0).toLocaleString()} ر.س
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
 const PurchasingManagement = () => {
   const showSnackbar = useSnackbar();
   const [tab, setTab] = useState(0);
@@ -134,6 +201,18 @@ const PurchasingManagement = () => {
       loadData();
     } catch {
       showSnackbar('فشل في تسجيل الاستلام', 'error');
+    }
+  };
+
+  const handleViewPO = async po => {
+    try {
+      const [detail, grns] = await Promise.all([
+        purchasingService.getPurchaseOrder(po._id),
+        purchasingService.getOrderReceipts(po._id),
+      ]);
+      setViewPO({ ...po, ...(detail || {}), grns: grns || [] });
+    } catch {
+      setViewPO({ ...po, grns: [] });
     }
   };
 
@@ -307,7 +386,7 @@ const PurchasingManagement = () => {
                       <TableCell>
                         <Chip label={po.department} size="small" variant="outlined" />
                       </TableCell>
-                      <TableCell align="center">{po.items}</TableCell>
+                      <TableCell align="center">{renderItemsCell(po)}</TableCell>
                       <TableCell align="left">
                         <Typography fontWeight={700} sx={{ color: brandColors.primary }}>
                           {po.totalAmount?.toLocaleString()} ر.س
@@ -322,11 +401,11 @@ const PurchasingManagement = () => {
                       </TableCell>
                       <TableCell>
                         <Tooltip title="عرض">
-                          <IconButton size="small" onClick={() => setViewPO(po)}>
+                          <IconButton size="small" onClick={() => handleViewPO(po)}>
                             <ViewIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        {po.status === 'pending' && (
+                        {(po.status === 'pending' || po.status === 'draft') && (
                           <Tooltip title="اعتماد">
                             <IconButton
                               size="small"
@@ -435,7 +514,7 @@ const PurchasingManagement = () => {
       <Dialog
         open={!!viewPO}
         onClose={() => setViewPO(null)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         PaperProps={{ sx: { borderRadius: 3 } }}
       >
@@ -479,8 +558,53 @@ const PurchasingManagement = () => {
                 <Typography variant="body2" color="textSecondary">
                   عدد الأصناف
                 </Typography>
-                <Typography fontWeight={600}>{viewPO.items}</Typography>
+                <Typography fontWeight={600}>{resolveItemsCount(viewPO)}</Typography>
               </Grid>
+              {viewPO.itemsSummary && (
+                <Grid item xs={12}>
+                  <Typography variant="body2" color="textSecondary">
+                    ملخص الأصناف
+                  </Typography>
+                  <Typography variant="body2">{viewPO.itemsSummary}</Typography>
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                  بنود الأمر
+                </Typography>
+                <PoLineItemsTable rows={viewPO.lineItems} />
+              </Grid>
+              {viewPO.grns?.length > 0 && (
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                    سندات الاستلام (GRN)
+                  </Typography>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>رقم السند</TableCell>
+                        <TableCell>التاريخ</TableCell>
+                        <TableCell>الأصناف</TableCell>
+                        <TableCell>الحالة</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {viewPO.grns.map(grn => (
+                        <TableRow key={grn._id}>
+                          <TableCell>{grn.receiptNumber}</TableCell>
+                          <TableCell>{grn.date}</TableCell>
+                          <TableCell>
+                            {grn.itemsSummary || `${resolveItemsCount(grn)} أصناف`}
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={grn.status} size="small" />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Grid>
+              )}
               <Grid item xs={6}>
                 <Typography variant="body2" color="textSecondary">
                   الحالة

@@ -133,6 +133,17 @@ export const purchasingService = {
     const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/receive`, data);
     return r.data;
   }),
+  getPurchaseOrder: safe(async id => {
+    const r = await apiClient.get(`/api/v1/purchasing/orders/${id}`);
+    const payload = r.data;
+    return payload?.data ?? payload;
+  }),
+  getOrderReceipts: safe(async id => {
+    const r = await apiClient.get(`/api/v1/purchasing/orders/${id}/receipts`);
+    const payload = r.data;
+    const rows = payload?.data ?? payload;
+    return Array.isArray(rows) ? rows : [];
+  }),
 
   getStats: safe(async () => {
     const r = await apiClient.get('/api/v1/purchasing/stats');

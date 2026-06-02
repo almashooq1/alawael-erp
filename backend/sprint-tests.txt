@@ -105,6 +105,7 @@ __tests__/stub-surface-cleanup-wave773.test.js
 __tests__/purchasing-adapter-behavioral-wave773.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
+__tests__/dashboard-mount-wave776.test.js
 __tests__/build-info-internals.test.js
 __tests__/calibration-mgmtreview-mfa-tier-wave277g.test.js
 __tests__/canonical-schemas-wave366.test.js

@@ -301,12 +301,9 @@ module.exports = function registerPhaseRoutes(
   );
   logger.info('Phase 10-C mounted (1 module: collaboration)');
 
-  // Dashboard, integrations, utilities
-  safeMount(
-    app,
-    ['/api/dashboard/widgets', '/api/v1/dashboard/widgets'],
-    '../routes/dashboardWidget.routes'
-  );
+  // Dashboard, integrations, utilities — W776: stats engine + widget router at /api/dashboard
+  safeMount(app, ['/api/dashboard', '/api/v1/dashboard'], '../routes/dashboard.stats');
+  safeMount(app, ['/api/dashboard', '/api/v1/dashboard'], '../routes/dashboardWidget.routes');
   safeMount(
     app,
     ['/api/integrations-hub', '/api/v1/integrations-hub'],
@@ -318,7 +315,7 @@ module.exports = function registerPhaseRoutes(
     '../routes/branch-integration.routes'
   );
   logger.info(
-    'Phase 10-D mounted (3 modules: dashboard-widgets, integrations-hub, branch-integration)'
+    'Phase 10-D mounted (4 modules: dashboard-stats, dashboard-widgets, integrations-hub, branch-integration)'
   );
 
   // Admin utilities & government

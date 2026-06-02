@@ -26,8 +26,9 @@ describe('W774 — dashboard.routes.unified hollow stub removed', () => {
     expect(PHASES).not.toMatch(/dashboard\.routes\.unified/);
   });
 
-  it('ceo-dashboard and dashboard widgets stay mounted', () => {
+  it('ceo-dashboard and dashboard engines stay mounted', () => {
     expect(PHASES).toMatch(/ceoDashboard\.routes/);
+    expect(PHASES).toMatch(/dashboard\.stats/);
     expect(PHASES).toMatch(/dashboardWidget\.routes/);
   });
 });

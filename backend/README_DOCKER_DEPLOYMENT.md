@@ -59,7 +59,7 @@ docker login
 docker pull <your-username>/alawael-backend:v1
 docker run -d --name alawael-app -p 3001:3001 \
   -e USE_MOCK_DB=true -e SKIP_SOCKET_IO=true \
-  -e DISABLE_REDIS=true -e SKIP_PHASE17=true \
+  -e DISABLE_REDIS=true \
   --restart=unless-stopped \
   <your-username>/alawael-backend:v1
 ```
@@ -114,7 +114,6 @@ Mark off as you complete each phase:
 - [ ] docker-compose up works
 - [ ] /health endpoint returns 200
 - [ ] /test-first endpoint returns 200
-- [ ] /phases-29-33 endpoint returns data
 - [ ] docker login successful
 - [ ] Image pushed to Docker Hub
 - [ ] SSH access to Hostinger confirmed
@@ -292,7 +291,6 @@ NODE_ENV=production       (security)
 USE_MOCK_DB=true          (in-memory database)
 SKIP_SOCKET_IO=true       (no WebSocket)
 DISABLE_REDIS=true        (no caching)
-SKIP_PHASE17=true         (skip problematic phase)
 ```
 
 If you need real Redis/MongoDB later, update these in docker run or docker-compose.

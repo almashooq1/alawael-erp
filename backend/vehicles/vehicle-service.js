@@ -479,7 +479,7 @@ class VehicleManagementService extends EventEmitter {
   /**
    * Initialize service
    */
-  async initialize(connection) {
+  async initialize(_connection) {
     // W340 dormant-service consolidation (2026-05-25): switched from
     // connection.model registrations to mongoose.model() lookup against
     // canonical models/. The schemas defined above (VehicleSchema,

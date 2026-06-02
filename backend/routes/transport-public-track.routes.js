@@ -15,7 +15,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const Trip = require('../models/transport/Trip');
-const Vehicle = require('../models/transport/Vehicle');
+const _Vehicle = require('../models/transport/Vehicle');
 const GpsTracking = require('../models/transport/GpsTracking');
 const {
   verifyTrackingToken,

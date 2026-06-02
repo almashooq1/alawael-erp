@@ -162,7 +162,7 @@ function tokenize(text) {
   if (!text) return new Set();
   return new Set(
     normalizeArabic(text)
-      .split(/[\s,.;:!?،؛"'(){}\[\]<>—–\-_/\\@#%&*+=|~`]+/)
+      .split(/[\s,.;:!?،؛"'(){}[\]<>—–\-_/\\@#%&*+=|~`]+/)
       .filter(w => w.length >= 2 && !STOP_WORDS.has(w))
   );
 }

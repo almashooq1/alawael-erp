@@ -491,15 +491,51 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
-  // ── Gap-fill: alerts, approvals, rehab-licenses — auth required ──────
-  // W658 — alerts + rehab-licenses were dualMount (NO auth) despite the
-  // "auth required" note + neither route file calls authenticate → both were
-  // anonymous-reachable. Promoted to dualMountAuth (surfaced by
-  // `npm run audit:unauthenticated-routes`).
-  dualMountAuth(app, 'alerts', safeRequire('../routes/alerts.routes'));
-  dualMountAuth(app, 'approvals', safeRequire('../routes/approvals.routes'));
+  // ── Purchasing — legacy /purchasing adapter to ops PR engine (W773) ───
+  dualMountAuth(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
+  logger.info('✅ Purchasing routes mounted (ops PR adapter): /api/(v1/)purchasing');
+
+  // ── Rehab-licenses — Mongo-backed License engine (W772) ───────────────
+  // W658 promoted to dualMountAuth; W772 replaced the 92-handler hollow stub
+  // with services/rehabLicenses.service.js (entityType=rehab_center_license).
   dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
-  logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
+  logger.info('✅ Rehab-licenses routes mounted (Mongo-backed): /api/(v1/)rehab-licenses');
+
+  // ── Approvals — REAL authorization chain engine (W771) ───────────────
+  // Legacy frontend calls /api/v1/approvals (inbox, approve, reject, …).
+  // The hollow routes/approvals.routes.js stub was deleted; mount the DB-backed
+  // engine from authorization/approvals (same pattern as break-glass W770).
+  try {
+    const {
+      buildRouter: buildApprovalsRouter,
+    } = require('../../authorization/approvals/approvals.routes');
+    const ApprovalRequestModel = require('../../authorization/approvals/approval-request.model');
+    dualMountAuth(app, 'approvals', buildApprovalsRouter({ ApprovalRequestModel }));
+    logger.info('✅ Approvals routes mounted (real chain engine): /api/(v1/)approvals');
+  } catch (e) {
+    logger.warn(`Approvals routes not mounted: ${e.message}`);
+  }
+
+  // ── Break-glass emergency access — REAL audited engine (W770) ────────
+  // The live web-admin /admin/break-glass surface calls /api/v1/break-glass,
+  // but only a hollow stub existed (unmounted) while the real DB-backed,
+  // L2-co-signed, rate-limited engine in authorization/break-glass was never
+  // wired to HTTP. Mount the REAL router here (auth-gated via dualMountAuth);
+  // the hollow routes/break-glass.routes.js stub was deleted in W770.
+  try {
+    const {
+      buildRouter: buildBreakGlassRouter,
+    } = require('../../authorization/break-glass/break-glass.routes');
+    const breakGlassSessionModel = require('../../authorization/break-glass/session.model');
+    dualMountAuth(
+      app,
+      'break-glass',
+      buildBreakGlassRouter({ SessionModel: breakGlassSessionModel })
+    );
+    logger.info('✅ Break-glass routes mounted (real audited engine): /api/(v1/)break-glass');
+  } catch (e) {
+    logger.warn(`Break-glass routes not mounted: ${e.message}`);
+  }
 
   logger.info('[Features] All prompt feature modules mounted successfully');
 };

@@ -85,7 +85,7 @@ function _publishToSocket(action, ctx) {
         emittedAt: new Date().toISOString(),
       },
     });
-  } catch (err) {
+  } catch {
     // Emitter not wired yet OR wrong env — silent. Audit chain is the
     // durable record; this socket emit is just a live convenience.
   }

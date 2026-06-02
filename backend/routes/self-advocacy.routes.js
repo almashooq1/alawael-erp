@@ -86,6 +86,7 @@ const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 const TRACKS = ['track_early', 'track_primary', 'track_teen', 'track_adult'];
 const STATUSES = ['active', 'on_hold', 'completed', 'archived'];
 const RIGHT_CODES = ['be_heard', 'consent', 'refuse', 'complain', 'community'];
+// eslint-disable-next-line no-unused-vars -- contract mirror asserted by self-advocacy-routes-wave518 drift guard
 const MODULE_STATUSES = ['not_started', 'in_progress', 'completed', 'skipped'];
 const DELIVERED_BY_ROLES = ['advocate', 'therapist', 'case_manager', 'family', 'peer'];
 

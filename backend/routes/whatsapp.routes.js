@@ -29,6 +29,7 @@
  *
  *   Templates:
  *     GET  /api/whatsapp/templates         — list available templates
+ *     GET  /api/whatsapp/event-bindings    — core event → template map (W727)
  *     POST /api/whatsapp/templates/session-reminder  — send session reminder
  *     POST /api/whatsapp/templates/progress-report   — send progress report
  *     POST /api/whatsapp/templates/homework          — send homework
@@ -222,7 +223,7 @@ router.get(
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
       Conversation.find(filter)
-        .sort({ urgencyLevel: 1, lastMessageAt: -1 })
+        .sort({ urgencyRank: -1, lastMessageAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .select('-messages') // exclude messages array for list view
@@ -252,7 +253,9 @@ router.get(
   '/conversations/:id',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    const conv = await Conversation.findById(req.params.id)
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId)
+    )
       .populate('beneficiaryId', 'personalInfo fileNumber')
       .populate('familyMemberId', 'firstName lastName relationship contactInfo')
       .populate('assignedTo', 'name email')
@@ -286,8 +289,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const staffId = req.user?._id || req.user?.id;
-    const data = await Conversation.findByIdAndUpdate(
-      req.params.id,
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
       {
         status: 'resolved',
         requiresHumanReview: false,
@@ -308,8 +311,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     validate(['staffId'], req.body);
-    const data = await Conversation.findByIdAndUpdate(
-      req.params.id,
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
       { assignedTo: req.body.staffId, status: 'pending_review' },
       { returnDocument: 'after' }
     ).lean();
@@ -323,7 +326,10 @@ router.post(
   '/conversations/:id/mark-read',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    await Conversation.findByIdAndUpdate(req.params.id, { unreadCount: 0 });
+    await Conversation.updateOne(
+      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
+      { unreadCount: 0 }
+    );
     res.json({ success: true });
   })
 );
@@ -682,7 +688,11 @@ router.get(
   '/ai/insights/:conversationId',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    const conv = await Conversation.findById(req.params.conversationId).select('messages').lean();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.conversationId, req.user?.organizationId)
+    )
+      .select('messages')
+      .lean();
     if (!conv) return res.status(404).json({ success: false, message: 'Not found' });
 
     const insights = whatsappAI.analyzeEngagementPatterns(
@@ -706,6 +716,16 @@ router.get(
 router.get('/templates', (_req, res) => {
   res.json({ success: true, data: whatsappTemplates.listTemplates() });
 });
+
+/** GET /event-bindings — W727: core event → template binding map (admin UI) */
+router.get(
+  '/event-bindings',
+  asyncHandler(async (_req, res) => {
+    const whatsappEventBindings = require('../services/whatsapp/whatsappEventBindings.service');
+    const data = await whatsappEventBindings.listBindingsWithStatus();
+    res.json({ success: true, data });
+  })
+);
 
 /** GET /templates/meta — from Meta Business Manager (raw passthrough) */
 router.get(
@@ -834,18 +854,11 @@ router.get(
     const { startDate, endDate } = req.query;
     const orgId = req.user?.organizationId;
 
+    const filters = Conversation.queueCountFilters(orgId);
     const [analytics, pendingReview, critical] = await Promise.all([
       Conversation.getAnalytics(orgId, startDate, endDate),
-      Conversation.countDocuments({
-        requiresHumanReview: true,
-        status: { $ne: 'resolved' },
-        isDeleted: false,
-      }),
-      Conversation.countDocuments({
-        urgencyLevel: 'critical',
-        status: { $ne: 'resolved' },
-        isDeleted: false,
-      }),
+      Conversation.countDocuments(filters.pendingReview),
+      Conversation.countDocuments(filters.critical),
     ]);
 
     res.json({
@@ -922,6 +935,741 @@ router.get(
     const phone = whatsappService.normalizePhone(req.params.phone);
     const result = await getConsentModel().canMessage(phone);
     res.json({ success: true, data: { phone, ...result } });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTACT GROUPS — org-scoped recipient segmentation (W746)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function getContactGroupModel() {
+  return mongoose.models.WhatsAppContactGroup || require('../models/WhatsAppContactGroup');
+}
+
+/** GET /contact-groups — list groups for the caller's org. */
+router.get(
+  '/contact-groups',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const { search, tag, page = 1, limit = 50 } = req.query;
+    const filter = Group.listScopedFilter(orgId, { search, tag });
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
+    const [items, total] = await Promise.all([
+      Group.find(filter)
+        .sort({ updatedAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum)
+        .lean(),
+      Group.countDocuments(filter),
+    ]);
+    res.json({
+      success: true,
+      data: items.map(g => ({ ...g, memberCount: (g.members || []).length })),
+      pagination: { page: pageNum, limit: limitNum, total },
+    });
+  })
+);
+
+/** POST /contact-groups — create a new group. */
+router.post(
+  '/contact-groups',
+  asyncHandler(async (req, res) => {
+    validate(['name'], req.body);
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const members = Group.dedupeMembers(req.body.members).map(m => ({
+      ...m,
+      addedBy: actorId,
+    }));
+    const doc = await Group.create({
+      organizationId: orgId,
+      name: String(req.body.name).trim(),
+      description: req.body.description || null,
+      tags: Array.isArray(req.body.tags) ? req.body.tags : [],
+      color: req.body.color || null,
+      members,
+      createdBy: actorId,
+    });
+    res.status(201).json({ success: true, data: doc });
+  })
+);
+
+/**
+ * GET /contact-groups/stats — org-scoped roll-up (W749).
+ *
+ * Read-only summary across all of the caller's active groups: total groups,
+ * total members, per-tag member distribution, and the largest group. Declared
+ * BEFORE /contact-groups/:id so the literal "stats" segment is not captured as
+ * an :id param.
+ */
+router.get(
+  '/contact-groups/stats',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const filter = Group.listScopedFilter(orgId, {});
+    const groups = await Group.find(filter).select('name tags members').lean();
+    res.json({ success: true, data: Group.summarizeGroups(groups) });
+  })
+);
+
+/** GET /contact-groups/:id — single group (org-scoped). */
+router.get(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: { ...doc, memberCount: (doc.members || []).length } });
+  })
+);
+
+/** PATCH /contact-groups/:id — update name/description/tags/color. */
+router.patch(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const update = {};
+    if (req.body.name != null) update.name = String(req.body.name).trim();
+    if (req.body.description !== undefined) update.description = req.body.description || null;
+    if (Array.isArray(req.body.tags)) update.tags = req.body.tags;
+    if (req.body.color !== undefined) update.color = req.body.color || null;
+    const doc = await Group.findOneAndUpdate(
+      Group.groupScopedFilter(req.params.id, orgId),
+      { $set: update },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** DELETE /contact-groups/:id — soft delete. */
+router.delete(
+  '/contact-groups/:id',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOneAndUpdate(
+      Group.groupScopedFilter(req.params.id, orgId),
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    res.json({ success: true, data: { id: req.params.id, deleted: true } });
+  })
+);
+
+/** POST /contact-groups/:id/members — add (deduped) members. */
+router.post(
+  '/contact-groups/:id/members',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const incoming = Array.isArray(req.body.members)
+      ? req.body.members
+      : req.body.phone
+        ? [{ phone: req.body.phone, displayName: req.body.displayName }]
+        : [];
+    const additions = Group.dedupeMembers(incoming);
+    if (!additions.length) {
+      return res.status(400).json({ success: false, message: 'No valid members supplied' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Merge existing + incoming, dedupe by phone (last-wins).
+    doc.members = Group.dedupeMembers([
+      ...(doc.members || []),
+      ...additions.map(m => ({ ...m, addedBy: actorId })),
+    ]);
+    await doc.save();
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** DELETE /contact-groups/:id/members/:phone — remove one member. */
+router.delete(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const target = Group.normalizePhone(req.params.phone);
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const before = (doc.members || []).length;
+    doc.members = (doc.members || []).filter(m => Group.normalizePhone(m.phone) !== target);
+    if (doc.members.length === before) {
+      return res.status(404).json({ success: false, message: 'Member not in group' });
+    }
+    await doc.save();
+    res.json({ success: true, data: doc });
+  })
+);
+
+/**
+ * GET /contact-groups/:id/broadcast-preview — eligibility preview (W747).
+ *
+ * Read-only. Runs each member's phone through WhatsAppConsent.canMessage and
+ * partitions into eligible vs blocked, so staff can see who a broadcast would
+ * actually reach (and why the rest are excluded) BEFORE any message is sent.
+ * No send is performed here.
+ */
+router.get(
+  '/contact-groups/:id/broadcast-preview',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const Consent = getConsentModel();
+    const members = doc.members || [];
+    const verdicts = await Promise.all(
+      members.map(async m => {
+        const phone = Group.normalizePhone(m.phone);
+        try {
+          const v = await Consent.canMessage(phone);
+          return [phone, v || { allowed: false, reason: 'unknown' }];
+        } catch {
+          return [phone, { allowed: false, reason: 'consent_check_failed' }];
+        }
+      })
+    );
+    const eligibilityByPhone = Object.fromEntries(verdicts);
+    const { eligible, blocked, total } = Group.partitionByEligibility(members, eligibilityByPhone);
+
+    res.json({
+      success: true,
+      data: {
+        groupId: String(doc._id),
+        name: doc.name,
+        total,
+        eligibleCount: eligible.length,
+        blockedCount: blocked.length,
+        eligible,
+        blocked,
+      },
+    });
+  })
+);
+
+/**
+ * GET /contact-groups/:id/members.csv — export members as CSV (W750).
+ *
+ * Read-only. Streams the group's members (phone, displayName, addedAt) as a
+ * downloadable CSV. Cells are escaped and formula-injection-neutralised by the
+ * model helper, so the file is safe to open in spreadsheet software.
+ */
+router.get(
+  '/contact-groups/:id/members.csv',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const safeName = String(doc.name || 'group').replace(/[^a-zA-Z0-9_-]+/g, '_');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="contact-group-${safeName}.csv"`);
+    res.send(Group.membersToCsv(doc));
+  })
+);
+
+/**
+ * GET /contact-groups/:id/members/search?q=… — search members within a group.
+ *
+ * Read-only. Filters the group's members case-insensitively by phone digits or
+ * displayName via the model helper. A blank query returns all members. Keeps
+ * large groups navigable without shipping every row to the client.
+ */
+router.get(
+  '/contact-groups/:id/members/search',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId))
+      .select('name members')
+      .lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+    const matches = Group.searchMembers(doc.members || [], req.query.q);
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        query: String(req.query.q == null ? '' : req.query.q),
+        total: (doc.members || []).length,
+        count: matches.length,
+        members: matches,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/members/import-csv — bulk-add members from CSV (W751).
+ *
+ * Round-trips with the W750 export: accepts a CSV body (header with a `phone`
+ * column, optional `displayName`), parses + de-dupes via the model helper, then
+ * merges into the group (last-wins by phone). Returns how many rows parsed and
+ * how many were newly added. Body: { csv: "<csv text>" }.
+ *
+ * Pass `?dryRun=true` (or body `{ dryRun: true }`) to PREVIEW the diff against
+ * existing members (new vs already-present) WITHOUT persisting anything (W752).
+ */
+router.post(
+  '/contact-groups/:id/members/import-csv',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    const parsed = Group.parseCsvMembers(req.body && req.body.csv);
+    if (!parsed.length) {
+      return res.status(400).json({ success: false, message: 'No valid members found in CSV' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const diff = Group.diffMembers(doc.members || [], parsed);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          parsed: parsed.length,
+          wouldAdd: diff.addCount,
+          duplicates: diff.duplicateCount,
+          toAdd: diff.toAdd,
+        },
+      });
+    }
+
+    const before = (doc.members || []).length;
+    doc.members = Group.dedupeMembers([
+      ...(doc.members || []),
+      ...parsed.map(m => ({ ...m, addedBy: actorId })),
+    ]);
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        parsed: parsed.length,
+        added: doc.members.length - before,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/merge — fold another group's members into this one (W754).
+ *
+ * Body: { sourceId: "<group id>", dryRun?: boolean }. Both groups must belong to
+ * the caller's org. Members are de-duped by phone (target wins on conflict). The
+ * source group is left untouched. Pass `dryRun` to preview the impact without
+ * persisting.
+ */
+router.post(
+  '/contact-groups/:id/merge',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?.userId || req.user?.id || null;
+    const sourceId = req.body && req.body.sourceId;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    if (!sourceId) {
+      return res.status(400).json({ success: false, message: 'sourceId is required' });
+    }
+    if (String(sourceId) === String(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Cannot merge a group into itself' });
+    }
+    const [target, source] = await Promise.all([
+      Group.findOne(Group.groupScopedFilter(req.params.id, orgId)),
+      Group.findOne(Group.groupScopedFilter(sourceId, orgId)).lean(),
+    ]);
+    if (!target) return res.status(404).json({ success: false, message: 'Group not found' });
+    if (!source) {
+      return res.status(404).json({ success: false, message: 'Source group not found' });
+    }
+
+    const result = Group.mergeMembers(target.members || [], source.members || []);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(target._id),
+          sourceId: String(source._id),
+          dryRun: true,
+          wouldAdd: result.addCount,
+          duplicates: result.duplicateCount,
+          total: result.merged.length,
+        },
+      });
+    }
+
+    target.members = result.merged.map(m => (m.addedBy ? m : { ...m, addedBy: actorId }));
+    await target.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(target._id),
+        sourceId: String(source._id),
+        added: result.addCount,
+        duplicates: result.duplicateCount,
+        total: target.members.length,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/members/bulk-remove — drop members by phone (W755).
+ *
+ * Body: { phones: ["966…", …], dryRun?: boolean }. Phones are normalized before
+ * matching, so any format is accepted. Reports how many were removed and how
+ * many requested phones were not present. Pass `dryRun` to preview without
+ * persisting.
+ */
+router.post(
+  '/contact-groups/:id/members/bulk-remove',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const phones = req.body && req.body.phones;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    if (!Array.isArray(phones) || phones.length === 0) {
+      return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.removeMembers(doc.members || [], phones);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          wouldRemove: result.removedCount,
+          notFound: result.notFoundCount,
+          total: result.remaining.length,
+        },
+      });
+    }
+
+    doc.members = result.remaining;
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        removed: result.removedCount,
+        notFound: result.notFoundCount,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/members/bulk-add — add members by phone list (W756).
+ *
+ * Body: { phones: ["966…" | { phone, displayName }, …], dryRun?: boolean }.
+ * Phones are normalized; entries already present are skipped, invalid entries
+ * (no digits) are counted. Pass `dryRun` to preview without persisting.
+ */
+router.post(
+  '/contact-groups/:id/members/bulk-add',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const actorId = req.user?._id || null;
+    const phones = req.body && req.body.phones;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    if (!Array.isArray(phones) || phones.length === 0) {
+      return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
+    }
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.addMembers(doc.members || [], phones);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          wouldAdd: result.addedCount,
+          duplicates: result.duplicateCount,
+          invalid: result.invalidCount,
+          total: result.merged.length,
+        },
+      });
+    }
+
+    doc.members = result.merged.map(m => (m.addedBy ? m : { ...m, addedBy: actorId }));
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        added: result.addedCount,
+        duplicates: result.duplicateCount,
+        invalid: result.invalidCount,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/members/dedupe — collapse duplicate members (W757).
+ *
+ * Removes redundant rows sharing the same normalized phone (last-wins). Pass
+ * `dryRun` (query or body) to preview the removal count without persisting.
+ */
+router.post(
+  '/contact-groups/:id/members/dedupe',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.dedupeReport(doc.members || []);
+    if (dryRun) {
+      return res.json({
+        success: true,
+        data: {
+          id: String(doc._id),
+          dryRun: true,
+          wouldRemove: result.removedCount,
+          total: result.deduped.length,
+        },
+      });
+    }
+
+    doc.members = result.deduped;
+    await doc.save();
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        removed: result.removedCount,
+        total: doc.members.length,
+      },
+    });
+  })
+);
+
+/**
+ * PATCH /contact-groups/:id/members/:phone — rename a single member (W758).
+ *
+ * Updates the member's displayName (body `{ displayName }`); a null/blank value
+ * clears it. The phone path segment is normalized before matching, so any
+ * format works. 404 when the group or member is not found.
+ */
+router.patch(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const displayName = req.body ? req.body.displayName : null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const result = Group.renameMember(doc.members || [], req.params.phone, displayName);
+    if (!result.updated) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    doc.members = result.members;
+    await doc.save();
+    res.json({
+      success: true,
+      data: { id: String(doc._id), phone: Group.normalizePhone(req.params.phone) },
+    });
+  })
+);
+
+/**
+ * GET /contact-groups/:id/members/:phone — fetch a single member (W759).
+ *
+ * Returns the member matching the (normalized) phone, or 404 when the group or
+ * member is not found. Read-only.
+ */
+router.get(
+  '/contact-groups/:id/members/:phone',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const member = Group.findMember(doc.members || [], req.params.phone);
+    if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
+    res.json({ success: true, data: { id: String(doc._id), member } });
+  })
+);
+
+/**
+ * GET /contact-groups/:id/members — list a group's members as JSON (W760).
+ *
+ * Optional `?sort=name|phone` (defaults to phone) and `?page=&limit=`
+ * pagination (W761; limit clamped to 200). Read-only.
+ */
+router.get(
+  '/contact-groups/:id/members',
+  asyncHandler(async (req, res) => {
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const sort = req.query.sort === 'name' ? 'name' : 'phone';
+    const sorted = Group.sortMembers(doc.members || [], sort);
+    const paged = Group.paginateMembers(sorted, req.query.page, req.query.limit);
+    res.json({
+      success: true,
+      data: {
+        id: String(doc._id),
+        sort,
+        page: paged.page,
+        limit: paged.limit,
+        total: paged.total,
+        totalPages: paged.totalPages,
+        members: paged.items,
+      },
+    });
+  })
+);
+
+/**
+ * POST /contact-groups/:id/broadcast — segment-based broadcast (W748).
+ *
+ * Sends a template (or service-window text) to every ELIGIBLE member of a
+ * group. Eligibility is resolved automatically via WhatsAppConsent.canMessage,
+ * so consent/opt-out filtering is built in (PDPL-safe) — blocked members are
+ * never contacted. Each eligible recipient is fanned out through
+ * `withSendGuards`, inheriting the same rate-limit / idempotency / DLQ
+ * hardening as single + bulk sends.
+ *
+ * Body: { templateKey, args? } OR { text }. Optional { broadcastId } for
+ * idempotent re-issue (per-recipient key derived from it).
+ *
+ * Distinct from POST /bulk: that takes an explicit phone list with no consent
+ * gate; this resolves a saved segment and enforces consent automatically.
+ */
+router.post(
+  '/contact-groups/:id/broadcast',
+  asyncHandler(async (req, res) => {
+    const { templateKey, args, text } = req.body;
+    if (!templateKey && !text) {
+      return res.status(400).json({ success: false, message: 'Missing: templateKey or text' });
+    }
+
+    const Group = getContactGroupModel();
+    const orgId = req.user?.organizationId || null;
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
+
+    const Consent = getConsentModel();
+    const members = doc.members || [];
+    const verdicts = await Promise.all(
+      members.map(async m => {
+        const phone = Group.normalizePhone(m.phone);
+        try {
+          const v = await Consent.canMessage(phone);
+          return [phone, v || { allowed: false, reason: 'unknown' }];
+        } catch {
+          return [phone, { allowed: false, reason: 'consent_check_failed' }];
+        }
+      })
+    );
+    const eligibilityByPhone = Object.fromEntries(verdicts);
+    const { eligible, blocked } = Group.partitionByEligibility(members, eligibilityByPhone);
+
+    const broadcastId =
+      req.body.broadcastId ||
+      `bcast-${doc._id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const results = [];
+    const targets = eligible.slice(0, 100); // cap per call
+
+    for (let i = 0; i < targets.length; i++) {
+      const phone = Group.normalizePhone(targets[i].phone);
+      const idemKey = `bcast:${broadcastId}:${phone}:${i}`;
+      const localReq = {
+        ...req,
+        get(name) {
+          if (typeof name === 'string' && name.toLowerCase() === 'idempotency-key') {
+            return idemKey;
+          }
+          return req.get(name);
+        },
+        body: { ...req.body, beneficiaryId: targets[i].beneficiaryId || null },
+      };
+
+      let outcome;
+      if (templateKey) {
+        outcome = await withSendGuards(
+          localReq,
+          'template',
+          phone,
+          { to: phone, templateKey, args: args || [] },
+          () => whatsappTemplates.sendTemplate(templateKey, phone, args || [])
+        );
+      } else {
+        outcome = await withSendGuards(localReq, 'text', phone, { to: phone, text }, () =>
+          whatsappService.sendText(phone, text)
+        );
+      }
+
+      if (outcome.status === 429) {
+        results.push({ phone, success: false, rateLimited: true, code: outcome.body.code });
+      } else if (outcome.status === 202) {
+        results.push({ phone, success: false, queued: true, code: outcome.body.code });
+      } else if (outcome.body?.data?.success) {
+        results.push({
+          phone,
+          success: true,
+          messageId: outcome.body.data.messageId,
+          replayed: !!outcome.replayed,
+        });
+      } else {
+        results.push({ phone, success: false, code: outcome.body?.code || 'UNKNOWN' });
+      }
+
+      await new Promise(r => setTimeout(r, 15));
+    }
+
+    const succeeded = results.filter(r => r.success).length;
+    const queued = results.filter(r => r.queued).length;
+    const rateLimited = results.filter(r => r.rateLimited).length;
+    res.json({
+      success: true,
+      data: {
+        broadcastId,
+        groupId: String(doc._id),
+        name: doc.name,
+        total: members.length,
+        eligibleCount: eligible.length,
+        blockedCount: blocked.length,
+        succeeded,
+        queued,
+        rateLimited,
+        failed: results.length - succeeded - queued - rateLimited,
+        results,
+      },
+    });
   })
 );
 

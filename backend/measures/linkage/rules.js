@@ -329,7 +329,7 @@ function closeAchievedDecision(goal, links, interpretations) {
       `PRIMARY interpretation must be SUSTAINED_IMPROVEMENT or CEILING_ACHIEVED (got ${primaryInterp?.category || 'none'})`
     );
   }
-  const latestDate =
+  const _latestDate =
     primaryInterp?.numbers?.currentDate || primaryInterp?.references?.currentApplicationId;
   // We don't have direct date in interpretation; allow ageDaysFromCurrentAdmin via context if passed.
   // For correctness we use the daysSinceBaseline + (history-driven) freshness check elsewhere.

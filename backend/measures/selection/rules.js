@@ -105,7 +105,7 @@ const DISCIPLINE_PRIMARY_TOOLKIT = Object.freeze({
   special_educator: ['PORTAGE', 'WPPSI', 'WISC', 'KABC-2', 'BRIEF-2'],
 });
 
-const ICD10_RE = /^[A-Z]\d{2}(\.\d+)?(\.\*)?$/i;
+const _ICD10_RE = /^[A-Z]\d{2}(\.\d+)?(\.\*)?$/i;
 
 // ─── Helpers ───────────────────────────────────────────────────────────
 

@@ -78,7 +78,7 @@ async function safeQuery(modelFn, queryFn, fallback) {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const COMPLETION_STATUSES = new Set(['COMPLETED']);
+const _COMPLETION_STATUSES = new Set(['COMPLETED']);
 const CANCELLED_STATUSES = new Set(['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER', 'NO_SHOW']);
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'RESCHEDULED']);
 

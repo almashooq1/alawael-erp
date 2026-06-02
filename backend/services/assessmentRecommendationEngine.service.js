@@ -1077,7 +1077,7 @@ function computeOverallConfidence({ interpretations, programs, goals }) {
 
 // ─── Evidence trace ─────────────────────────────────────────────
 
-function buildEvidenceTrace({ interpretations, goals, programs }) {
+function buildEvidenceTrace({ interpretations: _interpretations, goals, programs }) {
   const trace = [];
   for (const g of goals) {
     trace.push({

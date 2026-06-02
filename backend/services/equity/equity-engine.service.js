@@ -118,7 +118,7 @@ async function runAuditAndPersist({
         alert.capaItemId = capaItem._id;
         await alert.save();
       }
-    } catch (err) {
+    } catch {
       // Don't fail the audit just because CAPA wiring is unavailable.
       // The alert is still persisted; capa can be manually attached later.
     }
@@ -174,7 +174,7 @@ async function _autoCreateCapaForAlert({ alert, audit }) {
     return null;
   }
 
-  const svc = createCapaService({ enforceMfa: false });
+  const svc = createCapaService({ enforceMfa: true });
 
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 30); // 30-day default SLA

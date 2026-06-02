@@ -324,7 +324,7 @@ class MeasureProgressInterpreterSvc {
     };
   }
 
-  _extractValue(admin, measure) {
+  _extractValue(admin, _measure) {
     // Outcome measures prefer totalRawScore; some use totalStandardScore.
     if (Number.isFinite(admin.totalRawScore)) return admin.totalRawScore;
     if (Number.isFinite(admin.totalStandardScore)) return admin.totalStandardScore;
@@ -379,7 +379,7 @@ class MeasureProgressInterpreterSvc {
     return ageDays > cadence * 2;
   }
 
-  _buildSummaryVars(ctx, locale) {
+  _buildSummaryVars(ctx, _locale) {
     const measure = ctx.measure;
     const delta =
       ctx.baseline && ctx.current

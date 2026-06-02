@@ -178,7 +178,7 @@ class CommandCenterService {
   _buildAttentionList({
     risk,
     fmea,
-    rca,
+    rca: _rca,
     suppliers,
     calibration,
     audits,

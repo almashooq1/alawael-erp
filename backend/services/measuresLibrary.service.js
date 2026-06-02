@@ -331,7 +331,12 @@ class MeasuresLibrarySvc {
   // 6. SUGGEST — اقتراح مقاييس حسب التشخيص والسن
   // ───────────────────────────────────────────────────────────────
 
-  async suggest({ beneficiaryId, disabilityType = '', ageMonths = 0, category = '' } = {}) {
+  async suggest({
+    beneficiaryId: _beneficiaryId,
+    disabilityType = '',
+    ageMonths = 0,
+    category = '',
+  } = {}) {
     const Measure = M.Measure();
     if (!Measure) return [];
 

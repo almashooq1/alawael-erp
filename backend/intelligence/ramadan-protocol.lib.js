@@ -138,7 +138,7 @@ function classifyActivity(activityCode) {
  * @param {Object} timingHints — { iftarTime, suhoorTime, sessionStart }
  * @returns {{ recommended: string, reasonAr: string, reasonEn: string }}
  */
-function recommendTiming(activityCode, timingHints = {}) {
+function recommendTiming(activityCode, _timingHints = {}) {
   const classification = classifyActivity(activityCode);
   if (classification === 'avoid_during_fasting') {
     return {

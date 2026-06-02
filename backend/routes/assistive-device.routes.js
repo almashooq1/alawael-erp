@@ -91,7 +91,13 @@ const APPROVE_ROLES = [
 ];
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
-const { CATEGORIES, AVAILABILITY, LOAN_STATUSES, MAINTENANCE_KINDS, CONDITION_GRADES } = Device;
+const {
+  CATEGORIES,
+  AVAILABILITY,
+  LOAN_STATUSES: _LOAN_STATUSES,
+  MAINTENANCE_KINDS,
+  CONDITION_GRADES,
+} = Device;
 
 function pushLoanCapped(doc, loanObj) {
   doc.loans.push(loanObj);

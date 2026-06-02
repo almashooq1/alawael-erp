@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/trendForecast.service');

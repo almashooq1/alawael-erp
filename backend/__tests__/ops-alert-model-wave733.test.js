@@ -58,7 +58,11 @@ describe('OpsAlert behavioral (W733)', () => {
   });
 
   test('accepts a full acknowledge → resolve lifecycle', async () => {
-    const doc = await OpsAlert.create({ kind: 'dr_verify_failed', severity: 'critical', subject: 's' });
+    const doc = await OpsAlert.create({
+      kind: 'dr_verify_failed',
+      severity: 'critical',
+      subject: 's',
+    });
     doc.status = 'acknowledged';
     doc.acknowledgedAt = new Date();
     await doc.save();

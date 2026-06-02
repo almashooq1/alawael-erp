@@ -23,11 +23,11 @@ const qualityService = {
   deleteCase: async id => api.delete(`/cases/${id}`),
 
   // Support Tickets
-  getTickets: async () => api.get('/support/tickets'),
-  getTicket: async id => api.get(`/support/tickets/${id}`),
-  createTicket: async data => api.post('/support/tickets', data),
-  updateTicket: async (id, data) => api.put(`/support/tickets/${id}`, data),
-  deleteTicket: async id => api.delete(`/support/tickets/${id}`),
+  getTickets: async () => api.get('/ticketing-system'),
+  getTicket: async id => api.get(`/ticketing-system/${id}`),
+  createTicket: async data => api.post('/ticketing-system', data),
+  updateTicket: async (id, data) => api.put(`/ticketing-system/${id}/status`, data),
+  deleteTicket: async id => api.delete(`/ticketing-system/${id}`),
 };
 
 export default qualityService;

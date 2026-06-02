@@ -34,12 +34,12 @@ class InspectionSubmissionService {
     if (!Array.isArray(items) || items.length === 0) return { score: null, outcome: null };
     let pass = 0;
     let fail = 0;
-    let na = 0;
+    let _na = 0;
     for (const it of items) {
       const a = String(it.answer || '').toLowerCase();
       if (a === 'pass' || a === 'yes') pass++;
       else if (a === 'fail' || a === 'no') fail++;
-      else if (a === 'n/a' || a === 'na') na++;
+      else if (a === 'n/a' || a === 'na') _na++;
     }
     const denominator = pass + fail; // exclude N/A
     if (denominator === 0) return { score: null, outcome: null };

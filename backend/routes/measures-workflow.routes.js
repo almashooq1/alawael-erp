@@ -56,7 +56,9 @@ const cascade = require('../services/reassessmentReminderCascade.service');
 const linkageInsights = require('../services/goalLinkageInsights.service');
 const linkage = require('../services/goalMeasureLinkage.service');
 const measureAdmin = require('../services/measureAdministration.service');
-const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
+const {
+  MeasureReassessmentTask: _MeasureReassessmentTask,
+} = require('../domains/goals/models/MeasureReassessmentTask');
 
 // All routes authenticated + branch-scoped.
 router.use(authenticate);

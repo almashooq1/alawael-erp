@@ -359,12 +359,12 @@ const transportService = {
   /* — Fuel — */
   getFuelRecords: () =>
     safe(async () => {
-      const r = await apiClient.get('/api/v1/fuel');
+      const r = await apiClient.get('/api/v1/fleet-fuel');
       return r.data?.data || r.data || r;
     }, MOCK_FUEL),
   createFuelRecord: data =>
     safe(async () => {
-      const r = await apiClient.post('/api/v1/fuel', data);
+      const r = await apiClient.post('/api/v1/fleet-fuel', data);
       return r.data?.data || r.data || r;
     }),
 
@@ -395,12 +395,12 @@ const transportService = {
   /* — Analytics / Dashboard — */
   getMonthlyStats: () =>
     safe(async () => {
-      const r = await apiClient.get('/api/v1/transport/analytics/monthly');
+      const r = await apiClient.get('/api/v1/bus-tracking/dashboard/overview');
       return r.data?.data || r.data || r;
     }, MOCK_MONTHLY_STATS),
   getDashboardSummary: () =>
     safe(async () => {
-      const r = await apiClient.get('/api/v1/transport/dashboard');
+      const r = await apiClient.get('/api/v1/bus-tracking/dashboard/overview');
       return r.data?.data || r.data || r;
     }, null),
 };

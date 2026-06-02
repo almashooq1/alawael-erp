@@ -11,7 +11,11 @@ const {
   sendOTP: sendSMSOTP,
   verifyOTP: verifySMSOTP,
 } = require('../communication/sms-service');
-const { whatsappService, sendWhatsAppOTP } = require('../communication/whatsapp-service');
+// W725: migrated to the canonical hardened WhatsApp service
+// (services/whatsapp) — HMAC webhook verification, consent gate (PDPL Art.13),
+// exponential back-off retry, phone normalization, idempotency + DLQ.
+// Replaces the retired legacy `../communication/whatsapp-service`.
+const { whatsappService } = require('../services/whatsapp');
 const logger = require('../utils/logger');
 
 /**
@@ -122,6 +126,34 @@ class OTPService {
    */
   generateOTPId() {
     return `otp_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
+  }
+
+  /**
+   * Hash an OTP for at-rest storage.
+   *
+   * OTPs are short-lived secrets that grant account access, so the raw code
+   * is NEVER persisted (DB row or in-memory map). We store an HMAC-SHA256
+   * digest keyed by a server-side pepper so a leaked OTP store cannot be
+   * replayed and an offline brute force needs the pepper too. Verification
+   * re-hashes the supplied code and timing-safe-compares the hex digests
+   * (always equal length → timingSafeEqual stays constant-time).
+   * @param {string} otp
+   * @returns {string} hex HMAC-SHA256 digest
+   */
+  hashOtp(otp) {
+    const secret =
+      process.env.OTP_HASH_SECRET || process.env.JWT_SECRET || process.env.SESSION_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('OTP_HASH_SECRET (or JWT_SECRET) must be set in production');
+      }
+      // Dev-only deterministic fallback so the flow still works locally.
+      logger.warn('[otp] OTP_HASH_SECRET not set — using dev fallback pepper');
+    }
+    return crypto
+      .createHmac('sha256', secret || 'dev-otp-pepper')
+      .update(String(otp))
+      .digest('hex');
   }
 
   /**
@@ -254,7 +286,8 @@ class OTPService {
       otpId,
       identifier,
       identifierType,
-      otp,
+      // Stored hashed (HMAC-SHA256 + server pepper) — never the raw code.
+      otp: this.hashOtp(otp),
       purpose,
       method: actualMethod,
       status: 'pending',
@@ -389,29 +422,28 @@ class OTPService {
     const expiryMinutes = Math.floor(this.config.otp.expirySeconds / 60);
 
     try {
-      // استخدام قالب الواتساب
-      if (whatsappService && whatsappService.sendTemplate) {
-        const template = {
-          name: 'otp_verification',
-          language: { code: 'ar' },
-          components: [
-            {
-              type: 'body',
-              parameters: [
-                { type: 'text', text: otp },
-                { type: 'text', text: String(expiryMinutes) },
-              ],
-            },
-          ],
+      // Canonical OTP path: sends the approved `otp_verification` template
+      // (Arabic) via the hardened service. Signature: (to, otp, expiryMinutes).
+      if (whatsappService && typeof whatsappService.sendOtp === 'function') {
+        const res = await whatsappService.sendOtp(phone, otp, expiryMinutes);
+        return {
+          success: res.success !== false,
+          method: 'whatsapp',
+          messageId: res.messageId,
+          ...res,
         };
-
-        return await whatsappService.sendTemplate(phone, template.name, template.components);
       }
 
-      // إرسال كرسالة نصية عادية
-      if (whatsappService && whatsappService.sendText) {
-        const message = `🔐 رمز التحقق الخاص بك هو: ${otp}\n⏰ صالح لمدة ${expiryMinutes} دقيقة\n\n@الأهداف`;
-        return await whatsappService.sendText(phone, message);
+      // Fallback: plain text message when the template path is unavailable.
+      if (whatsappService && typeof whatsappService.sendText === 'function') {
+        const message = `🔐 رمز التحقق الخاص بك هو: ${otp}\n⏰ صالح لمدة ${expiryMinutes} دقيقة\n\n@الأوائل`;
+        const res = await whatsappService.sendText(phone, message);
+        return {
+          success: res.success !== false,
+          method: 'whatsapp',
+          messageId: res.messageId,
+          ...res,
+        };
       }
     } catch (error) {
       logger.error('WhatsApp Error:', error);
@@ -485,9 +517,10 @@ class OTPService {
       };
     }
 
-    // التحقق من صحة OTP — timing-safe comparison to prevent timing attacks
+    // التحقق من صحة OTP — hash the supplied code with the same pepper and
+    // timing-safe-compare the hex digests (constant length → constant time).
     const storedBuf = Buffer.from(String(otpRecord.otp), 'utf8');
-    const providedBuf = Buffer.from(String(otp), 'utf8');
+    const providedBuf = Buffer.from(this.hashOtp(otp), 'utf8');
     const otpMatch =
       storedBuf.length === providedBuf.length && crypto.timingSafeEqual(storedBuf, providedBuf);
     if (!otpMatch) {

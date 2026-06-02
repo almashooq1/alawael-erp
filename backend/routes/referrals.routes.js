@@ -383,7 +383,7 @@ router.post(
       url: req.body.url || '',
       uploadedAt: new Date(),
     };
-    const referral = await M.findByIdAndUpdate(
+    const _referral = await M.findByIdAndUpdate(
       req.params.id,
       { $push: { documents: doc } },
       { returnDocument: 'after' }

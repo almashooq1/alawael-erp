@@ -57,19 +57,6 @@ module.exports = function registerPhaseRoutes(
   // Phase 4: Health Monitoring
   safeMount(app, ['/api/health', '/api/v1/health'], '../routes/health.routes');
 
-  // Phase 21-28
-  safeMount(app, ['/api/phases-21-28', '/api/v1/phases-21-28'], '../routes/phases-21-28.routes');
-
-  // Phase 17 (namespaced to avoid collisions with analytics/integrations)
-  if (process.env.SKIP_PHASE17 === 'true') {
-    logger.warn('Phase 17 routes skipped (SKIP_PHASE17=true)');
-  } else {
-    safeMount(app, ['/api/phase17', '/api/v1/phase17'], '../routes/phase17-advanced.routes');
-  }
-
-  // Phases 18-20 (namespaced to avoid collisions with tenants/compliance)
-  safeMount(app, ['/api/phases-18-20', '/api/v1/phases-18-20'], '../routes/phases-18-20.routes');
-
   // ── Phase 21: New Feature Services (individual safeMount for resilience) ──
   safeMount(app, ['/api/contracts', '/api/v1/contracts'], '../routes/contracts.routes');
   safeMount(
@@ -202,9 +189,6 @@ module.exports = function registerPhaseRoutes(
     'Administrative systems routes mounted (strategic planning, complaints, facilities, meetings, visitors, knowledge center)'
   );
 
-  // Phase 29-33
-  safeMount(app, ['/api/phases-29-33', '/api/v1/phases-29-33'], '../routes/phases-29-33.routes');
-
   // ── New Systems — Phase 4 (الأنظمة المضافة — المرحلة الرابعة) ─────────
   safeMount(app, ['/api/kitchen', '/api/v1/kitchen'], '../routes/kitchen.routes');
   safeMount(app, ['/api/laundry', '/api/v1/laundry'], '../routes/laundry.routes');
@@ -219,7 +203,7 @@ module.exports = function registerPhaseRoutes(
   // ── New Systems — Phase 6 (الأنظمة المضافة — المرحلة السادسة) ─────────
   safeMount(app, ['/api/crisis', '/api/v1/crisis'], '../routes/crisis.routes');
   safeMount(app, ['/api/recruitment', '/api/v1/recruitment'], '../routes/recruitment.routes');
-  safeMount(app, ['/api/iot', '/api/v1/iot'], '../routes/iot.routes');
+  // W775 — iot + ar-rehab hollow stubs deleted (IoT UI uses mock fallback; AR live at /ar-vr)
   // Public verification MUST mount before the auth-gated admin router so the
   // /public/* paths match a router without authenticate middleware.
   safeMount(
@@ -228,9 +212,8 @@ module.exports = function registerPhaseRoutes(
     '../routes/blockchain-public.routes'
   );
   safeMount(app, ['/api/blockchain', '/api/v1/blockchain'], '../routes/blockchain.routes');
-  safeMount(app, ['/api/ar-rehab', '/api/v1/ar-rehab'], '../routes/ar-rehab.routes');
   logger.info(
-    'Phase 6 new systems mounted (5 modules: crisis/emergency, recruitment, IoT, blockchain certificates, AR/XR rehabilitation)'
+    'Phase 6 new systems mounted (3 modules: crisis/emergency, recruitment, blockchain certificates)'
   );
 
   // ── BI Dashboard — نظام التقارير والتحليلات ──────────────────────────────
@@ -283,28 +266,13 @@ module.exports = function registerPhaseRoutes(
   // ── Phase 10: Unmounted Route Files — ملفات مسارات غير مُثبّتة ─────
   // High priority — auth & executive
   safeMount(app, ['/api/otp-auth', '/api/v1/otp-auth'], '../routes/otp-auth.routes');
-  safeMount(
-    app,
-    ['/api/executive-dashboard', '/api/v1/executive-dashboard'],
-    '../routes/executive-dashboard'
-  );
-  safeMount(
-    app,
-    ['/api/executive-dashboard-enhanced', '/api/v1/executive-dashboard-enhanced'],
-    '../routes/executive-dashboard-enhanced'
-  );
+  // W773 — executive-dashboard ×2 deleted (zero UI consumers; live surfaces:
+  // /api/v1/ceo-dashboard + domains/dashboards for DDD executive UI).
   safeMount(app, ['/api/incidents', '/api/v1/incidents'], '../routes/incidentRoutes');
   safeMount(app, ['/api/policies', '/api/v1/policies'], '../routes/policyRoutes');
   safeMount(app, ['/api/fcm', '/api/v1/fcm'], '../routes/fcm');
-  safeMount(
-    app,
-    ['/api/cache-management', '/api/v1/cache-management'],
-    '../routes/cache-management.routes'
-  );
   safeMount(app, ['/api/tenants', '/api/v1/tenants'], '../routes/tenant.routes');
-  logger.info(
-    'Phase 10-A mounted (8 modules: otp-auth, executive-dashboard ×2, incidents, policies, fcm, cache-management, tenants)'
-  );
+  logger.info('Phase 10-A mounted (5 modules: otp-auth, incidents, policies, fcm, tenants)');
 
   // Medium priority — analytics & AI
   safeMount(
@@ -328,34 +296,14 @@ module.exports = function registerPhaseRoutes(
   // Sessions, profiles, collaboration
   safeMount(
     app,
-    ['/api/advanced-sessions', '/api/v1/advanced-sessions'],
-    '../routes/advancedSessions'
-  );
-  safeMount(
-    app,
     ['/api/collaboration', '/api/v1/collaboration'],
     '../routes/realtimeCollaboration.routes'
   );
-  safeMount(
-    app,
-    ['/api/community-awareness', '/api/v1/community-awareness'],
-    '../routes/communityAwarenessRoutes'
-  );
-  logger.info(
-    'Phase 10-C mounted (4 modules: advanced-sessions, employee-profiles, collaboration, community-awareness)'
-  );
+  logger.info('Phase 10-C mounted (1 module: collaboration)');
 
-  // Dashboard, integrations, utilities
-  safeMount(
-    app,
-    ['/api/dashboard-unified', '/api/v1/dashboard-unified'],
-    '../routes/dashboard.routes.unified'
-  );
-  safeMount(
-    app,
-    ['/api/dashboard/widgets', '/api/v1/dashboard/widgets'],
-    '../routes/dashboardWidget.routes'
-  );
+  // Dashboard, integrations, utilities — W776: stats engine + widget router at /api/dashboard
+  safeMount(app, ['/api/dashboard', '/api/v1/dashboard'], '../routes/dashboard.stats');
+  safeMount(app, ['/api/dashboard', '/api/v1/dashboard'], '../routes/dashboardWidget.routes');
   safeMount(
     app,
     ['/api/integrations-hub', '/api/v1/integrations-hub'],
@@ -367,7 +315,7 @@ module.exports = function registerPhaseRoutes(
     '../routes/branch-integration.routes'
   );
   logger.info(
-    'Phase 10-D mounted (4 modules: dashboard-unified, dashboard-widgets, integrations-hub, branch-integration)'
+    'Phase 10-D mounted (4 modules: dashboard-stats, dashboard-widgets, integrations-hub, branch-integration)'
   );
 
   // Admin utilities & government
@@ -697,15 +645,6 @@ module.exports = function registerPhaseRoutes(
   safeMount(app, ['/api/visitor-auth', '/api/v1/visitor-auth'], '../routes/visitor-auth.routes');
 
   logger.info('Phase 35 mounted (32 previously unmounted route modules)');
-  // The smart-attendance.routes.js (hyphen) provides additional CRUD sub-modules
-  safeMount(
-    app,
-    ['/api/smart-attendance-crud', '/api/v1/smart-attendance-crud'],
-    '../routes/smart-attendance.routes'
-  );
-  logger.info(
-    'Phase 34 mounted (12 sub-modules: records, behavior-patterns, appeals, parent-notification-preferences, biometric-enrollments, anomaly-alerts, summary-reports, camera-devices, biometric-devices, face-recognition, fingerprint-data, camera-attendance)'
-  );
 
   // ── Phase 35: Beneficiary Management — إدارة المستفيدين ──────────────────
   safeMount(
@@ -726,7 +665,8 @@ module.exports = function registerPhaseRoutes(
   logger.info('Phase 36 mounted (2 sub-modules: expenses, payments)');
 
   // ── System Settings, Saudi Tax, Finance Operations ─────────
-  dualMount(app, 'system-settings', systemSettingsRoutes);
+  // W779: dualMountAuth — systemSettings.routes has inline auth; registry gate is defense-in-depth
+  dualMountAuth(app, 'system-settings', systemSettingsRoutes);
   // ─── prompt_24: الإعدادات المتقدمة مع Override الفروع ────────────────────
   dualMount(app, 'advanced-settings', advancedSettingsRoutes);
   logger.info(

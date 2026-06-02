@@ -114,7 +114,7 @@ const {
   buildMultiStopGoogleMapsUrl,
   computeLiveEta,
   signTrackingToken,
-  verifyTrackingToken,
+  verifyTrackingToken: _verifyTrackingToken,
   haversineDistanceMeters,
   GEOFENCE_RADIUS_METERS,
 } = require('../services/transport/smartTransport.service');
@@ -162,7 +162,7 @@ function auditAsync(entry) {
 }
 
 const routeOptimizer = new RouteOptimizationService();
-const inspectionService = new PreTripInspectionService();
+const _inspectionService = new PreTripInspectionService();
 const notificationService = new ParentNotificationService();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

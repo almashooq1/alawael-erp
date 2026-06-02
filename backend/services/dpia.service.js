@@ -24,7 +24,11 @@ const TRANSITIONS = Object.freeze({
   expired: ['in_review'], // re-review after expiry
 });
 
-function dpiaServiceFactory({ DpiaModel, mfaActorReader = null, enforceMfa = false } = {}) {
+function dpiaServiceFactory({
+  DpiaModel,
+  mfaActorReader: _mfaActorReader = null,
+  enforceMfa = false,
+} = {}) {
   const Dpia = DpiaModel || mongoose.model('Dpia');
 
   async function create(payload, actor) {

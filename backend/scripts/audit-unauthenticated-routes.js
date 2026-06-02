@@ -140,7 +140,13 @@ while ((m = appUseStmtRe.exec(appSrc))) {
 }
 
 // ── 2. In-file auth signal per route file ────────────────────────────
-const AUTH_TOKENS = /\b(authenticate|authenticateToken|requireAuth|requireRole|requireMfaTier)\b/;
+// Recognize every auth-aware middleware used in this repo, not just the
+// canonical `authenticate`. Omitting these produced false positives for
+// routes that ARE auth-aware (e.g. advancedAnalytics → `protect`,
+// dashboard.stats → `optionalAuth`). A route applying ANY of these has
+// made a deliberate auth decision and is not an "anonymous oversight".
+const AUTH_TOKENS =
+  /\b(authenticate|authenticateToken|requireAuth|requireRole|requireMfaTier|protect|optionalAuth|verifyToken|requireUser|ensureAuth|isAuthenticated|loadMfaActor)\b/;
 const ROUTE_DEF = /\brouter\.(get|post|put|patch|delete)\s*\(/;
 const PUBLIC_HINT = /public|webhook|health|status|nps|nafath|callback/i;
 // Verified intentionally-public (no-auth by design, self-guarded). Excluded

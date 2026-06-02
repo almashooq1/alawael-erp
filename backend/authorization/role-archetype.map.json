@@ -15,15 +15,7 @@
     "AUDITOR",
     "NON_MATRIX"
   ],
-  "scopes": [
-    "G",
-    "regional",
-    "B",
-    "U",
-    "S",
-    "self",
-    "none"
-  ],
+  "scopes": ["G", "regional", "B", "U", "S", "self", "none"],
   "map": [
     {
       "live": "super_admin",

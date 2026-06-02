@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');

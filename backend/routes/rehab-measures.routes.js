@@ -26,13 +26,13 @@ const {
   listAllMeasures,
   getMeasure,
   getMeasuresByCategory,
-  getMeasuresForPopulation,
+  getMeasuresForPopulation: _getMeasuresForPopulation,
   getCategories,
 } = require('../rehabilitation-services/rehab-measures-library');
 
 const {
   SmartAssessmentEngine,
-  analyzeProgressTrend,
+  analyzeProgressTrend: _analyzeProgressTrend,
   buildAssessmentPlan,
   generateClinicalSummary,
   generateSMARTGoals,

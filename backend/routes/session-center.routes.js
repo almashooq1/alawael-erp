@@ -20,7 +20,7 @@ const router = express.Router();
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 const sessionCenterSvc = require('../services/sessionCenter.service');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

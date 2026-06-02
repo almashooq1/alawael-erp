@@ -73,16 +73,6 @@ function setupMiddleware(app, { isTestEnv, isProd }) {
     logger.debug('Dev test endpoints mounted: /test-first, /api/test');
   }
 
-  // ── Phase 29-33 public bypass ────────────────────────────────────────────
-  if (process.env.PHASE2933_PUBLIC === 'true') {
-    app.use((req, _res, next) => {
-      if (req.path.startsWith('/api/phases-29-33')) {
-        req.isPhase2933Public = true;
-      }
-      next();
-    });
-  }
-
   // ── Service worker ───────────────────────────────────────────────────────
   app.get('/service-worker.js', (_req, res) => {
     const swPath = require('path').join(__dirname, '..', 'public', 'service-worker.js');
@@ -261,17 +251,7 @@ function setupMiddleware(app, { isTestEnv, isProd }) {
   }
 
   // ── Rate limiting ────────────────────────────────────────────────────────
-  const apiLimiterWithPhase2933Skip = (req, res, next) => {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      process.env.PHASE2933_PUBLIC === 'true' &&
-      (req.path.startsWith('/phases-29-33') || req.path.startsWith('/api/phases-29-33'))
-    ) {
-      return next();
-    }
-    apiLimiter(req, res, next);
-  };
-  app.use('/api', apiLimiterWithPhase2933Skip);
+  app.use('/api', apiLimiter);
 
   // ── Swagger ──────────────────────────────────────────────────────────────
   const { setupSwagger } = require('../config/swagger.config');

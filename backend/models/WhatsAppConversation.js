@@ -155,12 +155,22 @@ const whatsappConversationSchema = new mongoose.Schema(
     lastIntent: String,
     lastSentiment: String,
     requiresHumanReview: { type: Boolean, default: false, index: true },
+    // Why the bot handed this conversation to a human (set on escalation).
+    // Surfaces in the staff pending-review queue so the reason is actionable
+    // without re-deriving it from the message log.
+    escalationReason: String,
+    escalatedAt: Date,
     urgencyLevel: {
       type: String,
       enum: ['low', 'medium', 'high', 'critical'],
       default: 'low',
       index: true,
     },
+    // Numeric mirror of urgencyLevel (higher = more urgent) so paginated DB
+    // queries can `.sort({ urgencyRank: -1 })` correctly. Sorting on the string
+    // enum orders lexically (critical, high, low, medium) and mis-ranks `low`.
+    // Kept in sync via the hooks below — never set this directly.
+    urgencyRank: { type: Number, default: 1, index: true },
     autoReplyEnabled: { type: Boolean, default: true },
 
     // Timestamps
@@ -186,6 +196,7 @@ const whatsappConversationSchema = new mongoose.Schema(
 whatsappConversationSchema.index({ phone: 1, beneficiaryId: 1 }, { unique: true, sparse: true });
 whatsappConversationSchema.index({ requiresHumanReview: 1, status: 1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ urgencyLevel: 1, status: 1 });
+whatsappConversationSchema.index({ urgencyRank: -1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ organizationId: 1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ assignedTo: 1, status: 1 });
 
@@ -200,6 +211,64 @@ whatsappConversationSchema.virtual('latestMessage').get(function () {
 });
 
 // ─── Statics ─────────────────────────────────────────────────────────────────
+// Rank order for the pending-review queue. urgencyLevel is a string enum, so a
+// plain Mongo `.sort({ urgencyLevel: 1 })` orders it LEXICALLY
+// (critical, high, low, medium) — which wrongly ranks `low` above `medium` and
+// `high`. Rank explicitly so the most urgent surfaces first, ties broken by
+// most-recent activity. Pure + side-effect free so it is unit-testable.
+// Numeric urgency rank used both for the stored `urgencyRank` field (higher =
+// more urgent) and to keep one canonical mapping. Unknown levels sink to 0.
+const URGENCY_RANK_DB = { critical: 4, high: 3, medium: 2, low: 1 };
+function urgencyRankFor(level) {
+  return URGENCY_RANK_DB[level] ?? 0;
+}
+
+const URGENCY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
+function sortPendingReview(rows) {
+  return (rows || []).slice().sort((a, b) => {
+    const r = (URGENCY_RANK[a?.urgencyLevel] ?? 9) - (URGENCY_RANK[b?.urgencyLevel] ?? 9);
+    if (r !== 0) return r;
+    return new Date(b?.lastMessageAt || 0).getTime() - new Date(a?.lastMessageAt || 0).getTime();
+  });
+}
+
+// Filters for the dashboard queue-count tiles. Org-scoped so multi-tenant
+// deployments don't over-count across organizations (the sibling analytics
+// aggregation is already org-scoped — these must match). Pure + unit-testable.
+function queueCountFilters(orgId) {
+  const base = { status: { $ne: 'resolved' }, isDeleted: false };
+  if (orgId) base.organizationId = orgId;
+  return {
+    pendingReview: { ...base, requiresHumanReview: true },
+    critical: { ...base, urgencyLevel: 'critical' },
+  };
+}
+
+// Query filter for a by-ID lookup that also enforces org isolation. Path-based
+// `/conversations/:id` routes would otherwise let a foreign-org staff member
+// read/resolve/assign another tenant's conversation (W269 doctrine). Returning
+// the org in the filter means a cross-org id simply yields a clean 404 (no
+// existence leak). Pure + unit-testable.
+function byIdScopedFilter(id, orgId) {
+  const filter = { _id: id };
+  if (orgId) filter.organizationId = orgId;
+  return filter;
+}
+
+// Aggregation $group accumulators for a full 4-tier urgency breakdown. Before
+// W745 getAnalytics only emitted `criticalCount`, so the queue dashboard had
+// no way to size the high/medium/low tiers. Returns an object spreadable into
+// the $group stage: { criticalCount, highCount, mediumCount, lowCount }, each a
+// counting $sum over $urgencyLevel. Pure + unit-testable.
+const URGENCY_LEVELS = ['critical', 'high', 'medium', 'low'];
+function urgencyCountAccumulators() {
+  const acc = {};
+  for (const level of URGENCY_LEVELS) {
+    acc[`${level}Count`] = { $sum: { $cond: [{ $eq: ['$urgencyLevel', level] }, 1, 0] } };
+  }
+  return acc;
+}
+
 whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
@@ -208,10 +277,10 @@ whatsappConversationSchema.statics.findPendingReview = function (orgId) {
   const q = { requiresHumanReview: true, status: { $ne: 'resolved' }, isDeleted: false };
   if (orgId) q.organizationId = orgId;
   return this.find(q)
-    .sort({ urgencyLevel: 1, lastMessageAt: -1 })
     .populate('beneficiaryId', 'personalInfo.firstName personalInfo.lastName fileNumber')
     .populate('familyMemberId', 'firstName lastName relationship')
-    .lean();
+    .lean()
+    .then(sortPendingReview);
 };
 
 whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, endDate) {
@@ -231,7 +300,7 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
         totalConversations: { $sum: 1 },
         totalMessages: { $sum: { $size: '$messages' } },
         avgUnread: { $avg: '$unreadCount' },
-        criticalCount: { $sum: { $cond: [{ $eq: ['$urgencyLevel', 'critical'] }, 1, 0] } },
+        ...urgencyCountAccumulators(),
         resolvedCount: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } },
         pendingReview: { $sum: { $cond: ['$requiresHumanReview', 1, 0] } },
         byIntent: { $push: '$lastIntent' },
@@ -241,6 +310,42 @@ whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, en
   ]);
 };
 
+// ─── Hooks: keep urgencyRank in sync with urgencyLevel ───────────────────────
+whatsappConversationSchema.pre('save', async function () {
+  if (this.isModified('urgencyLevel') || this.isNew) {
+    this.urgencyRank = urgencyRankFor(this.urgencyLevel);
+  }
+});
+
+// Covers the webhook upsert (findOneAndUpdate) + any update*-family write that
+// changes urgencyLevel via $set or a top-level field.
+function syncUrgencyRankOnUpdate(next) {
+  const update = this.getUpdate() || {};
+  const level =
+    (update.$set && update.$set.urgencyLevel) !== undefined
+      ? update.$set.urgencyLevel
+      : update.urgencyLevel;
+  if (level !== undefined) {
+    update.$set = update.$set || {};
+    update.$set.urgencyRank = urgencyRankFor(level);
+    this.setUpdate(update);
+  }
+  next();
+}
+whatsappConversationSchema.pre('findOneAndUpdate', syncUrgencyRankOnUpdate);
+whatsappConversationSchema.pre('updateOne', syncUrgencyRankOnUpdate);
+whatsappConversationSchema.pre('updateMany', syncUrgencyRankOnUpdate);
+
 module.exports =
   mongoose.models.WhatsAppConversation ||
   mongoose.model('WhatsAppConversation', whatsappConversationSchema);
+
+// Pure helper exported for unit tests (the queue sort logic must stay correct).
+module.exports.sortPendingReview = sortPendingReview;
+// Exported so the urgency→rank mapping has a single, testable source of truth.
+module.exports.urgencyRankFor = urgencyRankFor;
+// Exported so the org-scoped queue-count filters stay testable + consistent.
+module.exports.queueCountFilters = queueCountFilters;
+// Exported so the by-id org-isolation filter stays testable + consistent.
+module.exports.byIdScopedFilter = byIdScopedFilter;
+module.exports.urgencyCountAccumulators = urgencyCountAccumulators; // W745

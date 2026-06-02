@@ -2,11 +2,11 @@ import api from './api.client';
 
 const systemService = {
   // Performance Evaluation
-  getEvaluations: async () => api.get('/performance-evaluations'),
-  getEvaluation: async id => api.get(`/performance-evaluations/${id}`),
-  createEvaluation: async data => api.post('/performance-evaluations', data),
-  updateEvaluation: async (id, data) => api.put(`/performance-evaluations/${id}`, data),
-  deleteEvaluation: async id => api.delete(`/performance-evaluations/${id}`),
+  getEvaluations: async () => api.get('/hr/performance/evaluations'),
+  getEvaluation: async id => api.get(`/hr/performance/evaluations/${id}`),
+  createEvaluation: async data => api.post('/hr/performance/evaluations', data),
+  updateEvaluation: async (id, data) => api.put(`/hr/performance/evaluations/${id}`, data),
+  deleteEvaluation: async id => api.delete(`/hr/performance/evaluations/${id}`),
 
   // Succession Planning
   getPlans: async () => api.get('/succession-planning'),
@@ -29,11 +29,14 @@ const systemService = {
   deleteSchedule: async id => api.delete(`/smart-scheduler/${id}`),
 
   // Notification Templates
-  getNotificationTemplates: async () => api.get('/notification-templates'),
-  getNotificationTemplate: async id => api.get(`/notification-templates/${id}`),
-  createNotificationTemplate: async data => api.post('/notification-templates', data),
-  updateNotificationTemplate: async (id, data) => api.put(`/notification-templates/${id}`, data),
-  deleteNotificationTemplate: async id => api.delete(`/notification-templates/${id}`),
+  getNotificationTemplates: async () => api.get('/communication/notifications/templates'),
+  getNotificationTemplate: async id => api.get(`/communication/notifications/templates/${id}`),
+  createNotificationTemplate: async data =>
+    api.post('/communication/notifications/templates', data),
+  updateNotificationTemplate: async (id, data) =>
+    api.put(`/communication/notifications/templates/${id}`, data),
+  deleteNotificationTemplate: async id =>
+    api.delete(`/communication/notifications/templates/${id}`),
 
   // Approval Requests — REMOVED in ADR-029 Option A (2026-05-25). The stub backend
   // at /api/approval-requests was deleted (silent-no-op risk). Use the canonical
@@ -41,11 +44,11 @@ const systemService = {
   // cancelRequest / escalateRequest) which targets /api/v1/approvals instead.
 
   // Templates
-  getTemplates: async () => api.get('/templates'),
-  getTemplate: async id => api.get(`/templates/${id}`),
-  createTemplate: async data => api.post('/templates', data),
-  updateTemplate: async (id, data) => api.put(`/templates/${id}`, data),
-  deleteTemplate: async id => api.delete(`/templates/${id}`),
+  getTemplates: async () => api.get('/reports/templates'),
+  getTemplate: async id => api.get(`/reports/templates/${id}`),
+  createTemplate: async data => api.post('/reports/templates', data),
+  updateTemplate: async (id, data) => api.put(`/reports/templates/${id}`, data),
+  deleteTemplate: async id => api.delete(`/reports/templates/${id}`),
 
   // RBAC
   getRoles: async () => api.get('/rbac/roles'),

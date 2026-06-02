@@ -113,7 +113,6 @@ describe('Route Mount Guard', () => {
         // specialized registry exposes newer endpoints.
         '/api/internal-audit', // _registry.js (self-duplicate, 2x in registry)
         '/api/traffic-accidents', // _registry.js self-duplicate
-        '/api/specialized-programs', // _registry.js self-duplicate
         '/api/smart-scheduler', // _registry.js self-duplicate
         '/api/ai-diagnostic', // _registry.js + phases.registry.js
         '/api/bus-tracking', // _registry.js + phases.registry.js

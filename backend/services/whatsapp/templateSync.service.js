@@ -352,6 +352,33 @@ function clearCache() {
   cache = { data: null, expiresAt: 0 };
 }
 
+/**
+ * Lightweight approval-status lookup for a Meta template, by name only.
+ *
+ * Unlike `validateSendParams` (which also checks param counts/lengths), this
+ * answers the single question "is this template deliverable right now?". When
+ * the same template exists in multiple languages, an APPROVED row in ANY
+ * language wins — mirroring the admin UI's deliverability indicator.
+ *
+ * Fails OPEN (returns `null`) when the row is absent or Mongo is unavailable,
+ * so a sync glitch never blocks an otherwise-valid send.
+ *
+ * @param {string} templateName  Meta-registered template name
+ * @returns {Promise<string|null>}  status string (e.g. 'APPROVED'), or null
+ */
+async function getTemplateStatus(templateName) {
+  if (!templateName) return null;
+  let rows;
+  try {
+    rows = await WhatsAppTemplate.find({ templateName }).select('status').lean();
+  } catch {
+    return null; // fail open — DB unavailable
+  }
+  if (!rows || rows.length === 0) return null;
+  if (rows.some(r => r.status === 'APPROVED')) return 'APPROVED';
+  return rows[0].status;
+}
+
 module.exports = {
   WhatsAppTemplate,
   sync,
@@ -360,6 +387,7 @@ module.exports = {
   listApproved,
   clearCache,
   validateSendParams,
+  getTemplateStatus,
   _extractBodyText: extractBodyText,
   _countPlaceholders: countPlaceholders,
 };

@@ -127,7 +127,7 @@ async function createScale(input, actorId, opts = {}) {
       try {
         require('../models/Beneficiary');
         Beneficiary = mongoose.model('Beneficiary');
-      } catch (e2) {
+      } catch {
         // Beneficiary model unavailable in test/internal callers.
         // Skip the branch check (the test pattern injects mocked
         // models; opts.enforceBranch is unset in those paths).

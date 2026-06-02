@@ -200,7 +200,7 @@ router.post('/auth/login', loginLimiter, async (req, res) => {
       beneficiaryId: primaryBeneficiary ? String(primaryBeneficiary._id) : null,
       nameAr: [guardian.firstName_ar, guardian.lastName_ar].filter(Boolean).join(' ').trim() || '—',
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'InternalError',
       message: 'login failed',
@@ -267,7 +267,7 @@ router.get('/me', authenticate, async (req, res) => {
           }
         : null,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({
       error: 'InternalError',
       message: 'failed to load guardian profile',
@@ -319,7 +319,7 @@ router.get('/beneficiaries/:id/summary', authenticate, async (req, res) => {
       activeCarePlanSummary: summary,
       activeCarePlanStatus: activePlan?.status || null,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -353,7 +353,7 @@ router.get('/beneficiaries/:id/sessions', authenticate, async (req, res) => {
         therapistId: a.therapist ? String(a.therapist) : '',
       }))
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -395,7 +395,7 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
         };
       })
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -472,7 +472,7 @@ router.get('/beneficiaries/:id/care-plan', authenticate, async (req, res) => {
       endDate: plan.reviewDate ? new Date(plan.reviewDate).toISOString().slice(0, 10) : null,
       goals,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -613,7 +613,7 @@ router.get('/home', authenticate, async (req, res) => {
       recentMilestone: null,
       progress30d,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -657,7 +657,7 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
     }));
 
     return res.json({ count: data.length, appointments: data });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -704,7 +704,7 @@ router.post('/appointments/:appointmentId/reschedule-request', authenticate, asy
     });
 
     return res.json({ ok: true, appointmentId: req.params.appointmentId });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -766,7 +766,7 @@ router.get('/beneficiaries/:id/reports', authenticate, async (req, res) => {
     }
 
     return res.json(reports);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -789,7 +789,7 @@ router.get('/beneficiaries/:id/assessments', authenticate, async (req, res) => {
       report = { error: 'unavailable', measures: [] };
     }
     return res.json(report);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -819,7 +819,7 @@ router.get('/beneficiaries/:id/assessment-forms', authenticate, async (req, res)
         items: ib.itemBank.items,
       }));
     return res.json({ forms, total: forms.length });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -895,7 +895,7 @@ router.post('/beneficiaries/:id/assessment-forms/:code', authenticate, async (re
         message_ar: 'شكرًا لك. تم استلام إجاباتك وسيراجعها الفريق العلاجي قريبًا.',
       },
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -953,7 +953,7 @@ router.get('/reports/:reportId', authenticate, async (req, res) => {
       goalsUpdates: [], // GoalProgressEntry join wires here in phase 16
       attachments: [], // Documents service integration pending
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1024,7 +1024,7 @@ router.get('/approvals', authenticate, async (req, res) => {
     items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return res.json(items);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1098,7 +1098,7 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
     }
 
     return res.status(404).json({ error: 'NotFound', message: 'approval not found' });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1171,7 +1171,7 @@ router.get('/invoices', authenticate, async (req, res) => {
         };
       })
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1302,7 +1302,7 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
         message: gwErr instanceof Error ? gwErr.message : 'payment gateway error',
       });
     }
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1323,7 +1323,7 @@ router.get('/messages/threads', authenticate, async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
     const threads = await _messagingService.getThreads(userId, { page, limit });
     return res.json(threads);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1346,7 +1346,7 @@ router.get('/messages/threads/:threadId', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'BadRequest', message: r.reason });
     }
     return res.json({ thread: r.thread, messages: r.messages });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1386,7 +1386,7 @@ router.post('/messages/threads/:threadId', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'BadRequest', message: r.reason });
     }
     return res.status(201).json({ message: r.message });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1456,7 +1456,7 @@ router.get('/consents', authenticate, async (req, res) => {
         expiresAt: c.expiresAt ? new Date(c.expiresAt).toISOString() : null,
       }))
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1504,7 +1504,7 @@ router.post('/consents/:id/grant', authenticate, async (req, res) => {
       revokedAt: null,
       expiresAt: doc.expiresAt ? new Date(doc.expiresAt).toISOString() : null,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1553,7 +1553,7 @@ router.post('/consents/:id/revoke', authenticate, async (req, res) => {
       revokedAt: doc.revokedAt.toISOString(),
       expiresAt: doc.expiresAt ? new Date(doc.expiresAt).toISOString() : null,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1615,7 +1615,7 @@ router.get('/settings/notifications', authenticate, async (req, res) => {
     if (!g) return res.status(404).json({ error: 'GuardianNotFound' });
 
     return res.json(coerceNotificationPrefs(g.notificationPrefs));
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1635,7 +1635,7 @@ router.put('/settings/notifications', authenticate, async (req, res) => {
       { strict: false }
     );
     return res.json(prefs);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });
@@ -1685,7 +1685,7 @@ router.get('/settings/delegates', authenticate, async (req, res) => {
             : null,
       }))
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'InternalError', message: 'failed' });
   }
 });

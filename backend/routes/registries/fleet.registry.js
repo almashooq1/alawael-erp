@@ -17,10 +17,7 @@
  * @param {object} helpers  – { safeRequire, dualMount, logger }
  *   NOTE: safeRequire resolves paths relative to _registry.js (its definer).
  */
-module.exports = function registerFleetRoutes(
-  app,
-  { safeRequire, dualMount, dualMountAuth, logger, authenticate }
-) {
+module.exports = function registerFleetRoutes(app, { safeRequire, dualMount, logger }) {
   // ── Imports ──────────────────────────────────────────────────────────────
   const driversRoutes = safeRequire('../routes/drivers');
   const vehiclesRoutes = safeRequire('../routes/vehicles');

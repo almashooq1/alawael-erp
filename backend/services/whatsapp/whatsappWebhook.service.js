@@ -382,35 +382,60 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
         }
       }
     } else if (decision.action === autoReply.ACTION.TEMPLATE && decision.templateName) {
-      const params = autoReply.buildTemplateParams(decision, {
-        beneficiaryName,
-        guardianName: ctxName,
-      });
-      autoReplySent = await whatsappService.sendTemplate(
-        fromPhone,
-        decision.templateName,
-        'ar',
-        params || []
-      );
-      if (autoReplySent?.success && Conversation && conv) {
-        await Conversation.updateOne(
-          { _id: conv._id },
-          {
-            $push: {
-              messages: {
-                direction: 'outgoing',
-                type: 'template',
-                text: `[template: ${decision.templateName}]`,
-                providerMessageId: autoReplySent.messageId,
-                timestamp: new Date(),
-                isAutoReply: true,
-                autoReplyDecision: decision,
-                deliveryStatus: 'sent',
-              },
-            },
-            $set: { lastMessageAt: new Date(), unreadCount: 0 },
-          }
+      // W738: gate auto-reply templates through the same approval check the
+      // event dispatcher uses (W731). Meta silently drops an unapproved
+      // template, so the inbound user would get nothing. Better to skip the
+      // auto-reply and force escalation so a human follows up. Fail OPEN: a
+      // null status (no cached row / DB error) means "don't block".
+      let templateStatus = null;
+      try {
+        templateStatus = await require('./templateSync.service').getTemplateStatus(
+          decision.templateName
         );
+      } catch (_e) {
+        templateStatus = null;
+      }
+
+      if (templateStatus && templateStatus !== 'APPROVED') {
+        logger.warn(
+          `[WhatsApp AutoReply] template "${decision.templateName}" not deliverable ` +
+            `(status=${templateStatus}); skipping auto-reply, forcing escalation.`
+        );
+        // Convert this turn into an escalation so the block below alerts staff.
+        decision.action = autoReply.ACTION.ESCALATE;
+        decision.severity = decision.severity || 'high';
+        decision.reason = `${decision.reason};template_not_approved:${templateStatus}`;
+      } else {
+        const params = autoReply.buildTemplateParams(decision, {
+          beneficiaryName,
+          guardianName: ctxName,
+        });
+        autoReplySent = await whatsappService.sendTemplate(
+          fromPhone,
+          decision.templateName,
+          'ar',
+          params || []
+        );
+        if (autoReplySent?.success && Conversation && conv) {
+          await Conversation.updateOne(
+            { _id: conv._id },
+            {
+              $push: {
+                messages: {
+                  direction: 'outgoing',
+                  type: 'template',
+                  text: `[template: ${decision.templateName}]`,
+                  providerMessageId: autoReplySent.messageId,
+                  timestamp: new Date(),
+                  isAutoReply: true,
+                  autoReplyDecision: decision,
+                  deliveryStatus: 'sent',
+                },
+              },
+              $set: { lastMessageAt: new Date(), unreadCount: 0 },
+            }
+          );
+        }
       }
     }
     // ACTION.ESCALATE and ACTION.NONE fall through to escalation block below.
@@ -427,6 +452,33 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     classified.requiresHumanReview;
 
   if (shouldEscalate) {
+    // W739: flag the conversation itself so it surfaces in the staff
+    // "pending review" queue (Conversation.findPendingReview filters on
+    // requiresHumanReview). Without this, an explicit ESCALATE decision
+    // (emergency/complaint) or a W738 template-not-deliverable escalation
+    // would only fire a notification but leave the conversation un-flagged
+    // when classified.requiresHumanReview was false. Never throws.
+    if (Conversation && conv) {
+      const escalationReason =
+        decision.reason ||
+        (classified.urgencyLevel === 'critical'
+          ? `critical_urgency:${classified.intent}`
+          : `requires_human_review:${classified.intent}`);
+      await Conversation.updateOne(
+        { _id: conv._id },
+        {
+          $set: {
+            requiresHumanReview: true,
+            status: 'escalated',
+            escalationReason,
+            escalatedAt: new Date(),
+          },
+        }
+      ).catch(err =>
+        logger.warn(`[WhatsApp Webhook] escalation flag update failed: ${err.message}`)
+      );
+    }
+
     try {
       const notifService = require('../notifications/notification-enhanced.service');
       if (notifService?.send) {

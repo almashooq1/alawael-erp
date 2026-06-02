@@ -92,7 +92,14 @@ const CLOSE_ROLES = [
 ];
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
-const { CATEGORIES, SEVERITY, STATUSES, OUTCOMES, SUBJECT_KINDS, NOTIFICATION_METHODS } = Concern;
+const {
+  CATEGORIES,
+  SEVERITY,
+  STATUSES,
+  OUTCOMES,
+  SUBJECT_KINDS,
+  NOTIFICATION_METHODS: _NOTIFICATION_METHODS,
+} = Concern;
 
 function startOfDay(d) {
   const x = new Date(d);

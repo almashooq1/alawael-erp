@@ -24,11 +24,11 @@ const educationService = {
   deleteMontessoriProgram: async id => api.delete(`/montessori/${id}`),
 
   // Specialized Programs
-  getPrograms: async () => api.get('/specialized-programs'),
-  getProgram: async id => api.get(`/specialized-programs/${id}`),
-  createProgram: async data => api.post('/specialized-programs', data),
-  updateProgram: async (id, data) => api.put(`/specialized-programs/${id}`, data),
-  deleteProgram: async id => api.delete(`/specialized-programs/${id}`),
+  getPrograms: async () => api.get('/programs'),
+  getProgram: async id => api.get(`/programs/${id}`),
+  createProgram: async data => api.post('/programs', data),
+  updateProgram: async (id, data) => api.put(`/programs/${id}`, data),
+  deleteProgram: async id => api.delete(`/programs/${id}`),
 
   // Community — backend router is mounted at /community with content CRUD under
   // /content (a bare GET /community has no handler → 404).

@@ -97,7 +97,7 @@ function _prepare(admins) {
  * @param {Object} [options]
  * @returns {Object} signal
  */
-function evaluateMeasure(measure, options = {}) {
+function evaluateMeasure(measure, _options = {}) {
   const code = measure.measureCode;
   const direction = measure.direction || 'higher_better';
   const { ordered, spanDays } = _prepare(measure.administrations);

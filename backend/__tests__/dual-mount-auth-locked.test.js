@@ -27,6 +27,7 @@ const path = require('path');
 
 const REGISTRY_FILES = [
   '../routes/_registry.js',
+  '../routes/registries/phases.registry.js', // W779: system-settings lives here post-W775
   '../routes/registries/features.registry.js',
   '../routes/registries/government.registry.js',
   '../routes/registries/clinical-assessment.registry.js',
@@ -87,7 +88,7 @@ function collectMounts() {
 describe('dualMountAuth invariant (commit 501420d66)', () => {
   const mounts = collectMounts();
 
-  it('sanity: at least 50 mounts scanned across the 4 registry files', () => {
+  it('sanity: at least 50 mounts scanned across the registry files', () => {
     expect(mounts.length).toBeGreaterThanOrEqual(50);
   });
 

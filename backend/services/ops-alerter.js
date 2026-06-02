@@ -135,7 +135,10 @@ async function sendOpsAlert({ kind, severity = 'high', subject, body, metadata }
   }
 
   const anySuccess = results.some(r => r.success);
-  await recordDelivery(anySuccess ? 'delivered' : 'failed', anySuccess ? '' : 'all channels failed');
+  await recordDelivery(
+    anySuccess ? 'delivered' : 'failed',
+    anySuccess ? '' : 'all channels failed'
+  );
   logger.info('[ops-alerter] dispatched', {
     kind,
     severity,

@@ -95,7 +95,7 @@ class PlanReviewSlaService {
    */
   async sweep({ branchId, now = new Date(), warningHours = 24, urgentHours = 48 } = {}) {
     const warnCutoff = new Date(now.getTime() - warningHours * 3600_000);
-    const urgentCutoff = new Date(now.getTime() - urgentHours * 3600_000);
+    const _urgentCutoff = new Date(now.getTime() - urgentHours * 3600_000);
 
     // Fetch all unack'd CRITICAL reviews older than the warning cutoff
     // (a single query for both tiers — we then split by age in JS).

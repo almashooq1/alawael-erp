@@ -24,6 +24,16 @@ const express = require('express');
 const request = require('supertest');
 const mongoose = require('mongoose');
 
+// Routes below /webhook require authenticate; webhook POST requires HMAC verify.
+jest.mock('../../middleware/auth', () => {
+  const actual = jest.requireActual('../../middleware/auth');
+  const passThrough = (req, _res, next) => {
+    req.user = { id: 'u-test', role: 'admin' };
+    next();
+  };
+  return { ...actual, authenticate: passThrough, authenticateToken: passThrough };
+});
+
 // ─── Mock WhatsApp services ──────────────────────────────────────────────────
 const mockVerifyWebhook = jest.fn();
 const mockSendText = jest.fn();
@@ -59,9 +69,11 @@ jest.mock('../../services/whatsapp/whatsappAI.service', () => ({
 }));
 
 const mockProcessWebhook = jest.fn().mockResolvedValue({ processed: true });
+const mockVerifySignature = jest.fn().mockReturnValue(true);
 
 jest.mock('../../services/whatsapp/whatsappWebhook.service', () => ({
   processWebhook: (...args) => mockProcessWebhook(...args),
+  verifySignature: (...args) => mockVerifySignature(...args),
 }));
 
 const TEMPLATE_LIST = [
@@ -109,12 +121,26 @@ const mockConversationGetAnalytics = jest.fn().mockResolvedValue({
   avgResponseTime: 0,
 });
 
+const mockFindOneReturn = {
+  populate: jest.fn().mockReturnThis(),
+  lean: jest.fn().mockResolvedValue(null),
+};
+const mockConversationFindOne = jest.fn().mockReturnValue(mockFindOneReturn);
+const mockByIdScopedFilter = jest.fn((id, _orgId) => ({ _id: id }));
+const mockQueueCountFilters = jest.fn(() => ({
+  pendingReview: { requiresHumanReview: true },
+  critical: { urgencyLevel: 'critical' },
+}));
+
 const MockConversationModel = {
   find: mockConversationFind,
+  findOne: mockConversationFindOne,
   findById: mockConversationFindById,
   countDocuments: mockConversationCountDocuments,
   findPendingReview: mockConversationFindPendingReview,
   getAnalytics: mockConversationGetAnalytics,
+  byIdScopedFilter: mockByIdScopedFilter,
+  queueCountFilters: mockQueueCountFilters,
   findByIdAndUpdate: jest.fn().mockResolvedValue(null),
   findOneAndUpdate: jest.fn().mockResolvedValue(null),
 };
@@ -122,10 +148,13 @@ const MockConversationModel = {
 // Mock the model module directly so jest.mock() persists across resetModules
 jest.mock('../../models/WhatsAppConversation', () => ({
   find: mockConversationFind,
+  findOne: mockConversationFindOne,
   findById: mockConversationFindById,
   countDocuments: mockConversationCountDocuments,
   findPendingReview: mockConversationFindPendingReview,
   getAnalytics: mockConversationGetAnalytics,
+  byIdScopedFilter: mockByIdScopedFilter,
+  queueCountFilters: mockQueueCountFilters,
   findByIdAndUpdate: jest.fn().mockResolvedValue(null),
   findOneAndUpdate: jest.fn().mockResolvedValue(null),
 }));
@@ -155,6 +184,8 @@ beforeEach(() => {
   mockConversationFind.mockReturnValue(mockFindReturn);
   mockConversationCountDocuments.mockResolvedValue(0);
   mockFindReturn.lean.mockResolvedValue([]);
+  mockFindOneReturn.lean.mockResolvedValue(null);
+  mockConversationFindOne.mockReturnValue(mockFindOneReturn);
   mockConversationFindPendingReview.mockResolvedValue([]);
   mockConversationGetAnalytics.mockResolvedValue({
     totalConversations: 0,
@@ -162,6 +193,7 @@ beforeEach(() => {
     byUrgency: [],
     avgResponseTime: 0,
   });
+  mockVerifySignature.mockReturnValue(true);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -251,10 +283,8 @@ describe('GET /conversations/pending-review', () => {
 
 describe('GET /conversations/:id', () => {
   test('returns 404 when conversation not found', async () => {
-    mockConversationFindById.mockReturnValue({
-      populate: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue(null),
-    });
+    mockFindOneReturn.lean.mockResolvedValue(null);
+    mockConversationFindOne.mockReturnValue(mockFindOneReturn);
     const app = makeApp();
     const res = await request(app).get('/api/v1/whatsapp/conversations/507f1f77bcf86cd799439011');
     expect(res.status).toBe(404);
@@ -263,10 +293,8 @@ describe('GET /conversations/:id', () => {
 
   test('returns conversation when found', async () => {
     const conv = { _id: '507f1f77bcf86cd799439011', phone: '+966501234567', messages: [] };
-    mockConversationFindById.mockReturnValue({
-      populate: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue(conv),
-    });
+    mockFindOneReturn.lean.mockResolvedValue(conv);
+    mockConversationFindOne.mockReturnValue(mockFindOneReturn);
     const app = makeApp();
     const res = await request(app).get('/api/v1/whatsapp/conversations/507f1f77bcf86cd799439011');
     expect(res.status).toBe(200);

@@ -122,7 +122,7 @@ const ENTITY_SCOPE_RE =
   /\$match[^]*?(therapist|beneficiary|employee|user|assignedTo|createdBy)\s*:\s*[\w.[\]'"]+\._id|\$match[^]*?:\s*new\s*\(?\s*(require\(['"]mongoose['"]\)\.)?Types\.ObjectId/;
 // A $match pinned to a named filter VARIABLE (commonly built by a scoped
 // helper like baseQuery(req)/branchFilter — verify, don't auto-trust).
-const VAR_MATCH_RE = /\$match:\s*(q|filter|base|scope|dateFilter|matchStage|sessionFilter)\s*[\},]/;
+const VAR_MATCH_RE = /\$match:\s*(q|filter|base|scope|dateFilter|matchStage|sessionFilter)\s*[},]/;
 
 function piiRouteScan() {
   const hits = [];

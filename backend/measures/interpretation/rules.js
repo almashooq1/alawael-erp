@@ -446,7 +446,7 @@ function _substitute(template, vars, locale) {
   });
 }
 
-function renderTemplate(category, vars, locale = 'ar') {
+function renderTemplate(category, vars, _locale = 'ar') {
   const tpl = TEMPLATES[category];
   if (!tpl) {
     return { ar: vars.measureName_ar || '', en: vars.measureName || '' };

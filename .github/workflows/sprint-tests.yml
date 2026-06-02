@@ -933,6 +933,9 @@ on:
       - 'backend/__tests__/reporting-scheduler-bootstrap-wave762.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/registry-mount-resilience-wave778.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/purchasing-vendor-order-wave780.test.js'
+      - 'backend/__tests__/purchasing-routes-real-data-wave780.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1849,6 +1852,9 @@ on:
       - 'backend/__tests__/reporting-scheduler-bootstrap-wave762.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/registry-mount-resilience-wave778.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/purchasing-vendor-order-wave780.test.js'
+      - 'backend/__tests__/purchasing-routes-real-data-wave780.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

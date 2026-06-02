@@ -491,13 +491,11 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
-  // ── Gap-fill: rehab-licenses — auth required (stub until real engine) ──
-  // W658 promoted rehab-licenses to dualMountAuth (was anonymous-reachable).
-  // W771 removed hollow alerts + approvals stubs — they shadowed the live
-  // surfaces: app.js mounts measure-alert workflow at /api/v1/alerts; the real
-  // approval-chain engine is wired below (authorization/approvals).
+  // ── Rehab-licenses — Mongo-backed License engine (W772) ───────────────
+  // W658 promoted to dualMountAuth; W772 replaced the 92-handler hollow stub
+  // with services/rehabLicenses.service.js (entityType=rehab_center_license).
   dualMountAuth(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
-  logger.info('✅ Gap-fill routes mounted: rehab-licenses');
+  logger.info('✅ Rehab-licenses routes mounted (Mongo-backed): /api/(v1/)rehab-licenses');
 
   // ── Approvals — REAL authorization chain engine (W771) ───────────────
   // Legacy frontend calls /api/v1/approvals (inbox, approve, reject, …).

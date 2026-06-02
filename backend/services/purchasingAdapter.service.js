@@ -10,6 +10,7 @@
  * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
  * W787: legacy stats field aliases for PurchasingManagement.js tiles.
  * W789: PR itemId normalization (legacy product/estimatedPrice → itemName/itemId).
+ * W790: lineItems + itemsSummary on PO/GRN/PR legacy payloads for branch UI.
  */
 
 const { applyStockReceiptForPoLines } = require('./purchasingStockReceive.lib');
@@ -80,11 +81,47 @@ function mapVendorToLegacy(doc) {
   };
 }
 
+function mapPoLineToLegacy(it) {
+  if (!it) return null;
+  const rawId = it.item_id || it.itemId;
+  return {
+    itemId: rawId || null,
+    itemName: it.item_name_ar || it.itemName || it.item_name || 'Item',
+    itemCode: it.item_code || it.itemCode,
+    quantity: it.quantity_ordered ?? it.quantity ?? 0,
+    quantityReceived: it.quantity_received ?? 0,
+    unitCost: it.unit_cost ?? it.unitCost ?? 0,
+    totalCost: it.total_cost ?? it.totalCost ?? 0,
+    unit: it.unit_of_measure || it.unit || 'ea',
+  };
+}
+
+function mapReceiptLineToLegacy(it) {
+  if (!it) return null;
+  return {
+    itemName: it.item_name || it.itemName || 'Item',
+    quantityOrdered: it.quantity_ordered ?? 0,
+    quantityReceived: it.quantity_received ?? 0,
+    unitCost: it.unit_cost ?? 0,
+  };
+}
+
+function buildItemsSummary(lines, mapFn, { max = 2, qtyKey = 'quantity' } = {}) {
+  if (!Array.isArray(lines) || !lines.length) return '';
+  const mapped = lines.map(mapFn).filter(Boolean);
+  const parts = mapped.slice(0, max).map(l => `${l.itemName} (×${l[qtyKey] ?? 0})`);
+  if (mapped.length > max) parts.push(`+${mapped.length - max}`);
+  return parts.join('، ');
+}
+
 function mapPoToLegacy(doc) {
   if (!doc) return doc;
   const o = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
   const orderDate = o.order_date ? new Date(o.order_date) : new Date();
   const delivery = o.expected_delivery_date ? new Date(o.expected_delivery_date) : null;
+  const rawLines = Array.isArray(o.items) ? o.items : [];
+  const lineItems = rawLines.map(mapPoLineToLegacy).filter(Boolean);
+  const itemsCount = rawLines.length;
   return {
     ...o,
     _id: o._id,
@@ -92,7 +129,11 @@ function mapPoToLegacy(doc) {
     vendor: o.vendor || o.supplier_name || '',
     date: orderDate.toISOString().slice(0, 10),
     deliveryDate: delivery ? delivery.toISOString().slice(0, 10) : '',
-    items: Array.isArray(o.items) ? o.items.length : o.items || 0,
+    items: itemsCount,
+    itemsCount,
+    lineItems,
+    itemsSummary: buildItemsSummary(rawLines, mapPoLineToLegacy),
+    linkedItemCount: lineItems.filter(l => l.itemId).length,
     totalAmount: o.totalAmount ?? o.total_amount ?? 0,
     status: legacyPoStatus(o.status),
     department: o.department || '',
@@ -102,7 +143,17 @@ function mapPoToLegacy(doc) {
 function mapPrToLegacyRequest(doc) {
   if (!doc) return doc;
   const o = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
-  const firstItem = Array.isArray(o.items) && o.items[0];
+  const rawLines = Array.isArray(o.items) ? o.items : [];
+  const lineItems = rawLines.map(it => ({
+    itemId: it.itemId || null,
+    itemName: it.itemName || 'Item',
+    itemCode: it.itemCode,
+    quantity: it.quantity ?? 0,
+    unitCost: it.estimatedUnitPrice ?? 0,
+    unit: it.unit || 'ea',
+  }));
+  const firstItem = rawLines[0];
+  const itemsCount = rawLines.length;
   return {
     ...o,
     _id: o._id,
@@ -118,6 +169,14 @@ function mapPrToLegacyRequest(doc) {
     requestedBy: o.requestedBy || o.requester?.nameSnapshot || '',
     priority: o.priority || 'normal',
     estimatedValue: o.summary?.estimatedValue ?? o.estimatedValue ?? 0,
+    items: itemsCount,
+    itemsCount,
+    lineItems,
+    itemsSummary: buildItemsSummary(rawLines, it => ({
+      itemName: it.itemName || 'Item',
+      quantity: it.quantity ?? 0,
+    })),
+    linkedItemCount: lineItems.filter(l => l.itemId).length,
   };
 }
 
@@ -516,6 +575,7 @@ function mapReceiptToLegacy(doc) {
   if (!doc) return doc;
   const o = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
   const lines = o.items || [];
+  const lineItems = lines.map(mapReceiptLineToLegacy).filter(Boolean);
   const ordered = lines.reduce((s, l) => s + (l.quantity_ordered || 0), 0);
   const received = lines.reduce((s, l) => s + (l.quantity_received || 0), 0);
   const d = o.receipt_date ? new Date(o.receipt_date) : new Date();
@@ -530,7 +590,13 @@ function mapReceiptToLegacy(doc) {
     branch: o.branch || (o.branch_id ? String(o.branch_id) : ''),
     date: d.toISOString().slice(0, 10),
     items: lines.length,
+    itemsCount: lines.length,
+    lineItems,
+    itemsSummary: buildItemsSummary(lines, mapReceiptLineToLegacy, {
+      qtyKey: 'quantityReceived',
+    }),
     totalReceived: received,
+    totalOrdered: ordered,
     totalAmount: o.totalAmount ?? o.total_amount ?? 0,
     status: o.status,
     receivedBy: o.receivedBy || o.received_by_name || '',

@@ -1,7 +1,7 @@
 import api from './api.client';
 import apiClient from './api';
 
-const BASE = '/api/v1/projects';
+const BASE = '/pm/projects';
 
 const projectManagementService = {
   // Projects

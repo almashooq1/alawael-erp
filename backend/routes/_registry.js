@@ -161,7 +161,6 @@ const careBeneficiary360Routes = safeRequire('../routes/care/beneficiary360.rout
 const careRetentionRoutes = safeRequire('../routes/care/retention.routes');
 const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
-const projectsRoutes = safeRequire('../routes/projects.routes');
 const branchesRoutes = safeRequire('../routes/branches.routes');
 const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
 const beneficiariesAdminRoutes = safeRequire('../routes/beneficiaries');
@@ -454,7 +453,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'care/retention', careRetentionRoutes);
   dualMount(app, 'equipment', equipmentRoutes);
   dualMount(app, 'predictions', predictionsRoutes);
-  dualMount(app, 'projects', projectsRoutes);
   dualMount(app, 'branches', branchesRoutes);
   dualMount(app, 'beneficiary-portal', beneficiaryPortalRoutes);
   dualMount(app, 'beneficiaries', beneficiariesAdminRoutes);
@@ -496,9 +494,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'medical-files', require('../routes/medicalFiles'));
 
   // ── New API routes for frontend services ────────────────────────────────
-  dualMount(app, 'support', require('../routes/supportTickets.routes'));
-  dualMount(app, 'specialized-programs', require('../routes/specializedPrograms.routes'));
-  dualMount(app, 'performance-evaluations', require('../routes/performanceEvaluations.routes'));
+  // W775 — specialized-programs legacy alias → real programs domain (Mongo-backed)
+  dualMountAuth(
+    app,
+    'specialized-programs',
+    safeRequire('../domains/programs/routes/programs.routes')
+  );
   dualMount(app, 'smart-scheduler', require('../routes/smartScheduler.routes'));
   dualMount(app, 'appointments', require('../routes/appointments.routes'));
   dualMount(app, 'bookings', require('../routes/public-booking.routes'));
@@ -567,12 +568,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/branch-compliance', require('../routes/branch-compliance.routes'));
   dualMount(app, 'admin/adapter-audit', require('../routes/adapter-audit.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));
-  dualMount(app, 'notification-templates', require('../routes/notificationTemplates.routes'));
   // ADR-029 Option A (2026-05-25): the approvalRequests stub at /api/approval-requests was
   // deleted because it returned hardcoded fake data including silent-no-op POST handlers.
   // The canonical implementation at authorization/approvals/approvals.routes.js mounted at
   // /api/v1/approvals is the real surface; SystemAdmin's lone caller was migrated to use it.
-  dualMount(app, 'templates', require('../routes/templates.routes'));
   dualMount(app, 'groups', require('../routes/groups.routes'));
 
   // ── Reports & Analytics Module (وحدة التقارير والتحليلات) ─────────────────
@@ -694,16 +693,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-management', safeRequire('../routes/qualityManagement.routes'));
   // Purchasing — المشتريات
   dualMountAuth(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
-  // Fuel Management — إدارة الوقود
-  dualMountAuth(app, 'fuel', safeRequire('../routes/fuel.routes'));
-  // Transport Overview — نظرة عامة على النقل
-  dualMountAuth(app, 'transport', safeRequire('../routes/transport.routes'));
-  // Form Templates — النماذج الجاهزة — auth required
-  dualMountAuth(app, 'form-templates', safeRequire('../routes/form-templates.routes'));
+  // Form Templates — real Mongo FormTemplate engine (W775; was hollow stub)
+  dualMountAuth(app, 'form-templates', safeRequire('../routes/formTemplate.routes'));
   // Report Builder — mounted in phases.registry.js via reportBuilder.routes (W771
   // removed the hollow report-builder.routes.js stub that shadowed the real surface)
-  // System Settings — إعدادات النظام — auth required (exposes security config)
-  dualMountAuth(app, 'system-settings', safeRequire('../routes/system-settings.routes'));
+  // System Settings — live router mounted in phases.registry.js (systemSettings.routes.js)
 
   // Unified Care Plans (خطط الرعاية الموحدة) — auth required (PII)
   dualMountAuth(app, 'care-plans', safeRequire('../domains/care-plans/routes/care-plans.routes'));
@@ -794,14 +788,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
   // Internal Audit — التدقيق الداخلي
   dualMount(app, 'internal-audit', safeRequire('../routes/internalAudit'));
-  // Specialized Programs — البرامج المتخصصة
-  dualMount(app, 'specialized-programs', safeRequire('../routes/specializedPrograms.routes'));
   // Disability Rehabilitation (maps to specialized rehab domain)
   dualMountAuth(app, 'disability-rehab', safeRequire('../routes/rehabilitation-specialized.routes'));
   // Rehabilitation Equipment
   dualMount(app, 'rehab-equipment', safeRequire('../routes/medicalEquipment.routes'));
-  // Social Media Management — إدارة وسائل التواصل الاجتماعي
-  dualMountAuth(app, 'social-media', safeRequire('../routes/social-media.routes'));
   // Break-glass — wired in features.registry.js (real authorization engine, W770)
 
   logger.info(

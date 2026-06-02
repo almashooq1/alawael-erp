@@ -109,39 +109,39 @@ export const therapySessionService = {
 // ═══════════════════════════════════════════
 export const specializedProgramService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/api/v1/specialized-programs', { params });
+    const r = await apiClient.get('/api/v1/programs', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/api/v1/specialized-programs/${id}`);
+    const r = await apiClient.get(`/api/v1/programs/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/api/v1/specialized-programs', data);
+    const r = await apiClient.post('/api/v1/programs', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/api/v1/specialized-programs/${id}`, data);
+    const r = await apiClient.put(`/api/v1/programs/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/api/v1/specialized-programs/${id}`);
+    const r = await apiClient.delete(`/api/v1/programs/${id}`);
     return r.data;
   }),
   activate: safe(async id => {
-    const r = await apiClient.post(`/api/v1/specialized-programs/${id}/activate`);
+    const r = await apiClient.put(`/api/v1/programs/${id}`, { status: 'active' });
     return r.data;
   }),
   getByDisability: safe(async type => {
-    const r = await apiClient.get(`/api/v1/specialized-programs/by-disability/${type}`);
+    const r = await apiClient.get('/api/v1/programs', { params: { type } });
     return r.data;
   }),
   getDisabilityTypes: safe(async () => {
-    const r = await apiClient.get('/api/v1/specialized-programs/disability-types');
+    const r = await apiClient.get('/api/v1/programs/statistics');
     return r.data;
   }),
   getStatistics: safe(async id => {
-    const r = await apiClient.get(`/api/v1/specialized-programs/${id}/statistics`);
+    const r = await apiClient.get(`/api/v1/programs/${id}`);
     return r.data;
   }),
 

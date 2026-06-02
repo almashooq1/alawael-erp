@@ -108,12 +108,7 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     ['/api/employee-portal', '/api/v1/employee-portal'],
     '../routes/employeePortal.routes'
   );
-  safeMount(
-    app,
-    ['/api/employee-profiles', '/api/v1/employee-profiles'],
-    '../routes/employeeProfile'
-  );
-  logger.info('[HR] Employee Portal + Profiles mounted');
+  logger.info('[HR] Employee Portal mounted');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Workforce Analytics & Planning ─────────────────────────────────────

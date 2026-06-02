@@ -27,7 +27,6 @@ module.exports = function registerCommunicationRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   const communicationsRouter = safeRequire('../routes/communications.routes');
   // PHANTOM: const aiCommRouter = safeRequire('../routes/aiCommunication.routes');
-  const communicationRoutes = safeRequire('../routes/communication.routes');
   // PHANTOM: const emailV2Routes = safeRequire('../routes/email-v2.routes');
   const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
   const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
@@ -42,8 +41,7 @@ module.exports = function registerCommunicationRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'communications', communicationsRouter);
   // PHANTOM-FIX: dualMount(app, 'ai-communications', aiCommRouter);
-  dualMount(app, 'communication', communicationRoutes);
-  logger.info('[Comm] Core communications mounted (communications, AI-comm, communication)');
+  logger.info('[Comm] Core communications mounted (communications)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Email System v2 (نظام البريد الإلكتروني الموحد) ────────────────────

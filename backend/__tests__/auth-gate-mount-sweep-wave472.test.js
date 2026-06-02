@@ -67,14 +67,9 @@ const W472_AUTHED_SLUGS = [
   'therapist-extended',
   'rehab',
   'purchasing',
-  'fuel',
-  'transport',
-  'report-builder',
   'timeline',
   'succession-planning',
   'disability-rehab',
-  'social-media',
-  'break-glass',
 ];
 
 describe('W472 — mount-layer authentication on 20 previously-unauth routes', () => {

@@ -203,7 +203,7 @@ module.exports = function registerPhaseRoutes(
   // ── New Systems — Phase 6 (الأنظمة المضافة — المرحلة السادسة) ─────────
   safeMount(app, ['/api/crisis', '/api/v1/crisis'], '../routes/crisis.routes');
   safeMount(app, ['/api/recruitment', '/api/v1/recruitment'], '../routes/recruitment.routes');
-  safeMount(app, ['/api/iot', '/api/v1/iot'], '../routes/iot.routes');
+  // W775 — iot + ar-rehab hollow stubs deleted (IoT UI uses mock fallback; AR live at /ar-vr)
   // Public verification MUST mount before the auth-gated admin router so the
   // /public/* paths match a router without authenticate middleware.
   safeMount(
@@ -212,9 +212,8 @@ module.exports = function registerPhaseRoutes(
     '../routes/blockchain-public.routes'
   );
   safeMount(app, ['/api/blockchain', '/api/v1/blockchain'], '../routes/blockchain.routes');
-  safeMount(app, ['/api/ar-rehab', '/api/v1/ar-rehab'], '../routes/ar-rehab.routes');
   logger.info(
-    'Phase 6 new systems mounted (5 modules: crisis/emergency, recruitment, IoT, blockchain certificates, AR/XR rehabilitation)'
+    'Phase 6 new systems mounted (3 modules: crisis/emergency, recruitment, blockchain certificates)'
   );
 
   // ── BI Dashboard — نظام التقارير والتحليلات ──────────────────────────────
@@ -272,15 +271,8 @@ module.exports = function registerPhaseRoutes(
   safeMount(app, ['/api/incidents', '/api/v1/incidents'], '../routes/incidentRoutes');
   safeMount(app, ['/api/policies', '/api/v1/policies'], '../routes/policyRoutes');
   safeMount(app, ['/api/fcm', '/api/v1/fcm'], '../routes/fcm');
-  safeMount(
-    app,
-    ['/api/cache-management', '/api/v1/cache-management'],
-    '../routes/cache-management.routes'
-  );
   safeMount(app, ['/api/tenants', '/api/v1/tenants'], '../routes/tenant.routes');
-  logger.info(
-    'Phase 10-A mounted (6 modules: otp-auth, incidents, policies, fcm, cache-management, tenants)'
-  );
+  logger.info('Phase 10-A mounted (5 modules: otp-auth, incidents, policies, fcm, tenants)');
 
   // Medium priority — analytics & AI
   safeMount(
@@ -304,22 +296,10 @@ module.exports = function registerPhaseRoutes(
   // Sessions, profiles, collaboration
   safeMount(
     app,
-    ['/api/advanced-sessions', '/api/v1/advanced-sessions'],
-    '../routes/advancedSessions'
-  );
-  safeMount(
-    app,
     ['/api/collaboration', '/api/v1/collaboration'],
     '../routes/realtimeCollaboration.routes'
   );
-  safeMount(
-    app,
-    ['/api/community-awareness', '/api/v1/community-awareness'],
-    '../routes/communityAwarenessRoutes'
-  );
-  logger.info(
-    'Phase 10-C mounted (4 modules: advanced-sessions, employee-profiles, collaboration, community-awareness)'
-  );
+  logger.info('Phase 10-C mounted (1 module: collaboration)');
 
   // Dashboard, integrations, utilities
   safeMount(

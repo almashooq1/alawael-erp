@@ -5,6 +5,7 @@
  * W773: purchase requests → purchaseRequest.service.
  * W780: vendors → Vendor model; orders → InventoryModulePurchaseOrder.
  * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
+ * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
  */
 
 function getVendorModel() {
@@ -397,23 +398,69 @@ async function approveOrder(id, actorId) {
   return mapPoToLegacy(doc);
 }
 
+async function applyReceiptLinesToPo(po, receiptLines, actorId) {
+  if (!po || !Array.isArray(po.items)) return po;
+  receiptLines.forEach((line, idx) => {
+    const poLine =
+      po.items.find(i => i.item_name_ar && line.item_name && i.item_name_ar === line.item_name) ||
+      po.items[idx];
+    if (!poLine) return;
+    const received = Number(line.quantity_received) || 0;
+    poLine.quantity_received = Math.min(
+      poLine.quantity_ordered || received,
+      (poLine.quantity_received || 0) + received
+    );
+  });
+  const allReceived = po.items.every(i => (i.quantity_received || 0) >= (i.quantity_ordered || 0));
+  po.status = allReceived ? 'received' : 'partial';
+  if (allReceived) po.actual_delivery_date = new Date();
+  if (actorId) po.updated_by = actorId;
+  await po.save();
+  return po;
+}
+
 async function receiveOrder(id, actorId) {
   const Po = getPoModel();
-  const doc = await Po.findOneAndUpdate(
-    { _id: id, deleted_at: null },
-    {
-      status: 'received',
-      actual_delivery_date: new Date(),
-      updated_by: actorId,
-    },
-    { new: true }
-  );
-  if (!doc) {
+  const Receipt = getReceiptModel();
+  const po = await Po.findOne({ _id: id, deleted_at: null });
+  if (!po) {
     const err = new Error('order_not_found');
     err.status = 404;
     throw err;
   }
-  return mapPoToLegacy(doc);
+
+  const existingGrn = await Receipt.findOne({ purchase_order_id: id, deleted_at: null });
+  if (existingGrn) {
+    return mapPoToLegacy(po);
+  }
+
+  const receiptLines = (po.items || []).map(it => ({
+    item_name: it.item_name_ar || 'Item',
+    quantity_ordered: it.quantity_ordered || 0,
+    quantity_received: it.quantity_ordered || 0,
+    unit_cost: it.unit_cost || 0,
+  }));
+
+  po.items.forEach(it => {
+    it.quantity_received = it.quantity_ordered || 0;
+  });
+  po.status = 'received';
+  po.actual_delivery_date = new Date();
+  po.updated_by = actorId;
+  await po.save();
+
+  await Receipt.create({
+    purchase_order_id: po._id,
+    po_number: po.po_number,
+    vendor_name: po.supplier_name,
+    branch_id: po.branch_id,
+    items: receiptLines,
+    received_by_name: null,
+    quality_check: 'passed',
+    created_by: actorId,
+  });
+
+  return mapPoToLegacy(po);
 }
 
 function getReceiptModel() {
@@ -551,6 +598,12 @@ async function createReceipt(body, actorId) {
     notes: body.notes,
     created_by: actorId,
   });
+
+  if (poId && require('mongoose').Types.ObjectId.isValid(poId)) {
+    const po = await Po.findOne({ _id: poId, deleted_at: null });
+    if (po) await applyReceiptLinesToPo(po, items, actorId);
+  }
+
   return mapReceiptToLegacy(doc);
 }
 

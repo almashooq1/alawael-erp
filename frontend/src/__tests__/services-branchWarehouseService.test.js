@@ -55,6 +55,9 @@ describe('services/branchWarehouseService.js', () => {
     expect(source).toMatch(/purchasing\/requests.*unwrapApiList/s);
     expect(source).toMatch(/purchasing\/receipts.*unwrapApiList/s);
     expect(source).toMatch(/purchasing\/contracts.*unwrapApiList/s);
+    expect(source).toMatch(/purchaseOrderService/);
+    expect(source).toMatch(/purchasing\/orders.*unwrapApiList/s);
+    expect(source).toMatch(/orders\/\$\{id\}\/receipts/);
   });
 
   test('makes API calls', () => {

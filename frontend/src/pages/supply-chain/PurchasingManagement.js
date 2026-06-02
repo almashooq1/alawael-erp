@@ -91,7 +91,7 @@ const PurchasingManagement = () => {
       ]);
       setVendors(Array.isArray(v?.data) ? v.data : purchasingService.getMockVendors());
       setOrders(Array.isArray(o?.data) ? o.data : purchasingService.getMockPOs());
-      setStats(s || purchasingService.getMockStats());
+      setStats(s?.data || s || purchasingService.getMockStats());
     } catch {
       setVendors(purchasingService.getMockVendors());
       setOrders(purchasingService.getMockPOs());

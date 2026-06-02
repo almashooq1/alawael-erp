@@ -107,6 +107,10 @@ function mapPrToLegacyRequest(doc) {
       (firstItem && firstItem.itemName) ||
       o.department ||
       'Purchase request',
+    branch: o.branch || o.department || '',
+    requestedBy: o.requestedBy || o.requester?.nameSnapshot || '',
+    priority: o.priority || 'normal',
+    estimatedValue: o.summary?.estimatedValue ?? o.estimatedValue ?? 0,
   };
 }
 

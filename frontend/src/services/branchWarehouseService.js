@@ -17,6 +17,18 @@ const safe =
     }
   };
 
+/** Unwrap 66666 API envelopes `{ success, data }` for legacy React pages. */
+export function unwrapApiList(payload) {
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload)) return payload;
+  return null;
+}
+
+export function unwrapApiOne(payload) {
+  if (payload?.data != null && typeof payload.data === 'object') return payload.data;
+  return payload ?? null;
+}
+
 // ═══════════════════════════════════════════
 // 1. BRANCHES — الفروع
 // ═══════════════════════════════════════════
@@ -193,11 +205,11 @@ export const stockTakeService = {
 export const purchaseRequestService = {
   getAll: safe(async (params = {}) => {
     const r = await apiClient.get('/api/v1/purchasing/requests', { params });
-    return r.data;
+    return unwrapApiList(r.data);
   }),
   getById: safe(async id => {
     const r = await apiClient.get(`/api/v1/purchasing/requests/${id}`);
-    return r.data;
+    return unwrapApiOne(r.data);
   }),
   create: safe(async data => {
     const r = await apiClient.post('/api/v1/purchasing/requests', data);
@@ -230,15 +242,15 @@ export const purchaseRequestService = {
 export const purchaseReceiptService = {
   getAll: safe(async (params = {}) => {
     const r = await apiClient.get('/api/v1/purchasing/receipts', { params });
-    return r.data;
+    return unwrapApiList(r.data);
   }),
   create: safe(async data => {
     const r = await apiClient.post('/api/v1/purchasing/receipts', data);
-    return r.data;
+    return unwrapApiOne(r.data);
   }),
   getById: safe(async id => {
     const r = await apiClient.get(`/api/v1/purchasing/receipts/${id}`);
-    return r.data;
+    return unwrapApiOne(r.data);
   }),
 
   getMockReceipts: () => MOCK_RECEIPTS,
@@ -250,15 +262,15 @@ export const purchaseReceiptService = {
 export const vendorContractService = {
   getAll: safe(async (params = {}) => {
     const r = await apiClient.get('/api/v1/purchasing/contracts', { params });
-    return r.data;
+    return unwrapApiList(r.data);
   }),
   create: safe(async data => {
     const r = await apiClient.post('/api/v1/purchasing/contracts', data);
-    return r.data;
+    return unwrapApiOne(r.data);
   }),
   getExpiring: safe(async () => {
     const r = await apiClient.get('/api/v1/purchasing/contracts/expiring');
-    return r.data;
+    return unwrapApiList(r.data);
   }),
 
   getMockContracts: () => MOCK_CONTRACTS,

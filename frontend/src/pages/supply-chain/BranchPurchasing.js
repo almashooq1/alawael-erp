@@ -65,10 +65,30 @@ import {
 const prStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },
   submitted: { label: 'مقدم', color: 'info' },
+  under_review: { label: 'قيد المراجعة', color: 'info' },
   approved: { label: 'معتمد', color: 'success' },
   rejected: { label: 'مرفوض', color: 'error' },
+  returned_for_clarification: { label: 'معاد للتوضيح', color: 'warning' },
+  converted_to_po: { label: 'تحوّل لأمر شراء', color: 'primary' },
+  cancelled: { label: 'ملغى', color: 'default' },
   ordered: { label: 'تم الطلب', color: 'primary' },
 };
+
+function computePrStats(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  return {
+    total: list.length,
+    draft: list.filter(r => r.status === 'draft').length,
+    submitted: list.filter(r => ['submitted', 'under_review'].includes(r.status)).length,
+    approved: list.filter(r => ['approved', 'converted_to_po'].includes(r.status)).length,
+    urgentPending: list.filter(
+      r =>
+        (r.priority === 'urgent' || r.isUrgent) &&
+        !['approved', 'rejected', 'cancelled', 'converted_to_po'].includes(r.status)
+    ).length,
+    totalEstimated: list.reduce((s, r) => s + (Number(r.estimatedValue) || 0), 0),
+  };
+}
 const priorityConfig = {
   urgent: { label: 'عاجل', color: 'error' },
   high: { label: 'عالي', color: 'warning' },
@@ -120,18 +140,18 @@ const BranchPurchasing = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [prData, rcData, ctData, brData, prStats] = await Promise.all([
+      const [prData, rcData, ctData, brData] = await Promise.all([
         purchaseRequestService.getAll(),
         purchaseReceiptService.getAll(),
         vendorContractService.getAll(),
         branchService.getAll(),
-        purchaseRequestService.getMockStats(),
       ]);
-      setRequests(prData || purchaseRequestService.getMockPRs());
+      const prRows = prData || purchaseRequestService.getMockPRs();
+      setRequests(prRows);
       setReceipts(rcData || purchaseReceiptService.getMockReceipts());
       setContracts(ctData || vendorContractService.getMockContracts());
       setBranches(brData || branchService.getMockBranches());
-      setStats(prStats || {});
+      setStats(computePrStats(prRows));
     } catch {
       setRequests(purchaseRequestService.getMockPRs());
       setReceipts(purchaseReceiptService.getMockReceipts());

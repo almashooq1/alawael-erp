@@ -270,7 +270,7 @@ router.patch(
       return res.status(400).json({ success: false, message: 'invalid_id' });
     }
     const { id } = actor(req);
-    const data = await adapter.receiveOrder(req.params.id, id);
+    const data = await adapter.receiveOrder(req.params.id, id, req.body);
     res.json({ success: true, data });
   })
 );

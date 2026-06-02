@@ -123,6 +123,7 @@ __tests__/purchasing-management-lines-wave791.test.js
 __tests__/purchasing-routes-stock-wave792.test.js
 __tests__/purchasing-cutover-doc-wave793.test.js
 __tests__/purchasing-routes-auth-wave794.test.js
+__tests__/purchasing-partial-receive-wave795.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

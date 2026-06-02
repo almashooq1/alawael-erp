@@ -272,8 +272,8 @@ export const purchaseOrderService = {
     const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/approve`);
     return unwrapApiOne(r.data);
   }),
-  receive: safe(async id => {
-    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/receive`);
+  receive: safe(async (id, data) => {
+    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/receive`, data);
     return unwrapApiOne(r.data);
   }),
 

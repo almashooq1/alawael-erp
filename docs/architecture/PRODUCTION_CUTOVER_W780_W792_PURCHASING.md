@@ -168,9 +168,11 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ## 7. Open follow-ups (post-W795)
 
-- **Web-admin PO unification** — separate `PurchaseOrder` model at
-  `/api/v1/inventory/purchase-orders`; needs ADR before redirecting web-admin to
-  `/api/v1/purchasing`.
+- **Web-admin PO unification** — **blocked on ADR-039 sign-off**
+  ([`docs/architecture/decisions/039-purchase-order-triple-backend.md`](decisions/039-purchase-order-triple-backend.md)).
+  Web-admin `/inventory/purchase-orders` stays on `/api/v1/inventory/purchase-orders`
+  (InventoryStock). Do **not** redirect to `/api/v1/purchasing` without migration.
+  Stakeholder brief: [`039-DECISION-BRIEF.md`](decisions/039-DECISION-BRIEF.md).
 
 ---
 

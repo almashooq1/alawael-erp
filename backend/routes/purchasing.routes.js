@@ -1,6 +1,6 @@
 /**
  * Purchasing Routes — /api/v1/purchasing/*
- * W773 — adapter to Phase-16 purchaseRequest.service (ops/purchase-requests).
+ * W773 — PR adapter; W780 — vendors (Vendor) + orders (InventoryModulePurchaseOrder).
  */
 'use strict';
 
@@ -19,6 +19,32 @@ function wrap(fn) {
 function actor(req) {
   const u = req.user || {};
   return { id: u.id || u._id, name: u.name || u.fullName };
+}
+
+function invalidId(res) {
+  return res.status(400).json({ success: false, message: 'invalid_id' });
+}
+
+async function handleApproveRequest(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+  const { id, name } = actor(req);
+  const roles = (req.user && req.user.roles) || [];
+  const data = await adapter.approveRequest(req.params.id, {
+    approverId: id,
+    approverName: name,
+    role: req.body.role || roles[0] || 'procurement_manager',
+  });
+  res.json({ success: true, data });
+}
+
+async function handleRejectRequest(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+  const { id } = actor(req);
+  const data = await adapter.rejectRequest(req.params.id, {
+    approverId: id,
+    reason: req.body.reason || 'rejected',
+  });
+  res.json({ success: true, data });
 }
 
 router.get(
@@ -51,28 +77,50 @@ router.get(
 
 router.get(
   '/vendors',
-  wrap(async (_req, res) => res.json({ success: true, data: [] }))
+  wrap(async (req, res) => {
+    const data = await adapter.listVendors(req.query);
+    res.json({ success: true, data });
+  })
 );
 router.get(
   '/vendors/:id',
-  wrap(async (req, res) => res.json({ success: true, data: { _id: req.params.id } }))
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const data = await adapter.getVendor(req.params.id);
+    res.json({ success: true, data });
+  })
 );
 router.post(
   '/vendors',
   authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) =>
-    res.status(201).json({ success: true, data: { _id: 'new', ...req.body } })
-  )
+  wrap(async (req, res) => {
+    const data = await adapter.createVendor(req.body);
+    res.status(201).json({ success: true, data });
+  })
 );
 router.put(
   '/vendors/:id',
   authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) => res.json({ success: true, data: { _id: req.params.id, ...req.body } }))
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const data = await adapter.updateVendor(req.params.id, req.body);
+    res.json({ success: true, data });
+  })
 );
 router.delete(
   '/vendors/:id',
   authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) => res.json({ success: true, data: { deleted: true, _id: req.params.id } }))
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const data = await adapter.deleteVendor(req.params.id);
+    res.json({ success: true, data });
+  })
 );
 
 router.get(
@@ -110,94 +158,218 @@ router.post(
 
 router.put(
   '/requests/:id',
-  authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) => res.json({ success: true, data: { _id: req.params.id, ...req.body } }))
+  authorize('admin', 'manager', 'procurement_manager', 'department_head', 'staff'),
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+    const { id } = actor(req);
+    const data = await adapter.updateRequest(
+      req.params.id,
+      { ...req.body, ...branchFilter(req) },
+      id
+    );
+    res.json({ success: true, data });
+  })
 );
+
+const REQUEST_APPROVE_ROLES = [
+  'admin',
+  'manager',
+  'procurement_manager',
+  'department_head',
+  'cfo',
+  'ceo',
+];
 
 router.patch(
   '/requests/:id/approve',
-  authorize('admin', 'manager', 'procurement_manager', 'department_head', 'cfo', 'ceo'),
+  authorize(...REQUEST_APPROVE_ROLES),
+  wrap(handleApproveRequest)
+);
+router.post(
+  '/requests/:id/approve',
+  authorize(...REQUEST_APPROVE_ROLES),
+  wrap(handleApproveRequest)
+);
+
+router.patch(
+  '/requests/:id/reject',
+  authorize(...REQUEST_APPROVE_ROLES),
+  wrap(handleRejectRequest)
+);
+router.post('/requests/:id/reject', authorize(...REQUEST_APPROVE_ROLES), wrap(handleRejectRequest));
+
+router.post(
+  '/requests/:id/submit',
+  authorize('admin', 'manager', 'procurement_manager', 'department_head', 'staff'),
   wrap(async (req, res) => {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'invalid_id' });
-    }
-    const { id, name } = actor(req);
-    const roles = (req.user && req.user.roles) || [];
-    const data = await adapter.approveRequest(req.params.id, {
-      approverId: id,
-      approverName: name,
-      role: req.body.role || roles[0] || 'procurement_manager',
+    if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+    const { id } = actor(req);
+    const data = await adapter.submitRequest(req.params.id, {
+      actorId: id,
+      notes: req.body.notes,
     });
     res.json({ success: true, data });
   })
 );
 
+router.post(
+  '/requests/:id/convert-to-po',
+  authorize('admin', 'manager', 'procurement_manager'),
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) return invalidId(res);
+    const { id } = actor(req);
+    const data = await adapter.convertRequestToPo(req.params.id, {
+      actorId: id,
+      supplierId: req.body.supplierId || req.body.vendorId,
+      supplierName: req.body.supplierName || req.body.vendor,
+    });
+    res.status(201).json({ success: true, data });
+  })
+);
+
+router.get(
+  '/orders',
+  wrap(async (req, res) => {
+    const scope = branchFilter(req);
+    const data = await adapter.listOrders({
+      ...req.query,
+      branchId: scope.branchId || req.query.branchId,
+    });
+    res.json({ success: true, data });
+  })
+);
+
+router.post(
+  '/orders',
+  authorize('admin', 'manager', 'procurement_manager'),
+  wrap(async (req, res) => {
+    const { id } = actor(req);
+    const data = await adapter.createOrder({ ...req.body, ...branchFilter(req) }, id);
+    res.status(201).json({ success: true, data });
+  })
+);
+
 router.patch(
-  '/requests/:id/reject',
-  authorize('admin', 'manager', 'procurement_manager', 'department_head', 'cfo', 'ceo'),
+  '/orders/:id/approve',
+  authorize('admin', 'manager', 'procurement_manager'),
   wrap(async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'invalid_id' });
     }
     const { id } = actor(req);
-    const data = await adapter.rejectRequest(req.params.id, {
-      approverId: id,
-      reason: req.body.reason || 'rejected',
-    });
+    const data = await adapter.approveOrder(req.params.id, id);
     res.json({ success: true, data });
   })
 );
 
-router.get(
-  '/orders',
-  wrap(async (_req, res) => {
-    const data = await adapter.listOrders();
-    res.json({ success: true, data });
-  })
-);
-
-router.get(
-  '/orders/:id',
-  wrap(async (req, res) => res.json({ success: true, data: { _id: req.params.id } }))
-);
-router.post(
-  '/orders',
-  authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) =>
-    res.status(201).json({ success: true, data: { _id: 'new', status: 'draft', ...req.body } })
-  )
-);
-router.put(
-  '/orders/:id',
-  authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) => res.json({ success: true, data: { _id: req.params.id, ...req.body } }))
-);
-router.patch(
-  '/orders/:id/status',
-  authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) =>
-    res.json({ success: true, data: { _id: req.params.id, status: req.body.status } })
-  )
-);
 router.patch(
   '/orders/:id/receive',
   authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) =>
-    res.json({
-      success: true,
-      data: { _id: req.params.id, status: 'received', receivedAt: new Date() },
-    })
-  )
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const { id } = actor(req);
+    const data = await adapter.receiveOrder(req.params.id, id);
+    res.json({ success: true, data });
+  })
 );
+
+router.patch(
+  '/orders/:id/status',
+  authorize('admin', 'manager', 'procurement_manager'),
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const { id } = actor(req);
+    const Po = require('../models/inventory/PurchaseOrder');
+    const doc = await Po.findOneAndUpdate(
+      { _id: req.params.id, deleted_at: null },
+      { status: req.body.status, updated_by: id },
+      { new: true }
+    );
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'order_not_found' });
+    }
+    const data = await adapter.getOrder(req.params.id);
+    res.json({ success: true, data });
+  })
+);
+
+router.get(
+  '/orders/:id',
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const data = await adapter.getOrder(req.params.id);
+    res.json({ success: true, data });
+  })
+);
+
+router.put(
+  '/orders/:id',
+  authorize('admin', 'manager', 'procurement_manager'),
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const { id } = actor(req);
+    const Po = require('../models/inventory/PurchaseOrder');
+    const patch = { updated_by: id };
+    if (req.body.vendor != null) patch.supplier_name = req.body.vendor;
+    if (req.body.supplierName != null) patch.supplier_name = req.body.supplierName;
+    if (req.body.deliveryDate != null) patch.expected_delivery_date = req.body.deliveryDate;
+    if (req.body.notes != null) patch.notes = req.body.notes;
+    const doc = await Po.findOneAndUpdate({ _id: req.params.id, deleted_at: null }, patch, {
+      new: true,
+    });
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'order_not_found' });
+    }
+    const data = await adapter.getOrder(req.params.id);
+    res.json({ success: true, data });
+  })
+);
+
 router.delete(
   '/orders/:id',
   authorize('admin', 'manager', 'procurement_manager'),
-  wrap(async (req, res) => res.json({ success: true, data: { deleted: true, _id: req.params.id } }))
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'invalid_id' });
+    }
+    const Po = require('../models/inventory/PurchaseOrder');
+    const doc = await Po.findOneAndUpdate(
+      { _id: req.params.id, deleted_at: null },
+      { deleted_at: new Date() },
+      { new: true }
+    );
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'order_not_found' });
+    }
+    res.json({ success: true, data: { deleted: true, _id: doc._id } });
+  })
 );
 
 router.use((err, _req, res, _next) => {
-  if (err.status === 404) {
+  if (err.status === 404 || err.code === 'NOT_FOUND') {
     return res.status(404).json({ success: false, message: err.message || 'not_found' });
+  }
+  if (err.code === 'ILLEGAL_TRANSITION' || err.code === 'CONFLICT') {
+    return res.status(409).json({
+      success: false,
+      message: err.message,
+      code: err.code,
+    });
+  }
+  if (err.code === 'MISSING_FIELD') {
+    return res.status(422).json({
+      success: false,
+      message: err.message,
+      fields: err.fields,
+    });
   }
   return safeError(res, err, 'purchasing');
 });

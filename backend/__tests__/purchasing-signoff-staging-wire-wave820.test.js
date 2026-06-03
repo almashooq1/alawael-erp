@@ -62,6 +62,6 @@ describe('W820 — sign-off staging wire (W819 script)', () => {
   it('PRODUCTION_GAPS and closure index reference staging verify', () => {
     expect(GAPS).toMatch(/verify:supply-chain-staging/);
     expect(GAPS).toMatch(/039-SIGNOFF-EMAIL-AR/);
-    expect(CLOSURE).toMatch(/through \*\*W820\*\*/);
+    expect(CLOSURE).toMatch(/verify:supply-chain-staging/);
   });
 });

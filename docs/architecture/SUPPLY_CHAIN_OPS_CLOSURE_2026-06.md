@@ -1,7 +1,11 @@
 # Supply Chain + Facility Ops — Closure Index (2026-06)
 
-**Status:** Engineering complete on `main` through **W820**. Stakeholder ADR-039 sign-off is the
+**Status:** Engineering complete on `main` through **W821**. Stakeholder ADR-039 sign-off is the
 remaining gate before any PO unification program.
+
+**Engineering freeze (W822):** No further supply-chain / facility-ops waves on `66666/backend`
+unless (a) ADR-039 is signed and only doc/status updates are needed, or (b) a stakeholder-approved
+migration charter (Approach A or C) is filed. Tier URL unification without migration is out of scope.
 
 This page is the single navigation index — not a fourth cutover doc.
 
@@ -13,9 +17,9 @@ This page is the single navigation index — not a fourth cutover doc.
 | ----- | ----- | -------- | ----------- |
 | Legacy purchasing | W780–W804 | `66666/frontend` `/purchasing`, `/branch-purchasing` | [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](PRODUCTION_CUTOVER_W780_W792_PURCHASING.md) |
 | Facility maintenance | W801–W810 | web-admin `/ops/*` + REST | [PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md](PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md) |
-| ADR-039 policy | W797–W818 | All tiers | [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md) + [039-SIGNOFF-EMAIL-AR.md](decisions/039-SIGNOFF-EMAIL-AR.md) |
+| ADR-039 policy | W797–W821 | All tiers | [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md) + [039-SIGNOFF-EMAIL-AR.md](decisions/039-SIGNOFF-EMAIL-AR.md) |
 | Platform hygiene | W812–W813 | Ops / CI | [PRODUCTION_GAPS_BEFORE_LIVE.md](../PRODUCTION_GAPS_BEFORE_LIVE.md) |
-| Pilot optional | W816 | Week 3–4 operators | [SCENARIO_7](../pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md) |
+| Pilot optional | W816–W821 | Week 3–4 operators | [SCENARIO_7](../pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md) |
 
 ---
 
@@ -44,6 +48,7 @@ This page is the single navigation index — not a fourth cutover doc.
 | W819 | `supply-chain-staging-verify-wave819` | Staging smoke script + closure links |
 | W820 | `purchasing-signoff-staging-wire-wave820` | Sign-off packet ↔ W819 script in cutover/gaps |
 | W821 | `pilot-supply-chain-scenario-wave821` | Pilot Scenario 7 + Arabic email ↔ W819 verify |
+| W822 | `supply-chain-engineering-freeze-wave822` | Engineering freeze banner + doc sync |
 
 ---
 

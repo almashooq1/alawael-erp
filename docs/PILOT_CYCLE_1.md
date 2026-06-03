@@ -326,6 +326,7 @@ Does **not** block Section 8 go/no-go. Run in **week 3–4** if procurement + fa
 | Legacy purchasing (Tier B) | PR→PO→partial receive + ADR-039 banner | `PRODUCTION_CUTOVER_W780_W792_PURCHASING.md` |
 | Maintenance hub | snapshot + bulk spawn + branch PPM tile | `PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md` |
 | Policy | Approach B sign-off | `039-SIGNOFF-PACKET.md` |
+| Staging smoke | `npm run verify:supply-chain-staging` (W819) | `SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md` §5 |
 
 ---
 

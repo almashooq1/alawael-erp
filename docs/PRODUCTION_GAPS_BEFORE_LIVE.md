@@ -122,6 +122,8 @@ Does the adapter have an auto-submitting cron?
 - [`PILOT_CYCLE_1.md`](PILOT_CYCLE_1.md) — operational readiness package for the 4-week pilot
 - [`pilot/README.md`](pilot/README.md) — 5 detailed scenario walkthroughs
 - [`architecture/PRODUCTION_CUTOVER_W356_W370.md`](architecture/PRODUCTION_CUTOVER_W356_W370.md) — W356-W370 + W384 module activation checklist
+- [`architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md) — W780–W795 legacy purchasing / supply-chain (66666 React); three PO backends — see ADR-039
+- [`architecture/decisions/039-purchase-order-triple-backend.md`](architecture/decisions/039-purchase-order-triple-backend.md) — 🟡 Proposed; web-admin vs legacy PO tier formalization (W797)
 - [`architecture/decisions/`](architecture/decisions/) — ADR-020 through ADR-028
 - [`runbooks/gov-adapter-circuit.md`](runbooks/gov-adapter-circuit.md) — circuit-breaker triage
 - [`runbooks/gov-adapter-misconfigured.md`](runbooks/gov-adapter-misconfigured.md) — first-time live cutover troubleshooting

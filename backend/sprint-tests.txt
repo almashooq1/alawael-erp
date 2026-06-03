@@ -126,6 +126,7 @@ __tests__/purchasing-routes-auth-wave794.test.js
 __tests__/purchasing-partial-receive-wave795.test.js
 __tests__/purchasing-cutover-doc-wave796.test.js
 __tests__/purchasing-po-adr-wave797.test.js
+__tests__/purchasing-modules-doc-wave798.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

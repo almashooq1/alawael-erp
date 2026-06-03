@@ -579,3 +579,4 @@ __tests__/facility-maintenance-bridge-wave801.test.js
 __tests__/facility-asset-spawn-work-order-wave802.test.js
 __tests__/ops-work-order-list-filter-wave805.test.js
 __tests__/maintenance-hub-wave807.test.js
+__tests__/branch-board-ppm-wave809.test.js

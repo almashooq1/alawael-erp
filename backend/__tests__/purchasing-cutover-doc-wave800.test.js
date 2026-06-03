@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * purchasing-cutover-doc-wave800.test.js — W800 cutover doc W796–W799 sync guard.
+ * purchasing-cutover-doc-wave800.test.js — W800 cutover doc W796–W804 sync guard.
  */
 
 const fs = require('fs');
@@ -35,5 +35,10 @@ describe('W800 — purchasing cutover doc W796–W799 extensions', () => {
     expect(DOC).toMatch(/purchasing-platform-stats-wave799/);
     expect(DOC).toMatch(/jq '\.data\.tiers'/);
     expect(DOC).toMatch(/ADR-039/);
+  });
+
+  it('post-W804 follow-ups mention legacy UI banner', () => {
+    expect(DOC).toMatch(/post-W804/);
+    expect(DOC).toMatch(/PurchasingPlatformStatsBanner/);
   });
 });

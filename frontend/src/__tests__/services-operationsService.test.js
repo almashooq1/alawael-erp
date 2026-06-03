@@ -34,6 +34,8 @@ describe('services/operationsService.js', () => {
     expect(source).toMatch(/purchasingService/);
     expect(source).toMatch(/getPurchaseOrder/);
     expect(source).toMatch(/getOrderReceipts/);
+    expect(source).toMatch(/getPlatformStats/);
+    expect(source).toMatch(/\/api\/v1\/purchasing\/platform-stats/);
   });
 
   test('exports equipmentService', () => {

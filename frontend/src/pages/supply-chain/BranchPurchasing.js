@@ -65,6 +65,7 @@ import {
   inventoryModuleItemService,
 } from 'services/branchWarehouseService';
 import PartialReceiveDialog from './PartialReceiveDialog';
+import PurchasingPlatformStatsBanner from './PurchasingPlatformStatsBanner';
 
 const prStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },
@@ -579,6 +580,8 @@ const BranchPurchasing = () => {
           </Box>
         </CardContent>
       </Card>
+
+      <PurchasingPlatformStatsBanner />
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 

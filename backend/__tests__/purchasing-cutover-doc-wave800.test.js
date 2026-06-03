@@ -26,6 +26,8 @@ describe('W800 — purchasing cutover doc W796–W799 extensions', () => {
     expect(DOC).toMatch(/\| W798 \|/);
     expect(DOC).toMatch(/\| W799 \|/);
     expect(DOC).toMatch(/\| W800 \|/);
+    expect(DOC).toMatch(/\| W803 \|/);
+    expect(DOC).toMatch(/\| W804 \|/);
   });
 
   it('documents platform-stats verification and sprint test', () => {

@@ -141,6 +141,8 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 
 > 📑 **W801-W810 Maintenance Doc**: [`docs/architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md`](architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md) — ops registry mount, maintenance hub, `ENABLE_PPM_WO_SWEEPER`, dashboard PPM tiles (W811 cutover checklist).
 
+> 📑 **Supply chain + ops closure (2026-06)**: [`docs/architecture/SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](architecture/SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — index for W780–W816 (purchasing, maintenance, ADR-039, pilot Scenario 7).
+
 ### 🤖 7. الذكاء الاصطناعي (AI/ML)
 
 | المسار                     | الوصف                     |

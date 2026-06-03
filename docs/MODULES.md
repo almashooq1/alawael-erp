@@ -170,21 +170,25 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 
 ### 🏗️ 10. الإدارة والعمليات (Operations)
 
-| المسار                               | الوصف                           |
-| ------------------------------------ | ------------------------------- |
-| `/api/admin/communications`          | المراسلات الإدارية (42+ نقطة)   |
-| `/api/admin/communications/enhanced` | موسّعة (signatures, QR, stamps) |
-| `/api/strategic-planning`            | التخطيط الاستراتيجي             |
-| `/api/complaints`                    | إدارة الشكاوى                   |
-| `/api/facilities`                    | إدارة المرافق                   |
-| `/api/meetings`                      | اجتماعات وقرارات                |
-| `/api/visitors`                      | نظام الزوار                     |
-| `/api/maintenance/tasks`             | صيانة المعدات                   |
-| `/api/maintenance/predictions`       | صيانة تنبؤية بالذكاء الاصطناعي  |
-| `/api/inventory/warehouse`           | المستودعات والمخزون             |
-| `/api/events`                        | الفعاليات والأنشطة              |
-| `/api/helpdesk`                      | خدمة العملاء                    |
-| `/api/hse`                           | الصحة والسلامة المهنية          |
+| المسار                               | الوصف                                                                       |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| `/api/admin/communications`          | المراسلات الإدارية (42+ نقطة)                                               |
+| `/api/admin/communications/enhanced` | موسّعة (signatures, QR, stamps)                                             |
+| `/api/strategic-planning`            | التخطيط الاستراتيجي                                                         |
+| `/api/complaints`                    | إدارة الشكاوى                                                               |
+| `/api/facilities`                    | إدارة المرافق                                                               |
+| `/api/meetings`                      | اجتماعات وقرارات                                                            |
+| `/api/visitors`                      | نظام الزوار                                                                 |
+| `/api/maintenance/tasks`             | صيانة المعدات                                                               |
+| `/api/maintenance/predictions`       | صيانة تنبؤية بالذكاء الاصطناعي                                              |
+| `/api/inventory/warehouse`           | المستودعات والمخزون (legacy path)                                           |
+| `/api/v1/inventory`                  | مخزون web-admin — PO، أصناف، مستودعات (InventoryStock) — **ADR-039 Tier A** |
+| `/api/v1/inventory-module`           | وحدة مخزون الفروع — منتقي أصناف PR (InventoryModule) — **ADR-039 Tier C**   |
+| `/api/v1/purchasing`                 | مشتريات legacy — PR→PO→GRN + استلام جزئي (W780–W795) — **ADR-039 Tier B**   |
+| `/api/purchasing`                    | نفس `/api/v1/purchasing` (dual mount)                                       |
+| `/api/events`                        | الفعاليات والأنشطة                                                          |
+| `/api/helpdesk`                      | خدمة العملاء                                                                |
+| `/api/hse`                           | الصحة والسلامة المهنية                                                      |
 
 ### 🌐 11. التكامل الحكومي (Gov Integration)
 
@@ -267,25 +271,31 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 
 ### وحدات الصفحات الرئيسية
 
-| المجلد                      | الصفحات                                            | الوحدة                |
-| --------------------------- | -------------------------------------------------- | --------------------- |
-| `pages/rehab/`              | DisabilityRehabDashboard, TherapySessionAdmin, ... | نظام التأهيل          |
-| `pages/RehabDashboard.jsx`  | لوحة التأهيل المتكاملة                             | التأهيل الشامل        |
-| `pages/Sessions/`           | إدارة الجلسات + Analytics                          | الجلسات               |
-| `pages/Beneficiaries/`      | قائمة المستفيدين، الملفات                          | المستفيدون            |
-| `pages/hr/`                 | HR modules (10+ صفحات)                             | الموارد البشرية       |
-| `pages/enterprise-plus/`    | EHS, ITSM, Vendor Management                       | المؤسسات الكبرى       |
-| `pages/enterprise-ultra/`   | BI, Sustainability, Digital Transform              | المستوى المتقدم       |
-| `pages/SpecializedRehab/`   | برامج التأهيل المتخصصة                             | التأهيل المتخصص       |
-| `pages/Operations/`         | Internal Audit, Rehab Licenses                     | العمليات              |
-| `pages/noor/`               | NoorDashboard                                      | تكامل نور             |
-| `pages/gosi/`               | GosiDashboard                                      | التأمينات             |
-| `pages/qiwa/`               | QiwaDashboard                                      | منصة قوى              |
-| `pages/guardian/`           | GuardianPortalDashboard                            | بوابة أولياء الأمور   |
-| `pages/familySatisfaction/` | FamilySatisfactionDashboard                        | رضا الأسرة            |
-| `pages/postRehab/`          | PostRehabFollowupDashboard                         | متابعة ما بعد التأهيل |
-| `pages/workflow/`           | WorkflowAnalytics                                  | تحليلات سير العمل     |
-| `pages/quality-management/` | QualityManagement                                  | الجودة                |
+| المجلد                      | الصفحات                                            | الوحدة                                        |
+| --------------------------- | -------------------------------------------------- | --------------------------------------------- |
+| `pages/rehab/`              | DisabilityRehabDashboard, TherapySessionAdmin, ... | نظام التأهيل                                  |
+| `pages/RehabDashboard.jsx`  | لوحة التأهيل المتكاملة                             | التأهيل الشامل                                |
+| `pages/Sessions/`           | إدارة الجلسات + Analytics                          | الجلسات                                       |
+| `pages/Beneficiaries/`      | قائمة المستفيدين، الملفات                          | المستفيدون                                    |
+| `pages/hr/`                 | HR modules (10+ صفحات)                             | الموارد البشرية                               |
+| `pages/enterprise-plus/`    | EHS, ITSM, Vendor Management                       | المؤسسات الكبرى                               |
+| `pages/enterprise-ultra/`   | BI, Sustainability, Digital Transform              | المستوى المتقدم                               |
+| `pages/SpecializedRehab/`   | برامج التأهيل المتخصصة                             | التأهيل المتخصص                               |
+| `pages/Operations/`         | Internal Audit, Rehab Licenses                     | العمليات                                      |
+| `pages/noor/`               | NoorDashboard                                      | تكامل نور                                     |
+| `pages/gosi/`               | GosiDashboard                                      | التأمينات                                     |
+| `pages/qiwa/`               | QiwaDashboard                                      | منصة قوى                                      |
+| `pages/guardian/`           | GuardianPortalDashboard                            | بوابة أولياء الأمور                           |
+| `pages/familySatisfaction/` | FamilySatisfactionDashboard                        | رضا الأسرة                                    |
+| `pages/postRehab/`          | PostRehabFollowupDashboard                         | متابعة ما بعد التأهيل                         |
+| `pages/workflow/`           | WorkflowAnalytics                                  | تحليلات سير العمل                             |
+| `pages/quality-management/` | QualityManagement                                  | الجودة                                        |
+| `pages/supply-chain/`       | PurchasingManagement, BranchPurchasing             | مشتريات (legacy React → `/api/v1/purchasing`) |
+
+**Supply chain / PO (W780–W798):** ثلاثة backends — لا دمج URL فقط. Cutover:
+[`architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md).
+قرار: [`architecture/decisions/039-purchase-order-triple-backend.md`](architecture/decisions/039-purchase-order-triple-backend.md).
+Web-admin PO يبقى على `/api/v1/inventory/purchase-orders` (`alawael-rehab-platform`).
 
 ---
 

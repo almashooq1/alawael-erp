@@ -285,7 +285,9 @@ function createFacilityInspectionService({
         const woData = {
           workOrderNumber: `WO-AUTO-${String(Date.now()).slice(-8)}`,
           branchId: doc.branchId,
+          facilityId: doc.facilityId,
           assetId: assetId || null,
+          facilityAssetId: findingData.facilityAssetId || null,
           type: 'corrective',
           priority: registry.workOrderPriorityForSeverity(finding.severity),
           title: `Inspection finding: ${finding.description.slice(0, 80)}`,

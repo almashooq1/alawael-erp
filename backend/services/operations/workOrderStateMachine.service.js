@@ -138,7 +138,14 @@ function createWorkOrderStateMachine({
     // Validate precondition fields.
     const edge = registry.allowedTransitions(from).find(e => e.to === to);
     const required = edge.required || [];
-    const missing = required.filter(f => _isMissing(wo[f]));
+    const missing = required.filter(f => {
+      if (f === 'assetId') {
+        return (
+          _isMissing(wo.assetId) && _isMissing(wo.facilityAssetId) && _isMissing(wo.facilityId)
+        );
+      }
+      return _isMissing(wo[f]);
+    });
     if (missing.length) {
       throw new MissingFieldError(missing);
     }
@@ -285,6 +292,8 @@ function createWorkOrderStateMachine({
       workOrderNumber: wo.workOrderNumber,
       branchId: wo.branchId ? String(wo.branchId) : null,
       assetId: wo.assetId ? String(wo.assetId) : null,
+      facilityAssetId: wo.facilityAssetId ? String(wo.facilityAssetId) : null,
+      facilityId: wo.facilityId ? String(wo.facilityId) : null,
       type: wo.type,
       priority: wo.priority,
       from,

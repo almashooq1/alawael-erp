@@ -1,7 +1,7 @@
-# Production Cutover — W780–W795 Legacy Purchasing / Supply Chain
+# Production Cutover — W780–W799 Legacy Purchasing / Supply Chain
 
-Date: 2026-06-02 (updated W796)  
-Scope: 16 waves (W780–W795) closing the legacy `/api/v1/purchasing/*` vertical for
+Date: 2026-06-02 (updated W800)  
+Scope: 20 waves (W780–W799) closing the legacy `/api/v1/purchasing/*` vertical for
 66666 React surfaces (`/purchasing`, `/branch-purchasing`). Zero new env flags —
 deploy-ready on next push once roles are provisioned.
 
@@ -108,6 +108,7 @@ cd backend && npx jest --config=jest.config.js \
   __tests__/purchasing-cutover-doc-wave793.test.js \
   __tests__/purchasing-routes-auth-wave794.test.js \
   __tests__/purchasing-partial-receive-wave795.test.js \
+  __tests__/purchasing-platform-stats-wave799.test.js \
   --no-coverage
 
 # HTTP E2E (MongoMemoryServer — no external DB)
@@ -116,10 +117,16 @@ cd backend && npx jest --config=jest.config.js \
   __tests__/purchasing-routes-stock-wave792.test.js \
   __tests__/purchasing-routes-auth-wave794.test.js \
   __tests__/purchasing-partial-receive-wave795.test.js \
+  __tests__/purchasing-platform-stats-wave799.test.js \
   --no-coverage
 
 # Route load gate (pre-push)
 cd backend && npm run check:routes-load
+
+# Cross-tier federation (read-only — ADR-039; staging JWT required)
+curl -sS -H "Authorization: Bearer $TOKEN" \
+  "$API_BASE/api/v1/purchasing/platform-stats" | jq '.data.tiers'
+# Expect: legacyPurchasing.* + inventoryStock.* (modelAvailable true when InventoryStock registered)
 ```
 
 **Manual UI checklist:**
@@ -127,6 +134,7 @@ cd backend && npm run check:routes-load
 1. `/branch-purchasing` — create PR with inventory item → convert → PO tab shows `itemsSummary`.
 2. Approve + receive PO — partial qty dialog (W795) or full receive; GRN appears; stock ↑ for linked `item_id`.
 3. `/purchasing` — PO table shows summary; detail dialog lists `lineItems` + GRNs; `partial` status chip when applicable.
+4. `GET /api/v1/purchasing/platform-stats` — returns both tiers without mutating either collection (W799).
 
 ---
 
@@ -142,36 +150,37 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ---
 
-## 6. Wave map (W780–W795)
+## 6. Wave map (W780–W799)
 
-| Wave | Deliverable                                                    |
-| ---- | -------------------------------------------------------------- |
-| W780 | Vendors + orders adapter; real data (no stubs)                 |
-| W781 | `PurchaseReceipt` + `VendorSupplyContract`                     |
-| W782 | Frontend `unwrapApiList` for legacy envelopes                  |
-| W783 | `/api/v1/inventory` alias for web-admin                        |
-| W784 | PO receive ↔ GRN sync (idempotent full receive)               |
-| W785 | `GET /orders/:id/receipts` + stats receipt count               |
-| W786 | Stock bump via `purchasingStockReceive.lib.js`                 |
-| W787 | Stats aliases for `PurchasingManagement` tiles                 |
-| W788 | BranchPurchasing PO tab + GRN dialog                           |
-| W789 | PR `itemId` picker + convert-to-po UI                          |
-| W790 | `lineItems` / `itemsSummary` on adapter payloads               |
-| W791 | `/purchasing` line items + HTTP PR→PO flow test                |
-| W792 | HTTP receive verifies stock bump (supertest)                   |
-| W793 | This cutover doc + registry drift guard                        |
-| W794 | Real `authorize()` 401/403 route negatives                     |
-| W795 | Partial receive via `body.items` + receive dialog              |
-| W796 | Cutover doc sync through W795                                  |
-| W797 | ADR-039 triple-backend formalization                           |
-| W798 | MODULES.md + PRODUCTION_GAPS discoverability links             |
-| W799 | `GET /platform-stats` cross-tier read-only PO counts (ADR-039) |
+| Wave | Deliverable                                                       |
+| ---- | ----------------------------------------------------------------- |
+| W780 | Vendors + orders adapter; real data (no stubs)                    |
+| W781 | `PurchaseReceipt` + `VendorSupplyContract`                        |
+| W782 | Frontend `unwrapApiList` for legacy envelopes                     |
+| W783 | `/api/v1/inventory` alias for web-admin                           |
+| W784 | PO receive ↔ GRN sync (idempotent full receive)                  |
+| W785 | `GET /orders/:id/receipts` + stats receipt count                  |
+| W786 | Stock bump via `purchasingStockReceive.lib.js`                    |
+| W787 | Stats aliases for `PurchasingManagement` tiles                    |
+| W788 | BranchPurchasing PO tab + GRN dialog                              |
+| W789 | PR `itemId` picker + convert-to-po UI                             |
+| W790 | `lineItems` / `itemsSummary` on adapter payloads                  |
+| W791 | `/purchasing` line items + HTTP PR→PO flow test                   |
+| W792 | HTTP receive verifies stock bump (supertest)                      |
+| W793 | This cutover doc + registry drift guard                           |
+| W794 | Real `authorize()` 401/403 route negatives                        |
+| W795 | Partial receive via `body.items` + receive dialog                 |
+| W796 | Cutover doc sync through W795                                     |
+| W797 | ADR-039 triple-backend formalization                              |
+| W798 | MODULES.md + PRODUCTION_GAPS discoverability links                |
+| W799 | `GET /platform-stats` cross-tier read-only PO counts (ADR-039)    |
+| W800 | Cutover doc verification sync through W799 (this section §4 curl) |
 
-**Sprint-gated drift guards:** 18+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` (enumerated in `backend/sprint-tests.txt`).
+**Sprint-gated drift guards:** 19+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` (enumerated in `backend/sprint-tests.txt`).
 
 ---
 
-## 7. Open follow-ups (post-W795)
+## 7. Open follow-ups (post-W799)
 
 - **Web-admin PO unification** — **blocked on ADR-039 sign-off**
   ([`docs/architecture/decisions/039-purchase-order-triple-backend.md`](decisions/039-purchase-order-triple-backend.md)).

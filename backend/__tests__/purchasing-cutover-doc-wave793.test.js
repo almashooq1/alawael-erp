@@ -25,7 +25,7 @@ const REGISTRY = fs.readFileSync(
 
 describe('W793 — purchasing cutover documentation', () => {
   it('cutover doc exists with three-PO-model warning', () => {
-    expect(DOC).toMatch(/Production Cutover.*W780.*W79[2-5]/i);
+    expect(DOC).toMatch(/Production Cutover.*W780.*W799/i);
     expect(DOC).toMatch(/three PO models/i);
     expect(DOC).toMatch(/InventoryModulePurchaseOrder/);
     expect(DOC).toMatch(/\/api\/v1\/inventory\/purchase-orders/);

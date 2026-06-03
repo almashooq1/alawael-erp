@@ -49,6 +49,7 @@ This page is the single navigation index — not a fourth cutover doc.
 | W820 | `purchasing-signoff-staging-wire-wave820` | Sign-off packet ↔ W819 script in cutover/gaps |
 | W821 | `pilot-supply-chain-scenario-wave821` | Pilot Scenario 7 + Arabic email ↔ W819 verify |
 | W822 | `supply-chain-engineering-freeze-wave822` | Engineering freeze banner + doc sync |
+| W823 | `supply-chain-doc-sync-wave823` | MODULES + cutover footers ↔ W822 freeze |
 
 ---
 

@@ -205,7 +205,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 
 ## 8. Related docs
 
-- [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — closure index (W780–W816)
+- [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — closure index (W780–W822, engineering freeze)
 - `docs/MODULES.md` — `/api/v1/ops/*` and `/api/facility-asset` rows (W801–W810)
 - `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` — template for env-flag cutover
 - `docs/architecture/decisions/039-purchase-order-triple-backend.md` — unrelated PO split

@@ -1,6 +1,6 @@
 /**
  * Purchasing Routes — /api/v1/purchasing/*
- * W773 — PR adapter; W780 — vendors/orders; W781 — receipts + vendor contracts; W785 — PO receipts.
+ * W773 — PR adapter; W780 — vendors/orders; W781 — receipts + vendor contracts; W785 — PO receipts; W799 — platform-stats.
  */
 'use strict';
 
@@ -51,6 +51,18 @@ router.get(
   '/stats',
   wrap(async (req, res) => {
     const data = await adapter.getStats();
+    res.json({ success: true, data });
+  })
+);
+
+router.get(
+  '/platform-stats',
+  wrap(async (req, res) => {
+    const scope = branchFilter(req);
+    const data = await adapter.getPlatformStats({
+      ...req.query,
+      branchId: scope.branchId || req.query.branchId,
+    });
     res.json({ success: true, data });
   })
 );

@@ -59,6 +59,7 @@ dualMountAuth(app, 'purchasing', purchasing.routes)
 | Area                   | Methods                                    | Notes                                              |
 | ---------------------- | ------------------------------------------ | -------------------------------------------------- |
 | `/stats`, `/dashboard` | GET                                        | W787 legacy tile aliases                           |
+| `/platform-stats`      | GET                                        | W799 — ADR-039 cross-tier read-only counts         |
 | `/vendors`             | CRUD                                       | W780                                               |
 | `/requests`            | CRUD + submit/approve/reject/convert-to-po | W773/W789                                          |
 | `/orders`              | CRUD + approve/receive/status              | W780/W784/W795 partial `body.items` on receive     |
@@ -143,27 +144,28 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ## 6. Wave map (W780–W795)
 
-| Wave | Deliverable                                        |
-| ---- | -------------------------------------------------- |
-| W780 | Vendors + orders adapter; real data (no stubs)     |
-| W781 | `PurchaseReceipt` + `VendorSupplyContract`         |
-| W782 | Frontend `unwrapApiList` for legacy envelopes      |
-| W783 | `/api/v1/inventory` alias for web-admin            |
-| W784 | PO receive ↔ GRN sync (idempotent full receive)   |
-| W785 | `GET /orders/:id/receipts` + stats receipt count   |
-| W786 | Stock bump via `purchasingStockReceive.lib.js`     |
-| W787 | Stats aliases for `PurchasingManagement` tiles     |
-| W788 | BranchPurchasing PO tab + GRN dialog               |
-| W789 | PR `itemId` picker + convert-to-po UI              |
-| W790 | `lineItems` / `itemsSummary` on adapter payloads   |
-| W791 | `/purchasing` line items + HTTP PR→PO flow test    |
-| W792 | HTTP receive verifies stock bump (supertest)       |
-| W793 | This cutover doc + registry drift guard            |
-| W794 | Real `authorize()` 401/403 route negatives         |
-| W795 | Partial receive via `body.items` + receive dialog  |
-| W796 | Cutover doc sync through W795                      |
-| W797 | ADR-039 triple-backend formalization               |
-| W798 | MODULES.md + PRODUCTION_GAPS discoverability links |
+| Wave | Deliverable                                                    |
+| ---- | -------------------------------------------------------------- |
+| W780 | Vendors + orders adapter; real data (no stubs)                 |
+| W781 | `PurchaseReceipt` + `VendorSupplyContract`                     |
+| W782 | Frontend `unwrapApiList` for legacy envelopes                  |
+| W783 | `/api/v1/inventory` alias for web-admin                        |
+| W784 | PO receive ↔ GRN sync (idempotent full receive)               |
+| W785 | `GET /orders/:id/receipts` + stats receipt count               |
+| W786 | Stock bump via `purchasingStockReceive.lib.js`                 |
+| W787 | Stats aliases for `PurchasingManagement` tiles                 |
+| W788 | BranchPurchasing PO tab + GRN dialog                           |
+| W789 | PR `itemId` picker + convert-to-po UI                          |
+| W790 | `lineItems` / `itemsSummary` on adapter payloads               |
+| W791 | `/purchasing` line items + HTTP PR→PO flow test                |
+| W792 | HTTP receive verifies stock bump (supertest)                   |
+| W793 | This cutover doc + registry drift guard                        |
+| W794 | Real `authorize()` 401/403 route negatives                     |
+| W795 | Partial receive via `body.items` + receive dialog              |
+| W796 | Cutover doc sync through W795                                  |
+| W797 | ADR-039 triple-backend formalization                           |
+| W798 | MODULES.md + PRODUCTION_GAPS discoverability links             |
+| W799 | `GET /platform-stats` cross-tier read-only PO counts (ADR-039) |
 
 **Sprint-gated drift guards:** 18+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` (enumerated in `backend/sprint-tests.txt`).
 

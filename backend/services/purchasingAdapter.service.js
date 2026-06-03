@@ -7,6 +7,7 @@
  * W781: receipts → PurchaseReceipt; contracts → VendorSupplyContract.
  * W784: PO receive ↔ GRN sync on InventoryModulePurchaseOrder.
  * W795: optional body.items on receiveOrder for partial GRN shipments.
+ * W799: read-only cross-tier PO counts (legacy + InventoryStock) for ADR-039 reporting.
  * W785: list receipts by PO + dashboard receipt count.
  * W786: stock receipt when PO lines include item_id (InventoryModuleItem).
  * W787: legacy stats field aliases for PurchasingManagement.js tiles.
@@ -924,6 +925,99 @@ async function getStats() {
   };
 }
 
+function tryGetInventoryStockPoModel() {
+  try {
+    const { PurchaseOrder } = require('../models/InventoryStock');
+    return PurchaseOrder;
+  } catch {
+    return null;
+  }
+}
+
+function buildBranchFilter(query, fieldName) {
+  const branchId = query.branchId || query.branch_id;
+  if (!branchId) return {};
+  return { [fieldName]: branchId };
+}
+
+async function countLegacyPurchasingTierStats(query = {}) {
+  const Po = getPoModel();
+  const base = { deleted_at: null, ...buildBranchFilter(query, 'branch_id') };
+  const [totalOrders, partialOrders, receivedOrders, pendingApproval, activeOrders] =
+    await Promise.all([
+      Po.countDocuments(base),
+      Po.countDocuments({ ...base, status: 'partial' }),
+      Po.countDocuments({ ...base, status: { $in: ['received', 'closed'] } }),
+      Po.countDocuments({ ...base, status: { $in: ['draft', 'pending_approval'] } }),
+      Po.countDocuments({
+        ...base,
+        status: { $in: ['approved', 'sent', 'partial'] },
+      }),
+    ]);
+  return { totalOrders, partialOrders, receivedOrders, pendingApproval, activeOrders };
+}
+
+async function countInventoryStockTierStats(query = {}) {
+  const StockPo = tryGetInventoryStockPoModel();
+  if (!StockPo) {
+    return {
+      modelAvailable: false,
+      totalOrders: 0,
+      partiallyReceivedOrders: 0,
+      receivedOrders: 0,
+      pendingApproval: 0,
+      activeOrders: 0,
+    };
+  }
+  const base = { ...buildBranchFilter(query, 'branchId') };
+  const [totalOrders, partiallyReceivedOrders, receivedOrders, pendingApproval, activeOrders] =
+    await Promise.all([
+      StockPo.countDocuments(base),
+      StockPo.countDocuments({ ...base, status: 'partially_received' }),
+      StockPo.countDocuments({ ...base, status: 'received' }),
+      StockPo.countDocuments({ ...base, status: { $in: ['draft', 'pending_approval'] } }),
+      StockPo.countDocuments({
+        ...base,
+        status: { $in: ['approved', 'ordered', 'partially_received'] },
+      }),
+    ]);
+  return {
+    modelAvailable: true,
+    totalOrders,
+    partiallyReceivedOrders,
+    receivedOrders,
+    pendingApproval,
+    activeOrders,
+  };
+}
+
+/** W799 — ADR-039 read-only federation; does not merge PO documents. */
+async function getPlatformStats(query = {}) {
+  const [legacyCounts, stockCounts] = await Promise.all([
+    countLegacyPurchasingTierStats(query),
+    countInventoryStockTierStats(query),
+  ]);
+  return {
+    generatedAt: new Date().toISOString(),
+    adr: '039',
+    note: 'Read-only per-tier counts; web-admin uses /api/v1/inventory, legacy React uses /api/v1/purchasing.',
+    tiers: {
+      legacyPurchasing: {
+        tier: 'B',
+        apiPath: '/api/v1/purchasing/orders',
+        mongooseModel: 'InventoryModulePurchaseOrder',
+        ...legacyCounts,
+      },
+      inventoryStock: {
+        tier: 'A',
+        apiPath: '/api/v1/inventory/purchase-orders',
+        mongooseModel: 'PurchaseOrder',
+        ...stockCounts,
+      },
+    },
+  };
+}
+
 module.exports = {
   listVendors,
   getVendor,
@@ -951,4 +1045,5 @@ module.exports = {
   listExpiringContracts,
   createContract,
   getStats,
+  getPlatformStats,
 };

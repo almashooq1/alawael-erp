@@ -43,6 +43,8 @@ describe('W817 — supply chain ops closure index', () => {
     expect(CLOSURE).toMatch(/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS/);
     expect(CLOSURE).toMatch(/purchasing-tier-consumer-wave814/);
     expect(CLOSURE).toMatch(/stub-audit-ratchet-wave813/);
+    expect(CLOSURE).toMatch(/purchasing-adr-signoff-email-wave818/);
+    expect(CLOSURE).toMatch(/verify:supply-chain-staging/);
   });
 
   it('cutover docs link back to closure index', () => {

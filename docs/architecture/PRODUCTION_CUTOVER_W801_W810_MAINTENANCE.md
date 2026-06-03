@@ -118,6 +118,13 @@ Ensure these exist in your auth provider (non-exhaustive; see route `authorize` 
 
 ## 5. Verification (post-deploy smoke)
 
+**Combined supply-chain smoke (W819)** — includes maintenance-hub snapshot; run with facility JWT:
+
+```bash
+cd backend && SUPPLY_CHAIN_API_URL=https://<staging-host> SUPPLY_CHAIN_TOKEN=<jwt> \
+  npm run verify:supply-chain-staging
+```
+
 Run against staging with a facility_manager or ops_manager JWT:
 
 ```bash

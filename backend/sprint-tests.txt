@@ -137,6 +137,7 @@ __tests__/supply-chain-ops-closure-wave817.test.js
 __tests__/purchasing-adr-signoff-email-wave818.test.js
 __tests__/supply-chain-staging-verify-wave819.test.js
 __tests__/purchasing-signoff-staging-wire-wave820.test.js
+__tests__/pilot-supply-chain-scenario-wave821.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/stub-audit-ratchet-wave813.test.js

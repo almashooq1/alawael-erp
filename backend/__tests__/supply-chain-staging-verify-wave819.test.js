@@ -32,7 +32,7 @@ describe('W819 — supply chain staging verification', () => {
   });
 
   it('closure index documents W818 engineering complete and W819 staging script', () => {
-    expect(CLOSURE).toMatch(/through \*\*W819\*\*/);
+    expect(CLOSURE).toMatch(/through \*\*W820\*\*/);
     expect(CLOSURE).toMatch(/verify:supply-chain-staging/);
     expect(CLOSURE).toMatch(/purchasing-adr-signoff-email-wave818/);
     expect(CLOSURE).toMatch(/supply-chain-staging-verify-wave819/);

@@ -9,11 +9,13 @@
 - [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](../architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md)
 - [PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md](../architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md)
 - [039-SIGNOFF-PACKET.md](../architecture/decisions/039-SIGNOFF-PACKET.md)
+- [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../architecture/SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md)
 
 ---
 
 ## Pre-test setup
 
+- [ ] **W819 smoke** — `cd backend && SUPPLY_CHAIN_API_URL=… SUPPLY_CHAIN_TOKEN=… npm run verify:supply-chain-staging` (exit 0)
 - [ ] Pilot JWT for roles: `procurement_manager` (Tier B) + `facility_manager` (maintenance hub)
 - [ ] Legacy UI reachable: `/purchasing`, `/branch-purchasing`
 - [ ] web-admin reachable: `/ops/maintenance`, `/ops/branch-board` (optional)
@@ -28,7 +30,7 @@
 | 7A.1 | Open `/branch-purchasing` → create PR with inventory item → convert to PO | PO tab shows `itemsSummary`; status advances |
 | 7A.2 | Open `/purchasing` → open PO → partial receive (W795 dialog) | Status `partial` when lines remain; GRN created |
 | 7A.3 | Confirm **PurchasingPlatformStatsBanner** (W803/W804) | Tier B + Tier A chips visible; read-only |
-| 7A.4 | `GET /api/v1/purchasing/platform-stats` | `data.tiers.legacyPurchasing` + `inventoryStock` counts present |
+| 7A.4 | `GET /api/v1/purchasing/platform-stats` (or W819 verify script) | `data.tiers.legacyPurchasing` + `inventoryStock` counts present |
 
 **If it fails:** capture `SCENARIO:7A + STEP` — do not redirect web-admin to `/purchasing` (ADR-039).
 

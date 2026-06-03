@@ -129,6 +129,7 @@ __tests__/purchasing-po-adr-wave797.test.js
 __tests__/purchasing-modules-doc-wave798.test.js
 __tests__/purchasing-platform-stats-wave799.test.js
 __tests__/purchasing-cutover-doc-wave800.test.js
+__tests__/purchasing-platform-stats-ui-wave803.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/dashboard-mount-wave776.test.js

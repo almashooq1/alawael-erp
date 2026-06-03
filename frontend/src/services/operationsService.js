@@ -150,6 +150,12 @@ export const purchasingService = {
     return r.data;
   }),
 
+  /** W803 — ADR-039 cross-tier read-only counts (legacy + InventoryStock). */
+  getPlatformStats: safe(async (params = {}) => {
+    const r = await apiClient.get('/api/v1/purchasing/platform-stats', { params });
+    return r.data;
+  }),
+
   getMockVendors: () => MOCK_VENDORS,
   getMockPOs: () => MOCK_PURCHASE_ORDERS,
   getMockStats: () => MOCK_PUR_STATS,

@@ -2,7 +2,8 @@
 
 **Audience:** Product owner (supply chain) + web-admin lead + backend platform  
 **Date:** 2026-06-03  
-**Full ADR:** [039-purchase-order-triple-backend.md](039-purchase-order-triple-backend.md)
+**Full ADR:** [039-purchase-order-triple-backend.md](039-purchase-order-triple-backend.md)  
+**Sign-off packet (print/email):** [039-SIGNOFF-PACKET.md](039-SIGNOFF-PACKET.md)
 
 ## Meeting question (15 minutes)
 

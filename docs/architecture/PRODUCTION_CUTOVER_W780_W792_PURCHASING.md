@@ -134,7 +134,8 @@ curl -sS -H "Authorization: Bearer $TOKEN" \
 1. `/branch-purchasing` — create PR with inventory item → convert → PO tab shows `itemsSummary`.
 2. Approve + receive PO — partial qty dialog (W795) or full receive; GRN appears; stock ↑ for linked `item_id`.
 3. `/purchasing` — PO table shows summary; detail dialog lists `lineItems` + GRNs; `partial` status chip when applicable.
-4. `GET /api/v1/purchasing/platform-stats` — returns both tiers without mutating either collection (W799).
+4. `/purchasing` + `/branch-purchasing` — `PurchasingPlatformStatsBanner` shows Tier B + Tier A (W803/W804).
+5. `GET /api/v1/purchasing/platform-stats` — returns both tiers without mutating either collection (W799).
 
 ---
 
@@ -175,6 +176,8 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 | W798 | MODULES.md + PRODUCTION_GAPS discoverability links                |
 | W799 | `GET /platform-stats` cross-tier read-only PO counts (ADR-039)    |
 | W800 | Cutover doc verification sync through W799 (this section §4 curl) |
+| W803 | `PurchasingPlatformStatsBanner` on `/purchasing`                  |
+| W804 | Same banner on `/branch-purchasing`                               |
 
 **Sprint-gated drift guards:** 19+ test files under `backend/__tests__/purchasing-*-wave78*.test.js` (enumerated in `backend/sprint-tests.txt`).
 

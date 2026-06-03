@@ -68,6 +68,12 @@ const SIGNALS = {
   // requires a controller / model / service / domain / repository / lib
   realRequire:
     /require\(\s*['"][^'"]*\/(controllers|models|services|domains|repositories|intelligence|workflow|students|vehicles)\//,
+  // W813 — in-process rehab catalog/engine (web-admin /rehab/* surfaces)
+  rehabEngine: /require\(\s*['"][^'"]*rehabilitation-services\//,
+  // W813 — disk-backed uploads (Phase 27) are real, not hollow placeholders
+  fsBacked:
+    /\bfs\.(?:readFile(?:Sync)?|writeFile(?:Sync)?|appendFile(?:Sync)?|unlink(?:Sync)?|mkdir(?:Sync)?|createWriteStream|statSync)\s*\(/,
+  multer: /\bmulter\b/,
   mongoose: /\bmongoose\b/,
   dbOps:
     /\.(find|findOne|findById|findByIdAndUpdate|findOneAndUpdate|aggregate|countDocuments|count|create|insertMany|updateOne|updateMany|deleteOne|deleteMany|save|populate)\s*\(/,
@@ -76,6 +82,8 @@ const SIGNALS = {
   appStore: /req\.app\.(_[A-Za-z]|get\s*\()/,
   // factory that receives wired collaborators (createXRouter({ service, ... }))
   factory: /function\s+create[A-Za-z0-9]*Router\s*\(/,
+  // deploy identity endpoint — reads BUILD_SHA / git at load time
+  childProcess: /\bexecSync\s*\(/,
 };
 
 // Stubs that are intentionally hollow placeholders by design (documented).

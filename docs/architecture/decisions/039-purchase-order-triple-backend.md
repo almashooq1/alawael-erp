@@ -78,7 +78,9 @@ Ops checklist: [`PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](../PRODUCTION_CUTO
 
 - New PO features: pick **one** tier in the PR description; cross-tier requires ADR
   amendment.
-- Drift guard: `purchasing-po-adr-wave797.test.js` + cutover doc §7 link.
+- Drift guards: `purchasing-po-adr-wave797.test.js`, `purchasing-tier-consumer-wave814.test.js`,
+  `purchasing-adr-signoff-packet-wave815.test.js` + cutover doc §7 link.
+- Stakeholder sign-off: [`039-SIGNOFF-PACKET.md`](039-SIGNOFF-PACKET.md) (Approach B, 12 months).
 - Wave namespace: backend adapter waves continue `W78x`; web-admin PO changes ship
   in `alawael-rehab-platform` with separate wave collision scope.
 

@@ -50,6 +50,7 @@ function _fallback() {
     purchaseRequestModel: require('../../models/operations/PurchaseRequest.model'),
     facilityInspectionModel: require('../../models/operations/FacilityInspection.model'),
     facilityModel: require('../../models/operations/Facility.model'),
+    facilityAssetModel: require('../../models/FacilityAsset'),
   });
   return _fb;
 }

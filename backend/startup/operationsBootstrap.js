@@ -201,6 +201,7 @@ function bootstrapOperations({ logger = console, dispatcher = null, startSchedul
     const PurchaseRequestModel = require('../models/operations/PurchaseRequest.model');
     const FacilityInspectionModel = require('../models/operations/FacilityInspection.model');
     const FacilityModel = require('../models/operations/Facility.model');
+    const FacilityAsset = require('../models/FacilityAsset');
     opsDashboardService = createOpsDashboardService({
       slaEngine,
       slaModel: SLAModel,
@@ -209,6 +210,7 @@ function bootstrapOperations({ logger = console, dispatcher = null, startSchedul
       purchaseRequestModel: PurchaseRequestModel,
       facilityInspectionModel: FacilityInspectionModel,
       facilityModel: FacilityModel,
+      facilityAssetModel: FacilityAsset,
       logger,
     });
     opsDashboardModule._replaceDefault(opsDashboardService);

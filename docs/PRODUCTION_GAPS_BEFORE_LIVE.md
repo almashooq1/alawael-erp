@@ -2,7 +2,7 @@
 
 **Type**: Operational matrix — what's stubbed/placeholder/blocked across the platform
 **Audience**: Ops team + product PM + pilot owner (decides cutover sequence)
-**Updated**: 2026-05-25 (post-W400-W404 — LIVE-registry event baselines now empty; 5 new producer surfaces added)
+**Updated**: 2026-06-03 (W804 purchasing UI + W810 maintenance ops + W811 cutover docs on `main`)
 
 This is the single source of truth for "what is NOT actually production-ready yet" across the platform. Use it when planning cutover sequence, prioritising stakeholder asks, or deciding what to ship for the pilot.
 
@@ -47,7 +47,8 @@ If a row says "Mitigation in place ✓" you can flip the flag and the system wil
 | **Web-admin pages for W356–W370**                   | 30 of 10 modules built (Next.js 15)               | `alawael-rehab-platform/apps/web-admin/src/app/(dashboard)/` | Pattern: list / detail / new-form per module. seizure-log is the reference; others mirror it. |
 | **Web-admin page for W384 CaregiverSupportProgram** | 3 pages built (W384) + 8th aggregator card (W390) | same repo                                                    | Complete.                                                                                     |
 | **Web-admin Speech tab**                            | UI exists but provider not wired                  | same repo                                                    | Shows empty state until `SPEECH_ANALYSIS_PROVIDER` set.                                       |
-| **Legacy frontend** (`frontend/`)                   | Superseded by web-admin; still gated in CI        | `frontend/src/`                                              | Both run concurrently during cutover. ~11K tests passing per pre-push gate.                   |
+| **Ops maintenance hub (W807)**                    | Built in web-admin (`/ops/maintenance`)           | `alawael-rehab-platform/apps/web-admin`                      | Snapshot + bulk spawn; branch/COO boards show PPM tiles (W809–W810). Cron still env-gated.    |
+| **Legacy frontend** (`frontend/`)                   | Superseded by web-admin; still gated in CI        | `frontend/src/`                                              | Both run concurrently during cutover. Purchasing ADR-039 banner on `/purchasing` (W803–W804).   |
 | **Mobile app** (`mobile/`)                          | Not in pilot scope                                | `mobile/src/`                                                | Phase 5+.                                                                                     |
 | **Payment-gateway demo placeholder**                | Already FIXED (W278b commit `e86560f8e`)          | `routes/parent-portal-v1.routes.js`                          | HyperPay live by default + Saudi gateway override via env. No longer a gap.                   |
 
@@ -114,6 +115,7 @@ Does the adapter have an auto-submitting cron?
 | `ENABLE_*_SWEEPER=true` (clinical)      | Anytime (internal sweepers)                                                      | None — see clinicalSweepersBootstrap.js for the 13                                                                                                                                                                                                               |
 | `ENABLE_BUDGET_THRESHOLD_SWEEPER=true`  | Anytime (W401 — emits finance.budget.threshold_reached daily)                    | Optionally tune via `BUDGET_THRESHOLD_PERCENT=80` (default 80% utilization). Internal event bus only — no external transport.                                                                                                                                    |
 | `ENABLE_ABSENCE_DETECTION_SWEEPER=true` | Anytime (W402 — emits attendance.absence.detected daily over yesterday's window) | Optionally widen via `ABSENCE_DETECTION_STATUSES=absent,on_leave,sick` (default `absent` only). Internal event bus only.                                                                                                                                         |
+| `ENABLE_PPM_WO_SWEEPER=true`            | After staging verifies manual `POST /ops/maintenance-hub/spawn-due-maintenance` (W808) | Optionally scope via `PPM_WO_SWEEPER_BRANCH_IDS` + `PPM_WO_SWEEPER_LIMIT` (max 50). Daily 05:30 Asia/Riyadh — idempotent bulk preventive WOs. See [`PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md`](architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md). |
 
 ---
 
@@ -122,7 +124,8 @@ Does the adapter have an auto-submitting cron?
 - [`PILOT_CYCLE_1.md`](PILOT_CYCLE_1.md) — operational readiness package for the 4-week pilot
 - [`pilot/README.md`](pilot/README.md) — 5 detailed scenario walkthroughs
 - [`architecture/PRODUCTION_CUTOVER_W356_W370.md`](architecture/PRODUCTION_CUTOVER_W356_W370.md) — W356-W370 + W384 module activation checklist
-- [`architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md) — W780–W795 legacy purchasing / supply-chain (66666 React); three PO backends — see ADR-039
+- [`architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](architecture/PRODUCTION_CUTOVER_W780_W792_PURCHASING.md) — W780–W804 legacy purchasing / supply-chain (66666 React + ADR-039 banner); three PO backends — see ADR-039
+- [`architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md`](architecture/PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md) — W801–W810 ops registry + maintenance hub + PPM cron (`ENABLE_PPM_WO_SWEEPER`)
 - [`architecture/decisions/039-purchase-order-triple-backend.md`](architecture/decisions/039-purchase-order-triple-backend.md) — 🟡 Proposed; web-admin vs legacy PO tier formalization (W797)
 - [`architecture/decisions/`](architecture/decisions/) — ADR-020 through ADR-028
 - [`runbooks/gov-adapter-circuit.md`](runbooks/gov-adapter-circuit.md) — circuit-breaker triage

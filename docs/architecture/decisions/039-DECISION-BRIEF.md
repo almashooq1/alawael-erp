@@ -40,5 +40,5 @@
 
 ## No-regrets pre-work (either sign-off)
 
-1. Link ADR-039 from cutover doc §7 (W797).
-2. Add drift guard so new `dualMount` redirects between tiers fail CI review checklist.
+1. Link ADR-039 from cutover doc §7 (W797). ✅
+2. Add drift guard so new `dualMount` redirects between tiers fail CI review checklist. ✅ W814 `purchasing-tier-consumer-wave814.test.js`

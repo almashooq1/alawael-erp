@@ -38,14 +38,12 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'FacilityAsset',
       default: null,
-      index: true,
     },
     // W801 — physical building link (operations/Facility Phase-16).
     facilityId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Facility',
       default: null,
-      index: true,
     },
     type: {
       type: String,
@@ -98,7 +96,8 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
   { timestamps: true, collection: 'maintenance_work_orders' }
 );
 
-maintenanceWorkOrderSchema.index({ workOrderNumber: 1 });
+// workOrderNumber already has `unique: true` at field level (which creates
+// the index); keep only one declaration to avoid duplicate-index warnings.
 // REMOVED DUPLICATE: status already has field-level index:true
 maintenanceWorkOrderSchema.index({ type: 1 });
 maintenanceWorkOrderSchema.index({ scheduledDate: 1 });

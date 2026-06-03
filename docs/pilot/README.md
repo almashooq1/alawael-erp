@@ -18,8 +18,9 @@ This directory is what pilot operators execute during weeks 1-4.
 | 4   | Transport + Hikvision camera attendance                  | [SCENARIO_4_TRANSPORT_HIKVISION.md](SCENARIO_4_TRANSPORT_HIKVISION.md)                 | Camera→Appointment auto-update + EOD reconcile (W96-W114 + W327 + W335)           | ~1-2 hrs            | 📋 Draft |
 | 5   | Monthly Disability Authority report submission           | [SCENARIO_5_DISABILITY_AUTHORITY_REPORT.md](SCENARIO_5_DISABILITY_AUTHORITY_REPORT.md) | Government reporting pipeline (W281 + W286 + W312 + W316)                         | ~1 hr active + cron | 📋 Draft |
 | 6   | Caregiver enrollment → sessions → Zarit pre/post outcome | [SCENARIO_6_CAREGIVER_SUPPORT_PROGRAM.md](SCENARIO_6_CAREGIVER_SUPPORT_PROGRAM.md)     | W384 CaregiverSupportProgram + W393 overdue sweeper (18 endpoints + lifecycle)    | ~2 hrs              | 📋 Draft |
+| 7   | Supply chain + facility maintenance (optional)           | [SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md](SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md) | W780–W804 purchasing + W801–W810 maintenance hub + ADR-039 (W815 sign-off)       | ~2 hrs              | 📋 Draft |
 
-**Coverage**: The 6 walkthroughs exercise the 7 ready platform phases (B360 + assessments + plans + sessions + reports + ops + quality) + the family-support surface end-to-end on real data.
+**Coverage**: Scenarios 1–6 exercise the 7 ready platform phases (B360 + assessments + plans + sessions + reports + ops + quality) + family-support. **Scenario 7** is optional ops validation for supply-chain + PPM (does not gate go/no-go).
 
 ---
 

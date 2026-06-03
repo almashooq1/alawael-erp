@@ -132,6 +132,7 @@ __tests__/purchasing-cutover-doc-wave800.test.js
 __tests__/purchasing-platform-stats-ui-wave803.test.js
 __tests__/purchasing-tier-consumer-wave814.test.js
 __tests__/purchasing-adr-signoff-packet-wave815.test.js
+__tests__/pilot-supply-chain-scenario-wave816.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/stub-audit-ratchet-wave813.test.js

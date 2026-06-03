@@ -315,6 +315,20 @@ If pilot needs to be aborted:
 - **Family disengagement**: family may not log in. Mitigation: 1 follow-up call after invite; if no engagement, document but don't block other scenarios.
 - **Scope creep**: stakeholders see pilot working → demand new features. Mitigation: this doc's "no-features-during-pilot" rule + dedicated backlog channel.
 
+## ١١. Optional — supply chain + facility maintenance (Scenario 7)
+
+Does **not** block Section 8 go/no-go. Run in **week 3–4** if procurement + facilities are in pilot scope.
+
+📖 [docs/pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md](pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md)
+
+| Track | Validates | Ops doc |
+| ----- | --------- | ------- |
+| Legacy purchasing (Tier B) | PR→PO→partial receive + ADR-039 banner | `PRODUCTION_CUTOVER_W780_W792_PURCHASING.md` |
+| Maintenance hub | snapshot + bulk spawn + branch PPM tile | `PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md` |
+| Policy | Approach B sign-off | `039-SIGNOFF-PACKET.md` |
+
+---
+
 ## Recommended next step
 
 1. Walk Q1-Q5 with the pilot owner (1 hour meeting).

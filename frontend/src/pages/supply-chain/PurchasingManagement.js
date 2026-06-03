@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
 import PartialReceiveDialog from './PartialReceiveDialog';
+import PurchasingPlatformStatsBanner from './PurchasingPlatformStatsBanner';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
@@ -275,6 +276,8 @@ const PurchasingManagement = () => {
           </Box>
         </CardContent>
       </Card>
+
+      <PurchasingPlatformStatsBanner />
 
       {/* Stats */}
       {stats && (

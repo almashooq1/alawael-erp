@@ -54,6 +54,7 @@
  *     workOrderBacklog: { totalOpen, byBranch: [...] },
  *     procurement: { pendingValue, avgCycleHours, convertedLast7d },
  *     inspections: { openCritical, byBranch: [...] },
+ *     facilityPpm: { dueMaintenance, dueInspection, expiredCertificates, lifeSafetyOos, openWorkOrdersOnAssets, worstBranches: [...] },
  *     recentEscalations: [...],
  *   }
  */
@@ -358,14 +359,21 @@ class OpsDashboardService {
     const generatedAt = this.now();
     const since = new Date(generatedAt.getTime() - windowHours * 3600 * 1000);
 
-    const [slaCompliance, workOrderBacklog, procurement, inspections, recentEscalations] =
-      await Promise.all([
-        this._cooSlaSection(since),
-        this._cooWorkOrderBacklog(),
-        this._cooProcurementSection(since),
-        this._cooInspectionsSection(),
-        this._cooRecentEscalations(since),
-      ]);
+    const [
+      slaCompliance,
+      workOrderBacklog,
+      procurement,
+      inspections,
+      facilityPpm,
+      recentEscalations,
+    ] = await Promise.all([
+      this._cooSlaSection(since),
+      this._cooWorkOrderBacklog(),
+      this._cooProcurementSection(since),
+      this._cooInspectionsSection(),
+      this._cooFacilityPpmSection(),
+      this._cooRecentEscalations(since),
+    ]);
 
     return {
       generatedAt,
@@ -374,8 +382,79 @@ class OpsDashboardService {
       workOrderBacklog,
       procurement,
       inspections,
+      facilityPpm,
       recentEscalations,
     };
+  }
+
+  /** W810 — cross-branch PPM rollup for COO executive board. */
+  async _cooFacilityPpmSection() {
+    if (!this.facilityAssetModel) return null;
+    return this._safe('coo facility PPM section', async () => {
+      const n = this.now();
+      const base = { status: { $ne: 'retired' } };
+      const openWoOnAssets = this.workOrderModel
+        ? (await this._count(this.workOrderModel, {
+            facilityAssetId: { $ne: null },
+            status: { $in: OPEN_WO_STATUSES },
+          })) || 0
+        : 0;
+
+      const [dueMaintenance, dueInspection, expiredCertificates, lifeSafetyOos] = await Promise.all(
+        [
+          this._count(this.facilityAssetModel, {
+            ...base,
+            nextMaintenanceDue: { $ne: null, $lt: n },
+          }),
+          this._count(this.facilityAssetModel, {
+            ...base,
+            nextInspectionDue: { $ne: null, $lt: n },
+          }),
+          this._count(this.facilityAssetModel, {
+            ...base,
+            'certificates.expiresAt': { $lt: n },
+          }),
+          this._count(this.facilityAssetModel, {
+            ...base,
+            criticality: 'life_safety',
+            status: { $in: ['out_of_service', 'inspection_failed'] },
+          }),
+        ]
+      );
+
+      let worstBranches = [];
+      try {
+        const agg = await this.facilityAssetModel.aggregate?.([
+          {
+            $match: {
+              status: { $ne: 'retired' },
+              branchId: { $ne: null },
+              nextMaintenanceDue: { $ne: null, $lt: n },
+            },
+          },
+          { $group: { _id: '$branchId', dueMaintenance: { $sum: 1 } } },
+          { $sort: { dueMaintenance: -1 } },
+          { $limit: 5 },
+        ]);
+        if (Array.isArray(agg)) {
+          worstBranches = agg.map(r => ({
+            branchId: r._id ? String(r._id) : null,
+            dueMaintenance: r.dueMaintenance,
+          }));
+        }
+      } catch {
+        worstBranches = [];
+      }
+
+      return {
+        dueMaintenance: dueMaintenance || 0,
+        dueInspection: dueInspection || 0,
+        expiredCertificates: expiredCertificates || 0,
+        lifeSafetyOos: lifeSafetyOos || 0,
+        openWorkOrdersOnAssets: openWoOnAssets,
+        worstBranches,
+      };
+    });
   }
 
   async _cooSlaSection(since) {

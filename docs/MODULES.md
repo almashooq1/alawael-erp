@@ -131,6 +131,7 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 | `/api/diet-prescription`                 | الوصفة الغذائية السريرية — IDDSI + NPO + enteral (W368)                                               |
 | `/api/facility-asset`                    | أصول المنشأة — مصاعد/منحدرات/إنذار/أوكسجين + PPM (W369); `POST /:id/spawn-work-order` → WO (W801)     |
 | `/api/v1/ops/maintenance-hub`            | مركز الصيانة — snapshot + spawn جماعي للمستحقات (W807); cron `ENABLE_PPM_WO_SWEEPER` (W808)           |
+| `/api/v1/ops/dashboard`                  | لوحات العمليات — فرع: `facilityAssets` PPM (W809); COO: `facilityPpm` عبر الفروع (W810)               |
 | `/api/v1/ops/work-orders`                | أوامر الصيانة — 14 حالة + SLA؛ ربط `facilityAssetId` / `facilityId`؛ list/get مع populate (W801–W805) |
 | `/api/v1/facility-asset/:id/work-orders` | أوامر مرتبطة بأصل منشأة (W807)                                                                        |
 | `/api/v1/ops/facilities`                 | مرافق + تفتيش؛ spawn WO من بند التفتيش (Phase 16 + W801)                                              |

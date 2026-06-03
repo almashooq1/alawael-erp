@@ -38,6 +38,8 @@ Mongoose model** as legacy purchasing but uses inline routes (item picker in W78
 - Status enum mismatch (`partial` vs `partially_received`).
 
 Ops checklist: [`PRODUCTION_CUTOVER_W780_W792_PURCHASING.md`](../PRODUCTION_CUTOVER_W780_W792_PURCHASING.md).
+Closure index (W817–W822, engineering freeze): [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md).
+Staging smoke: `cd backend && npm run verify:supply-chain-staging` (W819).
 
 ## Decision
 

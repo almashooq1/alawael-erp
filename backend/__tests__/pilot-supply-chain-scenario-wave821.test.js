@@ -47,8 +47,7 @@ describe('W821 — pilot + sign-off email staging verify', () => {
     expect(EMAIL).toMatch(/W780–W820/);
   });
 
-  it('closure index is through W820', () => {
-    expect(CLOSURE).toMatch(/through \*\*W820\*\*/);
+  it('closure index lists W821 pilot drift guard', () => {
     expect(CLOSURE).toMatch(/pilot-supply-chain-scenario-wave821/);
   });
 });

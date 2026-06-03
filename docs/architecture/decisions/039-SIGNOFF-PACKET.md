@@ -8,7 +8,7 @@
 **Full ADR:** [039-purchase-order-triple-backend.md](039-purchase-order-triple-backend.md)  
 **Decision brief:** [039-DECISION-BRIEF.md](039-DECISION-BRIEF.md)  
 **Ops cutover:** [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](../PRODUCTION_CUTOVER_W780_W792_PURCHASING.md)  
-**Closure index:** [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) (W817–W819)
+**Closure index:** [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) (W817–W822 — engineering freeze)
 
 ---
 

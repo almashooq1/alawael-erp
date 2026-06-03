@@ -211,7 +211,7 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ## 8. Related docs
 
-- [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — closure index (W780–W816)
+- [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — closure index (W780–W822, engineering freeze)
 
 - `CLAUDE.md` — repo routing doctrine (66666 backend vs web-admin)
 - `docs/MIGRATION_LEDGER.md` — two-repo topology

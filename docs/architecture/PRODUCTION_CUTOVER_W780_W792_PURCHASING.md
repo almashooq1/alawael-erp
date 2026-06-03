@@ -183,8 +183,11 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
 
 ---
 
-## 7. Open follow-ups (post-W799)
+## 7. Open follow-ups (post-W804)
 
+- **Legacy UI ADR-039 banner** — shipped W803/W804 (`PurchasingPlatformStatsBanner` on
+  `/purchasing` and `/branch-purchasing`). Verify tier chips against
+  `GET /platform-stats` in staging.
 - **Web-admin PO unification** — **blocked on ADR-039 sign-off**
   ([`docs/architecture/decisions/039-purchase-order-triple-backend.md`](decisions/039-purchase-order-triple-backend.md)).
   Web-admin `/inventory/purchase-orders` stays on `/api/v1/inventory/purchase-orders`

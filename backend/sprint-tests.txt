@@ -582,3 +582,4 @@ __tests__/ops-work-order-list-filter-wave805.test.js
 __tests__/maintenance-hub-wave807.test.js
 __tests__/branch-board-ppm-wave809.test.js
 __tests__/coo-board-ppm-wave810.test.js
+__tests__/maintenance-cutover-doc-wave811.test.js

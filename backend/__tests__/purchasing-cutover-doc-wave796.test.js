@@ -21,7 +21,7 @@ const DOC = fs.readFileSync(
 
 describe('W796 — purchasing cutover doc W793–W795 extensions', () => {
   it('wave map includes W793 W794 W795', () => {
-    expect(DOC).toMatch(/W780–W795/);
+    expect(DOC).toMatch(/W780–W799/);
     expect(DOC).toMatch(/\| W793 \|/);
     expect(DOC).toMatch(/\| W794 \|/);
     expect(DOC).toMatch(/\| W795 \|/);

@@ -7,7 +7,8 @@
 **Email draft (AR):** [039-SIGNOFF-EMAIL-AR.md](039-SIGNOFF-EMAIL-AR.md) (W818 — copy/paste to stakeholders)  
 **Full ADR:** [039-purchase-order-triple-backend.md](039-purchase-order-triple-backend.md)  
 **Decision brief:** [039-DECISION-BRIEF.md](039-DECISION-BRIEF.md)  
-**Ops cutover:** [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](../PRODUCTION_CUTOVER_W780_W792_PURCHASING.md)
+**Ops cutover:** [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](../PRODUCTION_CUTOVER_W780_W792_PURCHASING.md)  
+**Closure index:** [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) (W817–W819)
 
 ---
 
@@ -23,7 +24,8 @@ Approve **Approach B — Keep tiers separate**. Do **not** redirect web-admin PO
 | **C** | `/api/v1/inventory-module/purchase-orders` | branch PR item picker only |
 
 **Already shipped on `main` (no sign-off required to deploy):** W780–W804 purchasing,
-W799–W804 ADR-039 banner, W814 tier-consumer drift guard, W801–W811 maintenance hub.
+W799–W804 ADR-039 banner, W814 tier-consumer drift guard, W801–W811 maintenance hub,
+W818 Arabic sign-off email, W819 `npm run verify:supply-chain-staging`.
 
 ---
 
@@ -41,7 +43,16 @@ W799–W804 ADR-039 banner, W814 tier-consumer drift guard, W801–W811 maintena
 
 ## Staging verification (ops — before pilot cutover)
 
-Run with staging JWT (`procurement_manager` or `facility_manager` as applicable):
+**One command (W819)** — procurement or facility JWT on staging:
+
+```bash
+cd backend
+SUPPLY_CHAIN_API_URL=https://<staging-host> \
+SUPPLY_CHAIN_TOKEN=<jwt> \
+npm run verify:supply-chain-staging
+```
+
+Manual curls (same checks):
 
 ```bash
 # Tier B — legacy adapter (read-only federation)

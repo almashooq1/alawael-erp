@@ -93,6 +93,17 @@ PR (optional itemId picker) → submit → approve → convert-to-po
 
 ## 4. Verification (post-deploy smoke)
 
+**Supply-chain staging smoke (W819)** — purchasing + maintenance hub in one call:
+
+```bash
+cd backend
+SUPPLY_CHAIN_API_URL=https://<staging-host> \
+SUPPLY_CHAIN_TOKEN=<procurement_or_facility_jwt> \
+npm run verify:supply-chain-staging
+```
+
+See also [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) §5.
+
 Run against staging with a procurement_manager JWT:
 
 ```bash

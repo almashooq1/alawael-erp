@@ -1,6 +1,6 @@
 # Supply Chain + Facility Ops — Closure Index (2026-06)
 
-**Status:** Engineering complete on `main` through **W818**. Stakeholder ADR-039 sign-off is the
+**Status:** Engineering complete on `main` through **W819**. Stakeholder ADR-039 sign-off is the
 remaining gate before any PO unification program.
 
 This page is the single navigation index — not a fourth cutover doc.
@@ -42,6 +42,7 @@ This page is the single navigation index — not a fourth cutover doc.
 | W816 | `pilot-supply-chain-scenario-wave816` | Pilot doc links |
 | W818 | `purchasing-adr-signoff-email-wave818` | Arabic sign-off email drift |
 | W819 | `supply-chain-staging-verify-wave819` | Staging smoke script + closure links |
+| W820 | `purchasing-signoff-staging-wire-wave820` | Sign-off packet ↔ W819 script in cutover/gaps |
 
 ---
 

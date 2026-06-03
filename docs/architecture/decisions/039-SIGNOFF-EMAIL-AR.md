@@ -37,7 +37,15 @@
 
 - [039-SIGNOFF-PACKET.md](039-SIGNOFF-PACKET.md) — خانات التوقيع + تحقق staging
 - [039-DECISION-BRIEF.md](039-DECISION-BRIEF.md) — ملخص إنجليزي 15 دقيقة
-- [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — فهرس الموجات W780–W817
+- [SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md](../SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — فهرس الموجات W780–W820
+
+### تحقق staging (قبل الاجتماع — اختياري للتقنية)
+
+```bash
+cd backend
+SUPPLY_CHAIN_API_URL=https://<staging> SUPPLY_CHAIN_TOKEN=<jwt> \
+npm run verify:supply-chain-staging
+```
 
 ### بعد التوقيع
 

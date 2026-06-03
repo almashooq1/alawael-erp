@@ -13,7 +13,7 @@ This page is the single navigation index — not a fourth cutover doc.
 | ----- | ----- | -------- | ----------- |
 | Legacy purchasing | W780–W804 | `66666/frontend` `/purchasing`, `/branch-purchasing` | [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](PRODUCTION_CUTOVER_W780_W792_PURCHASING.md) |
 | Facility maintenance | W801–W810 | web-admin `/ops/*` + REST | [PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md](PRODUCTION_CUTOVER_W801_W810_MAINTENANCE.md) |
-| ADR-039 policy | W797–W815 | All tiers | [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md) |
+| ADR-039 policy | W797–W818 | All tiers | [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md) + [039-SIGNOFF-EMAIL-AR.md](decisions/039-SIGNOFF-EMAIL-AR.md) |
 | Platform hygiene | W812–W813 | Ops / CI | [PRODUCTION_GAPS_BEFORE_LIVE.md](../PRODUCTION_GAPS_BEFORE_LIVE.md) |
 | Pilot optional | W816 | Week 3–4 operators | [SCENARIO_7](../pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md) |
 
@@ -45,7 +45,7 @@ This page is the single navigation index — not a fourth cutover doc.
 
 ## 4. Stakeholder actions (not code)
 
-1. **Schedule 15 min** — use [039-DECISION-BRIEF.md](decisions/039-DECISION-BRIEF.md) + [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md).
+1. **Schedule 15 min** — send [039-SIGNOFF-EMAIL-AR.md](decisions/039-SIGNOFF-EMAIL-AR.md); attach [039-SIGNOFF-PACKET.md](decisions/039-SIGNOFF-PACKET.md) + [039-DECISION-BRIEF.md](decisions/039-DECISION-BRIEF.md).
 2. **Approve Approach B** (keep three PO tiers 12 months).
 3. **Pilot week 3–4** — optional Scenario 7 if procurement/facilities in scope.
 4. **Do not** open a “unify PO URLs only” PR without migration charter (ADR-039 § Decision).

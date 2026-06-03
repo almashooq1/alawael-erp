@@ -4,6 +4,7 @@
 (keep three tiers; no cross-redirect) for 12 months.
 
 **Meeting time:** 15 minutes  
+**Email draft (AR):** [039-SIGNOFF-EMAIL-AR.md](039-SIGNOFF-EMAIL-AR.md) (W818 — copy/paste to stakeholders)  
 **Full ADR:** [039-purchase-order-triple-backend.md](039-purchase-order-triple-backend.md)  
 **Decision brief:** [039-DECISION-BRIEF.md](039-DECISION-BRIEF.md)  
 **Ops cutover:** [PRODUCTION_CUTOVER_W780_W792_PURCHASING.md](../PRODUCTION_CUTOVER_W780_W792_PURCHASING.md)

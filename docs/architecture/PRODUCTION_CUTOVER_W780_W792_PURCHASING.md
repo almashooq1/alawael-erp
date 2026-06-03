@@ -193,10 +193,14 @@ Missing roles → 403 on mutate endpoints (not silent fallback).
   Web-admin `/inventory/purchase-orders` stays on `/api/v1/inventory/purchase-orders`
   (InventoryStock). Do **not** redirect to `/api/v1/purchasing` without migration.
   Stakeholder brief: [`039-DECISION-BRIEF.md`](decisions/039-DECISION-BRIEF.md).
+  Sign-off packet: [`039-SIGNOFF-PACKET.md`](decisions/039-SIGNOFF-PACKET.md) (W815).
+  Optional pilot: [Scenario 7](../pilot/SCENARIO_7_SUPPLY_CHAIN_MAINTENANCE_OPS.md) (W816).
 
 ---
 
 ## 8. Related docs
+
+- [`SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md`](SUPPLY_CHAIN_OPS_CLOSURE_2026-06.md) — closure index (W780–W816)
 
 - `CLAUDE.md` — repo routing doctrine (66666 backend vs web-admin)
 - `docs/MIGRATION_LEDGER.md` — two-repo topology

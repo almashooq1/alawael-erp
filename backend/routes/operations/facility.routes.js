@@ -314,6 +314,7 @@ router.post(
     body('description').isString().notEmpty(),
     body('severity').isIn(registry.FINDING_SEVERITIES),
     body('assetId').optional().isMongoId(),
+    body('facilityAssetId').optional().isMongoId(),
     body('spawnWorkOrder').optional().isBoolean(),
   ],
   handleValidation,
@@ -328,6 +329,7 @@ router.post(
           location: req.body.location,
           recommendation: req.body.recommendation,
           photos: req.body.photos,
+          facilityAssetId: req.body.facilityAssetId || null,
         },
         {
           actorId: req.user?._id,

@@ -168,6 +168,7 @@ describe('W369 facility-asset routes — endpoint surface', () => {
     ['patch', '/:id'],
     ['post', '/:id/inspection'],
     ['post', '/:id/certificate'],
+    ['post', '/:id/spawn-work-order'],
     ['post', '/:id/start-maintenance'],
     ['post', '/:id/return-to-service'],
     ['post', '/:id/out-of-service'],

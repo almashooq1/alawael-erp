@@ -576,3 +576,9 @@ __tests__/ops-alert-model-wave733.test.js
 tests/unit/ops-alerter.test.js
 __tests__/email-transport-wave735.test.js
 __tests__/reporting-scheduler-bootstrap-wave762.test.js
+__tests__/facility-maintenance-bridge-wave801.test.js
+__tests__/facility-asset-spawn-work-order-wave802.test.js
+__tests__/ops-work-order-list-filter-wave805.test.js
+__tests__/maintenance-hub-wave807.test.js
+__tests__/branch-board-ppm-wave809.test.js
+__tests__/coo-board-ppm-wave810.test.js

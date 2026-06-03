@@ -111,26 +111,31 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 
 ### 🌿 6. الصحة والعيادة (Clinical)
 
-| المسار                        | الوصف                                                                |
-| ----------------------------- | -------------------------------------------------------------------- |
-| `/api/emr`                    | السجل الطبي الإلكتروني                                               |
-| `/api/pharmacy`               | إدارة الصيدلية                                                       |
-| `/api/appointment-scheduling` | جدولة المواعيد                                                       |
-| `/api/medical-equipment`      | الأجهزة الطبية                                                       |
-| `/api/medical-referrals`      | الإحالات الطبية                                                      |
-| `/api/nutrition-plans`        | خطط التغذية                                                          |
-| `/api/medication-records`     | سجلات الأدوية                                                        |
-| `/api/seizure-log`            | سجل النوبات الصرعية — ILAE 2017 + status-epilepticus (W356)          |
-| `/api/safeguarding`           | بلاغات الحماية — CBAHI + Saudi child protection (W357)               |
-| `/api/communication-aid`      | ملف AAC — ASHA modality tiers (W358)                                 |
-| `/api/assistive-device`       | الأجهزة المساعدة — إعارة + صيانة (W359)                              |
-| `/api/cbahi`                  | اعتماد CBAHI — 45 معياراً عبر 8 فصول + إقرارات لكل فرع (W360 + W367) |
-| `/api/transition-plan`        | خطط الانتقال — 5 مراحل حياتية (W361)                                 |
-| `/api/adaptive-sports`        | الرياضة التكيّفية — 19 رياضة + جلسات + إنجازات (W362)                |
-| `/api/respite`                | الرعاية المؤقتة — Disability Authority subsidy (W363)                |
-| `/api/diet-prescription`      | الوصفة الغذائية السريرية — IDDSI + NPO + enteral (W368)              |
-| `/api/facility-asset`         | أصول المنشأة — مصاعد/منحدرات/إنذار/أوكسجين + PPM (W369)              |
-| `/api/caregiver-support`      | برامج دعم مقدمي الرعاية — Zarit pre/post + sessions (W384)           |
+| المسار                                   | الوصف                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/api/emr`                               | السجل الطبي الإلكتروني                                                                                |
+| `/api/pharmacy`                          | إدارة الصيدلية                                                                                        |
+| `/api/appointment-scheduling`            | جدولة المواعيد                                                                                        |
+| `/api/medical-equipment`                 | الأجهزة الطبية                                                                                        |
+| `/api/medical-referrals`                 | الإحالات الطبية                                                                                       |
+| `/api/nutrition-plans`                   | خطط التغذية                                                                                           |
+| `/api/medication-records`                | سجلات الأدوية                                                                                         |
+| `/api/seizure-log`                       | سجل النوبات الصرعية — ILAE 2017 + status-epilepticus (W356)                                           |
+| `/api/safeguarding`                      | بلاغات الحماية — CBAHI + Saudi child protection (W357)                                                |
+| `/api/communication-aid`                 | ملف AAC — ASHA modality tiers (W358)                                                                  |
+| `/api/assistive-device`                  | الأجهزة المساعدة — إعارة + صيانة (W359)                                                               |
+| `/api/cbahi`                             | اعتماد CBAHI — 45 معياراً عبر 8 فصول + إقرارات لكل فرع (W360 + W367)                                  |
+| `/api/transition-plan`                   | خطط الانتقال — 5 مراحل حياتية (W361)                                                                  |
+| `/api/adaptive-sports`                   | الرياضة التكيّفية — 19 رياضة + جلسات + إنجازات (W362)                                                 |
+| `/api/respite`                           | الرعاية المؤقتة — Disability Authority subsidy (W363)                                                 |
+| `/api/diet-prescription`                 | الوصفة الغذائية السريرية — IDDSI + NPO + enteral (W368)                                               |
+| `/api/facility-asset`                    | أصول المنشأة — مصاعد/منحدرات/إنذار/أوكسجين + PPM (W369); `POST /:id/spawn-work-order` → WO (W801)     |
+| `/api/v1/ops/maintenance-hub`            | مركز الصيانة — snapshot + spawn جماعي للمستحقات (W807); cron `ENABLE_PPM_WO_SWEEPER` (W808)           |
+| `/api/v1/ops/dashboard`                  | لوحات العمليات — فرع: `facilityAssets` PPM (W809); COO: `facilityPpm` عبر الفروع (W810)               |
+| `/api/v1/ops/work-orders`                | أوامر الصيانة — 14 حالة + SLA؛ ربط `facilityAssetId` / `facilityId`؛ list/get مع populate (W801–W805) |
+| `/api/v1/facility-asset/:id/work-orders` | أوامر مرتبطة بأصل منشأة (W807)                                                                        |
+| `/api/v1/ops/facilities`                 | مرافق + تفتيش؛ spawn WO من بند التفتيش (Phase 16 + W801)                                              |
+| `/api/caregiver-support`                 | برامج دعم مقدمي الرعاية — Zarit pre/post + sessions (W384)                                            |
 
 > 📑 **W356-W390 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap. W384 added caregiver-support; W390 wired it into the `/clinical-services/[id]` aggregator (8 surfaces). Note: W381/W383/W384/W385/W386/W387/W388/W389 collide with a parallel agent session — see CLAUDE.md "Wave numbers consumed" line.
 

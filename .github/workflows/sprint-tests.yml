@@ -979,6 +979,17 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-cutover-doc-wave800.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-maintenance-bridge-wave801.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-asset-spawn-work-order-wave802.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ops-work-order-list-filter-wave805.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenance-hub-wave807.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-board-ppm-wave809.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/coo-board-ppm-wave810.test.js'
       - 'backend/__tests__/purchasing-platform-stats-ui-wave803.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -1942,6 +1953,17 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-cutover-doc-wave800.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-maintenance-bridge-wave801.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-asset-spawn-work-order-wave802.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ops-work-order-list-filter-wave805.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenance-hub-wave807.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-board-ppm-wave809.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/coo-board-ppm-wave810.test.js'
       - 'backend/__tests__/purchasing-platform-stats-ui-wave803.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'

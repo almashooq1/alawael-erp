@@ -19,6 +19,7 @@
  *   PATCH  /:id
  *   POST   /:id/inspection           — log inspection event (advances nextDue)
  *   POST   /:id/certificate
+ *   POST   /:id/spawn-work-order      — W801 corrective/preventive WO (ops layer)
  *   POST   /:id/start-maintenance
  *   POST   /:id/return-to-service
  *   POST   /:id/out-of-service
@@ -272,6 +273,33 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
 });
 
 // ── GET /:id ────────────────────────────────────────────────────────
+// ── GET /:id/work-orders (W807) ─────────────────────────────────────
+router.get('/:id/work-orders', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    }
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }).select('_id');
+    if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
+
+    const WO = require('../models/MaintenanceWorkOrder');
+    require('../models/operations/Facility.model');
+    const limit = Math.min(Number(req.query.limit) || 50, 100);
+    const items = await WO.find({
+      facilityAssetId: row._id,
+      ...branchFilter(req),
+    })
+      .populate('facilityAssetId', 'name nameAr assetTag')
+      .sort({ scheduledDate: -1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    res.json({ success: true, items, count: items.length });
+  } catch (err) {
+    return safeError(res, err, 'facility.assetWorkOrders');
+  }
+});
+
 router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -492,6 +520,88 @@ router.post('/:id/certificate', requireRole(WRITE_ROLES), async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'facility.cert');
+  }
+});
+
+// ── POST /:id/spawn-work-order (W801) ───────────────────────────────
+router.post('/:id/spawn-work-order', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    }
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) });
+    if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
+    if (row.status === 'retired') {
+      return res.status(409).json({ success: false, message: 'الأصل متقاعد' });
+    }
+
+    const type = ['preventive', 'corrective', 'emergency', 'inspection', 'calibration'].includes(
+      req.body?.type
+    )
+      ? req.body.type
+      : row.isMaintenanceOverdue || row.status === 'inspection_failed'
+        ? 'corrective'
+        : 'preventive';
+
+    const priority =
+      req.body?.priority ||
+      (row.criticality === 'life_safety'
+        ? 'critical'
+        : row.criticality === 'high'
+          ? 'high'
+          : row.criticality === 'low'
+            ? 'low'
+            : 'normal');
+
+    const title =
+      String(req.body?.title || '').trim() ||
+      `صيانة ${row.nameAr || row.name || row.assetTag || 'أصل منشأة'}`.slice(0, 120);
+    const description =
+      String(req.body?.description || '').trim() ||
+      `أمر عمل مرتبط بأصل المنشأة ${row.assetTag} (${row.category}).`;
+
+    let sm = null;
+    try {
+      sm = require('../startup/operationsBootstrap')._getWorkOrderStateMachine?.();
+    } catch {
+      sm = null;
+    }
+    if (!sm) {
+      const {
+        createWorkOrderStateMachine,
+      } = require('../services/operations/workOrderStateMachine.service');
+      const WO = require('../models/MaintenanceWorkOrder');
+      sm = createWorkOrderStateMachine({ workOrderModel: WO });
+    }
+
+    const wo = await sm.createWorkOrder(
+      {
+        workOrderNumber: `WO-FA-${Date.now().toString(36).toUpperCase()}`,
+        branchId: row.branchId,
+        facilityAssetId: row._id,
+        type,
+        priority,
+        title,
+        description,
+        scheduledDate: req.body?.scheduledDate
+          ? new Date(req.body.scheduledDate)
+          : row.nextMaintenanceDue || new Date(),
+        createdBy: req.user?._id || req.user?.id || null,
+      },
+      { autoSubmit: req.body?.autoSubmit !== false, actorId: req.user?._id || req.user?.id || null }
+    );
+
+    if (req.body?.markInMaintenance !== false && row.status === 'in_service') {
+      row.status = 'maintenance';
+      await row.save();
+    }
+
+    res.status(201).json({ success: true, data: { asset: row, workOrder: wo } });
+  } catch (err) {
+    if (err.code === 'MISSING_FIELD') {
+      return res.status(422).json({ success: false, message: err.message, fields: err.fields });
+    }
+    return safeError(res, err, 'facility.spawnWo');
   }
 });
 

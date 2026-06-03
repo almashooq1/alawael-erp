@@ -27,10 +27,23 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
   {
     workOrderNumber: { type: String, required: true, unique: true, uppercase: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
+    // Fixed-asset CMMS link (prompt_20 /api/asset-management/work-orders).
     assetId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Asset',
-      required: true,
+      default: null,
+    },
+    // W801 — building-infrastructure link (FacilityAsset / W369).
+    facilityAssetId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FacilityAsset',
+      default: null,
+    },
+    // W801 — physical building link (operations/Facility Phase-16).
+    facilityId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Facility',
+      default: null,
     },
     type: {
       type: String,
@@ -83,12 +96,26 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
   { timestamps: true, collection: 'maintenance_work_orders' }
 );
 
-maintenanceWorkOrderSchema.index({ workOrderNumber: 1 });
+// workOrderNumber already has `unique: true` at field level (which creates
+// the index); keep only one declaration to avoid duplicate-index warnings.
 // REMOVED DUPLICATE: status already has field-level index:true
 maintenanceWorkOrderSchema.index({ type: 1 });
 maintenanceWorkOrderSchema.index({ scheduledDate: 1 });
 maintenanceWorkOrderSchema.index({ assetId: 1 });
+maintenanceWorkOrderSchema.index({ facilityAssetId: 1 });
+maintenanceWorkOrderSchema.index({ facilityId: 1 });
 maintenanceWorkOrderSchema.index({ branchId: 1 });
+
+// W801 — at least one subject link (fixed asset OR building infra OR facility).
+// Async style (W483) — Kareem omits `next` on validate when any sibling hook is async.
+maintenanceWorkOrderSchema.pre('validate', async function woSubjectLink() {
+  if (!this.assetId && !this.facilityAssetId && !this.facilityId) {
+    this.invalidate(
+      'assetId',
+      'يجب ربط أمر العمل بأصل ثابت (assetId) أو أصل منشأة (facilityAssetId) أو مرفق (facilityId)'
+    );
+  }
+});
 
 // W430: optimistic concurrency. Same race-class as W428/W429. The
 // `services/operations/workOrderStateMachine.service.js` transition()

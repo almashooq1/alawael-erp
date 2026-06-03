@@ -14,6 +14,8 @@
  *
  * Endpoints:
  *   GET  /reference           — state graph + legal transitions
+ *   GET  /                    — list (branch-scoped W801)
+ *   POST /                    — create via state machine (W801)
  *   POST /:id/transition      — move a WO to a new state
  *
  * Response shape: `{ success: true, data }` | `{ success: false, error }`.
@@ -26,8 +28,32 @@ const { authenticate, authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/workOrder.registry');
 const WorkOrderModel = require('../../models/MaintenanceWorkOrder');
+// Populate targets for list/detail labels (W806) — register before first query.
+require('../../models/FacilityAsset');
+require('../../models/operations/Facility.model');
+const { requireBranchAccess, branchFilter } = require('../../middleware/branchScope.middleware');
 
 const router = express.Router();
+
+router.use(authenticate);
+router.use(requireBranchAccess);
+
+const CREATE_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'ops_manager',
+  'maintenance_supervisor',
+  'maintenance_technician',
+  'facility_manager',
+  'maintenance',
+  'manager',
+  'branch_manager',
+];
+
+function nextWorkOrderNumber() {
+  return `WO-${Date.now().toString(36).toUpperCase()}`;
+}
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -64,7 +90,6 @@ function _buildFallback() {
 
 router.get(
   '/reference',
-  authenticate,
   wrap((req, res) => {
     res.json({
       success: true,
@@ -90,31 +115,37 @@ router.get(
 
 router.get(
   '/',
-  authenticate,
   [
     query('branchId').optional().isMongoId(),
     query('status').optional().isString(),
     query('priority').optional().isIn(['low', 'normal', 'high', 'critical']),
     query('type').optional().isString(),
+    query('facilityAssetId').optional().isMongoId(),
+    query('facilityId').optional().isMongoId(),
     query('limit').optional().isInt({ min: 1, max: 500 }),
     query('skip').optional().isInt({ min: 0 }),
   ],
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const filter = {};
+      const filter = { ...branchFilter(req) };
       if (req.query.branchId) filter.branchId = req.query.branchId;
       if (req.query.status) filter.status = req.query.status;
       if (req.query.priority) filter.priority = req.query.priority;
       if (req.query.type) filter.type = req.query.type;
+      if (req.query.facilityAssetId) filter.facilityAssetId = req.query.facilityAssetId;
+      if (req.query.facilityId) filter.facilityId = req.query.facilityId;
 
       const limit = req.query.limit ? Number(req.query.limit) : 100;
       const skip = req.query.skip ? Number(req.query.skip) : 0;
 
       const rows = await WorkOrderModel.find(filter)
+        .populate('facilityAssetId', 'name nameAr assetTag')
+        .populate('facilityId', 'nameAr nameEn')
         .sort({ scheduledDate: -1, createdAt: -1 })
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
 
       res.json({ success: true, data: rows });
     } catch (err) {
@@ -123,14 +154,80 @@ router.get(
   })
 );
 
+// ── create (W801) ─────────────────────────────────────────────────
+
+router.post(
+  '/',
+  authorize(CREATE_ROLES),
+  [
+    body('title').isString().notEmpty(),
+    body('description').isString().notEmpty(),
+    body('type').isIn(['preventive', 'corrective', 'emergency', 'inspection', 'calibration']),
+    body('priority').optional().isIn(['low', 'normal', 'high', 'critical']),
+    body('scheduledDate').isISO8601(),
+    body('branchId').optional().isMongoId(),
+    body('assetId').optional().isMongoId(),
+    body('facilityAssetId').optional().isMongoId(),
+    body('facilityId').optional().isMongoId(),
+    body('autoSubmit').optional().isBoolean(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    try {
+      const hasLink = req.body.assetId || req.body.facilityAssetId || req.body.facilityId;
+      if (!hasLink) {
+        return res.status(422).json({
+          success: false,
+          error: 'assetId أو facilityAssetId أو facilityId مطلوب',
+        });
+      }
+      const sm = getStateMachine();
+      const wo = await sm.createWorkOrder(
+        {
+          workOrderNumber: nextWorkOrderNumber(),
+          branchId: req.body.branchId || req.user?.branchId || null,
+          assetId: req.body.assetId || null,
+          facilityAssetId: req.body.facilityAssetId || null,
+          facilityId: req.body.facilityId || null,
+          type: req.body.type,
+          priority: req.body.priority || 'normal',
+          title: req.body.title,
+          description: req.body.description,
+          scheduledDate: new Date(req.body.scheduledDate),
+          createdBy: req.user?._id || null,
+        },
+        {
+          autoSubmit: req.body.autoSubmit !== false,
+          actorId: req.user?._id || null,
+        }
+      );
+      res.status(201).json({ success: true, data: wo });
+    } catch (err) {
+      if (err.code === 'MISSING_FIELD') {
+        return res.status(422).json({
+          success: false,
+          error: err.message,
+          fields: err.fields,
+        });
+      }
+      safeError(res, err);
+    }
+  })
+);
+
 router.get(
   '/:id',
-  authenticate,
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await WorkOrderModel.findById(req.params.id);
+      const doc = await WorkOrderModel.findOne({
+        _id: req.params.id,
+        ...branchFilter(req),
+      })
+        .populate('facilityAssetId', 'name nameAr assetTag')
+        .populate('facilityId', 'nameAr nameEn')
+        .lean();
       if (!doc) return res.status(404).json({ success: false, error: 'WO not found' });
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -143,7 +240,6 @@ router.get(
 
 router.post(
   '/:id/transition',
-  authenticate,
   authorize(['admin', 'ops_manager', 'maintenance_supervisor', 'maintenance_technician']),
   [
     param('id').isMongoId(),
@@ -154,9 +250,16 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      const existing = await WorkOrderModel.findOne({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!existing) {
+        return res.status(404).json({ success: false, error: 'WO not found' });
+      }
       const sm = getStateMachine();
       const wo = await sm.transition({
-        workOrder: req.params.id,
+        workOrder: existing,
         toState: req.body.toState,
         actorId: req.user?._id || null,
         notes: req.body.notes,

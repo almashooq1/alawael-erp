@@ -65,6 +65,7 @@ const notificationsRoutes = safeRequire('../routes/notifications.routes');
 const messagingRoutes = safeRequire('../routes/messaging.routes');
 // Finance — delegated to registries/finance.registry.js (16 modules)
 const registerFinanceRoutes = require('./registries/finance.registry');
+const registerOpsRoutes = require('./registries/ops.registry');
 // Clinical, HR, Documents, Communication, Student-Parent — delegated via phases.registry.js
 const integrationRoutes = safeRequire('../routes/integration.routes.minimal');
 // NOTE: disability-rehabilitation (old .js) — الإصدار القديم. تمّ استبداله بـ disability-rehabilitation.routes.js
@@ -800,6 +801,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── Phases & Systems (~100 modules) — delegated to registries/phases.registry.js ──
   registerPhaseRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
+
+  // ── Phase-16 Ops Control Tower (W801) — was built but unmounted until W801 ──
+  registerOpsRoutes(app, { safeMount, logger });
 
   // ── Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js ──
   registerFeatureRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });

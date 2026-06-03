@@ -96,6 +96,45 @@ describe('OpsDashboardService — getBranchOpsBoard', () => {
     expect(board.workOrders).toBeNull();
     expect(board.purchaseRequests).toBeNull();
     expect(board.facility).toBeNull();
+    expect(board.facilityAssets).toBeNull();
+  });
+
+  it('W809/W810 — aggregates facilityAssets PPM counts for branch', async () => {
+    const past = new Date(NOW.getTime() - 48 * 3600 * 1000);
+    const facilityAssetModel = makeModel({
+      name: 'FacilityAsset',
+      docs: [
+        {
+          branchId: BRANCH,
+          status: 'in_service',
+          nextMaintenanceDue: past,
+          nextInspectionDue: past,
+        },
+        {
+          branchId: BRANCH,
+          status: 'in_service',
+          nextMaintenanceDue: new Date(NOW.getTime() + 7 * 24 * 3600 * 1000),
+        },
+        {
+          branchId: 'branch-2',
+          status: 'out_of_service',
+          criticality: 'life_safety',
+        },
+      ],
+    });
+    const workOrderModel = makeModel({
+      name: 'MaintenanceWorkOrder',
+      docs: [
+        { branchId: BRANCH, facilityAssetId: 'fa1', status: 'in_progress' },
+        { branchId: BRANCH, facilityAssetId: 'fa2', status: 'closed' },
+      ],
+    });
+    const svc = createOpsDashboardService({ facilityAssetModel, workOrderModel, now: () => NOW });
+    const board = await svc.getBranchOpsBoard(BRANCH);
+    expect(board.facilityAssets).toBeTruthy();
+    expect(board.facilityAssets.dueMaintenance).toBe(1);
+    expect(board.facilityAssets.dueInspection).toBe(1);
+    expect(board.facilityAssets.openWorkOrdersOnAssets).toBe(1);
   });
 
   it('aggregates SLA counts + topNearBreach + recentBreaches', async () => {
@@ -324,7 +363,40 @@ describe('OpsDashboardService — getCooExecutiveBoard', () => {
     expect(board.workOrderBacklog).toBeNull();
     expect(board.procurement).toBeNull();
     expect(board.inspections).toBeNull();
+    expect(board.facilityPpm).toBeNull();
     expect(Array.isArray(board.recentEscalations)).toBe(true);
+  });
+
+  it('W810 — COO facilityPpm cross-branch rollup + worstBranches', async () => {
+    const past = new Date(NOW.getTime() - 24 * 3600 * 1000);
+    const facilityAssetModel = makeModel({
+      name: 'FacilityAsset',
+      docs: [
+        { branchId: 'b1', status: 'in_service', nextMaintenanceDue: past },
+        { branchId: 'b1', status: 'in_service', nextMaintenanceDue: past },
+        { branchId: 'b2', status: 'in_service', nextMaintenanceDue: past },
+        {
+          branchId: 'b1',
+          status: 'out_of_service',
+          criticality: 'life_safety',
+        },
+      ],
+    });
+    const workOrderModel = makeModel({
+      name: 'MaintenanceWorkOrder',
+      docs: [
+        { branchId: 'b1', facilityAssetId: 'x', status: 'submitted' },
+        { branchId: 'b2', facilityAssetId: null, status: 'submitted' },
+      ],
+    });
+    const svc = createOpsDashboardService({ facilityAssetModel, workOrderModel, now: () => NOW });
+    const board = await svc.getCooExecutiveBoard({ windowHours: 24 });
+    expect(board.facilityPpm).toBeTruthy();
+    expect(board.facilityPpm.dueMaintenance).toBe(3);
+    expect(board.facilityPpm.lifeSafetyOos).toBe(1);
+    expect(board.facilityPpm.openWorkOrdersOnAssets).toBe(1);
+    const b1 = board.facilityPpm.worstBranches.find(r => r.branchId === 'b1');
+    expect(b1?.dueMaintenance).toBe(2);
   });
 
   it('computes overall SLA compliance + by-module breakdown', async () => {

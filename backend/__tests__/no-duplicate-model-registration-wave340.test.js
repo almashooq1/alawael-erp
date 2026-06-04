@@ -128,7 +128,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Employee'      — W342 CONSOLIDATED: hr/saudi-hr-service.js now re-exports models/Employee.js
   // 'LeaveRequest'  — W342 CONSOLIDATED: same — re-exports models/LeaveRequest.js
   // 'Attendance'    — W342 CONSOLIDATED: same — re-exports models/Attendance.js
-  'Payroll', // 2× — NO canonical at models/Payroll.js (only PayrollPeriod.js); consolidation deferred
+  // 'Payroll' — W844 ratchet-down: SaudiHrPayroll (saudi-hr-service); canonical
+  // remains models/payroll.model.js.
   // 'Event' — W843 ratchet-down: RehabSpecializedEvent (rehabilitation-specialized) +
   // EventStoreEntry (infrastructure/eventStore).
   // 'BranchSetting' — 2026-05-25 moved to REGISTRATION_ALLOWLIST (defensive
@@ -225,8 +226,10 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // collisions closed via Pattern D rename in documentSharing.service.js
   // (DocumentShareLink + DocumentShareAccessLog) and documentVersioning.service.js
   // (DocumentVersionSnapshot). Canonical models remain at models/*.js.
-  'ComplianceAlert',
-  'CalendarEvent',
+  // 'ComplianceAlert' — W844 ratchet-down: DocumentComplianceAlert (documentComplianceMonitor)
+  // + EnterpriseProComplianceAlert (EnterprisePro).
+  // 'CalendarEvent' — W844 ratchet-down: DocumentCalendarEvent (documentCalendar)
+  // + EnterpriseProCalendarEvent (EnterprisePro).
   // RoomBooking + Warehouse + JobPosting + JobApplication + Facility: same
   // EnterprisePro.js / EnterpriseProPlus.js mega-file `reg()` / `getOrCreate()`
   // bulk-registration pattern vs single-file canonical at models/<X>.js with
@@ -234,7 +237,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // bookingDate/startTime/endTime + room:ObjectId ref:'Room', mega-file uses
   // start/end:Date + room:String). Same P1 cluster as above documents-pro group;
   // requires stakeholder ADR before either Pattern D rename or mega-file split.
-  'RoomBooking',
+  // 'RoomBooking' — W844 ratchet-down: EnterpriseProRoomBooking (EnterprisePro);
+  // canonical remains models/RoomBooking.js.
   'Warehouse',
   'JobPosting',
   'JobApplication',

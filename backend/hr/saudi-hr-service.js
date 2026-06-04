@@ -296,13 +296,12 @@ const PayrollSchema = new Schema(
 //   Employee     → models/Employee.js
 //   LeaveRequest → models/LeaveRequest.js
 //   Attendance   → models/Attendance.js
-//   Payroll      — NO canonical at models/<Name>.js (only PayrollPeriod.js exists).
-//                  Local registration retained; consolidation deferred until
-//                  a canonical Payroll model is designed.
+//   Payroll      — W844 Pattern D: SaudiHrPayroll (distinct from models/payroll.model.js Payroll).
 const Employee = require('../models/HR/Employee');
 const LeaveRequest = require('../models/LeaveRequest');
 const Attendance = require('../models/Attendance');
-const Payroll = mongoose.models.Payroll || mongoose.model('Payroll', PayrollSchema);
+const SaudiHrPayroll =
+  mongoose.models.SaudiHrPayroll || mongoose.model('SaudiHrPayroll', PayrollSchema);
 
 // ============================================
 // SERVICE CLASS
@@ -825,7 +824,7 @@ class SaudiHRService {
     };
 
     // Check if payroll already exists
-    const existingPayroll = await Payroll.findOne({ employee: employeeId, month, year });
+    const existingPayroll = await SaudiHrPayroll.findOne({ employee: employeeId, month, year });
 
     if (existingPayroll) {
       Object.assign(existingPayroll, payroll);
@@ -833,7 +832,7 @@ class SaudiHRService {
       return existingPayroll;
     }
 
-    const newPayroll = new Payroll(payroll);
+    const newPayroll = new SaudiHrPayroll(payroll);
     await newPayroll.save();
     return newPayroll;
   }
@@ -868,7 +867,7 @@ class SaudiHRService {
    * Generate WPS file for bank submission
    */
   async generateWPSFile(month, year) {
-    const payrolls = await Payroll.find({
+    const payrolls = await SaudiHrPayroll.find({
       month,
       year,
       paymentStatus: 'pending',
@@ -962,5 +961,5 @@ module.exports = {
   Employee,
   LeaveRequest,
   Attendance,
-  Payroll,
+  Payroll: SaudiHrPayroll,
 };

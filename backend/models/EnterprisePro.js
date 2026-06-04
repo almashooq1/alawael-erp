@@ -352,7 +352,7 @@ const RoomBookingSchema = new Schema(
     roomNameAr: String,
     capacity: Number,
     facilities: [String], // 'projector', 'whiteboard', 'video_conf'
-    event: { type: Schema.Types.ObjectId, ref: 'CalendarEvent' },
+    event: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCalendarEvent' },
     bookedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     start: { type: Date, required: true },
     end: { type: Date, required: true },
@@ -764,7 +764,8 @@ module.exports = {
   // Audit Trail & Compliance
   AuditTrailEntry: reg('AuditTrailEntry', AuditTrailEntrySchema),
   ComplianceChecklist: reg('ComplianceChecklist', ComplianceChecklistSchema),
-  ComplianceAlert: reg('ComplianceAlert', ComplianceAlertSchema),
+  // Pattern D (W844): Enterprise Pro scoped names (export keys unchanged below)
+  ComplianceAlert: reg('EnterpriseProComplianceAlert', ComplianceAlertSchema),
 
   // Report Builder
   // Pattern D (W840): Enterprise Pro report builder (distinct from models/reports/ReportTemplate)
@@ -772,8 +773,8 @@ module.exports = {
   ReportExecution: reg('ReportExecution', ReportExecutionSchema),
 
   // Unified Calendar
-  CalendarEvent: reg('CalendarEvent', CalendarEventSchema),
-  RoomBooking: reg('RoomBooking', RoomBookingSchema),
+  CalendarEvent: reg('EnterpriseProCalendarEvent', CalendarEventSchema),
+  RoomBooking: reg('EnterpriseProRoomBooking', RoomBookingSchema),
 
   // CRM Pro
   CRMContact: reg('CRMContact', CRMContactSchema),

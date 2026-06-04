@@ -95,8 +95,10 @@ calendarEventSchema.index({ startDate: 1, status: 1 });
 calendarEventSchema.index({ documentId: 1, type: 1 });
 calendarEventSchema.index({ 'assignees.userId': 1 });
 
-const CalendarEvent =
-  mongoose.models.CalendarEvent || mongoose.model('CalendarEvent', calendarEventSchema);
+// Pattern D (W844): document calendar events (distinct from EnterprisePro DocumentCalendarEvent)
+const DocumentCalendarEvent =
+  mongoose.models.DocumentCalendarEvent ||
+  mongoose.model('DocumentCalendarEvent', calendarEventSchema);
 
 /* ─── Calendar View/Preset Model ─────────────────────────────── */
 const calendarViewSchema = new mongoose.Schema(
@@ -173,7 +175,7 @@ class DocumentCalendarService extends EventEmitter {
       userId,
     } = data;
 
-    const event = new CalendarEvent({
+    const event = new DocumentCalendarEvent({
       documentId,
       title,
       titleAr: titleAr || title,
@@ -204,7 +206,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Update Event ─────────────────────────────────────────── */
   async updateEvent(eventId, updates, userId) {
-    const event = await CalendarEvent.findByIdAndUpdate(
+    const event = await DocumentCalendarEvent.findByIdAndUpdate(
       eventId,
       { $set: updates },
       { returnDocument: 'after', runValidators: true }
@@ -217,7 +219,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Delete Event ─────────────────────────────────────────── */
   async deleteEvent(eventId, userId) {
-    const event = await CalendarEvent.findByIdAndDelete(eventId);
+    const event = await DocumentCalendarEvent.findByIdAndDelete(eventId);
     if (!event) return { success: false, error: 'الحدث غير موجود' };
     this.emit('eventDeleted', { eventId, documentId: event.documentId, userId });
     return { success: true };
@@ -225,7 +227,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Complete Event ───────────────────────────────────────── */
   async completeEvent(eventId, userId, notes) {
-    const event = await CalendarEvent.findByIdAndUpdate(
+    const event = await DocumentCalendarEvent.findByIdAndUpdate(
       eventId,
       {
         status: 'completed',
@@ -249,7 +251,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Snooze Event ─────────────────────────────────────────── */
   async snoozeEvent(eventId, snoozeUntil, _userId) {
-    const event = await CalendarEvent.findByIdAndUpdate(
+    const event = await DocumentCalendarEvent.findByIdAndUpdate(
       eventId,
       {
         status: 'snoozed',
@@ -292,7 +294,7 @@ class DocumentCalendarService extends EventEmitter {
     }
 
     const [events, total] = await Promise.all([
-      CalendarEvent.find(filter)
+      DocumentCalendarEvent.find(filter)
         .sort({ startDate: 1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -300,7 +302,7 @@ class DocumentCalendarService extends EventEmitter {
         .populate('assignees.userId', 'name email')
         .populate('createdBy', 'name')
         .lean(),
-      CalendarEvent.countDocuments(filter),
+      DocumentCalendarEvent.countDocuments(filter),
     ]);
 
     return { success: true, events, total, page, limit };
@@ -311,7 +313,7 @@ class DocumentCalendarService extends EventEmitter {
     const { days = 7, userId, types = ['deadline', 'expiry', 'renewal'] } = options;
     const endDate = new Date(Date.now() + days * 86400000);
 
-    const events = await CalendarEvent.find({
+    const events = await DocumentCalendarEvent.find({
       type: { $in: types },
       status: { $in: ['scheduled', 'in_progress'] },
       startDate: { $gte: new Date(), $lte: endDate },
@@ -327,12 +329,12 @@ class DocumentCalendarService extends EventEmitter {
   /* ── Get Overdue Events ───────────────────────────────────── */
   async getOverdue(userId) {
     // Update status of past events
-    await CalendarEvent.updateMany(
+    await DocumentCalendarEvent.updateMany(
       { startDate: { $lt: new Date() }, status: 'scheduled' },
       { $set: { status: 'overdue' } }
     );
 
-    const events = await CalendarEvent.find({
+    const events = await DocumentCalendarEvent.find({
       status: 'overdue',
       ...(userId && { 'assignees.userId': userId }),
     })
@@ -345,7 +347,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Respond to Event ─────────────────────────────────────── */
   async respondToEvent(eventId, userId, response) {
-    const event = await CalendarEvent.findOneAndUpdate(
+    const event = await DocumentCalendarEvent.findOneAndUpdate(
       { _id: eventId, 'assignees.userId': userId },
       { $set: { 'assignees.$.status': response.status, 'assignees.$.response': response.note } },
       { returnDocument: 'after' }
@@ -375,7 +377,7 @@ class DocumentCalendarService extends EventEmitter {
   /* ── Process Reminders ────────────────────────────────────── */
   async processReminders() {
     const now = new Date();
-    const events = await CalendarEvent.find({
+    const events = await DocumentCalendarEvent.find({
       status: { $in: ['scheduled', 'in_progress'] },
       'reminders.sent': false,
     }).lean();
@@ -390,7 +392,7 @@ class DocumentCalendarService extends EventEmitter {
         const sendAt = new Date(event.startDate.getTime() - advanceMs);
 
         if (now >= sendAt) {
-          await CalendarEvent.updateOne(
+          await DocumentCalendarEvent.updateOne(
             { _id: event._id },
             { $set: { [`reminders.${i}.sent`]: true, [`reminders.${i}.sentAt`]: now } }
           );
@@ -432,7 +434,7 @@ class DocumentCalendarService extends EventEmitter {
       newEvent.reminders = newEvent.reminders.map(r => ({ ...r, sent: false, sentAt: undefined }));
     }
 
-    await CalendarEvent.create(newEvent);
+    await DocumentCalendarEvent.create(newEvent);
   }
 
   _calculateNextDate(date, pattern, interval = 1) {
@@ -470,7 +472,7 @@ class DocumentCalendarService extends EventEmitter {
 
   /* ── Document Timeline ────────────────────────────────────── */
   async getDocumentTimeline(documentId) {
-    const events = await CalendarEvent.find({ documentId })
+    const events = await DocumentCalendarEvent.find({ documentId })
       .sort({ startDate: 1 })
       .populate('assignees.userId', 'name')
       .lean();
@@ -499,19 +501,19 @@ class DocumentCalendarService extends EventEmitter {
     }
 
     const [byStatus, byType, byPriority, total] = await Promise.all([
-      CalendarEvent.aggregate([
+      DocumentCalendarEvent.aggregate([
         { $match: match },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
-      CalendarEvent.aggregate([
+      DocumentCalendarEvent.aggregate([
         { $match: match },
         { $group: { _id: '$type', count: { $sum: 1 } } },
       ]),
-      CalendarEvent.aggregate([
+      DocumentCalendarEvent.aggregate([
         { $match: match },
         { $group: { _id: '$priority', count: { $sum: 1 } } },
       ]),
-      CalendarEvent.countDocuments(match),
+      DocumentCalendarEvent.countDocuments(match),
     ]);
 
     return {

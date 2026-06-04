@@ -162,8 +162,10 @@ const complianceAlertSchema = new mongoose.Schema(
 complianceAlertSchema.index({ status: 1, severity: 1 });
 complianceAlertSchema.index({ documentId: 1 });
 
-const ComplianceAlert =
-  mongoose.models.ComplianceAlert || mongoose.model('ComplianceAlert', complianceAlertSchema);
+// Pattern D (W844): document compliance alerts (distinct from EnterprisePro DocumentComplianceAlert)
+const DocumentComplianceAlert =
+  mongoose.models.DocumentComplianceAlert ||
+  mongoose.model('DocumentComplianceAlert', complianceAlertSchema);
 
 /* ─── Default Rules ──────────────────────────────────────────── */
 const DEFAULT_RULES = [
@@ -348,7 +350,7 @@ class DocumentComplianceMonitorService {
         v => v.severity === 'critical' || v.severity === 'high'
       );
       for (const v of criticalViolations) {
-        await ComplianceAlert.create({
+        await DocumentComplianceAlert.create({
           scanId: scan._id,
           documentId: v.documentId,
           ruleCode: v.ruleCode,
@@ -447,20 +449,20 @@ class DocumentComplianceMonitorService {
     if (severity) filter.severity = severity;
 
     const [alerts, total] = await Promise.all([
-      ComplianceAlert.find(filter)
+      DocumentComplianceAlert.find(filter)
         .sort({ severity: 1, createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('documentId', 'title name')
         .lean(),
-      ComplianceAlert.countDocuments(filter),
+      DocumentComplianceAlert.countDocuments(filter),
     ]);
 
     return { success: true, alerts, total, page, limit };
   }
 
   async resolveAlert(alertId, data = {}) {
-    const alert = await ComplianceAlert.findByIdAndUpdate(
+    const alert = await DocumentComplianceAlert.findByIdAndUpdate(
       alertId,
       {
         $set: {
@@ -477,7 +479,7 @@ class DocumentComplianceMonitorService {
   }
 
   async dismissAlert(alertId, data = {}) {
-    const alert = await ComplianceAlert.findByIdAndUpdate(
+    const alert = await DocumentComplianceAlert.findByIdAndUpdate(
       alertId,
       { $set: { status: 'dismissed', notes: data.notes } },
       { returnDocument: 'after' }
@@ -530,8 +532,8 @@ class DocumentComplianceMonitorService {
     await this.init();
     const [latestScan, openAlerts, alertsBySeverity, scanHistory] = await Promise.all([
       ComplianceScan.findOne({ status: 'completed' }).sort({ createdAt: -1 }).lean(),
-      ComplianceAlert.countDocuments({ status: 'open' }),
-      ComplianceAlert.aggregate([
+      DocumentComplianceAlert.countDocuments({ status: 'open' }),
+      DocumentComplianceAlert.aggregate([
         { $match: { status: 'open' } },
         { $group: { _id: '$severity', count: { $sum: 1 } } },
       ]),

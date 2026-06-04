@@ -1053,6 +1053,8 @@ on:
       - 'backend/__tests__/capa-close-behavioral-wave841.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/capa-reject-behavioral-wave843.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/capa-cancel-behavioral-wave844.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2089,6 +2091,8 @@ on:
       - 'backend/__tests__/capa-close-behavioral-wave841.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/capa-reject-behavioral-wave843.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/capa-cancel-behavioral-wave844.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -359,5 +359,6 @@ jest.mock('../middleware/auth', () => ({
 - ~~CAPA behavioral enforceMfa parity~~ — **done W842** (W835/W838/W840 wired `enforceMfa: true`).
 - ~~GeneratedReport + Event W340 Tier 2~~ — **done W843** (`DocumentGeneratedReport`, `RehabSpecializedEvent`, `EventStoreEntry`).
 - ~~CAPA OPEN→REJECTED behavioral + service-layer validateTransition~~ — **done W843** (reasonCode + MFA tier 2; fixes hook priorDoc blind spot).
-- Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.
-- Remaining W340 Tier 2: `Payroll`, `LifecyclePolicy`, …
+- ~~CAPA OPEN→CANCELLED behavioral~~ — **done W844** (`capa-cancel-behavioral-wave844`).
+- ~~Payroll + EnterprisePro/doc cluster Pattern D~~ — **done W844** (`SaudiHrPayroll`, `DocumentComplianceAlert`, `DocumentCalendarEvent`, `EnterprisePro*` renames).
+- Remaining W340 mega-file cluster: `Warehouse`, `JobPosting`, `NotificationLog`, … → stakeholder ADR.

@@ -17,7 +17,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -49,6 +49,15 @@ const genCode = prefix => {
   const ts = Date.now().toString(36).slice(-4).toUpperCase();
   return `${prefix}-${year}-${ts}${rnd}`;
 };
+
+/** W912 — branch-scoped models (work orders, transfers, bookings, inventories). */
+function mergeTenantFilter(req, base = {}) {
+  return { ...base, ...branchFilter(req) };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -322,7 +331,7 @@ router.get('/work-orders', async (req, res) => {
       page = 1,
       limit: rawLimit = 20,
     } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (type) filter.type = type;
@@ -359,12 +368,14 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
         .json({ success: false, message: 'الأصل، النوع، العنوان، والتاريخ مطلوبة' });
     }
     const workOrderNumber = genCode('WO');
-    const workOrder = await MaintenanceWorkOrder.create({
+    const woPayload = {
       ...stripUpdateMeta(req.body),
       workOrderNumber,
       status: 'pending',
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) woPayload.branchId = req.branchScope.branchId;
+    const workOrder = await MaintenanceWorkOrder.create(woPayload);
     // Update asset status to under_maintenance for corrective/emergency
     if (['corrective', 'emergency'].includes(type)) {
       await Asset.findByIdAndUpdate(assetId, { status: 'maintenance' });
@@ -378,7 +389,7 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
 router.get('/work-orders/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findById(req.params.id)
+    const wo = await MaintenanceWorkOrder.findOne(scopedById(req, req.params.id))
       .populate('assetId', 'name category location')
       .populate('assignedTo', 'name email')
       .lean();
@@ -392,8 +403,8 @@ router.get('/work-orders/:id', async (req, res) => {
 router.put('/work-orders/:id', authorize(['admin', 'manager', 'technician']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
-      req.params.id,
+    const wo = await MaintenanceWorkOrder.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
       { returnDocument: 'after', runValidators: true }
     ).lean();
@@ -415,8 +426,8 @@ router.patch(
       if (!findings || !resolution) {
         return res.status(400).json({ success: false, message: 'النتائج والإجراء مطلوبان' });
       }
-      const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
-        req.params.id,
+      const wo = await MaintenanceWorkOrder.findOneAndUpdate(
+        scopedById(req, req.params.id),
         {
           status: 'completed',
           findings,
@@ -444,7 +455,7 @@ router.patch(
 router.delete('/work-orders/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findByIdAndDelete(req.params.id);
+    const wo = await MaintenanceWorkOrder.findOneAndDelete(scopedById(req, req.params.id));
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -459,7 +470,7 @@ router.delete('/work-orders/:id', authorize(['admin']), async (req, res) => {
 router.get('/transfers', async (req, res) => {
   try {
     const { assetId, status, fromBranchId, toBranchId, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (fromBranchId) filter.fromBranchId = fromBranchId;
@@ -489,13 +500,15 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
     }
     const transferNumber = genCode('TR');
-    const transfer = await AssetTransfer.create({
+    const trPayload = {
       ...stripUpdateMeta(req.body),
       transferNumber,
       status: 'pending',
       requestedBy: req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) trPayload.branchId = req.branchScope.branchId;
+    const transfer = await AssetTransfer.create(trPayload);
     res.status(201).json({ success: true, data: transfer, message: 'تم إنشاء طلب النقل' });
   } catch (err) {
     safeError(res, err, 'transfers create error');
@@ -505,8 +518,8 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
 router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findByIdAndUpdate(
-      req.params.id,
+    const transfer = await AssetTransfer.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'approved', approvedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -520,7 +533,7 @@ router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (r
 router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findById(req.params.id);
+    const transfer = await AssetTransfer.findOne(scopedById(req, req.params.id));
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     transfer.status = 'received';
     transfer.receivedDate = new Date();
@@ -540,8 +553,8 @@ router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (r
 router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findByIdAndUpdate(
-      req.params.id,
+    const transfer = await AssetTransfer.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'rejected', updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -559,7 +572,7 @@ router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (re
 router.get('/bookings', async (req, res) => {
   try {
     const { assetId, status, date, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (date) filter.bookingDate = new Date(date);
@@ -598,12 +611,14 @@ router.post('/bookings', async (req, res) => {
       return res.status(409).json({ success: false, message: 'المورد محجوز في هذا الوقت' });
     }
     const bookingNumber = genCode('BK');
-    const booking = await ResourceBooking.create({
+    const bkPayload = {
       ...stripUpdateMeta(req.body),
       bookingNumber,
       bookedBy: req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) bkPayload.branchId = req.branchScope.branchId;
+    const booking = await ResourceBooking.create(bkPayload);
     res.status(201).json({ success: true, data: booking, message: 'تم إنشاء الحجز' });
   } catch (err) {
     safeError(res, err, 'bookings create error');
@@ -613,8 +628,8 @@ router.post('/bookings', async (req, res) => {
 router.patch('/bookings/:id/cancel', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const booking = await ResourceBooking.findByIdAndUpdate(
-      req.params.id,
+    const booking = await ResourceBooking.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'cancelled', updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -632,7 +647,7 @@ router.patch('/bookings/:id/cancel', async (req, res) => {
 router.get('/inventories', async (req, res) => {
   try {
     const { status, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (status) filter.status = status;
     const limit = clamp(rawLimit);
     const skip = (Math.max(1, +page) - 1) * limit;
@@ -657,12 +672,14 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
     if (!title || !inventoryDate)
       return res.status(400).json({ success: false, message: 'العنوان والتاريخ مطلوبان' });
     const inventoryNumber = genCode('INV');
-    const inventory = await AssetInventory.create({
+    const invPayload = {
       ...stripUpdateMeta(req.body),
       inventoryNumber,
       conductedBy: req.body.conductedBy || req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) invPayload.branchId = req.branchScope.branchId;
+    const inventory = await AssetInventory.create(invPayload);
     res.status(201).json({ success: true, data: inventory, message: 'تم إنشاء سجل الجرد' });
   } catch (err) {
     safeError(res, err, 'inventories create error');
@@ -672,7 +689,7 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
 router.get('/inventories/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const inventory = await AssetInventory.findById(req.params.id)
+    const inventory = await AssetInventory.findOne(scopedById(req, req.params.id))
       .populate('conductedBy', 'name email')
       .lean();
     if (!inventory) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
@@ -689,6 +706,10 @@ router.get('/inventories/:id', async (req, res) => {
 router.post('/inventories/:id/items', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    const parent = await AssetInventory.findOne(scopedById(req, req.params.id))
+      .select('_id')
+      .lean();
+    if (!parent) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
     const { assetId, status, condition, actualLocation, marketValue, notes } = req.body;
     if (!assetId || !status)
       return res.status(400).json({ success: false, message: 'الأصل والحالة مطلوبان' });
@@ -719,8 +740,8 @@ router.patch('/inventories/:id/complete', authorize(['admin', 'manager']), async
     const found = items.filter(i => i.status === 'found').length;
     const missing = items.filter(i => i.status === 'missing').length;
     const damaged = items.filter(i => i.status === 'damaged').length;
-    const inventory = await AssetInventory.findByIdAndUpdate(
-      req.params.id,
+    const inventory = await AssetInventory.findOneAndUpdate(
+      scopedById(req, req.params.id),
       {
         status: 'completed',
         totalAssetsCounted: items.length,

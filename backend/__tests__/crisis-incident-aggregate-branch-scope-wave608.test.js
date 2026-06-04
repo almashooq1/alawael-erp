@@ -8,13 +8,8 @@
  * { isDeleted... } }])` pipelines with NO branchId. CrisisIncident is
  * beneficiary-clinical (ADR-033) and carries branchId, but .aggregate()
  * bypasses the tenantScope plugin → a single-branch caller saw all-branch
- * crisis type/severity breakdowns. Fixed by adding `...branchFilter(req)`
- * to each $match (returns {} for cross-branch/HQ roles, so emergency-ops
- * oversight keeps all-branch visibility).
- *
- * The facility EmergencyPlan / EmergencyDrill queries are intentionally
- * NOT scoped — those models have no branchId and are org-wide (ADR-033
- * facility-emergency subsystem).
+ * crisis type/severity breakdowns. W909 maps branchFilter → `{ center }`
+ * via mergeCrisisFilter on aggregates and dashboard counts.
  */
 
 const fs = require('fs');
@@ -41,9 +36,15 @@ describe('W608 — every CrisisIncident.aggregate in crisis.routes.js is branch-
     expect(bodies.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('every CrisisIncident.aggregate pipeline references branchFilter(req)', () => {
+  it('every CrisisIncident.aggregate pipeline is tenant-scoped (W909 mergeCrisisFilter)', () => {
     const unscoped = bodies
-      .map((b, i) => ({ i, ok: /branchFilter\s*\(\s*req\s*\)/.test(b) }))
+      .map((b, i) => ({
+        i,
+        ok:
+          /mergeCrisisFilter\s*\(\s*req/.test(b) ||
+          /crisisCenterFilter\s*\(\s*req/.test(b) ||
+          /branchFilter\s*\(\s*req\s*\)/.test(b),
+      }))
       .filter(x => !x.ok)
       .map(x => x.i);
     expect(unscoped).toEqual([]);

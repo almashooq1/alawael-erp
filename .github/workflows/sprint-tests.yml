@@ -1153,6 +1153,9 @@ on:
       - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/outcomes-admin-branch-isolation-wave908.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crisis-routes-branch-isolation-wave909.test.js'
+      - 'backend/__tests__/asset-management-work-orders-branch-isolation-wave912.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2289,6 +2292,9 @@ on:
       - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/outcomes-admin-branch-isolation-wave908.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crisis-routes-branch-isolation-wave909.test.js'
+      - 'backend/__tests__/asset-management-work-orders-branch-isolation-wave912.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -70,6 +70,7 @@ const eventSchema = new mongoose.Schema(
     },
     tags: [String],
     attachments: [{ name: String, url: String }],
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

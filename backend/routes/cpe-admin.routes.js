@@ -24,6 +24,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const CpeRecord = require('../models/CpeRecord');
 const Employee = require('../models/HR/Employee');
@@ -32,6 +33,38 @@ const safeError = require('../utils/safeError');
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
+
+function employeeBranchFilter(req) {
+  const scope = branchFilter(req);
+  return scope.branchId ? { branch_id: scope.branchId } : {};
+}
+
+async function scopedEmployeeIds(req) {
+  const filter = employeeBranchFilter(req);
+  if (!filter.branch_id) return null;
+  return Employee.find(filter).distinct('_id');
+}
+
+async function assertEmployeeInScope(req, employeeId, res) {
+  if (!employeeId || !mongoose.isValidObjectId(String(employeeId))) {
+    return res.status(400).json({ success: false, message: 'معرّف الموظف غير صالح' });
+  }
+  const branchPart = employeeBranchFilter(req);
+  if (!branchPart.branch_id) return null;
+  const hit = await Employee.findOne({ _id: employeeId, ...branchPart })
+    .select('_id')
+    .lean();
+  if (!hit) {
+    return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
+  }
+  return null;
+}
+
+async function cpeInstanceFilter(req) {
+  const ids = await scopedEmployeeIds(req);
+  return ids ? { employeeId: { $in: ids } } : {};
+}
 
 const READ_ROLES = [
   'admin',
@@ -56,7 +89,7 @@ function resolveCycleEnd(employeeDoc) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const { employeeId, category, verified, from, to, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = { ...(await cpeInstanceFilter(req)) };
     if (employeeId && mongoose.isValidObjectId(employeeId)) filter.employeeId = employeeId;
     if (category) filter.category = String(category);
     if (verified != null) filter.verified = verified === 'true' || verified === true;
@@ -98,6 +131,8 @@ router.get('/employee/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
+    const denied = await assertEmployeeInScope(req, req.params.id, res);
+    if (denied) return;
     const items = await CpeRecord.find({ employeeId: req.params.id })
       .sort({ activityDate: -1 })
       .lean();
@@ -113,6 +148,8 @@ router.get('/employee/:id/summary', requireRole(READ_ROLES), async (req, res) =>
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
+    const denied = await assertEmployeeInScope(req, req.params.id, res);
+    if (denied) return;
     const employee = await Employee.findById(req.params.id).lean();
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
@@ -158,6 +195,8 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (!activityDate) {
       return res.status(400).json({ success: false, message: 'activityDate مطلوب' });
     }
+    const denied = await assertEmployeeInScope(req, employeeId, res);
+    if (denied) return;
 
     const row = await CpeRecord.create({
       ...req.body,
@@ -186,7 +225,11 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.creditHours != null) body.creditHours = Number(body.creditHours);
     if (body.activityDate) body.activityDate = new Date(body.activityDate);
 
-    const row = await CpeRecord.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
+    const row = await CpeRecord.findOneAndUpdate(
+      { _id: req.params.id, ...(await cpeInstanceFilter(req)) },
+      body,
+      { returnDocument: 'after' }
+    );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -200,8 +243,8 @@ router.post('/:id/verify', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await CpeRecord.findByIdAndUpdate(
-      req.params.id,
+    const row = await CpeRecord.findOneAndUpdate(
+      { _id: req.params.id, ...(await cpeInstanceFilter(req)) },
       { verified: true, verifiedBy: req.user?.id, verifiedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -218,7 +261,10 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await CpeRecord.findByIdAndDelete(req.params.id);
+    const row = await CpeRecord.findOneAndDelete({
+      _id: req.params.id,
+      ...(await cpeInstanceFilter(req)),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -233,6 +279,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
     const employees = await Employee.find({
       scfhs_number: { $exists: true, $ne: '' },
       status: { $ne: 'terminated' },
+      ...employeeBranchFilter(req),
     })
       .select('name_ar name_en employee_number specialization scfhs_number scfhs_expiry')
       .lean();
@@ -301,7 +348,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
   try {
     const { employeeId, category, verified, from, to } = req.query;
-    const filter = {};
+    const filter = { ...(await cpeInstanceFilter(req)) };
     if (employeeId && mongoose.isValidObjectId(employeeId)) filter.employeeId = employeeId;
     if (category) filter.category = String(category);
     if (verified != null) filter.verified = verified === 'true' || verified === true;

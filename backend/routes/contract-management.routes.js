@@ -17,7 +17,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 
 // Models
@@ -54,6 +54,32 @@ const genAmendmentNumber = () => {
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+function listScope(req, base = {}) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query?.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    scope.branchId = req.query.branchId;
+  }
+  return { ...base, ...scope };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
+
+async function loadContractOr404(req, res, id = req.params.id) {
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return null;
+  }
+  const contract = await Contract.findOne(scopedById(req, id)).lean();
+  if (!contract) {
+    res.status(404).json({ success: false, message: 'العقد غير موجود' });
+    return null;
+  }
+  return contract;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONTRACT TEMPLATES
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -61,7 +87,7 @@ router.use(requireBranchAccess);
 router.get('/templates', async (req, res) => {
   try {
     const { type, isActive, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = listScope(req, {});
     if (type) filter.type = type;
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     const limit = clamp(rawLimit);
@@ -79,7 +105,7 @@ router.get('/templates', async (req, res) => {
 router.get('/templates/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const tmpl = await ContractTemplate.findById(req.params.id).lean();
+    const tmpl = await ContractTemplate.findOne(scopedById(req, req.params.id)).lean();
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: tmpl });
   } catch (err) {
@@ -92,7 +118,11 @@ router.post('/templates', authorize(['admin', 'manager']), async (req, res) => {
     const { nameAr, code, type, bodyAr } = req.body;
     if (!nameAr || !code || !type || !bodyAr)
       return res.status(400).json({ success: false, message: 'الاسم، الكود، النوع، والنص مطلوبة' });
-    const tmpl = await ContractTemplate.create({ ...req.body, createdBy: req.user?.id });
+    const tmpl = await ContractTemplate.create({
+      ...req.body,
+      branchId: req.branchScope?.branchId || req.body.branchId || null,
+      createdBy: req.user?.id,
+    });
     res.status(201).json({ success: true, data: tmpl, message: 'تم إنشاء القالب' });
   } catch (err) {
     if (err.code === 11000)
@@ -104,8 +134,8 @@ router.post('/templates', authorize(['admin', 'manager']), async (req, res) => {
 router.put('/templates/:id', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const tmpl = await ContractTemplate.findByIdAndUpdate(
-      req.params.id,
+    const tmpl = await ContractTemplate.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { ...req.body, updatedBy: req.user?.id },
       { returnDocument: 'after', runValidators: true }
     ).lean();
@@ -119,7 +149,7 @@ router.put('/templates/:id', authorize(['admin', 'manager']), async (req, res) =
 router.delete('/templates/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const tmpl = await ContractTemplate.findByIdAndDelete(req.params.id);
+    const tmpl = await ContractTemplate.findOneAndDelete(scopedById(req, req.params.id));
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, message: 'تم حذف القالب' });
   } catch (err) {
@@ -133,13 +163,14 @@ router.delete('/templates/:id', authorize(['admin']), async (req, res) => {
 
 router.get('/contracts/stats', async (req, res) => {
   try {
+    const scope = listScope(req, {});
     const now = new Date();
     const soon = new Date(now.getTime() + 30 * 864e5);
     const [total, byStatus, expiringSoon, autoRenewal] = await Promise.all([
-      Contract.countDocuments(),
-      Contract.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Contract.countDocuments({ status: 'ACTIVE', endDate: { $gte: now, $lte: soon } }),
-      Contract.countDocuments({ 'renewalTerms.isAutoRenewal': true, status: 'ACTIVE' }),
+      Contract.countDocuments(scope),
+      Contract.aggregate([{ $match: scope }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Contract.countDocuments({ ...scope, status: 'ACTIVE', endDate: { $gte: now, $lte: soon } }),
+      Contract.countDocuments({ ...scope, 'renewalTerms.isAutoRenewal': true, status: 'ACTIVE' }),
     ]);
     const stats = { total, byStatus: {}, expiringSoon, autoRenewal };
     byStatus.forEach(s => {
@@ -154,7 +185,7 @@ router.get('/contracts/stats', async (req, res) => {
 router.get('/contracts', async (req, res) => {
   try {
     const { search, status, type, expiringSoon, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = listScope(req, {});
     if (status) filter.status = status.toUpperCase();
     if (type) filter.contractType = type.toUpperCase();
     if (expiringSoon === 'true') {
@@ -191,17 +222,19 @@ router.post('/contracts', authorize(['admin', 'manager']), async (req, res) => {
     const contractNumber = genContractNumber();
     const contract = await Contract.create({
       ...req.body,
+      branchId: req.branchScope?.branchId || req.body.branchId || null,
       contractNumber,
       status: 'DRAFT',
       createdBy: req.user?.id,
     });
     // Create parties if provided
     if (Array.isArray(req.body.parties) && req.body.parties.length > 0) {
+      const partyBranch = req.branchScope?.branchId || req.body.branchId || null;
       const partyDocs = req.body.parties.map((p, i) => ({
         ...p,
         contractId: contract._id,
         sortOrder: i,
-        branchId: req.body.branchId,
+        branchId: partyBranch,
         createdBy: req.user?.id,
       }));
       await ContractParty.insertMany(partyDocs);
@@ -215,8 +248,8 @@ router.post('/contracts', authorize(['admin', 'manager']), async (req, res) => {
 router.get('/contracts/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id).lean();
-    if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
+    const contract = await loadContractOr404(req, res);
+    if (!contract) return;
     const [parties, approvals, amendments, negotiations] = await Promise.all([
       ContractParty.find({ contractId: req.params.id }).sort({ sortOrder: 1 }).lean(),
       ContractApproval.find({ contractId: req.params.id }).sort({ stepOrder: 1 }).lean(),
@@ -238,13 +271,13 @@ router.get('/contracts/:id', async (req, res) => {
 router.put('/contracts/:id', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const existing = await Contract.findById(req.params.id);
+    const existing = await Contract.findOne(scopedById(req, req.params.id));
     if (!existing) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     if (!['DRAFT', 'SUSPENDED'].includes(existing.status)) {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل عقد في هذه الحالة' });
     }
-    const contract = await Contract.findByIdAndUpdate(
-      req.params.id,
+    const contract = await Contract.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { ...req.body, updatedBy: req.user?.id, updatedAt: new Date() },
       { returnDocument: 'after', runValidators: true }
     ).lean();
@@ -257,7 +290,7 @@ router.put('/contracts/:id', authorize(['admin', 'manager']), async (req, res) =
 router.delete('/contracts/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id);
+    const contract = await Contract.findOne(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     if (contract.status !== 'DRAFT')
       return res.status(409).json({ success: false, message: 'لا يمكن حذف إلا المسودات' });
@@ -272,7 +305,7 @@ router.delete('/contracts/:id', authorize(['admin']), async (req, res) => {
 router.post('/contracts/:id/submit-approval', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id);
+    const contract = await Contract.findOne(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     if (contract.status !== 'DRAFT')
       return res.status(409).json({ success: false, message: 'يمكن رفع المسودات فقط' });
@@ -299,11 +332,12 @@ router.post(
   async (req, res) => {
     if (!validId(req, res)) return;
     try {
+      if (!(await loadContractOr404(req, res))) return;
       const { decision, comments } = req.body;
       if (!decision || !['approved', 'rejected', 'return_for_revision'].includes(decision))
         return res.status(400).json({ success: false, message: 'القرار غير صالح' });
-      const approval = await ContractApproval.findByIdAndUpdate(
-        req.params.approvalId,
+      const approval = await ContractApproval.findOneAndUpdate(
+        { _id: req.params.approvalId, contractId: req.params.id },
         {
           decision,
           comments,
@@ -317,7 +351,7 @@ router.post(
         return res.status(404).json({ success: false, message: 'سجل الاعتماد غير موجود' });
       // Update contract status based on decision
       if (decision === 'rejected') {
-        await Contract.findByIdAndUpdate(req.params.id, { status: 'DRAFT' });
+        await Contract.findOneAndUpdate(scopedById(req, req.params.id), { status: 'DRAFT' });
       }
       res.json({ success: true, data: approval, message: 'تم تسجيل القرار' });
     } catch (err) {
@@ -330,11 +364,12 @@ router.post(
 router.post('/contracts/:id/sign', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const { partyId, signatureMethod, signatureData } = req.body;
     if (!partyId || !signatureMethod)
       return res.status(400).json({ success: false, message: 'بيانات التوقيع ناقصة' });
-    const party = await ContractParty.findByIdAndUpdate(
-      partyId,
+    const party = await ContractParty.findOneAndUpdate(
+      { _id: partyId, contractId: req.params.id },
       {
         signatureStatus: 'signed',
         signatureMethod,
@@ -351,7 +386,7 @@ router.post('/contracts/:id/sign', async (req, res) => {
       signatureStatus: { $ne: 'signed' },
     });
     if (unsigned === 0) {
-      await Contract.findByIdAndUpdate(req.params.id, {
+      await Contract.findOneAndUpdate(scopedById(req, req.params.id), {
         status: 'ACTIVE',
         executionDate: new Date(),
       });
@@ -366,7 +401,7 @@ router.post('/contracts/:id/sign', async (req, res) => {
 router.post('/contracts/:id/renew', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id);
+    const contract = await Contract.findOne(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     const months =
       req.body.months || contract.renewalTerms?.renewalPeriod?.replace(/[^0-9]/g, '') || 12;
@@ -389,8 +424,8 @@ router.post('/contracts/:id/terminate', authorize(['admin', 'manager']), async (
   try {
     const { reason } = req.body;
     if (!reason) return res.status(400).json({ success: false, message: 'سبب الإنهاء مطلوب' });
-    const contract = await Contract.findByIdAndUpdate(
-      req.params.id,
+    const contract = await Contract.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'TERMINATED', notes: reason, updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -408,6 +443,7 @@ router.post('/contracts/:id/terminate', authorize(['admin', 'manager']), async (
 router.get('/contracts/:id/parties', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const parties = await ContractParty.find({ contractId: req.params.id })
       .sort({ sortOrder: 1 })
       .lean();
@@ -420,12 +456,14 @@ router.get('/contracts/:id/parties', async (req, res) => {
 router.post('/contracts/:id/parties', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const { nameAr, role, partyType } = req.body;
     if (!nameAr || !role || !partyType)
       return res.status(400).json({ success: false, message: 'الاسم، الدور، والنوع مطلوبة' });
     const party = await ContractParty.create({
       ...req.body,
       contractId: req.params.id,
+      branchId: req.branchScope?.branchId || null,
       createdBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: party, message: 'تم إضافة الطرف' });
@@ -439,7 +477,11 @@ router.delete(
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
-      const party = await ContractParty.findByIdAndDelete(req.params.partyId);
+      if (!(await loadContractOr404(req, res))) return;
+      const party = await ContractParty.findOneAndDelete({
+        _id: req.params.partyId,
+        contractId: req.params.id,
+      });
       if (!party) return res.status(404).json({ success: false, message: 'الطرف غير موجود' });
       res.json({ success: true, message: 'تم حذف الطرف' });
     } catch (err) {
@@ -455,6 +497,7 @@ router.delete(
 router.get('/contracts/:id/amendments', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const amendments = await ContractAmendment.find({ contractId: req.params.id })
       .sort({ effectiveDate: -1 })
       .lean();
@@ -467,6 +510,7 @@ router.get('/contracts/:id/amendments', async (req, res) => {
 router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const { title, type, description, effectiveDate } = req.body;
     if (!title || !type || !description || !effectiveDate)
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
@@ -475,11 +519,14 @@ router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async 
       ...req.body,
       amendmentNumber,
       contractId: req.params.id,
+      branchId: req.branchScope?.branchId || null,
       createdBy: req.user?.id,
     });
     // If extension — update contract endDate
     if (type === 'extension' && req.body.newEndDate) {
-      await Contract.findByIdAndUpdate(req.params.id, { endDate: req.body.newEndDate });
+      await Contract.findOneAndUpdate(scopedById(req, req.params.id), {
+        endDate: req.body.newEndDate,
+      });
     }
     res.status(201).json({ success: true, data: amendment, message: 'تم إضافة الملحق' });
   } catch (err) {
@@ -494,6 +541,7 @@ router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async 
 router.get('/contracts/:id/negotiations', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const { status, page = 1, limit: rawLimit = 20 } = req.query;
     const filter = { contractId: req.params.id };
     if (status) filter.status = status;
@@ -517,6 +565,7 @@ router.get('/contracts/:id/negotiations', async (req, res) => {
 router.post('/contracts/:id/negotiations', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    if (!(await loadContractOr404(req, res))) return;
     const { action, content } = req.body;
     if (!action || !content)
       return res.status(400).json({ success: false, message: 'الإجراء والمحتوى مطلوبان' });
@@ -537,8 +586,9 @@ router.patch(
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
-      const neg = await ContractNegotiation.findByIdAndUpdate(
-        req.params.negId,
+      if (!(await loadContractOr404(req, res))) return;
+      const neg = await ContractNegotiation.findOneAndUpdate(
+        { _id: req.params.negId, contractId: req.params.id },
         { status: 'resolved', resolvedBy: req.user?.id, resolvedAt: new Date() },
         { returnDocument: 'after' }
       ).lean();
@@ -556,9 +606,19 @@ router.patch(
 
 router.get('/dashboard', async (req, res) => {
   try {
+    const scope = listScope(req, {});
     const now = new Date();
     const soon30 = new Date(now.getTime() + 30 * 864e5);
     const soon7 = new Date(now.getTime() + 7 * 864e5);
+    const scopedContractIds = scope.branchId ? await Contract.find(scope).distinct('_id') : null;
+    const approvalFilter =
+      scopedContractIds != null
+        ? { status: 'pending', contractId: { $in: scopedContractIds } }
+        : { status: 'pending' };
+    const signatureFilter =
+      scopedContractIds != null
+        ? { signatureStatus: 'pending', contractId: { $in: scopedContractIds } }
+        : { signatureStatus: 'pending' };
     const [
       totalContracts,
       activeContracts,
@@ -569,17 +629,17 @@ router.get('/dashboard', async (req, res) => {
       pendingApprovals,
       pendingSignatures,
     ] = await Promise.all([
-      Contract.countDocuments(),
-      Contract.countDocuments({ status: 'ACTIVE' }),
-      Contract.countDocuments({ status: 'DRAFT' }),
-      Contract.countDocuments({ status: 'EXPIRED' }),
-      Contract.countDocuments({ status: 'ACTIVE', endDate: { $gte: now, $lte: soon30 } }),
-      Contract.countDocuments({ status: 'ACTIVE', endDate: { $gte: now, $lte: soon7 } }),
-      ContractApproval.countDocuments({ status: 'pending' }),
-      ContractParty.countDocuments({ signatureStatus: 'pending' }),
+      Contract.countDocuments(scope),
+      Contract.countDocuments({ ...scope, status: 'ACTIVE' }),
+      Contract.countDocuments({ ...scope, status: 'DRAFT' }),
+      Contract.countDocuments({ ...scope, status: 'EXPIRED' }),
+      Contract.countDocuments({ ...scope, status: 'ACTIVE', endDate: { $gte: now, $lte: soon30 } }),
+      Contract.countDocuments({ ...scope, status: 'ACTIVE', endDate: { $gte: now, $lte: soon7 } }),
+      ContractApproval.countDocuments(approvalFilter),
+      ContractParty.countDocuments(signatureFilter),
     ]);
     const recentByType = await Contract.aggregate([
-      { $match: { status: 'ACTIVE' } },
+      { $match: { ...scope, status: 'ACTIVE' } },
       { $group: { _id: '$contractType', count: { $sum: 1 } } },
     ]);
     res.json({
@@ -611,6 +671,7 @@ router.get('/expiring-soon', async (req, res) => {
     const now = new Date();
     const future = new Date(now.getTime() + days * 864e5);
     const contracts = await Contract.find({
+      ...listScope(req, {}),
       status: 'ACTIVE',
       endDate: { $gte: now, $lte: future },
     })

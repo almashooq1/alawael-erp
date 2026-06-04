@@ -238,6 +238,7 @@ const ContractSchema = new mongoose.Schema(
     notes: String,
     internalNotes: String,
     tags: [String],
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
 
     createdBy: mongoose.Schema.Types.ObjectId,
     createdAt: { type: Date, default: Date.now },

@@ -388,11 +388,18 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W858 seizure-log route behavioral~~ — **done (pending push)**: 16 supertest tests — record+validation
+- ~~W860 assistive-device route behavioral~~ — **done (pending push)**: 17 supertest tests — catalog create+validation,
+  full loan lifecycle (request→approve→check-out→return / cancel / mark-damaged) + device availability state machine,
+  approve-vs-write role split, maintenance start/end + log, retire role gating + reason, cross-branch isolation,
+  DELETE role gating.
+- ~~W861 diet-prescription route behavioral~~ — **done (pending push)**: 12 supertest tests — singleton 409,
+  draft→active activation gate (prescriber discipline), NPO start/end + IDDSI-clear invariant, enteral start/stop,
+  review (active-only) + discontinue (reason + PATCH-block), prescribe-role gating, cross-branch isolation, DELETE.
+- ~~W858 seizure-log route behavioral~~ — **done** (`00c175d0f`, pushed `main`): 16 supertest tests — record+validation
   (type/beneficiary/endTime), cross-branch isolation (W445), parent/supervisor notify, review immutability
   (therapist 403 / supervisor 200 / re-review 409 / post-review PATCH+notify 409), status-epilepticus ≥300s
   analytics, DELETE role gating.
-- ~~W859 respite route behavioral~~ — **done (pending push)**: 16 supertest tests — request+validation
+- ~~W859 respite route behavioral~~ — **done** (`00c175d0f`, pushed `main`): 16 supertest tests — request+validation
   (type/dates/emergency-contact), cross-branch 403/404, approve-vs-ops role split, full 8-state lifecycle
   (requested→approved→confirmed→checked_in→completed), out-of-order 409s, cancel/no-show terminals,
   DELETE role gating.

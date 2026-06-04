@@ -36,6 +36,7 @@ __tests__/assessment-goal-from-suggestion-wave568.test.js
 __tests__/assessment-insight-behavioral-wave564.test.js
 __tests__/assessment-insight-wave563.test.js
 __tests__/assistive-device-behavioral-wave359.test.js
+__tests__/assistive-device-routes-behavioral-wave860.test.js
 __tests__/assistive-device-wave359.test.js
 __tests__/attendance-clinical-day-care-behavioral-wave136-176-177.test.js
 __tests__/attendance-day-rollup-behavioral-wave131-132-174.test.js
@@ -214,6 +215,7 @@ __tests__/decision-rights-routes-wave515.test.js
 __tests__/decision-rights-routes-behavioral-wave854.test.js
 __tests__/decision-rights-wave461.test.js
 __tests__/diet-prescription-behavioral-wave368.test.js
+__tests__/diet-prescription-routes-behavioral-wave861.test.js
 __tests__/diet-prescription-wave368.test.js
 __tests__/digital-assessment-behavioral-wave557.test.js
 __tests__/digital-assessment-routes-wave559.test.js

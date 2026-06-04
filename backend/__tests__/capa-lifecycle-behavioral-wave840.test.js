@@ -54,7 +54,7 @@ function mountApp() {
   const a = express();
   a.use(express.json());
   a.use((req, _res, next) => {
-    req.app._capaService = createCapaService();
+    req.app._capaService = createCapaService({ enforceMfa: true });
     next();
   });
   a.use('/api/v1/quality/capa', require('../routes/quality/capa.routes'));

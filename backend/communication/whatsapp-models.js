@@ -27,7 +27,7 @@ const MessageSchema = new Schema(
     // المحادثة
     conversationId: {
       type: Schema.Types.ObjectId,
-      ref: 'WhatsAppConversation',
+      ref: 'CommWhatsAppConversation',
       required: true,
       index: true,
     },
@@ -672,11 +672,12 @@ WebhookEventSchema.index({ processed: 1, createdAt: 1 });
 
 // تصدير النماذج
 const Message = mongoose.models.WhatsAppMessage || mongoose.model('WhatsAppMessage', MessageSchema);
+// Pattern D (W842): comm-bundle WhatsApp models (canonical: models/WhatsAppConversation.js)
 const Conversation =
-  mongoose.models.WhatsAppConversation ||
-  mongoose.model('WhatsAppConversation', ConversationSchema);
+  mongoose.models.CommWhatsAppConversation ||
+  mongoose.model('CommWhatsAppConversation', ConversationSchema);
 const Template =
-  mongoose.models.WhatsAppTemplate || mongoose.model('WhatsAppTemplate', TemplateSchema);
+  mongoose.models.CommWhatsAppTemplate || mongoose.model('CommWhatsAppTemplate', TemplateSchema);
 const OTP = mongoose.models.WhatsAppOTP || mongoose.model('WhatsAppOTP', OTPSchema);
 const BulkMessage =
   mongoose.models.WhatsAppBulkMessage || mongoose.model('WhatsAppBulkMessage', BulkMessageSchema);

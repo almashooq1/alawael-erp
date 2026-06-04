@@ -17,7 +17,7 @@
  *   - Pull is manual + scheduled. Manual: admin endpoint
  *     `POST /whatsapp/templates/sync`. Scheduled: every 6 hours via the
  *     existing schedulers bootstrap (Phase B already added a slot).
- *   - We upsert into WhatsAppTemplate (model created in this file) keyed
+ *   - We upsert into WhatsAppSyncTemplate (model created in this file) keyed
  *     by (templateName, language). Status pulled directly from Meta:
  *     APPROVED, IN_REVIEW, REJECTED, PAUSED, DISABLED.
  *   - We never DELETE local rows on a missing-in-Meta diff — Meta sometimes
@@ -68,8 +68,10 @@ WhatsAppTemplateSchema.pre('save', function (next) {
   next();
 });
 
-const WhatsAppTemplate =
-  mongoose.models.WhatsAppTemplate || mongoose.model('WhatsAppTemplate', WhatsAppTemplateSchema);
+// Pattern D (W842): Meta provider template sync (distinct from comm/whatsapp-models Template)
+const WhatsAppSyncTemplate =
+  mongoose.models.WhatsAppSyncTemplate ||
+  mongoose.model('WhatsAppSyncTemplate', WhatsAppTemplateSchema);
 
 // ─── Sync logic ────────────────────────────────────────────────────────────
 
@@ -139,7 +141,7 @@ async function validateSendParams(templateName, language, components = []) {
 
   let row;
   try {
-    row = await WhatsAppTemplate.findOne({ templateName, language }).lean();
+    row = await WhatsAppSyncTemplate.findOne({ templateName, language }).lean();
   } catch {
     // Mongo unavailable — fail open. The downstream Meta call will surface
     // any real error.
@@ -225,7 +227,7 @@ async function fetchFromMeta() {
  * Upsert one template row. Returns { created, updated, statusChanged }.
  */
 async function upsertOne(metaTemplate) {
-  const existing = await WhatsAppTemplate.findOne({
+  const existing = await WhatsAppSyncTemplate.findOne({
     templateName: metaTemplate.name,
     language: metaTemplate.language,
   });
@@ -243,7 +245,7 @@ async function upsertOne(metaTemplate) {
   };
 
   if (!existing) {
-    await WhatsAppTemplate.create(next);
+    await WhatsAppSyncTemplate.create(next);
     return { created: true, statusChanged: false };
   }
 
@@ -303,13 +305,13 @@ async function sync() {
   }
 
   // Mark missing: locally known templates that weren't in Meta's response.
-  const localRows = await WhatsAppTemplate.find().lean();
+  const localRows = await WhatsAppSyncTemplate.find().lean();
   const missingNow = [];
   for (const row of localRows) {
     const key = `${row.templateName}::${row.language}`;
     if (seen.has(key)) continue;
     if (row.status === 'MISSING_IN_META') continue; // already flagged
-    await WhatsAppTemplate.updateOne(
+    await WhatsAppSyncTemplate.updateOne(
       { _id: row._id },
       { $set: { status: 'MISSING_IN_META', lastSyncedAt: new Date() } }
     );
@@ -343,7 +345,7 @@ async function listApproved({ language = null, force = false } = {}) {
   if (!force && cache.data && cache.expiresAt > Date.now()) {
     return language ? cache.data.filter(t => t.language === language) : cache.data;
   }
-  const rows = await WhatsAppTemplate.find({ status: 'APPROVED' }).lean();
+  const rows = await WhatsAppSyncTemplate.find({ status: 'APPROVED' }).lean();
   cache = { data: rows, expiresAt: Date.now() + 60_000 };
   return language ? rows.filter(t => t.language === language) : rows;
 }
@@ -370,7 +372,7 @@ async function getTemplateStatus(templateName) {
   if (!templateName) return null;
   let rows;
   try {
-    rows = await WhatsAppTemplate.find({ templateName }).select('status').lean();
+    rows = await WhatsAppSyncTemplate.find({ templateName }).select('status').lean();
   } catch {
     return null; // fail open — DB unavailable
   }
@@ -380,7 +382,7 @@ async function getTemplateStatus(templateName) {
 }
 
 module.exports = {
-  WhatsAppTemplate,
+  WhatsAppTemplate: WhatsAppSyncTemplate,
   sync,
   upsertOne,
   fetchFromMeta,

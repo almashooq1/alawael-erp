@@ -103,10 +103,14 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Beneficiary' — W341 CONSOLIDATED: seeder now re-exports canonical models/Beneficiary.js.
 
   // Tier 2 — registered in 2 files (lower risk but still drift-prone)
-  'Correspondence',
-  'EmailTemplate',
-  'WhatsAppConversation',
-  'WhatsAppTemplate',
+  // 'Correspondence' — W842 ratchet-down: AdminCommCorrespondence (administrative-communications-service);
+  // canonical remains models/Correspondence.js.
+  // 'EmailTemplate' — W842 ratchet-down: DocumentEmailTemplate (documentEmailGateway);
+  // canonical remains communication/email-models.js.
+  // 'WhatsAppConversation' — W842 ratchet-down: CommWhatsAppConversation (whatsapp-models);
+  // canonical remains models/WhatsAppConversation.js.
+  // 'WhatsAppTemplate' — W842 ratchet-down: CommWhatsAppTemplate (whatsapp-models) +
+  // WhatsAppSyncTemplate (templateSync.service).
   // 'LifecyclePolicy' — 2026-05-25 moved to REGISTRATION_ALLOWLIST (defensive
   //                     lookup-with-fallback pattern in database/ttl-lifecycle-manager.js
   //                     lines 79-84: try { mongoose.model('LifecyclePolicy') } catch

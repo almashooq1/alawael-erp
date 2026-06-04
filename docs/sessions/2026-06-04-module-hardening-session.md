@@ -355,5 +355,7 @@ jest.mock('../middleware/auth', () => ({
 - ~~CAPA OPEN→IN_PROGRESS→IMPLEMENTED chain~~ — **done W840** (`capa-lifecycle-behavioral-wave840`).
 - ~~CAPA IMPLEMENTED→VERIFIED→CLOSED + MFA tier 2 gate~~ — **done W841** (`capa-close-behavioral-wave841`).
 - ~~IQAssessment phantom ref Episode~~ — **done W841** (`ref: 'EpisodeOfCare'` per W325c).
+- ~~W340 Tier 2 comm/doc/whatsapp Pattern D~~ — **done W842** (`AdminCommCorrespondence`, `DocumentEmailTemplate`, `CommWhatsApp*`, `WhatsAppSyncTemplate`).
+- ~~CAPA behavioral enforceMfa parity~~ — **done W842** (W835/W838/W840 wired `enforceMfa: true`).
 - Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.
-- Remaining W340 Tier 2: `Correspondence`, `EmailTemplate`, …
+- Remaining W340 Tier 2: `LifecyclePolicy`, `GeneratedReport`, `Payroll`, `Event`, …

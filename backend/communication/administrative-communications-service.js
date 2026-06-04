@@ -234,14 +234,14 @@ const CorrespondenceSchema = new Schema(
     // سلسلة المراسلات (للردود)
     parentCorrespondence: {
       type: Schema.Types.ObjectId,
-      ref: 'Correspondence',
+      ref: 'AdminCommCorrespondence',
     },
 
     // المراسلات المرتبطة
     relatedCorrespondences: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Correspondence',
+        ref: 'AdminCommCorrespondence',
       },
     ],
 
@@ -523,7 +523,7 @@ const CorrespondenceActionSchema = new Schema(
   {
     correspondenceId: {
       type: Schema.Types.ObjectId,
-      ref: 'Correspondence',
+      ref: 'AdminCommCorrespondence',
       required: true,
     },
     actionType: {
@@ -573,8 +573,10 @@ CorrespondenceActionSchema.index({ correspondenceId: 1, performedAt: -1 });
 // Create Models — defensive `mongoose.models.X || mongoose.model(...)` guards
 // against OverwriteModelError. Correspondence is a W340 baseline entry
 // (registered in >1 file). Other names kept defensive for symmetry.
-const Correspondence =
-  mongoose.models.Correspondence || mongoose.model('Correspondence', CorrespondenceSchema);
+// Pattern D (W842): admin-comm correspondence (distinct from models/Correspondence.js)
+const AdminCommCorrespondence =
+  mongoose.models.AdminCommCorrespondence ||
+  mongoose.model('AdminCommCorrespondence', CorrespondenceSchema);
 const ExternalEntity =
   mongoose.models.ExternalEntity || mongoose.model('ExternalEntity', ExternalEntitySchema);
 const CorrespondenceTemplate =
@@ -650,7 +652,7 @@ class AdministrativeCommunicationsService {
   async createCorrespondence(data, userId) {
     const referenceNumber = await this.generateReferenceNumber(data.type, data.branchCode || 'HQ');
 
-    const correspondence = new Correspondence({
+    const correspondence = new AdminCommCorrespondence({
       referenceNumber,
       type: data.type,
       subject: data.subject,
@@ -683,7 +685,7 @@ class AdministrativeCommunicationsService {
    * تحديث مراسلة
    */
   async updateCorrespondence(id, data, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -706,7 +708,7 @@ class AdministrativeCommunicationsService {
    * إرسال مراسلة
    */
   async sendCorrespondence(id, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -738,7 +740,7 @@ class AdministrativeCommunicationsService {
    * استلام مراسلة
    */
   async receiveCorrespondence(id, recipientId, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -764,7 +766,7 @@ class AdministrativeCommunicationsService {
    * الموافقة على مراسلة
    */
   async approveCorrespondence(id, userId, comments = '') {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -787,7 +789,7 @@ class AdministrativeCommunicationsService {
    * رفض مراسلة
    */
   async rejectCorrespondence(id, userId, reason = '') {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -809,7 +811,7 @@ class AdministrativeCommunicationsService {
    * معالجة سير عمل الموافقات
    */
   async processApprovalWorkflow(id, userId, action, comments = '') {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -861,7 +863,7 @@ class AdministrativeCommunicationsService {
    * توجيه مراسلة
    */
   async addDirective(id, directiveData, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -889,7 +891,7 @@ class AdministrativeCommunicationsService {
    * إضافة مرفق
    */
   async addAttachment(id, attachmentData, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -912,7 +914,7 @@ class AdministrativeCommunicationsService {
    * أرشفة مراسلة
    */
   async archiveCorrespondence(id, archiveData, userId) {
-    const correspondence = await Correspondence.findById(id);
+    const correspondence = await AdminCommCorrespondence.findById(id);
     if (!correspondence) {
       throw new Error('المراسلة غير موجودة');
     }
@@ -996,14 +998,14 @@ class AdministrativeCommunicationsService {
     const skip = (page - 1) * limit;
 
     const [results, total] = await Promise.all([
-      Correspondence.find(filter)
+      AdminCommCorrespondence.find(filter)
         .sort(sort)
         .skip(skip)
         .limit(limit)
         .populate('createdBy', 'name nameAr')
         .populate('sender.entityId')
         .populate('recipients.entityId'),
-      Correspondence.countDocuments(filter),
+      AdminCommCorrespondence.countDocuments(filter),
     ]);
 
     return {
@@ -1032,24 +1034,24 @@ class AdministrativeCommunicationsService {
 
     const [totalByType, totalByStatus, totalByPriority, overdueCount, pendingApprovals] =
       await Promise.all([
-        Correspondence.aggregate([
+        AdminCommCorrespondence.aggregate([
           { $match: matchStage },
           { $group: { _id: '$type', count: { $sum: 1 } } },
         ]),
-        Correspondence.aggregate([
+        AdminCommCorrespondence.aggregate([
           { $match: matchStage },
           { $group: { _id: '$status', count: { $sum: 1 } } },
         ]),
-        Correspondence.aggregate([
+        AdminCommCorrespondence.aggregate([
           { $match: matchStage },
           { $group: { _id: '$priority', count: { $sum: 1 } } },
         ]),
-        Correspondence.countDocuments({
+        AdminCommCorrespondence.countDocuments({
           ...matchStage,
           dueDate: { $lt: new Date() },
           status: { $nin: [Status.COMPLETED, Status.ARCHIVED, Status.CANCELLED] },
         }),
-        Correspondence.countDocuments({
+        AdminCommCorrespondence.countDocuments({
           ...matchStage,
           status: Status.PENDING_APPROVAL,
         }),
@@ -1177,12 +1179,14 @@ class AdministrativeCommunicationsService {
    * الحصول على تاريخ المراسلات (سلسلة المراسلات)
    */
   async getCorrespondenceThread(id) {
-    const correspondence = await Correspondence.findById(id)
+    const correspondence = await AdminCommCorrespondence.findById(id)
       .populate('parentCorrespondence')
       .populate('relatedCorrespondences');
 
     // البحث عن الردود
-    const replies = await Correspondence.find({ parentCorrespondence: id }).sort({ createdAt: 1 });
+    const replies = await AdminCommCorrespondence.find({ parentCorrespondence: id }).sort({
+      createdAt: 1,
+    });
 
     return {
       current: correspondence,
@@ -1210,7 +1214,7 @@ class AdministrativeCommunicationsService {
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - daysThreshold);
 
-    return Correspondence.find({
+    return AdminCommCorrespondence.find({
       dueDate: { $lt: thresholdDate },
       status: { $nin: [Status.COMPLETED, Status.ARCHIVED, Status.CANCELLED] },
     })
@@ -1222,7 +1226,7 @@ class AdministrativeCommunicationsService {
    * إرسال تذكيرات
    */
   async sendReminders() {
-    const upcomingDue = await Correspondence.find({
+    const upcomingDue = await AdminCommCorrespondence.find({
       dueDate: {
         $gte: new Date(),
         $lte: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 أيام
@@ -1257,8 +1261,9 @@ module.exports = {
   AdministrativeCommunicationsService,
   adminCommService,
 
-  // Models
-  Correspondence,
+  // Models (Correspondence alias preserved for route/index importers — W842 Pattern D)
+  Correspondence: AdminCommCorrespondence,
+  AdminCommCorrespondence,
   ExternalEntity,
   CorrespondenceTemplate,
   CorrespondenceAction,

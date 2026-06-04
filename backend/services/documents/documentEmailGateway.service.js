@@ -101,8 +101,10 @@ const emailTemplateSchema = new mongoose.Schema(
   { timestamps: true, collection: 'document_email_templates' }
 );
 
-const EmailTemplate =
-  mongoose.models.EmailTemplate || mongoose.model('EmailTemplate', emailTemplateSchema);
+// Pattern D (W842): document email templates (distinct from communication/email-models DocumentEmailTemplate)
+const DocumentEmailTemplate =
+  mongoose.models.DocumentEmailTemplate ||
+  mongoose.model('DocumentEmailTemplate', emailTemplateSchema);
 
 /* ─── Forwarding Rule Model ──────────────────────────────────── */
 const forwardingRuleSchema = new mongoose.Schema(
@@ -242,7 +244,7 @@ class DocumentEmailGatewayService extends EventEmitter {
   /* ─── Init Templates ──────────────────────────────────────── */
   async initTemplates() {
     for (const tpl of DEFAULT_EMAIL_TEMPLATES) {
-      await EmailTemplate.findOneAndUpdate(
+      await DocumentEmailTemplate.findOneAndUpdate(
         { key: tpl.key },
         { $setOnInsert: tpl },
         { upsert: true }
@@ -336,7 +338,7 @@ class DocumentEmailGatewayService extends EventEmitter {
 
   /* ─── Resolve Template ────────────────────────────────────── */
   async _resolveTemplate(templateKey, vars) {
-    const template = await EmailTemplate.findOne({ key: templateKey }).lean();
+    const template = await DocumentEmailTemplate.findOne({ key: templateKey }).lean();
     if (!template) return null;
 
     const replaceVars = text => {
@@ -410,23 +412,23 @@ class DocumentEmailGatewayService extends EventEmitter {
     const { category } = options;
     const filter = {};
     if (category) filter.category = category;
-    let templates = await EmailTemplate.find(filter).sort({ isSystem: -1 }).lean();
+    let templates = await DocumentEmailTemplate.find(filter).sort({ isSystem: -1 }).lean();
     if (templates.length === 0) {
       await this.initTemplates();
-      templates = await EmailTemplate.find(filter).lean();
+      templates = await DocumentEmailTemplate.find(filter).lean();
     }
     return { success: true, templates };
   }
 
   async createTemplate(data) {
     const key = `custom_${Date.now()}`;
-    const template = new EmailTemplate({ ...data, key, isSystem: false });
+    const template = new DocumentEmailTemplate({ ...data, key, isSystem: false });
     await template.save();
     return { success: true, template };
   }
 
   async updateTemplate(templateId, updates) {
-    const template = await EmailTemplate.findByIdAndUpdate(
+    const template = await DocumentEmailTemplate.findByIdAndUpdate(
       templateId,
       { $set: updates },
       { returnDocument: 'after' }
@@ -436,7 +438,7 @@ class DocumentEmailGatewayService extends EventEmitter {
   }
 
   async deleteTemplate(templateId) {
-    const template = await EmailTemplate.findById(templateId);
+    const template = await DocumentEmailTemplate.findById(templateId);
     if (!template) return { success: false, error: 'القالب غير موجود' };
     if (template.isSystem) return { success: false, error: 'لا يمكن حذف قالب النظام' };
     await template.deleteOne();

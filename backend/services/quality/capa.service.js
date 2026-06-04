@@ -137,18 +137,23 @@ function createCapaService(opts = {}) {
       throw err;
     }
 
-    // W275 defense-in-depth: when enforceMfa is on, refuse callers that didn't supply a tier
-    // for transitions that the lib marks as requiring one. The hook would also catch this,
-    // but failing fast here gives a clearer service-layer error.
-    if (enforceMfa) {
-      const required = lib.requiredMfaTier(doc.status, to);
-      if (required != null && (mfaTier == null || mfaTier < required)) {
-        const err = new Error(
-          `transitionCapaItem: ${doc.status}→${to} requires MFA tier ${required}; caller supplied ${mfaTier ?? 'none'}`
-        );
-        err.code = 'MFA_TIER_INSUFFICIENT';
-        throw err;
-      }
+    // W275 + W843 defense-in-depth: validate transition at service layer before
+    // mutating status. The pre-save hook also validates, but relies on priorDoc
+    // which may be absent in some persistence paths — this call is authoritative
+    // for HTTP/cron callers using createCapaService({ enforceMfa: true }).
+    const from = doc.status;
+    const preCheck = lib.validateTransition({
+      from,
+      to,
+      actor: actorUserId,
+      reasonCode,
+      notes,
+      mfaTier: mfaTier != null ? mfaTier : enforceMfa ? 0 : Number.MAX_SAFE_INTEGER,
+    });
+    if (!preCheck.ok) {
+      const err = new Error(preCheck.message);
+      err.code = preCheck.code;
+      throw err;
     }
 
     doc.$locals.transition = { actor: actorUserId, reasonCode, notes, mfaTier };

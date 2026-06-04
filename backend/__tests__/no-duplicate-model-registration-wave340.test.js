@@ -123,12 +123,14 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Session'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Session.js
   // 'Vehicle'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Vehicle.js
   'LifecyclePolicy',
-  'GeneratedReport',
+  // 'GeneratedReport' — W843 ratchet-down: DocumentGeneratedReport (documentReporting);
+  // canonical remains domains/reports/models/GeneratedReport.js.
   // 'Employee'      — W342 CONSOLIDATED: hr/saudi-hr-service.js now re-exports models/Employee.js
   // 'LeaveRequest'  — W342 CONSOLIDATED: same — re-exports models/LeaveRequest.js
   // 'Attendance'    — W342 CONSOLIDATED: same — re-exports models/Attendance.js
   'Payroll', // 2× — NO canonical at models/Payroll.js (only PayrollPeriod.js); consolidation deferred
-  'Event',
+  // 'Event' — W843 ratchet-down: RehabSpecializedEvent (rehabilitation-specialized) +
+  // EventStoreEntry (infrastructure/eventStore).
   // 'BranchSetting' — 2026-05-25 moved to REGISTRATION_ALLOWLIST (defensive
   //                   lookup-with-fallback pattern in routes/central-settings.routes.js
   //                   lines 24-98: try { require('../models/BranchSetting') } catch

@@ -1181,7 +1181,9 @@ module.exports = {
     mongoose.model('RehabSpecializedDocument', documentSchema),
 
   // التقويم
-  Event: mongoose.models.Event || mongoose.model('Event', eventSchema),
+  // Pattern D (W843): rehab calendar events (distinct from infrastructure/eventStore EventStoreEntry)
+  Event:
+    mongoose.models.RehabSpecializedEvent || mongoose.model('RehabSpecializedEvent', eventSchema),
 
   // الملاحظات السريرية — scoped to dodge models/emr.model.js ClinicalNote
   ClinicalNote:

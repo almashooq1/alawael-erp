@@ -119,20 +119,11 @@ SnapshotSchema.index({ aggregateType: 1, aggregateId: 1 }, { unique: true });
 
 // ─── Models ──────────────────────────────────────────────────────────────────
 
-let EventModel;
-let SnapshotModel;
-
-try {
-  EventModel = mongoose.model('Event');
-} catch {
-  EventModel = mongoose.model('Event', EventSchema);
-}
-
-try {
-  SnapshotModel = mongoose.model('EventSnapshot');
-} catch {
-  SnapshotModel = mongoose.model('EventSnapshot', SnapshotSchema);
-}
+// Pattern D (W843): event-sourcing store (distinct from rehab Event export)
+const EventModel =
+  mongoose.models.EventStoreEntry || mongoose.model('EventStoreEntry', EventSchema);
+const SnapshotModel =
+  mongoose.models.EventStoreSnapshot || mongoose.model('EventStoreSnapshot', SnapshotSchema);
 
 // ─── Event Store Class ───────────────────────────────────────────────────────
 

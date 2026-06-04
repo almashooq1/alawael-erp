@@ -147,8 +147,10 @@ const generatedReportSchema = new mongoose.Schema(
 generatedReportSchema.index({ createdBy: 1, createdAt: -1 });
 generatedReportSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const GeneratedReport =
-  mongoose.models.GeneratedReport || mongoose.model('GeneratedReport', generatedReportSchema);
+// Pattern D (W843): document generated reports (distinct from domains/reports/GeneratedReport)
+const DocumentGeneratedReport =
+  mongoose.models.DocumentGeneratedReport ||
+  mongoose.model('DocumentGeneratedReport', generatedReportSchema);
 
 /* ─── Default Templates ──────────────────────────────────────── */
 const DEFAULT_TEMPLATES = [
@@ -342,7 +344,7 @@ class DocumentReportingEngine extends EventEmitter {
     const template = await DocumentReportTemplate.findById(templateId).lean();
     if (!template) return { success: false, error: 'القالب غير موجود' };
 
-    const report = new GeneratedReport({
+    const report = new DocumentGeneratedReport({
       templateId,
       name: template.name,
       nameAr: template.nameAr,
@@ -463,13 +465,13 @@ class DocumentReportingEngine extends EventEmitter {
     if (status) filter.status = status;
 
     const [reports, total] = await Promise.all([
-      GeneratedReport.find(filter)
+      DocumentGeneratedReport.find(filter)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('templateId', 'name nameAr category')
         .lean(),
-      GeneratedReport.countDocuments(filter),
+      DocumentGeneratedReport.countDocuments(filter),
     ]);
 
     return { success: true, reports, total, page, limit };
@@ -477,7 +479,7 @@ class DocumentReportingEngine extends EventEmitter {
 
   /* ─── Get Report by ID ────────────────────────────────────── */
   async getReport(reportId) {
-    const report = await GeneratedReport.findById(reportId)
+    const report = await DocumentGeneratedReport.findById(reportId)
       .populate('templateId')
       .populate('createdBy', 'name')
       .lean();
@@ -487,7 +489,7 @@ class DocumentReportingEngine extends EventEmitter {
 
   /* ─── Export Report ───────────────────────────────────────── */
   async exportReport(reportId, format = 'csv') {
-    const report = await GeneratedReport.findById(reportId).populate('templateId').lean();
+    const report = await DocumentGeneratedReport.findById(reportId).populate('templateId').lean();
     if (!report) return { success: false, error: 'التقرير غير موجود' };
 
     let content;
@@ -599,7 +601,7 @@ th,td{border:1px solid #ddd;padding:8px;text-align:right}th{background:#3b82f6;c
   async getStats() {
     const [totalTemplates, totalReports, byCategory, scheduled] = await Promise.all([
       DocumentReportTemplate.countDocuments(),
-      GeneratedReport.countDocuments(),
+      DocumentGeneratedReport.countDocuments(),
       DocumentReportTemplate.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
       DocumentReportTemplate.countDocuments({ 'schedule.enabled': true }),
     ]);

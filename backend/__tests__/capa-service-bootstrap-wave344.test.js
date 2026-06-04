@@ -119,16 +119,12 @@ describe('W344 — createCapaItem input validation', () => {
 });
 
 describe('W344 — transitionCapaItem MFA enforcement (service-layer defense)', () => {
-  it('enforceMfa:true throws MFA_TIER_INSUFFICIENT before touching the model when caller lacks tier', async () => {
-    const svc = createCapaService({ enforceMfa: true });
-    // Stub the model lookup so we never hit mongoose: hijack listByStatus → swap
-    // _CapaModel by monkey-patching the internal closure isn't possible from
-    // outside, but the throw happens *after* findById so we use a sentinel error
-    // pattern instead: verify the service ALWAYS calls lib.requiredMfaTier under
-    // enforceMfa:true. Read the source for the assertion.
-    expect(SERVICE_SRC).toMatch(/if\s*\(\s*enforceMfa\s*\)/);
-    expect(SERVICE_SRC).toMatch(/lib\.requiredMfaTier\(\s*doc\.status\s*,\s*to\s*\)/);
-    expect(SERVICE_SRC).toMatch(/err\.code\s*=\s*['"]MFA_TIER_INSUFFICIENT['"]/);
+  it('enforceMfa:true validates via lib.validateTransition before mutating status (W843)', async () => {
+    createCapaService({ enforceMfa: true });
+    expect(SERVICE_SRC).toMatch(/lib\.validateTransition\s*\(/);
+    expect(SERVICE_SRC).toMatch(/enforceMfa\s*\?\s*0\s*:\s*Number\.MAX_SAFE_INTEGER/);
+    expect(SERVICE_SRC).toMatch(/preCheck\.code/);
+    expect(SERVICE_SRC).toMatch(/MFA_TIER_INSUFFICIENT/);
   });
 });
 

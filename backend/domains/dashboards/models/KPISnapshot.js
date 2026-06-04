@@ -10,7 +10,12 @@ const Schema = mongoose.Schema;
 
 const kpiSnapshotSchema = new Schema(
   {
-    kpiId: { type: Schema.Types.ObjectId, ref: 'KPIDefinition', required: true, index: true },
+    kpiId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DashboardKPIDefinition',
+      required: true,
+      index: true,
+    },
     kpiCode: { type: String, required: true, index: true },
     branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
 

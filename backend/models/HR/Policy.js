@@ -60,4 +60,4 @@ PolicySchema.virtual('acknowledgedCount').get(function () {
 PolicySchema.set('toJSON', { virtuals: true });
 PolicySchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.models.HrPolicy || mongoose.model('HrPolicy', PolicySchema);
+module.exports = mongoose.models.HrModulePolicy || mongoose.model('HrModulePolicy', PolicySchema);

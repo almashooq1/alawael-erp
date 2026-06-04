@@ -523,28 +523,12 @@ describe('W340 no-duplicate-model-registration drift guard', () => {
   // or a legitimate-but-divergent legacy variant (ALLOWLIST + ADR).
   // ─────────────────────────────────────────────────────────────────────────
   const KNOWN_CASE_VARIANTS = new Set([
-    // W850 ratchet-down: icfassessment — route uses canonical ICFAssessment only.
-    // W850 ratchet-down: aacprofile — RehabLegacyAacProfile (aac-therapy-protocols.js).
-    // W850 ratchet-down: mdtmeeting — CarePsychMdtMeeting (psych care) vs MDTMeeting (MDTCoordination).
-    // ─────────────────────────────────────────────────────────────────────────
-    // 'kpidefinition' — KPIDefinition (domains/dashboards/models/) vs
-    //   KpiDefinition (models/KpiDefinition.js). Both → `kpidefinitions` collection.
-    'kpidefinition',
-    // 'aiprediction' — AiPrediction (models/AiPrediction.js) vs AIPrediction
-    //   (models/organization.model.js mega-file). Both → `aipredictions` collection.
-    'aiprediction',
-    // 'mdtmeeting' — W850 closed (CarePsychMdtMeeting vs MDTMeeting).
-    // 'icfassessment' — W850 closed (canonical ICFAssessment; route fallback removed).
-    // 'elearningcourse' — ELearningCourse (models/ELearning/Course.js) vs
-    //   ElearningCourse (models/ElearningCourse.js). Both → `elearningcourses`.
-    'elearningcourse',
-    // 'hrpolicy' — HRPolicy (models/HR/HRPolicy.js) vs HrPolicy (models/HR/Policy.js).
-    //   Both → `hrpolicies` collection.
-    'hrpolicy',
-    // 'icfassessment' — W850 closed.
-    // 'zktecodevice' — ZktecoDevice (models/ZktecoDevice.js) vs ZKTecoDevice
-    //   (models/zktecoDevice.model.js). Note also filename casing differs.
-    //   Both → `zktecodevices` collection.
+    // W850 ratchet-down: icfassessment, aacprofile, mdtmeeting.
+    // W851 ratchet-down: kpidefinition → DashboardKPIDefinition (domain dashboards).
+    // W851 ratchet-down: aiprediction → OrganizationAIPrediction (organization mega-file).
+    // W851 ratchet-down: elearningcourse → LegacyELearningCourseShell (ELearning/Course.js stub).
+    // W851 ratchet-down: hrpolicy → HrUnifiedPolicy + HrModulePolicy (HR/Policy.js).
+    // 'zktecodevice' — ZktecoDevice vs ZKTecoDevice; requires data migration (deferred).
     'zktecodevice',
   ]);
 

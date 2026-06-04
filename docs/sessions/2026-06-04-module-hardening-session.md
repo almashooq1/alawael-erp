@@ -371,8 +371,11 @@ jest.mock('../middleware/auth', () => ({
   - `MontessoriStudent` + `TransportStudent`; canonical `Student` in `student-service.js`.
   - EnterpriseProPlus: 15 unprefixed models → `EnterpriseProPlus*` (Candidate, RFQ, Safety*, IT*, …).
   - `KNOWN_DUPLICATE_REGISTRATIONS` baseline **EMPTY**.
-- Open: ADR-020 Student↔Beneficiary consolidation; ADR-032 case-variant cluster (`kpidefinition`, `hrpolicy`, `zktecodevice`, …).
-- ~~W850 case-variant + EnterprisePro closure~~ — **done (pending push)**:
+- Open: ADR-020 Student↔Beneficiary; `zktecodevice` migration (deferred).
+- ~~W851 ADR-032 case variants (4 of 5)~~ — **done (pending push)**:
+  - `DashboardKPIDefinition`, `OrganizationAIPrediction`, `LegacyELearningCourseShell`, `HrUnifiedPolicy` + `HrModulePolicy`.
+  - Case-variant baseline: only `zktecodevice` remains.
+- ~~W850 case-variant + EnterprisePro closure~~ — **done** (`b4563066b`, pushed `main`):
   - ICF route → canonical `ICFAssessment` + nested flatten helper; fixed async pre-save hook.
   - `RehabLegacyAacProfile` (aac-therapy-protocols); `CarePsychMdtMeeting` (psych care).
   - EnterprisePro: 12 unprefixed `reg()` names → `EnterprisePro*` scoped registrations.

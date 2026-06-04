@@ -142,5 +142,7 @@ const kpiDefinitionSchema = new Schema(
 kpiDefinitionSchema.index({ category: 1, status: 1 });
 kpiDefinitionSchema.index({ domain: 1, status: 1 });
 
+// Pattern D (W851): DDD dashboards KPI defs (canonical ops KPI: models/KpiDefinition.js → KpiDefinition)
 module.exports =
-  mongoose.models.KPIDefinition || mongoose.model('KPIDefinition', kpiDefinitionSchema);
+  mongoose.models.DashboardKPIDefinition ||
+  mongoose.model('DashboardKPIDefinition', kpiDefinitionSchema);

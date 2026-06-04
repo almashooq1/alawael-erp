@@ -350,9 +350,11 @@ module.exports = {
   // Registered as `OrganizationEmployee` to dodge the collision with
   // the canonical models/HR/Employee.js. Export key unchanged.
   Employee:
-    mongoose.models.OrganizationEmployee ||
-    mongoose.model('OrganizationEmployee', EmployeeSchema),
-  AIPrediction: mongoose.models.AIPrediction || mongoose.model('AIPrediction', AIPredictionSchema),
+    mongoose.models.OrganizationEmployee || mongoose.model('OrganizationEmployee', EmployeeSchema),
+  // Pattern D (W851): org mega-file AI predictions (canonical: models/AiPrediction.js)
+  AIPrediction:
+    mongoose.models.OrganizationAIPrediction ||
+    mongoose.model('OrganizationAIPrediction', AIPredictionSchema),
   SystemLog: mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema),
   Backup: mongoose.models.Backup || mongoose.model('Backup', BackupSchema),
 };

@@ -115,7 +115,7 @@ function dddHandler(socket, io, activeSubscriptions) {
     try {
       const mongoose = require('mongoose');
       const KPISnapshot = mongoose.models.KPISnapshot;
-      const KPIDefinition = mongoose.models.KPIDefinition;
+      const KPIDefinition = mongoose.models.DashboardKPIDefinition;
 
       if (!KPISnapshot || !KPIDefinition) {
         socket.emit('ddd:kpi:update', {

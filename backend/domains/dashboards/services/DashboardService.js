@@ -89,12 +89,12 @@ class DashboardService extends BaseService {
   /* ═══════════════════════ KPI DEFINITIONS ═══════════════════════ */
 
   async createKPI(data) {
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
     return KPIDefinition.create(data);
   }
 
   async listKPIs({ category, domain, status = 'active', page = 1, limit = 50 } = {}) {
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
     const q = { isDeleted: { $ne: true } };
     if (status) q.status = status;
     if (category) q.category = category;
@@ -109,12 +109,12 @@ class DashboardService extends BaseService {
   }
 
   async getKPI(id) {
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
     return KPIDefinition.findById(id).lean();
   }
 
   async updateKPI(id, data) {
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
     return KPIDefinition.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
@@ -122,7 +122,7 @@ class DashboardService extends BaseService {
 
   async recordSnapshot(data) {
     const KPISnapshot = mongoose.model('KPISnapshot');
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
 
     // Calculate status
     const kpi = await KPIDefinition.findById(data.kpiId).lean();
@@ -189,7 +189,7 @@ class DashboardService extends BaseService {
   }
 
   async getLatestSnapshots(branchId) {
-    const KPIDefinition = mongoose.model('KPIDefinition');
+    const KPIDefinition = mongoose.model('DashboardKPIDefinition');
     const KPISnapshot = mongoose.model('KPISnapshot');
 
     const kpis = await KPIDefinition.find({ status: 'active', isDeleted: { $ne: true } }).lean();

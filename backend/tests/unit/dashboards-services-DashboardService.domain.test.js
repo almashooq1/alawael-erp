@@ -224,7 +224,7 @@ describe('DashboardService.recordSnapshot() — higher_is_better status', () => 
   };
 
   async function snap(value) {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({ ...kpiBase });
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({ ...kpiBase });
     mockModels.KPISnapshot = makeKPISnapshotMock(null);
     const data = { kpiId: 'kpi1', value };
     await dashboardService.recordSnapshot(data);
@@ -271,7 +271,7 @@ describe('DashboardService.recordSnapshot() — lower_is_better status', () => {
   };
 
   async function snap(value) {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({ ...kpiLower });
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({ ...kpiLower });
     mockModels.KPISnapshot = makeKPISnapshotMock(null);
     const data = { kpiId: 'kpi1', value };
     await dashboardService.recordSnapshot(data);
@@ -308,7 +308,7 @@ describe('DashboardService.recordSnapshot() — lower_is_better status', () => {
 
 describe('DashboardService.recordSnapshot() — variance calculation', () => {
   test('sets variance, variancePercentage, and target from KPI', async () => {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({
       direction: 'higher_is_better',
       target: { value: 100 },
     });
@@ -321,7 +321,7 @@ describe('DashboardService.recordSnapshot() — variance calculation', () => {
   });
 
   test('variancePercentage is 0 when target is 0', async () => {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({
       direction: 'higher_is_better',
       target: { value: 0 },
     });
@@ -336,7 +336,7 @@ describe('DashboardService.recordSnapshot() — variance calculation', () => {
 
 describe('DashboardService.recordSnapshot() — trend calculation', () => {
   async function snapWithPrev(value, previousValue, direction = 'higher_is_better') {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({
       direction,
       target: { value: 80 },
     });
@@ -378,7 +378,7 @@ describe('DashboardService.recordSnapshot() — trend calculation', () => {
   });
 
   test('no previous snapshot → no trend set', async () => {
-    mockModels.KPIDefinition = makeKPIDefinitionMock({
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock({
       direction: 'higher_is_better',
       target: { value: 80 },
     });
@@ -393,7 +393,7 @@ describe('DashboardService.recordSnapshot() — trend calculation', () => {
 
 describe('DashboardService.recordSnapshot() — no KPI definition', () => {
   test('creates snapshot with no status when KPI is null', async () => {
-    mockModels.KPIDefinition = makeKPIDefinitionMock(null);
+    mockModels.DashboardKPIDefinition = makeKPIDefinitionMock(null);
     mockModels.KPISnapshot = makeKPISnapshotMock(null);
     const data = { kpiId: 'unknown_kpi', value: 50 };
     await dashboardService.recordSnapshot(data);

@@ -66,7 +66,11 @@ router.get('/meetings', async (req, res) => {
 // ─── Get Single MDT Meeting ──────────────────────────────────────────────────
 router.get('/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findById(req.params.id)
+    // W867 — branch-scope the instance read. Pre-W867 a bare findById (this
+    // route has NO authorize gate) let any authenticated restricted user read
+    // another branch's MDT meeting — beneficiary names + MRNs + clinical case
+    // discussion. Same IDOR class W269/W447/W866 closed.
+    const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('organizer', 'name email')
       .populate('attendees.user', 'name email')
       .populate('cases.beneficiary', 'name mrn')
@@ -124,10 +128,13 @@ router.post(
 // ─── Update MDT Meeting ──────────────────────────────────────────────────────
 router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    }).lean();
+    // W867 — branch-scoped update. 'manager' is a branch-level role, so a bare
+    // findByIdAndUpdate let a branch-A manager rewrite branch-B's meeting.
+    const meeting = await MDTMeeting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      { returnDocument: 'after', runValidators: true }
+    ).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'تم تحديث الاجتماع بنجاح' });
   } catch (error) {
@@ -138,7 +145,9 @@ router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) =>
 // ─── Delete MDT Meeting ──────────────────────────────────────────────────────
 router.delete('/meetings/:id', authorize(['admin']), async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findByIdAndDelete(req.params.id);
+    // W867 — branch-scoped delete (defense-in-depth; admin is cross-branch so
+    // branchFilter is {} for them, but this keeps the pattern uniform).
+    const meeting = await MDTMeeting.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم حذف الاجتماع بنجاح' });
   } catch (error) {

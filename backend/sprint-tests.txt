@@ -464,6 +464,7 @@ __tests__/respite-wave363.test.js
 __tests__/restraint-seclusion-event-behavioral-wave193b.test.js
 __tests__/restraint-seclusion-routes-behavioral-wave865.test.js
 __tests__/complaints-routes-behavioral-wave866.test.js
+__tests__/mdt-coordination-branch-isolation-wave867.test.js
 __tests__/retention-digest-script.test.js
 __tests__/retention-service.test.js
 __tests__/revenue-digest-script.test.js

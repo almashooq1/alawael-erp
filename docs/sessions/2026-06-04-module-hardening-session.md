@@ -388,7 +388,22 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W866 complaints cross-branch IDOR fix + behavioral~~ — **done (pending push)**: **security fix** —
+- **Systematic IDOR audit (2026-06-04)**: grep `findById(req.params|findByIdAndUpdate(req.params|findByIdAndDelete(req.params`
+  across `routes/` surfaced ~60 files; the high-signal subset is branch-aware files (import `branchFilter`, scope
+  their lists/stats) whose INSTANCE endpoints still use bare `findById`. Confirmed leaks: `complaints` (W866, fixed),
+  `mdt-coordination` (W867, partial fix), `crisis` (ambiguous — see below), `riskAssessment`, `mar` (need model-intent
+  check). **`crisis.routes.js` deliberately NOT touched**: its create handlers don't stamp `branchId` and its list
+  endpoints aren't branch-scoped (only the dashboard aggregations are), and EmergencyPlans may be org-wide safety
+  infrastructure — applying branch isolation there is a design decision needing product input, not an autonomous fix.
+- ~~W867 MDT-coordination cross-branch IDOR fix (meetings CRUD) + regression~~ — **done (pending push)**: **security fix** —
+  `mdt-coordination.routes.js` `GET /meetings/:id` (no authorize gate → any restricted user) + `PUT /meetings/:id`
+  (authorize ['admin','manager'] — manager is branch-level) + `DELETE /meetings/:id` used bare findById/
+  findByIdAndUpdate/findByIdAndDelete → cross-branch read/rewrite of MDT meetings (beneficiary names + MRNs + clinical
+  case discussion). Added `branchFilter(req)` to the 3 primary MDTMeeting CRUD instance endpoints + 6-test regression
+  guard. **Follow-up W868**: the same file's MDTMeeting sub-resource endpoints (attendees/cases/action-items) +
+  ALL UnifiedRehabPlan + ReferralTicket instance endpoints carry the identical leak (~20 endpoints) — same one-line
+  fix each, deferred to keep this change reviewable.
+- ~~W866 complaints cross-branch IDOR fix + behavioral~~ — **done** (`572b6013d`, pushed `main`): **security fix** —
   `complaints.routes.js` instance endpoints (GET/PUT/respond/escalate/resolve/rate/DELETE `/:id`) used bare
   `findById`/`findByIdAndUpdate` with NO branch filter (IDOR: restricted branch-A user could read/modify/resolve/
   delete a branch-B complaint's PII + grievance content by ObjectId guess). Added `branchFilter(req)` to all 7

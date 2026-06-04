@@ -608,5 +608,7 @@ __tests__/clinical-routes-behavioral-wave830.test.js
 __tests__/rights-voice-lifecycle-behavioral-wave831.test.js
 __tests__/iq-assessments-branch-isolation-behavioral-wave832.test.js
 __tests__/branch-scope-mount-drift-wave833.test.js
+__tests__/capa-routes-behavioral-wave835.test.js
+__tests__/leave-requests-branch-isolation-behavioral-wave836.test.js
 __tests__/spasticity-injection-api-wave715.test.js
 __tests__/spasticity-injection-behavioral-wave715.test.js

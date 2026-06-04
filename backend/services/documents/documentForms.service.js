@@ -152,13 +152,15 @@ formTemplateSchema.index({ category: 1, status: 1 });
 formTemplateSchema.index({ createdBy: 1, createdAt: -1 });
 formTemplateSchema.index({ name: 'text', nameAr: 'text', description: 'text' });
 
-const FormTemplate =
-  mongoose.models.FormTemplate || mongoose.model('FormTemplate', formTemplateSchema);
+// Pattern D (W835): canonical DocumentFormsTemplate at models/DocumentFormsTemplate.js
+const DocumentFormsTemplate =
+  mongoose.models.DocumentFormsTemplate ||
+  mongoose.model('DocumentFormsTemplate', formTemplateSchema);
 
 /* ─── Form Submission ─── */
 const formSubmissionSchema = new mongoose.Schema(
   {
-    formId: { type: mongoose.Schema.Types.ObjectId, ref: 'FormTemplate', required: true },
+    formId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentFormsTemplate', required: true },
     documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
     submissionNumber: String,
     status: {
@@ -200,8 +202,10 @@ formSubmissionSchema.index({ formId: 1, status: 1 });
 formSubmissionSchema.index({ submittedBy: 1, createdAt: -1 });
 formSubmissionSchema.index({ documentId: 1 });
 
-const FormSubmission =
-  mongoose.models.FormSubmission || mongoose.model('FormSubmission', formSubmissionSchema);
+// Pattern D (W835): canonical DocumentFormsSubmission at models/DocumentFormsSubmission.js
+const DocumentFormsSubmission =
+  mongoose.models.DocumentFormsSubmission ||
+  mongoose.model('DocumentFormsSubmission', formSubmissionSchema);
 
 /* ── Custom Fields for Documents ── */
 const customFieldDefSchema = new mongoose.Schema(
@@ -311,12 +315,12 @@ class DocumentFormsService {
       });
     }
 
-    const template = await FormTemplate.create({ ...data, createdBy: userId });
+    const template = await DocumentFormsTemplate.create({ ...data, createdBy: userId });
     return { success: true, template };
   }
 
   async updateTemplate(templateId, data, _userId) {
-    const template = await FormTemplate.findById(templateId);
+    const template = await DocumentFormsTemplate.findById(templateId);
     if (!template) throw new Error('القالب غير موجود');
 
     if (data.fields) {
@@ -332,7 +336,10 @@ class DocumentFormsService {
   }
 
   async getTemplate(templateId) {
-    const template = await FormTemplate.findById(templateId).populate('createdBy', 'name email');
+    const template = await DocumentFormsTemplate.findById(templateId).populate(
+      'createdBy',
+      'name email'
+    );
     if (!template) throw new Error('القالب غير موجود');
     return { success: true, template };
   }
@@ -352,25 +359,25 @@ class DocumentFormsService {
     const limit = parseInt(filters.limit) || 20;
 
     const [templates, total] = await Promise.all([
-      FormTemplate.find(query)
+      DocumentFormsTemplate.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('createdBy', 'name')
         .lean(),
-      FormTemplate.countDocuments(query),
+      DocumentFormsTemplate.countDocuments(query),
     ]);
 
     return { success: true, templates, total, page, pages: Math.ceil(total / limit) };
   }
 
   async deleteTemplate(templateId) {
-    await FormTemplate.findByIdAndUpdate(templateId, { isActive: false });
+    await DocumentFormsTemplate.findByIdAndUpdate(templateId, { isActive: false });
     return { success: true };
   }
 
   async publishTemplate(templateId) {
-    const t = await FormTemplate.findByIdAndUpdate(
+    const t = await DocumentFormsTemplate.findByIdAndUpdate(
       templateId,
       { status: 'published' },
       { returnDocument: 'after' }
@@ -379,7 +386,7 @@ class DocumentFormsService {
   }
 
   async cloneTemplate(templateId, userId) {
-    const original = await FormTemplate.findById(templateId).lean();
+    const original = await DocumentFormsTemplate.findById(templateId).lean();
     if (!original) throw new Error('القالب غير موجود');
 
     delete original._id;
@@ -391,14 +398,14 @@ class DocumentFormsService {
     original.usageCount = 0;
     original.createdBy = userId;
 
-    const clone = await FormTemplate.create(original);
+    const clone = await DocumentFormsTemplate.create(original);
     return { success: true, template: clone };
   }
 
   /* ══════ Form Submissions ══════ */
 
   async submitForm(formId, data, userId, options = {}) {
-    const template = await FormTemplate.findById(formId);
+    const template = await DocumentFormsTemplate.findById(formId);
     if (!template) throw new Error('القالب غير موجود');
     if (template.status !== 'published' && !options.allowDraft) throw new Error('القالب غير منشور');
 
@@ -409,7 +416,7 @@ class DocumentFormsService {
 
     // Check max submissions
     if (template.settings?.maxSubmissions) {
-      const count = await FormSubmission.countDocuments({ formId });
+      const count = await DocumentFormsSubmission.countDocuments({ formId });
       if (count >= template.settings.maxSubmissions) throw new Error('تم الوصول للحد الأقصى');
     }
 
@@ -445,7 +452,7 @@ class DocumentFormsService {
     template.usageCount++;
     await template.save();
 
-    const submission = await FormSubmission.create({
+    const submission = await DocumentFormsSubmission.create({
       formId,
       documentId: options.documentId,
       submissionNumber,
@@ -466,7 +473,7 @@ class DocumentFormsService {
   }
 
   async updateSubmission(submissionId, data, userId) {
-    const submission = await FormSubmission.findById(submissionId);
+    const submission = await DocumentFormsSubmission.findById(submissionId);
     if (!submission) throw new Error('العرض غير موجود');
     if (!['draft', 'rejected'].includes(submission.status))
       throw new Error('لا يمكن تعديل هذا العرض');
@@ -475,7 +482,7 @@ class DocumentFormsService {
     submission.history.push({ action: 'updated', data, changedBy: userId });
 
     // Re-validate
-    const template = await FormTemplate.findById(submission.formId);
+    const template = await DocumentFormsTemplate.findById(submission.formId);
     if (template) {
       const errors = [];
       for (const field of template.fields) {
@@ -490,7 +497,7 @@ class DocumentFormsService {
   }
 
   async getSubmission(submissionId) {
-    const sub = await FormSubmission.findById(submissionId)
+    const sub = await DocumentFormsSubmission.findById(submissionId)
       .populate('formId')
       .populate('submittedBy', 'name email')
       .populate('reviewedBy', 'name email');
@@ -509,21 +516,21 @@ class DocumentFormsService {
     const limit = parseInt(filters.limit) || 20;
 
     const [submissions, total] = await Promise.all([
-      FormSubmission.find(query)
+      DocumentFormsSubmission.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('formId', 'name nameAr')
         .populate('submittedBy', 'name')
         .lean(),
-      FormSubmission.countDocuments(query),
+      DocumentFormsSubmission.countDocuments(query),
     ]);
 
     return { success: true, submissions, total, page, pages: Math.ceil(total / limit) };
   }
 
   async reviewSubmission(submissionId, approved, reviewData, userId) {
-    const sub = await FormSubmission.findById(submissionId);
+    const sub = await DocumentFormsSubmission.findById(submissionId);
     if (!sub) throw new Error('العرض غير موجود');
 
     sub.status = approved ? 'approved' : 'rejected';
@@ -540,7 +547,7 @@ class DocumentFormsService {
   }
 
   async deleteSubmission(submissionId) {
-    await FormSubmission.findByIdAndDelete(submissionId);
+    await DocumentFormsSubmission.findByIdAndDelete(submissionId);
     return { success: true };
   }
 
@@ -579,11 +586,11 @@ class DocumentFormsService {
 
   async getStats() {
     const [templates, published, submissions, customFields, categoryStats] = await Promise.all([
-      FormTemplate.countDocuments({ isActive: true }),
-      FormTemplate.countDocuments({ isActive: true, status: 'published' }),
-      FormSubmission.countDocuments(),
+      DocumentFormsTemplate.countDocuments({ isActive: true }),
+      DocumentFormsTemplate.countDocuments({ isActive: true, status: 'published' }),
+      DocumentFormsSubmission.countDocuments(),
       CustomFieldDef.countDocuments({ isActive: true }),
-      FormTemplate.aggregate([
+      DocumentFormsTemplate.aggregate([
         { $match: { isActive: true } },
         {
           $group: {
@@ -596,7 +603,7 @@ class DocumentFormsService {
       ]),
     ]);
 
-    const statusStats = await FormSubmission.aggregate([
+    const statusStats = await DocumentFormsSubmission.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
 

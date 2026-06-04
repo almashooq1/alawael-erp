@@ -342,11 +342,8 @@ jest.mock('../middleware/auth', () => ({
 
 ## Open follow-ups (next batches)
 
-- ~~Reapply lost Batches 1–4 (CAPA, documentAdvanced, leave-requests, hr-performance, W340 DocumentShare/Version)~~ — **done W834 (2026-06-04, uncommitted)**.
-- ~~Fix `purchasing.routes.js` W833 baseline entry~~ — **done W834**: mounted `requireBranchAccess` + updated 5 purchasing test mocks; W833 baseline now empty.
-- Remaining single-file W340 collisions amenable to Pattern D: `GoalBank`,
-  `ImportExportJob`, `FormSubmission` / `FormTemplate`, `DigitalSignature`,
-  `TherapyProtocol`.
-- `ComplianceAlert` / `CalendarEvent` / `RoomBooking` live in `EnterprisePro*.js`
-  mega-files → deferred to a stakeholder ADR (mega-file split) per doctrine.
-- Extend behavioral harness to `respite`, `diet-prescription`, `facility-asset`.
+- ~~Reapply lost Batches 1–4~~ — **done W834** (committed `8aa3e7102`).
+- ~~Fix `purchasing.routes.js` W833 baseline~~ — **done W834**.
+- ~~W340 Pattern D (GoalBank, ImportExportJob, FormTemplate/Submission, TherapyProtocol, DigitalSignature)~~ — **done W835**.
+- ~~Behavioral tests for CAPA + leave-requests~~ — **done W835/W836** (`capa-routes-behavioral-wave835`, `leave-requests-branch-isolation-behavioral-wave836`).
+- Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.

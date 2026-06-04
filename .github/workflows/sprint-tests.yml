@@ -1038,6 +1038,9 @@ on:
       - 'backend/__tests__/iq-assessments-branch-isolation-behavioral-wave832.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-scope-mount-drift-wave833.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/capa-routes-behavioral-wave835.test.js'
+      - 'backend/__tests__/leave-requests-branch-isolation-behavioral-wave836.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2059,6 +2062,9 @@ on:
       - 'backend/__tests__/iq-assessments-branch-isolation-behavioral-wave832.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-scope-mount-drift-wave833.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/capa-routes-behavioral-wave835.test.js'
+      - 'backend/__tests__/leave-requests-branch-isolation-behavioral-wave836.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

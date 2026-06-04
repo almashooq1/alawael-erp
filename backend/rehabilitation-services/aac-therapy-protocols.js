@@ -261,11 +261,12 @@ TherapyProtocolSchema.index({ approach: 1, 'target_population.disability_types':
 
 // Defensive registration — prevents OverwriteModelError when this file loads
 // after `rehabilitation-services/advanced-therapy-protocols.js` (which also
-// registers 'TherapyProtocol'). Both schemas are divergent and both are in
+// registers 'AacTherapyProtocol'). Both schemas are divergent and both are in
 // the W340 baseline pending ADR-032 resolution. Until consolidation lands,
 // whichever loads first wins the mongoose.models cache.
-const TherapyProtocol =
-  mongoose.models.TherapyProtocol || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
+// Pattern D (W835): AAC-local protocol catalog (distinct from advanced-therapy-protocols.js)
+const AacTherapyProtocol =
+  mongoose.models.AacTherapyProtocol || mongoose.model('AacTherapyProtocol', TherapyProtocolSchema);
 
 // بروتوكولات مدمجة - 12 بروتوكول أساسي
 const BUILT_IN_PROTOCOLS = [
@@ -669,9 +670,9 @@ router.post('/protocols/seed', async (req, res) => {
   try {
     let seeded = 0;
     for (const proto of BUILT_IN_PROTOCOLS) {
-      const exists = await TherapyProtocol.findOne({ protocol_code: proto.protocol_code });
+      const exists = await AacTherapyProtocol.findOne({ protocol_code: proto.protocol_code });
       if (!exists) {
-        await TherapyProtocol.create(proto);
+        await AacTherapyProtocol.create(proto);
         seeded++;
       }
     }
@@ -692,7 +693,7 @@ router.get('/protocols', async (req, res) => {
       filter['target_population.age_range.min'] = { $lte: ageNum };
       filter['target_population.age_range.max'] = { $gte: ageNum };
     }
-    const protocols = await TherapyProtocol.find(filter)
+    const protocols = await AacTherapyProtocol.find(filter)
       .select(
         'protocol_code protocol_name_ar approach target_population objective_ar evidence_level usage_count rating'
       )
@@ -705,9 +706,9 @@ router.get('/protocols', async (req, res) => {
 
 router.get('/protocols/:id', async (req, res) => {
   try {
-    const protocol = await TherapyProtocol.findById(req.params.id);
+    const protocol = await AacTherapyProtocol.findById(req.params.id);
     if (!protocol) return res.status(404).json({ success: false, error: 'البروتوكول غير موجود' });
-    await TherapyProtocol.findByIdAndUpdate(req.params.id, { $inc: { usage_count: 1 } });
+    await AacTherapyProtocol.findByIdAndUpdate(req.params.id, { $inc: { usage_count: 1 } });
     res.json({ success: true, data: protocol });
   } catch (err) {
     safeError(res, err, 'aac-therapy-protocols');
@@ -716,7 +717,7 @@ router.get('/protocols/:id', async (req, res) => {
 
 router.post('/protocols', async (req, res) => {
   try {
-    const protocol = new TherapyProtocol(req.body);
+    const protocol = new AacTherapyProtocol(req.body);
     await protocol.save();
     res.status(201).json({ success: true, message: 'تم إنشاء البروتوكول', data: protocol });
   } catch (err) {
@@ -729,11 +730,11 @@ router.post('/protocols/:id/rate', async (req, res) => {
     const { rating } = req.body;
     if (!rating || rating < 1 || rating > 5)
       return res.status(400).json({ success: false, error: 'التقييم يجب أن يكون بين 1 و 5' });
-    const protocol = await TherapyProtocol.findById(req.params.id);
+    const protocol = await AacTherapyProtocol.findById(req.params.id);
     if (!protocol) return res.status(404).json({ success: false, error: 'البروتوكول غير موجود' });
     const newRating =
       (protocol.rating * protocol.ratings_count + rating) / (protocol.ratings_count + 1);
-    await TherapyProtocol.findByIdAndUpdate(req.params.id, {
+    await AacTherapyProtocol.findByIdAndUpdate(req.params.id, {
       rating: Math.round(newRating * 10) / 10,
       $inc: { ratings_count: 1 },
     });
@@ -758,7 +759,7 @@ router.get('/protocols/search/:beneficiaryId', async (req, res) => {
       }
     }
 
-    const protocols = await TherapyProtocol.find(filter)
+    const protocols = await AacTherapyProtocol.find(filter)
       .select('protocol_code protocol_name_ar approach objective_ar evidence_level')
       .sort({ usage_count: -1 })
       .limit(10);

@@ -70,8 +70,10 @@ const TherapyProtocolSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const TherapyProtocol =
-  mongoose.models.TherapyProtocol || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
+// Pattern D (W835): advanced protocol catalog (distinct from aac-therapy-protocols.js)
+const AdvancedTherapyProtocol =
+  mongoose.models.AdvancedTherapyProtocol ||
+  mongoose.model('AdvancedTherapyProtocol', TherapyProtocolSchema);
 
 // ============================================================
 // 20+ بروتوكول علاجي متقدم
@@ -1054,15 +1056,15 @@ class AdvancedTherapyProtocolsService {
    */
   async seedProtocols() {
     try {
-      const count = await TherapyProtocol.countDocuments();
+      const count = await AdvancedTherapyProtocol.countDocuments();
       if (count > 0)
         return {
           success: true,
           message: `البروتوكولات موجودة مسبقاً (${count})`,
           count,
         };
-      await TherapyProtocol.insertMany(ADVANCED_THERAPY_PROTOCOLS);
-      const total = await TherapyProtocol.countDocuments();
+      await AdvancedTherapyProtocol.insertMany(ADVANCED_THERAPY_PROTOCOLS);
+      const total = await AdvancedTherapyProtocol.countDocuments();
       return {
         success: true,
         message: `تم تهيئة ${total} بروتوكول علاجي`,
@@ -1097,11 +1099,11 @@ class AdvancedTherapyProtocolsService {
 
     const skip = (page - 1) * limit;
     const [protocols, total] = await Promise.all([
-      TherapyProtocol.find(query)
+      AdvancedTherapyProtocol.find(query)
         .skip(skip)
         .limit(parseInt(limit))
         .sort({ category: 1, protocolId: 1 }),
-      TherapyProtocol.countDocuments(query),
+      AdvancedTherapyProtocol.countDocuments(query),
     ]);
 
     return {
@@ -1120,7 +1122,7 @@ class AdvancedTherapyProtocolsService {
    * استرجاع بروتوكول بالمعرف
    */
   async getProtocol(protocolId) {
-    const protocol = await TherapyProtocol.findOne({ protocolId, isActive: true });
+    const protocol = await AdvancedTherapyProtocol.findOne({ protocolId, isActive: true });
     if (!protocol) throw new Error(`البروتوكول ${protocolId} غير موجود`);
     return { success: true, data: protocol };
   }
@@ -1148,7 +1150,9 @@ class AdvancedTherapyProtocolsService {
     const targetCategories = domains.flatMap(d => categoryMap[d] || []);
     if (targetCategories.length > 0) query.category = { $in: [...new Set(targetCategories)] };
 
-    const protocols = await TherapyProtocol.find(query).sort({ evidenceLevel: 1 }).limit(10);
+    const protocols = await AdvancedTherapyProtocol.find(query)
+      .sort({ evidenceLevel: 1 })
+      .limit(10);
     return { success: true, data: protocols, count: protocols.length };
   }
 
@@ -1156,7 +1160,7 @@ class AdvancedTherapyProtocolsService {
    * إحصائيات بنك البروتوكولات
    */
   async getStatistics() {
-    const stats = await TherapyProtocol.aggregate([
+    const stats = await AdvancedTherapyProtocol.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
@@ -1167,8 +1171,8 @@ class AdvancedTherapyProtocolsService {
       },
       { $sort: { count: -1 } },
     ]);
-    const total = await TherapyProtocol.countDocuments({ isActive: true });
-    const level1 = await TherapyProtocol.countDocuments({
+    const total = await AdvancedTherapyProtocol.countDocuments({ isActive: true });
+    const level1 = await AdvancedTherapyProtocol.countDocuments({
       isActive: true,
       evidenceLevel: 'Level_I',
     });
@@ -1187,9 +1191,9 @@ class AdvancedTherapyProtocolsService {
    * إضافة بروتوكول جديد
    */
   async addProtocol(protocolData) {
-    const existing = await TherapyProtocol.findOne({ protocolId: protocolData.protocolId });
+    const existing = await AdvancedTherapyProtocol.findOne({ protocolId: protocolData.protocolId });
     if (existing) throw new Error(`البروتوكول ${protocolData.protocolId} موجود مسبقاً`);
-    const protocol = new TherapyProtocol(protocolData);
+    const protocol = new AdvancedTherapyProtocol(protocolData);
     await protocol.save();
     return { success: true, data: protocol, message: 'تم إضافة البروتوكول بنجاح' };
   }
@@ -1223,5 +1227,5 @@ class AdvancedTherapyProtocolsService {
 
 module.exports = new AdvancedTherapyProtocolsService();
 module.exports.AdvancedTherapyProtocolsService = AdvancedTherapyProtocolsService;
-module.exports.TherapyProtocol = TherapyProtocol;
+module.exports.AdvancedTherapyProtocol = AdvancedTherapyProtocol;
 module.exports.ADVANCED_THERAPY_PROTOCOLS = ADVANCED_THERAPY_PROTOCOLS;

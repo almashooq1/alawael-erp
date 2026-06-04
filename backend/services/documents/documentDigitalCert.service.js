@@ -123,7 +123,7 @@ const signatureRequestSchema = new mongoose.Schema(
           default: 'pending',
         },
         signedAt: Date,
-        signatureId: { type: mongoose.Schema.Types.ObjectId, ref: 'DigitalSignature' },
+        signatureId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentCertSignature' },
         rejectedAt: Date,
         rejectReason: String,
       },
@@ -154,8 +154,10 @@ signatureRequestSchema.index({ documentId: 1, status: 1 });
 const DigitalCertificate =
   mongoose.models.DigitalCertificate ||
   mongoose.model('DigitalCertificate', digitalCertificateSchema);
-const DigitalSignature =
-  mongoose.models.DigitalSignature || mongoose.model('DigitalSignature', digitalSignatureSchema);
+// Pattern D (W835): canonical DocumentCertSignature in documentSignature.service.js
+const DocumentCertSignature =
+  mongoose.models.DocumentCertSignature ||
+  mongoose.model('DocumentCertSignature', digitalSignatureSchema);
 const SignatureRequestV2 =
   mongoose.models.SignatureRequestV2 ||
   mongoose.model('SignatureRequestV2', signatureRequestSchema);
@@ -214,7 +216,7 @@ class DigitalCertificateService {
     await cert.save();
 
     // invalidate all signatures with this cert
-    await DigitalSignature.updateMany({ certificateId: certId }, { status: 'revoked' });
+    await DocumentCertSignature.updateMany({ certificateId: certId }, { status: 'revoked' });
     return cert;
   }
 
@@ -262,7 +264,7 @@ class DigitalCertificateService {
       .update(dataToSign + cert.publicKey)
       .digest('hex');
 
-    const sig = new DigitalSignature({
+    const sig = new DocumentCertSignature({
       documentId,
       certificateId: certId,
       signerId: userId,
@@ -296,7 +298,7 @@ class DigitalCertificateService {
   }
 
   async verifySignature(signatureId) {
-    const sig = await DigitalSignature.findById(signatureId).populate('certificateId');
+    const sig = await DocumentCertSignature.findById(signatureId).populate('certificateId');
     if (!sig) throw new Error('التوقيع غير موجود');
 
     const cert = sig.certificateId;
@@ -331,7 +333,7 @@ class DigitalCertificateService {
   }
 
   async getDocumentSignatures(documentId) {
-    return DigitalSignature.find({ documentId })
+    return DocumentCertSignature.find({ documentId })
       .populate('signerId', 'name email')
       .populate('certificateId', 'serialNumber subject status')
       .sort('-createdAt')
@@ -339,7 +341,7 @@ class DigitalCertificateService {
   }
 
   async verifyAllSignatures(documentId) {
-    const sigs = await DigitalSignature.find({ documentId });
+    const sigs = await DocumentCertSignature.find({ documentId });
     const results = [];
     for (const s of sigs) {
       try {
@@ -415,11 +417,11 @@ class DigitalCertificateService {
   async getStats(userId) {
     const [certs, sigs, requests, activeCerts] = await Promise.all([
       DigitalCertificate.countDocuments(userId ? { userId } : {}),
-      DigitalSignature.countDocuments(userId ? { signerId: userId } : {}),
+      DocumentCertSignature.countDocuments(userId ? { signerId: userId } : {}),
       SignatureRequestV2.countDocuments(),
       DigitalCertificate.countDocuments({ status: 'active', ...(userId ? { userId } : {}) }),
     ]);
-    const validSigs = await DigitalSignature.countDocuments({ status: 'valid' });
+    const validSigs = await DocumentCertSignature.countDocuments({ status: 'valid' });
     return {
       totalCertificates: certs,
       activeCertificates: activeCerts,

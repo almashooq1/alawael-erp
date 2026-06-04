@@ -87,8 +87,10 @@ const importExportJobSchema = new mongoose.Schema(
 importExportJobSchema.index({ type: 1, status: 1 });
 importExportJobSchema.index({ createdBy: 1, createdAt: -1 });
 
-const ImportExportJob =
-  mongoose.models.ImportExportJob || mongoose.model('ImportExportJob', importExportJobSchema);
+// Pattern D (W835): canonical DocumentImportExportJob at models/DocumentImportExportJob.js
+const DocumentImportExportJob =
+  mongoose.models.DocumentImportExportJob ||
+  mongoose.model('DocumentImportExportJob', importExportJobSchema);
 
 /* ─── Field Mapping Template Model ───────────────────────────── */
 const fieldMappingSchema = new mongoose.Schema(
@@ -197,7 +199,7 @@ class DocumentImportExportService {
       userId,
     } = options;
 
-    const job = new ImportExportJob({
+    const job = new DocumentImportExportJob({
       type: 'export',
       format,
       status: 'processing',
@@ -361,7 +363,7 @@ class DocumentImportExportService {
     const { data, format = 'json', mappingId, overwriteExisting = false, userId } = options;
     await this.init();
 
-    const job = new ImportExportJob({
+    const job = new DocumentImportExportJob({
       type: 'import',
       format,
       status: 'processing',
@@ -531,25 +533,25 @@ class DocumentImportExportService {
     if (userId) filter.createdBy = userId;
 
     const [jobs, total] = await Promise.all([
-      ImportExportJob.find(filter)
+      DocumentImportExportJob.find(filter)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
-      ImportExportJob.countDocuments(filter),
+      DocumentImportExportJob.countDocuments(filter),
     ]);
 
     return { success: true, jobs, total, page, limit };
   }
 
   async getJob(jobId) {
-    const job = await ImportExportJob.findById(jobId).lean();
+    const job = await DocumentImportExportJob.findById(jobId).lean();
     if (!job) return { success: false, error: 'المهمة غير موجودة' };
     return { success: true, job };
   }
 
   async cancelJob(jobId) {
-    const job = await ImportExportJob.findOneAndUpdate(
+    const job = await DocumentImportExportJob.findOneAndUpdate(
       { _id: jobId, status: { $in: ['pending', 'processing'] } },
       { $set: { status: 'cancelled' } },
       { returnDocument: 'after' }
@@ -596,10 +598,10 @@ class DocumentImportExportService {
   /* ─── Stats ───────────────────────────────────────────────── */
   async getStats() {
     const [totalJobs, byType, byStatus, byFormat] = await Promise.all([
-      ImportExportJob.countDocuments(),
-      ImportExportJob.aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]),
-      ImportExportJob.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      ImportExportJob.aggregate([{ $group: { _id: '$format', count: { $sum: 1 } } }]),
+      DocumentImportExportJob.countDocuments(),
+      DocumentImportExportJob.aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]),
+      DocumentImportExportJob.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      DocumentImportExportJob.aggregate([{ $group: { _id: '$format', count: { $sum: 1 } } }]),
     ]);
 
     return {

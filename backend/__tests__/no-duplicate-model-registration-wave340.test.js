@@ -263,18 +263,15 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //     likely warrants its own ADR (workflow domain owns multiple engines).
   //     Keeping in baseline = visible tech debt; CI fails on any NEW duplicate.
   // ──────────────────────────────────────────────────────────────────────────
-  'FormSubmission',
-  'FormTemplate',
-  'GoalBank',
-  'ImportExportJob',
+  // W835 ratchet-down: GoalBank, ImportExportJob, FormTemplate, FormSubmission,
+  // TherapyProtocol, DigitalSignature (documentDigitalCert) — Pattern D renames
+  // in service/rehab files; canonical models remain at models/*.js.
   'MDTMeeting',
   'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary) — see ADR-020 for canonical-consolidation decision (deferred pending stakeholder)
   'NotificationPreferences',
   // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
   // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
   'DataSubjectRequest',
-  'TherapyProtocol',
-  'DigitalSignature',
   'WorkflowInstance',
   'WorkflowDefinition',
 

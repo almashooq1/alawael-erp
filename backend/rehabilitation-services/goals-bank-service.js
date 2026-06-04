@@ -65,7 +65,9 @@ const GoalSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Goal = mongoose.models.GoalBank || mongoose.model('GoalBank', GoalSchema);
+// Pattern D (W835): canonical GoalBank at models/GoalBank.js
+const RehabGoalBankEntry =
+  mongoose.models.RehabGoalBankEntry || mongoose.model('RehabGoalBankEntry', GoalSchema);
 
 // ============================================================
 // بنك الأهداف - 200+ هدف مصنف
@@ -1462,8 +1464,11 @@ class GoalsBankService {
 
       const skip = (page - 1) * limit;
       const [goals, total] = await Promise.all([
-        Goal.find(query).skip(skip).limit(parseInt(limit)).sort({ domain: 1, goalId: 1 }),
-        Goal.countDocuments(query),
+        RehabGoalBankEntry.find(query)
+          .skip(skip)
+          .limit(parseInt(limit))
+          .sort({ domain: 1, goalId: 1 }),
+        RehabGoalBankEntry.countDocuments(query),
       ]);
 
       return {
@@ -1485,7 +1490,7 @@ class GoalsBankService {
    * الحصول على هدف بالمعرف
    */
   async getGoalById(goalId) {
-    const goal = await Goal.findOne({ goalId, isActive: true });
+    const goal = await RehabGoalBankEntry.findOne({ goalId, isActive: true });
     if (!goal) throw new Error(`الهدف ${goalId} غير موجود`);
     return { success: true, data: goal };
   }
@@ -1503,7 +1508,7 @@ class GoalsBankService {
       const existingGoalIds = currentIEP.map(g => g.goalId);
       if (existingGoalIds.length > 0) query.goalId = { $nin: existingGoalIds };
 
-      const goals = await Goal.find(query).limit(30).sort({ level: 1 });
+      const goals = await RehabGoalBankEntry.find(query).limit(30).sort({ level: 1 });
       return { success: true, data: goals, count: goals.length };
     } catch (error) {
       throw new Error(`خطأ في اقتراح الأهداف: ${error.message}`);
@@ -1514,9 +1519,9 @@ class GoalsBankService {
    * إضافة هدف جديد لبنك الأهداف
    */
   async addGoal(goalData) {
-    const existing = await Goal.findOne({ goalId: goalData.goalId });
+    const existing = await RehabGoalBankEntry.findOne({ goalId: goalData.goalId });
     if (existing) throw new Error(`الهدف بالمعرف ${goalData.goalId} موجود مسبقاً`);
-    const newGoal = new Goal(goalData);
+    const newGoal = new RehabGoalBankEntry(goalData);
     await newGoal.save();
     return { success: true, data: newGoal, message: 'تم إضافة الهدف بنجاح' };
   }
@@ -1525,7 +1530,7 @@ class GoalsBankService {
    * تحديث هدف موجود
    */
   async updateGoal(goalId, updates) {
-    const goal = await Goal.findOneAndUpdate({ goalId }, updates, {
+    const goal = await RehabGoalBankEntry.findOneAndUpdate({ goalId }, updates, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -1537,7 +1542,7 @@ class GoalsBankService {
    * إحصائيات بنك الأهداف
    */
   async getStatistics() {
-    const stats = await Goal.aggregate([
+    const stats = await RehabGoalBankEntry.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
@@ -1549,7 +1554,7 @@ class GoalsBankService {
       },
       { $sort: { count: -1 } },
     ]);
-    const total = await Goal.countDocuments({ isActive: true });
+    const total = await RehabGoalBankEntry.countDocuments({ isActive: true });
     return {
       success: true,
       data: {
@@ -1565,7 +1570,7 @@ class GoalsBankService {
    */
   async seedGoalsBank() {
     try {
-      const existingCount = await Goal.countDocuments();
+      const existingCount = await RehabGoalBankEntry.countDocuments();
       if (existingCount > 0) {
         return {
           success: true,
@@ -1573,8 +1578,8 @@ class GoalsBankService {
           count: existingCount,
         };
       }
-      await Goal.insertMany(GOALS_BANK);
-      const count = await Goal.countDocuments();
+      await RehabGoalBankEntry.insertMany(GOALS_BANK);
+      const count = await RehabGoalBankEntry.countDocuments();
       return { success: true, message: `تم تهيئة بنك الأهداف بـ ${count} هدف`, count };
     } catch (error) {
       throw new Error(`خطأ في تهيئة بنك الأهداف: ${error.message}`);
@@ -1625,5 +1630,5 @@ class GoalsBankService {
 
 module.exports = new GoalsBankService();
 module.exports.GoalsBankService = GoalsBankService;
-module.exports.Goal = Goal;
+module.exports.RehabGoalBankEntry = RehabGoalBankEntry;
 module.exports.GOALS_BANK = GOALS_BANK;

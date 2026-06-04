@@ -376,6 +376,10 @@ jest.mock('../middleware/auth', () => ({
   - `ZktecoDevice` model renamed → `ZktecoLegacyDevice`, collection pinned `zktecodevices` (no data move).
   - `AttendanceLog.deviceId` ref + migration-script comment updated.
   - `KNOWN_CASE_VARIANTS` baseline now **EMPTY**. Both W340 baselines (duplicate + case-variant) cleared.
+- ~~W853 Phase B routes behavioral coverage (voice-log)~~ — **done (pending push)**:
+  - `voice-log-routes-behavioral-wave853.test.js` (11 tests): real Express + branchScope + MongoMemoryServer, auth mocked only.
+  - Covers create/enum-400/anti-substitution invariant, cross-branch 403 + list isolation, CRPD directPct, action→supersede→409 state machine, DELETE role gating (therapist 403 / admin 200).
+  - Next Phase-B behavioral targets: `decision-rights-routes` (W515), `self-advocacy-routes` (W518).
 - ~~W851 ADR-032 case variants (4 of 5)~~ — **done** (`9bbdcbeba`, pushed `main`):
   - `DashboardKPIDefinition`, `OrganizationAIPrediction`, `LegacyELearningCourseShell`, `HrUnifiedPolicy` + `HrModulePolicy`.
   - Case-variant baseline: only `zktecodevice` remains.

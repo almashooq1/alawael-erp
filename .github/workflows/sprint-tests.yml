@@ -1061,6 +1061,8 @@ on:
       - 'backend/__tests__/capa-implemented-mutations-behavioral-wave846.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/capa-reject-inprogress-behavioral-wave848.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/voice-log-routes-behavioral-wave853.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2105,6 +2107,8 @@ on:
       - 'backend/__tests__/capa-implemented-mutations-behavioral-wave846.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/capa-reject-inprogress-behavioral-wave848.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/voice-log-routes-behavioral-wave853.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

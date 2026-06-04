@@ -373,10 +373,10 @@ const RFQSchema = new Schema(
         estimatedUnitPrice: Number,
       },
     ],
-    invitedVendors: [{ type: Schema.Types.ObjectId, ref: 'Vendor' }],
+    invitedVendors: [{ type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusVendor' }],
     submissions: [
       {
-        vendor: { type: Schema.Types.ObjectId, ref: 'Vendor' },
+        vendor: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusVendor' },
         totalPrice: Number,
         deliveryDays: Number,
         notes: String,
@@ -392,7 +392,7 @@ const RFQSchema = new Schema(
     },
     publishDate: Date,
     deadline: Date,
-    awardedTo: { type: Schema.Types.ObjectId, ref: 'Vendor' },
+    awardedTo: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusVendor' },
     budget: Number,
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
@@ -403,7 +403,7 @@ RFQSchema.index({ status: 1, deadline: 1 });
 
 const VendorEvaluationSchema = new Schema(
   {
-    vendor: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true },
+    vendor: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusVendor', required: true },
     period: { start: Date, end: Date },
     evaluator: { type: Schema.Types.ObjectId, ref: 'User' },
     scores: {
@@ -546,7 +546,7 @@ const ITAssetSchema = new Schema(
     department: String,
     location: String,
     purchaseInfo: {
-      vendor: { type: Schema.Types.ObjectId, ref: 'Vendor' },
+      vendor: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusVendor' },
       purchaseDate: Date,
       purchasePrice: Number,
       warrantyExpiry: Date,
@@ -1007,15 +1007,21 @@ const LeaseContract = getOrCreate('LeaseContract', LeaseContractSchema);
 const UtilityReading = getOrCreate('UtilityReading', UtilityReadingSchema);
 
 // Module 3 — Vendor Management
-const Vendor = getOrCreate('Vendor', VendorSchema);
+const EnterpriseProPlusVendor = getOrCreate('EnterpriseProPlusVendor', VendorSchema);
 const RFQ = getOrCreate('RFQ', RFQSchema);
-const VendorEvaluation = getOrCreate('VendorEvaluation', VendorEvaluationSchema);
+const EnterpriseProPlusVendorEvaluation = getOrCreate(
+  'EnterpriseProPlusVendorEvaluation',
+  VendorEvaluationSchema
+);
 
 // Module 4 — ITSM
 const ITIncident = getOrCreate('ITIncident', ITIncidentSchema);
 const ITAsset = getOrCreate('ITAsset', ITAssetSchema);
 const ServiceCatalogItem = getOrCreate('ServiceCatalogItem', ServiceCatalogItemSchema);
-const ChangeRequest = getOrCreate('ChangeRequest', ChangeRequestSchema);
+const EnterpriseProPlusChangeRequest = getOrCreate(
+  'EnterpriseProPlusChangeRequest',
+  ChangeRequestSchema
+);
 
 // Module 5 — EHS Safety
 const SafetyIncident = getOrCreate('SafetyIncident', SafetyIncidentSchema);
@@ -1025,7 +1031,10 @@ const PPERecord = getOrCreate('PPERecord', PPERecordSchema);
 
 // Module 6 — Strategic Planning
 const StrategicObjective = getOrCreate('StrategicObjective', StrategicObjectiveSchema);
-const StrategicInitiative = getOrCreate('StrategicInitiative', StrategicInitiativeSchema);
+const EnterpriseProPlusStrategicInitiative = getOrCreate(
+  'EnterpriseProPlusStrategicInitiative',
+  StrategicInitiativeSchema
+);
 const SWOTAnalysis = getOrCreate('SWOTAnalysis', SWOTAnalysisSchema);
 
 module.exports = {
@@ -1040,14 +1049,14 @@ module.exports = {
   LeaseContract,
   UtilityReading,
   // Vendor Management
-  Vendor,
+  Vendor: EnterpriseProPlusVendor,
   RFQ,
-  VendorEvaluation,
+  VendorEvaluation: EnterpriseProPlusVendorEvaluation,
   // ITSM
   ITIncident,
   ITAsset,
   ServiceCatalogItem,
-  ChangeRequest,
+  ChangeRequest: EnterpriseProPlusChangeRequest,
   // EHS Safety
   SafetyIncident,
   SafetyInspection,
@@ -1055,7 +1064,7 @@ module.exports = {
   PPERecord,
   // Strategic Planning
   StrategicObjective,
-  StrategicInitiative,
+  StrategicInitiative: EnterpriseProPlusStrategicInitiative,
   SWOTAnalysis,
 };
 

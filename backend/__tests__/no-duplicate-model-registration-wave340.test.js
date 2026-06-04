@@ -247,10 +247,13 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // canonical remains models/JobApplication.js.
   // 'Facility' — W845 ratchet-down: EnterpriseProPlusFacility (EnterpriseProPlus);
   // canonical remains models/operations/Facility.model.js.
-  'Vendor',
-  'VendorEvaluation',
-  'ChangeRequest',
-  'StrategicInitiative',
+  // 'Vendor' — W846 ratchet-down: EnterpriseProPlusVendor; canonical models/Vendor.js.
+  // 'VendorEvaluation' — W846 ratchet-down: EnterpriseProPlusVendorEvaluation;
+  // canonical models/VendorEvaluation.js.
+  // 'ChangeRequest' — W846 ratchet-down: EnterpriseProPlusChangeRequest;
+  // canonical models/quality/ChangeRequest.model.js.
+  // 'StrategicInitiative' — W846 ratchet-down: EnterpriseProPlusStrategicInitiative;
+  // canonical models/StrategicInitiative.js.
   //
   // ─── UMBRELLA: 2026-05-27 audit — all entries below to 'WorkflowDefinition'
   //     belong to the SAME divergent-schema cluster as the documents-pro block

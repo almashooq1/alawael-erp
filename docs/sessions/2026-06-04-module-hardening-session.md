@@ -388,7 +388,15 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W865 restraint-seclusion route behavioral~~ — **done (pending push)**: 18 supertest tests — highest-stakes
+- ~~W866 complaints cross-branch IDOR fix + behavioral~~ — **done (pending push)**: **security fix** —
+  `complaints.routes.js` instance endpoints (GET/PUT/respond/escalate/resolve/rate/DELETE `/:id`) used bare
+  `findById`/`findByIdAndUpdate` with NO branch filter (IDOR: restricted branch-A user could read/modify/resolve/
+  delete a branch-B complaint's PII + grievance content by ObjectId guess). Added `branchFilter(req)` to all 7
+  instance lookups (same W269/W447 pattern). + `complaints-routes-behavioral-wave866.test.js` (12 tests): create
+  branch-stamping, cross-branch 404 regression guard on every instance path, lifecycle (respond/escalate/resolve/
+  rate), write-role gating. Note: DELETE is admin-only (cross-branch by design) so its branch check is a no-op for
+  admins — documented in the test.
+- ~~W865 restraint-seclusion route behavioral~~ — **done** (`84d714323`, pushed `main`): 18 supertest tests — highest-stakes
   physical-intervention ledger. start→end→notify-parent→complete→review state machine with completion gates
   (endTime + parent notification + debrief notes all required), type-specific intake (chemical→medication,
   seclusion→location), review immutability + role gating (therapist review 403), foreign-branchId-in-body

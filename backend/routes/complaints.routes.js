@@ -136,7 +136,10 @@ router.get('/stats', async (req, res) => {
 // GET /:id — Get complaint details
 router.get('/:id', validateObjectId('id'), async (req, res) => {
   try {
-    const doc = await Complaint.findById(req.params.id)
+    // W866 — branch-scope the instance read. Pre-W866 a bare findById let a
+    // restricted user in branch A read any branch's complaint (PII + grievance
+    // content) by guessing the ObjectId — same IDOR class W269/W447 closed.
+    const doc = await Complaint.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('submittedBy', 'name email')
       .populate('assignedTo', 'name email')
       .populate('responses.respondedBy', 'name')
@@ -198,10 +201,12 @@ router.put(
       if (updates.status === 'resolved' && !updates.resolvedAt) {
         updates.resolvedAt = new Date();
       }
-      const doc = await Complaint.findByIdAndUpdate(req.params.id, updates, {
-        returnDocument: 'after',
-        runValidators: true,
-      });
+      // W866 — branch-scoped update (cross-tenant IDOR defense).
+      const doc = await Complaint.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        updates,
+        { returnDocument: 'after', runValidators: true }
+      );
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم تحديث الشكوى بنجاح' });
     } catch (err) {
@@ -220,7 +225,8 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = await Complaint.findById(req.params.id);
+      // W866 — branch-scoped lookup (cross-tenant IDOR defense).
+      const doc = await Complaint.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
 
       doc.responses.push({
@@ -246,8 +252,9 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = await Complaint.findByIdAndUpdate(
-        req.params.id,
+      // W866 — branch-scoped update (cross-tenant IDOR defense).
+      const doc = await Complaint.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         {
           priority: 'critical',
           status: 'escalated',
@@ -273,8 +280,9 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = await Complaint.findByIdAndUpdate(
-        req.params.id,
+      // W866 — branch-scoped update (cross-tenant IDOR defense).
+      const doc = await Complaint.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         {
           status: 'resolved',
           resolution: req.body.resolution,
@@ -299,8 +307,9 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = await Complaint.findByIdAndUpdate(
-        req.params.id,
+      // W866 — branch-scoped update (cross-tenant IDOR defense).
+      const doc = await Complaint.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         { rating: req.body.rating },
         { returnDocument: 'after' }
       );
@@ -319,7 +328,8 @@ router.delete(
   validateObjectId('id'),
   async (req, res) => {
     try {
-      const doc = await Complaint.findByIdAndDelete(req.params.id);
+      // W866 — branch-scoped delete (cross-tenant IDOR defense).
+      const doc = await Complaint.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
     } catch (err) {

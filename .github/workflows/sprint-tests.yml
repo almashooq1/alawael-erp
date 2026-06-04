@@ -1084,6 +1084,8 @@ on:
       - 'backend/__tests__/cbahi-routes-behavioral-wave864.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/restraint-seclusion-routes-behavioral-wave865.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-routes-behavioral-wave866.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2151,6 +2153,8 @@ on:
       - 'backend/__tests__/cbahi-routes-behavioral-wave864.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/restraint-seclusion-routes-behavioral-wave865.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-routes-behavioral-wave866.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

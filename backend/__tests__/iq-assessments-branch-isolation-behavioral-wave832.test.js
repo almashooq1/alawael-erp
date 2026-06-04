@@ -78,10 +78,13 @@ beforeAll(async () => {
 
   require('../config/mongoose.plugins');
   require('../models/Beneficiary');
-  // The route populates episodeId (ref 'Episode'); register a minimal stub so
+  // The route populates episodeId (ref 'EpisodeOfCare'); register a minimal stub so
   // populate() doesn't throw MissingSchemaError.
-  if (!mongoose.models.Episode) {
-    mongoose.model('Episode', new mongoose.Schema({ phase_nr: Number }));
+  if (!mongoose.models.EpisodeOfCare) {
+    mongoose.model(
+      'EpisodeOfCare',
+      new mongoose.Schema({ phase_nr: Number, currentPhase: String })
+    );
   }
   IQAssessment = require('../models/IQAssessment');
 

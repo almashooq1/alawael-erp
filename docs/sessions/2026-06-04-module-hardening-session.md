@@ -353,3 +353,7 @@ jest.mock('../middleware/auth', () => ({
 - ~~ApprovalRequest W340 Tier 1 Pattern D (legacy + document chains)~~ — **done W839** (`LegacyHrApprovalRequest`, `DocumentChainApprovalRequest`; canonical stays in `authorization/approvals/`).
 - ~~ReportTemplate W340 Tier 1 Pattern D~~ — **done W840** (`DocumentReportTemplate`, `EnterpriseProReportTemplate`; canonical stays in `models/reports/ReportTemplate.js`).
 - ~~CAPA OPEN→IN_PROGRESS→IMPLEMENTED chain~~ — **done W840** (`capa-lifecycle-behavioral-wave840`).
+- ~~CAPA IMPLEMENTED→VERIFIED→CLOSED + MFA tier 2 gate~~ — **done W841** (`capa-close-behavioral-wave841`).
+- ~~IQAssessment phantom ref Episode~~ — **done W841** (`ref: 'EpisodeOfCare'` per W325c).
+- Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.
+- Remaining W340 Tier 2: `Correspondence`, `EmailTemplate`, …

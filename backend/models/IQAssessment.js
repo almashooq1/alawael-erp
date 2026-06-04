@@ -30,7 +30,7 @@ const iqAssessmentSchema = new mongoose.Schema(
     },
     episodeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Episode',
+      ref: 'EpisodeOfCare',
       required: true,
     },
     branchId: {

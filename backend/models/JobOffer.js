@@ -55,7 +55,6 @@ const jobOfferSchema = new mongoose.Schema(
 jobOfferSchema.index({ branchId: 1, status: 1 });
 jobOfferSchema.index({ offerDate: 1 });
 jobOfferSchema.index({ offerExpiry: 1 });
-jobOfferSchema.index({ applicationId: 1 });
 jobOfferSchema.index({ deletedAt: 1 });
 
 jobOfferSchema.pre(/^find/, function () {

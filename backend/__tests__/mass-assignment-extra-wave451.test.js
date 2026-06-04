@@ -54,6 +54,22 @@ describe('W451 — mass-assignment cleanup (extension of W450)', () => {
       );
     });
 
+    test('status transitions + DELETE use findOneAndUpdate/Delete with branchFilter', () => {
+      expect(src).toMatch(
+        /WaitingListEntry\.findOneAndUpdate\(\s*\{\s*_id:\s*id,\s*\.\.\.branchFilter\(req\)\s*\}/
+      );
+      expect(src).toMatch(/WaitingListEntry\.findOneAndDelete\([\s\S]*branchFilter\(req\)/);
+      expect(src).not.toMatch(/WaitingListEntry\.findByIdAndDelete\(/);
+    });
+
+    test('list/overview/prioritized queries merge branchFilter(req)', () => {
+      expect(src).toMatch(/buildFilter\(req\.query,\s*req\)/);
+      expect(src).toMatch(/WaitingListEntry\.find\(branchFilter\(req\)\)/);
+      expect(src).toMatch(
+        /WaitingListEntry\.find\(\{\s*status:\s*'waiting',\s*\.\.\.branchFilter\(req\)\s*\}\)/
+      );
+    });
+
     test('module loads without throwing', () => {
       expect(() => require('../routes/waitlist-admin.routes')).not.toThrow();
     });

@@ -43,7 +43,12 @@ function historyFixture() {
         {
           operation: 'notify-family',
           status: 'ok',
-          metadata: { name: 'notify-family', category: 'notification', deferred: true, emitted: true },
+          metadata: {
+            name: 'notify-family',
+            category: 'notification',
+            deferred: true,
+            emitted: true,
+          },
         },
       ],
     },
@@ -101,14 +106,25 @@ function makeGovernance(allow = true) {
   return { hasPermission: jest.fn(() => allow) };
 }
 
-function makeApp({ service, governance, userId = 'U-1', role = 'branch_manager', branchScope } = {}) {
+function makeApp({
+  service,
+  governance,
+  userId = 'U-1',
+  role = 'branch_manager',
+  userBranchId,
+} = {}) {
   const svc = service || makeService();
   const gov = governance || makeGovernance();
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
-    if (userId) req.user = { id: userId, role };
-    if (branchScope) req.branchScope = branchScope;
+    // Drive branch scope through req.user (the real production path): the
+    // router mounts requireBranchAccess (W833), which RECOMPUTES
+    // req.branchScope from req.user on every request — so injecting
+    // req.branchScope directly here would be overwritten. A restricted
+    // role (branch_manager) + branchId yields { restricted, branchId }.
+    if (userId)
+      req.user = { id: userId, role, ...(userBranchId ? { branchId: userBranchId } : {}) };
     next();
   });
   app.use(
@@ -156,9 +172,7 @@ describe('W601 GET /side-effects-summary (branch-level)', () => {
   });
 
   test('200 restricted caller only aggregates their own branch', async () => {
-    const { app } = makeApp({
-      branchScope: { restricted: true, branchId: 'branch-a' },
-    });
+    const { app } = makeApp({ userBranchId: 'branch-a' });
     const r = await request(app).get(PATH);
     expect(r.status).toBe(200);
     const d = r.body.data;
@@ -174,15 +188,14 @@ describe('W601 GET /side-effects-summary (branch-level)', () => {
     expect(s.dataMutations.releasedFromEpisodes).toBe(1);
   });
 
-  test('200 restricted caller ignores ?branchId= spoof and uses own branch', async () => {
-    const { app } = makeApp({
-      branchScope: { restricted: true, branchId: 'branch-a' },
-    });
+  test('403 restricted caller naming a foreign ?branchId= is rejected', async () => {
+    // W833: with requireBranchAccess mounted, a restricted caller (branch-a)
+    // that explicitly names a foreign branch in the query is hard-rejected at
+    // the middleware (the W269 "explicit foreign branchId" contract) — even
+    // stronger than the endpoint's own effectiveBranchScope spoof-ignore.
+    const { app } = makeApp({ userBranchId: 'branch-a' });
     const r = await request(app).get(`${PATH}?branchId=branch-b`);
-    expect(r.status).toBe(200);
-    const d = r.body.data;
-    expect(d.branchId).toBe('branch-a'); // spoof ignored
-    expect(d.transitionsConsidered).toBe(2);
+    expect(r.status).toBe(403);
   });
 
   test('200 unrestricted caller may scope via ?branchId=', async () => {

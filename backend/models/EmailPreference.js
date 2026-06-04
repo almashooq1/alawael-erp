@@ -143,7 +143,6 @@ const emailPreferenceSchema = new mongoose.Schema(
 
 // ─── Indexes ───────────────────────────────────────────────────────────
 emailPreferenceSchema.index({ email: 1 });
-emailPreferenceSchema.index({ unsubscribeToken: 1 });
 emailPreferenceSchema.index({ 'deliveryHealth.suppressed': 1 });
 
 // ─── Pre-save: Generate unsubscribe token ──────────────────────────────

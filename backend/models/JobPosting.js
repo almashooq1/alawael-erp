@@ -72,7 +72,6 @@ const jobPostingSchema = new mongoose.Schema(
 jobPostingSchema.index({ branchId: 1, status: 1 });
 jobPostingSchema.index({ employmentType: 1 });
 jobPostingSchema.index({ applicationDeadline: 1 });
-jobPostingSchema.index({ jobCode: 1 });
 jobPostingSchema.index({ deletedAt: 1 });
 
 jobPostingSchema.pre(/^find/, function () {

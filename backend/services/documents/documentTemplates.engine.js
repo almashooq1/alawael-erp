@@ -118,7 +118,6 @@ const DocumentTemplateSchema = new mongoose.Schema(
 );
 
 DocumentTemplateSchema.index({ category: 1, isActive: 1 });
-DocumentTemplateSchema.index({ slug: 1 });
 DocumentTemplateSchema.index({ tags: 1 });
 DocumentTemplateSchema.index({ name: 'text', description: 'text' });
 

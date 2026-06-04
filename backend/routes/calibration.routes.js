@@ -3,7 +3,7 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // W277g — MFA tier-2 on calibration lifecycle. Status changes
 // (in_service / out_of_service / retired) drive the JCI/Saudi-MOH
 // asset register. Sweep-overdue is a bulk batch op against the
@@ -25,6 +25,12 @@ function mapStatusError(err, res) {
   if (err.code === 'VALIDATION')
     return res.status(422).json({ success: false, error: err.message });
   return safeError(res, err);
+}
+
+function listScope(req) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query.branchId) scope.branchId = req.query.branchId;
+  return scope;
 }
 
 router.get(
@@ -50,7 +56,7 @@ router.get(
   requireBranchAccess,
   wrap(async (req, res) => {
     try {
-      const data = await getService().getDashboard({ branchId: req.query.branchId });
+      const data = await getService().getDashboard({ scopeFilter: listScope(req) });
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -65,7 +71,7 @@ router.get(
   wrap(async (req, res) => {
     try {
       const items = await getService().list({
-        branchId: req.query.branchId,
+        scopeFilter: listScope(req),
         status: req.query.status,
         type: req.query.type,
         dueWithinDays:
@@ -83,11 +89,12 @@ router.get(
 router.get(
   '/:id',
   authenticate,
+  requireBranchAccess,
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().findById(req.params.id);
+      const doc = await getService().findById(req.params.id, branchFilter(req));
       if (!doc) return res.status(404).json({ success: false, error: 'Not found' });
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -99,13 +106,16 @@ router.get(
 router.post(
   '/',
   authenticate,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'quality_manager', 'facility_manager']),
   [body('name').isString().isLength({ min: 2 }), body('type').isString()],
   handleValidation,
   wrap(async (req, res) => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const doc = await getService().registerAsset(req.body, userId);
+      const payload = { ...req.body };
+      if (req.branchScope?.branchId) payload.branchId = req.branchScope.branchId;
+      const doc = await getService().registerAsset(payload, userId);
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -116,13 +126,19 @@ router.post(
 router.post(
   '/:id/calibrations',
   authenticate,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'quality_manager', 'facility_manager']),
   [param('id').isMongoId(), body('outcome').isIn(['pass', 'pass_with_adjustment', 'fail'])],
   handleValidation,
   wrap(async (req, res) => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const doc = await getService().recordCalibration(req.params.id, req.body, userId);
+      const doc = await getService().recordCalibration(
+        req.params.id,
+        req.body,
+        userId,
+        branchFilter(req)
+      );
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -133,6 +149,7 @@ router.post(
 router.post(
   '/:id/status',
   authenticate,
+  requireBranchAccess,
   attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'facility_manager']),
   requireMfaTier(2),
@@ -145,7 +162,8 @@ router.post(
         req.params.id,
         req.body.status,
         req.body.reason,
-        userId
+        userId,
+        branchFilter(req)
       );
       res.json({ success: true, data: doc });
     } catch (err) {

@@ -42,8 +42,8 @@ class ControlledDocumentService {
     }
   }
 
-  async _load(id) {
-    const doc = await this.model.findOne({ _id: id, deleted_at: null });
+  async _load(id, scopeFilter = {}) {
+    const doc = await this.model.findOne({ _id: id, deleted_at: null, ...scopeFilter });
     if (!doc) {
       const err = new Error('Document not found');
       err.code = 'NOT_FOUND';
@@ -94,8 +94,8 @@ class ControlledDocumentService {
 
   // ── draft a new version ──────────────────────────────────────────
 
-  async draftNewVersion(id, payload, userId) {
-    const doc = await this._load(id);
+  async draftNewVersion(id, payload, userId, scopeFilter = {}) {
+    const doc = await this._load(id, scopeFilter);
 
     const nextVersionNumber = doc.versions.length
       ? Math.max(...doc.versions.map(v => v.versionNumber)) + 1
@@ -142,8 +142,8 @@ class ControlledDocumentService {
     }
   }
 
-  async transitionVersion(id, versionNumber, to, userId) {
-    const doc = await this._load(id);
+  async transitionVersion(id, versionNumber, to, userId, scopeFilter = {}) {
+    const doc = await this._load(id, scopeFilter);
     const version = doc.versions.find(v => v.versionNumber === versionNumber);
     if (!version) throw Object.assign(new Error('Version not found'), { code: 'NOT_FOUND' });
     this._assertTransition(version.status, to);
@@ -206,7 +206,7 @@ class ControlledDocumentService {
 
   // ── 21 CFR Part 11 e-signature ───────────────────────────────────
 
-  async signVersion(id, versionNumber, payload, signer) {
+  async signVersion(id, versionNumber, payload, signer, scopeFilter = {}) {
     if (!signer || !signer._id) {
       throw Object.assign(new Error('signer is required'), { code: 'VALIDATION' });
     }
@@ -234,7 +234,7 @@ class ControlledDocumentService {
       );
     }
 
-    const doc = await this._load(id);
+    const doc = await this._load(id, scopeFilter);
     const version = doc.versions.find(v => v.versionNumber === versionNumber);
     if (!version) throw Object.assign(new Error('Version not found'), { code: 'NOT_FOUND' });
     if (['superseded', 'retired', 'cancelled'].includes(version.status)) {
@@ -305,9 +305,9 @@ class ControlledDocumentService {
    * Revoke an earlier signature. Per Part 11, the original record is
    * not deleted — instead we leave a forward-pointing revocation.
    */
-  async revokeSignature(id, versionNumber, signatureId, reason, userId) {
+  async revokeSignature(id, versionNumber, signatureId, reason, userId, scopeFilter = {}) {
     if (!reason) throw Object.assign(new Error('reason required'), { code: 'VALIDATION' });
-    const doc = await this._load(id);
+    const doc = await this._load(id, scopeFilter);
     const version = doc.versions.find(v => v.versionNumber === versionNumber);
     if (!version) throw Object.assign(new Error('Version not found'), { code: 'NOT_FOUND' });
     const sig = version.signatures.id(signatureId);
@@ -358,8 +358,8 @@ class ControlledDocumentService {
 
   // ── read acknowledgement ─────────────────────────────────────────
 
-  async acknowledgeRead(id, versionNumber, userId) {
-    const doc = await this._load(id);
+  async acknowledgeRead(id, versionNumber, userId, scopeFilter = {}) {
+    const doc = await this._load(id, scopeFilter);
     const version = doc.versions.find(v => v.versionNumber === versionNumber);
     if (!version) throw Object.assign(new Error('Version not found'), { code: 'NOT_FOUND' });
     if (version.status !== 'effective') {
@@ -426,13 +426,12 @@ class ControlledDocumentService {
 
   // ── queries ──────────────────────────────────────────────────────
 
-  async findById(id) {
-    return this.model.findOne({ _id: id, deleted_at: null });
+  async findById(id, scopeFilter = {}) {
+    return this.model.findOne({ _id: id, deleted_at: null, ...scopeFilter });
   }
 
-  async list({ branchId, type, q, limit = 50, skip = 0 } = {}) {
-    const filter = { deleted_at: null };
-    if (branchId) filter.branchId = branchId;
+  async list({ scopeFilter = {}, type, q, limit = 50, skip = 0 } = {}) {
+    const filter = { deleted_at: null, ...scopeFilter };
     if (type) filter.type = type;
     if (q) {
       filter.$or = [
@@ -447,9 +446,8 @@ class ControlledDocumentService {
       .limit(Math.min(Number(limit) || 50, 200));
   }
 
-  async getDashboard({ branchId } = {}) {
-    const q = { deleted_at: null };
-    if (branchId) q.branchId = branchId;
+  async getDashboard({ scopeFilter = {} } = {}) {
+    const q = { deleted_at: null, ...scopeFilter };
     const all = await this.model.find(q).select('versions').lean();
     let totalDocs = 0;
     let effective = 0;

@@ -23,6 +23,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const NpsResponse = require('../models/NpsResponse');
 const Guardian = require('../models/Guardian');
@@ -31,6 +32,19 @@ const safeError = require('../utils/safeError');
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
+
+function listScope(req, base = {}) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query?.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    scope.branchId = req.query.branchId;
+  }
+  return { ...base, ...scope };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 const READ_ROLES = [
   'admin',
@@ -54,14 +68,11 @@ const WRITE_ROLES = [
 ];
 const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_manager'];
 
-function buildFilter(query) {
-  const filter = {};
+function buildFilter(query, req) {
+  const filter = listScope(req, {});
   if (query.surveyKey) filter.surveyKey = String(query.surveyKey);
   if (query.bucket && ['detractor', 'passive', 'promoter'].includes(query.bucket)) {
     filter.bucket = query.bucket;
-  }
-  if (query.branchId && mongoose.isValidObjectId(query.branchId)) {
-    filter.branchId = query.branchId;
   }
   if (query.from || query.to) {
     filter.submittedAt = {};
@@ -77,7 +88,7 @@ function buildFilter(query) {
 
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -101,7 +112,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
     // Default window: last 90 days unless surveyKey scopes it.
-    const filter = {};
+    const filter = listScope(req, {});
     if (req.query.surveyKey) {
       filter.surveyKey = String(req.query.surveyKey);
     } else {
@@ -126,7 +137,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/trend', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const items = await NpsResponse.find({}).limit(10_000).lean();
+    const items = await NpsResponse.find(listScope(req, {})).limit(10_000).lean();
     const series = nps.trendByPeriod(items, r => new Date(r.submittedAt).toISOString().slice(0, 7));
     res.json({ success: true, series });
   } catch (err) {
@@ -136,7 +147,7 @@ router.get('/trend', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/campaigns', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const items = await NpsResponse.find({}).limit(20_000).lean();
+    const items = await NpsResponse.find(listScope(req, {})).limit(20_000).lean();
     const series = nps.trendByPeriod(items, r => r.surveyKey || 'no-key');
     res.json({ success: true, campaigns: series });
   } catch (err) {
@@ -146,7 +157,7 @@ router.get('/campaigns', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/themes', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const items = await NpsResponse.find(filter).select('comment bucket').limit(5_000).lean();
     const all = items.map(r => r.comment).filter(Boolean);
     const detractor = items
@@ -182,6 +193,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const row = await NpsResponse.create({
       ...req.body,
+      branchId: req.branchScope?.branchId || req.body.branchId || null,
       score: s,
       bucket: nps.bucket(s),
       sourceChannel: req.body.sourceChannel || 'in_person',
@@ -206,7 +218,7 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     }
     delete body.surveyKey;
     delete body.guardianId;
-    const row = await NpsResponse.findByIdAndUpdate(req.params.id, body, {
+    const row = await NpsResponse.findOneAndUpdate(scopedById(req, req.params.id), body, {
       returnDocument: 'after',
     });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -221,7 +233,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await NpsResponse.findByIdAndDelete(req.params.id);
+    const row = await NpsResponse.findOneAndDelete(scopedById(req, req.params.id));
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -231,7 +243,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
 
 router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const EXPORT_LIMIT = 10_000;
     const totalMatching = await NpsResponse.countDocuments(filter);
     const items = await NpsResponse.find(filter)

@@ -26,9 +26,9 @@
 
 const express = require('express');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const router = express.Router();
-router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
@@ -60,6 +60,21 @@ async function findActiveSection(beneficiaryId) {
 }
 
 router.use(authenticateToken);
+// W883 — populate req.branchScope so bodyScopedBeneficiaryGuard + branchFilter work.
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
+
+function listScope(req, base = {}) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query?.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    scope.branchId = req.query.branchId;
+  }
+  return { ...base, ...scope };
+}
 
 const READ_ROLES = [
   'admin',
@@ -97,16 +112,13 @@ function endOfDay(d) {
   return x;
 }
 
-function buildFilter(query) {
-  const filter = {};
+function buildFilter(query, req) {
+  const filter = listScope(req, {});
   if (query.beneficiaryId && mongoose.isValidObjectId(query.beneficiaryId)) {
     filter.beneficiaryId = query.beneficiaryId;
   }
   if (query.classroomId && mongoose.isValidObjectId(query.classroomId)) {
     filter.classroomId = query.classroomId;
-  }
-  if (query.branchId && mongoose.isValidObjectId(query.branchId)) {
-    filter.branchId = query.branchId;
   }
   if (query.status && STATUSES.includes(String(query.status))) {
     filter.status = String(query.status);
@@ -141,7 +153,7 @@ async function hydrateBeneficiaries(items) {
 // ── GET / — paginated list ─────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
     const [rawItems, total] = await Promise.all([
@@ -167,10 +179,10 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const dateParam = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(dateParam), $lte: endOfDay(dateParam) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
-      filter.branchId = req.query.branchId;
-    }
+    const filter = {
+      ...listScope(req, {}),
+      date: { $gte: startOfDay(dateParam), $lte: endOfDay(dateParam) },
+    };
     if (req.query.classroomId && mongoose.isValidObjectId(req.query.classroomId)) {
       filter.classroomId = req.query.classroomId;
     }
@@ -188,10 +200,11 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
 router.get('/summary', requireRole(READ_ROLES), async (req, res) => {
   try {
     const dateParam = req.query.date ? new Date(req.query.date) : new Date();
-    const match = { date: { $gte: startOfDay(dateParam), $lte: endOfDay(dateParam) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
-      match.branchId = new mongoose.Types.ObjectId(req.query.branchId);
-    }
+    const match = {
+      ...listScope(req, {}),
+      date: { $gte: startOfDay(dateParam), $lte: endOfDay(dateParam) },
+    };
+    if (match.branchId) match.branchId = new mongoose.Types.ObjectId(match.branchId);
     const rows = await BeneficiaryDayAttendance.aggregate([
       { $match: match },
       { $group: { _id: '$status', count: { $sum: 1 } } },
@@ -227,7 +240,8 @@ router.post('/check-in', requireRole(MARK_ROLES), async (req, res) => {
       markedAt: now,
     };
     if (classroomId && mongoose.isValidObjectId(classroomId)) update.classroomId = classroomId;
-    if (branchId && mongoose.isValidObjectId(branchId)) update.branchId = branchId;
+    if (req.branchScope?.branchId) update.branchId = req.branchScope.branchId;
+    else if (branchId && mongoose.isValidObjectId(branchId)) update.branchId = branchId;
     if (typeof arrivedByBus === 'boolean') update.arrivedByBus = arrivedByBus;
     if (busRouteId && mongoose.isValidObjectId(busRouteId)) update.busRouteId = busRouteId;
     if (notes) update.notes = String(notes).slice(0, 500);
@@ -304,7 +318,8 @@ router.post('/mark', requireRole(MARK_ROLES), async (req, res) => {
     };
     if (notes) update.notes = String(notes).slice(0, 500);
     if (classroomId && mongoose.isValidObjectId(classroomId)) update.classroomId = classroomId;
-    if (branchId && mongoose.isValidObjectId(branchId)) update.branchId = branchId;
+    if (req.branchScope?.branchId) update.branchId = req.branchScope.branchId;
+    else if (branchId && mongoose.isValidObjectId(branchId)) update.branchId = branchId;
     if (status === 'late') update.checkInTime = new Date();
 
     const row = await BeneficiaryDayAttendance.findOneAndUpdate({ beneficiaryId, date }, update, {
@@ -349,7 +364,8 @@ router.post('/bulk', requireRole(MARK_ROLES), async (req, res) => {
       };
       if (it.classroomId && mongoose.isValidObjectId(it.classroomId))
         update.classroomId = it.classroomId;
-      if (it.branchId && mongoose.isValidObjectId(it.branchId)) update.branchId = it.branchId;
+      if (req.branchScope?.branchId) update.branchId = req.branchScope.branchId;
+      else if (it.branchId && mongoose.isValidObjectId(it.branchId)) update.branchId = it.branchId;
       if (typeof it.arrivedByBus === 'boolean') update.arrivedByBus = it.arrivedByBus;
       if (it.notes) update.notes = String(it.notes).slice(0, 500);
       if (it.status === 'present') update.checkInTime = new Date();
@@ -378,9 +394,13 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     delete body.date;
     if (body.checkInTime) body.checkInTime = new Date(body.checkInTime);
     if (body.checkOutTime) body.checkOutTime = new Date(body.checkOutTime);
-    const row = await BeneficiaryDayAttendance.findByIdAndUpdate(req.params.id, body, {
-      returnDocument: 'after',
-    });
+    const row = await BeneficiaryDayAttendance.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      body,
+      {
+        returnDocument: 'after',
+      }
+    );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -394,7 +414,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await BeneficiaryDayAttendance.findByIdAndDelete(req.params.id);
+    const row = await BeneficiaryDayAttendance.findOneAndDelete(scopedById(req, req.params.id));
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -405,7 +425,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
 // ── GET /export.csv ────────────────────────────────────────────────────
 router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const EXPORT_LIMIT = 10_000;
     const total = await BeneficiaryDayAttendance.countDocuments(filter);
     const items = await BeneficiaryDayAttendance.find(filter)

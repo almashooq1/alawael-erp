@@ -73,7 +73,6 @@ const dailyAttendanceSchema = new Schema(
 // سجل واحد لكل موظف يومياً
 dailyAttendanceSchema.index({ employeeId: 1, workDate: 1 }, { unique: true });
 dailyAttendanceSchema.index({ workDate: 1, status: 1 });
-dailyAttendanceSchema.index({ employeeId: 1, workDate: 1 });
 // REMOVED DUPLICATES: status / isProcessed already have field-level index:true
 
 module.exports =

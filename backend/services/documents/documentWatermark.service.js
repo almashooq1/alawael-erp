@@ -115,7 +115,6 @@ const watermarkLogSchema = new mongoose.Schema(
   { timestamps: true, collection: 'watermark_logs' }
 );
 
-watermarkLogSchema.index({ trackingCode: 1 });
 watermarkLogSchema.index({ documentId: 1, status: 1 });
 
 const WatermarkLog =

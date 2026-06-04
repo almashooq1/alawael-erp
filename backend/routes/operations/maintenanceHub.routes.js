@@ -8,7 +8,7 @@
  */
 
 const express = require('express');
-const { body, query, validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');

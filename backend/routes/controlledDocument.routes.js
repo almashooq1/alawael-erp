@@ -4,7 +4,7 @@ const express = require('express');
 const { body, param, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // W277f — MFA tier-2 step-up on e-signature operations.
 // 21 CFR Part 11 §11.200(a)(1)(i) requires that the act of signing be
 // authenticated by at least two distinct identification components, with
@@ -39,6 +39,13 @@ function mapStatusError(err, res) {
   return safeError(res, err);
 }
 
+/** Merge branchFilter with optional ?branchId for cross-branch roles. */
+function listScope(req) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query.branchId) scope.branchId = req.query.branchId;
+  return scope;
+}
+
 router.get(
   '/reference',
   authenticate,
@@ -62,7 +69,7 @@ router.get(
   requireBranchAccess,
   wrap(async (req, res) => {
     try {
-      const data = await getService().getDashboard({ branchId: req.query.branchId });
+      const data = await getService().getDashboard({ scopeFilter: listScope(req) });
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -77,7 +84,7 @@ router.get(
   wrap(async (req, res) => {
     try {
       const items = await getService().list({
-        branchId: req.query.branchId,
+        scopeFilter: listScope(req),
         type: req.query.type,
         q: req.query.q,
         limit: Number(req.query.limit) || 50,
@@ -93,11 +100,12 @@ router.get(
 router.get(
   '/:id',
   authenticate,
+  requireBranchAccess,
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().findById(req.params.id);
+      const doc = await getService().findById(req.params.id, branchFilter(req));
       if (!doc) return res.status(404).json({ success: false, error: 'Not found' });
       const integrity = getService().verifyIntegrity(doc);
       res.json({ success: true, data: doc, meta: { integrity } });
@@ -110,6 +118,7 @@ router.get(
 router.post(
   '/',
   authenticate,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'quality_manager', 'department_head']),
   [
     body('title').isString().isLength({ min: 3, max: 200 }),
@@ -119,7 +128,9 @@ router.post(
   wrap(async (req, res) => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const doc = await getService().createDocument(req.body, userId);
+      const payload = { ...req.body };
+      if (req.branchScope?.branchId) payload.branchId = req.branchScope.branchId;
+      const doc = await getService().createDocument(payload, userId);
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -130,13 +141,19 @@ router.post(
 router.post(
   '/:id/versions',
   authenticate,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'quality_manager', 'department_head']),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const doc = await getService().draftNewVersion(req.params.id, req.body, userId);
+      const doc = await getService().draftNewVersion(
+        req.params.id,
+        req.body,
+        userId,
+        branchFilter(req)
+      );
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -147,6 +164,7 @@ router.post(
 router.post(
   '/:id/versions/:vn/sign',
   authenticate,
+  requireBranchAccess,
   attachMfaActor,
   requireMfaTier(2),
   [
@@ -177,7 +195,8 @@ router.post(
         req.params.id,
         Number(req.params.vn),
         payload,
-        signer
+        signer,
+        branchFilter(req)
       );
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
@@ -189,6 +208,7 @@ router.post(
 router.post(
   '/:id/versions/:vn/revoke-signature/:sigId',
   authenticate,
+  requireBranchAccess,
   attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
   requireMfaTier(2),
@@ -207,7 +227,8 @@ router.post(
         Number(req.params.vn),
         req.params.sigId,
         req.body.reason,
-        userId
+        userId,
+        branchFilter(req)
       );
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -219,6 +240,7 @@ router.post(
 router.post(
   '/:id/versions/:vn/transition',
   authenticate,
+  requireBranchAccess,
   attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
   requireMfaTier(2),
@@ -235,7 +257,8 @@ router.post(
         req.params.id,
         Number(req.params.vn),
         req.body.to,
-        userId
+        userId,
+        branchFilter(req)
       );
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -247,12 +270,18 @@ router.post(
 router.post(
   '/:id/versions/:vn/acknowledge',
   authenticate,
+  requireBranchAccess,
   [param('id').isMongoId(), param('vn').isInt({ min: 1 })],
   handleValidation,
   wrap(async (req, res) => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const doc = await getService().acknowledgeRead(req.params.id, Number(req.params.vn), userId);
+      const doc = await getService().acknowledgeRead(
+        req.params.id,
+        Number(req.params.vn),
+        userId,
+        branchFilter(req)
+      );
       res.json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);

@@ -85,7 +85,6 @@ const BulkJobSchema = new mongoose.Schema(
 
 BulkJobSchema.index({ createdBy: 1, createdAt: -1 });
 BulkJobSchema.index({ status: 1 });
-BulkJobSchema.index({ jobId: 1 });
 
 const BulkJob = mongoose.models.DocumentBulkJob || mongoose.model('DocumentBulkJob', BulkJobSchema);
 

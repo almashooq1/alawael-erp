@@ -140,7 +140,6 @@ const referralSchema = new Schema(
 referralSchema.index({ branch: 1, status: 1, priority: 1 });
 referralSchema.index({ branch: 1, specialtyRequired: 1 });
 referralSchema.index({ patientNationalId: 1 });
-referralSchema.index({ referralNumber: 1 });
 
 // ─── ReferralDocument ────────────────────────────────────────────────────────
 

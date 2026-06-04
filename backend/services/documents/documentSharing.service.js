@@ -87,7 +87,6 @@ const DocumentShareSchema = new mongoose.Schema(
 
 DocumentShareSchema.index({ documentId: 1, recipientId: 1 });
 DocumentShareSchema.index({ documentId: 1, status: 1 });
-DocumentShareSchema.index({ shareLink: 1 });
 DocumentShareSchema.index({ recipientId: 1, status: 1 });
 DocumentShareSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 

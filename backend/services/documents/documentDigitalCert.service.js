@@ -147,7 +147,6 @@ const signatureRequestSchema = new mongoose.Schema(
 );
 
 digitalCertificateSchema.index({ userId: 1, status: 1 });
-digitalCertificateSchema.index({ serialNumber: 1 }, { unique: true });
 digitalSignatureSchema.index({ documentId: 1, signerId: 1 });
 signatureRequestSchema.index({ documentId: 1, status: 1 });
 

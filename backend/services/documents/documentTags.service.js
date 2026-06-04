@@ -55,7 +55,6 @@ const tagSchema = new mongoose.Schema(
 
 tagSchema.index({ category: 1, isActive: 1 });
 tagSchema.index({ usageCount: -1 });
-tagSchema.index({ slug: 1 });
 
 const Tag = mongoose.models.Tag || mongoose.model('Tag', tagSchema);
 

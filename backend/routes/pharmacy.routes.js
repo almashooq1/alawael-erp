@@ -22,12 +22,31 @@ const {
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
+const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 
 // All pharmacy routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+async function beneficiaryScopeFilter(req) {
+  const bf = branchFilter(req);
+  if (!bf || Object.keys(bf).length === 0) return {};
+  const ids = await Beneficiary.find(bf).select('_id').lean();
+  return { beneficiary: { $in: ids.map(r => r._id) } };
+}
+
+async function scopedPrescriptionById(req, id) {
+  const scope = await beneficiaryScopeFilter(req);
+  return Prescription.findOne({ _id: id, isDeleted: { $ne: true }, ...scope });
+}
+
+async function scopedDispensingById(req, id) {
+  const scope = await beneficiaryScopeFilter(req);
+  return Dispensing.findOne({ _id: id, isDeleted: { $ne: true }, ...scope });
+}
 // ── Field whitelists ────────────────────────────────────────────────────────
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 
@@ -187,7 +206,7 @@ router.delete('/medications/:id', async (req, res) => {
 router.get('/prescriptions', async (req, res) => {
   try {
     const { beneficiary, prescriber, status, priority, type, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    const filter = { isDeleted: { $ne: true }, ...(await beneficiaryScopeFilter(req)) };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (prescriber) filter.prescriber = prescriber;
     if (status) filter.status = status;
@@ -196,8 +215,8 @@ router.get('/prescriptions', async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [prescriptions, total] = await Promise.all([
       Prescription.find(filter)
-        .populate('beneficiary', 'name')
-        .populate('prescriber', 'name')
+        .populate('beneficiary', 'name firstName')
+        .populate('prescriber', 'fullName username')
         .sort({ createdAt: -1 })
         .limit(parseInt(limit))
         .skip(skip),
@@ -217,12 +236,14 @@ router.get('/prescriptions', async (req, res) => {
 
 router.get('/prescriptions/:id', async (req, res) => {
   try {
-    const prescription = await Prescription.findById(req.params.id)
-      .populate('beneficiary')
-      .populate('prescriber', 'name email')
-      .populate('items.medication');
+    const prescription = await scopedPrescriptionById(req, req.params.id);
     if (!prescription)
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    await prescription.populate([
+      { path: 'beneficiary' },
+      { path: 'prescriber', select: 'name email' },
+      { path: 'items.medication' },
+    ]);
     res.json({ success: true, data: prescription });
   } catch (error) {
     safeError(res, error, '[Pharmacy] Get prescription error');
@@ -231,6 +252,8 @@ router.get('/prescriptions/:id', async (req, res) => {
 
 router.post('/prescriptions', async (req, res) => {
   try {
+    const beneficiaryId = req.body.beneficiary || req.body.patient;
+    if (beneficiaryId) await enforceBeneficiaryBranch(req, beneficiaryId);
     const prescription = new Prescription({
       ...pick(req.body, PRESCRIPTION_FIELDS),
       createdBy: req.user?.id,
@@ -245,6 +268,8 @@ router.post('/prescriptions', async (req, res) => {
 
 router.put('/prescriptions/:id', async (req, res) => {
   try {
+    const existing = await scopedPrescriptionById(req, req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
@@ -260,6 +285,8 @@ router.put('/prescriptions/:id', async (req, res) => {
 
 router.patch('/prescriptions/:id/verify', async (req, res) => {
   try {
+    const existing = await scopedPrescriptionById(req, req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
       {
@@ -281,6 +308,8 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
 
 router.patch('/prescriptions/:id/cancel', async (req, res) => {
   try {
+    const existing = await scopedPrescriptionById(req, req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', notes: req.body.reason },
@@ -301,7 +330,7 @@ router.patch('/prescriptions/:id/cancel', async (req, res) => {
 router.get('/dispensing', async (req, res) => {
   try {
     const { beneficiary, pharmacist, status, prescription, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    const filter = { isDeleted: { $ne: true }, ...(await beneficiaryScopeFilter(req)) };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (pharmacist) filter.pharmacist = pharmacist;
     if (status) filter.status = status;
@@ -324,6 +353,12 @@ router.get('/dispensing', async (req, res) => {
 
 router.post('/dispensing', async (req, res) => {
   try {
+    const beneficiaryId = req.body.beneficiary || req.body.patient;
+    if (beneficiaryId) await enforceBeneficiaryBranch(req, beneficiaryId);
+    if (req.body.prescription) {
+      const rx = await scopedPrescriptionById(req, req.body.prescription);
+      if (!rx) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    }
     const dispensing = new Dispensing({
       ...pick(req.body, DISPENSING_FIELDS),
       pharmacist: req.user?.id,
@@ -368,6 +403,8 @@ router.post('/dispensing', async (req, res) => {
 
 router.patch('/dispensing/:id/return', async (req, res) => {
   try {
+    const existing = await scopedDispensingById(req, req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'سجل الصرف غير موجود' });
     const dispensing = await Dispensing.findByIdAndUpdate(
       req.params.id,
       { status: 'returned' },

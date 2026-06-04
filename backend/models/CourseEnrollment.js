@@ -47,7 +47,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
 courseEnrollmentSchema.index({ courseId: 1, userId: 1 }, { unique: true });
 courseEnrollmentSchema.index({ branchId: 1, userId: 1, status: 1 });
 courseEnrollmentSchema.index({ status: 1, dueDate: 1 });
-courseEnrollmentSchema.index({ certificateNumber: 1 });
 
 // W494: callback → async.
 courseEnrollmentSchema.pre('save', async function () {

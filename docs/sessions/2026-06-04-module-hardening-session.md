@@ -371,8 +371,12 @@ jest.mock('../middleware/auth', () => ({
   - `MontessoriStudent` + `TransportStudent`; canonical `Student` in `student-service.js`.
   - EnterpriseProPlus: 15 unprefixed models → `EnterpriseProPlus*` (Candidate, RFQ, Safety*, IT*, …).
   - `KNOWN_DUPLICATE_REGISTRATIONS` baseline **EMPTY**.
-- Open: ADR-020 Student↔Beneficiary; `zktecodevice` migration (deferred).
-- ~~W851 ADR-032 case variants (4 of 5)~~ — **done (pending push)**:
+- Open: ADR-020 Student↔Beneficiary; ZKTeco DATA merge (`zkteco-device-merge.js --execute`, operator + DB).
+- ~~W852 zktecodevice case-variant~~ — **done (pending push)**:
+  - `ZktecoDevice` model renamed → `ZktecoLegacyDevice`, collection pinned `zktecodevices` (no data move).
+  - `AttendanceLog.deviceId` ref + migration-script comment updated.
+  - `KNOWN_CASE_VARIANTS` baseline now **EMPTY**. Both W340 baselines (duplicate + case-variant) cleared.
+- ~~W851 ADR-032 case variants (4 of 5)~~ — **done** (`9bbdcbeba`, pushed `main`):
   - `DashboardKPIDefinition`, `OrganizationAIPrediction`, `LegacyELearningCourseShell`, `HrUnifiedPolicy` + `HrModulePolicy`.
   - Case-variant baseline: only `zktecodevice` remains.
 - ~~W850 case-variant + EnterprisePro closure~~ — **done** (`b4563066b`, pushed `main`):

@@ -1,26 +1,28 @@
 /**
- * ZktecoDevice — أجهزة ZKTeco البيومترية
- * النظام 37: الحضور البيومتري ZKTeco
+ * ZktecoLegacyDevice — أجهزة ZKTeco البيومترية (النظام 37 القديم)
  *
  * @deprecated Use backend/models/zktecoDevice.model.js instead.
- * This 53-line schema (mongoose model name: `ZktecoDevice`, lowercase k)
- * is the System-37 legacy model. The canonical 308-line
- * zktecoDevice.model.js (registered as `ZKTecoDevice`, uppercase KT)
+ * This 53-line schema is the System-37 legacy model. W851/W852 renamed its
+ * mongoose model name from `ZktecoDevice` → `ZktecoLegacyDevice` (Pattern D)
+ * to clear the ADR-032 case-variant collision with the canonical
+ * `ZKTecoDevice` (uppercase KT) registered by zktecoDevice.model.js. The
+ * physical collection is pinned to `zktecodevices` (its historical default)
+ * so NO data migration is required for this rename — existing rows keep
+ * resolving through the same collection.
+ *
+ * The canonical 308-line zktecoDevice.model.js (collection `zkteco_devices`)
  * carries the enterprise enrichments: syncLogs, deviceUsers mapping to
  * Employees, consecutiveFailures, deviceInfo, fingerprint/face counts,
- * connection-health fields.
- *
- * Both models are in production on DIFFERENT collections — this is a
- * real data-fragmentation problem, not just a code duplicate. A merge
- * requires a data-migration script that reconciles rows from the two
- * collections onto one schema. Migration is tracked in
- * docs/technical-debt/consolidation-roadmap.md (Phase 6).
+ * connection-health fields. A full DATA consolidation onto the canonical
+ * collection still requires the operator-run merge script
+ * (scripts/migrations/zkteco-device-merge.js --execute) + DB access — see
+ * docs/technical-debt/consolidation-roadmap.md (Phase 6). That is separate
+ * from this code-level rename.
  *
  * Current consumers of this legacy model:
  *   • routes/biometric-attendance.routes.js
  *   • services/zktecoSdk.service.js
  *   • scheduler/kpi-attendance.scheduler.js
- * These must migrate to the canonical model first.
  */
 
 const mongoose = require('mongoose');
@@ -63,9 +65,12 @@ const zktecoDeviceSchema = new Schema(
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     deletedAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  // Pattern D (W852): pin collection to the legacy default so the model
+  // rename (ZktecoDevice → ZktecoLegacyDevice) does NOT move existing data.
+  { timestamps: true, collection: 'zktecodevices' }
 );
 
 // REMOVED DUPLICATES: status / ipAddress / serialNumber already have field-level index:true
 
-module.exports = mongoose.models.ZktecoDevice || mongoose.model('ZktecoDevice', zktecoDeviceSchema);
+module.exports =
+  mongoose.models.ZktecoLegacyDevice || mongoose.model('ZktecoLegacyDevice', zktecoDeviceSchema);

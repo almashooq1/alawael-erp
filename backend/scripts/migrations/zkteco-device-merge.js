@@ -163,8 +163,9 @@ async function main() {
   const mongoose = require('mongoose');
 
   // Registering BOTH models in the same process so we can read from
-  // each of their collections. The names differ ("ZktecoDevice" vs
-  // "ZKTecoDevice"), which is exactly the core of the bug.
+  // each of their collections. The legacy model registers as
+  // "ZktecoLegacyDevice" (collection `zktecodevices`, renamed in W852)
+  // while the canonical is "ZKTecoDevice" (collection `zkteco_devices`).
   const LegacyModel = require('../../models/ZktecoDevice');
   const CanonicalModel = require('../../models/zktecoDevice.model');
 

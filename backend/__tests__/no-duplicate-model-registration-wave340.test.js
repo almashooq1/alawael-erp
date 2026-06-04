@@ -528,8 +528,11 @@ describe('W340 no-duplicate-model-registration drift guard', () => {
     // W851 ratchet-down: aiprediction → OrganizationAIPrediction (organization mega-file).
     // W851 ratchet-down: elearningcourse → LegacyELearningCourseShell (ELearning/Course.js stub).
     // W851 ratchet-down: hrpolicy → HrUnifiedPolicy + HrModulePolicy (HR/Policy.js).
-    // 'zktecodevice' — ZktecoDevice vs ZKTecoDevice; requires data migration (deferred).
-    'zktecodevice',
+    // W852 ratchet-down: zktecodevice → ZktecoLegacyDevice (models/ZktecoDevice.js, collection
+    //   pinned to `zktecodevices`); canonical ZKTecoDevice keeps `zkteco_devices`. The two are on
+    //   SEPARATE collections, so this rename is code-level only — the operator-run DATA merge
+    //   (scripts/migrations/zkteco-device-merge.js --execute) remains tracked in the Phase-6 roadmap.
+    // BASELINE EMPTY as of W852 — any NEW case-variant collision fails CI.
   ]);
 
   it('no model name has multiple case variants registered (silent collection-collision check)', () => {

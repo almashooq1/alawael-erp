@@ -15,7 +15,12 @@ const attendanceLogSchema = new Schema(
       required: true,
       index: true,
     },
-    deviceId: { type: Schema.Types.ObjectId, ref: 'ZktecoDevice', default: null, index: true },
+    deviceId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ZktecoLegacyDevice',
+      default: null,
+      index: true,
+    },
     deviceUserId: { type: Number, default: null }, // رقم المستخدم في الجهاز
     punchTime: { type: Date, required: true, index: true },
     punchType: {

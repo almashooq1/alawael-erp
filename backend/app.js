@@ -927,6 +927,18 @@ try {
         logger.warn('[CpeAdmin] routes skipped:', cpeErr.message);
       }
 
+      // Outcomes admin trajectory analytics — explicit mount (W898) so
+      // /api/admin/outcomes stays stable instead of relying on auto-mount
+      // filename-derived paths.
+      try {
+        const outcomesAdminRouter = require('./routes/outcomes-admin.routes');
+        app.use('/api/admin/outcomes', outcomesAdminRouter);
+        app.use('/api/v1/admin/outcomes', outcomesAdminRouter);
+        logger.info('[OutcomesAdmin] ✓ /api/admin/outcomes + /api/v1/admin/outcomes mounted');
+      } catch (outcomesErr) {
+        logger.warn('[OutcomesAdmin] routes skipped:', outcomesErr.message);
+      }
+
       // HR Modules — Round 10 mega-router (onboarding + loans + travel + insurance
       // + bands + positions + surveys + assets + kudos + policies + shift-swaps
       // + visas + org-chart + time-off-calendar + WPS export)
@@ -2580,6 +2592,7 @@ try {
     'notifications-log.routes',
     'nphies-webhook.routes',
     'openapi-integration.routes',
+    'outcomes-admin.routes',
     'parent-portal-v1.routes',
     'payroll.routes',
     'public-forms.routes',

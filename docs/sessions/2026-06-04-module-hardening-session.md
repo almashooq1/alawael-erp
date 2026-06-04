@@ -396,7 +396,14 @@ jest.mock('../middleware/auth', () => ({
   `kitchen` (W876), `warehouse` (W877), `pharmacy` (W878), `toileting` (W879),
   `invoices-admin` (W880), `referrals-admin` (W881), `nps-admin` (W882),
   `beneficiary-day-attendance` (W883), `events-management` (W885),
-  `contract-management` (W886), `therapy-sessions-admin` (W887), `cpe-admin` (W888).
+  `contract-management` (W886), `therapy-sessions-admin` (W887), `cpe-admin` (W888),
+  `guardians` (W889), `parent-portal-v1 ownership` (W890), `family-home-program` (W891),
+  `waitlist-capacity-optimizer` (W892), `waitlist-offer-batch` (W893),
+  `waitlist-schedule-suggestions` (W894), `claims-denial-precheck` (W895),
+  `clinical-pathway-engine` (W896), `equity-outcome-benchmarking` (W897),
+  `outcomes-admin-branch-isolation` (W898), `clinical-docs` (W899),
+  `care-plans-admin` (W900), `emr-routes` (W901), `medical-referrals` (W902),
+  `insurance-claims` (W903).
   Still open / deferred: `crisis` (ambiguous — see below), `medicalEquipment`/`asset-management`
   (models lack branch/center — need schema + product intent), `meetings`/`strategicPlanning`
   (no branchId on model — org-wide or needs schema), `medication catalog` + `MenuItem` (org-wide
@@ -525,6 +532,103 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   mount `requireBranchAccess`; `employeeBranchFilter`/`scopedEmployeeIds`/`assertEmployeeInScope`/`cpeInstanceFilter`;
   scoped list, overview, export, mutations, employee sub-routes; POST create gated by employee scope. +
   `cpe-admin-branch-isolation-wave888.test.js` (4 tests).
+- ~~W889 guardians IDOR closure~~ — **done** (local, not yet pushed): **security fix** — guardians surface had
+  unrestricted instance reads/mutations (`GET/PUT/DELETE /:id`) plus global list/search despite branch-aware middleware.
+  Guardian model has no `branchId`, so scope is derived from in-scope beneficiary links. Fix: added
+  `guardianListScope` (via beneficiary `branchFilter`), `loadGuardianOr404` for instance ownership checks, scoped
+  beneficiary fetch on details, scoped active-beneficiary count before soft-delete, and guardian-scope precheck in
+  link/unlink paths; `guardianBeneficiaryClause` `$or` matches both ObjectId[] and
+  `{ guardian }[]` stored shapes (Mongoose schema vs production docs). +
+  `guardians-branch-isolation-wave889.test.js` (5 tests: list, get, put, delete, link).
+- ~~W890 parent-portal-v1 ownership hardening~~ — **done** (local, not yet pushed): **security fix** — `guardianOwnsBeneficiary`
+  relied on `Guardian.beneficiaries` only; if that array drifted stale, a guardian could still read foreign beneficiary
+  endpoints (`/beneficiaries/:id/*`) despite missing reciprocal link on `Beneficiary.guardians`. Fix: rewired ownership
+  check to authoritative beneficiary-side relation (`guardians.guardian` OR `primaryGuardian`) after resolving guardian
+  by `userId`. + `parent-portal-v1-guardian-ownership-wave890.test.js` (2 tests) proves reciprocal-link allow and
+  stale one-sided relation deny (404).
+- ~~W891 family-home-program MVP (new module)~~ — **done** (local, not yet pushed): **feature + security hardening** —
+  added `models/FamilyHomeProgram.js` and `routes/family-home-program.routes.js`, mounted via
+  `features.registry.js` on `/api/(v1/)?family-home-program` using `dualMountAuth`. Surface includes create/list/details,
+  task add, task completion log, progress summary. Branch isolation is first-class: route-level `requireBranchAccess`,
+  beneficiary gate via `assertBeneficiaryInScope`, and instance gate via `findOne({ _id, ...branchFilter(req) })`.
+  Create stamps `branchId` from the beneficiary record (not caller input). +
+  `family-home-program-routes-wave891.test.js` (4 tests: create in-scope, create cross-branch 404, foreign instance 404,
+  list scoped by beneficiary branch).
+- ~~W892 waitlist-capacity-optimizer MVP~~ — **done** (local, not yet pushed): **feature + branch-safe ops intelligence** —
+  extended `waitlist-admin.routes.js` with `GET /optimizer/recommendations` that fuses branch-scoped waiters
+  (`WaitingListEntry`) with branch-scoped appointment throughput (`Appointment`) to compute offer recommendations
+  per service line. Algorithm factors historical completed/no-show rates + upcoming load and returns:
+  `summary`, `byServiceType`, and queue-ordered `recommendations` (priority + wait-age aware). +
+  `waitlist-capacity-optimizer-wave892.test.js` (2 tests): restricted branch sees only local recommendations;
+  cross-branch admin sees union across branches.
+- ~~W893 waitlist auto-offer batch (safe apply mode)~~ — **done** (local, not yet pushed): **feature + controlled mutation** —
+  added `POST /optimizer/offer-batch` to `waitlist-admin.routes.js`. Default behavior is `dryRun` (preview only);
+  applying requires explicit `{ apply: true }`. The endpoint reuses optimizer recommendations, selects top N, and
+  transitions scoped rows `waiting → offered` with `offerExpiresAt` from `WAITLIST_OFFER_DAYS`. Scope is enforced in
+  the mutation query itself (`findOneAndUpdate({ _id, status:'waiting', ...branchFilter(req) })`) so foreign-branch
+  rows are never touched. + `waitlist-offer-batch-wave893.test.js` (2 tests: dry-run no mutation; apply mutates only
+  caller branch rows).
+- ~~W894 waitlist schedule-suggestions optimizer~~ — **done** (local, not yet pushed): **feature + capacity UX layer** —
+  added `GET /optimizer/schedule-suggestions` to `waitlist-admin.routes.js`. Endpoint builds on optimizer context and
+  returns per-recommendation `suggestedWindows` (date/time slots) for the next horizon, excluding occupied slots from
+  upcoming appointments (`PENDING|CONFIRMED|CHECKED_IN`) per service line. Branch isolation is inherited from optimizer
+  scope, so restricted callers only receive their branch's entries while cross-branch admins get the union. +
+  `waitlist-schedule-suggestions-wave894.test.js` (2 tests: scoped IDs + occupied-slot avoidance; cross-branch union
+  for admin).
+- ~~W895 claims denial-precheck MVP~~ — **done** (local, not yet pushed): **feature + submit safety gate** —
+  enhanced `insuranceClaims.routes.js` with `GET /claims/:id/denial-precheck` and wired the same precheck into
+  `PATCH /claims/:id/submit`. New checks flag critical blockers before submission (missing principal diagnosis,
+  missing service codes, inactive/out-of-range contract, required pre-auth missing/unapproved/expired) plus warnings
+  (totals mismatch, missing membership number). Submit now returns `409` with `{ precheck }` when blockers exist, and
+  keeps claim status in `draft`. Also added beneficiary branch-scope enforcement on claim read + submit paths via
+  `assertBeneficiaryInScope` to prevent cross-branch probing. +
+  `insurance-claims-denial-precheck-wave895.test.js` (4 tests: precheck blockers, submit blocked, submit success after
+  fixing blockers + approved pre-auth, foreign-branch 404).
+- ~~W896 clinical-pathway engine MVP~~ — **done** (local, not yet pushed): **feature + pathway lifecycle** —
+  added `models/ClinicalPathwayPlan.js` and `routes/clinical-pathway.routes.js`, mounted via
+  `features.registry.js` on `/api/(v1/)?clinical-pathway` using `dualMountAuth`. Surface includes create/list/details,
+  stage start, stage complete, and pathway progress summary. Branch isolation mirrors the hardened pattern:
+  `requireBranchAccess` + beneficiary ownership gate (`assertBeneficiaryInScope`) + instance scope
+  (`findOne({ _id, ...branchFilter(req) })`). Create stamps `branchId` from beneficiary record; stage completion updates
+  current stage and auto-closes pathway when completion reaches 100%. +
+  `clinical-pathway-routes-wave896.test.js` (4 tests: in-scope create, cross-branch create 404, foreign instance 404,
+  progress 50% after first stage completion).
+- ~~W897 outcome benchmarking MVP~~ — **done** (local, not yet pushed): **feature + branch-safe analytics** —
+  expanded `equity.routes.js` with `GET /benchmarks/compare` and hardened `GET /benchmarks` branch filtering. New compare
+  endpoint computes observed branch mean from real `ClinicalAssessment` scores (90-day default window) and compares it
+  to the best published benchmark (branch benchmark preferred over national), returning `gap`, `targetValue`,
+  `meetsTarget`, and `gapBand`. Hardened list endpoint now prevents restricted users from seeing other branches'
+  `scope='branch'` benchmarks while still exposing non-branch scopes (national/regional/carf/da_publication). +
+  `equity-outcome-benchmarking-wave897.test.js` (4 tests: restricted list isolation, cross-branch admin visibility,
+  compare computation, foreign-branch compare denial).
+- ~~W898 outcomes-admin branch isolation + explicit mount~~ — **done** (local, not yet pushed): **security hardening** —
+  hardened `outcomes-admin.routes.js` by activating `requireBranchAccess`, applying `branchFilter(req)` to list/overview/
+  export/beneficiary queries, and enforcing beneficiary ownership gates via `assertBeneficiaryInScope` on beneficiary-keyed
+  reads. This closes cross-branch trajectory/export probing for restricted roles. Also added explicit app mounts in
+  `app.js` at `/api/admin/outcomes` + `/api/v1/admin/outcomes` and excluded `outcomes-admin.routes` from generic
+  auto-mount dedupe list to keep path contracts stable. +
+  `outcomes-admin-branch-isolation-wave898.test.js` (4 tests: list isolation, foreign beneficiary 404, overview isolation,
+  export excludes foreign branch rows).
+- ~~W899 clinical-docs instance isolation~~ — **done** (local, not yet pushed): **security fix** —
+  hardened `clinical-docs.routes.js` record-level read path by enforcing beneficiary-ownership branch checks on
+  `GET /api/admin/clinical-docs/:id`, preventing cross-branch document retrieval by guessed ObjectId. +
+  `clinical-docs-branch-isolation-wave899.test.js` (2 tests: in-scope 200, foreign-branch 404).
+- ~~W900 care-plans-admin branch isolation~~ — **done** (local, not yet pushed): **security fix** —
+  applied branch scoping to both list and instance retrieval in `care-plans-admin.routes.js` so restricted users only
+  enumerate/read care plans in their own branch. +
+  `care-plans-admin-branch-isolation-wave900.test.js` (2 tests: list scoped to branch, foreign plan 404).
+- ~~W901 EMR routes branch isolation~~ — **done** (local, not yet pushed): **security fix** —
+  tightened `emr.routes.js` medical-record read surfaces to enforce tenant scope on list + id-keyed access, closing
+  cross-branch PHI exposure via direct record IDs. +
+  `emr-routes-branch-isolation-wave901.test.js` (2 tests: scoped list, foreign record 404).
+- ~~W902 medical referrals branch isolation~~ — **done** (local, not yet pushed): **security fix** —
+  hardened `medicalReferrals.routes.js` instance endpoints (`GET /:id`, `PATCH /:id/approve`) with branch ownership checks
+  to block cross-branch referral disclosure and actioning. +
+  `medical-referrals-branch-isolation-wave902.test.js` (2 tests: foreign referral read/action both 404).
+- ~~W903 insurance claims branch isolation (instance + list)~~ — **done** (local, not yet pushed): **security fix** —
+  completed tenant isolation in `insuranceClaims.routes.js` beyond W895 precheck by enforcing branch scope on list and
+  instance update/read mutation paths (`GET/PUT /claims/:id`), preventing cross-branch claim probing/modification. +
+  `insurance-claims-branch-isolation-wave903.test.js` (3 tests: scoped list, foreign GET 404, foreign PUT 404).
 - ~~W884 Mongoose duplicate schema.index drift guard + 25-index cleanup~~ — **done** (local, not yet pushed; renumbered from W880 — W880 taken by invoices-admin isolation):
   - **Cleanup**: removed redundant `schema.index({field:1})` where the field already declares `unique:true`
     (or a duplicate compound unique) across 19 models — 25 warnings → 0 (AssetTransfer, Volunteer×3,
@@ -536,7 +640,7 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   - **Lifecycle tests**: W597/W601 updated to drive scope via `req.user.branchId` (W833 `requireBranchAccess`
     overwrites injected `req.branchScope`); W601 foreign `?branchId=` now expects 403 at middleware.
   - **ESLint**: 5 unused-var warnings cleared (maintenanceHub, purchasing, rehabLicenses).
-  - **Verify**: W870–888 isolation batch — 18 suites / 75 tests ✅; + W884 + W597/W601 in full local gate; all 5 pre-push gates + lint ✅.
+  - **Verify**: W870–903 isolation+capacity+claims+pathway+benchmarking+outcomes-admin+clinical-docs+care-plans+emr+referrals batch — 33 suites / 118 tests ✅; + W884 + W597/W601 in full local gate; all 5 pre-push gates + lint ✅.
 - ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done** (`b7b337f9c`, pushed `main`): converted ALL 26 remaining
   bare instance lookups in `mdt-coordination.routes.js` to branch-scoped `findOne`/`findOneAndDelete` — 12 MDTMeeting
   sub-resource reads + 10 UnifiedRehabPlan (GET/:id + 7 sub-resource + DELETE) + 4 ReferralTicket (GET/:id + sub-resource

@@ -4,9 +4,11 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const router = express.Router();
 const Payroll = require('../models/payroll.model');
+const Employee = require('../models/Employee');
 const {
   CompensationStructure,
   IndividualIncentive,
@@ -16,7 +18,7 @@ const {
 const PayrollCalculationService = require('../services/payrollCalculationService');
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -30,6 +32,69 @@ const validate = (req, res, next) => {
   next();
 };
 
+/** Payroll rows carry employeeId only — scope via Employee.branch_id (W904). */
+function employeeBranchFilter(req) {
+  const scope = branchFilter(req);
+  return scope.branchId ? { branch_id: scope.branchId } : {};
+}
+
+async function payrollEmployeeIdFilter(req) {
+  const branchPart = employeeBranchFilter(req);
+  if (!branchPart.branch_id) return {};
+  const ids = await Employee.find(branchPart).distinct('_id');
+  return { employeeId: { $in: ids } };
+}
+
+async function assertPayrollEmployeeInScope(
+  req,
+  employeeId,
+  res,
+  notFoundMsg = 'الراتب غير موجود'
+) {
+  if (!employeeId || !mongoose.isValidObjectId(String(employeeId))) {
+    return res.status(400).json({ success: false, error: 'معرّف الموظف غير صالح' });
+  }
+  const branchPart = employeeBranchFilter(req);
+  if (!branchPart.branch_id) return null;
+  const hit = await Employee.findOne({ _id: employeeId, ...branchPart })
+    .select('_id')
+    .lean();
+  if (!hit) {
+    return res.status(404).json({ success: false, error: notFoundMsg });
+  }
+  return null;
+}
+
+async function loadPayrollScoped(req, res, payrollId) {
+  if (!mongoose.isValidObjectId(payrollId)) {
+    res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    return null;
+  }
+  const gate = await Payroll.findById(payrollId).select('employeeId').lean();
+  if (!gate) {
+    res.status(404).json({ success: false, error: 'الراتب غير موجود' });
+    return null;
+  }
+  const denied = await assertPayrollEmployeeInScope(req, gate.employeeId, res);
+  if (denied) return null;
+  return Payroll.findById(payrollId);
+}
+
+async function loadEmployeeOwnedScoped(Model, req, res, id, notFoundMsg) {
+  if (!mongoose.isValidObjectId(id)) {
+    res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    return null;
+  }
+  const gate = await Model.findById(id).select('employeeId').lean();
+  if (!gate) {
+    res.status(404).json({ success: false, error: notFoundMsg });
+    return null;
+  }
+  const denied = await assertPayrollEmployeeInScope(req, gate.employeeId, res, notFoundMsg);
+  if (denied) return null;
+  return Model.findById(id);
+}
+
 // ============= مسارات الرواتب =============
 
 /**
@@ -39,7 +104,10 @@ const validate = (req, res, next) => {
 router.get('/monthly/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { month, year } = req.params;
-    const payrolls = await Payroll.getMonthlyPayroll(month, parseInt(year)).select(
+    const empScope = await payrollEmployeeIdFilter(req);
+    let monthlyQuery = Payroll.getMonthlyPayroll(month, parseInt(year));
+    if (empScope.employeeId) monthlyQuery = monthlyQuery.where(empScope);
+    const payrolls = await monthlyQuery.select(
       'employeeName departmentName baseSalary calculations_totalGross calculations.totalNet payment.status'
     );
 
@@ -64,13 +132,8 @@ router.get('/monthly/:month/:year', authenticateToken, requireBranchAccess, asyn
  */
 router.get('/:payrollId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const payroll = await Payroll.findById(req.params.payrollId);
-    if (!payroll) {
-      return res.status(404).json({
-        success: false,
-        error: 'الراتب غير موجود',
-      });
-    }
+    const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+    if (!payroll) return;
 
     res.json({
       success: true,
@@ -97,6 +160,8 @@ router.get(
   async (req, res) => {
     try {
       const { employeeId, year } = req.params;
+      const denied = await assertPayrollEmployeeInScope(req, employeeId, res);
+      if (denied) return;
       const payrolls = await Payroll.getEmployeePayrolls(employeeId, parseInt(year));
 
       const summary = {
@@ -151,6 +216,8 @@ router.post(
   async (req, res) => {
     try {
       const { employeeId, month, year } = req.body;
+      const denied = await assertPayrollEmployeeInScope(req, employeeId, res);
+      if (denied) return;
 
       // حساب الراتب
       const payroll = await PayrollCalculationService.calculateMonthlyPayroll(
@@ -244,13 +311,8 @@ router.put(
   requireRole('hr', 'admin'),
   async (req, res) => {
     try {
-      const payroll = await Payroll.findById(req.params.payrollId);
-      if (!payroll) {
-        return res.status(404).json({
-          success: false,
-          error: 'الراتب غير موجود',
-        });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
 
       payroll.submitForApproval(req.user._id, req.user.name);
       await payroll.save();
@@ -283,13 +345,8 @@ router.put(
   requireRole('admin', 'director'),
   async (req, res) => {
     try {
-      const payroll = await Payroll.findById(req.params.payrollId);
-      if (!payroll) {
-        return res.status(404).json({
-          success: false,
-          error: 'الراتب غير موجود',
-        });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
 
       payroll.approve(req.user._id, req.user.name);
       await payroll.save();
@@ -322,10 +379,8 @@ router.put(
   requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
-      const payroll = await Payroll.findById(req.params.payrollId);
-      if (!payroll) {
-        return res.status(404).json({ success: false, error: 'الراتب غير موجود' });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
       if (payroll.payment?.status === 'paid') {
         return res.status(409).json({ success: false, error: 'لا يمكن تعديل راتب مدفوع' });
       }
@@ -382,13 +437,8 @@ router.put(
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
-      const payroll = await Payroll.findById(req.params.payrollId);
-      if (!payroll) {
-        return res.status(404).json({
-          success: false,
-          error: 'الراتب غير موجود',
-        });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
 
       payroll.process(req.user._id, req.user.name);
       await payroll.save();
@@ -422,14 +472,8 @@ router.put(
   async (req, res) => {
     try {
       const { transactionRef, bankName } = req.body;
-      const payroll = await Payroll.findById(req.params.payrollId);
-
-      if (!payroll) {
-        return res.status(404).json({
-          success: false,
-          error: 'الراتب غير موجود',
-        });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
 
       payroll.transfer(transactionRef, bankName);
       await payroll.save();
@@ -462,13 +506,8 @@ router.put(
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
-      const payroll = await Payroll.findById(req.params.payrollId);
-      if (!payroll) {
-        return res.status(404).json({
-          success: false,
-          error: 'الراتب غير موجود',
-        });
-      }
+      const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
+      if (!payroll) return;
 
       payroll.confirmPayment();
       await payroll.save();
@@ -652,13 +691,14 @@ router.put(
   requireRole('admin', 'hr'),
   async (req, res) => {
     try {
-      const incentive = await IndividualIncentive.findById(req.params.incentiveId);
-      if (!incentive) {
-        return res.status(404).json({
-          success: false,
-          error: 'الحافز غير موجود',
-        });
-      }
+      const incentive = await loadEmployeeOwnedScoped(
+        IndividualIncentive,
+        req,
+        res,
+        req.params.incentiveId,
+        'الحافز غير موجود'
+      );
+      if (!incentive) return;
 
       incentive.approve(req.user._id, req.user.name);
       await incentive.save();
@@ -692,14 +732,14 @@ router.put(
   async (req, res) => {
     try {
       const { transactionRef } = req.body;
-      const incentive = await IndividualIncentive.findById(req.params.incentiveId);
-
-      if (!incentive) {
-        return res.status(404).json({
-          success: false,
-          error: 'الحافز غير موجود',
-        });
-      }
+      const incentive = await loadEmployeeOwnedScoped(
+        IndividualIncentive,
+        req,
+        res,
+        req.params.incentiveId,
+        'الحافز غير موجود'
+      );
+      if (!incentive) return;
 
       incentive.markAsPaid(transactionRef);
       await incentive.save();
@@ -765,13 +805,14 @@ router.put(
   requireRole('admin', 'director'),
   async (req, res) => {
     try {
-      const penalty = await PerformancePenalty.findById(req.params.penaltyId);
-      if (!penalty) {
-        return res.status(404).json({
-          success: false,
-          error: 'العقوبة غير موجودة',
-        });
-      }
+      const penalty = await loadEmployeeOwnedScoped(
+        PerformancePenalty,
+        req,
+        res,
+        req.params.penaltyId,
+        'العقوبة غير موجودة'
+      );
+      if (!penalty) return;
 
       penalty.approve(req.user._id, req.user.name);
       await penalty.save();
@@ -803,14 +844,14 @@ router.post(
   async (req, res) => {
     try {
       const { reason } = req.body;
-      const penalty = await PerformancePenalty.findById(req.params.penaltyId);
-
-      if (!penalty) {
-        return res.status(404).json({
-          success: false,
-          error: 'العقوبة غير موجودة',
-        });
-      }
+      const penalty = await loadEmployeeOwnedScoped(
+        PerformancePenalty,
+        req,
+        res,
+        req.params.penaltyId,
+        'العقوبة غير موجودة'
+      );
+      if (!penalty) return;
 
       penalty.appeal(reason);
       await penalty.save();

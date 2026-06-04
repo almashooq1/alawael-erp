@@ -26,7 +26,11 @@
 'use strict';
 
 const express = require('express');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const {
+  requireBranchAccess,
+  branchFilter,
+  effectiveBranchScope,
+} = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -45,6 +49,28 @@ const fail = (res, msg, status = 400, extra = {}) =>
 
 const isValidId = id => mongoose.Types.ObjectId.isValid(id);
 
+/** WaitlistEntry uses `branch`, not `branchId` — map branchFilter output. */
+function waitlistBranchScope(req) {
+  const scope = branchFilter(req);
+  return scope.branchId ? { branch: scope.branchId } : {};
+}
+
+async function scopedWaitlistEntry(
+  req,
+  id,
+  query = WaitlistEntry.findOne({ _id: id, ...waitlistBranchScope(req) })
+) {
+  return query;
+}
+
+function mergeListBranchFilter(req, filter = {}) {
+  const scope = waitlistBranchScope(req);
+  if (scope.branch) return { ...filter, ...scope };
+  const explicit = effectiveBranchScope(req);
+  if (explicit) return { ...filter, branch: explicit };
+  return filter;
+}
+
 const validateId = (req, res, next) => {
   if (!isValidId(req.params.id)) return fail(res, 'معرّف غير صحيح', 400);
   next();
@@ -59,8 +85,8 @@ router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.bene
 // ══════════════════════════════════════════════════════════════════════════════
 router.get('/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const stats = await WaitlistEntry.getStats(branchId || null);
+    const branchId = effectiveBranchScope(req) || req.query.branchId || null;
+    const stats = await WaitlistEntry.getStats(branchId && isValidId(branchId) ? branchId : null);
     return ok(res, stats);
   } catch (err) {
     return fail(res, err.message, 500);
@@ -76,11 +102,12 @@ router.get('/stats', async (req, res) => {
  */
 router.get('/smart', async (req, res) => {
   try {
-    const { branchId, limit = 50 } = req.query;
+    const branchId = effectiveBranchScope(req) || req.query.branchId;
     if (!branchId || !isValidId(branchId)) {
       return fail(res, 'معرّف الفرع مطلوب وصحيح', 422);
     }
 
+    const limit = req.query.limit || 50;
     const entries = await beneficiaryService.getSmartWaitlist(branchId, {
       limit: Math.min(parseInt(limit, 10), 200),
     });
@@ -119,13 +146,9 @@ router.get('/', async (req, res) => {
       direction = 'desc',
     } = req.query;
 
-    const filter = {};
-
-    // تصفية بالفرع: إذا لم يكن super-admin، يرى فرعه فقط
-    if (branchId && isValidId(branchId)) {
+    const filter = mergeListBranchFilter(req, {});
+    if (!filter.branch && branchId && isValidId(branchId)) {
       filter.branch = branchId;
-    } else if (req.user?.branch && !req.user?.isSuperAdmin) {
-      filter.branch = req.user.branch;
     }
 
     if (status) filter.status = status;
@@ -176,12 +199,16 @@ router.get('/', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 router.get('/:id', validateId, async (req, res) => {
   try {
-    const entry = await WaitlistEntry.findById(req.params.id)
-      .populate('branch', 'nameAr code')
-      .populate('beneficiary', 'fileNumber firstName_ar lastName_ar status')
-      .populate('createdBy', 'name')
-      .populate('assignedTo', 'name')
-      .lean({ virtuals: true });
+    const entry = await scopedWaitlistEntry(
+      req,
+      req.params.id,
+      WaitlistEntry.findOne({ _id: req.params.id, ...waitlistBranchScope(req) })
+        .populate('branch', 'nameAr code')
+        .populate('beneficiary', 'fileNumber firstName_ar lastName_ar status')
+        .populate('createdBy', 'name')
+        .populate('assignedTo', 'name')
+        .lean({ virtuals: true })
+    );
 
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
     return ok(res, entry);
@@ -313,7 +340,7 @@ router.put('/:id', validateId, async (req, res) => {
     if (Object.keys(updates).length === 0) return fail(res, 'لا توجد بيانات للتحديث', 400);
 
     // لا يمكن تحديث طلب مغلق
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     if (
@@ -341,7 +368,7 @@ router.put('/:id', validateId, async (req, res) => {
 router.post('/:id/contact', validateId, async (req, res) => {
   try {
     const { note } = req.body;
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     if (entry.status !== WAITLIST_STATUSES.PENDING) {
@@ -377,7 +404,7 @@ router.post('/:id/schedule-assessment', validateId, async (req, res) => {
     const parsedDate = new Date(assessmentDate);
     if (isNaN(parsedDate.getTime())) return fail(res, 'تاريخ التقييم غير صحيح', 422);
 
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     if (![WAITLIST_STATUSES.PENDING, WAITLIST_STATUSES.CONTACTED].includes(entry.status)) {
@@ -407,7 +434,7 @@ router.post('/:id/schedule-assessment', validateId, async (req, res) => {
 router.post('/:id/approve', validateId, async (req, res) => {
   try {
     const { note } = req.body;
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     const validStatuses = [
@@ -444,7 +471,14 @@ router.post('/:id/enroll', validateId, async (req, res) => {
   try {
     const { beneficiaryId, branchId } = req.body;
 
-    const entry = await WaitlistEntry.findById(req.params.id).populate('branch', 'code');
+    const entry = await scopedWaitlistEntry(
+      req,
+      req.params.id,
+      WaitlistEntry.findOne({ _id: req.params.id, ...waitlistBranchScope(req) }).populate(
+        'branch',
+        'code'
+      )
+    );
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     // التحقق من الحالة
@@ -521,7 +555,7 @@ router.post('/:id/reject', validateId, async (req, res) => {
     const { reason } = req.body;
     if (!reason || !reason.trim()) return fail(res, 'سبب الرفض مطلوب', 422);
 
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     if (
@@ -558,7 +592,7 @@ router.post('/:id/cancel', validateId, async (req, res) => {
   try {
     const { reason } = req.body;
 
-    const entry = await WaitlistEntry.findById(req.params.id);
+    const entry = await scopedWaitlistEntry(req, req.params.id);
     if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
     if (

@@ -22,12 +22,8 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const {
-  branchFilter,
-  effectiveBranchScope,
-  requireBranchAccess,
-} = require('../middleware/branchScope.middleware');
-const { assertBranchMatch } = require('../middleware/assertBranchMatch');
+const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const { requireMfaTier } = require('../middleware/requireMfaTier');
 
 const VALID_STATUSES = [
@@ -40,6 +36,15 @@ const VALID_STATUSES = [
   'dismissed',
 ];
 const VALID_SEVERITIES = ['none', 'minor', 'moderate', 'major'];
+const VALID_BENCHMARK_METRICS = [
+  'gas_avg_tscore',
+  'icf_avg_qualifier',
+  'session_attendance_rate',
+  'goal_achievement_rate',
+  'wait_time_days',
+  'complaint_rate',
+  'wbci_avg',
+];
 
 router.use(authenticateToken);
 // W833: populate req.branchScope so branchFilter(req) + assertBranchMatch(req)
@@ -60,6 +65,57 @@ function loadBenchmarkModel() {
   } catch {
     return null;
   }
+}
+
+function loadClinicalAssessmentModel() {
+  try {
+    return mongoose.model('ClinicalAssessment');
+  } catch {
+    try {
+      return require('../models/ClinicalAssessment');
+    } catch {
+      return null;
+    }
+  }
+}
+
+function allowedBranchIds(req) {
+  if (!req.branchScope || req.branchScope.allBranches) return null;
+  if (Array.isArray(req.branchScope.branchIds) && req.branchScope.branchIds.length) {
+    return req.branchScope.branchIds.map(String);
+  }
+  if (req.branchScope.branchId) return [String(req.branchScope.branchId)];
+  return [];
+}
+
+function buildBenchmarkListFilter(req, baseFilter = {}) {
+  const filter = { ...baseFilter };
+  const allowed = allowedBranchIds(req);
+  if (allowed == null) return filter;
+  const branchMatch = allowed.length > 1 ? { $in: allowed } : allowed[0] || null;
+
+  if (filter.scope === 'branch') {
+    // Restricted users querying branch benchmarks should only see their own branch scope.
+    filter.branchId = branchMatch;
+    return filter;
+  }
+
+  if (!filter.scope) {
+    filter.$or = [{ scope: { $ne: 'branch' } }, { scope: 'branch', branchId: branchMatch }];
+  }
+  return filter;
+}
+
+function parseDateBoundary(value, endOfDay = false) {
+  if (!value) return null;
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return null;
+  if (endOfDay) dt.setHours(23, 59, 59, 999);
+  return dt;
+}
+
+function round2(value) {
+  return Number(Number(value || 0).toFixed(2));
 }
 
 /**
@@ -296,6 +352,137 @@ router.post(
  * Filters: scope, metricKind, status
  */
 router.get(
+  '/benchmarks/compare',
+  requireRole(['admin', 'supervisor', 'quality_lead', 'compliance']),
+  async (req, res) => {
+    const Benchmark = loadBenchmarkModel();
+    const ClinicalAssessment = loadClinicalAssessmentModel();
+    if (!Benchmark) return res.status(503).json({ success: false, code: 'MODEL_NOT_REGISTERED' });
+    if (!ClinicalAssessment) {
+      return res.status(503).json({ success: false, code: 'ASSESSMENT_MODEL_NOT_REGISTERED' });
+    }
+
+    const targetBranchId = req.query.branchId || effectiveBranchScope(req);
+    if (!targetBranchId || !mongoose.isValidObjectId(targetBranchId)) {
+      return res.status(400).json({
+        success: false,
+        code: 'BRANCH_ID_REQUIRED',
+        message: 'branchId is required and must be valid for benchmark comparison',
+      });
+    }
+
+    try {
+      assertBranchMatch(req, targetBranchId, 'OutcomeBenchmark compare branch');
+    } catch (err) {
+      if (err.statusCode === 403) {
+        return res.status(403).json({ success: false, code: 'BRANCH_MISMATCH' });
+      }
+      return res.status(400).json({ success: false, code: 'INVALID_BRANCH_SCOPE' });
+    }
+
+    const metricKind = req.query.metricKind || 'gas_avg_tscore';
+    if (!VALID_BENCHMARK_METRICS.includes(metricKind)) {
+      return res.status(400).json({ success: false, code: 'INVALID_METRIC_KIND' });
+    }
+
+    const targetBranchObjectId = new mongoose.Types.ObjectId(targetBranchId);
+    const from = parseDateBoundary(req.query.from);
+    const to = parseDateBoundary(req.query.to, true);
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    const dateFilter = {
+      $gte: from || ninetyDaysAgo,
+      ...(to ? { $lte: to } : {}),
+    };
+    const assessmentFilter = {
+      branchId: targetBranchObjectId,
+      score: { $ne: null },
+      assessmentDate: dateFilter,
+      ...(req.query.tool ? { tool: String(req.query.tool) } : {}),
+    };
+
+    try {
+      const [observedStats, benchmarkRows] = await Promise.all([
+        ClinicalAssessment.aggregate([
+          { $match: assessmentFilter },
+          {
+            $group: {
+              _id: null,
+              observations: { $sum: 1 },
+              observedMean: { $avg: '$score' },
+              latestAssessmentDate: { $max: '$assessmentDate' },
+            },
+          },
+        ]).exec(),
+        Benchmark.find({
+          metricKind,
+          status: 'published',
+          $or: [{ scope: 'branch', branchId: targetBranchObjectId }, { scope: 'national' }],
+        })
+          .sort({ periodEnd: -1 })
+          .lean(),
+      ]);
+
+      const selectedBenchmark =
+        benchmarkRows.find(
+          row => row.scope === 'branch' && String(row.branchId || '') === String(targetBranchId)
+        ) || benchmarkRows.find(row => row.scope === 'national');
+      if (!selectedBenchmark) {
+        return res.status(404).json({ success: false, code: 'BENCHMARK_NOT_FOUND' });
+      }
+
+      const stats = observedStats[0] || null;
+      if (!stats || !Number.isFinite(stats.observedMean)) {
+        return res.json({
+          success: true,
+          data: {
+            branchId: targetBranchId,
+            metricKind,
+            observations: 0,
+            observedMean: null,
+            benchmark: selectedBenchmark,
+            targetStatus: 'insufficient_data',
+          },
+        });
+      }
+
+      const targetValue =
+        selectedBenchmark.targetValue != null
+          ? selectedBenchmark.targetValue
+          : selectedBenchmark.centralTendency;
+      const gap = round2(stats.observedMean - targetValue);
+      const higherBetter = selectedBenchmark.targetDirection !== 'lower_better';
+      const meetsTarget = higherBetter
+        ? stats.observedMean >= targetValue
+        : stats.observedMean <= targetValue;
+      const gapBand =
+        Math.abs(gap) <= 2 ? 'aligned' : Math.abs(gap) <= 5 ? 'moderate_gap' : 'major_gap';
+
+      return res.json({
+        success: true,
+        data: {
+          branchId: targetBranchId,
+          metricKind,
+          observations: stats.observations,
+          observedMean: round2(stats.observedMean),
+          latestAssessmentDate: stats.latestAssessmentDate,
+          benchmark: selectedBenchmark,
+          targetValue: round2(targetValue),
+          gap,
+          meetsTarget,
+          gapBand,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({ success: false, code: 'COMPARE_FAILED', message: err.message });
+    }
+  }
+);
+
+/**
+ * GET /api/equity/benchmarks
+ * Filters: scope, metricKind, status
+ */
+router.get(
   '/benchmarks',
   requireRole(['admin', 'supervisor', 'quality_lead', 'compliance']),
   async (req, res) => {
@@ -306,10 +493,28 @@ router.get(
     if (req.query.scope) filter.scope = req.query.scope;
     if (req.query.metricKind) filter.metricKind = req.query.metricKind;
     if (req.query.status) filter.status = req.query.status;
+    if (req.query.branchId) {
+      if (!mongoose.isValidObjectId(req.query.branchId)) {
+        return res.status(400).json({ success: false, code: 'INVALID_BRANCH_ID' });
+      }
+      try {
+        assertBranchMatch(req, req.query.branchId, 'OutcomeBenchmark list branch');
+      } catch (err) {
+        if (err.statusCode === 403) {
+          return res.status(403).json({ success: false, code: 'BRANCH_MISMATCH' });
+        }
+        throw err;
+      }
+      filter.scope = 'branch';
+      filter.branchId = req.query.branchId;
+    }
 
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
     try {
-      const items = await Benchmark.find(filter).sort({ periodEnd: -1 }).limit(limit).lean();
+      const items = await Benchmark.find(buildBenchmarkListFilter(req, filter))
+        .sort({ periodEnd: -1 })
+        .limit(limit)
+        .lean();
       res.json({ success: true, items, total: items.length });
     } catch (err) {
       res.status(500).json({ success: false, code: 'LIST_FAILED', message: err.message });

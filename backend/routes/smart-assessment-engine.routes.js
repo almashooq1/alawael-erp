@@ -101,8 +101,29 @@ const {
 /* ─── Middleware ────────────────────────────────────────────────────────── */
 const { authenticateToken } = require('../middleware/auth');
 
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { fetchScopedByBeneficiary } = require('../utils/beneficiaryBranchGate');
+const Beneficiary = require('../models/Beneficiary');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+async function beneficiaryIdsInScope(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return null;
+  const rows = await Beneficiary.find(scope).select('_id').lean();
+  return rows.map(r => r._id);
+}
+
+/** W907 — list/dashboard filters via beneficiary FK, not raw branch ObjectId. */
+async function applyAssessmentListScope(req, filter) {
+  const ids = await beneficiaryIdsInScope(req);
+  if (!ids) return filter;
+  if (filter.beneficiary) {
+    const bid = String(filter.beneficiary);
+    if (!ids.some(id => String(id) === bid)) return { ...filter, beneficiary: { $in: [] } };
+    return filter;
+  }
+  return { ...filter, beneficiary: { $in: ids } };
+}
 
 // ══════════════════════════════════════════════════════════════
 // ASSESSMENT CRUD ENDPOINTS
@@ -322,7 +343,13 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const collection = await ABCDataCollection.findById(req.params.id);
+    const { doc: collection, denied } = await fetchScopedByBeneficiary(
+      ABCDataCollection,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     if (!collection)
       return res
         .status(404)
@@ -340,7 +367,13 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const collection = await ABCDataCollection.findById(req.params.id);
+    const { doc: collection, denied } = await fetchScopedByBeneficiary(
+      ABCDataCollection,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     if (!collection)
       return res
         .status(404)
@@ -854,24 +887,23 @@ router.get(
     const filter = {};
     if (req.query.beneficiary) filter.beneficiary = req.query.beneficiary;
     if (req.query.status) filter.status = req.query.status;
-    if (req.query.branch) filter.branch = req.query.branch;
-    else if (req.user?.branch) filter.branch = req.user.branch; // تقييد بالفرع
     if (req.query.assessor) filter.assessor = req.query.assessor;
     if (req.query.from || req.query.to) {
       filter.createdAt = {};
       if (req.query.from) filter.createdAt.$gte = new Date(req.query.from);
       if (req.query.to) filter.createdAt.$lte = new Date(req.query.to);
     }
+    const scopedFilter = await applyAssessmentListScope(req, filter);
 
     const [data, total] = await Promise.all([
-      Model.find(filter)
+      Model.find(scopedFilter)
         .sort(sortField)
         .skip(skip)
         .limit(limit)
         .populate('assessor', 'name role')
         .populate('beneficiary', 'name fileNumber')
         .lean(),
-      Model.countDocuments(filter),
+      Model.countDocuments(scopedFilter),
     ]);
 
     res.json({
@@ -902,11 +934,14 @@ router.get(
         .status(400)
         .json({ success: false, message: `نوع تقييم غير معروف: ${req.params.type}` });
 
-    const doc = await Model.findById(req.params.id)
-      .populate('assessor', 'name role email')
-      .populate('beneficiary', 'name fileNumber diagnosis dateOfBirth')
-      .lean();
-
+    const { doc, denied } = await fetchScopedByBeneficiary(Model, req.params.id, req, res, {
+      populate: [
+        { path: 'assessor', select: 'name role email' },
+        { path: 'beneficiary', select: 'name fileNumber diagnosis dateOfBirth' },
+      ],
+      lean: true,
+    });
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'لم يتم العثور على التقييم' });
     res.json({ success: true, data: doc });
   })
@@ -930,6 +965,12 @@ router.put(
     safeUpdate.updatedBy = req.user?._id || req.user?.id;
     safeUpdate.lastModified = new Date();
 
+    const { denied } = await fetchScopedByBeneficiary(Model, req.params.id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (denied) return;
+
     const doc = await Model.findByIdAndUpdate(req.params.id, safeUpdate, {
       returnDocument: 'after',
       runValidators: true,
@@ -952,6 +993,12 @@ router.delete(
       return res
         .status(400)
         .json({ success: false, message: `نوع تقييم غير معروف: ${req.params.type}` });
+
+    const { denied } = await fetchScopedByBeneficiary(Model, req.params.id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (denied) return;
 
     const doc = await Model.findByIdAndUpdate(
       req.params.id,
@@ -980,7 +1027,8 @@ router.post(
         .status(400)
         .json({ success: false, message: `نوع تقييم غير معروف: ${req.params.type}` });
 
-    const doc = await Model.findById(req.params.id);
+    const { doc, denied } = await fetchScopedByBeneficiary(Model, req.params.id, req, res);
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'لم يتم العثور على التقييم' });
 
     let scoring;
@@ -1042,6 +1090,16 @@ router.post(
     let pre, post;
 
     if (pre_id && post_id) {
+      const preGate = await fetchScopedByBeneficiary(Model, pre_id, req, res, {
+        select: 'beneficiary',
+        lean: true,
+      });
+      if (preGate.denied) return;
+      const postGate = await fetchScopedByBeneficiary(Model, post_id, req, res, {
+        select: 'beneficiary',
+        lean: true,
+      });
+      if (postGate.denied) return;
       [pre, post] = await Promise.all([
         Model.findById(pre_id).lean(),
         Model.findById(post_id).lean(),
@@ -1114,7 +1172,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const branchFilter = req.user?.branch ? { branch: req.user.branch } : {};
+    const tenantFilter = await applyAssessmentListScope(req, { status: { $ne: 'deleted' } });
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfWeek = new Date(now);
@@ -1128,15 +1186,13 @@ router.get(
     for (const [type, Model] of Object.entries(ASSESSMENT_MODELS)) {
       try {
         const [total, thisMonth, thisWeek] = await Promise.all([
-          Model.countDocuments({ ...branchFilter, status: { $ne: 'deleted' } }),
+          Model.countDocuments(tenantFilter),
           Model.countDocuments({
-            ...branchFilter,
-            status: { $ne: 'deleted' },
+            ...tenantFilter,
             createdAt: { $gte: startOfMonth },
           }),
           Model.countDocuments({
-            ...branchFilter,
-            status: { $ne: 'deleted' },
+            ...tenantFilter,
             createdAt: { $gte: startOfWeek },
           }),
         ]);
@@ -1152,7 +1208,7 @@ router.get(
     // أحدث 10 تقييمات عبر جميع الأنواع
     const recentPromises = Object.entries(ASSESSMENT_MODELS).map(async ([type, Model]) => {
       try {
-        const docs = await Model.find({ ...branchFilter, status: { $ne: 'deleted' } })
+        const docs = await Model.find(tenantFilter)
           .sort({ createdAt: -1 })
           .limit(3)
           .populate('beneficiary', 'name fileNumber')
@@ -1355,10 +1411,14 @@ router.get(
     if (!Model)
       return res.status(400).json({ success: false, message: `نوع التقييم غير معروف: ${type}` });
 
-    const doc = await Model.findById(id)
-      .populate('beneficiary', 'name fileNumber dateOfBirth')
-      .populate('assessor', 'name')
-      .lean();
+    const { doc, denied } = await fetchScopedByBeneficiary(Model, id, req, res, {
+      populate: [
+        { path: 'beneficiary', select: 'name fileNumber dateOfBirth' },
+        { path: 'assessor', select: 'name' },
+      ],
+      lean: true,
+    });
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
 
     const report = AssessmentReportGenerator.generateReport(type, doc, { format });
@@ -1385,6 +1445,16 @@ router.post(
     if (!Model)
       return res.status(400).json({ success: false, message: `نوع التقييم غير معروف: ${type}` });
 
+    const preGate = await fetchScopedByBeneficiary(Model, pre_id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (preGate.denied) return;
+    const postGate = await fetchScopedByBeneficiary(Model, post_id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (postGate.denied) return;
     const pre = await Model.findById(pre_id).lean();
     const post = await Model.findById(post_id).lean();
     if (!pre || !post)

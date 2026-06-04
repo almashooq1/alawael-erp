@@ -12,11 +12,28 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { fetchScopedByBeneficiary } = require('../utils/beneficiaryBranchGate');
+const Beneficiary = require('../models/Beneficiary');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(authenticateToken);
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard);
+
+async function icfTenantMatch(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return {};
+  const ids = await Beneficiary.find(scope).select('_id').lean();
+  return { beneficiaryId: { $in: ids.map(r => r._id) } };
+}
 
 // ── Canonical ICF assessment model (W850: drop IcfAssessment fallback — use ICFAssessment) ──
 function getIcfAssessmentModel() {
@@ -117,7 +134,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
     const { beneficiaryId, episodeId, status, limit = 20, skip = 0 } = req.query;
-    const q = { isDeleted: { $ne: true } };
+    const q = { isDeleted: { $ne: true }, ...(await icfTenantMatch(req)) };
     if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
     if (episodeId) q.episodeId = new mongoose.Types.ObjectId(episodeId);
     if (status) q.status = status;
@@ -142,10 +159,11 @@ router.get(
   '/statistics',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
+    const tenant = await icfTenantMatch(req);
     const [total, byStatus] = await Promise.all([
-      M.countDocuments({ isDeleted: { $ne: true } }),
+      M.countDocuments({ isDeleted: { $ne: true }, ...tenant }),
       M.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: { isDeleted: { $ne: true }, ...tenant } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
     ]);
@@ -160,8 +178,9 @@ router.get(
   '/domain-distribution',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
+    const tenant = await icfTenantMatch(req);
     const dist = await M.aggregate([
-      { $match: { isDeleted: { $ne: true } } },
+      { $match: { isDeleted: { $ne: true }, ...tenant } },
       {
         $project: {
           bodyFunctionsCount: { $size: { $ifNull: ['$bodyFunctions', []] } },
@@ -188,8 +207,9 @@ router.get(
   '/organization-report',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const total = await M.countDocuments({ isDeleted: { $ne: true } });
-    const recent = await M.find({ isDeleted: { $ne: true } })
+    const tenant = await icfTenantMatch(req);
+    const total = await M.countDocuments({ isDeleted: { $ne: true }, ...tenant });
+    const recent = await M.find({ isDeleted: { $ne: true }, ...tenant })
       .sort({ createdAt: -1 })
       .limit(10)
       .lean();
@@ -308,7 +328,11 @@ router.get(
   '/beneficiary/:beneficiaryId/timeline',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const data = await M.find({ beneficiaryId: req.params.beneficiaryId, isDeleted: { $ne: true } })
+    const data = await M.find({
+      beneficiaryId: req.params.beneficiaryId,
+      isDeleted: { $ne: true },
+      ...(await icfTenantMatch(req)),
+    })
       .sort({ assessmentDate: 1 })
       .lean();
     res.json({ success: true, data });
@@ -319,7 +343,11 @@ router.get(
   '/beneficiary/:beneficiaryId/comparative-report',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const data = await M.find({ beneficiaryId: req.params.beneficiaryId, isDeleted: { $ne: true } })
+    const data = await M.find({
+      beneficiaryId: req.params.beneficiaryId,
+      isDeleted: { $ne: true },
+      ...(await icfTenantMatch(req)),
+    })
       .sort({ assessmentDate: -1 })
       .limit(5)
       .lean();
@@ -331,7 +359,11 @@ router.get(
   '/:id',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const doc = await M.findById(req.params.id).lean();
+    const { doc, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: doc });
   })
@@ -341,9 +373,15 @@ router.put(
   '/:id',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
+    const { denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      select: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     const doc = await M.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
@@ -355,6 +393,12 @@ router.patch(
   '/:id/status',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
+    const { denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      select: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     const doc = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
@@ -368,6 +412,12 @@ router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
+    const { denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      select: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })
@@ -377,7 +427,11 @@ router.get(
   '/:id/compare',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const doc = await M.findById(req.params.id).lean();
+    const { doc, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     res.json({ success: true, data: { current: doc, previous: null } });
   })
 );
@@ -390,7 +444,11 @@ router.get(
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
     const B = IcfBenchmark();
-    const doc = await M.findById(req.params.id).lean();
+    const { doc, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
 
     const items = collectIcfQualifierItems(doc);
@@ -435,7 +493,11 @@ router.get(
   '/:id/report',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const doc = await M.findById(req.params.id).lean();
+    const { doc, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: doc });
   })

@@ -58,7 +58,7 @@ jest.mock('mongoose', () => {
               countDocuments: mockConsentCountDocuments,
               updateMany: mockConsentUpdateMany,
             };
-          if (name === 'DataSubjectRequest')
+          if (name === 'PdplServiceDataSubjectRequest')
             return {
               create: mockDSRCreate,
               findByIdAndUpdate: mockDSRFindByIdAndUpdate,
@@ -219,7 +219,7 @@ describe('PdplService', () => {
       expect(mockConsentFindOneAndUpdate).toHaveBeenCalledWith(
         { userId: 'u1', purpose: 'marketing', isActive: true },
         expect.objectContaining({ isActive: false, consentGiven: false }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -274,7 +274,7 @@ describe('PdplService', () => {
       expect(mockDSRFindByIdAndUpdate).toHaveBeenCalledWith(
         'dsr1',
         expect.objectContaining({ status: 'completed', completedAt: expect.any(Date) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -284,7 +284,7 @@ describe('PdplService', () => {
       expect(mockDSRFindByIdAndUpdate).toHaveBeenCalledWith(
         'dsr1',
         expect.objectContaining({ completedAt: expect.any(Date) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -294,7 +294,7 @@ describe('PdplService', () => {
       expect(mockDSRFindByIdAndUpdate).toHaveBeenCalledWith(
         'dsr1',
         expect.not.objectContaining({ completedAt: expect.any(Date) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });

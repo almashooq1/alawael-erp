@@ -289,12 +289,12 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // W835 ratchet-down: GoalBank, ImportExportJob, FormTemplate, FormSubmission,
   // TherapyProtocol, DigitalSignature (documentDigitalCert) — Pattern D renames
   // in service/rehab files; canonical models remain at models/*.js.
-  'MDTMeeting',
+  // W848 ratchet-down: MDTMeeting → MdtQualityMDTMeeting (mdt-transition-quality.js);
+  //   NotificationPreferences → DocumentNotificationPreferences (documentNotification.service.js);
+  //   DataSubjectRequest → PdplServiceDataSubjectRequest (pdpl.service.js); canonicals unchanged.
   'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary) — see ADR-020 for canonical-consolidation decision (deferred pending stakeholder)
-  'NotificationPreferences',
   // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
   // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
-  'DataSubjectRequest',
   // W837 ratchet-down: WorkflowDefinition + WorkflowInstance document-service collisions
   // closed via Pattern D rename (DocumentOrch* + DocumentEngineWorkflowInstance).
 

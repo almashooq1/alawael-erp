@@ -129,13 +129,15 @@ const MDTMeetingSchema = new Schema(
 MDTMeetingSchema.pre('save', async function () {
   if (!this.meeting_number) {
     const count = await mongoose
-      .model('MDTMeeting')
+      .model('MdtQualityMDTMeeting')
       .countDocuments({ beneficiary_id: this.beneficiary_id });
     this.meeting_number = `MDT-${this.beneficiary_id.toString().slice(-6)}-${String(count + 1).padStart(3, '0')}`;
   }
 });
 
-const MDTMeeting = mongoose.models.MDTMeeting || mongoose.model('MDTMeeting', MDTMeetingSchema);
+// Pattern D (W848): MDT transition-quality meetings (canonical: models/MDTCoordination.js)
+const MdtQualityMDTMeeting =
+  mongoose.models.MdtQualityMDTMeeting || mongoose.model('MdtQualityMDTMeeting', MDTMeetingSchema);
 
 // ══════════════════════════════════════════════════════════════
 // PRIORITY 7 - Transition Planning Protocol
@@ -431,7 +433,7 @@ class KPICalculator {
 
 router.post('/mdt/meetings', async (req, res) => {
   try {
-    const meeting = new MDTMeeting(req.body);
+    const meeting = new MdtQualityMDTMeeting(req.body);
     await meeting.save();
     res.status(201).json({ success: true, message: 'تم جدولة اجتماع الفريق', data: meeting });
   } catch (err) {
@@ -441,7 +443,7 @@ router.post('/mdt/meetings', async (req, res) => {
 
 router.get('/mdt/meetings/beneficiary/:id', async (req, res) => {
   try {
-    const meetings = await MDTMeeting.find({ beneficiary_id: req.params.id }).sort({
+    const meetings = await MdtQualityMDTMeeting.find({ beneficiary_id: req.params.id }).sort({
       meeting_date: -1,
     });
     res.json({ success: true, count: meetings.length, data: meetings });
@@ -452,7 +454,7 @@ router.get('/mdt/meetings/beneficiary/:id', async (req, res) => {
 
 router.get('/mdt/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findById(req.params.id);
+    const meeting = await MdtQualityMDTMeeting.findById(req.params.id);
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting });
   } catch (err) {
@@ -462,7 +464,7 @@ router.get('/mdt/meetings/:id', async (req, res) => {
 
 router.patch('/mdt/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, req.body, {
+    const meeting = await MdtQualityMDTMeeting.findByIdAndUpdate(req.params.id, req.body, {
       returnDocument: 'after',
     });
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
@@ -474,7 +476,7 @@ router.patch('/mdt/meetings/:id', async (req, res) => {
 
 router.post('/mdt/meetings/:id/decisions/:decisionIndex/complete', async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findById(req.params.id);
+    const meeting = await MdtQualityMDTMeeting.findById(req.params.id);
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     const idx = parseInt(req.params.decisionIndex);
     if (meeting.decisions[idx]) {
@@ -489,7 +491,7 @@ router.post('/mdt/meetings/:id/decisions/:decisionIndex/complete', async (req, r
 
 router.get('/mdt/branch/:branchId/upcoming', async (req, res) => {
   try {
-    const meetings = await MDTMeeting.find({
+    const meetings = await MdtQualityMDTMeeting.find({
       branch_id: req.params.branchId,
       status: 'scheduled',
       meeting_date: { $gte: new Date() },

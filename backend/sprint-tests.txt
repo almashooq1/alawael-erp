@@ -619,5 +619,6 @@ __tests__/capa-reject-behavioral-wave843.test.js
 __tests__/capa-cancel-behavioral-wave844.test.js
 __tests__/capa-verification-failure-behavioral-wave845.test.js
 __tests__/capa-implemented-mutations-behavioral-wave846.test.js
+__tests__/capa-reject-inprogress-behavioral-wave848.test.js
 __tests__/spasticity-injection-api-wave715.test.js
 __tests__/spasticity-injection-behavioral-wave715.test.js

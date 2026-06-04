@@ -306,9 +306,10 @@ const NotificationPreferencesSchema = new mongoose.Schema(
   }
 );
 
-const NotificationPreferences =
-  mongoose.models.NotificationPreferences ||
-  mongoose.model('NotificationPreferences', NotificationPreferencesSchema);
+// Pattern D (W848): document notification prefs (distinct from models/operations/DocumentNotificationPreferences)
+const DocumentNotificationPreferences =
+  mongoose.models.DocumentNotificationPreferences ||
+  mongoose.model('DocumentNotificationPreferences', NotificationPreferencesSchema);
 
 // ─────────────────────────────────────────────
 // خدمة الإشعارات
@@ -530,15 +531,15 @@ class DocumentNotificationService extends EventEmitter {
   // ═══════════════════════════════════════════════════════════
 
   async getPreferences(userId) {
-    let prefs = await NotificationPreferences.findOne({ userId }).lean();
+    let prefs = await DocumentNotificationPreferences.findOne({ userId }).lean();
     if (!prefs) {
-      prefs = await new NotificationPreferences({ userId }).save();
+      prefs = await new DocumentNotificationPreferences({ userId }).save();
     }
     return prefs;
   }
 
   async updatePreferences(userId, updates) {
-    const prefs = await NotificationPreferences.findOneAndUpdate(
+    const prefs = await DocumentNotificationPreferences.findOneAndUpdate(
       { userId },
       { $set: updates },
       { returnDocument: 'after', upsert: true }
@@ -552,7 +553,7 @@ class DocumentNotificationService extends EventEmitter {
 
   async _getUserPreferences(userId) {
     try {
-      return await NotificationPreferences.findOne({ userId }).lean();
+      return await DocumentNotificationPreferences.findOne({ userId }).lean();
     } catch {
       return null;
     }
@@ -634,5 +635,5 @@ class DocumentNotificationService extends EventEmitter {
 
 module.exports = new DocumentNotificationService();
 module.exports.Notification = Notification;
-module.exports.NotificationPreferences = NotificationPreferences;
+module.exports.DocumentNotificationPreferences = DocumentNotificationPreferences;
 module.exports.NOTIFICATION_TYPES = NOTIFICATION_TYPES;

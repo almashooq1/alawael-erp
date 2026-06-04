@@ -113,10 +113,10 @@ const DataProcessingRecord =
 const ConsentRecord =
   mongoose.models.ConsentRecord || mongoose.model('ConsentRecord', consentRecordSchema);
 
-const DataSubjectRequest =
-  mongoose.models.DataSubjectRequest ||
-  mongoose.models.DataSubjectRequest ||
-  mongoose.model('DataSubjectRequest', dataSubjectRequestSchema);
+// Pattern D (W848): PDPL service DSR (distinct from privacy/data-subject-request.model.js)
+const PdplServiceDataSubjectRequest =
+  mongoose.models.PdplServiceDataSubjectRequest ||
+  mongoose.model('PdplServiceDataSubjectRequest', dataSubjectRequestSchema);
 
 const DataBreachIncident =
   mongoose.models.DataBreachIncident ||
@@ -230,7 +230,7 @@ class PdplService {
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 30);
 
-    const request = await DataSubjectRequest.create({
+    const request = await PdplServiceDataSubjectRequest.create({
       userId,
       requestType,
       status: 'received',
@@ -248,7 +248,9 @@ class PdplService {
   async updateRequestStatus(requestId, status, handledBy, notes) {
     const update = { status, handledBy, notes };
     if (['completed', 'rejected'].includes(status)) update.completedAt = new Date();
-    return DataSubjectRequest.findByIdAndUpdate(requestId, update, { returnDocument: 'after' });
+    return PdplServiceDataSubjectRequest.findByIdAndUpdate(requestId, update, {
+      returnDocument: 'after',
+    });
   }
 
   async getDataSubjectRequests(filters = {}) {
@@ -256,7 +258,7 @@ class PdplService {
     if (filters.userId) query.userId = filters.userId;
     if (filters.status) query.status = filters.status;
     if (filters.requestType) query.requestType = filters.requestType;
-    return DataSubjectRequest.find(query).sort({ receivedAt: -1 }).lean();
+    return PdplServiceDataSubjectRequest.find(query).sort({ receivedAt: -1 }).lean();
   }
 
   // =========================================================================
@@ -275,7 +277,7 @@ class PdplService {
     }
 
     const consents = await ConsentRecord.find({ userId }).lean();
-    const requests = await DataSubjectRequest.find({ userId }).lean();
+    const requests = await PdplServiceDataSubjectRequest.find({ userId }).lean();
 
     return {
       personalInformation: user
@@ -316,7 +318,7 @@ class PdplService {
     erasedItems.push('consent_records_withdrawn');
 
     // تسجيل طلب المحو
-    await DataSubjectRequest.create({
+    await PdplServiceDataSubjectRequest.create({
       userId,
       requestType: 'erasure',
       status: 'completed',
@@ -404,12 +406,14 @@ class PdplService {
     const [processingRecords, activeConsents, pendingRequests, openBreaches] = await Promise.all([
       DataProcessingRecord.countDocuments(),
       ConsentRecord.countDocuments({ isActive: true }),
-      DataSubjectRequest.countDocuments({ status: { $in: ['received', 'in_progress'] } }),
+      PdplServiceDataSubjectRequest.countDocuments({
+        status: { $in: ['received', 'in_progress'] },
+      }),
       DataBreachIncident.countDocuments({ status: { $in: ['open', 'investigating'] } }),
     ]);
 
     // الطلبات المتأخرة (تجاوزت 30 يوماً دون إغلاق)
-    const overdueRequests = await DataSubjectRequest.countDocuments({
+    const overdueRequests = await PdplServiceDataSubjectRequest.countDocuments({
       status: { $in: ['received', 'in_progress'] },
       deadline: { $lt: new Date() },
     });

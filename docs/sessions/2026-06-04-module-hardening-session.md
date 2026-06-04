@@ -364,4 +364,10 @@ jest.mock('../middleware/auth', () => ({
 - ~~EnterpriseProPlus talent/facility + Warehouse Pattern D~~ — **done W845** (`EnterpriseProWarehouse`, `EnterpriseProPlusJobPosting/JobApplication/Facility`).
 - ~~EnterpriseProPlus vendor/ITSM/strategic Pattern D~~ — **done W846** (`EnterpriseProPlusVendor`, `VendorEvaluation`, `ChangeRequest`, `StrategicInitiative`).
 - ~~NotificationLog collision (ADR-031)~~ — **done W847** (`UserNotification` inbox + `NotificationDeliveryLog` delivery audit).
-- Remaining W340 cluster: documents-pro `WorkflowDefinition` umbrella, `LifecyclePolicy`, …
+- ~~W848 CAPA IN_PROGRESS→REJECTED + W340 trio Pattern D~~ — **done (uncommitted)**:
+  - `capa-reject-inprogress-behavioral-wave848.test.js` (reasonCode + tier 2).
+  - `MdtQualityMDTMeeting` (`rehabilitation-services/mdt-transition-quality.js`; canonical `MDTMeeting` in `models/MDTCoordination.js`).
+  - `DocumentNotificationPreferences` (`documentNotification.service.js`; canonical `models/operations/NotificationPreferences.model.js`).
+  - `PdplServiceDataSubjectRequest` (`pdpl.service.js`; canonical `privacy/data-subject-request.model.js` — schemas diverge, no merge).
+  - W340 baseline ratchet: removed `MDTMeeting`, `NotificationPreferences`, `DataSubjectRequest` from `KNOWN_DUPLICATE_REGISTRATIONS`.
+- Remaining W340 cluster: documents-pro `WorkflowDefinition` umbrella, `LifecyclePolicy`, `Student`, …

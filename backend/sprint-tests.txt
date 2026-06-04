@@ -170,6 +170,7 @@ __tests__/caseload-rebalance-apply-wave512.test.js
 __tests__/caseload-rebalance-wave510.test.js
 __tests__/cbahi-behavioral-wave360.test.js
 __tests__/cbahi-wave360.test.js
+__tests__/cbahi-routes-behavioral-wave864.test.js
 __tests__/cctv-lazy-env-read-wave414.test.js
 __tests__/changelog-structure.test.js
 __tests__/check-authz-consolidation-script.test.js

@@ -388,7 +388,11 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W863 adaptive-sports + facility-asset route behavioral~~ — **done (pending push)**: 28 supertest tests.
+- ~~W864 cbahi route behavioral~~ — **done (pending push)**: 15 supertest tests — standards registry (catalog/by-key/chapters),
+  per-(branch,standard) attestation singleton 409, attest met/score, evidence add/remove, dashboard compliance %
+  computation (met + not_applicable), role gating (therapist 403), cross-branch isolation, DELETE gating.
+  **Closes W356-W370 clinical-series route behavioral coverage (13 surfaces).**
+- ~~W863 adaptive-sports + facility-asset route behavioral~~ — **done** (`359da53eb`, pushed `main`): 28 supertest tests.
   `adaptive-sports-routes-behavioral-wave863` (15): **medical-clearance activation gate** for high-demand
   sports (high+no-clearance → 400, clearance → activate 200), lifecycle, session/achievement subdocs,
   cross-branch. `facility-asset-routes-behavioral-wave863b` (13): PPM inspection flow (fail→inspection_failed

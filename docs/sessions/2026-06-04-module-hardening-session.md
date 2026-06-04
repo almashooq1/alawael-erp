@@ -395,7 +395,8 @@ jest.mock('../middleware/auth', () => ({
   `controlledDocument` (W872), `calibration` (W873), `evidence` (W874), `laundry` (W875),
   `kitchen` (W876), `warehouse` (W877), `pharmacy` (W878), `toileting` (W879),
   `invoices-admin` (W880), `referrals-admin` (W881), `nps-admin` (W882),
-  `beneficiary-day-attendance` (W883).
+  `beneficiary-day-attendance` (W883), `events-management` (W885),
+  `contract-management` (W886), `therapy-sessions-admin` (W887), `cpe-admin` (W888).
   Still open / deferred: `crisis` (ambiguous — see below), `medicalEquipment`/`asset-management`
   (models lack branch/center — need schema + product intent), `meetings`/`strategicPlanning`
   (no branchId on model — org-wide or needs schema), `medication catalog` + `MenuItem` (org-wide
@@ -501,6 +502,29 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `?branchId` spoof; PATCH/DELETE bare `findById`; check-in trusted body `branchId`. Fix: mount
   `requireBranchAccess`, `listScope`/`scopedById`, stamp `branchId` from caller scope on check-in/mark/bulk. +
   `beneficiary-day-attendance-branch-isolation-wave883.test.js` (4 tests).
+- ~~W885 events-management IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `EventManagement`
+  model (in `_archived/dead-models/`) lacked `branchId`; list/dashboard/registrations used bare `findById` despite
+  `requireBranchAccess`. Fix: added `branchId` to schema; `listScope`/`scopedById`/`assertEventInScope` on every
+  instance path; POST stamps `branchId`; `safeModel()` fallback loads archived model when primary missing. +
+  `events-management-branch-isolation-wave885.test.js` (3 tests).
+- ~~W886 contract-management IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `Contract` +
+  `ContractTemplate` carry `branchId` but templates/contracts stats/list/dashboard/expiring-soon + every contract
+  sub-route (parties, amendments, negotiations, sign, approve, …) used bare `findById`. Fix: `listScope`/`scopedById`/
+  `loadContractOr404` on all instance paths; POST stamps `branchId` from `req.branchScope`. +
+  `contract-management-branch-isolation-wave886.test.js` (4 tests; POST includes `liabilityInsurance` string — model
+  nested `type: String` shorthand makes subdoc a String path). DELETE is admin-only (CROSS_BRANCH) → PUT used for
+  instance isolation regression instead.
+- ~~W887 therapy-sessions-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — admin therapy
+  session CRUD filtered beneficiaries via manual `HQ_ROLES` + `req.user.branchId` (never set by middleware); POST
+  create had no beneficiary scope check. Fix: mount `requireBranchAccess`; refactor `getScopedBeneficiaryIds` to
+  `branchFilter(req)`; `assertBeneficiaryInScope` on POST create (instance paths already gated). +
+  `therapy-sessions-admin-branch-isolation-wave887.test.js` (3 tests). **Note**: route comment says
+  `/api/admin/therapy-sessions` but no explicit registry mount found — smoke tests expect full `app.js` wiring.
+- ~~W888 cpe-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — CPE records tie to
+  `employeeId` (Employee uses `branch_id`); list/overview/export + PATCH/DELETE/verify used bare `findById`. Fix:
+  mount `requireBranchAccess`; `employeeBranchFilter`/`scopedEmployeeIds`/`assertEmployeeInScope`/`cpeInstanceFilter`;
+  scoped list, overview, export, mutations, employee sub-routes; POST create gated by employee scope. +
+  `cpe-admin-branch-isolation-wave888.test.js` (4 tests).
 - ~~W884 Mongoose duplicate schema.index drift guard + 25-index cleanup~~ — **done** (local, not yet pushed; renumbered from W880 — W880 taken by invoices-admin isolation):
   - **Cleanup**: removed redundant `schema.index({field:1})` where the field already declares `unique:true`
     (or a duplicate compound unique) across 19 models — 25 warnings → 0 (AssetTransfer, Volunteer×3,
@@ -512,7 +536,7 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   - **Lifecycle tests**: W597/W601 updated to drive scope via `req.user.branchId` (W833 `requireBranchAccess`
     overwrites injected `req.branchScope`); W601 foreign `?branchId=` now expects 403 at middleware.
   - **ESLint**: 5 unused-var warnings cleared (maintenanceHub, purchasing, rehabLicenses).
-  - **Verify**: 17 suites / 78 tests (W870–883 + W884 + W597/W601) ✅; all 5 pre-push gates + lint ✅.
+  - **Verify**: W870–888 isolation batch — 18 suites / 75 tests ✅; + W884 + W597/W601 in full local gate; all 5 pre-push gates + lint ✅.
 - ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done** (`b7b337f9c`, pushed `main`): converted ALL 26 remaining
   bare instance lookups in `mdt-coordination.routes.js` to branch-scoped `findOne`/`findOneAndDelete` — 12 MDTMeeting
   sub-resource reads + 10 UnifiedRehabPlan (GET/:id + 7 sub-resource + DELETE) + 4 ReferralTicket (GET/:id + sub-resource

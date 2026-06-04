@@ -103,6 +103,15 @@ const OPTIONAL_REQUIRES_ALLOWLIST = new Set([
   // `./models/BeneficiaryFile` (app.js) to `../models/BeneficiaryFile`
   // (one dir deeper). Same optional file-model rationale stands.
   'startup/carePlanningBootstrap.js::../models/BeneficiaryFile',
+  // W885 — events-management.routes.js `safeModel()` lazy-loads the Event
+  // models inside a try/catch: first tries `../models/EventManagement`
+  // (no such canonical file — Event schemas are registered at runtime via
+  // mongoose.models), then falls back to the dead-model copy under
+  // `_archived/` (skipped by EXCLUDED_DIRS). The primary path is an
+  // intentional optional require guarded by try/catch, never a load-time
+  // dependency. Was invisible pre-W885 (backtick template literal); the
+  // single-quote rewrite exposed it to the scanner.
+  'routes/events-management.routes.js::../models/EventManagement',
 ]);
 
 function walk(dir, files = []) {

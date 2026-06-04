@@ -18,7 +18,7 @@
 'use strict';
 
 const express = require('express');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -35,6 +35,54 @@ const fail = (res, msg, status = 400, extra = {}) =>
   res.status(status).json({ success: false, message: msg, ...extra });
 
 const isValidId = id => mongoose.Types.ObjectId.isValid(id);
+const hasBranchScope = req => Object.keys(branchFilter(req)).length > 0;
+
+async function scopedGuardianIds(req) {
+  if (!hasBranchScope(req)) return null;
+  const rows = await Beneficiary.find({
+    ...branchFilter(req),
+    'guardians.guardian': { $exists: true },
+  })
+    .select('guardians.guardian')
+    .lean();
+  const ids = new Set();
+  for (const row of rows) {
+    for (const link of row.guardians || []) {
+      if (link.guardian) ids.add(String(link.guardian));
+    }
+  }
+  return Array.from(ids);
+}
+
+async function guardianListScope(req, base = {}) {
+  if (!hasBranchScope(req)) return base;
+  const ids = await scopedGuardianIds(req);
+  return { ...base, _id: { $in: ids } };
+}
+
+async function loadGuardianOr404(req, res, id = req.params.id) {
+  if (!hasBranchScope(req)) {
+    const guardian = await Guardian.findById(id);
+    if (!guardian) return null;
+    return guardian;
+  }
+  const linkedInScope = await Beneficiary.exists({
+    ...branchFilter(req),
+    'guardians.guardian': id,
+  });
+  if (!linkedInScope) return null;
+  return Guardian.findById(id);
+}
+
+async function assertGuardianInScopeForLink(req, res, guardianId) {
+  if (!hasBranchScope(req)) return null;
+  const [linkedInScope, linkedAnywhere] = await Promise.all([
+    Beneficiary.exists({ ...branchFilter(req), 'guardians.guardian': guardianId }),
+    Beneficiary.exists({ 'guardians.guardian': guardianId }),
+  ]);
+  if (linkedInScope || !linkedAnywhere) return null;
+  return fail(res, 'ولي الأمر غير موجود', 404);
+}
 
 // ─── Middleware: التحقق من صحة ObjectId ───────────────────────────────────────
 const validateId = (req, res, next) => {
@@ -72,7 +120,8 @@ router.get('/search', async (req, res) => {
           ],
         };
 
-    const guardians = await Guardian.find(filter)
+    const scopedFilter = await guardianListScope(req, filter);
+    const guardians = await Guardian.find(scopedFilter)
       .select('_id firstName_ar lastName_ar name_ar phone idNumber relationship')
       .limit(Math.min(parseInt(limit, 10), 50))
       .lean();
@@ -105,7 +154,7 @@ router.get('/', async (req, res) => {
       direction = 'desc',
     } = req.query;
 
-    const filter = {};
+    let filter = {};
 
     if (search && search.trim()) {
       const s = escapeRegex(search.trim());
@@ -125,6 +174,7 @@ router.get('/', async (req, res) => {
 
     const sortObj = { [sort]: direction === 'asc' ? 1 : -1 };
 
+    filter = await guardianListScope(req, filter);
     const [guardians, total] = await Promise.all([
       Guardian.find(filter)
         .select('-__v -idDocumentPath')
@@ -153,11 +203,15 @@ router.get('/', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 router.get('/:id', validateId, async (req, res) => {
   try {
-    const guardian = await Guardian.findById(req.params.id).select('-__v').lean();
+    const guardianDoc = await loadGuardianOr404(req, res);
+    const guardian = guardianDoc?.toObject ? guardianDoc.toObject() : guardianDoc;
     if (!guardian) return fail(res, 'ولي الأمر غير موجود', 404);
 
     // جلب المستفيدين المرتبطين
-    const beneficiaries = await Beneficiary.find({ 'guardians.guardian': req.params.id })
+    const beneficiaries = await Beneficiary.find({
+      ...branchFilter(req),
+      'guardians.guardian': req.params.id,
+    })
       .select('fileNumber firstName_ar lastName_ar status disabilityType branch')
       .populate('branch', 'nameAr code')
       .lean();
@@ -274,8 +328,10 @@ router.put('/:id', validateId, async (req, res) => {
       return fail(res, 'لا توجد بيانات للتحديث', 400);
     }
 
-    const guardian = await Guardian.findByIdAndUpdate(
-      req.params.id,
+    const existing = await loadGuardianOr404(req, res);
+    if (!existing) return fail(res, 'ولي الأمر غير موجود', 404);
+    const guardian = await Guardian.findOneAndUpdate(
+      { _id: existing._id },
       { $set: updates },
       { returnDocument: 'after', runValidators: true }
     ).lean();
@@ -293,8 +349,13 @@ router.put('/:id', validateId, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 router.delete('/:id', validateId, async (req, res) => {
   try {
+    const guardian = await loadGuardianOr404(req, res);
+    if (!guardian) return fail(res, 'ولي الأمر غير موجود', 404);
+
+    const beneficiaryScope = hasBranchScope(req) ? branchFilter(req) : {};
     // التحقق من عدم وجود مستفيدين نشطين مرتبطين
     const activeBeneficiaries = await Beneficiary.countDocuments({
+      ...beneficiaryScope,
       'guardians.guardian': req.params.id,
       status: 'active',
     });
@@ -307,14 +368,10 @@ router.delete('/:id', validateId, async (req, res) => {
       );
     }
 
-    // حذف ناعم إذا كان موجوداً في النموذج
-    const guardian = await Guardian.findById(req.params.id);
-    if (!guardian) return fail(res, 'ولي الأمر غير موجود', 404);
-
     if (typeof guardian.delete === 'function') {
       await guardian.delete();
     } else {
-      await Guardian.findByIdAndUpdate(req.params.id, { isActive: false });
+      await Guardian.findOneAndUpdate({ _id: guardian._id }, { isActive: false });
     }
 
     return ok(res, { deleted: true, id: req.params.id });
@@ -333,6 +390,9 @@ router.post('/:id/link', validateId, async (req, res) => {
     if (!beneficiaryId || !isValidId(beneficiaryId)) {
       return fail(res, 'معرّف المستفيد غير صحيح', 422);
     }
+
+    const deniedByGuardianScope = await assertGuardianInScopeForLink(req, res, req.params.id);
+    if (deniedByGuardianScope) return;
 
     // Branch gate — linking a guardian to a foreign-branch beneficiary
     // would let a staff member in branch A grant a parent access to
@@ -386,6 +446,9 @@ router.delete('/:id/unlink/:beneficiaryId', validateId, async (req, res) => {
   try {
     const { beneficiaryId } = req.params;
     if (!isValidId(beneficiaryId)) return fail(res, 'معرّف المستفيد غير صحيح', 400);
+
+    const deniedByGuardianScope = await assertGuardianInScopeForLink(req, res, req.params.id);
+    if (deniedByGuardianScope) return;
 
     // Branch gate — unlinking a guardian from a foreign-branch
     // beneficiary is the mirror PDPL violation of /link above.

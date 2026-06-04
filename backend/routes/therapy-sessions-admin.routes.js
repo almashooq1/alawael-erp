@@ -22,6 +22,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const TherapySession = require('../models/TherapySession');
 const Beneficiary = require('../models/Beneficiary');
@@ -38,6 +39,7 @@ const { subjectFromReq } = require('../authorization/abac/policy-enforcement-poi
 const sessionNotePdp = new PolicyDecisionPoint(policies);
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 const STAFF_ROLES = [
   'admin',
@@ -59,7 +61,12 @@ const WRITE_ROLES = [
   'therapist',
   'receptionist',
 ];
-const HQ_ROLES = ['admin', 'superadmin', 'super_admin'];
+// ── helpers ──────────────────────────────────────────────────────────────
+async function getScopedBeneficiaryIds(req) {
+  const scope = branchFilter(req);
+  if (!scope.branchId) return null;
+  return Beneficiary.find(scope).distinct('_id');
+}
 
 const STATUS_VALUES = [
   'SCHEDULED',
@@ -71,13 +78,6 @@ const STATUS_VALUES = [
   'NO_SHOW',
   'RESCHEDULED',
 ];
-
-// ── helpers ──────────────────────────────────────────────────────────────
-async function getScopedBeneficiaryIds(req) {
-  if (HQ_ROLES.includes(req.user?.role) || !req.user?.branchId) return null;
-  const ids = await Beneficiary.find({ branchId: req.user.branchId }).distinct('_id');
-  return ids;
-}
 
 function parseDateRange(q) {
   const out = {};
@@ -337,6 +337,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const body = { ...req.body };
     if (!body.date) return res.status(400).json({ success: false, message: 'تاريخ الجلسة مطلوب' });
+    if (body.beneficiary) {
+      const denied = await assertBeneficiaryInScope(req, body.beneficiary, res);
+      if (denied) return;
+    }
     body.createdBy = req.user?.id;
 
     // Conflict detection (force option to override)

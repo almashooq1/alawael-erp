@@ -27,8 +27,15 @@ const MAR = require('../models/MedicationAdministrationRecord');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W869 — mount requireBranchAccess so req.branchScope is populated. Pre-W869 the
+// W441 bodyScopedBeneficiaryGuard below was INERT (it no-ops when req.branchScope
+// is undefined) and the instance endpoints used bare findById — a nurse in branch
+// A could read/administer/refuse/hold/delete medication records for ANY branch's
+// beneficiary by guessing the ObjectId. Same IDOR class W269/W447/W866/W867.
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -74,7 +81,7 @@ async function hydrate(items) {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    const filter = { ...branchFilter(req), date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -98,7 +105,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await MAR.find({ beneficiaryId: req.params.id })
+    const items = await MAR.find({ ...branchFilter(req), beneficiaryId: req.params.id })
       .sort({ scheduledTime: -1 })
       .limit(100)
       .lean();
@@ -128,7 +135,11 @@ router.post('/', requireRole(ADMIN_ROLES), async (req, res) => {
     const route = ROUTES.includes(body.route) ? body.route : 'oral';
     const doc = await MAR.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      // W869 — stamp the caller's branch (restricted users); bodyScopedBeneficiaryGuard
+      // already verified the beneficiary belongs to it. Cross-branch roles may pass branchId.
+      branchId:
+        req.branchScope?.branchId ||
+        (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       medicationId:
         body.medicationId && mongoose.isValidObjectId(body.medicationId) ? body.medicationId : null,
       medicationName: String(body.medicationName).trim(),
@@ -152,7 +163,7 @@ router.post('/:id/administer', requireRole(ADMINISTER_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MAR.findById(req.params.id);
+    const row = await MAR.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status !== 'scheduled' && row.status !== 'held') {
       return res
@@ -193,8 +204,8 @@ router.post('/:id/refuse', requireRole(ADMINISTER_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الرفض مطلوب' });
     }
-    const row = await MAR.findByIdAndUpdate(
-      req.params.id,
+    const row = await MAR.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         status: 'refused',
         actualTime: new Date(),
@@ -221,8 +232,8 @@ router.post('/:id/hold', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الإيقاف مطلوب' });
     }
-    const row = await MAR.findByIdAndUpdate(
-      req.params.id,
+    const row = await MAR.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'held', notes: reason.slice(0, 500) },
       { returnDocument: 'after' }
     );
@@ -291,7 +302,11 @@ router.post('/schedule-recurring', requireRole(ADMIN_ROLES), async (req, res) =>
         scheduledTime.setHours(hh, mm, 0, 0);
         docs.push({
           beneficiaryId: body.beneficiaryId,
-          branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+          // W869 — stamp the caller's branch (restricted users); bodyScopedBeneficiaryGuard
+          // already verified the beneficiary belongs to it. Cross-branch roles may pass branchId.
+          branchId:
+            req.branchScope?.branchId ||
+            (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
           medicationId:
             body.medicationId && mongoose.isValidObjectId(body.medicationId)
               ? body.medicationId
@@ -332,7 +347,7 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     delete body.beneficiaryId;
     delete body.date;
     if (body.scheduledTime) body.scheduledTime = new Date(body.scheduledTime);
-    const row = await MAR.findByIdAndUpdate(req.params.id, body, {
+    const row = await MAR.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) }, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -349,7 +364,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MAR.findByIdAndDelete(req.params.id);
+    const row = await MAR.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

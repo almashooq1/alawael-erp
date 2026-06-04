@@ -403,7 +403,18 @@ jest.mock('../middleware/auth', () => ({
   guard. **Follow-up W868**: the same file's MDTMeeting sub-resource endpoints (attendees/cases/action-items) +
   ALL UnifiedRehabPlan + ReferralTicket instance endpoints carry the identical leak (~20 endpoints) — same one-line
   fix each, deferred to keep this change reviewable.
-- ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done (pending push)**: converted ALL 26 remaining
+- ~~W869 MAR (medication record) IDOR fix + behavioral~~ — **done (pending push)**: **security fix** —
+  `mar.routes.js` mounted `bodyScopedBeneficiaryGuard` (W441) but **NOT `requireBranchAccess`**, so `req.branchScope`
+  was never set → the guard was INERT and the instance endpoints (administer/refuse/hold/patch/delete + GET /today +
+  GET /by-beneficiary) used bare findById → a nurse in branch A could read/administer/refuse/hold/delete ANY branch's
+  medication records by ObjectId guess (the worst of the lot — medication safety). Fix: mounted `requireBranchAccess`
+  (activates the existing guard), stamped `branchId` from the caller scope on both create paths, and added
+  `branchFilter(req)` to all instance lookups + the two list endpoints. + `mar-routes-branch-isolation-wave869.test.js`
+  (9 tests) proves create branch-stamping, foreign-beneficiary 403 (guard now active), cross-branch 404 on every
+  instance path, and the controlled-drug-witness + administer/refuse lifecycle. Existing W191b model test still green.
+  **riskAssessment**: audited — org-wide by design (no `branchId`, no `branchFilter` anywhere, org-level risk types) →
+  NOT a leak, no change.
+- ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done** (`b7b337f9c`, pushed `main`): converted ALL 26 remaining
   bare instance lookups in `mdt-coordination.routes.js` to branch-scoped `findOne`/`findOneAndDelete` — 12 MDTMeeting
   sub-resource reads + 10 UnifiedRehabPlan (GET/:id + 7 sub-resource + DELETE) + 4 ReferralTicket (GET/:id + sub-resource
   - DELETE). The plan + referral GET /:id had NO authorize gate (any restricted user could read a foreign branch's rehab

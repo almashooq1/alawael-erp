@@ -21,6 +21,10 @@ jest.mock('../middleware/auth', () => ({
 }));
 jest.mock('../middleware/branchScope.middleware', () => ({
   branchFilter: () => ({}),
+  requireBranchAccess: (req, _res, next) => {
+    req.branchScope = { restricted: false, branchId: null, allBranches: true };
+    next();
+  },
 }));
 
 let mongod;

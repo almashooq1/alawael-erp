@@ -23,8 +23,10 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const { authorize } = require('../../middleware/auth');
-const { effectiveBranchScope } = require('../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { effectiveBranchScope, assertBranchMatch } = require('../../middleware/assertBranchMatch');
 const safeError = require('../../utils/safeError');
 const { HrPerformanceService } = require('../../services/hr/hrPerformanceService');
 
@@ -33,6 +35,7 @@ const { HrPerformanceService } = require('../../services/hr/hrPerformanceService
  */
 function createHrPerformanceRouter({ logger }) {
   const router = express.Router();
+  router.use(requireBranchAccess);
 
   // Lazy-load models inside the factory so missing models degrade gracefully
   let svc;
@@ -42,6 +45,28 @@ function createHrPerformanceRouter({ logger }) {
     const SuccessionPlan = require('../../models/SuccessionPlan');
     svc = new HrPerformanceService({ PerformanceEvaluation, SuccessionPlan, logger });
     return svc;
+  }
+
+  async function assertEvaluationBranch(req, res) {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ success: false, message: 'معرف غير صالح' });
+      return false;
+    }
+    const PerformanceEvaluation = require('../../models/PerformanceEvaluation');
+    const doc = await PerformanceEvaluation.findById(req.params.id).select('branchId').lean();
+    if (!doc) {
+      res.status(404).json({ success: false, message: 'التقييم غير موجود' });
+      return false;
+    }
+    if (doc.branchId) {
+      try {
+        assertBranchMatch(req, doc.branchId, 'performance evaluation');
+      } catch (err) {
+        res.status(err.status || 403).json({ success: false, message: err.message });
+        return false;
+      }
+    }
+    return true;
   }
 
   /* ─── Performance Evaluations ─────────────────────────────── */
@@ -81,6 +106,7 @@ function createHrPerformanceRouter({ logger }) {
   // GET /evaluations/:id
   router.get('/evaluations/:id', async (req, res) => {
     try {
+      if (!(await assertEvaluationBranch(req, res))) return;
       const doc = await getService().getEvaluation(req.params.id);
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -94,7 +120,16 @@ function createHrPerformanceRouter({ logger }) {
     authorize(['admin', 'super_admin', 'hr_manager', 'manager']),
     async (req, res) => {
       try {
-        const doc = await getService().createEvaluation(req.body, req.user?._id);
+        const body = req.body || {};
+        const doc = await getService().createEvaluation(
+          {
+            employeeId: body.employeeId,
+            evaluationPeriod: body.evaluationPeriod,
+            hrNotes: body.hrNotes,
+            branchId: effectiveBranchScope(req) || body.branchId,
+          },
+          req.user?._id
+        );
         res.status(201).json({ success: true, data: doc });
       } catch (err) {
         safeError(res, err, 'creating evaluation');
@@ -105,6 +140,7 @@ function createHrPerformanceRouter({ logger }) {
   // POST /evaluations/:id/submit
   router.post('/evaluations/:id/submit', async (req, res) => {
     try {
+      if (!(await assertEvaluationBranch(req, res))) return;
       const { evaluationType, scores, comments, strengths, areasForImprovement } = req.body;
       if (!evaluationType) {
         return res.status(400).json({ success: false, message: 'نوع المقيّم مطلوب' });
@@ -129,6 +165,7 @@ function createHrPerformanceRouter({ logger }) {
     authorize(['admin', 'super_admin', 'hr_manager']),
     async (req, res) => {
       try {
+        if (!(await assertEvaluationBranch(req, res))) return;
         const doc = await getService().approveEvaluation(req.params.id, req.user?._id);
         res.json({ success: true, data: doc, message: 'تم اعتماد التقييم بنجاح' });
       } catch (err) {
@@ -143,6 +180,7 @@ function createHrPerformanceRouter({ logger }) {
     authorize(['admin', 'super_admin', 'hr_manager']),
     async (req, res) => {
       try {
+        if (!(await assertEvaluationBranch(req, res))) return;
         const result = await getService().deleteEvaluation(req.params.id);
         res.json({ success: true, ...result });
       } catch (err) {

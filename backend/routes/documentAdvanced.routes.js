@@ -33,6 +33,9 @@ const exportService = require('../services/documents/documentImportExport.servic
 const qrService = require('../services/documents/documentQRCode.service');
 const safeError = require('../utils/safeError');
 
+router.use(authenticateToken);
+router.use(requireBranchAccess);
+
 // ── Helper ───────────────────────────────────────────────────────────────────
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const userId = req => req.user?.id || req.user?._id || 'anonymous';
@@ -45,9 +48,6 @@ const userName = req => req.user?.name || req.user?.fullName || 'مستخدم';
 // Toggle favorite
 router.post(
   '/favorites/toggle',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.toggleFavorite(userId(req), req.body.documentId, {
       ...req.body,
@@ -60,9 +60,6 @@ router.post(
 // Get user favorites
 router.get(
   '/favorites',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.getFavorites(userId(req), req.query);
     res.json(result);
@@ -72,9 +69,6 @@ router.get(
 // Check if favorited
 router.get(
   '/favorites/check/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.isFavorited(userId(req), req.params.documentId);
     res.json(result);
@@ -84,9 +78,6 @@ router.get(
 // Get favorite statistics
 router.get(
   '/favorites/stats',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.getStatistics(userId(req));
     res.json(result);
@@ -96,9 +87,6 @@ router.get(
 // Create collection
 router.post(
   '/favorites/collections',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.createCollection(userId(req), req.body);
     res.json(result);
@@ -108,9 +96,6 @@ router.post(
 // Get collections
 router.get(
   '/favorites/collections',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.getCollections(userId(req));
     res.json(result);
@@ -120,9 +105,6 @@ router.get(
 // Add to collection
 router.post(
   '/favorites/collections/:collectionId/add',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.updateFavorite(userId(req), req.body.documentId, {
       collection: req.params.collectionId,
@@ -135,9 +117,6 @@ router.post(
 // Remove from collection
 router.post(
   '/favorites/collections/:collectionId/remove',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await favoritesService.updateFavorite(userId(req), req.body.documentId, {
       collection: null,
@@ -154,9 +133,6 @@ router.post(
 // Log audit event (internal — also called by other services)
 router.post(
   '/audit/log',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.logEvent({
       ...req.body,
@@ -172,9 +148,6 @@ router.post(
 // Get document audit trail
 router.get(
   '/audit/trail/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.getDocumentAuditTrail(req.params.documentId, req.query);
     res.json(result);
@@ -184,9 +157,6 @@ router.get(
 // Get user activity log
 router.get(
   '/audit/user-activity',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.getUserActivityReport(userId(req), req.query);
     res.json(result);
@@ -196,9 +166,6 @@ router.get(
 // Get compliance report
 router.get(
   '/audit/compliance',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.generateComplianceReport(req.query);
     res.json(result);
@@ -208,9 +175,6 @@ router.get(
 // Export audit trail
 router.get(
   '/audit/export',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.exportAuditLog(req.query);
     res.json(result);
@@ -220,9 +184,6 @@ router.get(
 // Verify chain integrity
 router.get(
   '/audit/verify-chain',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.getAuditLog({
       documentId: req.query.documentId,
@@ -235,9 +196,6 @@ router.get(
 // Detect suspicious activity
 router.get(
   '/audit/suspicious',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.getAuditLog({ ...req.query, severity: 'high' });
     res.json(result);
@@ -247,9 +205,6 @@ router.get(
 // Audit statistics
 router.get(
   '/audit/stats',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await auditService.getStatistics(req.query);
     res.json(result);
@@ -263,9 +218,6 @@ router.get(
 // Apply watermark
 router.post(
   '/watermarks/apply',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await watermarkService.applyWatermark(req.body.documentId, {
       ...req.body.options,
@@ -278,9 +230,6 @@ router.post(
 // Remove watermark
 router.delete(
   '/watermarks/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await watermarkService.removeWatermark(req.params.documentId, userId(req));
     res.json(result);
@@ -290,9 +239,6 @@ router.delete(
 // Get watermark presets
 router.get(
   '/watermarks/presets',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await watermarkService.getPresets();
     res.json(result);
@@ -302,9 +248,6 @@ router.get(
 // Get document watermarks
 router.get(
   '/watermarks/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res, next) => {
     // W544: non-ObjectId → fall through to literal sibling /watermarks/templates.
     if (!/^[0-9a-fA-F]{24}$/.test(req.params.documentId)) return next('route');
@@ -316,9 +259,6 @@ router.get(
 // Dynamic watermark generation
 router.post(
   '/watermarks/dynamic',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await watermarkService.applyWatermark(req.body.documentId, {
       type: 'dynamic',
@@ -332,9 +272,6 @@ router.post(
 // Save custom template
 router.post(
   '/watermarks/templates',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await watermarkService.createTemplate(req.body.orgId, req.body);
     res.json(result);
@@ -344,9 +281,6 @@ router.post(
 // Get templates
 router.get(
   '/watermarks/templates',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await watermarkService.getTemplates(req.query.orgId);
     res.json(result);
@@ -360,9 +294,6 @@ router.get(
 // Create approval workflow
 router.post(
   '/approvals/create',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.createApprovalRequest(
       req.body.documentId,
@@ -376,9 +307,6 @@ router.post(
 // Submit decision (approve / reject / comment)
 router.post(
   '/approvals/:workflowId/decide',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.submitDecision(req.params.workflowId, userId(req), {
       ...req.body,
@@ -391,9 +319,6 @@ router.post(
 // Get workflow status
 router.get(
   '/approvals/:workflowId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.getApprovalRequest(req.params.workflowId);
     res.json(result);
@@ -403,9 +328,6 @@ router.get(
 // Get pending approvals for current user
 router.get(
   '/approvals/pending/me',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.getPendingApprovals(userId(req));
     res.json(result);
@@ -415,9 +337,6 @@ router.get(
 // Get available templates
 router.get(
   '/approvals/templates/list',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await approvalService.getTemplates();
     res.json(result);
@@ -427,9 +346,6 @@ router.get(
 // Delegate approval
 router.post(
   '/approvals/:workflowId/delegate',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.delegateApproval(
       req.params.workflowId,
@@ -444,9 +360,6 @@ router.post(
 // Cancel workflow
 router.post(
   '/approvals/:workflowId/cancel',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.cancelApprovalRequest(
       req.params.workflowId,
@@ -460,9 +373,6 @@ router.post(
 // Approval statistics
 router.get(
   '/approvals/stats/overview',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await approvalService.getStatistics(req.query);
     res.json(result);
@@ -476,9 +386,6 @@ router.get(
 // Set document expiry
 router.post(
   '/expiry/set',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await expiryService.trackExpiry(req.body.documentId, {
       ...req.body,
@@ -492,9 +399,6 @@ router.post(
 // Check document expiry
 router.get(
   '/expiry/check/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await expiryService.checkExpiry();
     res.json(result);
@@ -504,9 +408,6 @@ router.get(
 // Get expiring soon
 router.get(
   '/expiry/upcoming',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const days = parseInt(req.query.days || '30');
     const result = await expiryService.getExpiringDocuments(days);
@@ -517,9 +418,6 @@ router.get(
 // Renew document
 router.post(
   '/expiry/renew/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await expiryService.renewDocument(req.params.documentId, {
       ...req.body,
@@ -533,9 +431,6 @@ router.post(
 // Get retention policies
 router.get(
   '/expiry/policies',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await expiryService.getRetentionPolicies();
     res.json(result);
@@ -545,9 +440,6 @@ router.get(
 // Apply retention policy
 router.post(
   '/expiry/policies/apply',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await expiryService.upsertRetentionPolicy({
       documentId: req.body.documentId,
@@ -562,9 +454,6 @@ router.post(
 // Check all alerts
 router.get(
   '/expiry/alerts',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await expiryService.getAlerts();
     res.json(result);
@@ -574,9 +463,6 @@ router.get(
 // Expiry statistics
 router.get(
   '/expiry/stats',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await expiryService.getStatistics();
     res.json(result);
@@ -590,9 +476,6 @@ router.get(
 // Move to trash
 router.post(
   '/trash/move',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.moveToTrash(req.body.documentId, userId(req), {
       reason: req.body.reason,
@@ -605,9 +488,6 @@ router.post(
 // Restore from trash
 router.post(
   '/trash/restore/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.restore(req.params.documentId, userId(req));
     res.json(result);
@@ -617,9 +497,6 @@ router.post(
 // List trash items
 router.get(
   '/trash',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.getTrash(req.query);
     res.json(result);
@@ -629,9 +506,6 @@ router.get(
 // Permanent delete
 router.delete(
   '/trash/permanent/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.permanentDelete(
       req.params.documentId,
@@ -645,9 +519,6 @@ router.delete(
 // Bulk restore
 router.post(
   '/trash/bulk-restore',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.bulkRestore(req.body.documentIds, userId(req));
     res.json(result);
@@ -657,9 +528,6 @@ router.post(
 // Empty trash
 router.delete(
   '/trash/empty',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await trashService.emptyTrash(userId(req));
     res.json(result);
@@ -669,9 +537,6 @@ router.delete(
 // Trash statistics
 router.get(
   '/trash/stats',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await trashService.getStatistics();
     res.json(result);
@@ -685,9 +550,6 @@ router.get(
 // Add annotation
 router.post(
   '/annotations',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.addAnnotation(req.body.documentId, {
       ...req.body,
@@ -701,9 +563,6 @@ router.post(
 // Get document annotations
 router.get(
   '/annotations/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.getAnnotations(
       req.params.documentId,
@@ -717,9 +576,6 @@ router.get(
 // Update annotation
 router.put(
   '/annotations/:annotationId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.updateAnnotation(
       req.body.documentId,
@@ -733,9 +589,6 @@ router.put(
 // Delete annotation
 router.delete(
   '/annotations/:annotationId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.deleteAnnotation(
       req.body.documentId,
@@ -749,9 +602,6 @@ router.delete(
 // Add comment to annotation
 router.post(
   '/annotations/:annotationId/comments',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.addComment(req.body.documentId, {
       ...req.body,
@@ -766,9 +616,6 @@ router.post(
 // Add reaction to annotation
 router.post(
   '/annotations/:annotationId/reactions',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.addReaction(
       req.body.documentId,
@@ -783,9 +630,6 @@ router.post(
 // Resolve annotation
 router.post(
   '/annotations/:annotationId/resolve',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.toggleResolveComment(
       req.body.documentId,
@@ -799,9 +643,6 @@ router.post(
 // Get available stamps
 router.get(
   '/annotations/stamps/list',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await annotationService.getStampTypes();
     res.json(result);
@@ -811,9 +652,6 @@ router.get(
 // Annotation statistics
 router.get(
   '/annotations/stats/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await annotationService.getStatistics(req.params.documentId);
     res.json(result);
@@ -827,9 +665,6 @@ router.get(
 // Compare two documents
 router.post(
   '/compare',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await comparisonService.compare(
       req.body.documentIdA,
@@ -843,9 +678,6 @@ router.post(
 // Compare document versions
 router.post(
   '/compare/versions',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await comparisonService.compare(req.body.documentId, null, {
       versionA: req.body.versionA,
@@ -859,9 +691,6 @@ router.post(
 // Batch compare
 router.post(
   '/compare/batch',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await comparisonService.batchCompare(req.body.versions);
     res.json(result);
@@ -871,9 +700,6 @@ router.post(
 // Compare metadata only
 router.post(
   '/compare/metadata',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await comparisonService.compare(req.body.documentIdA, req.body.documentIdB, {
       metadataOnly: true,
@@ -885,9 +711,6 @@ router.post(
 // Get comparison history
 router.get(
   '/compare/history',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await comparisonService.getHistory(req.query);
     res.json(result);
@@ -901,9 +724,6 @@ router.get(
 // Export documents
 router.post(
   '/export',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await exportService.createExportJob(req.body.documentIds, {
       ...req.body.options,
@@ -917,9 +737,6 @@ router.post(
 // Import documents
 router.post(
   '/import',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await exportService.createImportJob(req.body.data, {
       ...req.body.options,
@@ -933,9 +750,6 @@ router.post(
 // Get export/import jobs
 router.get(
   '/export-import/jobs',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await exportService.getJobs(req.query);
     res.json(result);
@@ -945,9 +759,6 @@ router.get(
 // Get job status
 router.get(
   '/export-import/jobs/:jobId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result =
       (await exportService.getExportJob(req.params.jobId)) ||
@@ -959,9 +770,6 @@ router.get(
 // Export as CSV
 router.post(
   '/export/csv',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await exportService.exportToCSV(req.body.documentIds, req.body.options);
     res.json(result);
@@ -975,9 +783,6 @@ router.post(
 // Generate QR code for document
 router.post(
   '/qr/generate',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await qrService.generateQR(req.body.documentId, {
       ...req.body.options,
@@ -1005,9 +810,6 @@ router.post(
 // Disable QR code
 router.post(
   '/qr/disable/:qrId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await qrService.disableQR(req.params.qrId);
     res.json(result);
@@ -1017,9 +819,6 @@ router.post(
 // Get document QR codes
 router.get(
   '/qr/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res, next) => {
     // W544: non-ObjectId → fall through to literal sibling /qr/stats.
     if (!/^[0-9a-fA-F]{24}$/.test(req.params.documentId)) return next('route');
@@ -1031,9 +830,6 @@ router.get(
 // Batch generate QR codes
 router.post(
   '/qr/batch',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await qrService.batchGenerateQR(req.body.documentIds, {
       ...req.body.options,
@@ -1047,9 +843,6 @@ router.post(
 // QR scan analytics
 router.get(
   '/qr/analytics/:documentId',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     const result = await qrService.getScanAnalytics(req.params.documentId, req.query);
     res.json(result);
@@ -1059,9 +852,6 @@ router.get(
 // QR statistics
 router.get(
   '/qr/stats',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (_req, res) => {
     const result = await qrService.getStatistics();
     res.json(result);
@@ -1075,9 +865,6 @@ router.get(
 // Combined overview stats for all advanced features
 router.get(
   '/overview',
-  authenticateToken,
-  requireBranchAccess,
-  requireBranchAccess,
   wrap(async (req, res) => {
     try {
       const [favoriteStats, auditStats, approvalStats, expiryStats, trashStats, qrStats] =

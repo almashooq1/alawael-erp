@@ -26,12 +26,26 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticate } = require('../../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../../middleware/requireMfaTier');
+const { requireBranchAccess, branchFilter } = require('../../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../../middleware/assertBranchMatch');
 const lib = require('../../intelligence/capa-lifecycle.lib');
 const logger = require('../../utils/logger');
+
+function _capaModel() {
+  return mongoose.model('CapaItem');
+}
+
+/** Pin branch for restricted callers; honour explicit query for cross-branch roles. */
+function _resolveScopedBranchId(req) {
+  const scoped = effectiveBranchScope(req);
+  if (scoped) return scoped;
+  return req.query.branchId || req.user?.branchId || null;
+}
 
 function mapErrorToHttp(err) {
   if (err.code === 'CAPA_NOT_FOUND') {
@@ -75,6 +89,7 @@ router.get('/health', (_req, res) => {
 });
 
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(attachMfaActor);
 
 // ── List by status (paginated) ────────────────────────────────────────────
@@ -82,7 +97,7 @@ router.get('/', requireMfaTier(1), async (req, res) => {
   try {
     const svc = _service(req);
     const status = req.query.status || 'OPEN';
-    const branchId = req.query.branchId || req.user?.branchId || null;
+    const branchId = _resolveScopedBranchId(req);
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
     const items = await svc.listByStatus({ status, branchId, limit });
     res.json({ success: true, count: items.length, items });
@@ -97,7 +112,7 @@ router.get('/', requireMfaTier(1), async (req, res) => {
 router.get('/overdue', requireMfaTier(1), async (req, res) => {
   try {
     const svc = _service(req);
-    const branchId = req.query.branchId || req.user?.branchId || null;
+    const branchId = _resolveScopedBranchId(req);
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 500);
     const items = await svc.listOverdue({ branchId, limit });
     res.json({ success: true, count: items.length, items });
@@ -111,9 +126,12 @@ router.get('/overdue', requireMfaTier(1), async (req, res) => {
 // ── Single CAPA full doc ──────────────────────────────────────────────────
 router.get('/:id', requireMfaTier(1), async (req, res) => {
   try {
-    const mongoose = require('mongoose');
-    const Model = mongoose.model('CapaItem');
-    const doc = await Model.findById(req.params.id).lean();
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, code: 'INVALID_ID' });
+    }
+    const doc = await _capaModel()
+      .findOne({ _id: req.params.id, ...branchFilter(req) })
+      .lean();
     if (!doc) return res.status(404).json({ success: false, code: 'CAPA_NOT_FOUND' });
     res.json({ success: true, capa: doc });
   } catch (err) {
@@ -125,12 +143,15 @@ router.get('/:id', requireMfaTier(1), async (req, res) => {
 // ── Audit (lifecycleHistory append-only) ──────────────────────────────────
 router.get('/:id/audit', requireMfaTier(1), async (req, res) => {
   try {
-    const mongoose = require('mongoose');
-    const Model = mongoose.model('CapaItem');
-    const doc = await Model.findById(
-      req.params.id,
-      'lifecycleHistory createdAt updatedAt capaNumber'
-    ).lean();
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, code: 'INVALID_ID' });
+    }
+    const doc = await _capaModel()
+      .findOne(
+        { _id: req.params.id, ...branchFilter(req) },
+        'lifecycleHistory createdAt updatedAt capaNumber branchId'
+      )
+      .lean();
     if (!doc) return res.status(404).json({ success: false, code: 'CAPA_NOT_FOUND' });
     res.json({
       success: true,
@@ -150,8 +171,20 @@ router.post('/', requireMfaTier(1), async (req, res) => {
   try {
     const svc = _service(req);
     const actorUserId = req.user?._id || req.user?.id;
+    const body = req.body || {};
     const doc = await svc.createCapaItem({
-      ...req.body,
+      source: body.source,
+      type: body.type,
+      title: body.title,
+      description: body.description,
+      ownerUserId: body.ownerUserId,
+      dueDate: body.dueDate,
+      branchId: _resolveScopedBranchId(req) || body.branchId || null,
+      tenantId: body.tenantId || null,
+      priority: body.priority,
+      rootCause: body.rootCause ?? null,
+      actionPlan: body.actionPlan ?? null,
+      verificationCriteria: body.verificationCriteria ?? null,
       createdBy: actorUserId,
     });
     res.status(201).json({ success: true, capa: doc });
@@ -167,6 +200,14 @@ router.post('/', requireMfaTier(1), async (req, res) => {
 // requested transition needs tier 2 (VERIFIED→CLOSED + ANY→REJECTED).
 router.post('/:id/transition', requireMfaTier(1), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, code: 'INVALID_ID' });
+    }
+    const owned = await _capaModel()
+      .findOne({ _id: req.params.id, ...branchFilter(req) })
+      .select('_id')
+      .lean();
+    if (!owned) return res.status(404).json({ success: false, code: 'CAPA_NOT_FOUND' });
     const svc = _service(req);
     const actorUserId = req.user?._id || req.user?.id;
     const mfaTier = req.mfaActor?.tier ?? null;

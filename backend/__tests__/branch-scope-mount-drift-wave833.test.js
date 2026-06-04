@@ -54,16 +54,8 @@ const MOUNTS_GUARD = /requireBranchAccess/;
 // `router.use(requireBranchAccess)` (auth runs first at mount, so req.user is
 // present) and delete the entry here.
 const KNOWN_UNGUARDED_ROUTES = new Set([
-  // purchasing — branchFilter(req) present, but mounting requireBranchAccess
-  // here breaks 5 sibling test suites that `jest.mock('../middleware/
-  // branchScope.middleware', () => ({ branchFilter: () => ({}) }))` WITHOUT a
-  // `requireBranchAccess` export → `router.use(undefined)` throws at require.
-  // Procurement scope (org-wide vs per-branch) also needs product confirmation.
-  // Deferred: fix requires updating those mocks in the same commit (the
-  // purchasing test suite is an actively-developed parallel area). The
-  // remaining clinical surfaces (assessmentRecommendation / equity / stories /
-  // rehab-licenses) were all fixed in the W833 sweep.
-  'purchasing.routes.js',
+  // W834 closed purchasing.routes.js — baseline intentionally empty. Add entries
+  // only for documented pre-existing gaps awaiting per-route remediation.
 ]);
 
 function walkJs(dir, out = []) {

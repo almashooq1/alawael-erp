@@ -211,9 +211,10 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // fallbacks; they are competing live schemas. Keeping in baseline = visible
   // tech debt that fails CI on any new such duplicate.
   // ──────────────────────────────────────────────────────────────────────────
-  'DocumentAccessLog',
-  'DocumentShare',
-  'DocumentVersion',
+  // W834 ratchet-down: DocumentShare / DocumentAccessLog / DocumentVersion
+  // collisions closed via Pattern D rename in documentSharing.service.js
+  // (DocumentShareLink + DocumentShareAccessLog) and documentVersioning.service.js
+  // (DocumentVersionSnapshot). Canonical models remain at models/*.js.
   'ComplianceAlert',
   'CalendarEvent',
   // RoomBooking + Warehouse + JobPosting + JobApplication + Facility: same

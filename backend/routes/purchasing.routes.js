@@ -8,13 +8,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const { authorize } = require('../middleware/auth');
-const { branchFilter } = require('../middleware/branchScope.middleware');
+const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const adapter = require('../services/purchasingAdapter.service');
 
 function wrap(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
+
+// W834 — activate branchFilter(req) (was a silent no-op without req.branchScope).
+router.use(requireBranchAccess);
 
 function actor(req) {
   const u = req.user || {};

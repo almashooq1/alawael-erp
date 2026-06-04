@@ -91,8 +91,11 @@ DocumentShareSchema.index({ shareLink: 1 });
 DocumentShareSchema.index({ recipientId: 1, status: 1 });
 DocumentShareSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const DocumentShare =
-  mongoose.models.DocumentShare || mongoose.model('DocumentShare', DocumentShareSchema);
+// Pattern D rename (ADR-021 / W834): canonical models live at models/DocumentShare.js
+// and models/DocumentAccessLog.js. This service-local schema is intentionally
+// renamed to avoid mongoose.model('DocumentShare') collision at runtime.
+const DocumentShareLink =
+  mongoose.models.DocumentShareLink || mongoose.model('DocumentShareLink', DocumentShareSchema);
 
 // ─────────────────────────────────────────────
 // سجل الوصول
@@ -101,7 +104,7 @@ const DocumentShare =
 const AccessLogSchema = new mongoose.Schema(
   {
     documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document', index: true },
-    shareId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentShare' },
+    shareId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentShareLink' },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     userName: String,
     action: {
@@ -117,8 +120,9 @@ const AccessLogSchema = new mongoose.Schema(
 
 AccessLogSchema.index({ documentId: 1, createdAt: -1 });
 
-const AccessLog =
-  mongoose.models.DocumentAccessLog || mongoose.model('DocumentAccessLog', AccessLogSchema);
+const DocumentShareAccessLog =
+  mongoose.models.DocumentShareAccessLog ||
+  mongoose.model('DocumentShareAccessLog', AccessLogSchema);
 
 // ─────────────────────────────────────────────
 // خدمة المشاركة
@@ -131,7 +135,7 @@ class DocumentSharingService {
   async shareWithUser(documentId, sharedBy, data) {
     try {
       // تحقق من عدم وجود مشاركة سابقة
-      const existing = await DocumentShare.findOne({
+      const existing = await DocumentShareLink.findOne({
         documentId,
         recipientId: data.recipientId,
         status: 'active',
@@ -146,7 +150,7 @@ class DocumentSharingService {
         return { success: true, share: this._format(existing.toObject()), updated: true };
       }
 
-      const share = new DocumentShare({
+      const share = new DocumentShareLink({
         documentId,
         shareType: 'user',
         recipientId: data.recipientId,
@@ -173,7 +177,7 @@ class DocumentSharingService {
    */
   async shareWithDepartment(documentId, sharedBy, data) {
     try {
-      const share = new DocumentShare({
+      const share = new DocumentShareLink({
         documentId,
         shareType: 'department',
         recipientDepartment: data.department,
@@ -200,7 +204,7 @@ class DocumentSharingService {
       const token = crypto.randomBytes(32).toString('hex');
       const shareLink = `share_${token}`;
 
-      const share = new DocumentShare({
+      const share = new DocumentShareLink({
         documentId,
         shareType: 'public_link',
         permission: data.permission || 'view',
@@ -228,7 +232,7 @@ class DocumentSharingService {
    */
   async accessByLink(shareLink, password, accessInfo = {}) {
     try {
-      const share = await DocumentShare.findOne({ shareLink, status: 'active' });
+      const share = await DocumentShareLink.findOne({ shareLink, status: 'active' });
       if (!share) throw new Error('الرابط غير صالح أو منتهي');
 
       // التحقق من كلمة المرور
@@ -257,7 +261,7 @@ class DocumentSharingService {
       await share.save();
 
       // تسجيل الوصول
-      await new AccessLog({
+      await new DocumentShareAccessLog({
         documentId: share.documentId,
         shareId: share._id,
         userId: accessInfo.userId,
@@ -283,7 +287,7 @@ class DocumentSharingService {
    */
   async getDocumentShares(documentId) {
     try {
-      const shares = await DocumentShare.find({ documentId, status: { $ne: 'revoked' } })
+      const shares = await DocumentShareLink.find({ documentId, status: { $ne: 'revoked' } })
         .populate('recipientId', 'name email avatar')
         .populate('sharedBy', 'name email')
         .sort({ createdAt: -1 })
@@ -308,7 +312,7 @@ class DocumentSharingService {
       const query = { recipientId: userId, status: 'active' };
       if (options.permission) query.permission = options.permission;
 
-      const shares = await DocumentShare.find(query)
+      const shares = await DocumentShareLink.find(query)
         .populate('documentId', 'title description category fileType fileSize createdAt')
         .populate('sharedBy', 'name email')
         .sort({ createdAt: -1 })
@@ -330,7 +334,7 @@ class DocumentSharingService {
    */
   async revokeShare(shareId, revokedBy) {
     try {
-      const share = await DocumentShare.findById(shareId);
+      const share = await DocumentShareLink.findById(shareId);
       if (!share) throw new Error('المشاركة غير موجودة');
 
       share.status = 'revoked';
@@ -350,7 +354,7 @@ class DocumentSharingService {
    */
   async updatePermission(shareId, permission) {
     try {
-      await DocumentShare.findByIdAndUpdate(shareId, { permission });
+      await DocumentShareLink.findByIdAndUpdate(shareId, { permission });
       return { success: true, message: 'تم تحديث الصلاحيات' };
     } catch (err) {
       logger.error(`[Sharing] خطأ: ${err.message}`);
@@ -367,13 +371,13 @@ class DocumentSharingService {
       const limit = options.limit || 50;
 
       const [logs, total] = await Promise.all([
-        AccessLog.find({ documentId })
+        DocumentShareAccessLog.find({ documentId })
           .populate('userId', 'name email')
           .sort({ createdAt: -1 })
           .skip((page - 1) * limit)
           .limit(limit)
           .lean(),
-        AccessLog.countDocuments({ documentId }),
+        DocumentShareAccessLog.countDocuments({ documentId }),
       ]);
 
       return { success: true, logs, total, page, pages: Math.ceil(total / limit) };
@@ -388,7 +392,7 @@ class DocumentSharingService {
    */
   async logAccess(documentId, userId, action, info = {}) {
     try {
-      await new AccessLog({
+      await new DocumentShareAccessLog({
         documentId,
         userId,
         userName: info.userName || '',
@@ -409,16 +413,16 @@ class DocumentSharingService {
   async getShareStats(documentId) {
     try {
       const [totalShares, byType, byPermission, totalAccess] = await Promise.all([
-        DocumentShare.countDocuments({ documentId, status: 'active' }),
-        DocumentShare.aggregate([
+        DocumentShareLink.countDocuments({ documentId, status: 'active' }),
+        DocumentShareLink.aggregate([
           { $match: { documentId: new mongoose.Types.ObjectId(documentId), status: 'active' } },
           { $group: { _id: '$shareType', count: { $sum: 1 } } },
         ]),
-        DocumentShare.aggregate([
+        DocumentShareLink.aggregate([
           { $match: { documentId: new mongoose.Types.ObjectId(documentId), status: 'active' } },
           { $group: { _id: '$permission', count: { $sum: 1 } } },
         ]),
-        AccessLog.countDocuments({ documentId }),
+        DocumentShareAccessLog.countDocuments({ documentId }),
       ]);
 
       return {
@@ -478,5 +482,5 @@ class DocumentSharingService {
 }
 
 module.exports = new DocumentSharingService();
-module.exports.DocumentShare = DocumentShare;
-module.exports.AccessLog = AccessLog;
+module.exports.DocumentShareLink = DocumentShareLink;
+module.exports.DocumentShareAccessLog = DocumentShareAccessLog;

@@ -111,8 +111,10 @@ DocumentVersionSchema.index({ documentId: 1, versionNumber: -1 });
 DocumentVersionSchema.index({ documentId: 1, isCurrentVersion: 1 });
 DocumentVersionSchema.index({ createdBy: 1, createdAt: -1 });
 
-const DocumentVersion =
-  mongoose.models.DocumentVersion || mongoose.model('DocumentVersion', DocumentVersionSchema);
+// Pattern D rename (ADR-021 / W834): canonical DocumentVersion at models/DocumentVersionSnapshot.js.
+const DocumentVersionSnapshot =
+  mongoose.models.DocumentVersionSnapshot ||
+  mongoose.model('DocumentVersionSnapshot', DocumentVersionSchema);
 
 // ─────────────────────────────────────────────
 // خدمة إدارة الإصدارات
@@ -129,7 +131,7 @@ class DocumentVersioningService {
       if (!doc) throw new Error('المستند غير موجود');
 
       // جلب آخر إصدار
-      const lastVersion = await DocumentVersion.findOne({ documentId })
+      const lastVersion = await DocumentVersionSnapshot.findOne({ documentId })
         .sort({ versionNumber: -1 })
         .lean();
 
@@ -144,12 +146,12 @@ class DocumentVersioningService {
       const diff = lastVersion ? this._calculateDiff(lastVersion, doc) : null;
 
       // إلغاء تفعيل الإصدار الحالي
-      await DocumentVersion.updateMany(
+      await DocumentVersionSnapshot.updateMany(
         { documentId, isCurrentVersion: true },
         { isCurrentVersion: false }
       );
 
-      const version = new DocumentVersion({
+      const version = new DocumentVersionSnapshot({
         documentId,
         versionNumber,
         versionLabel: options.versionLabel || `v${versionNumber}.0`,
@@ -212,7 +214,7 @@ class DocumentVersioningService {
       const query = { documentId, status: { $ne: 'deleted' } };
       if (options.changeType) query.changeType = options.changeType;
 
-      const versions = await DocumentVersion.find(query)
+      const versions = await DocumentVersionSnapshot.find(query)
         .populate('createdBy', 'name email')
         .sort({ versionNumber: -1 })
         .lean();
@@ -235,7 +237,7 @@ class DocumentVersioningService {
    */
   async getVersion(documentId, versionNumber) {
     try {
-      const version = await DocumentVersion.findOne({ documentId, versionNumber })
+      const version = await DocumentVersionSnapshot.findOne({ documentId, versionNumber })
         .populate('createdBy', 'name email')
         .lean();
 
@@ -253,8 +255,8 @@ class DocumentVersioningService {
   async compareVersions(documentId, versionA, versionB) {
     try {
       const [verA, verB] = await Promise.all([
-        DocumentVersion.findOne({ documentId, versionNumber: versionA }).lean(),
-        DocumentVersion.findOne({ documentId, versionNumber: versionB }).lean(),
+        DocumentVersionSnapshot.findOne({ documentId, versionNumber: versionA }).lean(),
+        DocumentVersionSnapshot.findOne({ documentId, versionNumber: versionB }).lean(),
       ]);
 
       if (!verA || !verB) throw new Error('أحد الإصدارات غير موجود');
@@ -366,7 +368,7 @@ class DocumentVersioningService {
    */
   async restoreVersion(documentId, versionNumber, userId, options = {}) {
     try {
-      const version = await DocumentVersion.findOne({ documentId, versionNumber }).lean();
+      const version = await DocumentVersionSnapshot.findOne({ documentId, versionNumber }).lean();
       if (!version) throw new Error('الإصدار غير موجود');
 
       const Document = mongoose.model('Document');
@@ -412,7 +414,7 @@ class DocumentVersioningService {
    */
   async deleteVersion(documentId, versionNumber) {
     try {
-      const version = await DocumentVersion.findOne({ documentId, versionNumber });
+      const version = await DocumentVersionSnapshot.findOne({ documentId, versionNumber });
       if (!version) throw new Error('الإصدار غير موجود');
       if (version.isCurrentVersion) throw new Error('لا يمكن حذف الإصدار الحالي');
 
@@ -530,4 +532,4 @@ class DocumentVersioningService {
 }
 
 module.exports = new DocumentVersioningService();
-module.exports.DocumentVersion = DocumentVersion;
+module.exports.DocumentVersionSnapshot = DocumentVersionSnapshot;

@@ -342,6 +342,8 @@ jest.mock('../middleware/auth', () => ({
 
 ## Open follow-ups (next batches)
 
+- ~~Reapply lost Batches 1–4 (CAPA, documentAdvanced, leave-requests, hr-performance, W340 DocumentShare/Version)~~ — **done W834 (2026-06-04, uncommitted)**.
+- ~~Fix `purchasing.routes.js` W833 baseline entry~~ — **done W834**: mounted `requireBranchAccess` + updated 5 purchasing test mocks; W833 baseline now empty.
 - Remaining single-file W340 collisions amenable to Pattern D: `GoalBank`,
   `ImportExportJob`, `FormSubmission` / `FormTemplate`, `DigitalSignature`,
   `TherapyProtocol`.

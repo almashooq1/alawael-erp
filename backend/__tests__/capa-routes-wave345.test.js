@@ -76,6 +76,37 @@ describe('W345 — CAPA REST surface contract', () => {
   });
 });
 
+describe('W834 — CAPA branch isolation + anti-mass-assignment', () => {
+  it('mounts requireBranchAccess after authenticate', () => {
+    expect(ROUTES_SRC).toMatch(/router\.use\(\s*requireBranchAccess\s*\)/);
+  });
+
+  it('uses _resolveScopedBranchId + effectiveBranchScope for list queries', () => {
+    expect(ROUTES_SRC).toMatch(/function _resolveScopedBranchId/);
+    expect(ROUTES_SRC).toMatch(/effectiveBranchScope\(req\)/);
+    expect(ROUTES_SRC).toMatch(/branchId = _resolveScopedBranchId\(req\)/);
+  });
+
+  it('GET /:id + GET /:id/audit scope with branchFilter + ObjectId guard', () => {
+    expect(ROUTES_SRC).toMatch(/mongoose\.isValidObjectId\(req\.params\.id\)/);
+    expect(ROUTES_SRC).toMatch(
+      /findOne\(\s*\{\s*_id:\s*req\.params\.id,\s*\.\.\.branchFilter\(req\)/
+    );
+  });
+
+  it('POST / uses explicit DTO (no ...req.body spread)', () => {
+    expect(ROUTES_SRC).not.toMatch(/\.\.\.req\.body/);
+    expect(ROUTES_SRC).toMatch(/source:\s*body\.source/);
+    expect(ROUTES_SRC).toMatch(/branchId:\s*_resolveScopedBranchId\(req\)/);
+  });
+
+  it('POST /:id/transition verifies branch ownership before service call', () => {
+    expect(ROUTES_SRC).toMatch(
+      /router\.post\(\s*['"]\/:id\/transition['"][\s\S]*findOne\(\s*\{\s*_id:\s*req\.params\.id,\s*\.\.\.branchFilter\(req\)/
+    );
+  });
+});
+
 describe('W345 — bootstrap mounts routes under both /api and /api/v1', () => {
   it('mounts at /api/quality/capa', () => {
     expect(BOOTSTRAP_SRC).toMatch(

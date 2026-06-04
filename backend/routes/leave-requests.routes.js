@@ -6,8 +6,10 @@
 'use strict';
 
 const express = require('express');
+const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope, assertBranchMatch } = require('../middleware/assertBranchMatch');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 
@@ -17,6 +19,30 @@ router.use(requireBranchAccess);
 const LeaveBalance = require('../models/LeaveBalance');
 const leaveService = require('../services/leaveManagement.service');
 const safeError = require('../utils/safeError');
+
+async function loadOwnedRequest(req, res, populate = true) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return null;
+  }
+  const LeaveRequest = require('../models/LeaveRequest');
+  let query = LeaveRequest.findById(req.params.id);
+  if (populate) {
+    query = query.populate('employeeId', 'name nameAr').populate('approvedBy', 'name');
+  }
+  const request = await query;
+  if (!request) {
+    res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    return null;
+  }
+  try {
+    assertBranchMatch(req, request.branchId, 'leave request');
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return null;
+  }
+  return request;
+}
 
 // ─── طلبات الإجازات ──────────────────────────────────────────────────────────
 
@@ -33,8 +59,9 @@ router.get('/', async (req, res) => {
       page = 1,
       perPage = 15,
     } = req.query;
+    const scopedBranch = effectiveBranchScope(req);
     const result = await leaveService.list({
-      branchId,
+      branchId: scopedBranch ?? branchId,
       employeeId,
       status,
       leaveType,
@@ -52,8 +79,15 @@ router.get('/', async (req, res) => {
 // POST /api/leave-requests — تقديم طلب إجازة
 router.post('/', async (req, res) => {
   try {
+    const body = req.body || {};
+    const pinnedBranch = effectiveBranchScope(req);
     const request = await leaveService.submitRequest({
-      ...req.body,
+      employeeId: body.employeeId,
+      leaveType: body.leaveType,
+      startDate: body.startDate,
+      endDate: body.endDate,
+      reason: body.reason,
+      branchId: pinnedBranch || body.branchId,
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, message: 'تم تقديم طلب الإجازة بنجاح', data: request });
@@ -65,11 +99,8 @@ router.post('/', async (req, res) => {
 // GET /api/leave-requests/:id — تفاصيل طلب
 router.get('/:id', async (req, res) => {
   try {
-    const LeaveRequest = require('../models/LeaveRequest');
-    const request = await LeaveRequest.findById(req.params.id)
-      .populate('employeeId', 'name nameAr')
-      .populate('approvedBy', 'name');
-    if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    const request = await loadOwnedRequest(req, res);
+    if (!request) return;
     res.json({ success: true, data: request });
   } catch (err) {
     safeError(res, err);
@@ -79,9 +110,8 @@ router.get('/:id', async (req, res) => {
 // PUT /api/leave-requests/:id — تعديل طلب (للموظف قبل المراجعة)
 router.put('/:id', async (req, res) => {
   try {
-    const LeaveRequest = require('../models/LeaveRequest');
-    const request = await LeaveRequest.findById(req.params.id);
-    if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    const request = await loadOwnedRequest(req, res, false);
+    if (!request) return;
     if (request.status !== 'pending') {
       return res.status(400).json({ success: false, message: 'لا يمكن تعديل طلب تمت معالجته' });
     }
@@ -96,9 +126,8 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/leave-requests/:id — إلغاء طلب
 router.delete('/:id', async (req, res) => {
   try {
-    const LeaveRequest = require('../models/LeaveRequest');
-    const request = await LeaveRequest.findById(req.params.id);
-    if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    const request = await loadOwnedRequest(req, res, false);
+    if (!request) return;
     if (request.status !== 'pending') {
       return res.status(400).json({ success: false, message: 'لا يمكن إلغاء طلب تمت معالجته' });
     }
@@ -115,6 +144,8 @@ router.delete('/:id', async (req, res) => {
 // POST /api/leave-requests/:id/approve — اعتماد طلب
 router.post('/:id/approve', async (req, res) => {
   try {
+    const owned = await loadOwnedRequest(req, res, false);
+    if (!owned) return;
     const result = await leaveService.approve(req.params.id, req.user?._id);
     res.json({ success: true, message: 'تم اعتماد الإجازة', data: result });
   } catch (err) {
@@ -125,6 +156,8 @@ router.post('/:id/approve', async (req, res) => {
 // POST /api/leave-requests/:id/reject — رفض طلب
 router.post('/:id/reject', async (req, res) => {
   try {
+    const owned = await loadOwnedRequest(req, res, false);
+    if (!owned) return;
     const { reason } = req.body;
     if (!reason) return res.status(400).json({ success: false, message: 'سبب الرفض مطلوب' });
 
@@ -176,9 +209,10 @@ router.post('/balance/initialize', async (req, res) => {
 // GET /api/leave-requests/balance/all — جميع أرصدة الفرع
 router.get('/balance/all', async (req, res) => {
   try {
+    const scopedBranch = effectiveBranchScope(req);
     const { branchId, year } = req.query;
     const query = {};
-    if (branchId) query.branchId = branchId;
+    query.branchId = scopedBranch ?? branchId;
     if (year) query.year = parseInt(year);
     else query.year = new Date().getFullYear();
 
@@ -195,7 +229,8 @@ router.get('/balance/all', async (req, res) => {
 router.get('/stats/summary', async (req, res) => {
   try {
     const { branchId } = req.query;
-    const stats = await leaveService.getStats(branchId);
+    const scopedBranch = effectiveBranchScope(req);
+    const stats = await leaveService.getStats(scopedBranch ?? branchId);
     res.json({ success: true, data: stats });
   } catch (err) {
     safeError(res, err);

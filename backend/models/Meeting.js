@@ -55,6 +55,7 @@ const meetingSchema = new mongoose.Schema(
     ],
     attachments: [{ name: String, url: String, uploadedAt: { type: Date, default: Date.now } }],
     department: { type: String, index: true },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

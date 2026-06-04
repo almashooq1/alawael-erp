@@ -12,6 +12,7 @@
 
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const {
   MedicalEquipment,
   CalibrationRecord,
@@ -21,11 +22,61 @@ const {
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+function mergeEquipFilter(req, base = {}) {
+  return { ...base, ...branchFilter(req), isDeleted: base.isDeleted ?? { $ne: true } };
+}
+
+function scopedEquipById(req, id) {
+  return { _id: id, ...branchFilter(req), isDeleted: { $ne: true } };
+}
+
+async function equipmentIdsInScope(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return null;
+  const rows = await MedicalEquipment.find({ ...scope, isDeleted: { $ne: true } })
+    .select('_id')
+    .lean();
+  return rows.map(r => r._id);
+}
+
+async function applyChildEquipmentScope(req, filter) {
+  const ids = await equipmentIdsInScope(req);
+  if (!ids) return filter;
+  if (filter.equipment) {
+    const eid = String(filter.equipment);
+    if (!ids.some(id => String(id) === eid)) return { ...filter, equipment: { $in: [] } };
+    return filter;
+  }
+  return { ...filter, equipment: { $in: ids } };
+}
+
+async function gateEquipmentId(req, res, equipmentId) {
+  if (!equipmentId || !mongoose.isValidObjectId(equipmentId)) {
+    res.status(400).json({ success: false, message: 'معرّف المعدة غير صالح' });
+    return false;
+  }
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return true;
+  const hit = await MedicalEquipment.findOne({
+    _id: equipmentId,
+    ...scope,
+    isDeleted: { $ne: true },
+  })
+    .select('_id')
+    .lean();
+  if (!hit) {
+    res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+    return false;
+  }
+  return true;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // EQUIPMENT — المعدات
 // ═══════════════════════════════════════════════════════════════════════════
@@ -33,7 +84,7 @@ router.use(requireBranchAccess);
 router.get('/equipment', async (req, res) => {
   try {
     const { category, status, department, search, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    const filter = mergeEquipFilter(req, {});
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (department) filter['location.department'] = department;
@@ -64,7 +115,7 @@ router.get('/equipment', async (req, res) => {
 
 router.get('/equipment/:id', async (req, res) => {
   try {
-    const eq = await MedicalEquipment.findById(req.params.id)
+    const eq = await MedicalEquipment.findOne(scopedEquipById(req, req.params.id))
       .populate('location.department', 'name')
       .populate('assignedTo', 'name');
     if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
@@ -93,7 +144,13 @@ router.get('/equipment/:id', async (req, res) => {
 
 router.post('/equipment', async (req, res) => {
   try {
-    const eq = new MedicalEquipment({ ...req.body, createdBy: req.user?.id });
+    const payload = stripUpdateMeta(req.body);
+    delete payload.branchId;
+    const eq = new MedicalEquipment({
+      ...payload,
+      createdBy: req.user?.id,
+      ...(req.branchScope?.branchId && { branchId: req.branchScope.branchId }),
+    });
     await eq.save();
     logger.info(`[MedEquip] Equipment created: ${eq.assetTag} - ${eq.name.ar}`);
     res.status(201).json({ success: true, data: eq });
@@ -104,7 +161,9 @@ router.post('/equipment', async (req, res) => {
 
 router.put('/equipment/:id', async (req, res) => {
   try {
-    const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const eq = await MedicalEquipment.findOneAndUpdate(scopedEquipById(req, req.params.id), body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -117,7 +176,12 @@ router.put('/equipment/:id', async (req, res) => {
 
 router.delete('/equipment/:id', async (req, res) => {
   try {
-    await MedicalEquipment.findByIdAndUpdate(req.params.id, { isDeleted: true });
+    const eq = await MedicalEquipment.findOneAndUpdate(
+      scopedEquipById(req, req.params.id),
+      { isDeleted: true },
+      { returnDocument: 'after' }
+    );
+    if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
     res.json({ success: true, message: 'تم حذف المعدة بنجاح' });
   } catch (error) {
     safeError(res, error, '[MedEquip] Delete equipment error');
@@ -131,10 +195,11 @@ router.delete('/equipment/:id', async (req, res) => {
 router.get('/calibrations', async (req, res) => {
   try {
     const { equipment, result, type, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (equipment) filter.equipment = equipment;
     if (result) filter.result = result;
     if (type) filter.type = type;
+    filter = await applyChildEquipmentScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
       CalibrationRecord.find(filter)
@@ -155,12 +220,13 @@ router.get('/calibrations', async (req, res) => {
 
 router.post('/calibrations', async (req, res) => {
   try {
-    const record = new CalibrationRecord({ ...req.body, createdBy: req.user?.id });
+    if (req.body.equipment && !(await gateEquipmentId(req, res, req.body.equipment))) return;
+    const record = new CalibrationRecord({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     await record.save();
 
     // Update equipment calibration dates
     if (req.body.equipment) {
-      await MedicalEquipment.findByIdAndUpdate(req.body.equipment, {
+      await MedicalEquipment.findOneAndUpdate(scopedEquipById(req, req.body.equipment), {
         'calibration.lastCalibrationDate': record.calibrationDate,
         'calibration.nextCalibrationDate': record.nextDueDate,
         status: record.result === 'fail' ? 'pending_calibration' : 'active',
@@ -184,11 +250,12 @@ router.post('/calibrations', async (req, res) => {
 router.get('/maintenance', async (req, res) => {
   try {
     const { equipment, status, type, priority, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (equipment) filter.equipment = equipment;
     if (status) filter.status = status;
     if (type) filter.type = type;
     if (priority) filter.priority = priority;
+    filter = await applyChildEquipmentScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
       EquipmentMaintenance.find(filter)
@@ -210,12 +277,18 @@ router.get('/maintenance', async (req, res) => {
 
 router.post('/maintenance', async (req, res) => {
   try {
-    const record = new EquipmentMaintenance({ ...req.body, createdBy: req.user?.id });
+    if (req.body.equipment && !(await gateEquipmentId(req, res, req.body.equipment))) return;
+    const record = new EquipmentMaintenance({
+      ...stripUpdateMeta(req.body),
+      createdBy: req.user?.id,
+    });
     await record.save();
 
     // Update equipment status
     if (req.body.equipment && req.body.type !== 'inspection') {
-      await MedicalEquipment.findByIdAndUpdate(req.body.equipment, { status: 'in_maintenance' });
+      await MedicalEquipment.findOneAndUpdate(scopedEquipById(req, req.body.equipment), {
+        status: 'in_maintenance',
+      });
     }
 
     logger.info(`[MedEquip] Maintenance WO created: ${record.workOrderNumber}`);
@@ -230,6 +303,10 @@ router.post('/maintenance', async (req, res) => {
 
 router.patch('/maintenance/:id/complete', async (req, res) => {
   try {
+    const existing = await EquipmentMaintenance.findById(req.params.id).select('equipment').lean();
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'أمر الصيانة غير موجود' });
+    if (!(await gateEquipmentId(req, res, existing.equipment))) return;
     const record = await EquipmentMaintenance.findByIdAndUpdate(
       req.params.id,
       {
@@ -250,7 +327,7 @@ router.patch('/maintenance/:id/complete', async (req, res) => {
     // Restore equipment status
     const newStatus =
       req.body.equipmentConditionAfter === 'out_of_service' ? 'out_of_service' : 'active';
-    await MedicalEquipment.findByIdAndUpdate(record.equipment, {
+    await MedicalEquipment.findOneAndUpdate(scopedEquipById(req, record.equipment), {
       status: newStatus,
       'maintenance.lastMaintenanceDate': new Date(),
     });
@@ -269,10 +346,11 @@ router.patch('/maintenance/:id/complete', async (req, res) => {
 router.get('/certificates', async (req, res) => {
   try {
     const { equipment, status, type, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (equipment) filter.equipment = equipment;
     if (status) filter.status = status;
     if (type) filter.type = type;
+    filter = await applyChildEquipmentScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [certs, total] = await Promise.all([
       SafetyCertificate.find(filter)
@@ -290,7 +368,8 @@ router.get('/certificates', async (req, res) => {
 
 router.post('/certificates', async (req, res) => {
   try {
-    const cert = new SafetyCertificate({ ...req.body, createdBy: req.user?.id });
+    if (req.body.equipment && !(await gateEquipmentId(req, res, req.body.equipment))) return;
+    const cert = new SafetyCertificate({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     await cert.save();
     logger.info(`[MedEquip] Certificate added: ${cert.certificateNumber}`);
     res.status(201).json({ success: true, data: cert });
@@ -307,6 +386,9 @@ router.get('/alerts', async (req, res) => {
   try {
     const now = new Date();
     const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const equipIds = await equipmentIdsInScope(req);
+    const certBase = { isDeleted: { $ne: true } };
+    if (equipIds) certBase.equipment = { $in: equipIds };
 
     const [
       calibrationDue,
@@ -318,44 +400,44 @@ router.get('/alerts', async (req, res) => {
       outOfService,
     ] = await Promise.all([
       MedicalEquipment.find({
+        ...mergeEquipFilter(req, {}),
         'calibration.requiresCalibration': true,
         'calibration.nextCalibrationDate': { $lte: thirtyDays, $gte: now },
         status: { $ne: 'retired' },
-        isDeleted: { $ne: true },
       })
         .select('assetTag name calibration.nextCalibrationDate')
         .sort({ 'calibration.nextCalibrationDate': 1 }),
       MedicalEquipment.find({
+        ...mergeEquipFilter(req, {}),
         'calibration.requiresCalibration': true,
         'calibration.nextCalibrationDate': { $lt: now },
         status: { $ne: 'retired' },
-        isDeleted: { $ne: true },
       })
         .select('assetTag name calibration.nextCalibrationDate')
         .sort({ 'calibration.nextCalibrationDate': 1 }),
       MedicalEquipment.find({
+        ...mergeEquipFilter(req, {}),
         'maintenance.nextMaintenanceDate': { $lte: thirtyDays },
         status: { $nin: ['retired', 'disposed'] },
-        isDeleted: { $ne: true },
       })
         .select('assetTag name maintenance.nextMaintenanceDate')
         .sort({ 'maintenance.nextMaintenanceDate': 1 }),
       MedicalEquipment.find({
+        ...mergeEquipFilter(req, {}),
         'purchaseInfo.warrantyEnd': { $lte: thirtyDays, $gte: now },
-        isDeleted: { $ne: true },
       })
         .select('assetTag name purchaseInfo.warrantyEnd')
         .sort({ 'purchaseInfo.warrantyEnd': 1 }),
       SafetyCertificate.find({
+        ...certBase,
         expiryDate: { $lte: thirtyDays, $gte: now },
-        isDeleted: { $ne: true },
       })
         .populate('equipment', 'assetTag name')
         .sort({ expiryDate: 1 }),
       SafetyCertificate.find({
+        ...certBase,
         expiryDate: { $lt: now },
         status: { $ne: 'revoked' },
-        isDeleted: { $ne: true },
       })
         .populate('equipment', 'assetTag name')
         .sort({ expiryDate: 1 }),
@@ -402,21 +484,25 @@ router.get('/dashboard', async (req, res) => {
       criticalWorkOrders,
       categoryBreakdown,
     ] = await Promise.all([
-      MedicalEquipment.countDocuments({ isDeleted: { $ne: true } }),
-      MedicalEquipment.countDocuments({ status: 'active', isDeleted: { $ne: true } }),
-      MedicalEquipment.countDocuments({ status: 'in_maintenance', isDeleted: { $ne: true } }),
-      MedicalEquipment.countDocuments({ status: 'out_of_service', isDeleted: { $ne: true } }),
-      EquipmentMaintenance.countDocuments({
-        status: { $in: ['requested', 'scheduled', 'in_progress'] },
-        isDeleted: { $ne: true },
-      }),
-      EquipmentMaintenance.countDocuments({
-        status: { $in: ['requested', 'scheduled', 'in_progress'] },
-        priority: 'critical',
-        isDeleted: { $ne: true },
-      }),
+      MedicalEquipment.countDocuments(mergeEquipFilter(req, {})),
+      MedicalEquipment.countDocuments(mergeEquipFilter(req, { status: 'active' })),
+      MedicalEquipment.countDocuments(mergeEquipFilter(req, { status: 'in_maintenance' })),
+      MedicalEquipment.countDocuments(mergeEquipFilter(req, { status: 'out_of_service' })),
+      EquipmentMaintenance.countDocuments(
+        await applyChildEquipmentScope(req, {
+          status: { $in: ['requested', 'scheduled', 'in_progress'] },
+          isDeleted: { $ne: true },
+        })
+      ),
+      EquipmentMaintenance.countDocuments(
+        await applyChildEquipmentScope(req, {
+          status: { $in: ['requested', 'scheduled', 'in_progress'] },
+          priority: 'critical',
+          isDeleted: { $ne: true },
+        })
+      ),
       MedicalEquipment.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: mergeEquipFilter(req, {}) },
         { $group: { _id: '$category', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
@@ -424,7 +510,7 @@ router.get('/dashboard', async (req, res) => {
 
     // Total asset value
     const valueAgg = await MedicalEquipment.aggregate([
-      { $match: { isDeleted: { $ne: true } } },
+      { $match: mergeEquipFilter(req, {}) },
       {
         $group: {
           _id: null,

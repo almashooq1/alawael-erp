@@ -38,11 +38,13 @@ const strategicKPISchema = new mongoose.Schema(
     records: [kpiRecordSchema],
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
 
 strategicKPISchema.index({ goalId: 1 });
+strategicKPISchema.index({ branchId: 1 });
 strategicKPISchema.index({ status: 1 });
 
 module.exports = mongoose.models.StrategicKPI || mongoose.model('StrategicKPI', strategicKPISchema);

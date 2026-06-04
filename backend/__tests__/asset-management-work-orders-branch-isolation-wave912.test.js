@@ -38,7 +38,12 @@ const managerA = {
 
 let mongod;
 let MaintenanceWorkOrder;
+let AssetInventory;
+let AssetTransfer;
 let woB;
+let inventoryA;
+let inventoryB;
+let transferB;
 let app;
 
 beforeAll(async () => {
@@ -46,6 +51,8 @@ beforeAll(async () => {
   await mongoose.connect(mongod.getUri());
   require('../config/mongoose.plugins');
   MaintenanceWorkOrder = require('../models/MaintenanceWorkOrder');
+  AssetInventory = require('../models/AssetInventory');
+  AssetTransfer = require('../models/AssetTransfer');
   const appExpress = express();
   appExpress.use(express.json());
   appExpress.use('/api/v1/asset-management', require('../routes/asset-management.routes'));
@@ -74,6 +81,52 @@ beforeAll(async () => {
     createdBy: USER_A,
   });
   woB = ins.insertedId;
+
+  const inv = await AssetInventory.collection.insertOne({
+    inventoryNumber: 'INV-A-912',
+    branchId: BRANCH_A,
+    title: 'جرد فرع أ',
+    inventoryDate: new Date(),
+    status: 'draft',
+    conductedBy: USER_A,
+    createdBy: USER_A,
+  });
+  inventoryA = inv.insertedId;
+
+  const invB = await AssetInventory.collection.insertOne({
+    inventoryNumber: 'INV-B-912',
+    branchId: BRANCH_B,
+    title: 'جرد فرع ب',
+    inventoryDate: new Date(),
+    status: 'draft',
+    conductedBy: USER_A,
+    createdBy: USER_A,
+  });
+  inventoryB = invB.insertedId;
+
+  await AssetTransfer.collection.insertOne({
+    transferNumber: 'TR-A-912',
+    branchId: BRANCH_A,
+    assetId: ASSET_A,
+    fromBranchId: BRANCH_A,
+    toBranchId: BRANCH_B,
+    transferDate: new Date(),
+    reason: 'تشغيل',
+    status: 'pending',
+    createdBy: USER_A,
+  });
+  const trB = await AssetTransfer.collection.insertOne({
+    transferNumber: 'TR-B-912',
+    branchId: BRANCH_B,
+    assetId: ASSET_A,
+    fromBranchId: BRANCH_B,
+    toBranchId: BRANCH_A,
+    transferDate: new Date(),
+    reason: 'صيانة',
+    status: 'pending',
+    createdBy: USER_A,
+  });
+  transferB = trB.insertedId;
 });
 
 beforeEach(() => {
@@ -96,5 +149,44 @@ describe('W912 — work orders isolation', () => {
   it('returns 404 for foreign-branch work order GET /:id', async () => {
     const res = await request(app).get(`/api/v1/asset-management/work-orders/${woB}`);
     expect(res.status).toBe(404);
+  });
+
+  it('lists only in-scope transfers', async () => {
+    const res = await request(app).get('/api/v1/asset-management/transfers');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(String(res.body.data[0].branchId)).toBe(String(BRANCH_A));
+  });
+
+  it('returns 404 for foreign-branch transfer action', async () => {
+    const res = await request(app).patch(`/api/v1/asset-management/transfers/${transferB}/receive`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 for foreign-branch inventory GET /inventories/:id', async () => {
+    const res = await request(app).get(`/api/v1/asset-management/inventories/${inventoryB}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('inherits branchId from parent inventory on item create', async () => {
+    const res = await request(app)
+      .post(`/api/v1/asset-management/inventories/${inventoryA}/items`)
+      .send({
+        assetId: ASSET_A,
+        status: 'found',
+      });
+    expect(res.status).toBe(201);
+    expect(String(res.body.data.branchId)).toBe(String(BRANCH_A));
+  });
+
+  it('rejects foreign branchId spoof in body before handler logic', async () => {
+    const res = await request(app)
+      .post(`/api/v1/asset-management/inventories/${inventoryA}/items`)
+      .send({
+        assetId: ASSET_A,
+        status: 'found',
+        branchId: BRANCH_B,
+      });
+    expect(res.status).toBe(403);
   });
 });

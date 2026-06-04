@@ -405,12 +405,9 @@ jest.mock('../middleware/auth', () => ({
   `care-plans-admin` (W900), `emr-routes` (W901), `medical-referrals` (W902),
   `insurance-claims` (W903), `payroll-routes` (W904), `episodes-routes` (W905),
   `icf-assessments` (W906), `smart-assessment-routes` (W907).
-  Still open / deferred: `crisis` (ambiguous — see below), `medicalEquipment`/`asset-management`
-  (models lack branch/center — need schema + product intent), `meetings`/`strategicPlanning`
-  (no branchId on model — org-wide or needs schema), `medication catalog` + `MenuItem` (org-wide
-  by design). **`crisis.routes.js` deliberately NOT touched**: its create handlers don't stamp `branchId` and its list
-  endpoints aren't branch-scoped (only the dashboard aggregations are), and EmergencyPlans may be org-wide safety
-  infrastructure — applying branch isolation there is a design decision needing product input, not an autonomous fix.
+  Also closed this branch: W909 crisis (`center` field), W912 asset sub-resources, W913 referrals, W914 meetings,
+  W915 strategic planning, W916 medical equipment, W917 asset catalog CRUD.
+  Still org-wide by design: `medication catalog` + `MenuItem`.
 - ~~W867 MDT-coordination cross-branch IDOR fix (meetings CRUD) + regression~~ — **done** (`d50841673`, pushed `main`): **security fix** —
   `mdt-coordination.routes.js` `GET /meetings/:id` (no authorize gate → any restricted user) + `PUT /meetings/:id`
   (authorize ['admin','manager'] — manager is branch-level) + `DELETE /meetings/:id` used bare findById/
@@ -647,12 +644,12 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   tightened `smart-assessment-engine.routes.js` list/detail read surfaces (M-CHAT and shared `/detail/:type/:id`)
   through beneficiary-scope gating so restricted clinicians cannot enumerate or fetch assessments from foreign branches. +
   `smart-assessment-routes-branch-isolation-wave907.test.js` (2 tests: scoped list, foreign detail 404).
-- ~~W909 crisis routes center-scoped isolation~~ — **done** (local, not yet pushed): **security fix** —
+- ~~W909 crisis routes center-scoped isolation~~ — **done** (`c4cef3f8f`, pushed): **security fix** —
   legacy `crisis.model.js` stores tenant on `center` (ref Branch), not `branchId`. Mapped `branchFilter` →
   `{ center }` on plans/incidents/drills/contacts lists + all instance mutations + dashboard aggregates (fixes W608
   mismatch where aggregates used `branchId` on a `center` field). Create paths stamp `center` from `req.branchScope`. +
   `crisis-routes-branch-isolation-wave909.test.js` (2 tests: scoped incident list, foreign incident 404).
-- ~~W912 asset-management branch-scoped sub-resources~~ — **done** (local, not yet pushed): **security fix** —
+- ~~W912 asset-management branch-scoped sub-resources~~ — **done** (`c4cef3f8f`, pushed): **security fix** —
   `Asset` root model has no `branchId` (org-wide catalog — unchanged). Hardened branch-bearing children in
   `asset-management.routes.js`: work orders, transfers, bookings, inventories (`mergeTenantFilter` + `scopedById`,
   stamp `branchId` on create). Follow-up: inventory-item scan no longer accepts `branchId` from request body; branch
@@ -665,8 +662,21 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `requireBranchAccess` + `applyReferralListScope` (portal `beneficiaryId` + canonical `beneficiary`/`branch`) +
   `fetchScopedReferral` on instance/sub-resource paths; blocks cross-branch comm/doc mutations. +
   `referrals-portal-branch-isolation-wave913.test.js` (3 tests: scoped list, foreign GET/PATCH 404).
-- **Deferred (product/schema)**: `meetings.routes.js` (Meeting has no branch field), `strategicPlanning.routes.js`
-  (org-wide KPIs), `medicalEquipment.routes.js` (department ref only), bare `Asset` CRUD (no branchId on schema).
+- **Targeted verify refresh (W909–W913)**: **3 suites / 12 tests** ✅ (`crisis-routes-branch-isolation-wave909`,
+  `asset-management-work-orders-branch-isolation-wave912`, `referrals-portal-branch-isolation-wave913`).
+- ~~W914 meetings routes branch isolation~~ — **done** (local, commit pending): optional `branchId` on `Meeting.js`;
+  `scopedMeetingById` + `branchFilter` on all CRUD/agenda/minutes/attendees/actions; stamp on create. +
+  `meetings-routes-branch-isolation-wave914.test.js` (3 tests).
+- ~~W915 strategic planning branch isolation~~ — **done** (local, commit pending): `branchId` on Goal/Initiative/KPI;
+  `mergeStrategicFilter`; initiatives/KPI inherit goal branch on create; dashboard/BSC/report scoped. +
+  `strategic-planning-branch-isolation-wave915.test.js` (3 tests).
+- ~~W916 medical equipment branch isolation~~ — **done** (local, commit pending): `branchId` on equipment model;
+  `gateEquipmentId` + `applyChildEquipmentScope` for calibration/maintenance/certs/alerts/dashboard. +
+  `medical-equipment-branch-isolation-wave916.test.js` (3 tests).
+- ~~W917 asset catalog branch isolation~~ — **done** (local, commit pending): `branchId` on `Asset`; list via
+  `effectiveBranchScope`; removed `?branchId` spoof via `location` regex; CRUD scoped. +
+  `asset-catalog-branch-isolation-wave917.test.js` (3 tests). W912 WO tests still pass (catalog vs sub-resource split).
+- **Verify (W914–W917)**: **4 suites / 12 tests** ✅ (+ W912 regression 7 tests).
 - ~~W884 Mongoose duplicate schema.index drift guard + 25-index cleanup~~ — **done** (local, not yet pushed; renumbered from W880 — W880 taken by invoices-admin isolation):
   - **Cleanup**: removed redundant `schema.index({field:1})` where the field already declares `unique:true`
     (or a duplicate compound unique) across 19 models — 25 warnings → 0 (AssetTransfer, Volunteer×3,

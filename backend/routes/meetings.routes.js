@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const Meeting = require('../models/Meeting');
 const safeError = require('../utils/safeError');
@@ -27,6 +27,10 @@ const validObjectId = (req, res) => {
   return true;
 };
 
+function scopedMeetingById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
+
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ─── List meetings ───────────────────────────────────────────────────────────
@@ -34,7 +38,7 @@ router.get('/', async (req, res) => {
   try {
     const { status, type, page = 1, limit: rawLimit = 20 } = req.query;
     const limit = clampLimit(rawLimit);
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (type) filter.type = type;
     const skip = (Math.max(1, +page) - 1) * limit;
@@ -57,7 +61,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const meeting = await Meeting.findById(req.params.id).lean();
+    const meeting = await Meeting.findOne(scopedMeetingById(req, req.params.id)).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'بيانات الاجتماع' });
   } catch (error) {
@@ -125,6 +129,7 @@ router.post(
         agenda,
         organizer: req.user._id || req.user.id,
         status: 'scheduled',
+        ...(req.branchScope?.branchId && { branchId: req.branchScope.branchId }),
       });
       res.status(201).json({ success: true, data: meeting, message: 'تم إنشاء الاجتماع بنجاح' });
     } catch (error) {
@@ -153,8 +158,8 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
       meetingLink,
       department,
     } = req.body;
-    const meeting = await Meeting.findByIdAndUpdate(
-      req.params.id,
+    const meeting = await Meeting.findOneAndUpdate(
+      scopedMeetingById(req, req.params.id),
       {
         title,
         type,
@@ -184,7 +189,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
 router.delete('/:id', authorize(['admin', 'manager']), async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const meeting = await Meeting.findByIdAndDelete(req.params.id);
+    const meeting = await Meeting.findOneAndDelete(scopedMeetingById(req, req.params.id));
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم حذف الاجتماع بنجاح' });
   } catch (error) {
@@ -202,7 +207,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const meeting = await Meeting.findById(req.params.id);
+      const meeting = await Meeting.findOne(scopedMeetingById(req, req.params.id));
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
       meeting.minutes.push({
         content: req.body.content,
@@ -230,7 +235,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const meeting = await Meeting.findById(req.params.id);
+      const meeting = await Meeting.findOne(scopedMeetingById(req, req.params.id));
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
       const attendee = meeting.attendees.find(a => a.userId?.toString() === req.user.id);
       if (attendee) {

@@ -4,10 +4,11 @@
  */
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const StrategicGoal = require('../models/StrategicGoal');
 const StrategicInitiative = require('../models/StrategicInitiative');
@@ -17,6 +18,30 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+function mergeStrategicFilter(req, base = {}) {
+  return { ...base, ...branchFilter(req) };
+}
+
+function scopedStrategicById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
+
+async function loadScopedGoal(req, res, goalId) {
+  if (!mongoose.isValidObjectId(goalId)) {
+    res.status(400).json({ success: false, message: 'معرّف الهدف غير صالح' });
+    return null;
+  }
+  const goal = await StrategicGoal.findOne(scopedStrategicById(req, goalId))
+    .select('_id branchId')
+    .lean();
+  if (!goal) {
+    res.status(404).json({ success: false, message: 'الهدف غير موجود' });
+    return null;
+  }
+  return goal;
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  GOALS (الأهداف الاستراتيجية)
 // ═══════════════════════════════════════════════════════════════
@@ -25,7 +50,7 @@ router.use(requireBranchAccess);
 router.get('/goals', async (req, res) => {
   try {
     const { perspective, status, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = mergeStrategicFilter(req, {});
     if (perspective) filter.perspective = perspective;
     if (status) filter.status = status;
 
@@ -48,7 +73,7 @@ router.get('/goals', async (req, res) => {
 // GET /goals/:id
 router.get('/goals/:id', async (req, res) => {
   try {
-    const goal = await StrategicGoal.findById(req.params.id).lean();
+    const goal = await StrategicGoal.findOne(scopedStrategicById(req, req.params.id)).lean();
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data: goal });
   } catch (err) {
@@ -68,7 +93,13 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const goal = new StrategicGoal({ ...req.body, createdBy: req.user._id || req.userId });
+      const payload = stripUpdateMeta(req.body);
+      delete payload.branchId;
+      const goal = new StrategicGoal({
+        ...payload,
+        createdBy: req.user._id || req.userId,
+        ...(req.branchScope?.branchId && { branchId: req.branchScope.branchId }),
+      });
       await goal.save();
       res.status(201).json({ success: true, data: goal, message: 'تم إنشاء الهدف بنجاح' });
     } catch (err) {
@@ -80,10 +111,16 @@ router.post(
 // PUT /goals/:id
 router.put('/goals/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const goal = await StrategicGoal.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const goal = await StrategicGoal.findOneAndUpdate(
+      scopedStrategicById(req, req.params.id),
+      body,
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data: goal, message: 'تم تحديث الهدف بنجاح' });
   } catch (err) {
@@ -94,7 +131,7 @@ router.put('/goals/:id', authorize(['admin', 'super_admin', 'manager']), async (
 // DELETE /goals/:id
 router.delete('/goals/:id', authorize(['admin', 'super_admin']), async (req, res) => {
   try {
-    const goal = await StrategicGoal.findByIdAndDelete(req.params.id);
+    const goal = await StrategicGoal.findOneAndDelete(scopedStrategicById(req, req.params.id));
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     // Cascade: remove related initiatives and KPIs
     await Promise.all([
@@ -114,7 +151,7 @@ router.delete('/goals/:id', authorize(['admin', 'super_admin']), async (req, res
 router.get('/initiatives', async (req, res) => {
   try {
     const { goalId, status, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = mergeStrategicFilter(req, {});
     if (goalId) filter.goalId = goalId;
     if (status) filter.status = status;
 
@@ -141,7 +178,7 @@ router.get('/initiatives', async (req, res) => {
 
 router.get('/initiatives/:id', async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findById(req.params.id)
+    const doc = await StrategicInitiative.findOne(scopedStrategicById(req, req.params.id))
       .populate('goalId', 'title perspective')
       .lean();
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
@@ -160,7 +197,15 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = new StrategicInitiative({ ...req.body, createdBy: req.user._id || req.userId });
+      const goal = await loadScopedGoal(req, res, req.body.goalId);
+      if (!goal) return;
+      const payload = stripUpdateMeta(req.body);
+      delete payload.branchId;
+      const doc = new StrategicInitiative({
+        ...payload,
+        branchId: goal.branchId || req.branchScope?.branchId,
+        createdBy: req.user._id || req.userId,
+      });
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم إنشاء المبادرة بنجاح' });
     } catch (err) {
@@ -171,9 +216,11 @@ router.post(
 
 router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const doc = await StrategicInitiative.findOneAndUpdate(
+      scopedStrategicById(req, req.params.id),
+      body,
       { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
@@ -185,7 +232,7 @@ router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), a
 
 router.delete('/initiatives/:id', authorize(['admin', 'super_admin']), async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findByIdAndDelete(req.params.id);
+    const doc = await StrategicInitiative.findOneAndDelete(scopedStrategicById(req, req.params.id));
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, message: 'تم حذف المبادرة بنجاح' });
   } catch (err) {
@@ -200,7 +247,7 @@ router.delete('/initiatives/:id', authorize(['admin', 'super_admin']), async (re
 router.get('/kpis', async (req, res) => {
   try {
     const { goalId, status, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = mergeStrategicFilter(req, {});
     if (goalId) filter.goalId = goalId;
     if (status) filter.status = status;
 
@@ -235,7 +282,15 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = new StrategicKPI({ ...req.body, createdBy: req.user._id || req.userId });
+      const goal = await loadScopedGoal(req, res, req.body.goalId);
+      if (!goal) return;
+      const payload = stripUpdateMeta(req.body);
+      delete payload.branchId;
+      const doc = new StrategicKPI({
+        ...payload,
+        branchId: goal.branchId || req.branchScope?.branchId,
+        createdBy: req.user._id || req.userId,
+      });
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم إنشاء المؤشر بنجاح' });
     } catch (err) {
@@ -246,7 +301,9 @@ router.post(
 
 router.put('/kpis/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const doc = await StrategicKPI.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const doc = await StrategicKPI.findOneAndUpdate(scopedStrategicById(req, req.params.id), body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -259,7 +316,7 @@ router.put('/kpis/:id', authorize(['admin', 'super_admin', 'manager']), async (r
 
 router.delete('/kpis/:id', authorize(['admin', 'super_admin']), async (req, res) => {
   try {
-    const doc = await StrategicKPI.findByIdAndDelete(req.params.id);
+    const doc = await StrategicKPI.findOneAndDelete(scopedStrategicById(req, req.params.id));
     if (!doc) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });
     res.json({ success: true, message: 'تم حذف المؤشر بنجاح' });
   } catch (err) {
@@ -274,7 +331,7 @@ router.post(
   async (req, res) => {
     try {
       const { value, note } = req.body;
-      const kpi = await StrategicKPI.findById(req.params.id);
+      const kpi = await StrategicKPI.findOne(scopedStrategicById(req, req.params.id));
       if (!kpi) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });
 
       kpi.records.push({ value, note, recordedBy: req.user._id || req.userId });
@@ -311,13 +368,20 @@ router.get('/dashboard', async (req, res) => {
       totalKPIs,
     ] = await Promise.all([
       StrategicGoal.aggregate([
+        { $match: mergeStrategicFilter(req, {}) },
         { $group: { _id: '$perspective', count: { $sum: 1 }, avgProgress: { $avg: '$progress' } } },
       ]),
-      StrategicInitiative.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      StrategicKPI.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      StrategicGoal.countDocuments(),
-      StrategicInitiative.countDocuments(),
-      StrategicKPI.countDocuments(),
+      StrategicInitiative.aggregate([
+        { $match: mergeStrategicFilter(req, {}) },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      StrategicKPI.aggregate([
+        { $match: mergeStrategicFilter(req, {}) },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      StrategicGoal.countDocuments(mergeStrategicFilter(req, {})),
+      StrategicInitiative.countDocuments(mergeStrategicFilter(req, {})),
+      StrategicKPI.countDocuments(mergeStrategicFilter(req, {})),
     ]);
 
     res.json({
@@ -340,7 +404,9 @@ router.get('/balanced-scorecard', async (req, res) => {
     const perspectives = ['financial', 'customer', 'internal_processes', 'learning_growth'];
     const bscData = await Promise.all(
       perspectives.map(async p => {
-        const goals = await StrategicGoal.find({ perspective: p }).lean();
+        const goals = await StrategicGoal.find(
+          mergeStrategicFilter(req, { perspective: p })
+        ).lean();
         const avgProgress = goals.length
           ? goals.reduce((sum, g) => sum + (g.progress || 0), 0) / goals.length
           : 0;
@@ -357,7 +423,7 @@ router.get('/balanced-scorecard', async (req, res) => {
 router.get('/progress-report', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const filter = {};
+    const filter = mergeStrategicFilter(req, {});
     if (startDate) filter.createdAt = { $gte: new Date(startDate) };
     if (endDate) filter.createdAt = { ...filter.createdAt, $lte: new Date(endDate) };
 

@@ -507,6 +507,10 @@ __tests__/smart-assessment-routes-branch-isolation-wave907.test.js
 __tests__/crisis-routes-branch-isolation-wave909.test.js
 __tests__/asset-management-work-orders-branch-isolation-wave912.test.js
 __tests__/referrals-portal-branch-isolation-wave913.test.js
+__tests__/meetings-routes-branch-isolation-wave914.test.js
+__tests__/strategic-planning-branch-isolation-wave915.test.js
+__tests__/medical-equipment-branch-isolation-wave916.test.js
+__tests__/asset-catalog-branch-isolation-wave917.test.js
 __tests__/outcomes-admin-branch-isolation-wave908.test.js
 __tests__/no-duplicate-schema-index-wave884.test.js
 __tests__/retention-digest-script.test.js

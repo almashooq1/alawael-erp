@@ -18,6 +18,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const _logger = require('../utils/logger');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -134,14 +135,17 @@ router.delete('/categories/:id', authorize(['admin']), async (req, res) => {
 // Dashboard stats
 router.get('/assets/stats', async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const [total, byStatus, _byCategory, warrantyExpiringSoon, maintenanceDue] = await Promise.all([
-      Asset.countDocuments(),
-      Asset.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Asset.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
+      Asset.countDocuments(scope),
+      Asset.aggregate([{ $match: scope }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Asset.aggregate([{ $match: scope }, { $group: { _id: '$category', count: { $sum: 1 } } }]),
       Asset.countDocuments({
+        ...scope,
         warrantyExpiryDate: { $gte: new Date(), $lte: new Date(Date.now() + 60 * 864e5) },
       }),
       Asset.countDocuments({
+        ...scope,
         lastMaintenanceDate: { $lte: new Date(Date.now() - 30 * 864e5) },
         status: 'active',
       }),
@@ -158,11 +162,12 @@ router.get('/assets/stats', async (req, res) => {
 
 router.get('/assets', async (req, res) => {
   try {
-    const { search, status, category, branchId, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const { search, status, category, page = 1, limit: rawLimit = 20 } = req.query;
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (branchId) filter.location = { $regex: escapeRegex(branchId), $options: 'i' };
+    const scopedBranch = effectiveBranchScope(req);
+    if (scopedBranch) filter.branchId = scopedBranch;
     if (search) {
       const safe = escapeRegex(String(search));
       filter.$or = [
@@ -187,7 +192,13 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
     const { name, category } = req.body;
     if (!name || !category)
       return res.status(400).json({ success: false, message: 'الاسم والفئة مطلوبان' });
-    const asset = await Asset.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
+    const payload = stripUpdateMeta(req.body);
+    delete payload.branchId;
+    const asset = await Asset.create({
+      ...payload,
+      createdBy: req.user?.id,
+      ...(req.branchScope?.branchId && { branchId: req.branchScope.branchId }),
+    });
     res.status(201).json({ success: true, data: asset, message: 'تم إضافة الأصل' });
   } catch (err) {
     safeError(res, err, 'assets create error');
@@ -197,7 +208,7 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
 router.get('/assets/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findById(req.params.id).lean();
+    const asset = await Asset.findOne(scopedById(req, req.params.id)).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset });
   } catch (err) {
@@ -208,9 +219,11 @@ router.get('/assets/:id', async (req, res) => {
 router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findByIdAndUpdate(
-      req.params.id,
-      { ...stripUpdateMeta(req.body), updatedAt: new Date() },
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const asset = await Asset.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      { ...body, updatedAt: new Date() },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
@@ -223,7 +236,7 @@ router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
 router.delete('/assets/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findById(req.params.id);
+    const asset = await Asset.findOne(scopedById(req, req.params.id));
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (asset.status === 'active')
       return res.status(409).json({ success: false, message: 'لا يمكن حذف أصل نشط' });
@@ -238,6 +251,7 @@ router.delete('/assets/:id', authorize(['admin']), async (req, res) => {
 router.get('/assets/scan/:barcode', async (req, res) => {
   try {
     const asset = await Asset.findOne({
+      ...branchFilter(req),
       $or: [{ tags: req.params.barcode }, { location: req.params.barcode }],
     }).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'لم يُعثر على الأصل' });
@@ -367,6 +381,13 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
         .status(400)
         .json({ success: false, message: 'الأصل، النوع، العنوان، والتاريخ مطلوبة' });
     }
+    const scope = branchFilter(req);
+    if (Object.keys(scope).length) {
+      const owned = await Asset.findOne({ _id: assetId, ...scope })
+        .select('_id')
+        .lean();
+      if (!owned) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
+    }
     const workOrderNumber = genCode('WO');
     const woPayload = {
       ...stripUpdateMeta(req.body),
@@ -378,7 +399,10 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
     const workOrder = await MaintenanceWorkOrder.create(woPayload);
     // Update asset status to under_maintenance for corrective/emergency
     if (['corrective', 'emergency'].includes(type)) {
-      await Asset.findByIdAndUpdate(assetId, { status: 'maintenance' });
+      await Asset.findOneAndUpdate(
+        Object.keys(scope).length ? { _id: assetId, ...scope } : { _id: assetId },
+        { status: 'maintenance' }
+      );
     }
     res.status(201).json({ success: true, data: workOrder, message: 'تم إنشاء أمر العمل' });
   } catch (err) {
@@ -707,12 +731,13 @@ router.post('/inventories/:id/items', async (req, res) => {
   if (!validId(req, res)) return;
   try {
     const parent = await AssetInventory.findOne(scopedById(req, req.params.id))
-      .select('_id')
+      .select('_id branchId')
       .lean();
     if (!parent) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
     const { assetId, status, condition, actualLocation, marketValue, notes } = req.body;
     if (!assetId || !status)
       return res.status(400).json({ success: false, message: 'الأصل والحالة مطلوبان' });
+    const scopedBranchId = parent.branchId || req.branchScope?.branchId;
     const item = await AssetInventoryItem.create({
       inventoryId: req.params.id,
       assetId,
@@ -723,7 +748,7 @@ router.post('/inventories/:id/items', async (req, res) => {
       notes,
       scannedBy: req.user?.name || req.user?.email,
       scannedAt: new Date(),
-      branchId: req.body.branchId,
+      ...(scopedBranchId ? { branchId: scopedBranchId } : {}),
       createdBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: item, message: 'تم تسجيل بند الجرد' });

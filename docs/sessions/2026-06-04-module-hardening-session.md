@@ -388,7 +388,12 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W864 cbahi route behavioral~~ — **done (pending push)**: 15 supertest tests — standards registry (catalog/by-key/chapters),
+- ~~W865 restraint-seclusion route behavioral~~ — **done (pending push)**: 18 supertest tests — highest-stakes
+  physical-intervention ledger. start→end→notify-parent→complete→review state machine with completion gates
+  (endTime + parent notification + debrief notes all required), type-specific intake (chemical→medication,
+  seclusion→location), review immutability + role gating (therapist review 403), foreign-branchId-in-body
+  rejected at branch-scope layer (403), cross-branch isolation, DELETE gating.
+- ~~W864 cbahi route behavioral~~ — **done** (`c1432473f`, pushed `main`): 15 supertest tests — standards registry (catalog/by-key/chapters),
   per-(branch,standard) attestation singleton 409, attest met/score, evidence add/remove, dashboard compliance %
   computation (met + not_applicable), role gating (therapist 403), cross-branch isolation, DELETE gating.
   **Closes W356-W370 clinical-series route behavioral coverage (13 surfaces).**

@@ -98,7 +98,7 @@ CandidateSchema.index({ status: 1, source: 1 });
 const JobApplicationSchema = new Schema(
   {
     jobPosting: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusJobPosting', required: true },
-    candidate: { type: Schema.Types.ObjectId, ref: 'Candidate', required: true },
+    candidate: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusCandidate', required: true },
     stage: {
       type: String,
       enum: [
@@ -484,7 +484,7 @@ const ITIncidentSchema = new Schema(
     reportedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
     assignedTeam: String,
-    affectedAsset: { type: Schema.Types.ObjectId, ref: 'ITAsset' },
+    affectedAsset: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusITAsset' },
     resolution: {
       description: String,
       resolvedAt: Date,
@@ -868,7 +868,7 @@ const StrategicObjectiveSchema = new Schema(
     },
     department: String,
     owner: { type: Schema.Types.ObjectId, ref: 'User' },
-    parentObjective: { type: Schema.Types.ObjectId, ref: 'StrategicObjective' },
+    parentObjective: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusStrategicObjective' },
     keyResults: [
       {
         title: { type: String, required: true },
@@ -925,7 +925,11 @@ const StrategicInitiativeSchema = new Schema(
     title: { type: String, required: true },
     titleAr: String,
     description: String,
-    objective: { type: Schema.Types.ObjectId, ref: 'StrategicObjective', required: true },
+    objective: {
+      type: Schema.Types.ObjectId,
+      ref: 'EnterpriseProPlusStrategicObjective',
+      required: true,
+    },
     owner: { type: Schema.Types.ObjectId, ref: 'User' },
     team: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     status: {
@@ -993,79 +997,109 @@ function getOrCreate(name, schema) {
 
 // Module 1 — Talent Acquisition
 const EnterpriseProPlusJobPosting = getOrCreate('EnterpriseProPlusJobPosting', JobPostingSchema);
-const Candidate = getOrCreate('Candidate', CandidateSchema);
+const EnterpriseProPlusCandidate = getOrCreate('EnterpriseProPlusCandidate', CandidateSchema);
 const EnterpriseProPlusJobApplication = getOrCreate(
   'EnterpriseProPlusJobApplication',
   JobApplicationSchema
 );
-const InterviewSchedule = getOrCreate('InterviewSchedule', InterviewScheduleSchema);
+const EnterpriseProPlusInterviewSchedule = getOrCreate(
+  'EnterpriseProPlusInterviewSchedule',
+  InterviewScheduleSchema
+);
 
 // Module 2 — Facility Management
 const EnterpriseProPlusFacility = getOrCreate('EnterpriseProPlusFacility', FacilitySchema);
-const SpaceBooking = getOrCreate('SpaceBooking', SpaceBookingSchema);
-const LeaseContract = getOrCreate('LeaseContract', LeaseContractSchema);
-const UtilityReading = getOrCreate('UtilityReading', UtilityReadingSchema);
+const EnterpriseProPlusSpaceBooking = getOrCreate(
+  'EnterpriseProPlusSpaceBooking',
+  SpaceBookingSchema
+);
+const EnterpriseProPlusLeaseContract = getOrCreate(
+  'EnterpriseProPlusLeaseContract',
+  LeaseContractSchema
+);
+const EnterpriseProPlusUtilityReading = getOrCreate(
+  'EnterpriseProPlusUtilityReading',
+  UtilityReadingSchema
+);
 
 // Module 3 — Vendor Management
 const EnterpriseProPlusVendor = getOrCreate('EnterpriseProPlusVendor', VendorSchema);
-const RFQ = getOrCreate('RFQ', RFQSchema);
+const EnterpriseProPlusRFQ = getOrCreate('EnterpriseProPlusRFQ', RFQSchema);
 const EnterpriseProPlusVendorEvaluation = getOrCreate(
   'EnterpriseProPlusVendorEvaluation',
   VendorEvaluationSchema
 );
 
 // Module 4 — ITSM
-const ITIncident = getOrCreate('ITIncident', ITIncidentSchema);
-const ITAsset = getOrCreate('ITAsset', ITAssetSchema);
-const ServiceCatalogItem = getOrCreate('ServiceCatalogItem', ServiceCatalogItemSchema);
+const EnterpriseProPlusITIncident = getOrCreate('EnterpriseProPlusITIncident', ITIncidentSchema);
+const EnterpriseProPlusITAsset = getOrCreate('EnterpriseProPlusITAsset', ITAssetSchema);
+const EnterpriseProPlusServiceCatalogItem = getOrCreate(
+  'EnterpriseProPlusServiceCatalogItem',
+  ServiceCatalogItemSchema
+);
 const EnterpriseProPlusChangeRequest = getOrCreate(
   'EnterpriseProPlusChangeRequest',
   ChangeRequestSchema
 );
 
 // Module 5 — EHS Safety
-const SafetyIncident = getOrCreate('SafetyIncident', SafetyIncidentSchema);
-const SafetyInspection = getOrCreate('SafetyInspection', SafetyInspectionSchema);
-const HazardRegister = getOrCreate('HazardRegister', HazardRegisterSchema);
-const PPERecord = getOrCreate('PPERecord', PPERecordSchema);
+const EnterpriseProPlusSafetyIncident = getOrCreate(
+  'EnterpriseProPlusSafetyIncident',
+  SafetyIncidentSchema
+);
+const EnterpriseProPlusSafetyInspection = getOrCreate(
+  'EnterpriseProPlusSafetyInspection',
+  SafetyInspectionSchema
+);
+const EnterpriseProPlusHazardRegister = getOrCreate(
+  'EnterpriseProPlusHazardRegister',
+  HazardRegisterSchema
+);
+const EnterpriseProPlusPPERecord = getOrCreate('EnterpriseProPlusPPERecord', PPERecordSchema);
 
 // Module 6 — Strategic Planning
-const StrategicObjective = getOrCreate('StrategicObjective', StrategicObjectiveSchema);
+const EnterpriseProPlusStrategicObjective = getOrCreate(
+  'EnterpriseProPlusStrategicObjective',
+  StrategicObjectiveSchema
+);
 const EnterpriseProPlusStrategicInitiative = getOrCreate(
   'EnterpriseProPlusStrategicInitiative',
   StrategicInitiativeSchema
 );
-const SWOTAnalysis = getOrCreate('SWOTAnalysis', SWOTAnalysisSchema);
+const EnterpriseProPlusSWOTAnalysis = getOrCreate(
+  'EnterpriseProPlusSWOTAnalysis',
+  SWOTAnalysisSchema
+);
 
 module.exports = {
   // Talent Acquisition
   JobPosting: EnterpriseProPlusJobPosting,
-  Candidate,
+  Candidate: EnterpriseProPlusCandidate,
   JobApplication: EnterpriseProPlusJobApplication,
-  InterviewSchedule,
+  InterviewSchedule: EnterpriseProPlusInterviewSchedule,
   // Facility Management
   Facility: EnterpriseProPlusFacility,
-  SpaceBooking,
-  LeaseContract,
-  UtilityReading,
+  SpaceBooking: EnterpriseProPlusSpaceBooking,
+  LeaseContract: EnterpriseProPlusLeaseContract,
+  UtilityReading: EnterpriseProPlusUtilityReading,
   // Vendor Management
   Vendor: EnterpriseProPlusVendor,
-  RFQ,
+  RFQ: EnterpriseProPlusRFQ,
   VendorEvaluation: EnterpriseProPlusVendorEvaluation,
   // ITSM
-  ITIncident,
-  ITAsset,
-  ServiceCatalogItem,
+  ITIncident: EnterpriseProPlusITIncident,
+  ITAsset: EnterpriseProPlusITAsset,
+  ServiceCatalogItem: EnterpriseProPlusServiceCatalogItem,
   ChangeRequest: EnterpriseProPlusChangeRequest,
   // EHS Safety
-  SafetyIncident,
-  SafetyInspection,
-  HazardRegister,
-  PPERecord,
+  SafetyIncident: EnterpriseProPlusSafetyIncident,
+  SafetyInspection: EnterpriseProPlusSafetyInspection,
+  HazardRegister: EnterpriseProPlusHazardRegister,
+  PPERecord: EnterpriseProPlusPPERecord,
   // Strategic Planning
-  StrategicObjective,
+  StrategicObjective: EnterpriseProPlusStrategicObjective,
   StrategicInitiative: EnterpriseProPlusStrategicInitiative,
-  SWOTAnalysis,
+  SWOTAnalysis: EnterpriseProPlusSWOTAnalysis,
 };
 
 logger.info(`  ✅ EnterpriseProPlus: ${Object.keys(module.exports).length} models loaded`);

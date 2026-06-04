@@ -101,7 +101,6 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'WorkflowInstance' — W837 ratchet-down: document-side renames to DocumentOrchWorkflowInstance
   // + DocumentEngineWorkflowInstance; single canonical remains in intelligent-workflow-engine.js.
   // 'Beneficiary' — W341 CONSOLIDATED: seeder now re-exports canonical models/Beneficiary.js.
-
   // Tier 2 — registered in 2 files (lower risk but still drift-prone)
   // 'Correspondence' — W842 ratchet-down: AdminCommCorrespondence (administrative-communications-service);
   // canonical remains models/Correspondence.js.
@@ -122,7 +121,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Department'— W341 CONSOLIDATED: seeder now re-exports canonical models/Department.js
   // 'Session'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Session.js
   // 'Vehicle'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Vehicle.js
-  'LifecyclePolicy',
+  // 'LifecyclePolicy' — W849 ratchet-down: DocumentLifecyclePolicy (documentLifecycle.service);
+  //                     ttl-lifecycle-manager → REGISTRATION_ALLOWLIST only.
   // 'GeneratedReport' — W843 ratchet-down: DocumentGeneratedReport (documentReporting);
   // canonical remains domains/reports/models/GeneratedReport.js.
   // 'Employee'      — W342 CONSOLIDATED: hr/saudi-hr-service.js now re-exports models/Employee.js
@@ -289,16 +289,19 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // W835 ratchet-down: GoalBank, ImportExportJob, FormTemplate, FormSubmission,
   // TherapyProtocol, DigitalSignature (documentDigitalCert) — Pattern D renames
   // in service/rehab files; canonical models remain at models/*.js.
+  // W849 ratchet-down: LifecyclePolicy → DocumentLifecyclePolicy (documentLifecycle.service);
+  //   ttl-lifecycle-manager defensive lookup-only — REGISTRATION_ALLOWLIST.
+  // W849 ratchet-down: Student → MontessoriStudent (montessori) + TransportStudent
+  //   (student-transport-service); canonical students/student-service.js (ADR-020 deferred).
+  // W849 ratchet-down: EnterpriseProPlus unprefixed models → EnterpriseProPlus* (15 names).
   // W848 ratchet-down: MDTMeeting → MdtQualityMDTMeeting (mdt-transition-quality.js);
   //   NotificationPreferences → DocumentNotificationPreferences (documentNotification.service.js);
   //   DataSubjectRequest → PdplServiceDataSubjectRequest (pdpl.service.js); canonicals unchanged.
-  'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary) — see ADR-020 for canonical-consolidation decision (deferred pending stakeholder)
-  // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
-  // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
+  // Baseline EMPTY as of W849 — all discovery-time duplicates consolidated or ALLOWLISTed.
   // W837 ratchet-down: WorkflowDefinition + WorkflowInstance document-service collisions
   // closed via Pattern D rename (DocumentOrch* + DocumentEngineWorkflowInstance).
-
-  // ─────────────────────────────────────────────────────────────────────────
+  // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
+  // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
   // AF-2 (2026-05-25) — surfaced by extending the regex to catch
   // `connection.model(...)` / `conn.model(...)` / `db.model(...)` patterns
   // (the per-connection registration form, previously a drift-guard blind

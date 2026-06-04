@@ -56,7 +56,7 @@ const lifecyclePolicySchema = new mongoose.Schema(
 const documentLifecycleSchema = new mongoose.Schema(
   {
     documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document', required: true },
-    policyId: { type: mongoose.Schema.Types.ObjectId, ref: 'LifecyclePolicy' },
+    policyId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentLifecyclePolicy' },
     currentPhase: {
       name: String,
       enteredAt: Date,
@@ -143,8 +143,10 @@ documentLifecycleSchema.index({ 'currentPhase.expiresAt': 1, status: 1 });
 documentLifecycleSchema.index({ 'retentionInfo.retentionEndDate': 1 });
 dispositionRequestSchema.index({ documentId: 1, status: 1 });
 
-const LifecyclePolicy =
-  mongoose.models.LifecyclePolicy || mongoose.model('LifecyclePolicy', lifecyclePolicySchema);
+// Pattern D (W849): document lifecycle policies (TTL canonical: database/ttl-lifecycle-manager.js)
+const DocumentLifecyclePolicy =
+  mongoose.models.DocumentLifecyclePolicy ||
+  mongoose.model('DocumentLifecyclePolicy', lifecyclePolicySchema);
 const DocumentLifecycle =
   mongoose.models.DocumentLifecycle || mongoose.model('DocumentLifecycle', documentLifecycleSchema);
 const DispositionRequest =
@@ -155,7 +157,7 @@ const DispositionRequest =
 class DocumentLifecycleService {
   /* ── Policies ─────────────────────── */
   async createPolicy(data, userId) {
-    const policy = new LifecyclePolicy({ ...data, createdBy: userId });
+    const policy = new DocumentLifecyclePolicy({ ...data, createdBy: userId });
     if (policy.phases?.length) {
       policy.phases = policy.phases.map((p, i) => ({ ...p, order: i }));
     }
@@ -164,7 +166,7 @@ class DocumentLifecycleService {
   }
 
   async updatePolicy(policyId, data, userId) {
-    const policy = await LifecyclePolicy.findByIdAndUpdate(
+    const policy = await DocumentLifecyclePolicy.findByIdAndUpdate(
       policyId,
       { ...data, updatedBy: userId },
       { returnDocument: 'after' }
@@ -181,11 +183,11 @@ class DocumentLifecycleService {
     const query = {};
     if (filters.status) query.status = filters.status;
     if (filters.category) query.category = filters.category;
-    return LifecyclePolicy.find(query).sort('-createdAt').lean();
+    return DocumentLifecyclePolicy.find(query).sort('-createdAt').lean();
   }
 
   async getPolicy(policyId) {
-    const p = await LifecyclePolicy.findById(policyId).lean();
+    const p = await DocumentLifecyclePolicy.findById(policyId).lean();
     if (!p) throw new Error('السياسة غير موجودة');
     return p;
   }
@@ -193,12 +195,12 @@ class DocumentLifecycleService {
   async deletePolicy(policyId) {
     const count = await DocumentLifecycle.countDocuments({ policyId });
     if (count > 0) throw new Error('لا يمكن حذف سياسة مرتبطة بمستندات');
-    return LifecyclePolicy.findByIdAndDelete(policyId);
+    return DocumentLifecyclePolicy.findByIdAndDelete(policyId);
   }
 
   /* ── Document Lifecycle ───────────── */
   async assignLifecycle(documentId, policyId, userId) {
-    const policy = await LifecyclePolicy.findById(policyId);
+    const policy = await DocumentLifecyclePolicy.findById(policyId);
     if (!policy || policy.status !== 'active') throw new Error('السياسة غير نشطة');
 
     const firstPhase = policy.phases.sort((a, b) => a.order - b.order)[0];
@@ -247,7 +249,7 @@ class DocumentLifecycleService {
     if (!lc) throw new Error('لا توجد دورة حياة');
     if (lc.status === 'legal_hold') throw new Error('المستند تحت حجز قانوني');
 
-    const policy = await LifecyclePolicy.findById(lc.policyId);
+    const policy = await DocumentLifecyclePolicy.findById(lc.policyId);
     const phase = policy?.phases?.find(p => p.name === targetPhase);
     if (!phase) throw new Error('المرحلة غير موجودة');
 
@@ -414,7 +416,7 @@ class DocumentLifecycleService {
     let processed = 0;
     for (const lc of expired) {
       try {
-        const policy = await LifecyclePolicy.findById(lc.policyId);
+        const policy = await DocumentLifecyclePolicy.findById(lc.policyId);
         if (!policy) continue;
         const currentIdx = policy.phases.findIndex(p => p.name === lc.currentPhase.name);
         const nextPhase = policy.phases[currentIdx + 1];
@@ -445,7 +447,7 @@ class DocumentLifecycleService {
   /* ── Stats ────────────────────────── */
   async getStats() {
     const [policies, lifecycles, dispositions, legalHolds, expiring] = await Promise.all([
-      LifecyclePolicy.countDocuments(),
+      DocumentLifecyclePolicy.countDocuments(),
       DocumentLifecycle.countDocuments(),
       DispositionRequest.countDocuments(),
       DocumentLifecycle.countDocuments({ 'retentionInfo.legalHold': true }),

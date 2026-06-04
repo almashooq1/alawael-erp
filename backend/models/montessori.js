@@ -16,7 +16,7 @@ const StudentSchema = new mongoose.Schema({
 
 // نموذج الخطة الفردية
 const MontessoriPlanSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriStudent' },
   goals: [
     {
       area: String, // مجال (حسي، لغوي، حركي...)
@@ -32,7 +32,7 @@ const MontessoriPlanSchema = new mongoose.Schema({
 
 // نموذج الجلسة
 const SessionSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriStudent' },
   plan: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriPlan' },
   date: { type: Date, default: Date.now },
   type: { type: String }, // منتسوري، علاج وظيفي، نطق...
@@ -44,7 +44,7 @@ const SessionSchema = new mongoose.Schema({
 
 // نموذج التقييم
 const EvaluationSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriStudent' },
   plan: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriPlan' },
   date: { type: Date, default: Date.now },
   area: String,
@@ -75,7 +75,7 @@ const ParentSchema = new mongoose.Schema({
   name: String,
   phone: String,
   email: String,
-  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriStudent' }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
@@ -89,7 +89,7 @@ const MediaFileSchema = new mongoose.Schema({
 
 // نموذج التقرير
 const ReportSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriStudent' },
   plan: { type: mongoose.Schema.Types.ObjectId, ref: 'MontessoriPlan' },
   date: { type: Date, default: Date.now },
   summary: String,
@@ -142,7 +142,9 @@ MontessoriProgramSchema.index({ status: 1 });
 MontessoriProgramSchema.index({ createdBy: 1 });
 
 module.exports = {
-  Student: mongoose.models.Student || mongoose.model('Student', StudentSchema),
+  // Registered as `MontessoriStudent` (not `Student`) to avoid collision with
+  // students/student-service.js canonical Student schema. Export key stays `Student`.
+  Student: mongoose.models.MontessoriStudent || mongoose.model('MontessoriStudent', StudentSchema),
   MontessoriPlan:
     mongoose.models.MontessoriPlan || mongoose.model('MontessoriPlan', MontessoriPlanSchema),
   Session: mongoose.models.MontessoriSession || mongoose.model('MontessoriSession', SessionSchema),

@@ -530,7 +530,8 @@ class StudentTransportService extends EventEmitter {
    */
   async initialize(connection) {
     this.Bus = connection.model('SchoolBus', SchoolBusSchema);
-    this.Student = connection.model('Student', StudentSchema);
+    // Pattern D (W849): transport roster — canonical Student in students/student-service.js
+    this.Student = connection.model('TransportStudent', StudentSchema);
     this.Trip = connection.model('BusTrip', BusTripSchema);
     this.Route = connection.model('BusRoute', BusRouteSchema);
     logger.info('✅ Student Transport Service initialized');

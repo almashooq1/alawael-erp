@@ -12,7 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { notify, NotificationLog } = require('../services/unifiedNotifier');
+const { notify, NotificationDeliveryLog } = require('../services/unifiedNotifier');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
@@ -116,12 +116,12 @@ router.get('/logs', requireRole(STAFF_ROLES), async (req, res) => {
     const p = Math.max(1, parseInt(page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
     const [items, total] = await Promise.all([
-      NotificationLog.find(filter)
+      NotificationDeliveryLog.find(filter)
         .sort({ createdAt: -1 })
         .skip((p - 1) * l)
         .limit(l)
         .lean(),
-      NotificationLog.countDocuments(filter),
+      NotificationDeliveryLog.countDocuments(filter),
     ]);
     res.json({
       success: true,
@@ -139,10 +139,10 @@ router.get('/stats', requireRole(STAFF_ROLES), async (_req, res) => {
     const since = new Date();
     since.setDate(since.getDate() - 30);
     const [total, byChannel, byStatus, last30days] = await Promise.all([
-      NotificationLog.countDocuments({}),
-      NotificationLog.aggregate([{ $group: { _id: '$channel', count: { $sum: 1 } } }]),
-      NotificationLog.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      NotificationLog.countDocuments({ createdAt: { $gte: since } }),
+      NotificationDeliveryLog.countDocuments({}),
+      NotificationDeliveryLog.aggregate([{ $group: { _id: '$channel', count: { $sum: 1 } } }]),
+      NotificationDeliveryLog.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      NotificationDeliveryLog.countDocuments({ createdAt: { $gte: since } }),
     ]);
     res.json({
       success: true,

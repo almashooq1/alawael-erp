@@ -167,7 +167,9 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //       but higher caller-update count.
   //   Recommendation: Pattern D rename inbox → 'UserNotification' (fewer touch
   //   points). Open ADR-031 to confirm before executing.
-  'NotificationLog',
+  // 'NotificationLog' — W847 ratchet-down: UserNotification (communication inbox) +
+  // NotificationDeliveryLog (unifiedNotifier delivery audit). Quality router uses
+  // QualityNotificationLog (already renamed in models/quality/NotificationLog.model.js).
   // 'Consent' — 2026-05-27 moved to REGISTRATION_ALLOWLIST. Verified dormant
   //   privacy fallback: privacy/consent.model.js has ZERO production importers
   //   (only __tests__/privacy.routes.test.js imports it; privacy/privacy.routes.js

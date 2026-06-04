@@ -1,5 +1,5 @@
 /**
- * NotificationLog Model — سجل الإشعارات المُرسلة
+ * UserNotification Model — سجل إشعارات المستخدم (in-app inbox) — W847 Pattern D
  * Rehab-ERP v2.0
  */
 
@@ -69,5 +69,6 @@ notificationLogSchema.index({ user_id: 1, read_at: 1 });
 notificationLogSchema.index({ reference_type: 1, reference_id: 1 });
 notificationLogSchema.index({ deleted_at: 1 });
 
+// Pattern D (W847): user inbox (distinct from unifiedNotifier NotificationDeliveryLog)
 module.exports =
-  mongoose.models.NotificationLog || mongoose.model('NotificationLog', notificationLogSchema);
+  mongoose.models.UserNotification || mongoose.model('UserNotification', notificationLogSchema);

@@ -363,5 +363,5 @@ jest.mock('../middleware/auth', () => ({
 - ~~Payroll + EnterprisePro/doc cluster Pattern D~~ — **done W844** (`SaudiHrPayroll`, `DocumentComplianceAlert`, `DocumentCalendarEvent`, `EnterprisePro*` renames).
 - ~~EnterpriseProPlus talent/facility + Warehouse Pattern D~~ — **done W845** (`EnterpriseProWarehouse`, `EnterpriseProPlusJobPosting/JobApplication/Facility`).
 - ~~EnterpriseProPlus vendor/ITSM/strategic Pattern D~~ — **done W846** (`EnterpriseProPlusVendor`, `VendorEvaluation`, `ChangeRequest`, `StrategicInitiative`).
-- ~~CAPA IMPLEMENTED-state cross-branch isolation~~ — **done W846** (`capa-implemented-mutations-behavioral-wave846`).
-- Remaining W340 cluster: `NotificationLog`, documents-pro `WorkflowDefinition` umbrella, … → stakeholder ADR.
+- ~~NotificationLog collision (ADR-031)~~ — **done W847** (`UserNotification` inbox + `NotificationDeliveryLog` delivery audit).
+- Remaining W340 cluster: documents-pro `WorkflowDefinition` umbrella, `LifecyclePolicy`, …

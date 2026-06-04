@@ -47,8 +47,9 @@ const logSchema = new mongoose.Schema(
 );
 logSchema.index({ createdAt: -1 });
 logSchema.index({ channel: 1, status: 1 });
-const NotificationLog =
-  mongoose.models.NotificationLog || mongoose.model('NotificationLog', logSchema);
+// Pattern D (W847): multi-channel delivery audit log (distinct from inbox UserNotification)
+const NotificationDeliveryLog =
+  mongoose.models.NotificationDeliveryLog || mongoose.model('NotificationDeliveryLog', logSchema);
 
 // ── WhatsApp via wa.me link (client-side) OR Cloud API (server-side) ──
 // Client-side wa.me is a URL (not actually sent) — kept for frontend use.
@@ -137,7 +138,7 @@ async function notify(opts) {
   const results = [];
 
   for (const channel of channelList) {
-    const log = await NotificationLog.create({
+    const log = await NotificationDeliveryLog.create({
       channel,
       to: toObj[channel === 'email' ? 'email' : 'phone'] || String(to),
       subject,
@@ -189,4 +190,9 @@ async function notify(opts) {
   return { success: anySuccess, results };
 }
 
-module.exports = { notify, NotificationLog, sendWhatsApp };
+module.exports = {
+  notify,
+  NotificationDeliveryLog,
+  NotificationLog: NotificationDeliveryLog,
+  sendWhatsApp,
+};

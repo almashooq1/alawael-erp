@@ -1917,10 +1917,10 @@ router.get(
     if (status) filter.status = status;
 
     const NotificationLog =
-      mongoose.models.NotificationLog ||
+      mongoose.models.NotificationDeliveryLog ||
       (() => {
         try {
-          return require('../services/unifiedNotifier').NotificationLog;
+          return require('../services/unifiedNotifier').NotificationDeliveryLog;
         } catch {
           return null;
         }

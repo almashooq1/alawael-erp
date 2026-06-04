@@ -260,7 +260,7 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     try {
       const NotificationLog = (() => {
         try {
-          return require('../../services/unifiedNotifier').NotificationLog;
+          return require('../../services/unifiedNotifier').NotificationDeliveryLog;
         } catch {
           return null;
         }

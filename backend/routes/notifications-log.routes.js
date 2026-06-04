@@ -30,7 +30,7 @@ function getModel() {
   } catch {
     /* ignore */
   }
-  return mongoose.models.NotificationLog;
+  return mongoose.models.NotificationDeliveryLog;
 }
 
 router.get('/', async (req, res) => {

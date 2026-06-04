@@ -19,7 +19,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // ─── Models ───────────────────────────────────────────────────────────────────
 const Announcement = require('../models/communication/Announcement');
 const InternalMessage = require('../models/communication/InternalMessage');
-const NotificationLog = require('../models/communication/NotificationLog');
+const UserNotification = require('../models/communication/NotificationLog');
 const ContactDirectory = require('../models/communication/ContactDirectory');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -375,12 +375,12 @@ router.get('/notifications', async (req, res) => {
     if (notification_type) filter.notification_type = notification_type;
 
     const [notifications, total, unread] = await Promise.all([
-      NotificationLog.find(filter)
+      UserNotification.find(filter)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(Number(limit)),
-      NotificationLog.countDocuments(filter),
-      NotificationLog.countDocuments({
+      UserNotification.countDocuments(filter),
+      UserNotification.countDocuments({
         user_id: req.user._id,
         status: { $ne: 'read' },
         deleted_at: null,
@@ -401,7 +401,7 @@ router.get('/notifications', async (req, res) => {
 // GET /notifications/unread-count
 router.get('/notifications/unread-count', async (req, res) => {
   try {
-    const count = await NotificationLog.countDocuments({
+    const count = await UserNotification.countDocuments({
       user_id: req.user._id,
       status: { $ne: 'read' },
       deleted_at: null,
@@ -415,7 +415,10 @@ router.get('/notifications/unread-count', async (req, res) => {
 // PUT /notifications/:id/read
 router.put('/notifications/:id/read', async (req, res) => {
   try {
-    await NotificationLog.findByIdAndUpdate(req.params.id, { status: 'read', read_at: new Date() });
+    await UserNotification.findByIdAndUpdate(req.params.id, {
+      status: 'read',
+      read_at: new Date(),
+    });
     res.json({ success: true, message: 'تم تعليم الإشعار كمقروء' });
   } catch (err) {
     safeError(res, err);
@@ -425,7 +428,7 @@ router.put('/notifications/:id/read', async (req, res) => {
 // PUT /notifications/read-all
 router.put('/notifications/read-all', async (req, res) => {
   try {
-    await NotificationLog.updateMany(
+    await UserNotification.updateMany(
       { user_id: req.user._id, status: { $ne: 'read' } },
       { status: 'read', read_at: new Date() }
     );
@@ -438,7 +441,7 @@ router.put('/notifications/read-all', async (req, res) => {
 // DELETE /notifications/:id
 router.delete('/notifications/:id', async (req, res) => {
   try {
-    await NotificationLog.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
+    await UserNotification.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف الإشعار' });
   } catch (err) {
     safeError(res, err);

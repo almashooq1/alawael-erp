@@ -25,7 +25,11 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { branchFilter, effectiveBranchScope } = require('../middleware/branchScope.middleware');
+const {
+  branchFilter,
+  effectiveBranchScope,
+  requireBranchAccess,
+} = require('../middleware/branchScope.middleware');
 const { assertBranchMatch } = require('../middleware/assertBranchMatch');
 
 const storyBuilder = require('../intelligence/story-builder.lib');
@@ -35,6 +39,9 @@ const VALID_STATUSES = ['draft', 'reviewed', 'published', 'shared_with_family', 
 const VALID_PERIOD_TYPES = ['quarterly', 'annual', 'milestone', 'ad-hoc'];
 
 router.use(authenticateToken);
+// W833: populate req.branchScope so branchFilter(req) + assertBranchMatch(req)
+// below actually enforce isolation (they no-op without it).
+router.use(requireBranchAccess);
 
 function loadBookModel() {
   try {

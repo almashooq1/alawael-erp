@@ -600,3 +600,13 @@ __tests__/maintenance-hub-wave807.test.js
 __tests__/branch-board-ppm-wave809.test.js
 __tests__/coo-board-ppm-wave810.test.js
 __tests__/maintenance-cutover-doc-wave811.test.js
+__tests__/phase-b-routes-behavioral-wave829.test.js
+__tests__/clinical-routes-behavioral-wave826.test.js
+__tests__/clinical-routes-behavioral-wave827.test.js
+__tests__/clinical-routes-behavioral-wave828.test.js
+__tests__/clinical-routes-behavioral-wave830.test.js
+__tests__/rights-voice-lifecycle-behavioral-wave831.test.js
+__tests__/iq-assessments-branch-isolation-behavioral-wave832.test.js
+__tests__/branch-scope-mount-drift-wave833.test.js
+__tests__/spasticity-injection-api-wave715.test.js
+__tests__/spasticity-injection-behavioral-wave715.test.js

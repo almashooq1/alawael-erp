@@ -59,6 +59,7 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/beneficiary-lifecycle.registry');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const {
   branchScopedBeneficiaryParam,
   assertBranchMatch,
@@ -144,6 +145,14 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
   void logger;
 
   const router = express.Router();
+  // W833: populate req.branchScope. The bootstrap mounts this router as
+  // `authenticate → loadMfaActor → router` (startup/beneficiaryLifecycleBootstrap.js)
+  // WITHOUT requireBranchAccess, so without this line req.branchScope was never
+  // set — and branchScopedBeneficiaryParam / assertBranchMatch / effectiveBranchScope
+  // below were ALL silent no-ops (the same dead-check IDOR class fixed for
+  // iq-assessments in W832). authenticate runs first at mount, so req.user is
+  // present here and requireBranchAccess resolves the caller's scope.
+  router.use(requireBranchAccess);
   // W440: auto-enforce branch ownership on every :beneficiaryId param.
   router.param('beneficiaryId', branchScopedBeneficiaryParam);
 

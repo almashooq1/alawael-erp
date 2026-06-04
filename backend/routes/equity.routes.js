@@ -22,7 +22,11 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { branchFilter, effectiveBranchScope } = require('../middleware/branchScope.middleware');
+const {
+  branchFilter,
+  effectiveBranchScope,
+  requireBranchAccess,
+} = require('../middleware/branchScope.middleware');
 const { assertBranchMatch } = require('../middleware/assertBranchMatch');
 const { requireMfaTier } = require('../middleware/requireMfaTier');
 
@@ -38,6 +42,9 @@ const VALID_STATUSES = [
 const VALID_SEVERITIES = ['none', 'minor', 'moderate', 'major'];
 
 router.use(authenticateToken);
+// W833: populate req.branchScope so branchFilter(req) + assertBranchMatch(req)
+// below actually enforce isolation (they no-op without it).
+router.use(requireBranchAccess);
 
 function loadAlertModel() {
   try {

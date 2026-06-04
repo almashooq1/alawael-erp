@@ -116,6 +116,15 @@ describe('[W714] IQ Assessments Routes — Static Analysis', () => {
     it('[22] Must NOT store raw item responses', () => {
       expect(ROUTES_SRC).not.toMatch(/itemResponse|rawItems|itemArray/i);
     });
+
+    it('[22b] W832 — must mount requireBranchAccess so branch checks are not dead no-ops', () => {
+      expect(ROUTES_SRC).toMatch(/requireBranchAccess/);
+      expect(ROUTES_SRC).toMatch(/router\.use\s*\(\s*requireBranchAccess\s*\)/);
+    });
+
+    it('[22c] W832 — :id handlers honor err.status (403 cross-branch, not masked as 500)', () => {
+      expect(ROUTES_SRC).toMatch(/res\.status\(\s*err\.status\s*\|\|\s*500\s*\)/);
+    });
   });
 
   describe('Report Generation & Interpretation (6)', () => {

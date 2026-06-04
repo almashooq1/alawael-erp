@@ -28,6 +28,7 @@ const llmModule = require('../services/assessmentRecommendationLlm.service');
 const createReassessmentSweeper = require('../services/assessmentReassessmentSweeper.service');
 const createBundleAnalytics = require('../services/assessmentBundleAnalytics.service');
 const createBundleOutcomes = require('../services/assessmentBundleOutcomes.service');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const {
   enforceBeneficiaryBranch,
   effectiveBranchScope,
@@ -40,6 +41,11 @@ const {
 // without a per-callsite call. No-op for the dry-run /recommend which
 // passes `beneficiary` as a context object (auto-skipped by ObjectId
 // regex check inside the guard).
+// W833: populate req.branchScope FIRST so bodyScopedBeneficiaryGuard +
+// enforceBeneficiaryBranch(req) + effectiveBranchScope(req) below actually
+// enforce isolation (all no-ops without it). Auth runs at mount via
+// dualMountAuth, so req.user is present here.
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard);
 const safeError = require('../utils/safeError');
 

@@ -8,10 +8,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const { authorize } = require('../middleware/auth');
-const { branchFilter } = require('../middleware/branchScope.middleware');
+const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const svc = require('../services/rehabLicenses.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
+
+// W833: populate req.branchScope so branchFilter(req) below actually enforces
+// isolation (it returns {} — no filter — without it). dualMountAuth applies
+// `authenticate` at mount, so req.user is present for requireBranchAccess.
+router.use(requireBranchAccess);
 
 function wrap(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

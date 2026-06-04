@@ -19,7 +19,7 @@ const { Types } = require('mongoose');
 // branchScope.middleware (which only exports branchFilter/requireBranchAccess) —
 // the wrong import made requireMfaTier undefined → "not a function" at load,
 // breaking check:routes-load for the whole shared tree.
-const { branchFilter } = require('../middleware/branchScope.middleware');
+const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { requireMfaTier } = require('../middleware/requireMfaTier');
 const { assertBranchMatch, enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 const IQAssessment = require('../models/IQAssessment');
@@ -27,6 +27,17 @@ const registry = require('../measures/scoring');
 const { generateAssessmentReport } = require('../services/iqReportService');
 
 const router = express.Router();
+
+// W832: this router relies on assertBranchMatch / branchFilter /
+// enforceBeneficiaryBranch for cross-tenant isolation, but those are ALL
+// no-ops unless `req.branchScope` is populated. The router was mounted
+// directly in app.js WITHOUT requireBranchAccess and there is no global
+// requireBranchAccess, so every branch check here was silently dead —
+// a restricted examiner in branch A could read any branch's IQ scores
+// (clinical PII) by guessing an ObjectId. Mounting it here activates the
+// existing (intended) checks. requireBranchAccess 401s without req.user,
+// matching the requireMfaTier guard already present on each route.
+router.use(requireBranchAccess);
 
 // ── POST /api/(v1/)?iq-assessments — Create assessment ──
 // Examiner enters standard scores; system auto-classifies
@@ -106,7 +117,7 @@ router.post('/', requireMfaTier(2), async (req, res) => {
     });
   } catch (err) {
     console.error('POST /iq-assessments error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -130,7 +141,7 @@ router.get('/:id', requireMfaTier(1), async (req, res) => {
     res.json(assessment);
   } catch (err) {
     console.error('GET /iq-assessments/:id error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -155,7 +166,7 @@ router.get('/by-beneficiary/:beneficiaryId', requireMfaTier(1), async (req, res)
     res.json({ count: assessments.length, assessments });
   } catch (err) {
     console.error('GET /by-beneficiary error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -175,7 +186,7 @@ router.get('/:id/report', requireMfaTier(1), async (req, res) => {
     res.json(report);
   } catch (err) {
     console.error('GET /report error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 

@@ -62,7 +62,7 @@ let Model;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  Model = mongoose.model('WorkflowInstance');
+  Model = mongoose.model('DocumentEngineWorkflowInstance');
 });
 
 // ═══════════════════════════════════════
@@ -98,11 +98,11 @@ describe('workflow.createWorkflow', () => {
     Model.findOne.mockResolvedValue(null); // no existing
     const saved = fakeWorkflow();
     const mockInstance = { ...saved, save: jest.fn().mockResolvedValue(saved) };
-    const origModel = mongoose.model('WorkflowInstance');
+    const origModel = mongoose.model('DocumentEngineWorkflowInstance');
     const ctor = jest.fn().mockReturnValue(mockInstance);
     Object.assign(ctor, origModel);
     mongoose.model.mockImplementation(name => {
-      if (name === 'WorkflowInstance') return ctor;
+      if (name === 'DocumentEngineWorkflowInstance') return ctor;
       return origModel;
     });
 

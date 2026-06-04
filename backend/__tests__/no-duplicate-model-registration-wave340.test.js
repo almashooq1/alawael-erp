@@ -95,7 +95,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //              for true consolidation but ALLOWLIST preserves current behavior).
   'ApprovalRequest', // 3× — discovered W340; schemas DIVERGE significantly (rich state-machine in authorization/approvals/ vs simple legacy in models/ — first-loaded wins silently)
   'ReportTemplate', // 3×
-  'WorkflowInstance', // 3× (was undercount before W340 comment-stripping fix; surfaced in re-scan)
+  // 'WorkflowInstance' — W837 ratchet-down: document-side renames to DocumentOrchWorkflowInstance
+  // + DocumentEngineWorkflowInstance; single canonical remains in intelligent-workflow-engine.js.
   // 'Beneficiary' — W341 CONSOLIDATED: seeder now re-exports canonical models/Beneficiary.js.
 
   // Tier 2 — registered in 2 files (lower risk but still drift-prone)
@@ -272,8 +273,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
   // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
   'DataSubjectRequest',
-  'WorkflowInstance',
-  'WorkflowDefinition',
+  // W837 ratchet-down: WorkflowDefinition + WorkflowInstance document-service collisions
+  // closed via Pattern D rename (DocumentOrch* + DocumentEngineWorkflowInstance).
 
   // ─────────────────────────────────────────────────────────────────────────
   // AF-2 (2026-05-25) — surfaced by extending the regex to catch

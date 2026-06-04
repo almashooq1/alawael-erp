@@ -143,6 +143,10 @@ const PerformanceEvaluationSchema = new mongoose.Schema({
     default: 'draft',
   },
 
+  // W837 — branch scoping (hrPerformanceService already filters/pins this field;
+  // was silently stripped by strict schema before this additive declaration).
+  branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
+
   // الجدول الزمني
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

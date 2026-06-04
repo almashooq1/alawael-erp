@@ -270,8 +270,10 @@ WorkflowInstanceSchema.index({ assignedTo: 1, isActive: 1 });
 WorkflowInstanceSchema.index({ 'sla.dueDate': 1, 'sla.isOverdue': 1 });
 WorkflowInstanceSchema.index({ initiatedBy: 1, createdAt: -1 });
 
-const WorkflowInstance =
-  mongoose.models.WorkflowInstance || mongoose.model('WorkflowInstance', WorkflowInstanceSchema);
+// Pattern D (W837): document approval engine instance (distinct from workflow-engine.js)
+const DocumentEngineWorkflowInstance =
+  mongoose.models.DocumentEngineWorkflowInstance ||
+  mongoose.model('DocumentEngineWorkflowInstance', WorkflowInstanceSchema);
 
 // ─────────────────────────────────────────────
 // محرك سير العمل
@@ -294,7 +296,7 @@ class DocumentWorkflowEngine extends EventEmitter {
       }
 
       // فحص وجود سير عمل نشط
-      const existing = await WorkflowInstance.findOne({
+      const existing = await DocumentEngineWorkflowInstance.findOne({
         documentId,
         isActive: true,
       });
@@ -313,7 +315,7 @@ class DocumentWorkflowEngine extends EventEmitter {
       // The static methods used elsewhere (findById/find/aggregate) still hit
       // the captured `WorkflowInstance` ref above — tests already mock those
       // via `Model.X.mockResolvedValue(...)` on that same reference.
-      const WorkflowInstanceCtor = mongoose.model('WorkflowInstance');
+      const WorkflowInstanceCtor = mongoose.model('DocumentEngineWorkflowInstance');
       const workflow = new WorkflowInstanceCtor({
         documentId,
         templateId,
@@ -376,7 +378,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async executeTransition(workflowId, newStatus, userId, options = {}) {
     try {
-      const workflow = await WorkflowInstance.findById(workflowId);
+      const workflow = await DocumentEngineWorkflowInstance.findById(workflowId);
       if (!workflow) throw new Error('سير العمل غير موجود');
       if (!workflow.isActive) throw new Error('سير العمل غير نشط');
 
@@ -523,7 +525,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async getWorkflow(documentId) {
     try {
-      const workflow = await WorkflowInstance.findOne({
+      const workflow = await DocumentEngineWorkflowInstance.findOne({
         documentId,
         isActive: true,
       }).populate('initiatedBy assignedTo', 'name email');
@@ -541,7 +543,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async getWorkflowById(workflowId) {
     try {
-      const workflow = await WorkflowInstance.findById(workflowId).populate(
+      const workflow = await DocumentEngineWorkflowInstance.findById(workflowId).populate(
         'initiatedBy assignedTo',
         'name email'
       );
@@ -565,7 +567,7 @@ class DocumentWorkflowEngine extends EventEmitter {
 
       if (options.status) query.currentStatus = options.status;
 
-      const workflows = await WorkflowInstance.find(query)
+      const workflows = await DocumentEngineWorkflowInstance.find(query)
         .populate('documentId', 'title category fileName fileType')
         .populate('initiatedBy', 'name email')
         .sort({ 'sla.dueDate': 1 })
@@ -583,7 +585,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async escalateOverdue(workflowId, escalateTo, userId) {
     try {
-      const workflow = await WorkflowInstance.findById(workflowId);
+      const workflow = await DocumentEngineWorkflowInstance.findById(workflowId);
       if (!workflow) throw new Error('سير العمل غير موجود');
 
       workflow.sla.isOverdue = true;
@@ -619,7 +621,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async delegateTask(workflowId, fromUserId, toUserId, comments = '') {
     try {
-      const workflow = await WorkflowInstance.findById(workflowId);
+      const workflow = await DocumentEngineWorkflowInstance.findById(workflowId);
       if (!workflow) throw new Error('سير العمل غير موجود');
 
       workflow.assignedTo = toUserId;
@@ -669,23 +671,23 @@ class DocumentWorkflowEngine extends EventEmitter {
 
       const [statusCounts, templateCounts, overdueCounts, avgCompletionTime] = await Promise.all([
         // توزيع حسب الحالة
-        WorkflowInstance.aggregate([
+        DocumentEngineWorkflowInstance.aggregate([
           { $match: matchStage },
           { $group: { _id: '$currentStatus', count: { $sum: 1 } } },
         ]),
         // توزيع حسب القالب
-        WorkflowInstance.aggregate([
+        DocumentEngineWorkflowInstance.aggregate([
           { $match: matchStage },
           { $group: { _id: '$templateId', count: { $sum: 1 } } },
         ]),
         // المتأخرة
-        WorkflowInstance.countDocuments({
+        DocumentEngineWorkflowInstance.countDocuments({
           ...matchStage,
           isActive: true,
           'sla.isOverdue': true,
         }),
         // متوسط وقت الإنجاز
-        WorkflowInstance.aggregate([
+        DocumentEngineWorkflowInstance.aggregate([
           { $match: { ...matchStage, completedAt: { $exists: true } } },
           {
             $project: {
@@ -696,8 +698,8 @@ class DocumentWorkflowEngine extends EventEmitter {
         ]),
       ]);
 
-      const totalActive = await WorkflowInstance.countDocuments({ isActive: true });
-      const totalCompleted = await WorkflowInstance.countDocuments({
+      const totalActive = await DocumentEngineWorkflowInstance.countDocuments({ isActive: true });
+      const totalCompleted = await DocumentEngineWorkflowInstance.countDocuments({
         isActive: false,
         completedAt: { $exists: true },
       });
@@ -733,7 +735,7 @@ class DocumentWorkflowEngine extends EventEmitter {
    */
   async checkOverdueSLAs() {
     try {
-      const overdue = await WorkflowInstance.find({
+      const overdue = await DocumentEngineWorkflowInstance.find({
         isActive: true,
         'sla.isOverdue': false,
         'sla.dueDate': { $lt: new Date() },
@@ -825,6 +827,6 @@ class DocumentWorkflowEngine extends EventEmitter {
 }
 
 module.exports = new DocumentWorkflowEngine();
-module.exports.WorkflowInstance = WorkflowInstance;
+module.exports.DocumentEngineWorkflowInstance = DocumentEngineWorkflowInstance;
 module.exports.WORKFLOW_STATUSES = WORKFLOW_STATUSES;
 module.exports.WORKFLOW_TEMPLATES = WORKFLOW_TEMPLATES;

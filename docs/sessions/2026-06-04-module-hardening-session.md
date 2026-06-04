@@ -345,5 +345,7 @@ jest.mock('../middleware/auth', () => ({
 - ~~Reapply lost Batches 1–4~~ — **done W834** (committed `8aa3e7102`).
 - ~~Fix `purchasing.routes.js` W833 baseline~~ — **done W834**.
 - ~~W340 Pattern D (GoalBank, ImportExportJob, FormTemplate/Submission, TherapyProtocol, DigitalSignature)~~ — **done W835**.
-- ~~Behavioral tests for CAPA + leave-requests~~ — **done W835/W836** (`capa-routes-behavioral-wave835`, `leave-requests-branch-isolation-behavioral-wave836`).
+- ~~Behavioral tests for CAPA + leave-requests~~ — **done W835/W836**.
+- ~~hr-performance behavioral + branchId schema~~ — **done W837** (`hr-performance-branch-isolation-behavioral-wave837` + `PerformanceEvaluation.branchId`).
+- ~~WorkflowDefinition/WorkflowInstance document-service collisions~~ — **done W837** Pattern D (`DocumentOrch*` + `DocumentEngineWorkflowInstance`).
 - Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.

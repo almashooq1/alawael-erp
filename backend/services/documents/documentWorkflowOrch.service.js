@@ -123,7 +123,7 @@ const workflowInstanceSchema = new mongoose.Schema(
   {
     definitionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'WorkflowDefinition',
+      ref: 'DocumentOrchWorkflowDefinition',
       required: true,
     },
     documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
@@ -153,7 +153,7 @@ const workflowInstanceSchema = new mongoose.Schema(
     completedAt: Date,
     dueAt: Date,
     slaStatus: { type: String, enum: ['on_track', 'warning', 'breached'], default: 'on_track' },
-    parentInstanceId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowInstance' },
+    parentInstanceId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentOrchWorkflowInstance' },
     startedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true, collection: 'workflow_instances' }
@@ -164,17 +164,19 @@ workflowInstanceSchema.index({ definitionId: 1, status: 1 });
 workflowInstanceSchema.index({ documentId: 1 });
 workflowInstanceSchema.index({ startedBy: 1, status: 1 });
 
-const WorkflowDefinition =
-  mongoose.models.WorkflowDefinition ||
-  mongoose.model('WorkflowDefinition', workflowDefinitionSchema);
-const WorkflowInstance =
-  mongoose.models.WorkflowInstance || mongoose.model('WorkflowInstance', workflowInstanceSchema);
+// Pattern D (W837): canonical Workflow* in workflow/intelligent-workflow-engine.js
+const DocumentOrchWorkflowDefinition =
+  mongoose.models.DocumentOrchWorkflowDefinition ||
+  mongoose.model('DocumentOrchWorkflowDefinition', workflowDefinitionSchema);
+const DocumentOrchWorkflowInstance =
+  mongoose.models.DocumentOrchWorkflowInstance ||
+  mongoose.model('DocumentOrchWorkflowInstance', workflowInstanceSchema);
 
 /* ─── Service ────────────────────────────────────────────── */
 class WorkflowOrchestrationService {
   /* ── Definitions ──────────────────── */
   async createDefinition(data, userId) {
-    const def = new WorkflowDefinition({ ...data, createdBy: userId });
+    const def = new DocumentOrchWorkflowDefinition({ ...data, createdBy: userId });
     if (!def.nodes?.length) {
       def.nodes = [
         {
@@ -199,7 +201,7 @@ class WorkflowOrchestrationService {
   }
 
   async updateDefinition(defId, data, userId) {
-    const def = await WorkflowDefinition.findById(defId);
+    const def = await DocumentOrchWorkflowDefinition.findById(defId);
     if (!def) throw new Error('التعريف غير موجود');
     Object.assign(def, data, { updatedBy: userId });
     def.version += 1;
@@ -215,17 +217,17 @@ class WorkflowOrchestrationService {
     const query = {};
     if (filters.status) query.status = filters.status;
     if (filters.category) query.category = filters.category;
-    return WorkflowDefinition.find(query).sort('-createdAt').lean();
+    return DocumentOrchWorkflowDefinition.find(query).sort('-createdAt').lean();
   }
 
   async getDefinition(defId) {
-    const d = await WorkflowDefinition.findById(defId).lean();
+    const d = await DocumentOrchWorkflowDefinition.findById(defId).lean();
     if (!d) throw new Error('التعريف غير موجود');
     return d;
   }
 
   async cloneDefinition(defId, userId) {
-    const src = await WorkflowDefinition.findById(defId).lean();
+    const src = await DocumentOrchWorkflowDefinition.findById(defId).lean();
     if (!src) throw new Error('التعريف غير موجود');
     delete src._id;
     src.name += ' (نسخة)';
@@ -233,20 +235,20 @@ class WorkflowOrchestrationService {
     src.status = 'draft';
     src.version = 1;
     src.createdBy = userId;
-    return new WorkflowDefinition(src).save();
+    return new DocumentOrchWorkflowDefinition(src).save();
   }
 
   async deleteDefinition(defId) {
-    const active = await WorkflowInstance.countDocuments({
+    const active = await DocumentOrchWorkflowInstance.countDocuments({
       definitionId: defId,
       status: { $in: ['running', 'waiting'] },
     });
     if (active > 0) throw new Error('يوجد تنفيذات نشطة');
-    return WorkflowDefinition.findByIdAndDelete(defId);
+    return DocumentOrchWorkflowDefinition.findByIdAndDelete(defId);
   }
 
   async validateDefinition(defId) {
-    const def = await WorkflowDefinition.findById(defId);
+    const def = await DocumentOrchWorkflowDefinition.findById(defId);
     if (!def) throw new Error('التعريف غير موجود');
 
     const issues = [];
@@ -290,7 +292,7 @@ class WorkflowOrchestrationService {
 
   /* ── Execution ────────────────────── */
   async startInstance(defId, params, userId) {
-    const def = await WorkflowDefinition.findById(defId);
+    const def = await DocumentOrchWorkflowDefinition.findById(defId);
     if (!def || def.status !== 'active') throw new Error('التعريف غير نشط');
 
     const startNode = def.nodes.find(n => n.type === 'start');
@@ -301,7 +303,7 @@ class WorkflowOrchestrationService {
       variables.set(v.name, params?.variables?.[v.name] ?? v.defaultValue);
     }
 
-    const instance = new WorkflowInstance({
+    const instance = new DocumentOrchWorkflowInstance({
       definitionId: defId,
       documentId: params?.documentId,
       startedBy: userId,
@@ -326,7 +328,7 @@ class WorkflowOrchestrationService {
 
     // auto advance from start
     await this._advanceInstance(instance, def, startNode.nodeId, userId);
-    return WorkflowInstance.findById(instance._id).lean();
+    return DocumentOrchWorkflowInstance.findById(instance._id).lean();
   }
 
   async _advanceInstance(instance, def, fromNodeId, userId, data = {}) {
@@ -364,7 +366,7 @@ class WorkflowOrchestrationService {
       if (targetNode.type === 'end') {
         instance.status = 'completed';
         instance.completedAt = new Date();
-        await WorkflowDefinition.findByIdAndUpdate(def._id, {
+        await DocumentOrchWorkflowDefinition.findByIdAndUpdate(def._id, {
           $inc: { 'usageStats.completions': 1 },
         });
       }
@@ -376,23 +378,23 @@ class WorkflowOrchestrationService {
   }
 
   async completeTask(instanceId, nodeId, userId, data = {}) {
-    const instance = await WorkflowInstance.findById(instanceId);
+    const instance = await DocumentOrchWorkflowInstance.findById(instanceId);
     if (!instance || instance.status !== 'running') throw new Error('التنفيذ غير نشط');
 
     const current = instance.currentNodes.find(n => n.nodeId === nodeId);
     if (!current) throw new Error('المهمة غير موجودة في التنفيذ الحالي');
 
-    const def = await WorkflowDefinition.findById(instance.definitionId);
+    const def = await DocumentOrchWorkflowDefinition.findById(instance.definitionId);
     if (data.variables) {
       for (const [k, v] of Object.entries(data.variables)) instance.variables.set(k, v);
     }
 
     await this._advanceInstance(instance, def, nodeId, userId, data);
-    return WorkflowInstance.findById(instanceId).lean();
+    return DocumentOrchWorkflowInstance.findById(instanceId).lean();
   }
 
   async suspendInstance(instanceId, userId, reason = '') {
-    const inst = await WorkflowInstance.findById(instanceId);
+    const inst = await DocumentOrchWorkflowInstance.findById(instanceId);
     if (!inst) throw new Error('التنفيذ غير موجود');
     inst.status = 'suspended';
     inst.history.push({
@@ -407,7 +409,7 @@ class WorkflowOrchestrationService {
   }
 
   async resumeInstance(instanceId, userId) {
-    const inst = await WorkflowInstance.findById(instanceId);
+    const inst = await DocumentOrchWorkflowInstance.findById(instanceId);
     if (!inst || inst.status !== 'suspended') throw new Error('التنفيذ غير معلق');
     inst.status = 'running';
     inst.history.push({ nodeId: 'system', action: 'resumed', enteredAt: new Date(), userId });
@@ -416,7 +418,7 @@ class WorkflowOrchestrationService {
   }
 
   async cancelInstance(instanceId, userId, reason = '') {
-    const inst = await WorkflowInstance.findById(instanceId);
+    const inst = await DocumentOrchWorkflowInstance.findById(instanceId);
     if (!inst) throw new Error('التنفيذ غير موجود');
     inst.status = 'cancelled';
     inst.completedAt = new Date();
@@ -432,7 +434,7 @@ class WorkflowOrchestrationService {
   }
 
   async retryNode(instanceId, nodeId, userId) {
-    const inst = await WorkflowInstance.findById(instanceId);
+    const inst = await DocumentOrchWorkflowInstance.findById(instanceId);
     if (!inst) throw new Error('التنفيذ غير موجود');
     const node = inst.currentNodes.find(n => n.nodeId === nodeId);
     if (!node) throw new Error('العقدة غير موجودة');
@@ -450,7 +452,7 @@ class WorkflowOrchestrationService {
     if (filters.status) query.status = filters.status;
     if (filters.startedBy) query.startedBy = filters.startedBy;
     if (filters.documentId) query.documentId = filters.documentId;
-    return WorkflowInstance.find(query)
+    return DocumentOrchWorkflowInstance.find(query)
       .populate('definitionId', 'name nameAr')
       .populate('startedBy', 'name')
       .sort('-createdAt')
@@ -459,14 +461,14 @@ class WorkflowOrchestrationService {
   }
 
   async getInstance(instanceId) {
-    return WorkflowInstance.findById(instanceId)
+    return DocumentOrchWorkflowInstance.findById(instanceId)
       .populate('definitionId')
       .populate('startedBy', 'name email')
       .lean();
   }
 
   async getMyTasks(userId) {
-    const instances = await WorkflowInstance.find({ status: 'running' })
+    const instances = await DocumentOrchWorkflowInstance.find({ status: 'running' })
       .populate('definitionId')
       .lean();
     const tasks = [];
@@ -496,19 +498,19 @@ class WorkflowOrchestrationService {
   /* ── Stats ────────────────────────── */
   async getStats() {
     const [definitions, instances, running, completed] = await Promise.all([
-      WorkflowDefinition.countDocuments(),
-      WorkflowInstance.countDocuments(),
-      WorkflowInstance.countDocuments({ status: 'running' }),
-      WorkflowInstance.countDocuments({ status: 'completed' }),
+      DocumentOrchWorkflowDefinition.countDocuments(),
+      DocumentOrchWorkflowInstance.countDocuments(),
+      DocumentOrchWorkflowInstance.countDocuments({ status: 'running' }),
+      DocumentOrchWorkflowInstance.countDocuments({ status: 'completed' }),
     ]);
 
-    const avgDuration = await WorkflowInstance.aggregate([
+    const avgDuration = await DocumentOrchWorkflowInstance.aggregate([
       { $match: { status: 'completed', completedAt: { $exists: true } } },
       { $project: { duration: { $subtract: ['$completedAt', '$startedAt'] } } },
       { $group: { _id: null, avg: { $avg: '$duration' } } },
     ]);
 
-    const byStatus = await WorkflowInstance.aggregate([
+    const byStatus = await DocumentOrchWorkflowInstance.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
 

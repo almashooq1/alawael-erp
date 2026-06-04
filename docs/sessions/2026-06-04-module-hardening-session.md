@@ -348,4 +348,5 @@ jest.mock('../middleware/auth', () => ({
 - ~~Behavioral tests for CAPA + leave-requests~~ — **done W835/W836**.
 - ~~hr-performance behavioral + branchId schema~~ — **done W837** (`hr-performance-branch-isolation-behavioral-wave837` + `PerformanceEvaluation.branchId`).
 - ~~WorkflowDefinition/WorkflowInstance document-service collisions~~ — **done W837** Pattern D (`DocumentOrch*` + `DocumentEngineWorkflowInstance`).
+- ~~CAPA POST /:id/transition behavioral~~ — **done W838** (`capa-transition-behavioral-wave838`).
 - Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.

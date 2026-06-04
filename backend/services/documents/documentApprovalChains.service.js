@@ -187,8 +187,10 @@ approvalRequestSchema.index({ requestedBy: 1, createdAt: -1 });
 approvalRequestSchema.index({ 'stepResults.approvedBy': 1 });
 approvalRequestSchema.index({ status: 1, currentStep: 1 });
 
-const ApprovalRequest =
-  mongoose.models.ApprovalRequest || mongoose.model('ApprovalRequest', approvalRequestSchema);
+// Pattern D (W839): document-chain approvals (distinct from authorization ApprovalRequest)
+const DocumentChainApprovalRequest =
+  mongoose.models.DocumentChainApprovalRequest ||
+  mongoose.model('DocumentChainApprovalRequest', approvalRequestSchema);
 
 /* ─── Delegation Log ─── */
 const delegationSchema = new mongoose.Schema(
@@ -200,7 +202,7 @@ const delegationSchema = new mongoose.Schema(
     endDate: Date,
     scope: { type: String, enum: ['all', 'specific_chain', 'specific_request'], default: 'all' },
     chainId: { type: mongoose.Schema.Types.ObjectId, ref: 'ApprovalChain' },
-    requestId: { type: mongoose.Schema.Types.ObjectId, ref: 'ApprovalRequest' },
+    requestId: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentChainApprovalRequest' },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true, collection: 'approval_delegations' }
@@ -309,7 +311,7 @@ class ApprovalChainsService {
     // Set first step
     stepResults[0].status = 'pending';
 
-    const request = await ApprovalRequest.create({
+    const request = await DocumentChainApprovalRequest.create({
       chainId,
       documentId: data.documentId,
       referenceId: data.referenceId,
@@ -326,7 +328,7 @@ class ApprovalChainsService {
   }
 
   async processStep(requestId, action, comment, userId) {
-    const request = await ApprovalRequest.findById(requestId);
+    const request = await DocumentChainApprovalRequest.findById(requestId);
     if (!request) throw new Error('طلب الموافقة غير موجود');
     if (!['in_progress', 'info_requested'].includes(request.status))
       throw new Error('لا يمكن معالجة هذا الطلب');
@@ -433,7 +435,7 @@ class ApprovalChainsService {
   }
 
   async getRequest(requestId) {
-    const request = await ApprovalRequest.findById(requestId)
+    const request = await DocumentChainApprovalRequest.findById(requestId)
       .populate('chainId', 'name nameAr steps')
       .populate('requestedBy', 'name email')
       .populate('stepResults.approvedBy', 'name email')
@@ -454,14 +456,14 @@ class ApprovalChainsService {
     const limit = parseInt(filters.limit) || 20;
 
     const [requests, total] = await Promise.all([
-      ApprovalRequest.find(query)
+      DocumentChainApprovalRequest.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('chainId', 'name nameAr')
         .populate('requestedBy', 'name')
         .lean(),
-      ApprovalRequest.countDocuments(query),
+      DocumentChainApprovalRequest.countDocuments(query),
     ]);
     return { success: true, requests, total, page, pages: Math.ceil(total / limit) };
   }
@@ -485,7 +487,7 @@ class ApprovalChainsService {
       $or: [{ endDate: null }, { endDate: { $gt: new Date() } }],
     }).lean();
 
-    const requests = await ApprovalRequest.find({
+    const requests = await DocumentChainApprovalRequest.find({
       status: 'in_progress',
       chainId: { $in: chainIds },
     })
@@ -498,7 +500,7 @@ class ApprovalChainsService {
   }
 
   async cancelRequest(requestId, _userId) {
-    const request = await ApprovalRequest.findById(requestId);
+    const request = await DocumentChainApprovalRequest.findById(requestId);
     if (!request) throw new Error('طلب الموافقة غير موجود');
     if (['approved', 'rejected', 'cancelled'].includes(request.status)) {
       throw new Error('لا يمكن إلغاء هذا الطلب');
@@ -510,7 +512,7 @@ class ApprovalChainsService {
   }
 
   async resubmitRequest(requestId, note, _userId) {
-    const request = await ApprovalRequest.findById(requestId);
+    const request = await DocumentChainApprovalRequest.findById(requestId);
     if (!request) throw new Error('طلب الموافقة غير موجود');
     if (!['rejected', 'returned'].includes(request.status)) {
       throw new Error('لا يمكن إعادة تقديم هذا الطلب');
@@ -566,7 +568,7 @@ class ApprovalChainsService {
 
   async checkSLA() {
     const now = new Date();
-    const activeRequests = await ApprovalRequest.find({ status: 'in_progress' });
+    const activeRequests = await DocumentChainApprovalRequest.find({ status: 'in_progress' });
     const results = { checked: 0, warned: 0, escalated: 0 };
 
     for (const req of activeRequests) {
@@ -620,9 +622,11 @@ class ApprovalChainsService {
       await Promise.all([
         ApprovalChain.countDocuments({ isActive: true }),
         ApprovalChain.countDocuments({ isActive: true, status: 'active' }),
-        ApprovalRequest.countDocuments(),
-        ApprovalRequest.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-        ApprovalRequest.aggregate([
+        DocumentChainApprovalRequest.countDocuments(),
+        DocumentChainApprovalRequest.aggregate([
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+        ]),
+        DocumentChainApprovalRequest.aggregate([
           { $match: { status: 'approved', totalDuration: { $gt: 0 } } },
           {
             $group: {
@@ -633,7 +637,9 @@ class ApprovalChainsService {
             },
           },
         ]),
-        ApprovalRequest.aggregate([{ $group: { _id: '$slaStatus', count: { $sum: 1 } } }]),
+        DocumentChainApprovalRequest.aggregate([
+          { $group: { _id: '$slaStatus', count: { $sum: 1 } } },
+        ]),
       ]);
 
     return {

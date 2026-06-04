@@ -93,7 +93,9 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'AuditLog' — W347 moved to REGISTRATION_ALLOWLIST (defensive pattern, canonical
   //              always wins via load-order; ADR-021 Tier 1 question Q1-Q3 still open
   //              for true consolidation but ALLOWLIST preserves current behavior).
-  'ApprovalRequest', // 3× — discovered W340; schemas DIVERGE significantly (rich state-machine in authorization/approvals/ vs simple legacy in models/ — first-loaded wins silently)
+  // 'ApprovalRequest' — W839 ratchet-down: LegacyHrApprovalRequest (models/) +
+  // DocumentChainApprovalRequest (documentApprovalChains); canonical remains in
+  // authorization/approvals/approval-request.model.js (ADR-022).
   'ReportTemplate', // 3×
   // 'WorkflowInstance' — W837 ratchet-down: document-side renames to DocumentOrchWorkflowInstance
   // + DocumentEngineWorkflowInstance; single canonical remains in intelligent-workflow-engine.js.

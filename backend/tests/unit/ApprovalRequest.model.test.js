@@ -52,7 +52,7 @@ mockModelFn.findOneAndUpdate = jest.fn().mockResolvedValue(null);
 mockModelFn.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
 mockModelFn.aggregate = jest.fn().mockResolvedValue([]);
 mockModelFn.schema = mockSchema;
-mockModelFn.modelName = 'ApprovalRequest';
+mockModelFn.modelName = 'LegacyHrApprovalRequest';
 
 jest.mock('mongoose', () => {
   const actualTypes = {

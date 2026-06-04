@@ -211,6 +211,7 @@ __tests__/day-rehab-section-bus-trip-behavioral-wave175-183-202b.test.js
 __tests__/db-backup-cron-wave676.test.js
 __tests__/decision-rights-behavioral-wave461.test.js
 __tests__/decision-rights-routes-wave515.test.js
+__tests__/decision-rights-routes-behavioral-wave854.test.js
 __tests__/decision-rights-wave461.test.js
 __tests__/diet-prescription-behavioral-wave368.test.js
 __tests__/diet-prescription-wave368.test.js
@@ -495,6 +496,7 @@ __tests__/seizure-log-behavioral-wave356.test.js
 __tests__/seizure-log-wave356.test.js
 __tests__/self-advocacy-behavioral-wave462.test.js
 __tests__/self-advocacy-routes-wave518.test.js
+__tests__/self-advocacy-routes-behavioral-wave855.test.js
 __tests__/self-advocacy-wave462.test.js
 __tests__/sensory-diet-behavioral-wave691.test.js
 __tests__/sensory-diet-wave691.test.js

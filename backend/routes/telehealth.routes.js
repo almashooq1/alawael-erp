@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   Teleconsultation,
   TelehealthWaitingRoom,
@@ -40,6 +40,18 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+/** Telehealth models use legacy `branch` field — map canonical branchFilter. */
+function telehealthBranchFilter(req) {
+  const f = branchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { branch: { $in: f.branchId.$in } };
+  return { branch: f.branchId };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...telehealthBranchFilter(req) };
+}
 // ─── Dashboard & Stats ────────────────────────────────────────────────────────
 
 /**
@@ -145,7 +157,7 @@ router.post(
  */
 router.get('/consultations/:id', async (req, res) => {
   try {
-    const consultation = await Teleconsultation.findById(req.params.id)
+    const consultation = await Teleconsultation.findOne(scopedById(req, req.params.id))
       .populate('beneficiary', 'name nationalId phone dateOfBirth')
       .populate('provider', 'name specialty licenseNumber')
       .populate('cancelledBy', 'name')
@@ -202,9 +214,16 @@ router.patch('/consultations/:id', async (req, res) => {
       if (req.body[k] !== undefined) update[k] = req.body[k];
     });
 
-    const consultation = await Teleconsultation.findByIdAndUpdate(req.params.id, update, {
-      returnDocument: 'after',
-    });
+    const consultation = await Teleconsultation.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      update,
+      {
+        returnDocument: 'after',
+      }
+    );
+    if (!consultation) {
+      return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
+    }
     res.json({ success: true, data: consultation });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -221,11 +240,14 @@ router.delete(
   async (req, res) => {
     try {
       const { reason } = req.body;
-      await Teleconsultation.findByIdAndUpdate(req.params.id, {
+      const updated = await Teleconsultation.findOneAndUpdate(scopedById(req, req.params.id), {
         status: 'cancelled',
         cancelledBy: req.user._id,
         cancellationReason: reason,
       });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
+      }
       res.json({ success: true, message: 'تم إلغاء الاستشارة' });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -311,7 +333,7 @@ router.get('/waiting-room/:consultationId', async (req, res) => {
       .populate('beneficiary', 'name')
       .lean();
 
-    const consultation = await Teleconsultation.findById(req.params.consultationId)
+    const consultation = await Teleconsultation.findOne(scopedById(req, req.params.consultationId))
       .populate('beneficiary', 'name')
       .populate('provider', 'name')
       .lean();
@@ -403,7 +425,7 @@ router.post(
  */
 router.get('/prescriptions/:id', async (req, res) => {
   try {
-    const prescription = await RemotePrescription.findById(req.params.id)
+    const prescription = await RemotePrescription.findOne(scopedById(req, req.params.id))
       .populate('prescriber', 'name licenseNumber')
       .populate('beneficiary', 'name nationalId')
       .populate('teleconsultation', 'consultationNumber scheduledAt')
@@ -426,7 +448,7 @@ router.post(
   authorize(['admin', 'medical_director', 'doctor']),
   async (req, res) => {
     try {
-      const prescription = await RemotePrescription.findById(req.params.id);
+      const prescription = await RemotePrescription.findOne(scopedById(req, req.params.id));
       if (!prescription) {
         return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
       }
@@ -553,7 +575,7 @@ router.post(
  */
 router.get('/availability-slots/:id', async (req, res) => {
   try {
-    const slot = await ProviderAvailabilitySlot.findById(req.params.id)
+    const slot = await ProviderAvailabilitySlot.findOne(scopedById(req, req.params.id))
       .populate('provider', 'name specialty')
       .lean();
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
@@ -571,11 +593,14 @@ router.patch(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
-      const slot = await ProviderAvailabilitySlot.findByIdAndUpdate(
-        req.params.id,
+      const slot = await ProviderAvailabilitySlot.findOneAndUpdate(
+        scopedById(req, req.params.id),
         stripUpdateMeta(req.body),
         { returnDocument: 'after' }
       );
+      if (!slot) {
+        return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
+      }
       res.json({ success: true, data: slot });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -588,7 +613,10 @@ router.patch(
  */
 router.delete('/availability-slots/:id', authorize(['admin', 'branch_admin']), async (req, res) => {
   try {
-    await ProviderAvailabilitySlot.findByIdAndDelete(req.params.id);
+    const deleted = await ProviderAvailabilitySlot.findOneAndDelete(scopedById(req, req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
+    }
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -672,8 +700,8 @@ router.post(
  */
 router.post('/devices/:id/reading', async (req, res) => {
   try {
-    const device = await TelehealthDevice.findByIdAndUpdate(
-      req.params.id,
+    const device = await TelehealthDevice.findOneAndUpdate(
+      scopedById(req, req.params.id),
       {
         lastReadingAt: new Date(),
         lastReadingData: req.body.reading,
@@ -736,11 +764,14 @@ router.post('/virtual-sessions', async (req, res) => {
  */
 router.patch('/virtual-sessions/:id/whiteboard', async (req, res) => {
   try {
-    const session = await VirtualSession.findByIdAndUpdate(
-      req.params.id,
+    const session = await VirtualSession.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { whiteboardData: req.body.data },
       { returnDocument: 'after' }
     );
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
+    }
     res.json({ success: true, data: session });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

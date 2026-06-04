@@ -133,7 +133,6 @@ const archiveRecordSchema = new mongoose.Schema(
   { timestamps: true, collection: 'document_archive_records' }
 );
 
-archiveRecordSchema.index({ archiveId: 1 });
 archiveRecordSchema.index({ category: 1, status: 1 });
 archiveRecordSchema.index({ 'classification.level': 1 });
 archiveRecordSchema.index({ 'retention.endDate': 1 });

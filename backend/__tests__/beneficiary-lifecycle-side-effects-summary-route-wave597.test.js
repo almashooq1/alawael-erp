@@ -20,8 +20,7 @@ const express = require('express');
 const request = require('supertest');
 const createBeneficiaryLifecycleRouter = require('../routes/beneficiary-lifecycle.routes');
 
-const SUMMARY_PATH =
-  '/api/v1/beneficiary-lifecycle/transitions/txn-1/side-effects-summary';
+const SUMMARY_PATH = '/api/v1/beneficiary-lifecycle/transitions/txn-1/side-effects-summary';
 
 // A realistic persisted audit array: 3 real data effects + 2 deferred.
 function auditFixture() {
@@ -82,14 +81,25 @@ function makeGovernance(allow = true) {
   return { hasPermission: jest.fn(() => allow) };
 }
 
-function makeApp({ service, governance, userId = 'U-1', role = 'branch_manager', branchScope } = {}) {
+function makeApp({
+  service,
+  governance,
+  userId = 'U-1',
+  role = 'branch_manager',
+  userBranchId,
+} = {}) {
   const svc = service || makeService();
   const gov = governance || makeGovernance();
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
-    if (userId) req.user = { id: userId, role };
-    if (branchScope) req.branchScope = branchScope;
+    // Drive branch scope through req.user (the real production path): the
+    // router mounts requireBranchAccess (W833), which RECOMPUTES
+    // req.branchScope from req.user on every request — so injecting
+    // req.branchScope directly here would be overwritten. A restricted
+    // role (branch_manager) + branchId yields { restricted, branchId }.
+    if (userId)
+      req.user = { id: userId, role, ...(userBranchId ? { branchId: userBranchId } : {}) };
     next();
   });
   app.use(
@@ -170,17 +180,16 @@ describe('W597 GET /transitions/:id/side-effects-summary', () => {
   });
 
   test('403 cross-branch: restricted caller from another branch is denied', async () => {
-    const { app } = makeApp({
-      branchScope: { restricted: true, branchId: 'branch-b' },
-    });
+    // Restricted caller owns branch-b; the transition belongs to branch-a.
+    // requireBranchAccess derives { restricted, branchId: 'branch-b' }; the
+    // handler's assertBranchMatch then rejects the cross-branch read.
+    const { app } = makeApp({ userBranchId: 'branch-b' });
     const r = await request(app).get(SUMMARY_PATH);
     expect(r.status).toBe(403);
   });
 
   test('200 same-branch: restricted caller from owning branch is allowed', async () => {
-    const { app } = makeApp({
-      branchScope: { restricted: true, branchId: 'branch-a' },
-    });
+    const { app } = makeApp({ userBranchId: 'branch-a' });
     const r = await request(app).get(SUMMARY_PATH);
     expect(r.status).toBe(200);
     expect(r.body.data.sideEffectsSummary.total).toBe(5);

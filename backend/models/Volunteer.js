@@ -96,9 +96,6 @@ const volunteerSchema = new mongoose.Schema(
 
 // الفهارس
 volunteerSchema.index({ branchId: 1, status: 1 });
-volunteerSchema.index({ nationalId: 1 });
-volunteerSchema.index({ email: 1 });
-volunteerSchema.index({ mntasatiId: 1 });
 volunteerSchema.index({ deletedAt: 1 });
 
 // الخاصية الافتراضية: الاسم الكامل

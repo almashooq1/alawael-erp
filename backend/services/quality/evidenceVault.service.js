@@ -156,8 +156,8 @@ class EvidenceVaultService {
    *
    *   { ok: boolean, effectiveStatus, storedHash, recomputedHash }
    */
-  async verify(evidenceId, buffer) {
-    const doc = await this._load(evidenceId);
+  async verify(evidenceId, buffer, scopeFilter = {}) {
+    const doc = await this._load(evidenceId, scopeFilter);
     const algorithm = (doc.file && doc.file.hashAlgorithm) || DEFAULT_HASH_ALGORITHM;
     const result = {
       id: String(doc._id),
@@ -201,8 +201,8 @@ class EvidenceVaultService {
    * in dev. The invariant check (old still exists and is not
    * already terminal) runs before writes.
    */
-  async supersede(oldEvidenceId, newInput, userId) {
-    const old = await this._load(oldEvidenceId);
+  async supersede(oldEvidenceId, newInput, userId, scopeFilter = {}) {
+    const old = await this._load(oldEvidenceId, scopeFilter);
     if (old.isTerminal) {
       throw Object.assign(new Error('evidence already terminal'), {
         code: 'ILLEGAL_TRANSITION',
@@ -241,11 +241,11 @@ class EvidenceVaultService {
 
   // ── revocation ──────────────────────────────────────────────────
 
-  async revoke(evidenceId, reason, userId) {
+  async revoke(evidenceId, reason, userId, scopeFilter = {}) {
     if (!reason || !String(reason).trim()) {
       throw new Error('revocation reason is required');
     }
-    const doc = await this._load(evidenceId);
+    const doc = await this._load(evidenceId, scopeFilter);
     if (doc.status === 'revoked') return doc; // idempotent
     if (doc.isTerminal) {
       throw Object.assign(new Error('evidence already terminal'), {
@@ -268,9 +268,14 @@ class EvidenceVaultService {
 
   // ── signatures ──────────────────────────────────────────────────
 
-  async sign(evidenceId, { role, signatureHash, intent, nameSnapshot, notes }, userId) {
+  async sign(
+    evidenceId,
+    { role, signatureHash, intent, nameSnapshot, notes },
+    userId,
+    scopeFilter = {}
+  ) {
     if (!role) throw new Error('role is required');
-    const doc = await this._load(evidenceId);
+    const doc = await this._load(evidenceId, scopeFilter);
     if (doc.isTerminal) {
       throw Object.assign(new Error('cannot sign terminal evidence'), {
         code: 'ILLEGAL_TRANSITION',
@@ -297,8 +302,8 @@ class EvidenceVaultService {
 
   // ── legal hold ──────────────────────────────────────────────────
 
-  async setLegalHold(evidenceId, reason, userId) {
-    const doc = await this._load(evidenceId);
+  async setLegalHold(evidenceId, reason, userId, scopeFilter = {}) {
+    const doc = await this._load(evidenceId, scopeFilter);
     doc.retention.legalHold = true;
     doc.retention.legalHoldReason = reason || null;
     await doc.save();
@@ -309,8 +314,8 @@ class EvidenceVaultService {
     return doc;
   }
 
-  async clearLegalHold(evidenceId, userId) {
-    const doc = await this._load(evidenceId);
+  async clearLegalHold(evidenceId, userId, scopeFilter = {}) {
+    const doc = await this._load(evidenceId, scopeFilter);
     doc.retention.legalHold = false;
     doc.retention.legalHoldReason = null;
     await doc.save();
@@ -323,16 +328,18 @@ class EvidenceVaultService {
 
   // ── queries ─────────────────────────────────────────────────────
 
-  async findById(evidenceId) {
-    return this.model.findOne({ _id: evidenceId, deleted_at: null });
+  async findById(evidenceId, scopeFilter = {}) {
+    return this.model.findOne({ _id: evidenceId, deleted_at: null, ...scopeFilter });
   }
 
-  async findByControl(controlId) {
-    return this.model.find({ controlIds: controlId, deleted_at: null }).sort({ collectedAt: -1 });
+  async findByControl(controlId, scopeFilter = {}) {
+    return this.model
+      .find({ controlIds: controlId, deleted_at: null, ...scopeFilter })
+      .sort({ collectedAt: -1 });
   }
 
-  async findByRegulation(standard, clause) {
-    const q = { deleted_at: null, 'regulationRefs.standard': standard };
+  async findByRegulation(standard, clause, scopeFilter = {}) {
+    const q = { deleted_at: null, 'regulationRefs.standard': standard, ...scopeFilter };
     if (clause) q['regulationRefs.clause'] = clause;
     return this.model.find(q).sort({ collectedAt: -1 });
   }
@@ -349,20 +356,29 @@ class EvidenceVaultService {
    * Used by the (upcoming) sweeper to emit `compliance.evidence.expiring`
    * and by the Compliance Calendar aggregator (Commit 3).
    */
-  async findExpiring(days = EXPIRY_WARNING_DAYS) {
+  async findExpiring(days = EXPIRY_WARNING_DAYS, scopeFilter = {}) {
     const horizon = new Date(this.now().getTime() + days * 86400000);
     return this.model
       .find({
         deleted_at: null,
         status: { $in: ['valid', 'expiring'] },
         validUntil: { $ne: null, $lte: horizon },
+        ...scopeFilter,
       })
       .sort({ validUntil: 1 });
   }
 
-  async list({ branchId, type, status, sourceModule, standard, tag, limit = 50, skip = 0 } = {}) {
-    const q = { deleted_at: null };
-    if (branchId) q.branchId = branchId;
+  async list({
+    scopeFilter = {},
+    type,
+    status,
+    sourceModule,
+    standard,
+    tag,
+    limit = 50,
+    skip = 0,
+  } = {}) {
+    const q = { deleted_at: null, ...scopeFilter };
     if (type) q.type = type;
     if (status) q.status = status;
     if (sourceModule) q.sourceModule = sourceModule;
@@ -378,9 +394,8 @@ class EvidenceVaultService {
   /**
    * Vault-health snapshot for executive dashboards.
    */
-  async getStats({ branchId } = {}) {
-    const q = { deleted_at: null };
-    if (branchId) q.branchId = branchId;
+  async getStats({ scopeFilter = {} } = {}) {
+    const q = { deleted_at: null, ...scopeFilter };
     const now = this.now();
     const horizon = new Date(now.getTime() + EXPIRY_WARNING_DAYS * 86400000);
 
@@ -414,8 +429,8 @@ class EvidenceVaultService {
 
   // ── internals ───────────────────────────────────────────────────
 
-  async _load(evidenceId) {
-    const doc = await this.model.findOne({ _id: evidenceId, deleted_at: null });
+  async _load(evidenceId, scopeFilter = {}) {
+    const doc = await this.model.findOne({ _id: evidenceId, deleted_at: null, ...scopeFilter });
     if (!doc) {
       const err = new Error('EvidenceItem not found');
       err.code = 'NOT_FOUND';

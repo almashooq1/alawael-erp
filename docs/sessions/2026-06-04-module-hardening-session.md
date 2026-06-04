@@ -390,9 +390,16 @@ jest.mock('../middleware/auth', () => ({
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
 - **Systematic IDOR audit (2026-06-04)**: grep `findById(req.params|findByIdAndUpdate(req.params|findByIdAndDelete(req.params`
   across `routes/` surfaced ~60 files; the high-signal subset is branch-aware files (import `branchFilter`, scope
-  their lists/stats) whose INSTANCE endpoints still use bare `findById`. Confirmed leaks: `complaints` (W866, fixed),
-  `mdt-coordination` (W867, partial fix), `crisis` (ambiguous — see below), `riskAssessment`, `mar` (need model-intent
-  check). **`crisis.routes.js` deliberately NOT touched**: its create handlers don't stamp `branchId` and its list
+  their lists/stats) whose INSTANCE endpoints still use bare `findById`. Confirmed leaks fixed: `complaints` (W866),
+  `mdt-coordination` (W867+W868), `mar` (W869), `waitlist-admin` (W870), `telehealth` (W871),
+  `controlledDocument` (W872), `calibration` (W873), `evidence` (W874), `laundry` (W875),
+  `kitchen` (W876), `warehouse` (W877), `pharmacy` (W878), `toileting` (W879),
+  `invoices-admin` (W880), `referrals-admin` (W881), `nps-admin` (W882),
+  `beneficiary-day-attendance` (W883).
+  Still open / deferred: `crisis` (ambiguous — see below), `medicalEquipment`/`asset-management`
+  (models lack branch/center — need schema + product intent), `meetings`/`strategicPlanning`
+  (no branchId on model — org-wide or needs schema), `medication catalog` + `MenuItem` (org-wide
+  by design). **`crisis.routes.js` deliberately NOT touched**: its create handlers don't stamp `branchId` and its list
   endpoints aren't branch-scoped (only the dashboard aggregations are), and EmergencyPlans may be org-wide safety
   infrastructure — applying branch isolation there is a design decision needing product input, not an autonomous fix.
 - ~~W867 MDT-coordination cross-branch IDOR fix (meetings CRUD) + regression~~ — **done** (`d50841673`, pushed `main`): **security fix** —
@@ -403,7 +410,7 @@ jest.mock('../middleware/auth', () => ({
   guard. **Follow-up W868**: the same file's MDTMeeting sub-resource endpoints (attendees/cases/action-items) +
   ALL UnifiedRehabPlan + ReferralTicket instance endpoints carry the identical leak (~20 endpoints) — same one-line
   fix each, deferred to keep this change reviewable.
-- ~~W869 MAR (medication record) IDOR fix + behavioral~~ — **done (pending push)**: **security fix** —
+- ~~W869 MAR (medication record) IDOR fix + behavioral~~ — **done** (`698e2b832`, pushed `main`): **security fix** —
   `mar.routes.js` mounted `bodyScopedBeneficiaryGuard` (W441) but **NOT `requireBranchAccess`**, so `req.branchScope`
   was never set → the guard was INERT and the instance endpoints (administer/refuse/hold/patch/delete + GET /today +
   GET /by-beneficiary) used bare findById → a nurse in branch A could read/administer/refuse/hold/delete ANY branch's
@@ -414,6 +421,98 @@ jest.mock('../middleware/auth', () => ({
   instance path, and the controlled-drug-witness + administer/refuse lifecycle. Existing W191b model test still green.
   **riskAssessment**: audited — org-wide by design (no `branchId`, no `branchFilter` anywhere, org-level risk types) →
   NOT a leak, no change.
+- ~~W870 waitlist-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — W451 closed PATCH /:id
+  but offer/enroll/withdraw/DELETE still used bare `findByIdAndUpdate`/`findByIdAndDelete` and list/overview/prioritized
+  ignored `branchFilter` → a receptionist in branch A could transition or delete branch-B waitlist rows (prospect PII +
+  service-line priority). Fix: branch-scoped `statusTransition` + DELETE, `buildFilter(q, req)` merges `branchFilter`,
+  overview/prioritized scoped, POST stamps `branchId` from caller scope. + `waitlist-admin-branch-isolation-wave870.test.js`
+  (10 tests) + W451 drift guard extended.
+- ~~W871 telehealth IDOR closure~~ — **done** (local, not yet pushed): **security fix** — telehealth models use legacy
+  `branch` field; instance endpoints (`GET/PATCH/DELETE consultations`, prescriptions, availability slots, device readings,
+  virtual-session whiteboard) used bare `findById` despite `requireBranchAccess` → any authenticated user could read/update
+  foreign-branch teleconsultations (beneficiary PHI + clinical notes) by ObjectId guess. Fix: `telehealthBranchFilter(req)`
+  maps canonical `branchFilter` → `{ branch }`, applied via `scopedById` on every instance lookup (zero bare `findById`
+  remain in file). + `telehealth-routes-branch-isolation-wave871.test.js` (5 tests).
+- ~~W872 controlled-document IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `ControlledDocument`
+  carries `branchId` but GET /:id + every mutation path (`draftNewVersion`, `signVersion`, `revokeSignature`,
+  `transitionVersion`, `acknowledgeRead`) used bare `_load(id)` with NO branch filter; list/dashboard passed raw
+  `?branchId` without merging `branchFilter(req)` for restricted callers. Any authenticated user could read/draft/sign
+  foreign-branch QMS documents (policy/SOP content + Part 11 signature chain) by ObjectId guess. Fix: optional
+  `scopeFilter` threaded through service `_load` + all route-facing methods; `listScope(req)` on list/dashboard; POST /
+  stamps `branchId` from caller scope; `requireBranchAccess` on every `/:id` route. + `controlled-document-branch-
+isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still green.
+- ~~W873 calibration IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `CalibrationAsset` carries
+  `branchId` but GET /:id lacked `requireBranchAccess` and every mutation (`recordCalibration`, `setStatus`) used bare
+  `_load(id)` → a facility manager in branch A could read/record-calibration/retire branch-B JCI/MOH register assets by
+  ObjectId guess. Fix: optional `scopeFilter` threaded through service `_load` + all route-facing methods; `listScope(req)`
+  on list/dashboard; POST stamps `branchId` from caller scope; `requireBranchAccess` on every instance route. +
+  `calibration-routes-branch-isolation-wave873.test.js` (5 tests). Existing `calibration.test.js` + W277g MFA tier test
+  still green.
+- ~~W874 evidence-vault IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `EvidenceItem` carries
+  `branchId`; GET /:id had `requireBranchAccess` but `findById`/`_load` ignored `branchFilter`, and list/stats/expiring/
+  by-control/by-regulation passed raw `?branchId` without merging caller scope → verify/revoke/sign/supersede/legal-hold
+  shared the same leak. Any branch-restricted quality manager could read or mutate foreign-branch compliance evidence by
+  ObjectId guess. Fix: optional `scopeFilter` threaded through vault service `_load` + all mutation/list/stats methods;
+  `listScope(req)` on list/stats; every instance route passes `branchFilter(req)`; POST ingest + upload stamp `branchId`
+  from `req.branchScope` (upload no longer trusts `req.user.branchId`). + `evidence-routes-branch-isolation-wave874.test.js`
+  (5 tests; uses `quality_manager` not `compliance_officer` — latter is CROSS_BRANCH). Existing `evidence-vault-service.test.js`
+  still green.
+- ~~W875 laundry IDOR closure~~ — **done** (local, not yet pushed): **security fix** — laundry models use legacy
+  `center` (ref Branch); instance endpoints + dashboard used bare `findById`/`countDocuments()` with no center filter
+  despite `requireBranchAccess` → a branch manager could read/update foreign-center laundry orders (beneficiary linen
+  tracking) by ObjectId guess. Fix: `laundryCenterFilter(req)` maps `branchFilter` → `{ center }`, applied via
+  `scopedById`/`mergeListFilter` on every instance lookup + list + dashboard; POST stamps `center` from caller scope. +
+  `laundry-routes-branch-isolation-wave875.test.js` (4 tests). Existing `laundry.routes` unit test still green.
+- ~~W876 kitchen IDOR closure~~ — **done** (local, not yet pushed): **security fix** — DailyMenu /
+  MealService / KitchenInventory use `center` (ref Branch); instance + list + dashboard ignored center
+  filter despite `requireBranchAccess`. MenuItem catalog intentionally org-wide (no center field).
+  Fix: `kitchenCenterFilter(req)` + `scopedById` on center-bearing entities; POST stamps `center`.
+  - `kitchen-routes-branch-isolation-wave876.test.js` (3 tests).
+- ~~W877 warehouse IDOR closure~~ — **done** (local, not yet pushed): **security fix** — Warehouse
+  carries `branchId` but CRUD + items/transactions/dashboard used bare `findById` and list passed raw
+  `?branch=` (wrong field). Fix: `branchFilter` on warehouse CRUD; `assertWarehouseInScope` on
+  nested items/transactions; dashboard aggregations scoped. + `warehouse-routes-branch-isolation-wave877.test.js`
+  (3 tests).
+- ~~W878 pharmacy IDOR closure~~ — **done** (local, not yet pushed): **security fix** — Prescriptions
+  and dispensing tie to `beneficiary` (no branchId on RX row). Pre-W878 instance endpoints used bare
+  `findById` → cross-branch read/verify/cancel/dispense of medication orders. Medication catalog org-wide.
+  Fix: `beneficiaryScopeFilter(req)` on list + `scopedPrescriptionById` / `scopedDispensingById`; POST
+  paths call `enforceBeneficiaryBranch`. + `pharmacy-routes-branch-isolation-wave878.test.js` (3 tests).
+- ~~W879 toileting IDOR closure~~ — **done** (local, not yet pushed): **security fix** — same class as
+  pre-W869 MAR: `bodyScopedBeneficiaryGuard` mounted but NOT `requireBranchAccess` → guard inert;
+  PATCH/DELETE used bare `findByIdAndUpdate`/`findByIdAndDelete`. Fix: mount `requireBranchAccess`,
+  `branchFilter` on today/summary/by-beneficiary, `scopedById` on PATCH/DELETE, stamp `branchId` from
+  caller scope on POST. + `toileting-routes-branch-isolation-wave879.test.js` (3 tests).
+- ~~W880 invoices-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — W651 scoped
+  `/stats` aggregates only; list + instance paths (`GET /`, `GET /:id`, PATCH, issue/pay/cancel/submit-to-zatca)
+  still used bare `findById`. Fix: `listScope(req)` + `scopedById(req, id)` on every path; POST stamps `branchId`
+  from `req.branchScope`; ZATCA prev-hash chain scoped to caller branch when restricted. +
+  `invoices-admin-branch-isolation-wave880.test.js` (4 tests; seeds via `insertOne` — UniversalCode post-save
+  hangs in test env without mock).
+- ~~W881 referrals-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `ReferralTracking`
+  carries `branchId` but file lacked `requireBranchAccess`; overview/trend/top-referrers/close-loop-gaps used
+  `find({})`; PATCH/DELETE bare `findById`. Fix: mount `requireBranchAccess`, `listScope`/`scopedById`, POST
+  stamps `branchId`. + `referrals-admin-branch-isolation-wave881.test.js` (5 tests).
+- ~~W882 nps-admin IDOR closure~~ — **done** (local, not yet pushed): **security fix** — `NpsResponse` carries
+  `branchId` but overview/trend/campaigns unscoped; PATCH/DELETE bare `findById`. Fix: same pattern as W881. +
+  `nps-admin-branch-isolation-wave882.test.js` (5 tests).
+- ~~W883 beneficiary-day-attendance IDOR closure~~ — **done** (local, not yet pushed): **security fix** — same
+  class as pre-W869 MAR: `bodyScopedBeneficiaryGuard` without `requireBranchAccess`; list/today/summary allowed
+  `?branchId` spoof; PATCH/DELETE bare `findById`; check-in trusted body `branchId`. Fix: mount
+  `requireBranchAccess`, `listScope`/`scopedById`, stamp `branchId` from caller scope on check-in/mark/bulk. +
+  `beneficiary-day-attendance-branch-isolation-wave883.test.js` (4 tests).
+- ~~W884 Mongoose duplicate schema.index drift guard + 25-index cleanup~~ — **done** (local, not yet pushed; renumbered from W880 — W880 taken by invoices-admin isolation):
+  - **Cleanup**: removed redundant `schema.index({field:1})` where the field already declares `unique:true`
+    (or a duplicate compound unique) across 19 models — 25 warnings → 0 (AssetTransfer, Volunteer×3,
+    document-pro services×8, InventoryStock×2, DailyAttendance compound, …).
+  - **Guard**: `scripts/check-duplicate-schema-index.js` + `npm run check:duplicate-schema-index` +
+    `__tests__/no-duplicate-schema-index-wave884.test.js` (empty baseline, ratchet-down).
+  - **Pharmacy follow-up**: fixed production 500 on `GET /prescriptions` — `populate('prescriber','name')`
+    → `fullName` (User schema); hardened W878 test seeds.
+  - **Lifecycle tests**: W597/W601 updated to drive scope via `req.user.branchId` (W833 `requireBranchAccess`
+    overwrites injected `req.branchScope`); W601 foreign `?branchId=` now expects 403 at middleware.
+  - **ESLint**: 5 unused-var warnings cleared (maintenanceHub, purchasing, rehabLicenses).
+  - **Verify**: 17 suites / 78 tests (W870–883 + W884 + W597/W601) ✅; all 5 pre-push gates + lint ✅.
 - ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done** (`b7b337f9c`, pushed `main`): converted ALL 26 remaining
   bare instance lookups in `mdt-coordination.routes.js` to branch-scoped `findOne`/`findOneAndDelete` — 12 MDTMeeting
   sub-resource reads + 10 UnifiedRehabPlan (GET/:id + 7 sub-resource + DELETE) + 4 ReferralTicket (GET/:id + sub-resource

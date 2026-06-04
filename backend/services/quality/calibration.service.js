@@ -35,8 +35,8 @@ class CalibrationService {
     }
   }
 
-  async _load(id) {
-    const doc = await this.model.findOne({ _id: id, deleted_at: null });
+  async _load(id, scopeFilter = {}) {
+    const doc = await this.model.findOne({ _id: id, deleted_at: null, ...scopeFilter });
     if (!doc) {
       const err = new Error('Calibration asset not found');
       err.code = 'NOT_FOUND';
@@ -83,14 +83,14 @@ class CalibrationService {
     return doc;
   }
 
-  async recordCalibration(id, payload, userId) {
+  async recordCalibration(id, payload, userId, scopeFilter = {}) {
     if (!payload || !payload.outcome) {
       throw Object.assign(new Error('outcome required'), { code: 'VALIDATION' });
     }
     if (!['pass', 'pass_with_adjustment', 'fail'].includes(payload.outcome)) {
       throw Object.assign(new Error(`unknown outcome: ${payload.outcome}`), { code: 'VALIDATION' });
     }
-    const doc = await this._load(id);
+    const doc = await this._load(id, scopeFilter);
     const calibratedAt = payload.calibratedAt ? new Date(payload.calibratedAt) : this.now();
     const nextDueDate = computeNextDueDate(
       calibratedAt,
@@ -139,11 +139,11 @@ class CalibrationService {
     return doc;
   }
 
-  async setStatus(id, status, reason, userId) {
+  async setStatus(id, status, reason, userId, scopeFilter = {}) {
     if (!CAL_STATUSES.includes(status)) {
       throw Object.assign(new Error(`invalid status: ${status}`), { code: 'VALIDATION' });
     }
-    const doc = await this._load(id);
+    const doc = await this._load(id, scopeFilter);
     doc.status = status;
     if (status === 'out_of_service' || status === 'retired') {
       doc.outOfServiceReason = reason || null;
@@ -162,13 +162,12 @@ class CalibrationService {
 
   // ── queries ──────────────────────────────────────────────────────
 
-  async findById(id) {
-    return this.model.findOne({ _id: id, deleted_at: null });
+  async findById(id, scopeFilter = {}) {
+    return this.model.findOne({ _id: id, deleted_at: null, ...scopeFilter });
   }
 
-  async list({ branchId, status, type, dueWithinDays, limit = 50, skip = 0 } = {}) {
-    const q = { deleted_at: null };
-    if (branchId) q.branchId = branchId;
+  async list({ scopeFilter = {}, status, type, dueWithinDays, limit = 50, skip = 0 } = {}) {
+    const q = { deleted_at: null, ...scopeFilter };
     if (status) q.status = status;
     if (type) q.type = type;
     if (dueWithinDays != null) {
@@ -182,9 +181,8 @@ class CalibrationService {
       .limit(Math.min(Number(limit) || 50, 200));
   }
 
-  async getDashboard({ branchId } = {}) {
-    const q = { deleted_at: null };
-    if (branchId) q.branchId = branchId;
+  async getDashboard({ scopeFilter = {} } = {}) {
+    const q = { deleted_at: null, ...scopeFilter };
     const now = this.now();
     const in30 = new Date(now.getTime() + 30 * 86400000);
     const [total, active, byStatus, dueSoon, overdue, failedCount] = await Promise.all([

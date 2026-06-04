@@ -11,7 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { LaundryOrder, LaundryMachine, LaundrySchedule } = require('../models/laundry.model');
 const _logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -20,6 +20,22 @@ const safeError = require('../utils/safeError');
 // ─── Authentication Middleware ────────────────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+/** Laundry models use legacy `center` (ref Branch) — map canonical branchFilter. */
+function laundryCenterFilter(req) {
+  const f = branchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { center: { $in: f.branchId.$in } };
+  return { center: f.branchId };
+}
+
+function mergeListFilter(req, base = {}) {
+  return { ...base, ...laundryCenterFilter(req) };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...laundryCenterFilter(req) };
+}
 // ═══════════════════════════════════════════════════════════════════════════
 // ORDERS — طلبات الغسيل
 // ═══════════════════════════════════════════════════════════════════════════
@@ -36,7 +52,7 @@ router.get('/orders', async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = {};
+    const filter = mergeListFilter(req, {});
     if (status) filter.status = status;
     if (beneficiary) filter.beneficiary = beneficiary;
     if (center) filter.center = center;
@@ -76,7 +92,7 @@ router.get('/orders', async (req, res) => {
 
 router.get('/orders/:id', async (req, res) => {
   try {
-    const order = await LaundryOrder.findById(req.params.id)
+    const order = await LaundryOrder.findOne(scopedById(req, req.params.id))
       .populate('beneficiary', 'name nationalId')
       .populate('machine', 'name type status')
       .lean();
@@ -89,7 +105,9 @@ router.get('/orders/:id', async (req, res) => {
 
 router.post('/orders', async (req, res) => {
   try {
-    const order = await LaundryOrder.create({ ...req.body, createdBy: req.user?._id });
+    const payload = stripUpdateMeta(req.body);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
+    const order = await LaundryOrder.create({ ...payload, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: order });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -98,10 +116,14 @@ router.post('/orders', async (req, res) => {
 
 router.put('/orders/:id', async (req, res) => {
   try {
-    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const order = await LaundryOrder.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      stripUpdateMeta(req.body),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
     res.json({ success: true, data: order });
   } catch (error) {
@@ -127,18 +149,21 @@ router.patch('/orders/:id/status', async (req, res) => {
     if (status === 'ready') update.completedAt = new Date();
     if (status === 'delivered') update.deliveredAt = new Date();
 
-    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, update, {
+    const order = await LaundryOrder.findOneAndUpdate(scopedById(req, req.params.id), update, {
       returnDocument: 'after',
     });
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
 
     // Free the machine if order is delivered or cancelled
     if (['delivered', 'cancelled'].includes(status) && order.machine) {
-      await LaundryMachine.findByIdAndUpdate(order.machine, {
-        status: 'available',
-        currentOrder: null,
-        $inc: { cyclesCompleted: status === 'delivered' ? 1 : 0 },
-      });
+      await LaundryMachine.findOneAndUpdate(
+        { _id: order.machine, ...laundryCenterFilter(req) },
+        {
+          status: 'available',
+          currentOrder: null,
+          $inc: { cyclesCompleted: status === 'delivered' ? 1 : 0 },
+        }
+      );
     }
 
     res.json({ success: true, data: order, message: `تم تحديث حالة الطلب إلى ${status}` });
@@ -151,23 +176,26 @@ router.patch('/orders/:id/status', async (req, res) => {
 router.patch('/orders/:id/assign-machine', async (req, res) => {
   try {
     const { machineId } = req.body;
-    const machine = await LaundryMachine.findById(machineId);
+    const machine = await LaundryMachine.findOne({ _id: machineId, ...laundryCenterFilter(req) });
     if (!machine) return res.status(404).json({ success: false, error: 'الجهاز غير موجود' });
     if (machine.status !== 'available') {
       return res.status(400).json({ success: false, error: 'الجهاز غير متاح حالياً' });
     }
 
-    const order = await LaundryOrder.findByIdAndUpdate(
-      req.params.id,
+    const order = await LaundryOrder.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { machine: machineId, status: 'washing' },
       { returnDocument: 'after' }
     );
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
 
-    await LaundryMachine.findByIdAndUpdate(machineId, {
-      status: 'in-use',
-      currentOrder: order._id,
-    });
+    await LaundryMachine.findOneAndUpdate(
+      { _id: machineId, ...laundryCenterFilter(req) },
+      {
+        status: 'in-use',
+        currentOrder: order._id,
+      }
+    );
 
     res.json({ success: true, data: order, message: 'تم تعيين الجهاز بنجاح' });
   } catch (error) {
@@ -182,7 +210,7 @@ router.patch('/orders/:id/assign-machine', async (req, res) => {
 router.get('/machines', async (req, res) => {
   try {
     const { type, status, center } = req.query;
-    const filter = {};
+    const filter = mergeListFilter(req, {});
     if (type) filter.type = type;
     if (status) filter.status = status;
     if (center) filter.center = center;
@@ -200,7 +228,9 @@ router.get('/machines', async (req, res) => {
 
 router.post('/machines', async (req, res) => {
   try {
-    const machine = await LaundryMachine.create(stripUpdateMeta(req.body));
+    const payload = stripUpdateMeta(req.body);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
+    const machine = await LaundryMachine.create(payload);
     res.status(201).json({ success: true, data: machine });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -209,8 +239,8 @@ router.post('/machines', async (req, res) => {
 
 router.put('/machines/:id', async (req, res) => {
   try {
-    const machine = await LaundryMachine.findByIdAndUpdate(
-      req.params.id,
+    const machine = await LaundryMachine.findOneAndUpdate(
+      scopedById(req, req.params.id),
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -223,8 +253,8 @@ router.put('/machines/:id', async (req, res) => {
 
 router.patch('/machines/:id/maintenance', async (req, res) => {
   try {
-    const machine = await LaundryMachine.findByIdAndUpdate(
-      req.params.id,
+    const machine = await LaundryMachine.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'maintenance', lastMaintenance: new Date(), currentOrder: null, ...req.body },
       { returnDocument: 'after' }
     );
@@ -242,7 +272,7 @@ router.patch('/machines/:id/maintenance', async (req, res) => {
 router.get('/schedules', async (req, res) => {
   try {
     const { dayOfWeek, center, type, isActive } = req.query;
-    const filter = {};
+    const filter = mergeListFilter(req, {});
     if (dayOfWeek !== undefined) filter.dayOfWeek = parseInt(dayOfWeek, 10);
     if (center) filter.center = center;
     if (type) filter.type = type;
@@ -261,7 +291,9 @@ router.get('/schedules', async (req, res) => {
 
 router.post('/schedules', async (req, res) => {
   try {
-    const schedule = await LaundrySchedule.create(stripUpdateMeta(req.body));
+    const payload = stripUpdateMeta(req.body);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
+    const schedule = await LaundrySchedule.create(payload);
     res.status(201).json({ success: true, data: schedule });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -270,8 +302,8 @@ router.post('/schedules', async (req, res) => {
 
 router.put('/schedules/:id', async (req, res) => {
   try {
-    const schedule = await LaundrySchedule.findByIdAndUpdate(
-      req.params.id,
+    const schedule = await LaundrySchedule.findOneAndUpdate(
+      scopedById(req, req.params.id),
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -284,8 +316,8 @@ router.put('/schedules/:id', async (req, res) => {
 
 router.delete('/schedules/:id', async (req, res) => {
   try {
-    const schedule = await LaundrySchedule.findByIdAndUpdate(
-      req.params.id,
+    const schedule = await LaundrySchedule.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { isActive: false },
       { returnDocument: 'after' }
     );
@@ -307,16 +339,19 @@ router.get('/dashboard', async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    const centerScope = laundryCenterFilter(req);
+
     const [totalOrders, pendingOrders, inProgressOrders, readyOrders, todayOrders, machines] =
       await Promise.all([
-        LaundryOrder.countDocuments(),
-        LaundryOrder.countDocuments({ status: 'pending' }),
+        LaundryOrder.countDocuments(centerScope),
+        LaundryOrder.countDocuments({ ...centerScope, status: 'pending' }),
         LaundryOrder.countDocuments({
+          ...centerScope,
           status: { $in: ['collected', 'sorting', 'washing', 'drying', 'ironing', 'folding'] },
         }),
-        LaundryOrder.countDocuments({ status: 'ready' }),
-        LaundryOrder.countDocuments({ createdAt: { $gte: today, $lt: tomorrow } }),
-        LaundryMachine.find().limit(500).lean(),
+        LaundryOrder.countDocuments({ ...centerScope, status: 'ready' }),
+        LaundryOrder.countDocuments({ ...centerScope, createdAt: { $gte: today, $lt: tomorrow } }),
+        LaundryMachine.find(centerScope).limit(500).lean(),
       ]);
 
     const machineStats = {

@@ -201,6 +201,8 @@
     "check:routes-load": "node scripts/scan-route-files.js",
     "check:gitignored-sources": "node scripts/check-gitignored-sources.js",
     "check:hook-style": "node scripts/check-mongoose-hook-style.js",
+    "check:duplicate-schema-index": "node scripts/check-duplicate-schema-index.js",
+    "check:duplicate-schema-index:json": "node scripts/check-duplicate-schema-index.js --json",
     "check:wave-collision": "node scripts/check-wave-collision.js",
     "check:wave-collision:json": "node scripts/check-wave-collision.js --json",
     "check:route-shadowing": "node scripts/check-route-shadowing.js",

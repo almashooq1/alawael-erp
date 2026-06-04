@@ -52,7 +52,6 @@ const graphNodeSchema = new mongoose.Schema(
   { timestamps: true, collection: 'graph_nodes' }
 );
 
-graphNodeSchema.index({ documentId: 1 });
 graphNodeSchema.index({ 'properties.category': 1, 'properties.department': 1 });
 graphNodeSchema.index({ 'metrics.pageRank': -1 });
 

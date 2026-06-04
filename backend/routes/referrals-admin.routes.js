@@ -25,12 +25,26 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const ReferralTracking = require('../models/ReferralTracking');
 const ref = require('../services/referralTrackingService');
 const safeError = require('../utils/safeError');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
+
+function listScope(req, base = {}) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query?.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    scope.branchId = req.query.branchId;
+  }
+  return { ...base, ...scope };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 const READ_ROLES = [
   'admin',
@@ -52,8 +66,8 @@ const WRITE_ROLES = [
 ];
 const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr'];
 
-function buildFilter(q) {
-  const f = {};
+function buildFilter(q, req) {
+  const f = listScope(req, {});
   if (q.direction && ['incoming', 'outgoing'].includes(q.direction)) f.direction = q.direction;
   if (
     q.status &&
@@ -62,13 +76,12 @@ function buildFilter(q) {
     f.status = q.status;
   }
   if (q.sourceOrgSlug) f.sourceOrgSlug = String(q.sourceOrgSlug).toLowerCase().trim();
-  if (q.branchId && mongoose.isValidObjectId(q.branchId)) f.branchId = q.branchId;
   return f;
 }
 
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -91,7 +104,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await ReferralTracking.find({}).lean();
+    const all = await ReferralTracking.find(listScope(req, {})).lean();
     res.json({
       success: true,
       both: ref.summarize(all),
@@ -107,7 +120,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 router.get('/top-referrers', requireRole(READ_ROLES), async (req, res) => {
   try {
     const n = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
-    const all = await ReferralTracking.find({ direction: 'incoming' }).lean();
+    const all = await ReferralTracking.find({ direction: 'incoming', ...branchFilter(req) }).lean();
     res.json({ success: true, items: ref.topReferrers(all, n) });
   } catch (err) {
     return safeError(res, err, 'referrals.topReferrers');
@@ -119,6 +132,7 @@ router.get('/close-loop-gaps', requireRole(READ_ROLES), async (req, res) => {
     const outgoing = await ReferralTracking.find({
       direction: 'outgoing',
       status: 'pending',
+      ...branchFilter(req),
     }).lean();
     res.json({
       success: true,
@@ -132,7 +146,7 @@ router.get('/close-loop-gaps', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/trend', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await ReferralTracking.find({}).lean();
+    const all = await ReferralTracking.find(listScope(req, {})).lean();
     res.json({ success: true, months: ref.trendByMonth(all) });
   } catch (err) {
     return safeError(res, err, 'referrals.trend');
@@ -149,6 +163,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const row = await ReferralTracking.create({
       ...req.body,
+      branchId: req.branchScope?.branchId || req.body.branchId || null,
       createdBy: req.user?.id,
       receivedAt: req.body.receivedAt ? new Date(req.body.receivedAt) : new Date(),
     });
@@ -164,7 +179,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const patch = { ...(req.body || {}) };
     if (patch.status && patch.status !== 'pending') patch.settledAt = new Date();
-    const row = await ReferralTracking.findByIdAndUpdate(req.params.id, patch, {
+    const row = await ReferralTracking.findOneAndUpdate(scopedById(req, req.params.id), patch, {
       returnDocument: 'after',
     });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -178,7 +193,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const row = await ReferralTracking.findByIdAndDelete(req.params.id);
+    const row = await ReferralTracking.findOneAndDelete(scopedById(req, req.params.id));
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -188,7 +203,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
 
 router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const total = await ReferralTracking.countDocuments(filter);
     const items = await ReferralTracking.find(filter).sort({ receivedAt: -1 }).limit(10_000).lean();
     res.set('X-Total-Count', String(total));

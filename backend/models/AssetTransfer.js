@@ -54,7 +54,6 @@ const assetTransferSchema = new mongoose.Schema(
   { timestamps: true, collection: 'asset_transfers' }
 );
 
-assetTransferSchema.index({ transferNumber: 1 });
 assetTransferSchema.index({ status: 1 });
 assetTransferSchema.index({ assetId: 1 });
 assetTransferSchema.index({ fromBranchId: 1 });

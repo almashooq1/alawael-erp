@@ -94,7 +94,6 @@ const teleconsultationSchema = new Schema(
 teleconsultationSchema.index({ branch: 1, status: 1, scheduledAt: -1 });
 teleconsultationSchema.index({ beneficiary: 1, scheduledAt: -1 });
 teleconsultationSchema.index({ provider: 1, scheduledAt: -1 });
-teleconsultationSchema.index({ consultationNumber: 1 });
 
 // ─── VirtualSession ──────────────────────────────────────────────────────────
 

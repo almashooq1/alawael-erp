@@ -20,7 +20,7 @@ const crypto = require('crypto');
 const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/evidenceVault.service');
 const registry = require('../config/evidence.registry');
@@ -76,6 +76,12 @@ function mapStatusError(err, res) {
   }
   return safeError(res, err);
 }
+
+function listScope(req) {
+  const scope = { ...branchFilter(req) };
+  if (!scope.branchId && req.query.branchId) scope.branchId = req.query.branchId;
+  return scope;
+}
 // ── helpers ────────────────────────────────────────────────────────
 
 router.get(
@@ -109,7 +115,7 @@ router.get(
   requireBranchAccess,
   wrap(async (req, res) => {
     try {
-      const data = await getService().getStats({ branchId: req.query.branchId });
+      const data = await getService().getStats({ scopeFilter: listScope(req) });
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -126,7 +132,7 @@ router.get(
   wrap(async (req, res) => {
     try {
       const days = req.query.days ? Number(req.query.days) : undefined;
-      const data = await getService().findExpiring(days);
+      const data = await getService().findExpiring(days, branchFilter(req));
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -151,7 +157,7 @@ router.get(
   wrap(async (req, res) => {
     try {
       const data = await getService().list({
-        branchId: req.query.branchId,
+        scopeFilter: listScope(req),
         type: req.query.type,
         status: req.query.status,
         sourceModule: req.query.sourceModule,
@@ -175,7 +181,7 @@ router.get(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const data = await getService().findByControl(req.params.controlId);
+      const data = await getService().findByControl(req.params.controlId, branchFilter(req));
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -191,7 +197,11 @@ router.get(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const data = await getService().findByRegulation(req.params.standard, req.query.clause);
+      const data = await getService().findByRegulation(
+        req.params.standard,
+        req.query.clause,
+        branchFilter(req)
+      );
       res.json({ success: true, data });
     } catch (err) {
       mapStatusError(err, res);
@@ -207,7 +217,7 @@ router.get(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().findById(req.params.id);
+      const doc = await getService().findById(req.params.id, branchFilter(req));
       if (!doc) return res.status(404).json({ success: false, error: 'not found' });
       res.json({
         success: true,
@@ -240,7 +250,9 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().ingest(req.body, req.user._id);
+      const payload = { ...req.body };
+      if (req.branchScope?.branchId) payload.branchId = req.branchScope.branchId;
+      const doc = await getService().ingest(payload, req.user._id);
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -260,7 +272,7 @@ router.post(
   wrap(async (req, res) => {
     try {
       const buf = req.body.contentBase64 ? Buffer.from(req.body.contentBase64, 'base64') : null;
-      const result = await getService().verify(req.params.id, buf);
+      const result = await getService().verify(req.params.id, buf, branchFilter(req));
       res.json({ success: true, data: result });
     } catch (err) {
       mapStatusError(err, res);
@@ -286,7 +298,8 @@ router.post(
       const { old, new: newDoc } = await getService().supersede(
         req.params.id,
         req.body,
-        req.user._id
+        req.user._id,
+        branchFilter(req)
       );
       res.status(201).json({ success: true, data: { old, new: newDoc } });
     } catch (err) {
@@ -306,7 +319,12 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().revoke(req.params.id, req.body.reason, req.user._id);
+      const doc = await getService().revoke(
+        req.params.id,
+        req.body.reason,
+        req.user._id,
+        branchFilter(req)
+      );
       res.json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -329,7 +347,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().sign(req.params.id, req.body, req.user._id);
+      const doc = await getService().sign(req.params.id, req.body, req.user._id, branchFilter(req));
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -348,7 +366,12 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().setLegalHold(req.params.id, req.body.reason, req.user._id);
+      const doc = await getService().setLegalHold(
+        req.params.id,
+        req.body.reason,
+        req.user._id,
+        branchFilter(req)
+      );
       res.json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -365,7 +388,7 @@ router.delete(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().clearLegalHold(req.params.id, req.user._id);
+      const doc = await getService().clearLegalHold(req.params.id, req.user._id, branchFilter(req));
       res.json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
@@ -412,7 +435,7 @@ router.post(
         hashAlgorithm: 'sha256',
       },
       validUntil: expiresAt ? new Date(expiresAt) : undefined,
-      branchId: req.user?.branchId || null,
+      branchId: req.branchScope?.branchId || req.user?.branchId || null,
       tenantId: req.user?.tenantId || null,
     };
 

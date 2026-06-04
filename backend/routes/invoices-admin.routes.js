@@ -91,11 +91,19 @@ function recalcTotals(invoice) {
   return { items, subTotal, discount, taxAmount, totalAmount };
 }
 
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
+
+function listScope(req, base = {}) {
+  return { ...base, ...branchFilter(req) };
+}
+
 // ── GET / — list ─────────────────────────────────────────────────────────
 router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
   try {
     const { status, beneficiary, q, from, to, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = listScope(req, {});
     if (status) filter.status = status;
     if (beneficiary && mongoose.isValidObjectId(beneficiary)) filter.beneficiary = beneficiary;
     if (from || to) {
@@ -185,7 +193,7 @@ router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('Invoice'), async (req
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const doc = await Invoice.findById(req.params.id)
+    const doc = await Invoice.findOne(scopedById(req, req.params.id))
       .populate(
         'beneficiary',
         'firstName lastName firstName_ar lastName_ar beneficiaryNumber nationalId'
@@ -213,6 +221,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     body.totalAmount = totals.totalAmount;
     body.issuer = req.user?.id;
     body.status = body.status || 'DRAFT';
+    if (req.branchScope?.branchId) body.branchId = req.branchScope.branchId;
 
     const doc = await Invoice.create(body);
     logger.info('[invoices] created', { id: doc._id.toString(), by: req.user?.id });
@@ -243,7 +252,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       body.taxAmount = totals.taxAmount;
       body.totalAmount = totals.totalAmount;
     }
-    const doc = await Invoice.findByIdAndUpdate(req.params.id, body, {
+    const doc = await Invoice.findOneAndUpdate(scopedById(req, req.params.id), body, {
       returnDocument: 'after',
       runValidators: true,
     }).lean();
@@ -261,13 +270,14 @@ router.post('/:id/issue', invoiceIdempotency, requireRole(WRITE_ROLES), async (r
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const invoice = await Invoice.findById(req.params.id);
+    const invoice = await Invoice.findOne(scopedById(req, req.params.id));
     if (!invoice) return res.status(404).json({ success: false, message: 'غير موجود' });
     if (invoice.status === 'CANCELLED')
       return res.status(400).json({ success: false, message: 'لا يمكن إصدار فاتورة ملغاة' });
 
-    // Find previous issued invoice to chain hash
+    // Find previous issued invoice to chain hash (same branch when restricted)
     const prev = await Invoice.findOne({
+      ...branchFilter(req),
       _id: { $ne: invoice._id },
       'zatca.invoiceHash': { $exists: true, $ne: null },
     })
@@ -308,8 +318,8 @@ router.post('/:id/issue', invoiceIdempotency, requireRole(WRITE_ROLES), async (r
 router.post('/:id/pay', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const { paymentMethod = 'CASH' } = req.body || {};
-    const doc = await Invoice.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Invoice.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'PAID', paymentMethod, paidAt: new Date() },
       { returnDocument: 'after' }
     ).lean();
@@ -323,8 +333,8 @@ router.post('/:id/pay', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/cancel ─────────────────────────────────────────────────────
 router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const doc = await Invoice.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Invoice.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'CANCELLED', notes: req.body?.reason || '' },
       { returnDocument: 'after' }
     ).lean();
@@ -340,7 +350,7 @@ router.post('/:id/submit-to-zatca', requireRole(WRITE_ROLES), async (req, res) =
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const invoice = await Invoice.findById(req.params.id);
+    const invoice = await Invoice.findOne(scopedById(req, req.params.id));
     if (!invoice) return res.status(404).json({ success: false, message: 'غير موجود' });
     if (!invoice.zatca?.uuid || !invoice.zatca?.invoiceHash) {
       return res.status(400).json({

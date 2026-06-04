@@ -145,7 +145,6 @@ const purchaseOrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-purchaseOrderSchema.index({ poNumber: 1 });
 purchaseOrderSchema.index({ supplierId: 1, status: 1 });
 purchaseOrderSchema.index({ branchId: 1, status: 1 });
 
@@ -213,7 +212,6 @@ const assetSchema = new mongoose.Schema(
 );
 
 assetSchema.index({ branchId: 1, status: 1 });
-assetSchema.index({ assetNumber: 1 });
 
 // --- الجرد الدوري ---
 const stockCountItemSchema = new mongoose.Schema(

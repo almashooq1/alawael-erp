@@ -356,7 +356,6 @@ async function pushEmbedded(id, field, entry, scopeFilter = {}) {
 }
 
 async function patchAlert(id, alertId, patch, scopeFilter = {}) {
-  const License = getLicenseModel();
   const doc = await requireLicense(id, scopeFilter);
   if (!Array.isArray(doc.alerts)) doc.alerts = [];
   const idx = doc.alerts.findIndex(a => String(a._id) === String(alertId));
@@ -371,7 +370,7 @@ async function patchAlert(id, alertId, patch, scopeFilter = {}) {
 
 async function cloneLicense(id, overrides = {}, userId, scopeFilter = {}) {
   const src = await getById(id, scopeFilter);
-  const { _id, createdAt, updatedAt, ...rest } = src;
+  const { _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = src;
   return create(
     {
       ...rest,

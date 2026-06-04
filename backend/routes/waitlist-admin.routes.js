@@ -50,11 +50,12 @@ const READ_ROLES = [
 const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'receptionist'];
 const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr'];
 
-function buildFilter(q) {
-  const f = {};
+function buildFilter(q, req) {
+  const f = { ...branchFilter(req) };
   if (q.status && ['waiting', 'offered', 'enrolled', 'withdrawn', 'lapsed'].includes(q.status))
     f.status = q.status;
-  if (q.branchId && mongoose.isValidObjectId(q.branchId)) f.branchId = q.branchId;
+  // Cross-branch roles get branchFilter(req)={}; honour explicit ?branchId then.
+  if (!f.branchId && q.branchId && mongoose.isValidObjectId(q.branchId)) f.branchId = q.branchId;
   if (q.serviceType) f.serviceType = String(q.serviceType);
   if (q.priority) f.priority = Number(q.priority);
   return f;
@@ -62,7 +63,7 @@ function buildFilter(q) {
 
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -85,7 +86,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await WaitingListEntry.find({}).lean();
+    const all = await WaitingListEntry.find(branchFilter(req)).lean();
     const summary = wl.summarize(all);
     const waiters = all.filter(e => e.status === 'waiting');
     const stale = wl.detectStale(waiters);
@@ -99,7 +100,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/prioritized', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const waiters = await WaitingListEntry.find({ status: 'waiting' }).lean();
+    const waiters = await WaitingListEntry.find({ status: 'waiting', ...branchFilter(req) }).lean();
     res.json({ success: true, items: wl.prioritize(waiters) });
   } catch (err) {
     return safeError(res, err, 'waitlist.prioritized');
@@ -115,10 +116,13 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         .status(400)
         .json({ success: false, message: 'يجب توفير beneficiaryId أو guardianId أو prospectName' });
     }
+    const body = stripUpdateMeta(req.body || {});
+    delete body.branchId;
     const row = await WaitingListEntry.create({
-      ...req.body,
+      ...body,
+      branchId: req.branchScope?.branchId ?? body.branchId,
       createdBy: req.user?.id,
-      requestedAt: req.body.requestedAt ? new Date(req.body.requestedAt) : new Date(),
+      requestedAt: body.requestedAt ? new Date(body.requestedAt) : new Date(),
     });
     res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -147,9 +151,9 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   }
 });
 
-async function statusTransition(id, patch) {
-  return WaitingListEntry.findByIdAndUpdate(
-    id,
+async function statusTransition(req, id, patch) {
+  return WaitingListEntry.findOneAndUpdate(
+    { _id: id, ...branchFilter(req) },
     { ...patch, statusChangedAt: new Date() },
     { returnDocument: 'after' }
   );
@@ -160,7 +164,7 @@ router.post('/:id/offer', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const offerExpiresAt = new Date(Date.now() + wl.THRESHOLDS.offerWindowDays * 86400000);
-    const row = await statusTransition(req.params.id, {
+    const row = await statusTransition(req, req.params.id, {
       status: 'offered',
       offeredAt: new Date(),
       offerExpiresAt,
@@ -176,7 +180,7 @@ router.post('/:id/enroll', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const row = await statusTransition(req.params.id, {
+    const row = await statusTransition(req, req.params.id, {
       status: 'enrolled',
       resolvedAt: new Date(),
     });
@@ -191,7 +195,7 @@ router.post('/:id/withdraw', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const row = await statusTransition(req.params.id, {
+    const row = await statusTransition(req, req.params.id, {
       status: 'withdrawn',
       resolvedAt: new Date(),
     });
@@ -206,7 +210,10 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const row = await WaitingListEntry.findByIdAndDelete(req.params.id);
+    const row = await WaitingListEntry.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -216,7 +223,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
 
 router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, req);
     const total = await WaitingListEntry.countDocuments(filter);
     const items = await WaitingListEntry.find(filter)
       .sort({ priority: 1, requestedAt: 1 })

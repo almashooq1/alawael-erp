@@ -38,7 +38,6 @@ const documentShareSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-documentShareSchema.index({ shareToken: 1 });
 documentShareSchema.index({ documentId: 1 });
 documentShareSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true });
 

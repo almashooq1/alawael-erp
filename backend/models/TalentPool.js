@@ -50,7 +50,6 @@ const talentPoolSchema = new mongoose.Schema(
 );
 
 talentPoolSchema.index({ branchId: 1, status: 1 });
-talentPoolSchema.index({ email: 1 });
 talentPoolSchema.index({ isSaudi: 1 });
 talentPoolSchema.index({ skills: 1 });
 talentPoolSchema.index({ deletedAt: 1 });

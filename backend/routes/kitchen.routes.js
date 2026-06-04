@@ -15,12 +15,28 @@ const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../model
 const _logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // All kitchen routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+/** Kitchen branch data uses legacy `center` (ref Branch). MenuItem catalog is org-wide. */
+function kitchenCenterFilter(req) {
+  const f = branchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { center: { $in: f.branchId.$in } };
+  return { center: f.branchId };
+}
+
+function mergeCenterFilter(req, base = {}) {
+  return { ...base, ...kitchenCenterFilter(req) };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...kitchenCenterFilter(req) };
+}
 // ── Field whitelists ────────────────────────────────────────────────────────
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 
@@ -174,14 +190,14 @@ router.delete('/menu-items/:id', async (req, res) => {
 router.get('/daily-menus', async (req, res) => {
   try {
     const { startDate, endDate, status, center, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeCenterFilter(req, {});
     if (startDate || endDate) {
       filter.date = {};
       if (startDate) filter.date.$gte = new Date(startDate);
       if (endDate) filter.date.$lte = new Date(endDate);
     }
     if (status) filter.status = status;
-    if (center) filter.center = center;
+    if (center && !kitchenCenterFilter(req).center) filter.center = center;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [menus, total] = await Promise.all([
@@ -216,7 +232,10 @@ router.get('/daily-menus/today', async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const menu = await DailyMenu.findOne({ date: { $gte: today, $lt: tomorrow } })
+    const menu = await DailyMenu.findOne({
+      date: { $gte: today, $lt: tomorrow },
+      ...kitchenCenterFilter(req),
+    })
       .populate(
         'meals.breakfast.items meals.lunch.items meals.dinner.items meals.morningSnack.items meals.afternoonSnack.items'
       )
@@ -232,8 +251,10 @@ router.get('/daily-menus/today', async (req, res) => {
 
 router.post('/daily-menus', async (req, res) => {
   try {
+    const payload = pick(req.body, DAILY_MENU_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
     const menu = await DailyMenu.create({
-      ...pick(req.body, DAILY_MENU_FIELDS),
+      ...payload,
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: menu });
@@ -244,10 +265,14 @@ router.post('/daily-menus', async (req, res) => {
 
 router.put('/daily-menus/:id', async (req, res) => {
   try {
-    const menu = await DailyMenu.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const menu = await DailyMenu.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      stripUpdateMeta(req.body),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu });
   } catch {
@@ -257,8 +282,8 @@ router.put('/daily-menus/:id', async (req, res) => {
 
 router.patch('/daily-menus/:id/approve', async (req, res) => {
   try {
-    const menu = await DailyMenu.findByIdAndUpdate(
-      req.params.id,
+    const menu = await DailyMenu.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'approved', approvedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -276,7 +301,7 @@ router.patch('/daily-menus/:id/approve', async (req, res) => {
 router.get('/meal-service', async (req, res) => {
   try {
     const { date, mealType, center, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeCenterFilter(req, {});
     if (date) {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
@@ -285,7 +310,7 @@ router.get('/meal-service', async (req, res) => {
       filter.date = { $gte: d, $lt: next };
     }
     if (mealType) filter.mealType = mealType;
-    if (center) filter.center = center;
+    if (center && !kitchenCenterFilter(req).center) filter.center = center;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [records, total] = await Promise.all([
@@ -315,7 +340,9 @@ router.get('/meal-service', async (req, res) => {
 
 router.post('/meal-service', async (req, res) => {
   try {
-    const record = await MealService.create(pick(req.body, MEAL_SERVICE_FIELDS));
+    const payload = pick(req.body, MEAL_SERVICE_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
+    const record = await MealService.create(payload);
     res.status(201).json({ success: true, data: record });
   } catch {
     res.status(400).json({ success: false });
@@ -324,10 +351,14 @@ router.post('/meal-service', async (req, res) => {
 
 router.put('/meal-service/:id', async (req, res) => {
   try {
-    const record = await MealService.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const record = await MealService.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      stripUpdateMeta(req.body),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!record) return res.status(404).json({ success: false, error: 'سجل الخدمة غير موجود' });
     res.json({ success: true, data: record });
   } catch {
@@ -342,9 +373,9 @@ router.put('/meal-service/:id', async (req, res) => {
 router.get('/inventory', async (req, res) => {
   try {
     const { category, lowStock, expiringSoon, center, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = mergeCenterFilter(req, {});
     if (category) filter.category = category;
-    if (center) filter.center = center;
+    if (center && !kitchenCenterFilter(req).center) filter.center = center;
     if (lowStock === 'true') filter.$expr = { $lte: ['$quantity', '$minStock'] };
     if (expiringSoon === 'true') {
       const week = new Date();
@@ -383,10 +414,11 @@ router.get('/inventory/alerts', async (req, res) => {
     const weekLater = new Date();
     weekLater.setDate(weekLater.getDate() + 7);
 
+    const centerScope = kitchenCenterFilter(req);
     const [lowStock, expiringSoon, expired] = await Promise.all([
-      KitchenInventory.find({ $expr: { $lte: ['$quantity', '$minStock'] } }).lean(),
-      KitchenInventory.find({ expiryDate: { $gte: now, $lte: weekLater } }).lean(),
-      KitchenInventory.find({ expiryDate: { $lt: now } }).lean(),
+      KitchenInventory.find({ ...centerScope, $expr: { $lte: ['$quantity', '$minStock'] } }).lean(),
+      KitchenInventory.find({ ...centerScope, expiryDate: { $gte: now, $lte: weekLater } }).lean(),
+      KitchenInventory.find({ ...centerScope, expiryDate: { $lt: now } }).lean(),
     ]);
 
     res.json({
@@ -404,8 +436,10 @@ router.get('/inventory/alerts', async (req, res) => {
 
 router.post('/inventory', async (req, res) => {
   try {
+    const payload = pick(req.body, INVENTORY_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
     const item = await KitchenInventory.create({
-      ...pick(req.body, INVENTORY_FIELDS),
+      ...payload,
       restockedBy: req.user?._id,
       lastRestocked: new Date(),
     });
@@ -417,8 +451,8 @@ router.post('/inventory', async (req, res) => {
 
 router.put('/inventory/:id', async (req, res) => {
   try {
-    const item = await KitchenInventory.findByIdAndUpdate(
-      req.params.id,
+    const item = await KitchenInventory.findOneAndUpdate(
+      scopedById(req, req.params.id),
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -432,8 +466,8 @@ router.put('/inventory/:id', async (req, res) => {
 router.patch('/inventory/:id/restock', async (req, res) => {
   try {
     const { quantity } = req.body;
-    const item = await KitchenInventory.findByIdAndUpdate(
-      req.params.id,
+    const item = await KitchenInventory.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { $inc: { quantity }, lastRestocked: new Date(), restockedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -455,11 +489,15 @@ router.get('/dashboard', async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    const centerScope = kitchenCenterFilter(req);
     const [todayMenu, menuItems, lowStock, todayServices] = await Promise.all([
-      DailyMenu.findOne({ date: { $gte: today, $lt: tomorrow } }).lean(),
+      DailyMenu.findOne({ date: { $gte: today, $lt: tomorrow }, ...centerScope }).lean(),
       MenuItem.countDocuments({ isActive: true }),
-      KitchenInventory.countDocuments({ $expr: { $lte: ['$quantity', '$minStock'] } }),
-      MealService.find({ date: { $gte: today, $lt: tomorrow } }).lean(),
+      KitchenInventory.countDocuments({
+        ...centerScope,
+        $expr: { $lte: ['$quantity', '$minStock'] },
+      }),
+      MealService.find({ date: { $gte: today, $lt: tomorrow }, ...centerScope }).lean(),
     ]);
 
     const totalServed = todayServices.reduce((sum, s) => sum + (s.servingsServed || 0), 0);

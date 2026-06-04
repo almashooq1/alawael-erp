@@ -165,7 +165,7 @@ router.post(
   '/requests',
   authorize('admin', 'manager', 'procurement_manager', 'department_head', 'staff'),
   wrap(async (req, res) => {
-    const { id, name } = actor(req);
+    const { id } = actor(req);
     const data = await adapter.createRequest({ ...req.body, ...branchFilter(req) }, id);
     res.status(201).json({ success: true, data });
   })

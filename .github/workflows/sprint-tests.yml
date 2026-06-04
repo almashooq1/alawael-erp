@@ -1092,6 +1092,28 @@ on:
       - 'backend/__tests__/mdt-coordination-branch-isolation-wave868.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mar-routes-branch-isolation-wave869.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-admin-branch-isolation-wave870.test.js'
+      - 'backend/__tests__/telehealth-routes-branch-isolation-wave871.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/controlled-document-branch-isolation-wave872.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/calibration-routes-branch-isolation-wave873.test.js'
+      - 'backend/__tests__/evidence-routes-branch-isolation-wave874.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/laundry-routes-branch-isolation-wave875.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/kitchen-routes-branch-isolation-wave876.test.js'
+      - 'backend/__tests__/warehouse-routes-branch-isolation-wave877.test.js'
+      - 'backend/__tests__/pharmacy-routes-branch-isolation-wave878.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/toileting-routes-branch-isolation-wave879.test.js'
+      - 'backend/__tests__/invoices-admin-branch-isolation-wave880.test.js'
+      - 'backend/__tests__/referrals-admin-branch-isolation-wave881.test.js'
+      - 'backend/__tests__/nps-admin-branch-isolation-wave882.test.js'
+      - 'backend/__tests__/beneficiary-day-attendance-branch-isolation-wave883.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-duplicate-schema-index-wave884.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2167,6 +2189,28 @@ on:
       - 'backend/__tests__/mdt-coordination-branch-isolation-wave868.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mar-routes-branch-isolation-wave869.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-admin-branch-isolation-wave870.test.js'
+      - 'backend/__tests__/telehealth-routes-branch-isolation-wave871.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/controlled-document-branch-isolation-wave872.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/calibration-routes-branch-isolation-wave873.test.js'
+      - 'backend/__tests__/evidence-routes-branch-isolation-wave874.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/laundry-routes-branch-isolation-wave875.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/kitchen-routes-branch-isolation-wave876.test.js'
+      - 'backend/__tests__/warehouse-routes-branch-isolation-wave877.test.js'
+      - 'backend/__tests__/pharmacy-routes-branch-isolation-wave878.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/toileting-routes-branch-isolation-wave879.test.js'
+      - 'backend/__tests__/invoices-admin-branch-isolation-wave880.test.js'
+      - 'backend/__tests__/referrals-admin-branch-isolation-wave881.test.js'
+      - 'backend/__tests__/nps-admin-branch-isolation-wave882.test.js'
+      - 'backend/__tests__/beneficiary-day-attendance-branch-isolation-wave883.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-duplicate-schema-index-wave884.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

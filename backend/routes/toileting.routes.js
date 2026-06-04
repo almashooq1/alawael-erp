@@ -20,10 +20,19 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const ToiletingEvent = require('../models/ToiletingEvent');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const {
+  bodyScopedBeneficiaryGuard,
+  enforceBeneficiaryBranch,
+} = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 const READ_ROLES = [
   'admin',
@@ -78,10 +87,7 @@ async function hydrate(items) {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
-      filter.branchId = req.query.branchId;
-    }
+    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) }, ...branchFilter(req) };
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -99,7 +105,8 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await ToiletingEvent.find({ beneficiaryId: req.params.id })
+    await enforceBeneficiaryBranch(req, req.params.id);
+    const items = await ToiletingEvent.find({ beneficiaryId: req.params.id, ...branchFilter(req) })
       .sort({ eventTime: -1 })
       .limit(200)
       .lean();
@@ -113,7 +120,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
 router.get('/summary', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const match = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    const match = { date: { $gte: startOfDay(d), $lte: endOfDay(d) }, ...branchFilter(req) };
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       match.beneficiaryId = new mongoose.Types.ObjectId(req.query.beneficiaryId);
     }
@@ -149,7 +156,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const date = startOfDay(eventTime);
     const doc = await ToiletingEvent.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: req.branchScope?.branchId || null,
       date,
       eventTime,
       type: body.type,
@@ -178,7 +185,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.type && !TYPES.includes(body.type)) {
       return res.status(400).json({ success: false, message: 'type غير صالح' });
     }
-    const row = await ToiletingEvent.findByIdAndUpdate(req.params.id, body, {
+    const row = await ToiletingEvent.findOneAndUpdate(scopedById(req, req.params.id), body, {
       returnDocument: 'after',
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -194,7 +201,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await ToiletingEvent.findByIdAndDelete(req.params.id);
+    const row = await ToiletingEvent.findOneAndDelete(scopedById(req, req.params.id));
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

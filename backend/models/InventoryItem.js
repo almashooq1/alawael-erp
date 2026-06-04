@@ -59,8 +59,6 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true, collection: 'inventoryitems' }
 );
 
-itemSchema.index({ sku: 1 });
-itemSchema.index({ barcode: 1 }, { sparse: true });
 itemSchema.index({ categoryId: 1, isActive: 1 });
 itemSchema.index({ reorderPoint: 1 });
 

@@ -239,10 +239,14 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // requires stakeholder ADR before either Pattern D rename or mega-file split.
   // 'RoomBooking' — W844 ratchet-down: EnterpriseProRoomBooking (EnterprisePro);
   // canonical remains models/RoomBooking.js.
-  'Warehouse',
-  'JobPosting',
-  'JobApplication',
-  'Facility',
+  // 'Warehouse' — W845 ratchet-down: EnterpriseProWarehouse (EnterprisePro);
+  // canonical remains models/Warehouse.js.
+  // 'JobPosting' — W845 ratchet-down: EnterpriseProPlusJobPosting (EnterpriseProPlus);
+  // canonical remains models/JobPosting.js.
+  // 'JobApplication' — W845 ratchet-down: EnterpriseProPlusJobApplication (EnterpriseProPlus);
+  // canonical remains models/JobApplication.js.
+  // 'Facility' — W845 ratchet-down: EnterpriseProPlusFacility (EnterpriseProPlus);
+  // canonical remains models/operations/Facility.model.js.
   'Vendor',
   'VendorEvaluation',
   'ChangeRequest',

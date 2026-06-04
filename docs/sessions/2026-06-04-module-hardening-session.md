@@ -361,4 +361,6 @@ jest.mock('../middleware/auth', () => ({
 - ~~CAPA OPEN→REJECTED behavioral + service-layer validateTransition~~ — **done W843** (reasonCode + MFA tier 2; fixes hook priorDoc blind spot).
 - ~~CAPA OPEN→CANCELLED behavioral~~ — **done W844** (`capa-cancel-behavioral-wave844`).
 - ~~Payroll + EnterprisePro/doc cluster Pattern D~~ — **done W844** (`SaudiHrPayroll`, `DocumentComplianceAlert`, `DocumentCalendarEvent`, `EnterprisePro*` renames).
-- Remaining W340 mega-file cluster: `Warehouse`, `JobPosting`, `NotificationLog`, … → stakeholder ADR.
+- ~~EnterpriseProPlus talent/facility + Warehouse Pattern D~~ — **done W845** (`EnterpriseProWarehouse`, `EnterpriseProPlusJobPosting/JobApplication/Facility`).
+- ~~CAPA IMPLEMENTED→IN_PROGRESS verification failure~~ — **done W845** (`capa-verification-failure-behavioral-wave845`).
+- Remaining W340 mega-file cluster: `Vendor`, `VendorEvaluation`, `ChangeRequest`, `NotificationLog`, … → stakeholder ADR.

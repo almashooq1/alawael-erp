@@ -783,7 +783,8 @@ module.exports = {
   CRMActivity: reg('CRMActivity', CRMActivitySchema),
 
   // Warehouse Intelligence
-  Warehouse: reg('Warehouse', WarehouseSchema),
+  // Pattern D (W845): Enterprise Pro warehouse intel (canonical: models/Warehouse.js)
+  Warehouse: reg('EnterpriseProWarehouse', WarehouseSchema),
   WarehouseBin: reg('WarehouseBin', WarehouseBinSchema),
   StockLevel: reg('StockLevel', StockLevelSchema),
   StockAlert: reg('StockAlert', StockAlertSchema),

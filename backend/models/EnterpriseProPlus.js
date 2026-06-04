@@ -97,7 +97,7 @@ CandidateSchema.index({ status: 1, source: 1 });
 
 const JobApplicationSchema = new Schema(
   {
-    jobPosting: { type: Schema.Types.ObjectId, ref: 'JobPosting', required: true },
+    jobPosting: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusJobPosting', required: true },
     candidate: { type: Schema.Types.ObjectId, ref: 'Candidate', required: true },
     stage: {
       type: String,
@@ -149,7 +149,11 @@ JobApplicationSchema.index({ candidate: 1 });
 
 const InterviewScheduleSchema = new Schema(
   {
-    application: { type: Schema.Types.ObjectId, ref: 'JobApplication', required: true },
+    application: {
+      type: Schema.Types.ObjectId,
+      ref: 'EnterpriseProPlusJobApplication',
+      required: true,
+    },
     type: {
       type: String,
       enum: ['phone', 'video', 'onsite', 'panel', 'technical'],
@@ -186,7 +190,7 @@ const FacilitySchema = new Schema(
       enum: ['building', 'floor', 'wing', 'room', 'parking', 'outdoor', 'warehouse', 'lab'],
       required: true,
     },
-    parentFacility: { type: Schema.Types.ObjectId, ref: 'Facility' },
+    parentFacility: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusFacility' },
     address: {
       street: String,
       city: String,
@@ -213,7 +217,7 @@ FacilitySchema.index({ type: 1, status: 1 });
 
 const SpaceBookingSchema = new Schema(
   {
-    facility: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
+    facility: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusFacility', required: true },
     title: { type: String, required: true },
     purpose: {
       type: String,
@@ -241,7 +245,7 @@ SpaceBookingSchema.index({ facility: 1, startTime: 1, endTime: 1 });
 
 const LeaseContractSchema = new Schema(
   {
-    facility: { type: Schema.Types.ObjectId, ref: 'Facility' },
+    facility: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusFacility' },
     propertyName: { type: String, required: true },
     type: { type: String, enum: ['lease', 'rent', 'own', 'sublease'], default: 'lease' },
     landlord: { name: String, phone: String, email: String, company: String },
@@ -266,7 +270,7 @@ LeaseContractSchema.index({ endDate: 1, status: 1 });
 
 const UtilityReadingSchema = new Schema(
   {
-    facility: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
+    facility: { type: Schema.Types.ObjectId, ref: 'EnterpriseProPlusFacility', required: true },
     type: {
       type: String,
       enum: ['electricity', 'water', 'gas', 'internet', 'hvac', 'sewage'],
@@ -988,13 +992,16 @@ function getOrCreate(name, schema) {
 }
 
 // Module 1 — Talent Acquisition
-const JobPosting = getOrCreate('JobPosting', JobPostingSchema);
+const EnterpriseProPlusJobPosting = getOrCreate('EnterpriseProPlusJobPosting', JobPostingSchema);
 const Candidate = getOrCreate('Candidate', CandidateSchema);
-const JobApplication = getOrCreate('JobApplication', JobApplicationSchema);
+const EnterpriseProPlusJobApplication = getOrCreate(
+  'EnterpriseProPlusJobApplication',
+  JobApplicationSchema
+);
 const InterviewSchedule = getOrCreate('InterviewSchedule', InterviewScheduleSchema);
 
 // Module 2 — Facility Management
-const Facility = getOrCreate('Facility', FacilitySchema);
+const EnterpriseProPlusFacility = getOrCreate('EnterpriseProPlusFacility', FacilitySchema);
 const SpaceBooking = getOrCreate('SpaceBooking', SpaceBookingSchema);
 const LeaseContract = getOrCreate('LeaseContract', LeaseContractSchema);
 const UtilityReading = getOrCreate('UtilityReading', UtilityReadingSchema);
@@ -1023,12 +1030,12 @@ const SWOTAnalysis = getOrCreate('SWOTAnalysis', SWOTAnalysisSchema);
 
 module.exports = {
   // Talent Acquisition
-  JobPosting,
+  JobPosting: EnterpriseProPlusJobPosting,
   Candidate,
-  JobApplication,
+  JobApplication: EnterpriseProPlusJobApplication,
   InterviewSchedule,
   // Facility Management
-  Facility,
+  Facility: EnterpriseProPlusFacility,
   SpaceBooking,
   LeaseContract,
   UtilityReading,

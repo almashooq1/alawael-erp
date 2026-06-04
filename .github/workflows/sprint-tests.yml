@@ -1017,6 +1017,12 @@ on:
       - 'backend/__tests__/supply-chain-doc-sync-wave823.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-adr-signoff-record-wave824.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hr-webhooks-mount-wave825.test.js'
+      - 'backend/__tests__/hr-webhooks-routes.test.js'
+      - 'backend/__tests__/absence-detection-sweeper-wave402.test.js'
+      - 'backend/__tests__/leave-request-atomic-wave434.test.js'
+      - 'backend/__tests__/w356-w370-branch-scope-wave445.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2017,6 +2023,12 @@ on:
       - 'backend/__tests__/supply-chain-doc-sync-wave823.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchasing-adr-signoff-record-wave824.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hr-webhooks-mount-wave825.test.js'
+      - 'backend/__tests__/hr-webhooks-routes.test.js'
+      - 'backend/__tests__/absence-detection-sweeper-wave402.test.js'
+      - 'backend/__tests__/leave-request-atomic-wave434.test.js'
+      - 'backend/__tests__/w356-w370-branch-scope-wave445.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

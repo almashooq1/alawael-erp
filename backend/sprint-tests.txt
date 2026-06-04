@@ -282,6 +282,11 @@ __tests__/hikvision-face-template-link-behavioral-wave97.test.js
 __tests__/hikvision-fraud-models-behavioral-wave100.test.js
 __tests__/hikvision-job-and-event-behavioral-wave108-109.test.js
 __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
+__tests__/hr-webhooks-mount-wave825.test.js
+__tests__/hr-webhooks-routes.test.js
+__tests__/absence-detection-sweeper-wave402.test.js
+__tests__/leave-request-atomic-wave434.test.js
+__tests__/w356-w370-branch-scope-wave445.test.js
 __tests__/icf-aggregate-wave457.test.js
 __tests__/icf-codes-endpoint-behavioral-wave692.test.js
 __tests__/icf-codes-endpoint-wave692.test.js

@@ -147,5 +147,22 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     '[HR] Work Shifts mounted (System 37 — shifts, assignments, overtime — 20+ endpoints)'
   );
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── HR Webhook subscriptions (W825 — admin CRUD, manager tier) ───────────
+  // ══════════════════════════════════════════════════════════════════════════
+  const hrWebhooksMod = safeRequire('../routes/hr/hr-webhooks.routes');
+  const HrWebhookSubscription = safeRequire('../models/HR/HrWebhookSubscription');
+  if (hrWebhooksMod?.createHrWebhooksRouter && HrWebhookSubscription) {
+    const hrWebhooksRouter = hrWebhooksMod.createHrWebhooksRouter({
+      subscriptionModel: HrWebhookSubscription,
+      logger,
+    });
+    app.use('/api/hr', hrWebhooksRouter);
+    app.use('/api/v1/hr', hrWebhooksRouter);
+    logger.info('[HR] HR webhooks admin mounted (/api/hr/webhooks/*, manager tier)');
+  } else {
+    logger.warn('[HR] HR webhooks not mounted (factory or HrWebhookSubscription missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

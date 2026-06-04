@@ -395,7 +395,7 @@ jest.mock('../middleware/auth', () => ({
   check). **`crisis.routes.js` deliberately NOT touched**: its create handlers don't stamp `branchId` and its list
   endpoints aren't branch-scoped (only the dashboard aggregations are), and EmergencyPlans may be org-wide safety
   infrastructure — applying branch isolation there is a design decision needing product input, not an autonomous fix.
-- ~~W867 MDT-coordination cross-branch IDOR fix (meetings CRUD) + regression~~ — **done (pending push)**: **security fix** —
+- ~~W867 MDT-coordination cross-branch IDOR fix (meetings CRUD) + regression~~ — **done** (`d50841673`, pushed `main`): **security fix** —
   `mdt-coordination.routes.js` `GET /meetings/:id` (no authorize gate → any restricted user) + `PUT /meetings/:id`
   (authorize ['admin','manager'] — manager is branch-level) + `DELETE /meetings/:id` used bare findById/
   findByIdAndUpdate/findByIdAndDelete → cross-branch read/rewrite of MDT meetings (beneficiary names + MRNs + clinical
@@ -403,6 +403,15 @@ jest.mock('../middleware/auth', () => ({
   guard. **Follow-up W868**: the same file's MDTMeeting sub-resource endpoints (attendees/cases/action-items) +
   ALL UnifiedRehabPlan + ReferralTicket instance endpoints carry the identical leak (~20 endpoints) — same one-line
   fix each, deferred to keep this change reviewable.
+- ~~W868 MDT-coordination IDOR closure (remaining endpoints)~~ — **done (pending push)**: converted ALL 26 remaining
+  bare instance lookups in `mdt-coordination.routes.js` to branch-scoped `findOne`/`findOneAndDelete` — 12 MDTMeeting
+  sub-resource reads + 10 UnifiedRehabPlan (GET/:id + 7 sub-resource + DELETE) + 4 ReferralTicket (GET/:id + sub-resource
+  - DELETE). The plan + referral GET /:id had NO authorize gate (any restricted user could read a foreign branch's rehab
+    plan / referral: beneficiary names, MRNs, clinical reasons, specialist correspondence). + `mdt-coordination-branch-
+isolation-wave868.test.js` (6 tests) proves plan + ticket reads are branch-scoped + admin-only delete. The whole file's
+    instance surface is now branch-scoped (zero bare `findById(req.params)` remain). **Pre-existing unrelated bug noted**:
+    several sub-resource POSTs do `Model.findOne(...).lean()` then `.save()` (lean POJO has no `.save()`) → 500; out of
+    scope for this security wave (behavior preserved, not introduced).
 - ~~W866 complaints cross-branch IDOR fix + behavioral~~ — **done** (`572b6013d`, pushed `main`): **security fix** —
   `complaints.routes.js` instance endpoints (GET/PUT/respond/escalate/resolve/rate/DELETE `/:id`) used bare
   `findById`/`findByIdAndUpdate` with NO branch filter (IDOR: restricted branch-A user could read/modify/resolve/

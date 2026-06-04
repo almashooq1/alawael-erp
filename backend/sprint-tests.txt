@@ -453,6 +453,7 @@ __tests__/referralticket-branch-tenancy-wave633.test.js
 __tests__/rehabplan-branch-tenancy-wave629.test.js
 __tests__/request-id-contract.test.js
 __tests__/respite-behavioral-wave363.test.js
+__tests__/respite-routes-behavioral-wave859.test.js
 __tests__/respite-wave363.test.js
 __tests__/restraint-seclusion-event-behavioral-wave193b.test.js
 __tests__/retention-digest-script.test.js
@@ -494,6 +495,7 @@ __tests__/seed-rag-policies-wave283d.test.js
 __tests__/sehhaty-adapter-wave280.test.js
 __tests__/sehhaty-bootstrap-wave280b.test.js
 __tests__/seizure-log-behavioral-wave356.test.js
+__tests__/seizure-log-routes-behavioral-wave858.test.js
 __tests__/seizure-log-wave356.test.js
 __tests__/self-advocacy-behavioral-wave462.test.js
 __tests__/self-advocacy-routes-wave518.test.js

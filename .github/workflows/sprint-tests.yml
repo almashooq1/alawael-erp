@@ -1068,6 +1068,9 @@ on:
       - 'backend/__tests__/self-advocacy-routes-behavioral-wave855.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/safeguarding-routes-behavioral-wave857.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/respite-routes-behavioral-wave859.test.js'
+      - 'backend/__tests__/seizure-log-routes-behavioral-wave858.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2119,6 +2122,9 @@ on:
       - 'backend/__tests__/self-advocacy-routes-behavioral-wave855.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/safeguarding-routes-behavioral-wave857.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/respite-routes-behavioral-wave859.test.js'
+      - 'backend/__tests__/seizure-log-routes-behavioral-wave858.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -388,7 +388,15 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W857 safeguarding route behavioral coverage~~ — **done (pending push)**: 20 supertest tests
+- ~~W858 seizure-log route behavioral~~ — **done (pending push)**: 16 supertest tests — record+validation
+  (type/beneficiary/endTime), cross-branch isolation (W445), parent/supervisor notify, review immutability
+  (therapist 403 / supervisor 200 / re-review 409 / post-review PATCH+notify 409), status-epilepticus ≥300s
+  analytics, DELETE role gating.
+- ~~W859 respite route behavioral~~ — **done (pending push)**: 16 supertest tests — request+validation
+  (type/dates/emergency-contact), cross-branch 403/404, approve-vs-ops role split, full 8-state lifecycle
+  (requested→approved→confirmed→checked_in→completed), out-of-order 409s, cancel/no-show terminals,
+  DELETE role gating.
+- ~~W857 safeguarding route behavioral coverage~~ — **done** (`f026ffe4c`, pushed `main`): 20 supertest tests
   (real Express + branchScope W444 + MongoMemoryServer; model + route distinct from the existing
   model-level W357 behavioral). Covers intake+validation, critical 1h-SLA invariant, 3-tier role
   gating (read/intake/investigate), full intake→triage→investigate→substantiate→authority→close

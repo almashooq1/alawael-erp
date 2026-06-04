@@ -466,6 +466,7 @@ __tests__/root-proxy-scripts.test.js
 __tests__/runbooks-referenced.test.js
 __tests__/safe-error.test.js
 __tests__/safeguarding-behavioral-wave357.test.js
+__tests__/safeguarding-routes-behavioral-wave857.test.js
 __tests__/safeguarding-wave357.test.js
 __tests__/safetyincident-branch-tenancy-wave664.test.js
 __tests__/saudization-analytics-service.test.js

@@ -388,7 +388,13 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W856 W340 scanner `safeModel` blind spot~~ — **done (pending push)**: added `safeModel` to
+- ~~W857 safeguarding route behavioral coverage~~ — **done (pending push)**: 20 supertest tests
+  (real Express + branchScope W444 + MongoMemoryServer; model + route distinct from the existing
+  model-level W357 behavioral). Covers intake+validation, critical 1h-SLA invariant, 3-tier role
+  gating (read/intake/investigate), full intake→triage→investigate→substantiate→authority→close
+  state machine + out-of-order 409s, cross-branch isolation (GET/:id 404, list filter, foreign
+  transition 404), DELETE role gating. Highest-stakes child-protection surface now route-tested.
+- ~~W856 W340 scanner `safeModel` blind spot~~ — **done** (`70bbcc4e5`, pushed `main`): added `safeModel` to
   `HELPER_REGISTRATION_RE`; the `, <ident>Schema` guard means single-arg lookups (`safeModel('Document')`
   in routes/_) are ignored while genuine two-arg registrations (`HSE.js` SafetyIncident/SafetyInspection)
   are now counted. No new duplicates surfaced (EnterpriseProPlus Safety_ renamed in W850). Closes the

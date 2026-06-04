@@ -388,11 +388,16 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W860 assistive-device route behavioral~~ — **done (pending push)**: 17 supertest tests — catalog create+validation,
+- ~~W862 communication-aid + transition-plan route behavioral~~ — **done (pending push)**: 27 supertest tests.
+  `communication-aid-routes-behavioral-wave862` (12): AAC singleton 409, activation gate (primaryModality),
+  activeTools[] add/remove subdocs + snapshot, role gating, cross-branch. `transition-plan-routes-behavioral-wave862b`
+  (15): create/validation, readiness→start→complete lifecycle + composite scoring, milestone subdocs
+  (add/update-achieved/delete), out-of-order 409s, cross-branch isolation, DELETE role gating.
+- ~~W860 assistive-device route behavioral~~ — **done** (`dd326cc36`, pushed `main`): 17 supertest tests — catalog create+validation,
   full loan lifecycle (request→approve→check-out→return / cancel / mark-damaged) + device availability state machine,
   approve-vs-write role split, maintenance start/end + log, retire role gating + reason, cross-branch isolation,
   DELETE role gating.
-- ~~W861 diet-prescription route behavioral~~ — **done (pending push)**: 12 supertest tests — singleton 409,
+- ~~W861 diet-prescription route behavioral~~ — **done** (`dd326cc36`, pushed `main`): 12 supertest tests — singleton 409,
   draft→active activation gate (prescriber discipline), NPO start/end + IDDSI-clear invariant, enteral start/stop,
   review (active-only) + discontinue (reason + PATCH-block), prescribe-role gating, cross-branch isolation, DELETE.
 - ~~W858 seizure-log route behavioral~~ — **done** (`00c175d0f`, pushed `main`): 16 supertest tests — record+validation

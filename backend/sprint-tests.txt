@@ -189,6 +189,7 @@ __tests__/clinical-assessment-trio-behavioral-wave673.test.js
 __tests__/clinical-crisis-routes-wave524.test.js
 __tests__/clinical-sweepers-wave364.test.js
 __tests__/communication-aid-behavioral-wave358.test.js
+__tests__/communication-aid-routes-behavioral-wave862.test.js
 __tests__/communication-aid-wave358.test.js
 __tests__/complaint-branch-tenancy-wave613.test.js
 __tests__/complaint-reasonable-adjustments-behavioral-wave465.test.js
@@ -539,6 +540,7 @@ __tests__/therapy-activity-wave697.test.js
 __tests__/therapy-sessions-analytics-branch-scope-wave657.test.js
 __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-wave361.test.js
+__tests__/transition-plan-routes-behavioral-wave862b.test.js
 __tests__/unauthenticated-routes-wave658.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/utilization-digest-script.test.js

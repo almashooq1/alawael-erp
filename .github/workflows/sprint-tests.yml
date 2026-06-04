@@ -1074,6 +1074,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/assistive-device-routes-behavioral-wave860.test.js'
       - 'backend/__tests__/diet-prescription-routes-behavioral-wave861.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/communication-aid-routes-behavioral-wave862.test.js'
+      - 'backend/__tests__/transition-plan-routes-behavioral-wave862b.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2131,6 +2134,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/assistive-device-routes-behavioral-wave860.test.js'
       - 'backend/__tests__/diet-prescription-routes-behavioral-wave861.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/communication-aid-routes-behavioral-wave862.test.js'
+      - 'backend/__tests__/transition-plan-routes-behavioral-wave862b.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

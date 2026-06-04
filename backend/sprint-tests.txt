@@ -14,6 +14,7 @@ __tests__/adapter-metrics-registry.test.js
 __tests__/adapter-public-interface.test.js
 __tests__/adapter-rate-limiter.test.js
 __tests__/adaptive-sports-behavioral-wave362.test.js
+__tests__/adaptive-sports-routes-behavioral-wave863.test.js
 __tests__/adaptive-sports-wave362.test.js
 __tests__/adjunct-therapy-api-wave699.test.js
 __tests__/adjunct-therapy-behavioral-wave693.test.js
@@ -248,6 +249,7 @@ __tests__/escalation-predictor-wave433.test.js
 __tests__/event-parser-mfa-service-layer-wave275u.test.js
 __tests__/face-enrollment-mfa-service-layer-wave275c.test.js
 __tests__/facility-asset-behavioral-wave369.test.js
+__tests__/facility-asset-routes-behavioral-wave863b.test.js
 __tests__/facility-asset-wave369.test.js
 __tests__/family-counselling-behavioral-wave470.test.js
 __tests__/family-counselling-wave470.test.js

@@ -388,7 +388,13 @@ jest.mock('../middleware/auth', () => ({
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
-- ~~W862 communication-aid + transition-plan route behavioral~~ — **done (pending push)**: 27 supertest tests.
+- ~~W863 adaptive-sports + facility-asset route behavioral~~ — **done (pending push)**: 28 supertest tests.
+  `adaptive-sports-routes-behavioral-wave863` (15): **medical-clearance activation gate** for high-demand
+  sports (high+no-clearance → 400, clearance → activate 200), lifecycle, session/achievement subdocs,
+  cross-branch. `facility-asset-routes-behavioral-wave863b` (13): PPM inspection flow (fail→inspection_failed
+  - defects required, pass→restore), certificate mgmt, availability machine (OOS/return/maintenance),
+    retire role gating, life-safety stats, cross-branch isolation.
+- ~~W862 communication-aid + transition-plan route behavioral~~ — **done** (`0a92459f2`, pushed `main`): 27 supertest tests.
   `communication-aid-routes-behavioral-wave862` (12): AAC singleton 409, activation gate (primaryModality),
   activeTools[] add/remove subdocs + snapshot, role gating, cross-branch. `transition-plan-routes-behavioral-wave862b`
   (15): create/validation, readiness→start→complete lifecycle + composite scoring, milestone subdocs

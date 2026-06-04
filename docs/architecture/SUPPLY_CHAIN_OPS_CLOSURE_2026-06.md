@@ -50,6 +50,7 @@ This page is the single navigation index — not a fourth cutover doc.
 | W821 | `pilot-supply-chain-scenario-wave821` | Pilot Scenario 7 + Arabic email ↔ W819 verify |
 | W822 | `supply-chain-engineering-freeze-wave822` | Engineering freeze banner + doc sync |
 | W823 | `supply-chain-doc-sync-wave823` | MODULES + cutover footers ↔ W822 freeze |
+| W824 | `purchasing-adr-signoff-record-wave824` | Post-meeting sign-off record template |
 
 ---
 
@@ -59,6 +60,7 @@ This page is the single navigation index — not a fourth cutover doc.
 2. **Approve Approach B** (keep three PO tiers 12 months).
 3. **Pilot week 3–4** — optional Scenario 7 if procurement/facilities in scope.
 4. **Do not** open a “unify PO URLs only” PR without migration charter (ADR-039 § Decision).
+5. **After meeting** — complete [039-SIGNOFF-RECORD.md](decisions/039-SIGNOFF-RECORD.md) and open a doc-only PR for ADR status `Accepted (Approach B)`.
 
 ---
 

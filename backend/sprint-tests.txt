@@ -140,6 +140,7 @@ __tests__/purchasing-signoff-staging-wire-wave820.test.js
 __tests__/pilot-supply-chain-scenario-wave821.test.js
 __tests__/supply-chain-engineering-freeze-wave822.test.js
 __tests__/supply-chain-doc-sync-wave823.test.js
+__tests__/purchasing-adr-signoff-record-wave824.test.js
 __tests__/stub-surface-cleanup-wave774.test.js
 __tests__/stub-surface-cleanup-wave775.test.js
 __tests__/stub-audit-ratchet-wave813.test.js

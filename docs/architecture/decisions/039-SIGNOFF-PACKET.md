@@ -89,7 +89,7 @@ Until then: **no** `dualMount` alias between `purchasing` and `inventory` keys (
 
 ## Record keeping
 
-After sign-off, scan or paste approval into ticket `ADR-039` and update ADR-039 status line:
+Fill [039-SIGNOFF-RECORD.md](039-SIGNOFF-RECORD.md) after the meeting, then scan or paste approval into ticket `ADR-039` and update ADR-039 status line:
 
 ```text
 Status: Accepted (Approach B) — signed YYYY-MM-DD by <names>

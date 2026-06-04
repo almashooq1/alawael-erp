@@ -449,7 +449,7 @@ const CRMDealSchema = new Schema(
   {
     title: { type: String, required: true },
     titleAr: String,
-    contact: { type: Schema.Types.ObjectId, ref: 'CRMContact' },
+    contact: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMContact' },
     pipeline: { type: Schema.Types.ObjectId, ref: 'CRMPipeline' },
     stage: { type: Schema.Types.ObjectId }, // stage _id within pipeline
     stageName: String,
@@ -482,7 +482,7 @@ const CRMActivitySchema = new Schema(
     },
     subject: { type: String, required: true },
     description: String,
-    contact: { type: Schema.Types.ObjectId, ref: 'CRMContact' },
+    contact: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMContact' },
     deal: { type: Schema.Types.ObjectId, ref: 'CRMDeal' },
     dueDate: Date,
     completedAt: Date,
@@ -559,7 +559,7 @@ const StockLevelSchema = new Schema(
   {
     warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouse', required: true },
     item: { type: Schema.Types.ObjectId, ref: 'InventoryItem', required: true },
-    bin: { type: Schema.Types.ObjectId, ref: 'WarehouseBin' },
+    bin: { type: Schema.Types.ObjectId, ref: 'EnterpriseProWarehouseBin' },
     quantity: { type: Number, default: 0 },
     reservedQty: { type: Number, default: 0 },
     availableQty: { type: Number, default: 0 },
@@ -623,8 +623,8 @@ const StockTransferOrderSchema = new Schema(
       {
         item: { type: Schema.Types.ObjectId, ref: 'InventoryItem' },
         quantity: { type: Number, required: true },
-        fromBin: { type: Schema.Types.ObjectId, ref: 'WarehouseBin' },
-        toBin: { type: Schema.Types.ObjectId, ref: 'WarehouseBin' },
+        fromBin: { type: Schema.Types.ObjectId, ref: 'EnterpriseProWarehouseBin' },
+        toBin: { type: Schema.Types.ObjectId, ref: 'EnterpriseProWarehouseBin' },
         received: { type: Number, default: 0 },
         notes: String,
       },
@@ -696,7 +696,7 @@ const ProjectProSchema = new Schema(
     ],
     tags: [String],
     isTemplate: { type: Boolean, default: false },
-    templateId: { type: Schema.Types.ObjectId, ref: 'ProjectPro' },
+    templateId: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProject' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
   },
@@ -705,7 +705,7 @@ const ProjectProSchema = new Schema(
 
 const ProjectTaskSchema = new Schema(
   {
-    project: { type: Schema.Types.ObjectId, ref: 'ProjectPro', required: true },
+    project: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProject', required: true },
     title: { type: String, required: true },
     titleAr: String,
     description: String,
@@ -744,7 +744,7 @@ ProjectTaskSchema.index({ assignee: 1, status: 1 });
 
 const ProjectTimeLogSchema = new Schema(
   {
-    project: { type: Schema.Types.ObjectId, ref: 'ProjectPro', required: true },
+    project: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProject', required: true },
     task: { type: Schema.Types.ObjectId, ref: 'ProjectTask' },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     hours: { type: Number, required: true },
@@ -762,38 +762,38 @@ const reg = (name, schema) => mongoose.models[name] || mongoose.model(name, sche
 // ── Export all models ────────────────────────────────────────────────────────
 module.exports = {
   // Audit Trail & Compliance
-  AuditTrailEntry: reg('AuditTrailEntry', AuditTrailEntrySchema),
-  ComplianceChecklist: reg('ComplianceChecklist', ComplianceChecklistSchema),
+  AuditTrailEntry: reg('EnterpriseProAuditTrailEntry', AuditTrailEntrySchema),
+  ComplianceChecklist: reg('EnterpriseProComplianceChecklist', ComplianceChecklistSchema),
   // Pattern D (W844): Enterprise Pro scoped names (export keys unchanged below)
   ComplianceAlert: reg('EnterpriseProComplianceAlert', ComplianceAlertSchema),
 
   // Report Builder
   // Pattern D (W840): Enterprise Pro report builder (distinct from models/reports/ReportTemplate)
   ReportTemplate: reg('EnterpriseProReportTemplate', ReportTemplateSchema),
-  ReportExecution: reg('ReportExecution', ReportExecutionSchema),
+  ReportExecution: reg('EnterpriseProReportExecution', ReportExecutionSchema),
 
   // Unified Calendar
   CalendarEvent: reg('EnterpriseProCalendarEvent', CalendarEventSchema),
   RoomBooking: reg('EnterpriseProRoomBooking', RoomBookingSchema),
 
-  // CRM Pro
-  CRMContact: reg('CRMContact', CRMContactSchema),
-  CRMPipeline: reg('CRMPipeline', CRMPipelineSchema),
-  CRMDeal: reg('CRMDeal', CRMDealSchema),
-  CRMActivity: reg('CRMActivity', CRMActivitySchema),
+  // CRM Pro (Pattern D W850 — Enterprise Pro scoped registration names)
+  CRMContact: reg('EnterpriseProCRMContact', CRMContactSchema),
+  CRMPipeline: reg('EnterpriseProCRMPipeline', CRMPipelineSchema),
+  CRMDeal: reg('EnterpriseProCRMDeal', CRMDealSchema),
+  CRMActivity: reg('EnterpriseProCRMActivity', CRMActivitySchema),
 
   // Warehouse Intelligence
   // Pattern D (W845): Enterprise Pro warehouse intel (canonical: models/Warehouse.js)
   Warehouse: reg('EnterpriseProWarehouse', WarehouseSchema),
-  WarehouseBin: reg('WarehouseBin', WarehouseBinSchema),
-  StockLevel: reg('StockLevel', StockLevelSchema),
-  StockAlert: reg('StockAlert', StockAlertSchema),
-  StockTransferOrder: reg('StockTransferOrder', StockTransferOrderSchema),
+  WarehouseBin: reg('EnterpriseProWarehouseBin', WarehouseBinSchema),
+  StockLevel: reg('EnterpriseProStockLevel', StockLevelSchema),
+  StockAlert: reg('EnterpriseProStockAlert', StockAlertSchema),
+  StockTransferOrder: reg('EnterpriseProStockTransferOrder', StockTransferOrderSchema),
 
-  // Project Management Pro
-  ProjectPro: reg('ProjectPro', ProjectProSchema),
-  ProjectTask: reg('ProjectTask', ProjectTaskSchema),
-  ProjectTimeLog: reg('ProjectTimeLog', ProjectTimeLogSchema),
+  // Project Management Pro (Pattern D W850)
+  ProjectPro: reg('EnterpriseProProject', ProjectProSchema),
+  ProjectTask: reg('EnterpriseProProjectTask', ProjectTaskSchema),
+  ProjectTimeLog: reg('EnterpriseProProjectTimeLog', ProjectTimeLogSchema),
 };
 
 logger.info('EnterprisePro models loaded OK — 18 schemas across 6 modules');

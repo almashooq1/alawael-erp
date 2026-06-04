@@ -523,17 +523,9 @@ describe('W340 no-duplicate-model-registration drift guard', () => {
   // or a legitimate-but-divergent legacy variant (ALLOWLIST + ADR).
   // ─────────────────────────────────────────────────────────────────────────
   const KNOWN_CASE_VARIANTS = new Set([
-    // 'aacprofile' — 'AacProfile' (canonical W263, models/AacProfile.js) +
-    // 'AACProfile' (legacy P9/P10, rehabilitation-services/aac-therapy-protocols.js).
-    // Both pluralize to the `aacprofiles` MongoDB collection. ADR-032 sub-cluster 5
-    // open question Q4 — pending stakeholder behavior-equivalence audit of the
-    // 13-endpoint legacy router before deletion or Pattern D rename.
-    'aacprofile',
-    // ─────────────────────────────────────────────────────────────────────────
-    // 2026-05-27 case-variant guard initial discovery — 7 additional entries.
-    // All are the same P1 bug class as 'aacprofile': two casings of one logical
-    // name → same Mongo collection → silent schema collision. Each deferred to
-    // ADR-032 sub-cluster 5 disposition (per-entry stakeholder decision needed).
+    // W850 ratchet-down: icfassessment — route uses canonical ICFAssessment only.
+    // W850 ratchet-down: aacprofile — RehabLegacyAacProfile (aac-therapy-protocols.js).
+    // W850 ratchet-down: mdtmeeting — CarePsychMdtMeeting (psych care) vs MDTMeeting (MDTCoordination).
     // ─────────────────────────────────────────────────────────────────────────
     // 'kpidefinition' — KPIDefinition (domains/dashboards/models/) vs
     //   KpiDefinition (models/KpiDefinition.js). Both → `kpidefinitions` collection.
@@ -541,21 +533,15 @@ describe('W340 no-duplicate-model-registration drift guard', () => {
     // 'aiprediction' — AiPrediction (models/AiPrediction.js) vs AIPrediction
     //   (models/organization.model.js mega-file). Both → `aipredictions` collection.
     'aiprediction',
-    // 'mdtmeeting' — MdtMeeting (models/care/MdtMeeting.model.js) vs MDTMeeting
-    //   (models/MDTCoordination.js + rehabilitation-services/mdt-transition-quality.js;
-    //   the latter pair is already in KNOWN_DUPLICATE_REGISTRATIONS as 'MDTMeeting').
-    //   Triple-collision: 3 files, 2 casings, 1 Mongo collection (`mdtmeetings`).
-    'mdtmeeting',
+    // 'mdtmeeting' — W850 closed (CarePsychMdtMeeting vs MDTMeeting).
+    // 'icfassessment' — W850 closed (canonical ICFAssessment; route fallback removed).
     // 'elearningcourse' — ELearningCourse (models/ELearning/Course.js) vs
     //   ElearningCourse (models/ElearningCourse.js). Both → `elearningcourses`.
     'elearningcourse',
     // 'hrpolicy' — HRPolicy (models/HR/HRPolicy.js) vs HrPolicy (models/HR/Policy.js).
     //   Both → `hrpolicies` collection.
     'hrpolicy',
-    // 'icfassessment' — ICFAssessment (models/icf/ICFAssessment.model.js canonical)
-    //   vs IcfAssessment (routes/icf-assessments.routes.js inlines a local schema).
-    //   Route-side inline schema is a strong Pattern D rename or delete candidate.
-    'icfassessment',
+    // 'icfassessment' — W850 closed.
     // 'zktecodevice' — ZktecoDevice (models/ZktecoDevice.js) vs ZKTecoDevice
     //   (models/zktecoDevice.model.js). Note also filename casing differs.
     //   Both → `zktecodevices` collection.

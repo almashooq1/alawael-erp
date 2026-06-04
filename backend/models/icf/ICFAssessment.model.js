@@ -455,7 +455,7 @@ icfAssessmentSchema.index({ createdAt: -1 });
 
 /* ─── Auto-generate Assessment Number ──────────────────────────────────────── */
 
-icfAssessmentSchema.pre('save', async function (next) {
+icfAssessmentSchema.pre('save', async function () {
   if (!this.assessmentNumber) {
     const count = await this.constructor.countDocuments();
     const date = new Date();
@@ -463,7 +463,6 @@ icfAssessmentSchema.pre('save', async function (next) {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     this.assessmentNumber = `ICF-${y}${m}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 /* ─── Virtuals ─────────────────────────────────────────────────────────────── */

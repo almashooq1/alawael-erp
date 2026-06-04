@@ -366,9 +366,14 @@ jest.mock('../middleware/auth', () => ({
 - ~~NotificationLog collision (ADR-031)~~ — **done W847** (`UserNotification` inbox + `NotificationDeliveryLog` delivery audit).
 - Remaining W340 cluster: documents-pro `WorkflowDefinition` umbrella, `LifecyclePolicy`, `Student`, …
 - ~~W848 CAPA IN_PROGRESS→REJECTED + trio Pattern D~~ — **done** (`da1ad9a8d`, pushed `main`).
-- ~~W849 W340 baseline closure~~ — **done (pending commit)**:
+- ~~W849 duplicate-model baseline closure~~ — **done** (`a46f1f6fe`, pushed `main`):
   - `DocumentLifecyclePolicy` (`documentLifecycle.service.js`; TTL `LifecyclePolicy` ALLOWLIST-only).
   - `MontessoriStudent` + `TransportStudent`; canonical `Student` in `student-service.js`.
   - EnterpriseProPlus: 15 unprefixed models → `EnterpriseProPlus*` (Candidate, RFQ, Safety*, IT*, …).
   - `KNOWN_DUPLICATE_REGISTRATIONS` baseline **EMPTY**.
-- Open: ADR-020 Student↔Beneficiary consolidation; ADR-032 case-variant cluster (`aacprofile`, …).
+- Open: ADR-020 Student↔Beneficiary consolidation; ADR-032 case-variant cluster (`kpidefinition`, `hrpolicy`, `zktecodevice`, …).
+- ~~W850 case-variant + EnterprisePro closure~~ — **done (pending push)**:
+  - ICF route → canonical `ICFAssessment` + nested flatten helper; fixed async pre-save hook.
+  - `RehabLegacyAacProfile` (aac-therapy-protocols); `CarePsychMdtMeeting` (psych care).
+  - EnterprisePro: 12 unprefixed `reg()` names → `EnterprisePro*` scoped registrations.
+  - Case-variant baseline ratchet: cleared `icfassessment`, `aacprofile`, `mdtmeeting`.

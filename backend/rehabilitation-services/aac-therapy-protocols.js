@@ -14,7 +14,7 @@ const { Schema } = mongoose;
 // PRIORITY 9 - AAC (Augmentative & Alternative Communication)
 // ══════════════════════════════════════════════════════════════
 
-const AACProfileSchema = new Schema(
+const RehabLegacyAacProfileSchema = new Schema(
   {
     beneficiary_id: {
       type: Schema.Types.ObjectId,
@@ -124,7 +124,10 @@ const AACProfileSchema = new Schema(
   { timestamps: true }
 );
 
-const AACProfile = mongoose.models.AACProfile || mongoose.model('AACProfile', AACProfileSchema);
+// Pattern D (W850): legacy AAC router profile (canonical: models/AacProfile.js → AacProfile)
+const RehabLegacyAacProfile =
+  mongoose.models.RehabLegacyAacProfile ||
+  mongoose.model('RehabLegacyAacProfile', RehabLegacyAacProfileSchema);
 
 // قائمة المفردات الأساسية (Core Vocabulary) - 100+ كلمة أساسية
 const CORE_VOCABULARY = [
@@ -579,10 +582,12 @@ const BUILT_IN_PROTOCOLS = [
 
 router.post('/aac/profiles', async (req, res) => {
   try {
-    const existing = await AACProfile.findOne({ beneficiary_id: req.body.beneficiary_id });
+    const existing = await RehabLegacyAacProfile.findOne({
+      beneficiary_id: req.body.beneficiary_id,
+    });
     if (existing)
       return res.status(409).json({ success: false, error: 'الملف موجود مسبقاً', data: existing });
-    const profile = new AACProfile(req.body);
+    const profile = new RehabLegacyAacProfile(req.body);
     await profile.save();
     res.status(201).json({ success: true, message: 'تم إنشاء ملف AAC', data: profile });
   } catch (err) {
@@ -592,7 +597,9 @@ router.post('/aac/profiles', async (req, res) => {
 
 router.get('/aac/profiles/:beneficiaryId', async (req, res) => {
   try {
-    const profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
+    const profile = await RehabLegacyAacProfile.findOne({
+      beneficiary_id: req.params.beneficiaryId,
+    });
     if (!profile) return res.status(404).json({ success: false, error: 'ملف AAC غير موجود' });
     res.json({ success: true, data: profile });
   } catch (err) {
@@ -602,7 +609,7 @@ router.get('/aac/profiles/:beneficiaryId', async (req, res) => {
 
 router.patch('/aac/profiles/:beneficiaryId', async (req, res) => {
   try {
-    const profile = await AACProfile.findOneAndUpdate(
+    const profile = await RehabLegacyAacProfile.findOneAndUpdate(
       { beneficiary_id: req.params.beneficiaryId },
       req.body,
       { returnDocument: 'after' }
@@ -616,7 +623,9 @@ router.patch('/aac/profiles/:beneficiaryId', async (req, res) => {
 
 router.post('/aac/profiles/:beneficiaryId/vocabulary', async (req, res) => {
   try {
-    const profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
+    const profile = await RehabLegacyAacProfile.findOne({
+      beneficiary_id: req.params.beneficiaryId,
+    });
     if (!profile) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     const word = { ...req.body, introduced_date: new Date() };
     profile.vocabulary_bank.push(word);
@@ -630,7 +639,9 @@ router.post('/aac/profiles/:beneficiaryId/vocabulary', async (req, res) => {
 
 router.patch('/aac/profiles/:beneficiaryId/vocabulary/:wordId/mastered', async (req, res) => {
   try {
-    const profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
+    const profile = await RehabLegacyAacProfile.findOne({
+      beneficiary_id: req.params.beneficiaryId,
+    });
     if (!profile) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     const word = profile.vocabulary_bank.id(req.params.wordId);
     if (word) {
@@ -646,7 +657,9 @@ router.patch('/aac/profiles/:beneficiaryId/vocabulary/:wordId/mastered', async (
 
 router.post('/aac/profiles/:beneficiaryId/progress', async (req, res) => {
   try {
-    const profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
+    const profile = await RehabLegacyAacProfile.findOne({
+      beneficiary_id: req.params.beneficiaryId,
+    });
     if (!profile) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     profile.progress_log.push({ ...req.body, date: new Date() });
     if (req.body.pecs_phase_reached)

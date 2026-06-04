@@ -18,41 +18,12 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
-// ── Dynamic model ────────────────────────────────────────────────────────────
-function IcfAssessment() {
+// ── Canonical ICF assessment model (W850: drop IcfAssessment fallback — use ICFAssessment) ──
+function getIcfAssessmentModel() {
   try {
-    return mongoose.model('IcfAssessment');
+    return mongoose.model('ICFAssessment');
   } catch (_e) {
-    return mongoose.model(
-      'IcfAssessment',
-      new mongoose.Schema(
-        {
-          beneficiaryId: { type: mongoose.Schema.Types.ObjectId, required: true },
-          episodeId: mongoose.Schema.Types.ObjectId,
-          assessedBy: mongoose.Schema.Types.ObjectId,
-          assessmentDate: { type: Date, default: Date.now },
-          status: {
-            type: String,
-            default: 'draft',
-            enum: ['draft', 'completed', 'reviewed', 'archived'],
-          },
-          // ICF components
-          bodyFunctions: [{ code: String, qualifier: Number, note: String }],
-          bodyStructures: [{ code: String, qualifier: Number, note: String }],
-          activities: [{ code: String, qualifier: Number, note: String }],
-          participation: [{ code: String, qualifier: Number, note: String }],
-          environmentalFactors: [{ code: String, qualifier: Number, note: String }],
-          personalFactors: [String],
-          // Scores
-          totalScore: Number,
-          domainScores: mongoose.Schema.Types.Mixed,
-          recommendations: String,
-          notes: String,
-          isDeleted: { type: Boolean, default: false },
-        },
-        { timestamps: true }
-      )
-    );
+    return require('../models/icf/ICFAssessment.model');
   }
 }
 
@@ -98,6 +69,45 @@ function zToPercentile(z) {
   return 99;
 }
 
+/** Flatten canonical nested ICF chapter arrays + legacy flat arrays for benchmark join. */
+function collectIcfQualifierItems(doc) {
+  const items = [];
+  const pushEntry = (entry, component) => {
+    if (entry && entry.code && entry.qualifier != null && entry.qualifier < 8) {
+      items.push({ code: entry.code, qualifier: entry.qualifier, component });
+    }
+  };
+  for (const comp of [
+    'bodyFunctions',
+    'bodyStructures',
+    'activities',
+    'participation',
+    'environmentalFactors',
+  ]) {
+    const val = doc[comp];
+    if (Array.isArray(val)) {
+      for (const entry of val) pushEntry(entry, comp);
+    } else if (val && typeof val === 'object') {
+      for (const chapterItems of Object.values(val)) {
+        if (Array.isArray(chapterItems)) {
+          for (const entry of chapterItems) pushEntry(entry, comp);
+        }
+      }
+    }
+  }
+  for (const comp of ['activitiesParticipation']) {
+    const val = doc[comp];
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      for (const chapterItems of Object.values(val)) {
+        if (Array.isArray(chapterItems)) {
+          for (const entry of chapterItems) pushEntry(entry, comp);
+        }
+      }
+    }
+  }
+  return items;
+}
+
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ══════════════════════ CRUD ═══════════════════════════════════════════════ */
@@ -105,7 +115,7 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const { beneficiaryId, episodeId, status, limit = 20, skip = 0 } = req.query;
     const q = { isDeleted: { $ne: true } };
     if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
@@ -122,7 +132,7 @@ router.get(
 router.post(
   '/',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
   })
@@ -131,7 +141,7 @@ router.post(
 router.get(
   '/statistics',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const [total, byStatus] = await Promise.all([
       M.countDocuments({ isDeleted: { $ne: true } }),
       M.aggregate([
@@ -149,7 +159,7 @@ router.get(
 router.get(
   '/domain-distribution',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const dist = await M.aggregate([
       { $match: { isDeleted: { $ne: true } } },
       {
@@ -177,7 +187,7 @@ router.get(
 router.get(
   '/organization-report',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const total = await M.countDocuments({ isDeleted: { $ne: true } });
     const recent = await M.find({ isDeleted: { $ne: true } })
       .sort({ createdAt: -1 })
@@ -297,7 +307,7 @@ router.post(
 router.get(
   '/beneficiary/:beneficiaryId/timeline',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const data = await M.find({ beneficiaryId: req.params.beneficiaryId, isDeleted: { $ne: true } })
       .sort({ assessmentDate: 1 })
       .lean();
@@ -308,7 +318,7 @@ router.get(
 router.get(
   '/beneficiary/:beneficiaryId/comparative-report',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const data = await M.find({ beneficiaryId: req.params.beneficiaryId, isDeleted: { $ne: true } })
       .sort({ assessmentDate: -1 })
       .limit(5)
@@ -320,7 +330,7 @@ router.get(
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: doc });
@@ -330,7 +340,7 @@ router.get(
 router.put(
   '/:id',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
@@ -344,7 +354,7 @@ router.put(
 router.patch(
   '/:id/status',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
@@ -357,7 +367,7 @@ router.patch(
 router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })
@@ -366,7 +376,7 @@ router.delete(
 router.get(
   '/:id/compare',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.findById(req.params.id).lean();
     res.json({ success: true, data: { current: doc, previous: null } });
   })
@@ -378,27 +388,12 @@ router.get(
 router.get(
   '/:id/benchmark',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const B = IcfBenchmark();
     const doc = await M.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
 
-    const components = [
-      'bodyFunctions',
-      'bodyStructures',
-      'activities',
-      'participation',
-      'environmentalFactors',
-    ];
-    const items = [];
-    for (const comp of components) {
-      for (const entry of doc[comp] || []) {
-        // qualifier 8 (not specified) / 9 (not applicable) are excluded from norms
-        if (entry && entry.code && entry.qualifier != null && entry.qualifier < 8) {
-          items.push({ code: entry.code, qualifier: entry.qualifier, component: comp });
-        }
-      }
-    }
+    const items = collectIcfQualifierItems(doc);
 
     if (!B || !items.length) {
       return res.json({ success: true, data: { comparisons: [], benchmarkedCount: 0 } });
@@ -439,7 +434,7 @@ router.get(
 router.get(
   '/:id/report',
   asyncHandler(async (req, res) => {
-    const M = IcfAssessment();
+    const M = getIcfAssessmentModel();
     const doc = await M.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: doc });

@@ -89,7 +89,7 @@ const psychRiskFlagSchema = new mongoose.Schema(
     escalationReason: { type: String, default: null },
     escalatedToMdtId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'MdtMeeting',
+      ref: 'CarePsychMdtMeeting',
       default: null,
     },
 

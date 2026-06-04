@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const MODELS = [
-  { name: 'MdtMeeting', file: 'MdtMeeting.model.js', schema: 'mdtMeetingSchema' },
+  { name: 'CarePsychMdtMeeting', file: 'MdtMeeting.model.js', schema: 'mdtMeetingSchema' },
   { name: 'WelfareApplication', file: 'WelfareApplication.model.js', schema: 'welfareAppSchema' },
   {
     name: 'TransitionReadinessAssessment',

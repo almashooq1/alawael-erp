@@ -22,7 +22,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 let mongod;
 let app;
 let ICFBenchmark;
-let IcfAssessment;
+let ICFAssessment;
 
 beforeAll(async () => {
   const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
@@ -35,15 +35,12 @@ beforeAll(async () => {
   }
   await mongoose.connect(uri);
   ICFBenchmark = require('../models/icf/ICFBenchmark.model');
+  ICFAssessment = require('../models/icf/ICFAssessment.model');
   await ICFBenchmark.init();
 
   app = express();
   app.use(express.json());
   app.use('/icf', require('../routes/icf-assessments.routes'));
-  // The route registers the IcfAssessment model lazily (on first handler call).
-  // Fire one request to trigger registration, then grab the model.
-  await request(app).get('/icf/');
-  IcfAssessment = mongoose.model('IcfAssessment');
 });
 
 afterAll(async () => {
@@ -53,7 +50,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await ICFBenchmark.deleteMany({});
-  await IcfAssessment.deleteMany({});
+  await ICFAssessment.deleteMany({});
 });
 
 describe('W706 static — placeholders removed, wired to ICFBenchmark', () => {
@@ -116,6 +113,15 @@ describe('W706 behavioral — /benchmarks CRUD', () => {
 });
 
 describe('W706 behavioral — GET /:id/benchmark comparison', () => {
+  const icfAssessmentFixture = (overrides = {}) => ({
+    title: 'W706 benchmark test',
+    assessmentType: 'initial',
+    beneficiaryId: new mongoose.Types.ObjectId(),
+    assessorId: new mongoose.Types.ObjectId(),
+    assessmentDate: new Date(),
+    ...overrides,
+  });
+
   it('joins assessment qualifiers to norms → z-score + percentile', async () => {
     await ICFBenchmark.create({
       code: 'b117',
@@ -124,11 +130,13 @@ describe('W706 behavioral — GET /:id/benchmark comparison', () => {
       standardDeviation: 1,
       dataSource: 'WHO',
     });
-    const a = await IcfAssessment.create({
-      beneficiaryId: new mongoose.Types.ObjectId(),
-      bodyFunctions: [{ code: 'b117', qualifier: 4 }],
-      activities: [{ code: 'd999', qualifier: 8 }], // qualifier 8 excluded
-    });
+    const a = await ICFAssessment.create(
+      icfAssessmentFixture({
+        bodyFunctions: {
+          chapter1_mental: [{ code: 'b117', title: 'Attention', qualifier: 4 }],
+        },
+      })
+    );
     const res = await request(app).get(`/icf/${a._id}/benchmark`);
     expect(res.status).toBe(200);
     expect(res.body.data.benchmarkedCount).toBe(1);
@@ -139,10 +147,13 @@ describe('W706 behavioral — GET /:id/benchmark comparison', () => {
   });
 
   it('returns empty comparison (not 500) when no norms seeded', async () => {
-    const a = await IcfAssessment.create({
-      beneficiaryId: new mongoose.Types.ObjectId(),
-      bodyFunctions: [{ code: 'b117', qualifier: 3 }],
-    });
+    const a = await ICFAssessment.create(
+      icfAssessmentFixture({
+        bodyFunctions: {
+          chapter1_mental: [{ code: 'b117', title: 'Attention', qualifier: 3 }],
+        },
+      })
+    );
     const res = await request(app).get(`/icf/${a._id}/benchmark`);
     expect(res.status).toBe(200);
     expect(res.body.data.benchmarkedCount).toBe(0);

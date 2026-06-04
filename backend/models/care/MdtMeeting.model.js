@@ -104,7 +104,7 @@ const mdtMeetingSchema = new mongoose.Schema(
     rescheduledTo: { type: Date, default: null },
     rescheduledToMeetingId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'MdtMeeting',
+      ref: 'CarePsychMdtMeeting',
       default: null,
     },
 
@@ -141,7 +141,7 @@ mdtMeetingSchema.index({ status: 1, scheduledFor: 1 });
 mdtMeetingSchema.pre('validate', async function () {
   if (this.meetingNumber) return;
   const year = (this.scheduledFor || new Date()).getUTCFullYear();
-  const Model = mongoose.model('MdtMeeting');
+  const Model = mongoose.model('CarePsychMdtMeeting');
   const count = await Model.countDocuments({
     meetingNumber: { $regex: `^MDT-${year}-` },
   });
@@ -166,6 +166,8 @@ mdtMeetingSchema.set('toObject', { virtuals: true });
 // admin actions.
 mdtMeetingSchema.set('optimisticConcurrency', true);
 
-const MdtMeeting = mongoose.models.MdtMeeting || mongoose.model('MdtMeeting', mdtMeetingSchema);
+// Pattern D (W850): psych-care MDT meetings (canonical coordination: models/MDTCoordination.js → MDTMeeting)
+const CarePsychMdtMeeting =
+  mongoose.models.CarePsychMdtMeeting || mongoose.model('CarePsychMdtMeeting', mdtMeetingSchema);
 
-module.exports = MdtMeeting;
+module.exports = CarePsychMdtMeeting;

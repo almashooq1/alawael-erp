@@ -653,27 +653,31 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `Asset` root model has no `branchId` (org-wide catalog — unchanged). Hardened branch-bearing children in
   `asset-management.routes.js`: work orders, transfers, bookings, inventories (`mergeTenantFilter` + `scopedById`,
   stamp `branchId` on create). Follow-up: inventory-item scan no longer accepts `branchId` from request body; branch
-  is inherited from the scoped parent inventory record. +
-  `asset-management-work-orders-branch-isolation-wave912.test.js` (7 tests: scoped WO list + foreign WO 404,
-  scoped transfers list + foreign transfer action 404, foreign inventory GET 404, inventory-item branch inheritance,
-  and explicit body-branch spoof rejection 403).
+  is inherited from the scoped parent inventory record. Follow-up 2: dashboard branch-aware counters
+  (`pendingWorkOrders`, `overdueWorkOrders`, `pendingTransfers`, `activeBookingsToday`) now respect tenant scope. +
+  `asset-management-work-orders-branch-isolation-wave912.test.js` (8 tests: scoped WO list + foreign WO 404,
+  scoped transfers list + foreign transfer action 404, foreign inventory GET 404, dashboard scoped counters,
+  inventory-item branch inheritance, and explicit body-branch spoof rejection 403).
 - ~~W913 referrals portal branch isolation~~ — **done** (local, pushed): **security fix** —
   `referrals.routes.js` had dualMountAuth only — bare `findById` on 15+ PHI paths. W913 adds
   `requireBranchAccess` + `applyReferralListScope` (portal `beneficiaryId` + canonical `beneficiary`/`branch`) +
   `fetchScopedReferral` on instance/sub-resource paths; blocks cross-branch comm/doc mutations. +
   `referrals-portal-branch-isolation-wave913.test.js` (3 tests: scoped list, foreign GET/PATCH 404).
-- **Targeted verify refresh (W909–W913)**: **3 suites / 12 tests** ✅ (`crisis-routes-branch-isolation-wave909`,
+- **Targeted verify refresh (W909–W913)**: **3 suites / 13 tests** ✅ (`crisis-routes-branch-isolation-wave909`,
   `asset-management-work-orders-branch-isolation-wave912`, `referrals-portal-branch-isolation-wave913`).
-- ~~W914 meetings routes branch isolation~~ — **done** (local, commit pending): optional `branchId` on `Meeting.js`;
+- ~~W918 CI fix (StrategicKPI index + crisis seeds + ICF catalog mount)~~ — **done** (local): duplicate
+  `branchId` index on StrategicKPI; W909 `incidentNumber` seeds; ICF `/codes` + `/benchmarks` before
+  `requireBranchAccess`; W692/W706 auth mock + W706 beneficiary seed for `/:id/benchmark`.
+- ~~W914 meetings routes branch isolation~~ — **done** (`cd01073e9`, pushed): optional `branchId` on `Meeting.js`;
   `scopedMeetingById` + `branchFilter` on all CRUD/agenda/minutes/attendees/actions; stamp on create. +
   `meetings-routes-branch-isolation-wave914.test.js` (3 tests).
-- ~~W915 strategic planning branch isolation~~ — **done** (local, commit pending): `branchId` on Goal/Initiative/KPI;
+- ~~W915 strategic planning branch isolation~~ — **done** (`cd01073e9`, pushed): `branchId` on Goal/Initiative/KPI;
   `mergeStrategicFilter`; initiatives/KPI inherit goal branch on create; dashboard/BSC/report scoped. +
   `strategic-planning-branch-isolation-wave915.test.js` (3 tests).
-- ~~W916 medical equipment branch isolation~~ — **done** (local, commit pending): `branchId` on equipment model;
+- ~~W916 medical equipment branch isolation~~ — **done** (`cd01073e9`, pushed): `branchId` on equipment model;
   `gateEquipmentId` + `applyChildEquipmentScope` for calibration/maintenance/certs/alerts/dashboard. +
   `medical-equipment-branch-isolation-wave916.test.js` (3 tests).
-- ~~W917 asset catalog branch isolation~~ — **done** (local, commit pending): `branchId` on `Asset`; list via
+- ~~W917 asset catalog branch isolation~~ — **done** (`cd01073e9`, pushed): `branchId` on `Asset`; list via
   `effectiveBranchScope`; removed `?branchId` spoof via `location` regex; CRUD scoped. +
   `asset-catalog-branch-isolation-wave917.test.js` (3 tests). W912 WO tests still pass (catalog vs sub-resource split).
 - **Verify (W914–W917)**: **4 suites / 12 tests** ✅ (+ W912 regression 7 tests).

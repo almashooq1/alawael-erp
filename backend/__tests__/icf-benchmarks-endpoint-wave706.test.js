@@ -12,6 +12,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(30000);
 
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, _res, next) => {
+    req.user = { id: 'w706-user', role: 'admin' };
+    next();
+  },
+}));
+
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -113,10 +120,20 @@ describe('W706 behavioral — /benchmarks CRUD', () => {
 });
 
 describe('W706 behavioral — GET /:id/benchmark comparison', () => {
+  let beneficiaryId;
+
+  beforeEach(async () => {
+    const ins = await mongoose.connection.collection('beneficiaries').insertOne({
+      status: 'active',
+      fullName: 'W706 beneficiary',
+    });
+    beneficiaryId = ins.insertedId;
+  });
+
   const icfAssessmentFixture = (overrides = {}) => ({
     title: 'W706 benchmark test',
     assessmentType: 'initial',
-    beneficiaryId: new mongoose.Types.ObjectId(),
+    beneficiaryId,
     assessorId: new mongoose.Types.ObjectId(),
     assessmentDate: new Date(),
     ...overrides,

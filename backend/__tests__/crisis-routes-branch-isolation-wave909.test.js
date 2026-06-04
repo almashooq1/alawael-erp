@@ -51,6 +51,7 @@ beforeAll(async () => {
   app = appExpress;
 
   await CrisisIncident.collection.insertOne({
+    incidentNumber: 'INC-W909-A',
     title: 'حادث فرع أ',
     type: 'fire',
     severity: 'minor',
@@ -60,6 +61,7 @@ beforeAll(async () => {
     isDeleted: false,
   });
   const ins = await CrisisIncident.collection.insertOne({
+    incidentNumber: 'INC-W909-B',
     title: 'حادث فرع ب',
     type: 'medical',
     severity: 'major',

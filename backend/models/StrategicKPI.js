@@ -44,7 +44,7 @@ const strategicKPISchema = new mongoose.Schema(
 );
 
 strategicKPISchema.index({ goalId: 1 });
-strategicKPISchema.index({ branchId: 1 });
+strategicKPISchema.index({ branchId: 1, status: 1 });
 strategicKPISchema.index({ status: 1 });
 
 module.exports = mongoose.models.StrategicKPI || mongoose.model('StrategicKPI', strategicKPISchema);

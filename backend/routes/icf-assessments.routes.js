@@ -25,8 +25,6 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 router.use(authenticateToken);
-router.use(requireBranchAccess);
-router.use(bodyScopedBeneficiaryGuard);
 
 async function icfTenantMatch(req) {
   const scope = branchFilter(req);
@@ -127,95 +125,7 @@ function collectIcfQualifierItems(doc) {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-/* ══════════════════════ CRUD ═══════════════════════════════════════════════ */
-
-router.get(
-  '/',
-  asyncHandler(async (req, res) => {
-    const M = getIcfAssessmentModel();
-    const { beneficiaryId, episodeId, status, limit = 20, skip = 0 } = req.query;
-    const q = { isDeleted: { $ne: true }, ...(await icfTenantMatch(req)) };
-    if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
-    if (episodeId) q.episodeId = new mongoose.Types.ObjectId(episodeId);
-    if (status) q.status = status;
-    const [data, total] = await Promise.all([
-      M.find(q).sort({ assessmentDate: -1 }).skip(Number(skip)).limit(Number(limit)).lean(),
-      M.countDocuments(q),
-    ]);
-    res.json({ success: true, data, total });
-  })
-);
-
-router.post(
-  '/',
-  asyncHandler(async (req, res) => {
-    const M = getIcfAssessmentModel();
-    const doc = await M.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: doc });
-  })
-);
-
-router.get(
-  '/statistics',
-  asyncHandler(async (req, res) => {
-    const M = getIcfAssessmentModel();
-    const tenant = await icfTenantMatch(req);
-    const [total, byStatus] = await Promise.all([
-      M.countDocuments({ isDeleted: { $ne: true }, ...tenant }),
-      M.aggregate([
-        { $match: { isDeleted: { $ne: true }, ...tenant } },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]),
-    ]);
-    res.json({
-      success: true,
-      data: { total, byStatus: Object.fromEntries(byStatus.map(r => [r._id, r.count])) },
-    });
-  })
-);
-
-router.get(
-  '/domain-distribution',
-  asyncHandler(async (req, res) => {
-    const M = getIcfAssessmentModel();
-    const tenant = await icfTenantMatch(req);
-    const dist = await M.aggregate([
-      { $match: { isDeleted: { $ne: true }, ...tenant } },
-      {
-        $project: {
-          bodyFunctionsCount: { $size: { $ifNull: ['$bodyFunctions', []] } },
-          activitiesCount: { $size: { $ifNull: ['$activities', []] } },
-          participationCount: { $size: { $ifNull: ['$participation', []] } },
-          environmentCount: { $size: { $ifNull: ['$environmentalFactors', []] } },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          avgBodyFunctions: { $avg: '$bodyFunctionsCount' },
-          avgActivities: { $avg: '$activitiesCount' },
-          avgParticipation: { $avg: '$participationCount' },
-          avgEnvironment: { $avg: '$environmentCount' },
-        },
-      },
-    ]);
-    res.json({ success: true, data: dist[0] || {} });
-  })
-);
-
-router.get(
-  '/organization-report',
-  asyncHandler(async (req, res) => {
-    const M = getIcfAssessmentModel();
-    const tenant = await icfTenantMatch(req);
-    const total = await M.countDocuments({ isDeleted: { $ne: true }, ...tenant });
-    const recent = await M.find({ isDeleted: { $ne: true }, ...tenant })
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean();
-    res.json({ success: true, data: { total, recent } });
-  })
-);
+/* ══════════════════════ Reference catalog (org-wide; W906/W918) ═══════════ */
 
 // ── GET /codes — search the seeded ICF code catalog ─────────────────────────
 // Filters: ?component=bodyFunctions|bodyStructures|activitiesParticipation|
@@ -321,6 +231,99 @@ router.post(
       success: true,
       data: { imported: (result.upsertedCount || 0) + (result.modifiedCount || 0) },
     });
+  })
+);
+
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard);
+
+/* ══════════════════════ CRUD ═══════════════════════════════════════════════ */
+
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const M = getIcfAssessmentModel();
+    const { beneficiaryId, episodeId, status, limit = 20, skip = 0 } = req.query;
+    const q = { isDeleted: { $ne: true }, ...(await icfTenantMatch(req)) };
+    if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
+    if (episodeId) q.episodeId = new mongoose.Types.ObjectId(episodeId);
+    if (status) q.status = status;
+    const [data, total] = await Promise.all([
+      M.find(q).sort({ assessmentDate: -1 }).skip(Number(skip)).limit(Number(limit)).lean(),
+      M.countDocuments(q),
+    ]);
+    res.json({ success: true, data, total });
+  })
+);
+
+router.post(
+  '/',
+  asyncHandler(async (req, res) => {
+    const M = getIcfAssessmentModel();
+    const doc = await M.create(stripUpdateMeta(req.body));
+    res.status(201).json({ success: true, data: doc });
+  })
+);
+
+router.get(
+  '/statistics',
+  asyncHandler(async (req, res) => {
+    const M = getIcfAssessmentModel();
+    const tenant = await icfTenantMatch(req);
+    const [total, byStatus] = await Promise.all([
+      M.countDocuments({ isDeleted: { $ne: true }, ...tenant }),
+      M.aggregate([
+        { $match: { isDeleted: { $ne: true }, ...tenant } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+    ]);
+    res.json({
+      success: true,
+      data: { total, byStatus: Object.fromEntries(byStatus.map(r => [r._id, r.count])) },
+    });
+  })
+);
+
+router.get(
+  '/domain-distribution',
+  asyncHandler(async (req, res) => {
+    const M = getIcfAssessmentModel();
+    const tenant = await icfTenantMatch(req);
+    const dist = await M.aggregate([
+      { $match: { isDeleted: { $ne: true }, ...tenant } },
+      {
+        $project: {
+          bodyFunctionsCount: { $size: { $ifNull: ['$bodyFunctions', []] } },
+          activitiesCount: { $size: { $ifNull: ['$activities', []] } },
+          participationCount: { $size: { $ifNull: ['$participation', []] } },
+          environmentCount: { $size: { $ifNull: ['$environmentalFactors', []] } },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgBodyFunctions: { $avg: '$bodyFunctionsCount' },
+          avgActivities: { $avg: '$activitiesCount' },
+          avgParticipation: { $avg: '$participationCount' },
+          avgEnvironment: { $avg: '$environmentCount' },
+        },
+      },
+    ]);
+    res.json({ success: true, data: dist[0] || {} });
+  })
+);
+
+router.get(
+  '/organization-report',
+  asyncHandler(async (req, res) => {
+    const M = getIcfAssessmentModel();
+    const tenant = await icfTenantMatch(req);
+    const total = await M.countDocuments({ isDeleted: { $ne: true }, ...tenant });
+    const recent = await M.find({ isDeleted: { $ne: true }, ...tenant })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+    res.json({ success: true, data: { total, recent } });
   })
 );
 

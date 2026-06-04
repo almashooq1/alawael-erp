@@ -380,14 +380,19 @@ jest.mock('../middleware/auth', () => ({
   - `voice-log-routes-behavioral-wave853.test.js` (11 tests): real Express + branchScope + MongoMemoryServer, auth mocked only.
   - Covers create/enum-400/anti-substitution invariant, cross-branch 403 + list isolation, CRPD directPct, action→supersede→409 state machine, DELETE role gating (therapist 403 / admin 200).
   - Next Phase-B behavioral targets: `decision-rights-routes` (W515), `self-advocacy-routes` (W518).
-- ~~W854 decision-rights routes behavioral~~ — **done (pending push)**: 18 tests — create/layer-routing
+- ~~W854 decision-rights routes behavioral~~ — **done** (`9840b3b35`, pushed `main`): 18 tests — create/layer-routing
   (autonomy/supported/substituted), cross-branch 403, finalize invariant chain (Layer 2/3
   supportArrangement, advocate on restraint/substituted), re-finalize 409, record-outcome ordering,
   DELETE role gating.
-- ~~W855 self-advocacy routes behavioral~~ — **done (pending push)**: 14 tests — singleton 409,
+- ~~W855 self-advocacy routes behavioral~~ — **done** (`9840b3b35`, pushed `main`): 14 tests — singleton 409,
   module start/complete/skip, auto-finalize at 100% (5/5 rights), partial %, hold/resume lifecycle,
   cross-branch read isolation, DELETE role gating.
 - Phase B routes behavioral coverage **COMPLETE** (voice-log W853 + decision-rights W854 + self-advocacy W855).
+- ~~W856 W340 scanner `safeModel` blind spot~~ — **done (pending push)**: added `safeModel` to
+  `HELPER_REGISTRATION_RE`; the `, <ident>Schema` guard means single-arg lookups (`safeModel('Document')`
+  in routes/_) are ignored while genuine two-arg registrations (`HSE.js` SafetyIncident/SafetyInspection)
+  are now counted. No new duplicates surfaced (EnterpriseProPlus Safety_ renamed in W850). Closes the
+  last known scanner blind spot.
 - ~~W851 ADR-032 case variants (4 of 5)~~ — **done** (`9bbdcbeba`, pushed `main`):
   - `DashboardKPIDefinition`, `OrganizationAIPrediction`, `LegacyELearningCourseShell`, `HrUnifiedPolicy` + `HrModulePolicy`.
   - Case-variant baseline: only `zktecodevice` remains.

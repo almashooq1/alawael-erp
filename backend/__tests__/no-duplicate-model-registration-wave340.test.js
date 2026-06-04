@@ -66,10 +66,17 @@ const SCAN_SKIP_DIRS = new Set([
 //   reg('Name', schemaName)                   — helper-wrapped (Enterprise PRO/Plus convention)
 //   getOrCreate('Name', schemaName)
 //   registerModel('Name', schemaName)
+//   safeModel('Name', schemaName)             — W856: closes the blind spot where models/HSE.js
+//                                               registered SafetyIncident/SafetyInspection via a
+//                                               local `safeModel(name, schema)` helper invisible to
+//                                               the scanner. The trailing `, <ident>Schema` guard
+//                                               means the MANY single-arg lookup calls
+//                                               (`safeModel('Document')` in routes/*) are NOT counted
+//                                               — only genuine two-arg registrations.
 const REGISTRATION_RE = /mongoose\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
 const CONNECTION_REGISTRATION_RE = /\b(?:connection|conn|db)\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
 const HELPER_REGISTRATION_RE =
-  /\b(?:reg|getOrCreate|registerModel|ensureModel|defineModel)\s*\(\s*['"]([^'"]+)['"]\s*,\s*\w+Schema\b/g;
+  /\b(?:reg|getOrCreate|registerModel|ensureModel|defineModel|safeModel)\s*\(\s*['"]([^'"]+)['"]\s*,\s*\w+Schema\b/g;
 
 // Known duplicates baselined for ratchet-DOWN per the W325c pattern. Each entry:
 //   <ModelName>: [<file1>, <file2>, ...]   — list of files that register the name

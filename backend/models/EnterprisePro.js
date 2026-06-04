@@ -244,7 +244,7 @@ const ReportTemplateSchema = new Schema(
 
 const ReportExecutionSchema = new Schema(
   {
-    template: { type: Schema.Types.ObjectId, ref: 'ReportTemplate', required: true },
+    template: { type: Schema.Types.ObjectId, ref: 'EnterpriseProReportTemplate', required: true },
     status: {
       type: String,
       enum: ['pending', 'running', 'completed', 'failed', 'cancelled'],
@@ -767,7 +767,8 @@ module.exports = {
   ComplianceAlert: reg('ComplianceAlert', ComplianceAlertSchema),
 
   // Report Builder
-  ReportTemplate: reg('ReportTemplate', ReportTemplateSchema),
+  // Pattern D (W840): Enterprise Pro report builder (distinct from models/reports/ReportTemplate)
+  ReportTemplate: reg('EnterpriseProReportTemplate', ReportTemplateSchema),
   ReportExecution: reg('ReportExecution', ReportExecutionSchema),
 
   // Unified Calendar

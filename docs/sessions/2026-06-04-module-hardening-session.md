@@ -351,5 +351,5 @@ jest.mock('../middleware/auth', () => ({
 - ~~CAPA POST /:id/transition behavioral~~ — **done W838** (`capa-transition-behavioral-wave838`).
 - ~~leave-requests approve/reject cross-branch 403~~ — **done W839** (`leave-requests-mutations-behavioral-wave839`).
 - ~~ApprovalRequest W340 Tier 1 Pattern D (legacy + document chains)~~ — **done W839** (`LegacyHrApprovalRequest`, `DocumentChainApprovalRequest`; canonical stays in `authorization/approvals/`).
-- Remaining W340 mega-file cluster: `ComplianceAlert`, `CalendarEvent`, `RoomBooking`, … → stakeholder ADR.
-- Remaining W340 Tier 1: `ReportTemplate` (3×) → ADR-023.
+- ~~ReportTemplate W340 Tier 1 Pattern D~~ — **done W840** (`DocumentReportTemplate`, `EnterpriseProReportTemplate`; canonical stays in `models/reports/ReportTemplate.js`).
+- ~~CAPA OPEN→IN_PROGRESS→IMPLEMENTED chain~~ — **done W840** (`capa-lifecycle-behavioral-wave840`).

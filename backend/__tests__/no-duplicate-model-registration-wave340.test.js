@@ -96,7 +96,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'ApprovalRequest' — W839 ratchet-down: LegacyHrApprovalRequest (models/) +
   // DocumentChainApprovalRequest (documentApprovalChains); canonical remains in
   // authorization/approvals/approval-request.model.js (ADR-022).
-  'ReportTemplate', // 3×
+  // 'ReportTemplate' — W840 ratchet-down: DocumentReportTemplate (documentReporting) +
+  // EnterpriseProReportTemplate (EnterprisePro); canonical remains in models/reports/ReportTemplate.js (ADR-023).
   // 'WorkflowInstance' — W837 ratchet-down: document-side renames to DocumentOrchWorkflowInstance
   // + DocumentEngineWorkflowInstance; single canonical remains in intelligent-workflow-engine.js.
   // 'Beneficiary' — W341 CONSOLIDATED: seeder now re-exports canonical models/Beneficiary.js.

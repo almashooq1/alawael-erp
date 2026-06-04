@@ -613,5 +613,6 @@ __tests__/leave-requests-branch-isolation-behavioral-wave836.test.js
 __tests__/hr-performance-branch-isolation-behavioral-wave837.test.js
 __tests__/capa-transition-behavioral-wave838.test.js
 __tests__/leave-requests-mutations-behavioral-wave839.test.js
+__tests__/capa-lifecycle-behavioral-wave840.test.js
 __tests__/spasticity-injection-api-wave715.test.js
 __tests__/spasticity-injection-behavioral-wave715.test.js

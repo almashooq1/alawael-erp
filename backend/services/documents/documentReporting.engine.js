@@ -102,15 +102,17 @@ const reportTemplateSchema = new mongoose.Schema(
   { timestamps: true, collection: 'document_report_templates' }
 );
 
-const ReportTemplate =
-  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema);
+// Pattern D (W840): document-domain templates (distinct from models/reports/ReportTemplate)
+const DocumentReportTemplate =
+  mongoose.models.DocumentReportTemplate ||
+  mongoose.model('DocumentReportTemplate', reportTemplateSchema);
 
 /* ─── Generated Report Model ─────────────────────────────────── */
 const generatedReportSchema = new mongoose.Schema(
   {
     templateId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'ReportTemplate',
+      ref: 'DocumentReportTemplate',
       index: true,
     },
     name: String,
@@ -277,7 +279,7 @@ class DocumentReportingEngine extends EventEmitter {
   /* ─── Initialize Defaults ─────────────────────────────────── */
   async initDefaults() {
     for (const tpl of DEFAULT_TEMPLATES) {
-      await ReportTemplate.findOneAndUpdate(
+      await DocumentReportTemplate.findOneAndUpdate(
         { key: tpl.key },
         { $setOnInsert: tpl },
         { upsert: true }
@@ -293,7 +295,7 @@ class DocumentReportingEngine extends EventEmitter {
     if (category) filter.category = category;
     if (type) filter.type = type;
 
-    let templates = await ReportTemplate.find(filter)
+    let templates = await DocumentReportTemplate.find(filter)
       .sort({ isSystem: -1, order: 1, createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -301,7 +303,7 @@ class DocumentReportingEngine extends EventEmitter {
 
     if (templates.length === 0) {
       await this.initDefaults();
-      templates = await ReportTemplate.find(filter).sort({ isSystem: -1 }).lean();
+      templates = await DocumentReportTemplate.find(filter).sort({ isSystem: -1 }).lean();
     }
 
     return { success: true, templates, total: templates.length };
@@ -310,14 +312,14 @@ class DocumentReportingEngine extends EventEmitter {
   /* ─── Create Template ─────────────────────────────────────── */
   async createTemplate(data) {
     const key = data.key || `custom_${data.name?.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
-    const template = new ReportTemplate({ ...data, key, isSystem: false });
+    const template = new DocumentReportTemplate({ ...data, key, isSystem: false });
     await template.save();
     return { success: true, template };
   }
 
   /* ─── Update Template ─────────────────────────────────────── */
   async updateTemplate(templateId, updates) {
-    const template = await ReportTemplate.findByIdAndUpdate(
+    const template = await DocumentReportTemplate.findByIdAndUpdate(
       templateId,
       { $set: updates },
       { returnDocument: 'after' }
@@ -328,7 +330,7 @@ class DocumentReportingEngine extends EventEmitter {
 
   /* ─── Delete Template ─────────────────────────────────────── */
   async deleteTemplate(templateId) {
-    const template = await ReportTemplate.findById(templateId);
+    const template = await DocumentReportTemplate.findById(templateId);
     if (!template) return { success: false, error: 'القالب غير موجود' };
     if (template.isSystem) return { success: false, error: 'لا يمكن حذف قالب النظام' };
     await template.deleteOne();
@@ -337,7 +339,7 @@ class DocumentReportingEngine extends EventEmitter {
 
   /* ─── Generate Report ─────────────────────────────────────── */
   async generate(templateId, parameters = {}, userId) {
-    const template = await ReportTemplate.findById(templateId).lean();
+    const template = await DocumentReportTemplate.findById(templateId).lean();
     if (!template) return { success: false, error: 'القالب غير موجود' };
 
     const report = new GeneratedReport({
@@ -544,7 +546,7 @@ th,td{border:1px solid #ddd;padding:8px;text-align:right}th{background:#3b82f6;c
 
   /* ─── Schedule Report ─────────────────────────────────────── */
   async scheduleReport(templateId, schedule) {
-    const template = await ReportTemplate.findByIdAndUpdate(
+    const template = await DocumentReportTemplate.findByIdAndUpdate(
       templateId,
       {
         $set: {
@@ -596,10 +598,10 @@ th,td{border:1px solid #ddd;padding:8px;text-align:right}th{background:#3b82f6;c
   /* ─── Statistics ──────────────────────────────────────────── */
   async getStats() {
     const [totalTemplates, totalReports, byCategory, scheduled] = await Promise.all([
-      ReportTemplate.countDocuments(),
+      DocumentReportTemplate.countDocuments(),
       GeneratedReport.countDocuments(),
-      ReportTemplate.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
-      ReportTemplate.countDocuments({ 'schedule.enabled': true }),
+      DocumentReportTemplate.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
+      DocumentReportTemplate.countDocuments({ 'schedule.enabled': true }),
     ]);
 
     return {

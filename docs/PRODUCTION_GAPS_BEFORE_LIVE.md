@@ -2,7 +2,7 @@
 
 **Type**: Operational matrix — what's stubbed/placeholder/blocked across the platform
 **Audience**: Ops team + product PM + pilot owner (decides cutover sequence)
-**Updated**: 2026-06-03 (W822 supply-chain engineering freeze on `main`; sign-off pending)
+**Updated**: 2026-06-03 (W825 HR webhooks mount + clinical sweeper doc sync; supply-chain W822 freeze)
 
 This is the single source of truth for "what is NOT actually production-ready yet" across the platform. Use it when planning cutover sequence, prioritising stakeholder asks, or deciding what to ship for the pilot.
 

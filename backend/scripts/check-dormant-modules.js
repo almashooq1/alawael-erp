@@ -162,7 +162,6 @@ const KNOWN_DORMANT_BASELINE = new Set([
   //
   // The 7 below are HELD (NOT auto-disposed) — each has a reason it
   // needs individual / stakeholder review before wire-or-delete:
-  'routes/hr/hr-webhooks.routes.js', // deliberate Phase16-18 ship; verify intended mount
   'services/base/BaseCrudService.js', // base class — adopt across CRUD services OR delete
   'services/finance/zatcaCalculation.service.js', // ⚠ ZATCA compliance — verify vs live zatca path first
   'services/gpsSecurityService.js', // entangled w/ W440 security drift-guard (verifyAPIKey timing-safe)

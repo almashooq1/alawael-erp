@@ -132,7 +132,7 @@ schema against its canonical Zod equivalent.
 
 ---
 
-## 4. Bootstrap cron sweepers — 12 ENV flags (W391 update: +1 caregiver-support overdue, W393)
+## 4. Bootstrap cron sweepers — 13 ENV flags (W383 assessment overdue + W393 caregiver-support)
 
 All default-disabled. To activate, set `ENABLE_<FLAG>=true` in the
 environment + restart. Each is independent — turn them on one at a time
@@ -147,6 +147,7 @@ and watch the logs.
 | `ENABLE_TRANSITION_OVERDUE_SWEEPER`        | W361 | Daily 10:00            | No                                                                      |
 | `ENABLE_CBAHI_REASSESSMENT_SWEEPER`        | W360 | Weekly Mon 06:00       | No                                                                      |
 | `ENABLE_AAC_REASSESSMENT_SWEEPER`          | W358 | Weekly Mon 06:30       | No                                                                      |
+| `ENABLE_ASSESSMENT_OVERDUE_SWEEPER`        | W383 | Daily 04:00            | No (read+log; emits `assessment.overdue` on integration bus)            |
 | `ENABLE_DIET_REVIEW_SWEEPER`               | W368 | Weekly Mon 07:00       | No                                                                      |
 | `ENABLE_FACILITY_INSPECTION_SWEEPER`       | W369 | Daily 05:00            | No                                                                      |
 | `ENABLE_FACILITY_MAINTENANCE_SWEEPER`      | W369 | Daily 05:30            | No                                                                      |

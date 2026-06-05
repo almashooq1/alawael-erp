@@ -1193,6 +1193,8 @@ on:
       - 'backend/__tests__/icf-assessment-create-assessor-wave930.test.js'
       - 'backend/__tests__/branch-scope-user-enrich-wave930.test.js'
       - 'backend/__tests__/form-save-bridge-complaints-groups-wave930.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/reporting-webhooks-wiring-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2369,6 +2371,8 @@ on:
       - 'backend/__tests__/icf-assessment-create-assessor-wave930.test.js'
       - 'backend/__tests__/branch-scope-user-enrich-wave930.test.js'
       - 'backend/__tests__/form-save-bridge-complaints-groups-wave930.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/reporting-webhooks-wiring-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

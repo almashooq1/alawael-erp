@@ -22,6 +22,7 @@ __tests__/adjunct-therapy-wave693.test.js
 __tests__/admin-anomaly-wiring-wave257e.test.js
 __tests__/admin-pages-routed.test.js
 __tests__/admin-routes-auth-wiring.test.js
+__tests__/ai-analytics-branch-isolation-wave973.test.js
 __tests__/alert-schema-wave11.test.js
 __tests__/anomalous-admins-csv-wave257k.test.js
 __tests__/anomalous-admins-route-wave257h.test.js

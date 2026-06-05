@@ -8,8 +8,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  requireBranchAccess,
+  branchFilter: mwBranchFilter,
+} = require('../middleware/branchScope.middleware');
+const {
+  branchScopedBeneficiaryParam,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 const logger = require('../utils/logger');
@@ -29,6 +35,16 @@ router.use(requireBranchAccess);
 // ─── Helper: safe try-catch wrapper ──────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// AI models use the legacy snake `branch_id` field. Map the canonical branchFilter
+// onto it; returns {} for HQ / cross-branch. Drives off req.branchScope, so a
+// restricted user's spoofed ?branch_id is IGNORED (no cross-branch read or spoof).
+function aiBranchFilter(req) {
+  const f = mwBranchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { branch_id: { $in: f.branchId.$in } };
+  return { branch_id: f.branchId };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // DASHBOARD — لوحة تحكم AI الرئيسية
 // ═══════════════════════════════════════════════════════════════════════════
@@ -40,8 +56,8 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const branchId = req.query.branch_id || req.user?.branch_id;
-    const branchFilter = branchId ? { branch_id: branchId } : {};
+    const branchId = effectiveBranchScope(req);
+    const branchFilter = aiBranchFilter(req);
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -185,8 +201,7 @@ router.get(
     } = req.query;
 
     const filter = { deleted_at: null };
-    if (branch_id) filter.branch_id = branch_id;
-    else if (req.user?.branch_id) filter.branch_id = req.user.branch_id;
+    Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
     if (alert_type) filter.alert_type = alert_type;
     if (severity) filter.severity = severity;
     if (is_read !== undefined) filter.is_read = is_read === 'true';
@@ -232,9 +247,7 @@ router.put(
 router.post(
   '/alerts/read-all',
   asyncHandler(async (req, res) => {
-    const branchId = req.query.branch_id || req.user?.branch_id;
-    const filter = { is_read: false, deleted_at: null };
-    if (branchId) filter.branch_id = branchId;
+    const filter = { is_read: false, deleted_at: null, ...aiBranchFilter(req) };
 
     const result = await AiAlert.updateMany(filter, {
       $set: {
@@ -358,8 +371,7 @@ router.get(
     const { branch_id, prediction_type, status, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
-    if (branch_id) filter.branch_id = branch_id;
-    else if (req.user?.branch_id) filter.branch_id = req.user.branch_id;
+    Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
     if (prediction_type) filter.prediction_type = prediction_type;
     if (status) filter.status = status;
 
@@ -402,8 +414,7 @@ router.get(
     } = req.query;
 
     const filter = { deleted_at: null };
-    if (branch_id) filter.branch_id = branch_id;
-    else if (req.user?.branch_id) filter.branch_id = req.user.branch_id;
+    Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
     if (status) filter.status = status;
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (suggestion_type) filter.suggestion_type = suggestion_type;
@@ -464,8 +475,7 @@ router.get(
     const { beneficiary_id, report_type, status, branch_id, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
-    if (branch_id) filter.branch_id = branch_id;
-    else if (req.user?.branch_id) filter.branch_id = req.user.branch_id;
+    Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (report_type) filter.report_type = report_type;
     if (status) filter.status = status;
@@ -934,8 +944,8 @@ router.post(
 router.get(
   '/stats',
   asyncHandler(async (req, res) => {
-    const branchId = req.query.branch_id || req.user?.branch_id;
-    const branchFilter = branchId ? { branch_id: branchId } : {};
+    const branchId = effectiveBranchScope(req);
+    const branchFilter = aiBranchFilter(req);
 
     const [alertsByType, alertsBySeverity, predictionsByType, suggestionsByStatus] =
       await Promise.all([

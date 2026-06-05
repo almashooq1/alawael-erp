@@ -49,7 +49,11 @@ const PATTERNS = [/req\.user\??\.branch_id\b/, /req\.user\??\.branch\b/];
 // Baseline (2026-06-05): consumer files currently reading the never-populated
 // snake/bare branch field. Ratchet DOWN as each adopts effectiveBranchScope(req).
 const BASELINE = new Set([
-  'routes/ai-analytics.routes.js',
+  // 'routes/ai-analytics.routes.js' — FIXED W973: 7 filter sites → aiBranchFilter(req)
+  //   (snake adapter, de-shadowed import); restricted scoped + ?branch_id spoof blocked;
+  //   isolation test (branchId-only user + spoof case, 3/3).
+  // 'routes/beneficiary-transfers.routes.js' — DEFERRED: deeper field-drift (service writes
+  //   fromBranch, schema declares fromBranchId strict:true → stripped; docs persist no branch).
   'routes/beneficiary-transfers.routes.js',
   // 'routes/communication-module.routes.js' — FIXED W946 (InternalMessage +
   //   ContactDirectory CREATE stamps now use effectiveBranchScope(req)).

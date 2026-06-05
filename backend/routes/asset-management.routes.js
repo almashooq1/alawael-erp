@@ -794,6 +794,7 @@ router.get('/dashboard', async (req, res) => {
     const now = new Date();
     const _soon30 = new Date(now.getTime() + 30 * 864e5);
     const soon60 = new Date(now.getTime() + 60 * 864e5);
+    const tenant = branchFilter(req);
     const [
       totalAssets,
       activeAssets,
@@ -808,15 +809,17 @@ router.get('/dashboard', async (req, res) => {
       Asset.countDocuments(),
       Asset.countDocuments({ status: 'active' }),
       Asset.countDocuments({ status: 'maintenance' }),
-      MaintenanceWorkOrder.countDocuments({ status: 'pending' }),
+      MaintenanceWorkOrder.countDocuments({ ...tenant, status: 'pending' }),
       MaintenanceWorkOrder.countDocuments({
+        ...tenant,
         scheduledDate: { $lt: now },
         status: { $in: ['pending', 'approved'] },
       }),
-      AssetTransfer.countDocuments({ status: 'pending' }),
+      AssetTransfer.countDocuments({ ...tenant, status: 'pending' }),
       Asset.countDocuments({ lastMaintenanceDate: { $lte: now }, status: 'active' }),
       Asset.countDocuments({ warrantyExpiryDate: { $gte: now, $lte: soon60 } }),
       ResourceBooking.countDocuments({
+        ...tenant,
         bookingDate: {
           $gte: new Date(now.toDateString()),
           $lt: new Date(new Date(now.toDateString()).getTime() + 864e5),

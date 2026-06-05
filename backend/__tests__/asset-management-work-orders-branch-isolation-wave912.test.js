@@ -40,6 +40,7 @@ let mongod;
 let MaintenanceWorkOrder;
 let AssetInventory;
 let AssetTransfer;
+let ResourceBooking;
 let woB;
 let inventoryA;
 let inventoryB;
@@ -53,6 +54,7 @@ beforeAll(async () => {
   MaintenanceWorkOrder = require('../models/MaintenanceWorkOrder');
   AssetInventory = require('../models/AssetInventory');
   AssetTransfer = require('../models/AssetTransfer');
+  ResourceBooking = require('../models/ResourceBooking');
   const appExpress = express();
   appExpress.use(express.json());
   appExpress.use('/api/v1/asset-management', require('../routes/asset-management.routes'));
@@ -127,6 +129,32 @@ beforeAll(async () => {
     createdBy: USER_A,
   });
   transferB = trB.insertedId;
+
+  const today = new Date();
+  await ResourceBooking.collection.insertOne({
+    bookingNumber: 'BK-A-912',
+    branchId: BRANCH_A,
+    assetId: ASSET_A,
+    bookedBy: USER_A,
+    bookingDate: today,
+    startTime: '10:00',
+    endTime: '11:00',
+    purpose: 'جلسة',
+    status: 'confirmed',
+    createdBy: USER_A,
+  });
+  await ResourceBooking.collection.insertOne({
+    bookingNumber: 'BK-B-912',
+    branchId: BRANCH_B,
+    assetId: ASSET_A,
+    bookedBy: USER_A,
+    bookingDate: today,
+    startTime: '12:00',
+    endTime: '13:00',
+    purpose: 'جلسة',
+    status: 'confirmed',
+    createdBy: USER_A,
+  });
 });
 
 beforeEach(() => {
@@ -166,6 +194,14 @@ describe('W912 — work orders isolation', () => {
   it('returns 404 for foreign-branch inventory GET /inventories/:id', async () => {
     const res = await request(app).get(`/api/v1/asset-management/inventories/${inventoryB}`);
     expect(res.status).toBe(404);
+  });
+
+  it('scopes dashboard branch-aware counters to caller branch', async () => {
+    const res = await request(app).get('/api/v1/asset-management/dashboard');
+    expect(res.status).toBe(200);
+    expect(res.body.data.pendingWorkOrders).toBe(1);
+    expect(res.body.data.pendingTransfers).toBe(1);
+    expect(res.body.data.activeBookingsToday).toBe(1);
   });
 
   it('inherits branchId from parent inventory on item create', async () => {

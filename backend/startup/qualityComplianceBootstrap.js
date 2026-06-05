@@ -62,10 +62,7 @@ const {
 const {
   createComplianceCalendarAlertSweeper,
 } = require('../services/quality/complianceCalendarAlertSweeper.service');
-const {
-  createQualityEventBus,
-  getDefault: getQualityBusDefault,
-} = require('../services/quality/qualityEventBus.service');
+const { getDefault: getQualityBusDefault } = require('../services/quality/qualityEventBus.service');
 const { createCapaAgingScheduler } = require('../services/quality/capaAgingScheduler.service');
 const {
   createRiskReassessmentScheduler,
@@ -105,7 +102,22 @@ function bootstrapQualityCompliance({
   //       service below. If the caller injected a dispatcher, we
   //       wrap it so both the external sink and in-process
   //       subscribers receive events.
-  const bus = createQualityEventBus({ logger });
+  //
+  // W974 — use the SINGLETON bus (getDefault). The lazy quality services
+  // (auditScheduler / fmea / coq / calibration / changeControl /
+  // controlledDocument / inspectionSubmission / paretoA3 / capa-producers) set
+  // their dispatcher to qualityEventBus.getDefault(), and phase29-subscribers
+  // (server.js) subscribe to getDefault(). This bootstrap previously created a
+  // FRESH bus, so the notification router + ncrPipeline lived on a DIFFERENT bus
+  // than those producers/subscribers → their events never reached the router
+  // (the W349/W387 silent-no-op class; W941 bridged quality.audit.* as a stopgap).
+  // Using getDefault() unifies everything onto one bus. This is ORDER-INDEPENDENT
+  // (getDefault always returns the same singleton; no re-seat, so no startup-
+  // ordering hazard that could orphan phase29's auto-CAPA). The W941 bridge below
+  // self-disables under unification via its `singleton !== bus` guard.
+  const bus = getQualityBusDefault();
+  if (logger && bus && bus.logger === console) bus.logger = logger; // preserve structured logging
+
   const combinedDispatcher = dispatcher
     ? {
         async emit(name, payload) {

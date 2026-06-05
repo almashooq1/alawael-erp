@@ -61,7 +61,8 @@ const BASELINE = new Set([
   'routes/hr-module.routes.js',
   'routes/referral.routes.js',
   'routes/reports-analytics-module.routes.js',
-  'routes/smart-assessment-engine.routes.js',
+  // 'routes/smart-assessment-engine.routes.js' — FIXED W973: 13 assessment CREATE
+  //   stamps now use effectiveBranchScope(req); reads already scoped (W907).
   // 'routes/telehealth.routes.js' — FIXED W946: all 11 req.user.branch sites now
   //   use telehealthBranchFilter(req) (lists) / effectiveBranchScope(req) (values
   //   + stamps); proven by the branchId-only-user cases in the W871 test (9/9).

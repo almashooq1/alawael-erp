@@ -38,6 +38,154 @@ const safeModel = name => {
   }
 };
 
+// Enum guards mirrored from models/Beneficiary.js so we never feed an
+// out-of-range value into a strict-enum path (which would 500 the create).
+const DISABILITY_TYPES = [
+  'physical',
+  'mental',
+  'sensory',
+  'multiple',
+  'learning',
+  'speech',
+  'other',
+];
+const SEVERITIES = ['mild', 'moderate', 'severe', 'profound'];
+const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
+
+const splitName = full => {
+  const parts = String(full || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return null;
+  return { firstName: parts[0], lastName: parts.slice(1).join(' ') || parts[0] };
+};
+
+/**
+ * Normalize the multi-step registration wizard payload (nested:
+ * { personal, address, disability, guardian, programs, medicalHistory })
+ * into the flat shape the Beneficiary schema expects.
+ *
+ * Backward-compatible: when `body.personal` is absent the payload is
+ * assumed to be already flat and returned unchanged, so existing callers
+ * and tests keep working.
+ */
+const normalizeStudentPayload = body => {
+  if (!body || typeof body !== 'object' || !body.personal) return body || {};
+
+  const p = body.personal || {};
+  const a = body.address || {};
+  const d = body.disability || {};
+  const g = body.guardian || {};
+  const m = body.medicalHistory || {};
+
+  const out = {};
+
+  // ── Personal (required: firstName + lastName) ──────────────────────────
+  out.firstName = p.firstNameAr || p.firstNameEn || '';
+  out.lastName = p.lastNameAr || p.lastNameEn || '';
+  if (p.firstNameAr) out.firstName_ar = p.firstNameAr;
+  if (p.lastNameAr) out.lastName_ar = p.lastNameAr;
+  if (p.firstNameEn) out.firstName_en = p.firstNameEn;
+  if (p.lastNameEn) out.lastName_en = p.lastNameEn;
+  const fullAr = [p.firstNameAr, p.lastNameAr].filter(Boolean).join(' ');
+  if (fullAr) out.fullNameArabic = fullAr;
+  const fullEn = [p.firstNameEn, p.lastNameEn].filter(Boolean).join(' ');
+  if (fullEn) out.fullNameEnglish = fullEn;
+  if (p.nationalId) out.nationalId = p.nationalId;
+  if (p.dateOfBirth) out.dateOfBirth = p.dateOfBirth;
+  if (p.gender) out.gender = p.gender;
+  if (p.nationality) out.nationality = p.nationality;
+  if (p.bloodType && BLOOD_TYPES.includes(p.bloodType)) out.bloodType = p.bloodType;
+
+  // ── Address ────────────────────────────────────────────────────────────
+  const address = {};
+  if (a.streetName) address.street = a.streetName;
+  if (a.district) address.district = a.district;
+  if (a.city) address.city = a.city;
+  if (a.region) address.state = a.region;
+  if (a.postalCode) address.postalCode = a.postalCode;
+  if (Object.keys(address).length) out.address = address;
+
+  // ── Disability (primaryType free-form; type/severity enum-guarded) ─────
+  const disability = {};
+  if (d.primaryType) disability.primaryType = d.primaryType;
+  if (DISABILITY_TYPES.includes(d.primaryType)) disability.type = d.primaryType;
+  if (SEVERITIES.includes(d.severity)) disability.severity = d.severity;
+  if (d.severity) out.disabilityLevel = d.severity;
+  if (d.diagnosisDate) disability.diagnosisDate = d.diagnosisDate;
+  if (d.diagnosisSource) disability.diagnosedBy = d.diagnosisSource;
+  if (d.notes) disability.description = d.notes;
+  if (Object.keys(disability).length) out.disability = disability;
+
+  // ── Programs → enrolledPrograms ────────────────────────────────────────
+  if (Array.isArray(body.programs) && body.programs.length) {
+    out.enrolledPrograms = body.programs.map(pr => ({
+      programName: pr.programName || pr.programType,
+      status: ['active', 'completed', 'paused', 'dropped'].includes(pr.status)
+        ? pr.status
+        : 'active',
+    }));
+  }
+
+  // ── Guardian → familyMembers (only when name present) ──────────────────
+  const familyMembers = [];
+  const father = splitName(g.father && g.father.name);
+  if (father) {
+    familyMembers.push({
+      ...father,
+      relationship: 'father',
+      nationalId: g.father.nationalId,
+      phone: g.father.mobile,
+      email: g.father.email,
+      occupation: g.father.occupation,
+      education: g.father.education,
+      isPrimaryCaregiver: true,
+    });
+  }
+  const mother = splitName(g.mother && g.mother.name);
+  if (mother) {
+    familyMembers.push({
+      ...mother,
+      relationship: 'mother',
+      phone: g.mother.mobile,
+      email: g.mother.email,
+      occupation: g.mother.occupation,
+    });
+  }
+  if (familyMembers.length) out.familyMembers = familyMembers;
+
+  // ── Emergency contact (all three fields required by sub-schema) ────────
+  const ec = g.emergencyContact || {};
+  if (ec.name && ec.mobile) {
+    out.emergencyContacts = [
+      { name: ec.name, relationship: ec.relation || 'other', phone: ec.mobile },
+    ];
+  }
+
+  // ── Medical history → medicalInfo ──────────────────────────────────────
+  const medicalInfo = {};
+  if (Array.isArray(m.chronicConditions) && m.chronicConditions.length)
+    medicalInfo.conditions = m.chronicConditions;
+  if (Array.isArray(m.allergies) && m.allergies.length)
+    medicalInfo.allergies = m.allergies
+      .map(x => (typeof x === 'string' ? x : x && x.name))
+      .filter(Boolean);
+  if (Array.isArray(m.medications) && m.medications.length)
+    medicalInfo.medications = m.medications.map(x =>
+      typeof x === 'string'
+        ? { name: x }
+        : { name: x && x.name, dosage: x && x.dosage, frequency: x && x.frequency }
+    );
+  if (Object.keys(medicalInfo).length) out.medicalInfo = medicalInfo;
+
+  // ── Contact (top-level phone convenience) ──────────────────────────────
+  if (g.father && g.father.mobile) out.phone = g.father.mobile;
+  else if (g.mother && g.mother.mobile) out.phone = g.mother.mobile;
+
+  return out;
+};
+
 // ── GET / ──────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
@@ -74,8 +222,16 @@ router.post('/', requireRole('admin', 'manager', 'receptionist'), async (req, re
     const Beneficiary = safeModel('Beneficiary');
     if (!Beneficiary)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    const normalized = normalizeStudentPayload(req.body);
+    if (!normalized.firstName || !normalized.lastName) {
+      return res.status(400).json({
+        success: false,
+        error: 'الاسم الأول واسم العائلة مطلوبان',
+        message: 'firstName and lastName are required',
+      });
+    }
     const doc = await Beneficiary.create({
-      ...req.body,
+      ...normalized,
       type: 'student',
       enrollmentStatus: 'active',
       branchId: req.user.branchId,

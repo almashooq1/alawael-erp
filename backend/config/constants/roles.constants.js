@@ -17,6 +17,15 @@
 const ROLES = {
   SUPER_ADMIN: 'super_admin',
   HEAD_OFFICE_ADMIN: 'head_office_admin',
+  // CEO is a DISTINCT executive role (ADR-037 Q5, 2026-06-01): it carries its
+  // OWN permission set in rbac.config (full wildcard `'*':['*']`, BROADER than
+  // head_office_admin's 14 scoped perms), inherits head_office_admin, and is
+  // gated directly in 34 live route files via authorize(['ceo', …]). It was
+  // previously ONLY a ROLE_ALIASES entry → resolveRole('ceo') collapsed CEOs to
+  // head_office_admin's narrower perms (a latent privilege-narrowing bug, now
+  // fixed by adding it here + removing the alias below). Closes the last
+  // ADR-037 D4 gap (constants is now a superset of rbac.config role values).
+  CEO: 'ceo',
   ADMIN: 'admin',
   MANAGER: 'manager',
   SUPERVISOR: 'supervisor',
@@ -129,7 +138,9 @@ const ROLE_ALIASES = {
   // branchScope.middleware.js legacy entries
   hq_super_admin: ROLES.SUPER_ADMIN,
   hq_admin: ROLES.HEAD_OFFICE_ADMIN,
-  ceo: ROLES.HEAD_OFFICE_ADMIN,
+  // NOTE: `ceo` is NO LONGER aliased to head_office_admin (ADR-037 Q5) — it is a
+  // distinct role (ROLES.CEO above) with its own broader permission set. Aliasing
+  // it here narrowed CEO access; removed 2026-06-01.
 };
 
 /**

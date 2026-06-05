@@ -147,9 +147,55 @@ function buildRouter({ handler, verifiers = {}, logger = console } = {}) {
 }
 
 const _handlerStub = { handleEvents: async () => ({ processed: 0 }) };
+
+// W933 — activate the REAL delivery/read-receipt handler.
+//
+// The default mount (via routes/registries/phases.registry.js safeMount) was
+// always built with the no-op `_handlerStub` above: provider webhooks returned
+// 200 but every delivered/read/failed event was silently DROPPED, so the
+// ReportDelivery ledger never advanced past SENT and the W762-activated reporting
+// platform had no delivery telemetry (W225 dormant-capability pattern — the real
+// services/reporting/webhookHandler.WebhookHandler existed but was never wired).
+//
+// GATED OFF BY DEFAULT (ENABLE_REPORT_WEBHOOKS=true). When unset, behaviour is
+// byte-identical to the prior stub mount — inert.
+//
+// SECURITY: the four external providers (sendgrid/mailgun/twilio/whatsapp) are
+// FAIL-CLOSED here. With no real signature verifier wired yet (owner must supply
+// provider signing secrets), each is given a `() => false` verifier so the route
+// returns 401 rather than ACCEPTING unsigned events that mutate the delivery
+// ledger — turning a harmless no-op into a fail-open hole is exactly what doctrine
+// forbids. The INTERNAL `portal` path needs no verifier (read-receipts fired by
+// the authenticated portal UI) and records straight to the ledger. Real external
+// verifiers ship in a later, owner-gated step alongside raw-body signature mounts.
+function _resolveDefaultHandler() {
+  if (process.env.ENABLE_REPORT_WEBHOOKS !== 'true') return _handlerStub;
+  try {
+    const { WebhookHandler } = require('../services/reporting/webhookHandler');
+    const ReportDelivery = require('../models/ReportDelivery'); // {.model} unwrapped lazily
+    return new WebhookHandler({ DeliveryModel: ReportDelivery });
+  } catch (_err) {
+    return _handlerStub; // any load error → safe no-op, never break boot
+  }
+}
+
+function _resolveDefaultVerifiers() {
+  if (process.env.ENABLE_REPORT_WEBHOOKS !== 'true') return {};
+  // Fail-closed externals until real signing secrets + raw-body mounts land.
+  return {
+    sendgrid: () => false,
+    mailgun: () => false,
+    twilio: () => false,
+    whatsapp: () => false,
+  };
+}
+
 let _reportsWebhooksRouter;
 try {
-  _reportsWebhooksRouter = buildRouter({ handler: _handlerStub });
+  _reportsWebhooksRouter = buildRouter({
+    handler: _resolveDefaultHandler(),
+    verifiers: _resolveDefaultVerifiers(),
+  });
 } catch (_err) {
   const _fb = require('express').Router();
   _fb.all('*', (_req, res) =>
@@ -160,3 +206,5 @@ try {
 module.exports = _reportsWebhooksRouter;
 module.exports.buildRouter = buildRouter;
 module.exports.asyncWrap = asyncWrap;
+module.exports._resolveDefaultHandler = _resolveDefaultHandler;
+module.exports._resolveDefaultVerifiers = _resolveDefaultVerifiers;

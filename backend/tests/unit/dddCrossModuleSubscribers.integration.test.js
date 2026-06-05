@@ -25,9 +25,9 @@ describe('integration/dddCrossModuleSubscribers.js', () => {
     expect(() => new vm.Script(source, { filename: 'dddCrossModuleSubscribers.js' })).not.toThrow();
   });
 
-  test('has npm dependencies (14)', () => {
+  test('has npm dependencies (15)', () => {
     const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
-    expect(npms.length).toBe(14);
+    expect(npms.length).toBe(15);
   });
 
   test('has module.exports', () => {

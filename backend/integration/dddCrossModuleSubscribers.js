@@ -357,6 +357,42 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Assessment → Timeline: Completed (W930) ──────────────────────
+  // Closes the next pathway link after W929: when an assessment is completed
+  // (AssessmentsService emits `assessment.completed` → bridged to
+  // `assessments.assessment.completed`), the only subscriber was the AI
+  // recommendation generator — nothing recorded the completion on the unified
+  // CareTimeline. Per doctrine "اربط كل تقييم بالمستفيد والحلقة والزمن", the
+  // assessment now lands on the timeline linked to its episode.
+  subscribers.push({
+    name: 'assessments:completed → timeline:record',
+    pattern: 'assessments.assessment.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const score = event.payload.overallScore;
+          const scoreText = score === undefined || score === null ? '' : ` (${score}%)`;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'assessment_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Assessment completed: ${event.payload.type || ''}${scoreText}`.trim(),
+            title_ar: `اكتمال تقييم: ${event.payload.type || ''}${scoreText}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(
+          `[DDD-CrossModule] Timeline assessment-complete record failed: ${err.message}`
+        );
+      }
+    },
+  });
+
   // ─── Assessment → AI: Trigger recommendations ─────────────────────
   subscribers.push({
     name: 'assessments:completed → ai:generate',

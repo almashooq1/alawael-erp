@@ -692,3 +692,4 @@ __tests__/spasticity-injection-behavioral-wave715.test.js
 __tests__/quality-enhanced-branch-isolation-wave923.test.js
 __tests__/morning-health-check-branch-isolation-wave924.test.js
 __tests__/beneficiary-create-branchid-wave926.test.js
+__tests__/no-inmemory-route-store.test.js

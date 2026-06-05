@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const { escapeRegex } = require('../utils/escapeRegex');
 const Employee = require('../models/HR/Employee');
@@ -225,7 +226,7 @@ router.post('/leaves', authenticate, requireBranchAccess, async (req, res) => {
     const { employee_id, leave_type, start_date, end_date, reason } = req.body;
     const leave = await LeaveService.applyLeave(
       employee_id,
-      req.user.branch_id,
+      effectiveBranchScope(req),
       leave_type,
       start_date,
       end_date,

@@ -58,9 +58,11 @@ const BASELINE = new Set([
   'routes/hr/employee-admin.routes.js',
   'routes/hr/hr-change-requests.routes.js',
   'routes/hr/hr-inbox.routes.js',
-  'routes/hr-module.routes.js',
+  // 'routes/hr-module.routes.js' — FIXED W973: POST /leaves branch stamp now uses
+  //   effectiveBranchScope(req) (was req.user.branch_id → undefined on a required field).
   'routes/referral.routes.js',
-  'routes/reports-analytics-module.routes.js',
+  // 'routes/reports-analytics-module.routes.js' — FIXED W973: inert never-populated
+  //   fallback swapped to scopedBranch (C3a already forces the real branch at the caller).
   // 'routes/smart-assessment-engine.routes.js' — FIXED W973: 13 assessment CREATE
   //   stamps now use effectiveBranchScope(req); reads already scoped (W907).
   // 'routes/telehealth.routes.js' — FIXED W946: all 11 req.user.branch sites now

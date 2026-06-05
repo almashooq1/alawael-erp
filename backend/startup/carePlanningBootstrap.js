@@ -145,6 +145,11 @@ function wireCarePlanning(app, deps = {}) {
         app._carePlanRoleViews = careplan.roleViews;
         app._carePlanGroupService = careplan.groupPlan;
         app._carePlanProgramsLibrary = careplan.programsLibrary;
+        // W973 — expose the background workers (overdue-review scanner W50 +
+        // family-retry worker W45). bootstrapCarePlanning builds them with a
+        // `runOnce()` contract and explicitly leaves scheduling to the caller;
+        // startup/carePlanWorkersBootstrap.js consumes this (env-gated, default OFF).
+        app._carePlanWorkers = careplan.workers;
 
         logger.info(
           '[CarePlan] ✓ Engine mounted at /api/v1/care-plans (Waves 41–48: 24 endpoints, ' +

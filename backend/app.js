@@ -2302,6 +2302,12 @@ try {
 // Identical behaviour: same bootstrapCarePlanning() call, same dep-loading order,
 // same /api/v1/care-plans mount, same 7 app._carePlanXxx references.
 require('./startup/carePlanningBootstrap').wireCarePlanning(app, { logger });
+// W973 — schedule the dormant care-plan background workers (overdue-review
+// scanner W50 + family-retry worker W45). They expose runOnce() and explicitly
+// leave scheduling to the caller; nothing did, so they were dead. Env-gated,
+// default OFF (ENABLE_CARE_PLAN_WORKERS=true). Runs after carePlanning so
+// app._carePlanWorkers is populated.
+require('./startup/carePlanWorkersBootstrap').wireCarePlanWorkers(app, { logger });
 
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {

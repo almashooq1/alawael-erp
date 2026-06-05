@@ -94,6 +94,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'cache',
     'system',
     'error', // W397 — ERROR_OCCURRED renamed from 'system.error' to 'error.occurred'
+    'measure_alert', // W970 — MEASURE_ALERT_RAISED/REASSIGNED (W506/W514) prefix; allowlist was stale and failing on main
   ])
 );
 

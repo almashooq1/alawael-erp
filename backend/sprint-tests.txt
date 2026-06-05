@@ -720,3 +720,4 @@ __tests__/documents-json-create-wave933.test.js
 __tests__/vehicle-create-branch-hook-wave933.test.js
 __tests__/employee-create-route-hook-wave933.test.js
 __tests__/purchase-order-create-branch-wave933.test.js
+__tests__/appointments-core-linkage-wave970.test.js

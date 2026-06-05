@@ -425,6 +425,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care plan → Timeline: Activated (W931) ───────────────────────
+  // Next pathway link after W930: CarePlansService.activatePlan emits
+  // `careplan.activated` (bridged to `care-plans.careplan.activated`), consumed
+  // until now only by downstream services — nothing recorded the activation on
+  // the unified CareTimeline. Per doctrine "اربط كل خطة بالمستفيد والحلقة والزمن"
+  // the activated plan now lands on the timeline linked to its episode.
+  subscribers.push({
+    name: 'care-plans:activated → timeline:record',
+    pattern: 'care-plans.careplan.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const goalCount = event.payload.goalCount;
+          const goalText = typeof goalCount === 'number' ? ` (${goalCount} هدف)` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_approved',
+            category: 'clinical',
+            severity: 'success',
+            title: `Care plan activated${typeof goalCount === 'number' ? ` (${goalCount} goals)` : ''}`,
+            title_ar: `تفعيل خطة الرعاية${goalText}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-activate record failed: ${err.message}`);
+      }
+    },
+  });
+
   // W390 DELETED: 'family:engagement_low' subscriber.
   // Listened for 'family.family.engagement_low' which W377 deleted (FAMILY_EVENTS
   // whole group). Dead-on-arrival — no producer existed.

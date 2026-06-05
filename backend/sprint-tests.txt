@@ -697,4 +697,5 @@ __tests__/student-registration-core-event-wave927.test.js
 __tests__/student-registration-episode-of-care-wave928.test.js
 __tests__/episode-created-timeline-subscriber-wave929.test.js
 __tests__/assessment-completed-timeline-subscriber-wave930.test.js
+__tests__/care-plan-activated-timeline-subscriber-wave931.test.js
 __tests__/no-inmemory-route-store.test.js

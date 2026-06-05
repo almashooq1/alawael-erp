@@ -204,7 +204,7 @@ rehabSessionSchema.virtual('duration_display').get(function () {
 });
 
 // ── Pre-save: حساب رقم الجلسة تلقائياً ──────────────────────
-rehabSessionSchema.pre('save', async function (next) {
+rehabSessionSchema.pre('save', async function () {
   if (!this.session_number && this.beneficiary_id && this.program_id) {
     const count = await this.constructor.countDocuments({
       beneficiary_id: this.beneficiary_id,
@@ -219,7 +219,6 @@ rehabSessionSchema.pre('save', async function (next) {
     const mins = eh * 60 + em - (sh * 60 + sm);
     if (mins > 0) this.actual_duration_minutes = mins;
   }
-  next();
 });
 
 const RehabSession =

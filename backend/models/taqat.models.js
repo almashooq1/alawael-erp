@@ -552,9 +552,8 @@ const TaqatJobApplication =
   mongoose.models.TaqatJobApplication ||
   mongoose.model('TaqatJobApplication', TaqatJobApplicationSchema);
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-TaqatTrainingProgramSchema.pre('save', async function (next) {
+TaqatTrainingProgramSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['fundingAmount', 'stipend']);
-  next();
 });
 
 const TaqatTrainingProgram =

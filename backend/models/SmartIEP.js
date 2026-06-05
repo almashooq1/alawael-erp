@@ -461,12 +461,11 @@ const smartIEPSchema = new mongoose.Schema(
 smartIEPSchema.index({ beneficiary_id: 1, 'plan_period.start_date': -1 });
 smartIEPSchema.index({ branch_id: 1, status: 1 });
 smartIEPSchema.index({ 'annual_goals.current_status': 1 });
-smartIEPSchema.pre('save', async function (next) {
+smartIEPSchema.pre('save', async function () {
   if (!this.iep_number) {
     const count = await this.constructor.countDocuments();
     this.iep_number = `IEP-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ══════════════════════════════════════════════════════════════

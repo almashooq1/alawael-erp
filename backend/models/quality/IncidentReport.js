@@ -94,13 +94,12 @@ const incidentReportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-incidentReportSchema.pre('save', async function (next) {
+incidentReportSchema.pre('save', async function () {
   if (!this.incident_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('IncidentReport').countDocuments();
     this.incident_number = `INC-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 incidentReportSchema.index({ incident_type: 1, severity: 1, incident_date: -1 });

@@ -67,12 +67,11 @@ ticketSchema.index({ requester: 1 });
 ticketSchema.index({ assignedTo: 1 });
 
 // Auto-generate ticket number
-ticketSchema.pre('validate', async function (next) {
+ticketSchema.pre('validate', async function () {
   if (!this.ticketNumber) {
     const count = await mongoose.model('HelpDeskTicket').countDocuments();
     this.ticketNumber = `HD-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ── نموذج قاعدة المعرفة — Knowledge Article ─────────────────────────

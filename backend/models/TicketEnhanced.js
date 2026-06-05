@@ -133,7 +133,7 @@ ticketSchema.set('toJSON', { virtuals: true });
 ticketSchema.set('toObject', { virtuals: true });
 
 // Auto-generate ticket number before save
-ticketSchema.pre('save', async function (next) {
+ticketSchema.pre('save', async function () {
   if (this.isNew && !this.ticketNumber) {
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
@@ -143,7 +143,6 @@ ticketSchema.pre('save', async function (next) {
     });
     this.ticketNumber = `TKT-${dateStr}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // ─── TicketComment ────────────────────────────────────────────────────────────

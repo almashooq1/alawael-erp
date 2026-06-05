@@ -116,14 +116,13 @@ const creditNoteSchema = new mongoose.Schema(
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
 // New async hook (no prior save hook existed) — async style per the W483/
 // Mongoose-9 doctrine in CLAUDE.md.
-creditNoteSchema.pre('save', async function (next) {
+creditNoteSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'subtotal',
     'taxAmount',
     'totalAmount',
     'remainingAmount',
   ]);
-  next();
 });
 
 creditNoteSchema.index({ type: 1, status: 1 });

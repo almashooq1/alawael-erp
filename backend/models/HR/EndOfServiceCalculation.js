@@ -53,7 +53,7 @@ const endOfServiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-endOfServiceSchema.pre('save', async function (next) {
+endOfServiceSchema.pre('save', async function () {
   if (!this.eos_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -104,7 +104,6 @@ endOfServiceSchema.pre('save', async function (next) {
     this.total_deductions = this.advances_deduction + this.other_deductions;
     this.net_payment = this.total_dues - this.total_deductions;
   }
-  next();
 });
 
 endOfServiceSchema.index({ employee_id: 1 });

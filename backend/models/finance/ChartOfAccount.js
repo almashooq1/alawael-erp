@@ -30,12 +30,11 @@ const chartOfAccountSchema = new mongoose.Schema(
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
 // New async hook (none existed) per the W483/Mongoose-9 async doctrine.
-chartOfAccountSchema.pre('save', async function (next) {
+chartOfAccountSchema.pre('save', async function () {
   require('../../intelligence/money.lib').deriveHalalas(this, [
     'current_balance',
     'opening_balance',
   ]);
-  next();
 });
 
 // REMOVED DUPLICATE: chartOfAccountSchema.index({ code: 1 }); — field already has index:true

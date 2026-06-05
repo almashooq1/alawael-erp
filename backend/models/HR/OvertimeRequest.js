@@ -89,7 +89,7 @@ OvertimeRequestSchema.index({ employeeId: 1, date: -1 });
 OvertimeRequestSchema.index({ status: 1, date: -1 });
 OvertimeRequestSchema.index({ department: 1, date: -1 });
 
-OvertimeRequestSchema.pre('save', async function (next) {
+OvertimeRequestSchema.pre('save', async function () {
   if (!this.requestNumber) {
     // Query against THIS scoped model so the counter is stable
     // per-collection.
@@ -104,7 +104,6 @@ OvertimeRequestSchema.pre('save', async function (next) {
   } else if (this.type === 'عمل ليلي') {
     this.calculation.multiplier = 1.75;
   }
-  next();
 });
 
 // Registered as `HROvertimeRequest` to dodge the collision with the

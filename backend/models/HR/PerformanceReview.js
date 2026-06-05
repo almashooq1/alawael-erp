@@ -56,7 +56,7 @@ const performanceReviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-performanceReviewSchema.pre('save', async function (next) {
+performanceReviewSchema.pre('save', async function () {
   if (!this.review_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -70,7 +70,6 @@ performanceReviewSchema.pre('save', async function (next) {
     this.weighted_score = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 10) / 10 : 0;
     this.total_score = this.criteria.reduce((s, c) => s + (c.score || 0), 0) / this.criteria.length;
   }
-  next();
 });
 
 performanceReviewSchema.index({ employee_id: 1, review_period_end: -1 });

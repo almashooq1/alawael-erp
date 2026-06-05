@@ -127,9 +127,8 @@ const budgetSchema = new mongoose.Schema(
 
 // فهرسة
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-budgetSchema.pre('save', async function (next) {
+budgetSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['totalBudgeted', 'totalSpent']);
-  next();
 });
 
 budgetSchema.index({ fiscalYear: 1, period: 1 });

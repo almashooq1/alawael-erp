@@ -70,7 +70,7 @@ const tripSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-tripSchema.pre('save', async function (next) {
+tripSchema.pre('save', async function () {
   if (!this.trip_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -85,7 +85,6 @@ tripSchema.pre('save', async function (next) {
     ).length;
     this.absent_count = this.passengers.filter(p => p.status === 'absent').length;
   }
-  next();
 });
 
 // REMOVED DUPLICATE: tripSchema.index({ trip_number: 1 }); — field already has index:true

@@ -205,7 +205,7 @@ impactMeasurementSchema.index({ beneficiary: 1, measurementDate: -1 });
 impactMeasurementSchema.index({ overallTrend: 1, riskLevel: 1 });
 
 // ── Auto-calculate months since discharge ──
-impactMeasurementSchema.pre('save', async function (next) {
+impactMeasurementSchema.pre('save', async function () {
   if (this.isNew || this.isModified('measurementDate')) {
     try {
       const postRehabCase = await mongoose.model('PostRehabCase').findById(this.postRehabCase);
@@ -218,7 +218,6 @@ impactMeasurementSchema.pre('save', async function (next) {
       // silent
     }
   }
-  next();
 });
 
 const ImpactMeasurement =

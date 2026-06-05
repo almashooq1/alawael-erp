@@ -275,12 +275,11 @@ const earlyInterventionChildSchema = new mongoose.Schema(
 );
 
 // Auto-generate childNumber
-earlyInterventionChildSchema.pre('save', async function (next) {
+earlyInterventionChildSchema.pre('save', async function () {
   if (!this.childNumber) {
     const count = await mongoose.model('EarlyInterventionChild').countDocuments();
     this.childNumber = `EIC-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 // Indexes

@@ -86,9 +86,8 @@ const taxCalendarSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-taxCalendarSchema.pre('save', async function (next) {
+taxCalendarSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'estimatedAmount']);
-  next();
 });
 
 taxCalendarSchema.index({ dueDate: 1, status: 1 });

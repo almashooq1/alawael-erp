@@ -200,11 +200,16 @@ function listSchemaFiles(roots) {
 function classifyHook(isAsync, params, bodyAhead) {
   const paramsTrim = params.trim();
   const hasNext = /\bnext\b/.test(paramsTrim);
-  if (isAsync) return 'async';
+  const callsNext = /\bnext\s*\(/.test(bodyAhead);
+  // W946 — an `async function (next)` hook that calls next() is ALSO broken
+  // under Mongoose 9: async hooks don't receive `next` (it's undefined), so
+  // next() throws "next is not a function" on every save. Fold it into the
+  // dangerous 'callback' class so the W494 ratchet + mixed-detection catch it.
+  if (isAsync) return hasNext && callsNext ? 'callback' : 'async';
   if (!hasNext) return 'sync';
   // sync with `next` param — check if body actually calls next(). If it
   // does, it's the dangerous callback style. If it doesn't, treat as sync.
-  if (/\bnext\s*\(/.test(bodyAhead)) return 'callback';
+  if (callsNext) return 'callback';
   return 'sync';
 }
 

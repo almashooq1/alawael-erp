@@ -99,13 +99,12 @@ const fileRecordSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-fileRecordSchema.pre('save', async function (next) {
+fileRecordSchema.pre('save', async function () {
   if (!this.file_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('FileRecord').countDocuments();
     this.file_number = `FILE-${year}-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 fileRecordSchema.index({ category: 1, reference_type: 1, reference_id: 1 });

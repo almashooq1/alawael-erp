@@ -99,7 +99,7 @@ ComplaintSchema.index({ employeeId: 1, status: 1 });
 // complaintNumber: removed — unique:true creates implicit index
 ComplaintSchema.index({ status: 1, priority: 1 });
 
-ComplaintSchema.pre('save', async function (next) {
+ComplaintSchema.pre('save', async function () {
   if (!this.complaintNumber) {
     // Query against THIS model (HRComplaint), not the canonical
     // models/Complaint.js, so the auto-number counter doesn't drift
@@ -107,7 +107,6 @@ ComplaintSchema.pre('save', async function (next) {
     const count = await mongoose.model('HRComplaint').countDocuments();
     this.complaintNumber = `CMP-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // Registered as `HRComplaint` to dodge the collision with the canonical

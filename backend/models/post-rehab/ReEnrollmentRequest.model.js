@@ -132,13 +132,12 @@ reEnrollmentRequestSchema.index({ beneficiary: 1 });
 reEnrollmentRequestSchema.index({ status: 1, urgencyLevel: 1 });
 
 // ── Auto-generate request number ──
-reEnrollmentRequestSchema.pre('save', async function (next) {
+reEnrollmentRequestSchema.pre('save', async function () {
   if (!this.requestNumber) {
     const count = await mongoose.model('ReEnrollmentRequest').countDocuments();
     const year = new Date().getFullYear();
     this.requestNumber = `RER-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 const ReEnrollmentRequest =

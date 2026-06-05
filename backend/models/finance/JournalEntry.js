@@ -42,7 +42,7 @@ const journalEntrySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-journalEntrySchema.pre('save', async function (next) {
+journalEntrySchema.pre('save', async function () {
   if (!this.entry_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -57,7 +57,6 @@ journalEntrySchema.pre('save', async function (next) {
   }
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../../intelligence/money.lib').deriveHalalas(this, ['total_debit', 'total_credit']);
-  next();
 });
 
 // REMOVED DUPLICATE: journalEntrySchema.index({ entry_number: 1 }); — field already has index:true

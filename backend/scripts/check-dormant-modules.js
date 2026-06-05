@@ -167,7 +167,9 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/gpsSecurityService.js', // entangled w/ W440 security drift-guard (verifyAPIKey timing-safe)
   'services/isolationForest.service.js', // deliberate Phase16-18 ship — anomaly ML; wire OR delete
   'services/rehabilitation/RehabService.js', // deliberate module add; rehab system is fragmented (future ADR)
-  'services/reporting/webhookHandler.js', // Phase10 "delivered/read receipts end-to-end" — wire-up likely missed
+  // services/reporting/webhookHandler.js — RATCHETED-DOWN 2026-06-05 (W933/W941):
+  //   wired via routes/reports-webhooks.routes.js self-init when ENABLE_REPORT_WEBHOOKS=true
+  //   (real WebhookHandler bound to ReportDelivery). No longer dormant.
 ]);
 
 function walk(rootAbs, accept) {

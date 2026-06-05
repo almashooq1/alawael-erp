@@ -249,7 +249,7 @@ describe('check-dormant-modules — baseline + skip structures', () => {
     expect(KNOWN_DORMANT_BASELINE).toBeInstanceOf(Set);
   });
 
-  it('baseline holds 11 entries (W825 wired hr-webhooks; W527 held 7)', () => {
+  it('baseline holds 10 entries (W933/W941 wired reporting webhookHandler; W825 hr-webhooks)', () => {
     // When a module is wired-up or deleted, drop it here AND from the
     // baseline in the same commit. Bumping this number without a
     // corresponding source change should fail the CLI contract below.
@@ -257,7 +257,8 @@ describe('check-dormant-modules — baseline + skip structures', () => {
     // W526: 6 dead flat documentXService.js duplicates deleted → 28→22.
     // W527: 10 bulk-import orphans deleted → 22→12 (5 CLI_TOOL + 7 held).
     // W825: hr-webhooks.routes.js mounted via hr.registry → 12→11.
-    expect(KNOWN_DORMANT_BASELINE.size).toBe(11);
+    // W933/W941: reporting/webhookHandler.js wired via reports-webhooks self-init → 11→10.
+    expect(KNOWN_DORMANT_BASELINE.size).toBe(10);
   });
 
   it('every baseline entry uses POSIX paths (no backslashes, no absolute paths)', () => {

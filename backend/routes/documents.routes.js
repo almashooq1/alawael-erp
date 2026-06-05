@@ -296,6 +296,82 @@ router.use(requireBranchAccess);
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// W933 — map the web-admin English category codes onto the model's Arabic enum.
+const DOC_CATEGORY_MAP = {
+  CLINICAL: 'تقارير',
+  HR: 'مراسلات',
+  FINANCE: 'مالي',
+  LEGAL: 'عقود',
+  QUALITY: 'سياسات',
+  GENERAL: 'أخرى',
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST / — JSON metadata create (web-admin document form). The form stores a
+// file URL (external storage) + entity linkage rather than a multipart upload,
+// so there was no matching route → every save 404'd. This maps its payload onto
+// the Document model (deriving the required fileName/originalFileName/filePath/
+// fileSize, mapping the English category, stamping uploadedBy from the token).
+// ══════════════════════════════════════════════════════════════════════════════
+router.post(
+  '/',
+  wrap(async (req, res) => {
+    const {
+      title,
+      category,
+      fileUrl,
+      mimeType,
+      sizeBytes,
+      entityType,
+      entityId,
+      isConfidential,
+      expiryDate,
+      description,
+      tags,
+      folder,
+    } = req.body;
+
+    if (!title || !String(title).trim()) {
+      return res.status(400).json({ success: false, message: 'عنوان المستند مطلوب' });
+    }
+    if (!fileUrl || !String(fileUrl).trim()) {
+      return res.status(400).json({ success: false, message: 'رابط الملف مطلوب' });
+    }
+
+    const url = String(fileUrl).trim();
+    const baseName = url.split(/[\\/?#]/).filter(Boolean).pop() || 'document';
+    // JWT carries `id` (not `_id`); the existing /upload handler's req.user._id
+    // is itself buggy — read both here so uploadedBy is actually populated.
+    const actorId = req.user.id || req.user._id;
+
+    const doc = await Document.create({
+      fileName: baseName,
+      originalFileName: baseName,
+      fileType: mimeToFileType(mimeType || '', baseName),
+      mimeType: mimeType || 'application/octet-stream',
+      fileSize: Number(sizeBytes) > 0 ? Number(sizeBytes) : 1,
+      filePath: url,
+      fileUrl: url,
+      title: String(title).trim(),
+      description: description || '',
+      category: DOC_CATEGORY_MAP[category] || 'أخرى',
+      tags: Array.isArray(tags) ? tags : [],
+      folder: folder || 'root',
+      uploadedBy: actorId,
+      uploadedByName: req.user.name || req.user.fullName || '',
+      uploadedByEmail: req.user.email || '',
+      ...(entityType ? { entityType: String(entityType) } : {}),
+      ...(entityId ? { entityId: String(entityId) } : {}),
+      ...(typeof isConfidential === 'boolean' ? { isConfidential } : {}),
+      ...(expiryDate ? { expiryDate: new Date(expiryDate) } : {}),
+      status: 'نشط',
+    });
+
+    logger.info(`[Documents] Metadata document created: ${doc.title} by ${actorId}`);
+    res.status(201).json({ success: true, data: doc, document: doc });
+  })
+);
+
 // ══════════════════════════════════════════════════════════════════════════════
 // POST /upload — رفع مستند جديد
 // ══════════════════════════════════════════════════════════════════════════════

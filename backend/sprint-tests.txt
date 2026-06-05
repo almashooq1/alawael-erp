@@ -707,3 +707,4 @@ __tests__/form-save-bridge-complaints-groups-wave930.test.js
 __tests__/reporting-webhooks-wiring-wave933.test.js
 __tests__/documents-json-create-wave933.test.js
 __tests__/vehicle-create-branch-hook-wave933.test.js
+__tests__/employee-create-route-hook-wave933.test.js

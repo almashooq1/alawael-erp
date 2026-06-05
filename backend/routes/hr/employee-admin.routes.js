@@ -33,7 +33,21 @@ const CAMEL_TO_SNAKE = Object.freeze({
   scfhsClassification: 'scfhs_classification',
   scfhsExpiry: 'scfhs_expiry',
   maxCaseload: 'max_caseload',
-  // `specialization` is the same in both — no mapping needed; falls through.
+  // W933 — full create-field map (the web-admin EmployeeForm submits camelCase).
+  // `specialization`, `department`, `gender`, `phone`, `email` are identical in
+  // both shapes — they fall through unchanged.
+  nameAr: 'name_ar',
+  nameEn: 'name_en',
+  nationalId: 'national_id',
+  dateOfBirth: 'date_of_birth',
+  jobTitle: 'job_title_ar',
+  jobTitleAr: 'job_title_ar',
+  hireDate: 'hire_date',
+  contractType: 'contract_type',
+  basicSalary: 'basic_salary',
+  branchId: 'branch_id',
+  maritalStatus: 'marital_status',
+  personalEmail: 'personal_email',
 });
 
 function camelKeysToSnake(patch) {
@@ -111,6 +125,44 @@ function createEmployeeAdminRouter({
         logger.error('[HrEmployeeList]', err.message || err);
       }
       return res.status(500).json({ error: 'list failed' });
+    }
+  });
+
+  // W933 — create route. The web-admin EmployeeForm posts here but no POST
+  // handler existed (only GET/PATCH) → every create failed. Maps the camelCase
+  // payload to the snake_case model, stamps branch_id (from the form's branch
+  // picker, else the caller's branch) + created_by. The Employee pre-save hook
+  // generates employee_number.
+  router.post('/employees', async (req, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'auth required' });
+      const ctx = resolveCallerContext(req);
+      const Employee = require('../../models/HR/Employee');
+      const body = camelKeysToSnake(req.body || {});
+      const branchId = body.branch_id || ctx.callerBranchId;
+      if (!branchId) {
+        return res.status(400).json({ error: 'branch_id required — اختر الفرع' });
+      }
+      const doc = await Employee.create({
+        ...body,
+        branch_id: branchId,
+        created_by: ctx.callerUserId,
+      });
+      return res.status(201).json({ success: true, data: doc });
+    } catch (err) {
+      if (err && err.code === 11000) {
+        const field = Object.keys(err.keyPattern || {})[0] || 'value';
+        return res.status(409).json({ error: `duplicate: ${field}` });
+      }
+      if (err && err.name === 'ValidationError') {
+        return res
+          .status(400)
+          .json({ error: 'validation failed', fields: Object.keys(err.errors || {}) });
+      }
+      if (logger && typeof logger.error === 'function') {
+        logger.error('[HrEmployeeCreate]', err.message || err);
+      }
+      return res.status(500).json({ error: 'create failed' });
     }
   });
 

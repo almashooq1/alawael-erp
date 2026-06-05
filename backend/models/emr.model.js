@@ -206,7 +206,7 @@ const VitalSignSchema = new Schema(
 VitalSignSchema.index({ beneficiary: 1, recordedAt: -1 });
 
 // Auto-calculate BMI
-VitalSignSchema.pre('save', function (next) {
+VitalSignSchema.pre('save', async function () {
   if (this.weight?.value && this.height) {
     const heightM = this.height / 100;
     this.bmi = Math.round((this.weight.value / (heightM * heightM)) * 10) / 10;
@@ -215,7 +215,6 @@ VitalSignSchema.pre('save', function (next) {
     this.glasgowComaScale.total =
       this.glasgowComaScale.eye + this.glasgowComaScale.verbal + this.glasgowComaScale.motor;
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

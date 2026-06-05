@@ -289,7 +289,7 @@ independentLivingPlanSchema.index({ createdBy: 1 });
 independentLivingPlanSchema.index({ startDate: 1, endDate: 1 });
 
 // ─── حساب التقدم قبل الحفظ ───
-independentLivingPlanSchema.pre('save', function (next) {
+independentLivingPlanSchema.pre('save', async function () {
   if (this.goals && this.goals.length > 0) {
     // حساب تقدم الفئات
     const categoryGoals = {};
@@ -311,7 +311,6 @@ independentLivingPlanSchema.pre('save', function (next) {
     const totalProgress = this.goals.reduce((acc, g) => acc + (g.progressPercentage || 0), 0);
     this.overallProgress = Math.round(totalProgress / this.goals.length);
   }
-  next();
 });
 
 // ─── Virtuals ───

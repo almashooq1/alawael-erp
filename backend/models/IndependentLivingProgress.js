@@ -260,7 +260,7 @@ independentLivingProgressSchema.index({ plan: 1, periodEnd: -1 });
 independentLivingProgressSchema.index({ status: 1 });
 
 // ─── حساب الاتجاه والنسب قبل الحفظ ───
-independentLivingProgressSchema.pre('save', function (next) {
+independentLivingProgressSchema.pre('save', async function () {
   // حساب نسبة الحضور
   if (this.sessionsScheduled > 0) {
     this.attendanceRate = Math.round((this.sessionsAttended / this.sessionsScheduled) * 100);
@@ -311,7 +311,6 @@ independentLivingProgressSchema.pre('save', function (next) {
   else if (this.overallScore >= 25) this.independenceLevel = 'mostly_dependent';
   else this.independenceLevel = 'dependent';
 
-  next();
 });
 
 // ─── Virtuals ───

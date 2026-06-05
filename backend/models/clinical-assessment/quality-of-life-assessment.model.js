@@ -85,7 +85,7 @@ QualityOfLifeSchema.index({ branch: 1, status: 1, createdAt: -1 });
 
 // ─── Pre-save Hook ────────────────────────────────────────────────────────────
 
-QualityOfLifeSchema.pre('save', function (next) {
+QualityOfLifeSchema.pre('save', async function () {
   if (typeof this.total_transformed_score === 'number' && !this.interpretation) {
     const s = this.total_transformed_score;
     if (s >= 80) this.interpretation = 'جودة حياة ممتازة';
@@ -94,7 +94,6 @@ QualityOfLifeSchema.pre('save', function (next) {
     else if (s >= 20) this.interpretation = 'جودة حياة منخفضة';
     else this.interpretation = 'جودة حياة متدنية جداً';
   }
-  next();
 });
 
 // ─── Virtuals ─────────────────────────────────────────────────────────────────

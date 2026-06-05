@@ -581,9 +581,8 @@ incidentSchema.methods.addAttachment = function (attachmentData) {
 };
 
 // تحديث الطوابع الزمنية
-incidentSchema.pre('save', function (next) {
+incidentSchema.pre('save', async function () {
   this.auditInfo.lastModifiedAt = new Date();
-  next();
 });
 
 const Incident = mongoose.models.Incident || mongoose.model('Incident', incidentSchema);

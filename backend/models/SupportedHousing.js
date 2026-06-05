@@ -304,7 +304,7 @@ supportedHousingSchema.index({ programType: 1, status: 1 });
 supportedHousingSchema.index({ 'housingUnit.status': 1 });
 
 // ─── حساب الجاهزية قبل الحفظ ───
-supportedHousingSchema.pre('save', function (next) {
+supportedHousingSchema.pre('save', async function () {
   // حساب درجة الجاهزية في آخر تقييم
   if (this.readinessAssessments && this.readinessAssessments.length > 0) {
     const latest = this.readinessAssessments[this.readinessAssessments.length - 1];
@@ -327,7 +327,6 @@ supportedHousingSchema.pre('save', function (next) {
     else if (latest.overallReadiness >= 40) latest.readinessLevel = 'preparing';
     else latest.readinessLevel = 'not_ready';
   }
-  next();
 });
 
 // ─── Virtuals ───

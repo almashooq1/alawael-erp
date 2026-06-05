@@ -197,7 +197,7 @@ adlAssessmentSchema.index({ assessor: 1, assessmentDate: -1 });
 adlAssessmentSchema.index({ status: 1 });
 
 // ─── حساب الدرجات قبل الحفظ ───
-adlAssessmentSchema.pre('save', function (next) {
+adlAssessmentSchema.pre('save', async function () {
   const allSkillArrays = {
     cooking: this.cookingSkills,
     cleaning: this.cleaningSkills,
@@ -239,7 +239,6 @@ adlAssessmentSchema.pre('save', function (next) {
   else if (this.overallScore >= 25) this.independenceLevel = 'mostly_dependent';
   else this.independenceLevel = 'dependent';
 
-  next();
 });
 
 // ─── Virtuals ───

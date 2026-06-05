@@ -82,7 +82,7 @@ const schema = new mongoose.Schema(
 );
 
 // Auto-generate confirmation number (AW-YYYYMMDD-RRRRR) before validation.
-schema.pre('validate', function (next) {
+schema.pre('validate', async function () {
   if (!this.confirmationNumber) {
     const date = new Date();
     const y = date.getFullYear();
@@ -91,7 +91,6 @@ schema.pre('validate', function (next) {
     const rand = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6 hex chars
     this.confirmationNumber = `AW-${y}${m}${d}-${rand}`;
   }
-  next();
 });
 
 schema.index({ createdAt: -1 });

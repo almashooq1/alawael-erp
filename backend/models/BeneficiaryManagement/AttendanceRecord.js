@@ -121,9 +121,8 @@ attendanceRecordSchema.index({ 'consecutiveAbsences.count': 1 });
 attendanceRecordSchema.index({ branchId: 1, attendanceDate: -1 });
 
 // Pre-save middleware
-attendanceRecordSchema.pre('save', function (next) {
+attendanceRecordSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 // Methods

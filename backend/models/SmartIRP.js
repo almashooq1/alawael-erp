@@ -593,9 +593,8 @@ smartIRPSchema.methods.scheduleNextReview = function () {
 };
 
 // Middleware to update timestamps
-smartIRPSchema.pre('save', function (next) {
+smartIRPSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 const SmartIRP = mongoose.models.SmartIRP || mongoose.model('SmartIRP', smartIRPSchema);

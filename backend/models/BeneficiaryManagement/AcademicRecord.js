@@ -185,10 +185,9 @@ academicRecordSchema.index({ enrollmentDate: -1 });
 academicRecordSchema.index({ branchId: 1, enrollmentStatus: 1 });
 
 // Pre-save middleware
-academicRecordSchema.pre('save', function (next) {
+academicRecordSchema.pre('save', async function () {
   this.updatedAt = new Date();
   this.progressPercentage = (this.totalCreditsEarned / this.totalCreditsRequired) * 100;
-  next();
 });
 
 // Methods

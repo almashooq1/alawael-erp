@@ -134,7 +134,7 @@ const trainingPlanSchema = new Schema(
 );
 
 // حساب الملخص تلقائياً
-trainingPlanSchema.pre('save', function (next) {
+trainingPlanSchema.pre('save', async function () {
   if (this.items && this.items.length > 0) {
     const items = this.items;
     this.summary.totalItems = items.length;
@@ -151,7 +151,6 @@ trainingPlanSchema.pre('save', function (next) {
       (this.summary.completedItems / this.summary.totalItems) * 100
     );
   }
-  next();
 });
 
 trainingPlanSchema.index({ year: 1, department: 1 });

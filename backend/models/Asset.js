@@ -81,9 +81,8 @@ assetSchema.index({ createdBy: 1, createdAt: -1 });
 assetSchema.index({ location: 1 });
 
 // Middleware to update updatedAt
-assetSchema.pre('save', function (next) {
+assetSchema.pre('save', async function () {
   this.updatedAt = Date.now();
-  next();
 });
 
 module.exports = mongoose.models.Asset || mongoose.model('Asset', assetSchema);

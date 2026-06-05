@@ -32,9 +32,8 @@ const learningPathSchema = new mongoose.Schema(
 
 learningPathSchema.index({ branchId: 1, targetRole: 1, isActive: 1 });
 
-learningPathSchema.pre('save', function (next) {
+learningPathSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.LearningPath || mongoose.model('LearningPath', learningPathSchema);

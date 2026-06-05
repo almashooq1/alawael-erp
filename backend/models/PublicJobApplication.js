@@ -57,7 +57,7 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-schema.pre('validate', function (next) {
+schema.pre('validate', async function () {
   if (!this.referenceNumber) {
     const d = new Date();
     const y = d.getFullYear();
@@ -66,7 +66,6 @@ schema.pre('validate', function (next) {
     const rand = crypto.randomBytes(3).toString('hex').toUpperCase();
     this.referenceNumber = `AWHR-${y}${m}${day}-${rand}`;
   }
-  next();
 });
 
 schema.index({ createdAt: -1 });

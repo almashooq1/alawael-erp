@@ -197,14 +197,13 @@ prescriptionSchema.index({ beneficiary: 1, status: 1 });
 prescriptionSchema.index({ prescriber: 1, createdAt: -1 });
 prescriptionSchema.index({ status: 1, createdAt: -1 });
 
-prescriptionSchema.pre('save', function (next) {
+prescriptionSchema.pre('save', async function () {
   if (!this.prescriptionNumber) {
     this.prescriptionNumber = `RX-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
   }
   if (!this.validUntil) {
     this.validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -257,11 +256,10 @@ dispensingSchema.index({ prescription: 1 });
 dispensingSchema.index({ beneficiary: 1, createdAt: -1 });
 dispensingSchema.index({ pharmacist: 1, createdAt: -1 });
 
-dispensingSchema.pre('save', function (next) {
+dispensingSchema.pre('save', async function () {
   if (!this.dispensingNumber) {
     this.dispensingNumber = `DSP-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

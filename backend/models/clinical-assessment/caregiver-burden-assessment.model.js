@@ -91,7 +91,7 @@ const CaregiverBurdenSchema = new Schema(
 CaregiverBurdenSchema.index({ beneficiary: 1, assessment_date: -1 });
 CaregiverBurdenSchema.index({ branch: 1, status: 1, createdAt: -1 });
 
-CaregiverBurdenSchema.pre('save', function (next) {
+CaregiverBurdenSchema.pre('save', async function () {
   if (typeof this.total_score === 'number' && !this.burden_level) {
     const s = this.total_score;
     if (s <= 20) {
@@ -108,7 +108,6 @@ CaregiverBurdenSchema.pre('save', function (next) {
       this.burden_level_ar = 'عبء شديد';
     }
   }
-  next();
 });
 
 CaregiverBurdenSchema.virtual('burden_summary').get(function () {

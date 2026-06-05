@@ -44,7 +44,7 @@
  *   episodes.service → episode.{created, phase_transitioned, closed}
  *   core.beneficiaryService → beneficiary.{status_changed, profile_updated}
  *   care-plans.service → careplan.{created, activated, completed}
- *   goals.goalService → goal.achieved
+ *   goals.goalService → goal.{created, achieved}
  *   behavior.behaviorService → behavior.{incident_recorded, plan_updated}
  *   assessments.assessmentService → assessment.completed
  *   aiRecommendation.bus → ai.recommendation_generated
@@ -165,11 +165,11 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`care-plans (${err.message})`);
   }
 
-  // ─── goals: goal.achieved ───────────────────────────────────────────────
+  // ─── goals: goal.{created, achieved} ──────────────────────────
   try {
     const goalsDomain = require('../domains/goals');
     if (goalsDomain.goalService) {
-      attachBridge('goals', goalsDomain.goalService, ['goal.achieved']);
+      attachBridge('goals', goalsDomain.goalService, ['goal.created', 'goal.achieved']);
     } else {
       skipped.push('goals (goalService not initialized)');
     }

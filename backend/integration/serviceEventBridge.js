@@ -43,7 +43,7 @@
  *
  *   episodes.service → episode.{created, phase_transitioned, closed}
  *   core.beneficiaryService → beneficiary.{status_changed, profile_updated}
- *   care-plans.service → careplan.{activated, completed}
+ *   care-plans.service → careplan.{created, activated, completed}
  *   goals.goalService → goal.achieved
  *   behavior.behaviorService → behavior.{incident_recorded, plan_updated}
  *   assessments.assessmentService → assessment.completed
@@ -148,12 +148,16 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`core (${err.message})`);
   }
 
-  // ─── care-plans: careplan.{activated, completed} ────────────────────────
+  // ─── care-plans: careplan.{created, activated, completed} ───────────────
   try {
     const cpModule = require('../domains/care-plans/services/CarePlansService');
     const svc = cpModule.carePlansService;
     if (svc) {
-      attachBridge('care-plans', svc, ['careplan.activated', 'careplan.completed']);
+      attachBridge('care-plans', svc, [
+        'careplan.created',
+        'careplan.activated',
+        'careplan.completed',
+      ]);
     } else {
       skipped.push('care-plans (singleton not exported)');
     }

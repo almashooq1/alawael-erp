@@ -425,6 +425,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care plan → Timeline: Created (W937) ─────────────────────────
+  // Completes the care-plan lifecycle on the unified timeline. CarePlansService
+  // .createPlan emits `careplan.created` (bridged to `care-plans.careplan.created`)
+  // with the draft plan's beneficiary + episode. Per doctrine "اربط كل خطة
+  // بالمستفيد والحلقة والزمن" the drafted plan now lands on the timeline as the
+  // opening of the chain that the W931 `care_plan_approved` entry continues.
+  subscribers.push({
+    name: 'care-plans:created → timeline:record',
+    pattern: 'care-plans.careplan.created',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.type || 'rehabilitation';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_created',
+            category: 'clinical',
+            severity: 'info',
+            title: `Care plan drafted: ${type}`,
+            title_ar: `إنشاء خطة رعاية: ${type}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-create record failed: ${err.message}`);
+      }
+    },
+  });
+
   // ─── Care plan → Timeline: Activated (W931) ───────────────────────
   // Next pathway link after W930: CarePlansService.activatePlan emits
   // `careplan.activated` (bridged to `care-plans.careplan.activated`), consumed

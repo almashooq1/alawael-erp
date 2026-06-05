@@ -46,7 +46,7 @@ class CarePlansService extends BaseService {
       status: 'draft',
     });
 
-    this.emit('care-plan:created', {
+    this.emit('careplan.created', {
       planId: plan._id,
       beneficiaryId: plan.beneficiaryId,
       episodeId: plan.episodeId,

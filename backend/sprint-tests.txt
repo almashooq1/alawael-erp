@@ -383,6 +383,7 @@ __tests__/money-lib-wave579.test.js
 __tests__/mudad-wps-bootstrap-wave282b.test.js
 __tests__/mudad-wps-orchestrator-wave282.test.js
 __tests__/new-admin-routes.api.test.js
+__tests__/no-audit-write-in-transaction-wave936.test.js
 __tests__/no-beneficiary-eager-fetch.test.js
 __tests__/no-broken-req-branchid-wave269h.test.js
 __tests__/no-broken-requires.test.js
@@ -392,7 +393,10 @@ __tests__/no-flaky-relative-date-month-math.test.js
 __tests__/no-float-money-fields-finance-wave579.test.js
 __tests__/no-it-only-or-skip.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
+__tests__/no-req-user-branch-snake-wave942.test.js
+__tests__/no-service-layer-role-check-wave943.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js
+__tests__/no-sole-dead-gate-requirerole-wave938.test.js
 __tests__/no-unprotected-beneficiary-param-wave440.test.js
 __tests__/no-wrapper-export-direct-call-wave278k.test.js
 __tests__/notify-channel-email-wave519.test.js
@@ -601,6 +605,7 @@ __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-wave361.test.js
 __tests__/transition-plan-routes-behavioral-wave862b.test.js
 __tests__/unauthenticated-routes-wave658.test.js
+__tests__/untenanted-aggregations-ratchet-wave944.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/utilization-digest-script.test.js
 __tests__/visitor-auth-httponly-cookie-wave584.test.js
@@ -700,11 +705,16 @@ __tests__/episode-created-timeline-subscriber-wave929.test.js
 __tests__/assessment-completed-timeline-subscriber-wave930.test.js
 __tests__/care-plan-activated-timeline-subscriber-wave931.test.js
 __tests__/episode-closed-timeline-subscriber-wave935.test.js
+__tests__/care-plan-created-timeline-subscriber-wave937.test.js
+__tests__/goal-created-timeline-subscriber-wave939.test.js
+__tests__/complaints-normalize-bridge-reconcile-wave940.test.js
+__tests__/care-plan-updated-timeline-subscriber-wave945.test.js
 __tests__/no-inmemory-route-store.test.js
 __tests__/icf-assessment-create-assessor-wave930.test.js
 __tests__/branch-scope-user-enrich-wave930.test.js
 __tests__/form-save-bridge-complaints-groups-wave930.test.js
 __tests__/reporting-webhooks-wiring-wave933.test.js
+__tests__/quality-audit-notify-wave941.test.js
 __tests__/documents-json-create-wave933.test.js
 __tests__/vehicle-create-branch-hook-wave933.test.js
 __tests__/employee-create-route-hook-wave933.test.js

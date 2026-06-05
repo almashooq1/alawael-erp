@@ -181,12 +181,21 @@ const COMPLAINT_CATEGORIES = new Set([
 ]);
 function normalizeComplaintInput(req, _res, next) {
   const b = req.body || {};
+  // W940 — only coerce a source that has a KNOWN mapping (UPPER web-admin codes
+  // or a lowercase enum passthrough). An unrecognized value (e.g. 'martian') is
+  // left untouched so validate() still rejects it with 400 — the W930 bridge
+  // must not silently launder invalid input into 'other'.
   if (b.source) {
-    b.source = COMPLAINT_SOURCE_MAP[b.source] || COMPLAINT_SOURCE_MAP[String(b.source).toUpperCase()] || 'other';
+    const mapped =
+      COMPLAINT_SOURCE_MAP[b.source] || COMPLAINT_SOURCE_MAP[String(b.source).toUpperCase()];
+    if (mapped) b.source = mapped;
   }
-  // subject is required by the model but the form has no subject field — derive
-  // it from the (Arabic) category, else the first line of the description.
-  if (!b.subject || !String(b.subject).trim()) {
+  // subject is required by the model but the web-admin form has NO subject field
+  // (it arrives undefined) — derive it from the (Arabic) category, else the first
+  // line of the description. W940 — only backfill when the field is ABSENT; an
+  // explicit empty/whitespace subject is a real validation error → leave it so
+  // validate() returns 400.
+  if (b.subject === undefined || b.subject === null) {
     const fromCategory = b.category && String(b.category).trim();
     b.subject = fromCategory || (b.description ? String(b.description).trim().slice(0, 120) : '');
   }

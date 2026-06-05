@@ -43,8 +43,8 @@
  *
  *   episodes.service → episode.{created, phase_transitioned, closed}
  *   core.beneficiaryService → beneficiary.{status_changed, profile_updated}
- *   care-plans.service → careplan.{activated, completed}
- *   goals.goalService → goal.achieved
+ *   care-plans.service → careplan.{created, updated, activated, completed}
+ *   goals.goalService → goal.{created, achieved}
  *   behavior.behaviorService → behavior.{incident_recorded, plan_updated}
  *   assessments.assessmentService → assessment.completed
  *   aiRecommendation.bus → ai.recommendation_generated
@@ -148,12 +148,17 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`core (${err.message})`);
   }
 
-  // ─── care-plans: careplan.{activated, completed} ────────────────────────
+  // ─── care-plans: careplan.{created, updated, activated, completed} ──────
   try {
     const cpModule = require('../domains/care-plans/services/CarePlansService');
     const svc = cpModule.carePlansService;
     if (svc) {
-      attachBridge('care-plans', svc, ['careplan.activated', 'careplan.completed']);
+      attachBridge('care-plans', svc, [
+        'careplan.created',
+        'careplan.updated',
+        'careplan.activated',
+        'careplan.completed',
+      ]);
     } else {
       skipped.push('care-plans (singleton not exported)');
     }
@@ -161,11 +166,11 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`care-plans (${err.message})`);
   }
 
-  // ─── goals: goal.achieved ───────────────────────────────────────────────
+  // ─── goals: goal.{created, achieved} ──────────────────────────
   try {
     const goalsDomain = require('../domains/goals');
     if (goalsDomain.goalService) {
-      attachBridge('goals', goalsDomain.goalService, ['goal.achieved']);
+      attachBridge('goals', goalsDomain.goalService, ['goal.created', 'goal.achieved']);
     } else {
       skipped.push('goals (goalService not initialized)');
     }

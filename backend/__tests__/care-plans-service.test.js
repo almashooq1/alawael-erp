@@ -104,10 +104,10 @@ describe('CarePlansService', () => {
       expect(UCP.create).not.toHaveBeenCalled();
     });
 
-    it('emits care-plan:created on success', async () => {
+    it('emits careplan.created on success', async () => {
       UCP.create.mockResolvedValueOnce(makePlan());
       const spy = jest.fn();
-      service.on('care-plan:created', spy);
+      service.on('careplan.created', spy);
 
       await service.createPlan({ beneficiaryId: 'ben001', episodeId: 'ep001' });
 
@@ -222,10 +222,10 @@ describe('CarePlansService', () => {
       });
     });
 
-    it('emits care-plan:updated on success', async () => {
+    it('emits careplan.updated on success', async () => {
       UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan()));
       const spy = jest.fn();
-      service.on('care-plan:updated', spy);
+      service.on('careplan.updated', spy);
 
       await service.updatePlan('plan001', { title: 'New Title' });
 

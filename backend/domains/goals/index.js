@@ -103,7 +103,12 @@ class GoalService extends BaseService {
     logger.info(
       `[GoalService] Goal ${entity.goalNumber} created for beneficiary ${entity.beneficiaryId}`
     );
-    this.emit('goalCreated', { goalId: entity._id, beneficiaryId: entity.beneficiaryId });
+    this.emit('goal.created', {
+      goalId: entity._id,
+      beneficiaryId: entity.beneficiaryId,
+      episodeId: entity.episodeId,
+      goalNumber: entity.goalNumber,
+    });
   }
 
   async getForBeneficiary(beneficiaryId, options) {

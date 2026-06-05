@@ -1199,12 +1199,26 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/episode-closed-timeline-subscriber-wave935.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-audit-write-in-transaction-wave936.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-created-timeline-subscriber-wave937.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-sole-dead-gate-requirerole-wave938.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-created-timeline-subscriber-wave939.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-normalize-bridge-reconcile-wave940.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-audit-notify-wave941.test.js'
+      - 'backend/__tests__/no-req-user-branch-snake-wave942.test.js'
+      - 'backend/__tests__/no-service-layer-role-check-wave943.test.js'
+      - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/documents-json-create-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/vehicle-create-branch-hook-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -2388,12 +2402,26 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/episode-closed-timeline-subscriber-wave935.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-audit-write-in-transaction-wave936.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-created-timeline-subscriber-wave937.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-sole-dead-gate-requirerole-wave938.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-created-timeline-subscriber-wave939.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-normalize-bridge-reconcile-wave940.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-audit-notify-wave941.test.js'
+      - 'backend/__tests__/no-req-user-branch-snake-wave942.test.js'
+      - 'backend/__tests__/no-service-layer-role-check-wave943.test.js'
+      - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/documents-json-create-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/vehicle-create-branch-hook-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'

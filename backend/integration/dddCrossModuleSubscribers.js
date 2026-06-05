@@ -209,7 +209,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // NO_SHOW + CANCELLED). Subscriber was dead-on-arrival — its handler's
   // integrationBus.publish('ai-recommendations', 'ai.risk_elevated', ...) chain
   // also became unreachable. Removal closes the W389 baseline by 1 entry.
-
+  // ─── Goals → Timeline: Goal created (W939) ──────────────────
+  // GoalService.afterCreate emits `goal.created` (normalized from the dead
+  // `goalCreated` ad-hoc name + enriched with episodeId, bridged to
+  // `goals.goal.created`). Until now only goal *achievement* landed on the
+  // timeline — the goal-setting moment that opens each therapeutic objective was
+  // invisible. Per doctrine "اربط كل هدف بالمستفيد والحلقة والزمن" the new
+  // goal now lands on the timeline linked to its episode.
+  subscribers.push({
+    name: 'goals:created → timeline:record',
+    pattern: 'goals.goal.created',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const num = event.payload.goalNumber;
+          const numText = num ? ` #${num}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'goal_created',
+            category: 'clinical',
+            severity: 'info',
+            title: `Therapeutic goal set${num ? ` #${num}` : ''}`,
+            title_ar: `تحديد هدف علاجي${numText}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline goal-create record failed: ${err.message}`);
+      }
+    },
+  });
   // ─── Goals → Timeline: Goal achieved ───────────────────────────────
   subscribers.push({
     name: 'goals:achieved → timeline:record',
@@ -421,6 +453,71 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
         }
       } catch (err) {
         logger.error(`[DDD-CrossModule] AI recommendation failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Care plan → Timeline: Created (W937) ─────────────────────────
+  // Completes the care-plan lifecycle on the unified timeline. CarePlansService
+  // .createPlan emits `careplan.created` (bridged to `care-plans.careplan.created`)
+  // with the draft plan's beneficiary + episode. Per doctrine "اربط كل خطة
+  // بالمستفيد والحلقة والزمن" the drafted plan now lands on the timeline as the
+  // opening of the chain that the W931 `care_plan_approved` entry continues.
+  subscribers.push({
+    name: 'care-plans:created → timeline:record',
+    pattern: 'care-plans.careplan.created',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.type || 'rehabilitation';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_created',
+            category: 'clinical',
+            severity: 'info',
+            title: `Care plan drafted: ${type}`,
+            title_ar: `إنشاء خطة رعاية: ${type}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-create record failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Care plan → Timeline: Updated (W945) ─────────────────────────
+  // Closes the last ad-hoc care-plan event: CarePlansService.updatePlan emitted
+  // a non-canonical `care-plan:updated` with no episode link and no timeline
+  // record. W945 canonicalizes it to `careplan.updated` (bridged to
+  // `care-plans.careplan.updated`) carrying episodeId, so every plan revision
+  // lands on the unified timeline between the W937 `care_plan_created` opening
+  // and the W931 `care_plan_approved` activation — per doctrine "اربط كل خطة
+  // بالمستفيد والحلقة والزمن".
+  subscribers.push({
+    name: 'care-plans:updated → timeline:record',
+    pattern: 'care-plans.careplan.updated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_updated',
+            category: 'clinical',
+            severity: 'info',
+            title: 'Care plan updated',
+            title_ar: 'تحديث خطة الرعاية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-update record failed: ${err.message}`);
       }
     },
   });

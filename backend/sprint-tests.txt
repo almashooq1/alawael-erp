@@ -712,6 +712,7 @@ __tests__/goal-created-timeline-subscriber-wave939.test.js
 __tests__/complaints-normalize-bridge-reconcile-wave940.test.js
 __tests__/care-plan-updated-timeline-subscriber-wave945.test.js
 __tests__/care-plan-completed-timeline-subscriber-wave947.test.js
+__tests__/session-lifecycle-timeline-subscriber-wave974.test.js
 __tests__/no-inmemory-route-store.test.js
 __tests__/icf-assessment-create-assessor-wave930.test.js
 __tests__/branch-scope-user-enrich-wave930.test.js

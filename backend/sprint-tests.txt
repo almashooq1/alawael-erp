@@ -393,6 +393,8 @@ __tests__/no-flaky-relative-date-month-math.test.js
 __tests__/no-float-money-fields-finance-wave579.test.js
 __tests__/no-it-only-or-skip.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
+__tests__/no-req-user-branch-snake-wave942.test.js
+__tests__/no-service-layer-role-check-wave943.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js
 __tests__/no-sole-dead-gate-requirerole-wave938.test.js
 __tests__/no-unprotected-beneficiary-param-wave440.test.js
@@ -603,6 +605,7 @@ __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-wave361.test.js
 __tests__/transition-plan-routes-behavioral-wave862b.test.js
 __tests__/unauthenticated-routes-wave658.test.js
+__tests__/untenanted-aggregations-ratchet-wave944.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/utilization-digest-script.test.js
 __tests__/visitor-auth-httponly-cookie-wave584.test.js

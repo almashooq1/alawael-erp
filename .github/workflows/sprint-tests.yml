@@ -1169,6 +1169,8 @@ on:
       - 'backend/__tests__/facilities-routes-branch-isolation-wave921.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/subsidies-routes-branch-isolation-wave922.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-enhanced-branch-isolation-wave923.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2321,6 +2323,8 @@ on:
       - 'backend/__tests__/facilities-routes-branch-isolation-wave921.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/subsidies-routes-branch-isolation-wave922.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-enhanced-branch-isolation-wave923.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

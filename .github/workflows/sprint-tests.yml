@@ -1121,6 +1121,8 @@ on:
       - 'backend/__tests__/cpe-admin-branch-isolation-wave888.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/guardians-branch-isolation-wave889.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-create-branchid-wave926.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2225,6 +2227,8 @@ on:
       - 'backend/__tests__/cpe-admin-branch-isolation-wave888.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/guardians-branch-isolation-wave889.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-create-branchid-wave926.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

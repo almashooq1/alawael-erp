@@ -553,6 +553,12 @@ router.post('/', async (req, res) => {
       generalNotes,
       registrationDate: new Date(),
       createdBy: req.user?._id,
+      // Multi-tenant isolation (W269): stamp the creating user's branch so the
+      // new record matches branchFilter(req) on the list query. Without this the
+      // beneficiary saves with branchId=null and is invisible to the branch-scoped
+      // list — looked like "registration didn't save". For cross-branch admins
+      // (branchScope.branchId === null) fall back to an explicit body branchId.
+      branchId: req.branchScope?.branchId || req.body.branchId || undefined,
     });
 
     await beneficiary.save();

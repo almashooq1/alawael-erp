@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const {
   Teleconsultation,
   TelehealthWaitingRoom,
@@ -60,7 +61,7 @@ function scopedById(req, id) {
  */
 router.get('/stats', async (req, res) => {
   try {
-    const branchId = req.user.branch || req.query.branchId;
+    const branchId = effectiveBranchScope(req); // honours ?branchId= for HQ; restricted → own branch
     const stats = await getDashboardStats(branchId);
     res.json({ success: true, data: stats });
   } catch (err) {
@@ -77,9 +78,7 @@ router.get('/stats', async (req, res) => {
 router.get('/consultations', async (req, res) => {
   try {
     const { status, date, providerId, search, page = 1, limit = 20 } = req.query;
-    const branchId = req.user.branch;
-
-    const filter = { branch: branchId };
+    const filter = { ...telehealthBranchFilter(req) };
     if (status) filter.status = status;
     if (date) {
       const d = new Date(date);
@@ -136,9 +135,10 @@ router.post(
   authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'receptionist']),
   async (req, res) => {
     try {
+      const scope = effectiveBranchScope(req);
       const consultation = await scheduleConsultation({
         ...req.body,
-        branchId: req.user.branch,
+        ...(scope ? { branchId: scope } : {}),
       });
       res.status(201).json({
         success: true,
@@ -386,7 +386,7 @@ router.patch('/waiting-room/:id/device-test', async (req, res) => {
  */
 router.get('/provider/queue', async (req, res) => {
   try {
-    const branchId = req.user.branch;
+    const branchId = effectiveBranchScope(req);
     const providerId = req.user.employeeId || req.user._id;
     const queue = await getProviderQueue(branchId, providerId);
     res.json({ success: true, data: queue });
@@ -507,7 +507,7 @@ router.get('/prescriptions/verify/:uuid', async (req, res) => {
 router.get('/availability-slots', async (req, res) => {
   try {
     const { providerId, date, status = 'available' } = req.query;
-    const filter = { branch: req.user.branch };
+    const filter = { ...telehealthBranchFilter(req) };
     if (providerId) filter.provider = providerId;
     if (date) {
       const d = new Date(date);
@@ -537,9 +537,10 @@ router.post(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
+      const scope = effectiveBranchScope(req);
       const slot = await ProviderAvailabilitySlot.create({
         ...req.body,
-        branch: req.user.branch,
+        ...(scope ? { branch: scope } : {}),
       });
       res.status(201).json({ success: true, data: slot });
     } catch (err) {
@@ -561,7 +562,8 @@ router.post(
       if (!Array.isArray(slots)) {
         return res.status(400).json({ success: false, message: 'slots يجب أن تكون مصفوفة' });
       }
-      const docs = slots.map(s => ({ ...s, branch: req.user.branch, uuid: uuidv4() }));
+      const scope = effectiveBranchScope(req);
+      const docs = slots.map(s => ({ ...s, ...(scope ? { branch: scope } : {}), uuid: uuidv4() }));
       const created = await ProviderAvailabilitySlot.insertMany(docs);
       res.status(201).json({ success: true, data: created, count: created.length });
     } catch (err) {
@@ -631,7 +633,7 @@ router.get('/providers/:providerId/availability', async (req, res) => {
   try {
     const { from, to, status = 'available' } = req.query;
     const filter = {
-      branch: req.user.branch,
+      ...telehealthBranchFilter(req),
       provider: req.params.providerId,
       status,
     };
@@ -658,7 +660,7 @@ router.get('/providers/:providerId/availability', async (req, res) => {
 router.get('/devices', async (req, res) => {
   try {
     const { beneficiaryId, deviceType, status } = req.query;
-    const filter = { branch: req.user.branch };
+    const filter = { ...telehealthBranchFilter(req) };
     if (beneficiaryId) filter.beneficiary = beneficiaryId;
     if (deviceType) filter.deviceType = deviceType;
     if (status) filter.status = status;
@@ -682,10 +684,11 @@ router.post(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
+      const scope = effectiveBranchScope(req);
       const device = await TelehealthDevice.create({
         ...req.body,
         uuid: uuidv4(),
-        branch: req.user.branch,
+        ...(scope ? { branch: scope } : {}),
       });
       res.status(201).json({ success: true, data: device });
     } catch (err) {
@@ -747,10 +750,11 @@ function checkAlertThresholds(device, reading) {
  */
 router.post('/virtual-sessions', async (req, res) => {
   try {
+    const scope = effectiveBranchScope(req);
     const session = await VirtualSession.create({
       ...req.body,
       uuid: uuidv4(),
-      branch: req.user.branch,
+      ...(scope ? { branch: scope } : {}),
     });
     res.status(201).json({ success: true, data: session });
   } catch (err) {

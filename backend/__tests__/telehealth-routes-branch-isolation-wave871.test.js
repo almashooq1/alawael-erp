@@ -46,6 +46,24 @@ const therapistA = {
   branch: BRANCH_A,
 };
 
+// W946: replicates PRODUCTION — only `branchId` is enriched onto req.user; the
+// legacy `branch` field is NEVER populated. Pre-W946 the list/create endpoints
+// read req.user.branch directly, so for this user they filtered/stamped by
+// undefined (cross-branch read leak + orphaned writes).
+const therapistBranchIdOnly = {
+  _id: new mongoose.Types.ObjectId(),
+  id: String(new mongoose.Types.ObjectId()),
+  role: 'therapist',
+  branchId: String(BRANCH_A),
+};
+
+const headOffice = {
+  _id: new mongoose.Types.ObjectId(),
+  id: String(new mongoose.Types.ObjectId()),
+  role: 'head_office_admin',
+  branchId: String(BRANCH_A),
+};
+
 function buildApp() {
   const app = express();
   app.use(express.json());
@@ -150,5 +168,53 @@ describe('W871 — availability slot instance paths are branch-scoped', () => {
     const res = await request(app).delete(`/api/v1/telehealth/availability-slots/${slot._id}`);
     expect(res.status).toBe(404);
     expect(await ProviderAvailabilitySlot.countDocuments({ _id: slot._id })).toBe(1);
+  });
+});
+
+describe('W946 — list/create endpoints scope via branchId, NOT the never-populated req.user.branch', () => {
+  it('GET /consultations returns ONLY same-branch rows for a branchId-only user', async () => {
+    mockAuthState.user = therapistBranchIdOnly;
+    await seedConsultation(BRANCH_A, { consultationNumber: `C-A-${uuidv4()}` });
+    await seedConsultation(BRANCH_B, { consultationNumber: `C-B-${uuidv4()}` });
+    const res = await request(app).get('/api/v1/telehealth/consultations');
+    expect(res.status).toBe(200);
+    const branches = (res.body.data || []).map(c => String(c.branch));
+    expect(branches).toContain(String(BRANCH_A));
+    expect(branches).not.toContain(String(BRANCH_B)); // pre-W946: leaked both (filter by undefined)
+  });
+
+  it('GET /availability-slots returns ONLY same-branch slots for a branchId-only user', async () => {
+    mockAuthState.user = therapistBranchIdOnly;
+    await seedSlot(BRANCH_A);
+    await seedSlot(BRANCH_B);
+    const res = await request(app).get('/api/v1/telehealth/availability-slots');
+    expect(res.status).toBe(200);
+    const branches = (res.body.data || []).map(s => String(s.branch));
+    expect(branches).not.toContain(String(BRANCH_B));
+  });
+
+  it("POST /availability-slots stamps the caller's real branch (not undefined) for a branchId-only user", async () => {
+    mockAuthState.user = therapistBranchIdOnly;
+    const res = await request(app)
+      .post('/api/v1/telehealth/availability-slots')
+      .send({
+        provider: String(PROVIDER),
+        slotDate: new Date().toISOString(),
+        startTime: '10:00',
+        endTime: '10:30',
+      });
+    expect([200, 201]).toContain(res.status);
+    const slot = res.body.data || res.body.slot;
+    expect(String(slot.branch)).toBe(String(BRANCH_A)); // pre-W946: branch was undefined (orphaned)
+  });
+
+  it('a cross-branch (head_office) user sees BOTH branches', async () => {
+    mockAuthState.user = headOffice;
+    await seedConsultation(BRANCH_A, { consultationNumber: `C-A-${uuidv4()}` });
+    await seedConsultation(BRANCH_B, { consultationNumber: `C-B-${uuidv4()}` });
+    const res = await request(app).get('/api/v1/telehealth/consultations');
+    expect(res.status).toBe(200);
+    const branches = (res.body.data || []).map(c => String(c.branch));
+    expect(branches).toEqual(expect.arrayContaining([String(BRANCH_A), String(BRANCH_B)]));
   });
 });

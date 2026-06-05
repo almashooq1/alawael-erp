@@ -62,7 +62,9 @@ const BASELINE = new Set([
   'routes/referral.routes.js',
   'routes/reports-analytics-module.routes.js',
   'routes/smart-assessment-engine.routes.js',
-  'routes/telehealth.routes.js',
+  // 'routes/telehealth.routes.js' — FIXED W946: all 11 req.user.branch sites now
+  //   use telehealthBranchFilter(req) (lists) / effectiveBranchScope(req) (values
+  //   + stamps); proven by the branchId-only-user cases in the W871 test (9/9).
 ]);
 
 function walk(dir, out = []) {

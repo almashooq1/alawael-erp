@@ -18,6 +18,7 @@
 
 const reg = require('./permissions.registry');
 const archetypeMap = require('./role-archetype.map.json');
+const { resolveRole } = require('../config/constants/roles.constants');
 
 // archetype NAME → CODE (invert registry.ARCHETYPES, which is code → name).
 const CODE_BY_NAME = Object.freeze(
@@ -35,7 +36,18 @@ const ENTRY_BY_ROLE = Object.freeze(
   }, {})
 );
 
-const normalizeRole = role => (role == null ? '' : String(role).toLowerCase().trim());
+// Normalize a raw role to the canonical map key (D4 / ADR-036): resolve legacy
+// aliases (kebab `super-admin`, camel `superAdmin`, `hq_admin`, …) to canonical
+// snake_case via the shared registry FIRST (its alias keys are case-sensitive,
+// so resolve before lowercasing), THEN lowercase for the map lookup. A nullish/
+// empty role stays '' so a missing role → 'unmapped-role' rather than
+// resolveRole's guest fallback.
+const normalizeRole = role => {
+  if (role == null) return '';
+  const raw = String(role).trim();
+  if (!raw) return '';
+  return String(resolveRole(raw)).toLowerCase().trim();
+};
 
 /**
  * Resolve a live role name to its archetype classification.

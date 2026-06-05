@@ -151,6 +151,7 @@ __tests__/duplicate-mount-cleanup-wave777.test.js
 __tests__/registry-mount-resilience-wave778.test.js
 __tests__/build-info-internals.test.js
 __tests__/calibration-mgmtreview-mfa-tier-wave277g.test.js
+__tests__/can-approver-gate-and-alias-wave934.test.js
 __tests__/canonical-schemas-wave366.test.js
 __tests__/capa-mfa-tier-wave277e.test.js
 __tests__/care-gap-loader-wave29.test.js

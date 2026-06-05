@@ -46,6 +46,10 @@ const careTimelineSchema = new mongoose.Schema(
         'session_completed',
         'session_cancelled',
         'session_no_show',
+        // Appointments (W970 — unified-core linkage)
+        'appointment_booked',
+        'appointment_cancelled',
+        'appointment_no_show',
         'goal_created',
         'goal_achieved',
         'goal_failed',
@@ -67,6 +71,7 @@ const careTimelineSchema = new mongoose.Schema(
         'risk_flag_resolved',
         'quality_alert',
         'compliance_issue',
+        'behavior_incident', // W970 — behavior subscriber (already on main) needs this enum value
         // Family
         'family_contact',
         'family_meeting',

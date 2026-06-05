@@ -152,8 +152,53 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 });
 
 // POST / — Create complaint/suggestion
+// W930 — bridge the web-admin complaint form onto the model contract. The form
+// posts UPPER source codes (FAMILY/STAFF/EXTERNAL/ANONYMOUS), a free-text Arabic
+// `category`, and a `description` but NO `subject`. The model needs a lowercase
+// `source` enum + a required `subject`, and `category` must be a known slug.
+// Without this every submit 400'd at the validator ("data not saved"). Runs
+// BEFORE validate() so the validator sees the normalized shape.
+const COMPLAINT_SOURCE_MAP = {
+  FAMILY: 'parent',
+  STAFF: 'employee',
+  EXTERNAL: 'customer',
+  ANONYMOUS: 'other',
+  employee: 'employee',
+  student: 'student',
+  customer: 'customer',
+  parent: 'parent',
+  other: 'other',
+};
+const COMPLAINT_CATEGORIES = new Set([
+  'administrative',
+  'technical',
+  'financial',
+  'service',
+  'hr',
+  'safety',
+  'academic',
+  'other',
+]);
+function normalizeComplaintInput(req, _res, next) {
+  const b = req.body || {};
+  if (b.source) {
+    b.source = COMPLAINT_SOURCE_MAP[b.source] || COMPLAINT_SOURCE_MAP[String(b.source).toUpperCase()] || 'other';
+  }
+  // subject is required by the model but the form has no subject field — derive
+  // it from the (Arabic) category, else the first line of the description.
+  if (!b.subject || !String(b.subject).trim()) {
+    const fromCategory = b.category && String(b.category).trim();
+    b.subject = fromCategory || (b.description ? String(b.description).trim().slice(0, 120) : '');
+  }
+  // category must be a known enum slug; the form sends free Arabic text → drop
+  // it (the model defaults to 'other'); the Arabic value survives in `subject`.
+  if (b.category && !COMPLAINT_CATEGORIES.has(b.category)) delete b.category;
+  next();
+}
+
 router.post(
   '/',
+  normalizeComplaintInput,
   validate([
     body('subject').trim().notEmpty().withMessage('عنوان الشكوى مطلوب'),
     body('description').trim().notEmpty().withMessage('وصف الشكوى مطلوب'),
@@ -339,3 +384,5 @@ router.delete(
 );
 
 module.exports = router;
+// W930 — exported for unit testing the web-admin→model normalization bridge.
+module.exports.normalizeComplaintInput = normalizeComplaintInput;

@@ -1957,7 +1957,23 @@ class TherapistPortalService {
 
   async createGroup(data, therapistId) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.create({ ...data, facilitator: data.facilitator || therapistId });
+    // W930 — the web-admin form posts `name` (no `nameAr`) and no `type`, but the
+    // model requires both → every create threw a ValidationError (500, "data not
+    // saved"). Map name↔nameAr and derive a valid `type` (from the form's `focus`
+    // when it matches the enum, else 'mixed') so the group actually saves.
+    const TYPE_ENUM = new Set([
+      'social_skills', 'language_group', 'motor_group', 'sensory_group',
+      'behavioral_group', 'life_skills', 'academic_readiness', 'parent_training',
+      'sibling_support', 'transition_group', 'recreation', 'art_therapy',
+      'music_therapy', 'mixed',
+    ]);
+    const payload = { ...data, facilitator: data.facilitator || therapistId };
+    if (!payload.nameAr && payload.name) payload.nameAr = payload.name;
+    if (!payload.name && payload.nameAr) payload.name = payload.nameAr;
+    if (!payload.type || !TYPE_ENUM.has(payload.type)) {
+      payload.type = TYPE_ENUM.has(payload.focus) ? payload.focus : 'mixed';
+    }
+    return TherapyGroup.create(payload);
   }
 
   async updateGroup(id, patch) {

@@ -60,7 +60,8 @@ const BASELINE = new Set([
   'routes/hr/hr-inbox.routes.js',
   // 'routes/hr-module.routes.js' — FIXED W973: POST /leaves branch stamp now uses
   //   effectiveBranchScope(req) (was req.user.branch_id → undefined on a required field).
-  'routes/referral.routes.js',
+  // 'routes/referral.routes.js' — FIXED W973: 2 list filters → referralBranchFilter(req),
+  //   value/stamps → effectiveBranchScope(req); list-isolation test (branchId-only user, 2/2).
   // 'routes/reports-analytics-module.routes.js' — FIXED W973: inert never-populated
   //   fallback swapped to scopedBranch (C3a already forces the real branch at the caller).
   // 'routes/smart-assessment-engine.routes.js' — FIXED W973: 13 assessment CREATE

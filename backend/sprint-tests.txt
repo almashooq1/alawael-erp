@@ -458,6 +458,7 @@ __tests__/reassessment-lifecycle-wave222.test.js
 __tests__/reassessment-reminder-cascade-wave225.test.js
 __tests__/reassessment-trigger-service-wave220.test.js
 __tests__/referral-branch-tenancy-wave621.test.js
+__tests__/referral-routes-branch-isolation-wave973.test.js
 __tests__/referral-tracking-service.test.js
 __tests__/referrals-digest-script.test.js
 __tests__/referralticket-branch-tenancy-wave633.test.js

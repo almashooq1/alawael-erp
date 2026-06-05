@@ -555,6 +555,41 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care plan → Timeline: Completed (W947) ─────────────────────
+  // Closes the care-plan lifecycle on the unified timeline: after drafting
+  // (W937), revision (W945) and activation (W931), CarePlansService.completePlan
+  // emits `careplan.completed` (bridged to `care-plans.careplan.completed`) with
+  // the beneficiary, episode (W947) and final achievementRate — yet nothing
+  // recorded the clinical closure of the plan. Per doctrine "اربط كل خطة
+  // بالمستفيد والحلقة والزمن" the completed plan now lands on the timeline as
+  // the terminal milestone of the care-plan chain.
+  subscribers.push({
+    name: 'care-plans:completed → timeline:record',
+    pattern: 'care-plans.careplan.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const rate = event.payload.achievementRate;
+          const rateText = typeof rate === 'number' ? ` (نسبة التحقق ${rate}٪)` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Care plan completed${typeof rate === 'number' ? ` (${rate}% achieved)` : ''}`,
+            title_ar: `استكمال خطة الرعاية${rateText}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-complete record failed: ${err.message}`);
+      }
+    },
+  });
+
   // ─── Episodes → Timeline: Discharge / episode closed (W935) ───────
   // Final longitudinal pathway link: EpisodeService.dischargeEpisode emits
   // `episode.closed` (bridged to `episodes.episode.closed`) with outcome +

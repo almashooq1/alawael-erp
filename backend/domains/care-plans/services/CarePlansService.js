@@ -199,10 +199,12 @@ class CarePlansService extends BaseService {
 
     // W380: canonical contract event (was ad-hoc 'care-plan:completed' pre-W380).
     // Envelope per CARE_PLAN_EVENTS.COMPLETED. achievementRate sourced from
-    // outcomeRating (0-100 scale) when present, else null.
+    // outcomeRating (0-100 scale) when present, else null. W947 adds episodeId so
+    // the unified CareTimeline links the completion to the beneficiary's episode.
     this.emit('careplan.completed', {
       planId: plan._id,
       beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
       achievementRate: typeof outcomeRating === 'number' ? outcomeRating : null,
     });
 

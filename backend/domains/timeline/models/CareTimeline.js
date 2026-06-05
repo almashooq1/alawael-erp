@@ -42,6 +42,7 @@ const careTimelineSchema = new mongoose.Schema(
         'care_plan_created',
         'care_plan_updated',
         'care_plan_approved',
+        'care_plan_completed',
         'session_completed',
         'session_cancelled',
         'session_no_show',

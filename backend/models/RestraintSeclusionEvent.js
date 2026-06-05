@@ -155,6 +155,31 @@ RestraintSeclusionEventSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W977 — surface a restraint/seclusion episode on the unified-core timeline at
+// once (high-importance safety/compliance event). Native pre-compile hooks,
+// create-only, guarded, fire-and-forget. Consumed by dddCrossModuleSubscribers.js.
+RestraintSeclusionEventSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+RestraintSeclusionEventSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('safety', 'restraint.applied', {
+        restraintEventId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        restraintType: doc.type || '',
+        status: doc.status || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.RestraintSeclusionEvent ||
   mongoose.model('RestraintSeclusionEvent', RestraintSeclusionEventSchema);

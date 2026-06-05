@@ -72,6 +72,10 @@ const careTimelineSchema = new mongoose.Schema(
         'quality_alert',
         'compliance_issue',
         'behavior_incident', // W970 — behavior subscriber (already on main) needs this enum value
+        // Safety (W977)
+        'seizure_event',
+        'safeguarding_concern',
+        'restraint_applied',
         // Family
         'family_contact',
         'family_meeting',

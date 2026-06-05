@@ -1235,6 +1235,8 @@ on:
       - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2453,6 +2455,8 @@ on:
       - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -728,3 +728,4 @@ __tests__/care-plan-workers-bootstrap-wave973.test.js
 __tests__/quality-bus-unification-wave974.test.js
 __tests__/model-event-bridge-global-plugin-wave974.test.js
 __tests__/incident-ncr-producer-wave976.test.js
+__tests__/safety-core-linkage-wave977.test.js

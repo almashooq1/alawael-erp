@@ -88,7 +88,9 @@ const invoiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-invoiceSchema.pre('save', async function (next) {
+// W933 — pure async hook (the mixed `async function (next){…next()}` style breaks
+// under Mongoose 9 → "next is not a function" on every save).
+invoiceSchema.pre('save', async function () {
   if (!this.invoice_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -128,7 +130,6 @@ invoiceSchema.pre('save', async function (next) {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings from
   // the float fields just computed. Additive: does not change float behaviour.
   require('../../intelligence/invoice-money.lib').applyInvoiceHalalas(this);
-  next();
 });
 
 // REMOVED DUPLICATE: invoiceSchema.index({ invoice_number: 1 }); — field already has index:true

@@ -430,15 +430,25 @@ router.get(
 router.post(
   '/invoices',
   asyncHandler(async (req, res) => {
+    // W933 — branch_id is required but the web-admin form never sent it. Stamp the
+    // creator's branch (W269: scoped for restricted users via ENABLE_USER_BRANCH_
+    // ENRICH; explicit body branch only for cross-branch creators). Fix created_by
+    // (JWT carries id, not _id).
+    const { branch_id: _b1, branchId: _b2, ...rest } = req.body || {};
+    const branchId =
+      req.branchScope?.branchId ||
+      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+    const actorId = req.user?.id || req.user?._id;
     const invoice = new Invoice({
-      ...req.body,
-      created_by: req.user?._id,
+      ...rest,
+      ...(branchId ? { branch_id: branchId } : {}),
+      created_by: actorId,
     });
     await invoice.save();
 
     // إنشاء قيد محاسبي تلقائي (مدين: ذمم مدينة، دائن: إيرادات + ضريبة)
     try {
-      await accountingService.createInvoiceEntry(invoice, req.user?._id);
+      await accountingService.createInvoiceEntry(invoice, actorId);
     } catch (err) {
       // لا نوقف إنشاء الفاتورة إذا فشل القيد
       logger.error('Invoice journal entry failed:', err.message);

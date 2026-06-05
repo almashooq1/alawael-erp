@@ -222,10 +222,10 @@ describe('CarePlansService', () => {
       });
     });
 
-    it('emits care-plan:updated on success', async () => {
+    it('emits careplan.updated on success', async () => {
       UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan()));
       const spy = jest.fn();
-      service.on('care-plan:updated', spy);
+      service.on('careplan.updated', spy);
 
       await service.updatePlan('plan001', { title: 'New Title' });
 

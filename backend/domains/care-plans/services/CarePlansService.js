@@ -134,9 +134,13 @@ class CarePlansService extends BaseService {
       throw err;
     }
 
-    this.emit('care-plan:updated', {
+    // W945: canonical contract event (was ad-hoc 'care-plan:updated' pre-W945).
+    // Carries episodeId so the unified CareTimeline can link the revision to the
+    // beneficiary's episode of care, per doctrine "اربط كل خطة بالمستفيد والحلقة والزمن".
+    this.emit('careplan.updated', {
       planId: plan._id,
       beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
     });
 
     return plan;

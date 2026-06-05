@@ -489,6 +489,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care plan → Timeline: Updated (W945) ─────────────────────────
+  // Closes the last ad-hoc care-plan event: CarePlansService.updatePlan emitted
+  // a non-canonical `care-plan:updated` with no episode link and no timeline
+  // record. W945 canonicalizes it to `careplan.updated` (bridged to
+  // `care-plans.careplan.updated`) carrying episodeId, so every plan revision
+  // lands on the unified timeline between the W937 `care_plan_created` opening
+  // and the W931 `care_plan_approved` activation — per doctrine "اربط كل خطة
+  // بالمستفيد والحلقة والزمن".
+  subscribers.push({
+    name: 'care-plans:updated → timeline:record',
+    pattern: 'care-plans.careplan.updated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_updated',
+            category: 'clinical',
+            severity: 'info',
+            title: 'Care plan updated',
+            title_ar: 'تحديث خطة الرعاية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-update record failed: ${err.message}`);
+      }
+    },
+  });
+
   // ─── Care plan → Timeline: Activated (W931) ───────────────────────
   // Next pathway link after W930: CarePlansService.activatePlan emits
   // `careplan.activated` (bridged to `care-plans.careplan.activated`), consumed

@@ -1213,6 +1213,8 @@ on:
       - 'backend/__tests__/no-req-user-branch-snake-wave942.test.js'
       - 'backend/__tests__/no-service-layer-role-check-wave943.test.js'
       - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2409,6 +2411,8 @@ on:
       - 'backend/__tests__/no-req-user-branch-snake-wave942.test.js'
       - 'backend/__tests__/no-service-layer-role-check-wave943.test.js'
       - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

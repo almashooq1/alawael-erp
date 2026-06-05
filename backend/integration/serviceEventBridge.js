@@ -43,7 +43,7 @@
  *
  *   episodes.service → episode.{created, phase_transitioned, closed}
  *   core.beneficiaryService → beneficiary.{status_changed, profile_updated}
- *   care-plans.service → careplan.{created, activated, completed}
+ *   care-plans.service → careplan.{created, updated, activated, completed}
  *   goals.goalService → goal.{created, achieved}
  *   behavior.behaviorService → behavior.{incident_recorded, plan_updated}
  *   assessments.assessmentService → assessment.completed
@@ -148,13 +148,14 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`core (${err.message})`);
   }
 
-  // ─── care-plans: careplan.{created, activated, completed} ───────────────
+  // ─── care-plans: careplan.{created, updated, activated, completed} ──────
   try {
     const cpModule = require('../domains/care-plans/services/CarePlansService');
     const svc = cpModule.carePlansService;
     if (svc) {
       attachBridge('care-plans', svc, [
         'careplan.created',
+        'careplan.updated',
         'careplan.activated',
         'careplan.completed',
       ]);

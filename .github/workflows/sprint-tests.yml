@@ -1196,6 +1196,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/reporting-webhooks-wiring-wave933.test.js'
       - 'backend/__tests__/can-approver-gate-and-alias-wave934.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/episode-closed-timeline-subscriber-wave935.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2375,6 +2377,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/reporting-webhooks-wiring-wave933.test.js'
       - 'backend/__tests__/can-approver-gate-and-alias-wave934.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/episode-closed-timeline-subscriber-wave935.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

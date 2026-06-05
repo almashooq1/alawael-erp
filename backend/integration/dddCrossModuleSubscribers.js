@@ -458,6 +458,41 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Episodes → Timeline: Discharge / episode closed (W935) ───────
+  // Final longitudinal pathway link: EpisodeService.dischargeEpisode emits
+  // `episode.closed` (bridged to `episodes.episode.closed`) with outcome +
+  // durationDays, but nothing recorded the discharge on the unified timeline —
+  // the Episode of Care موحد closed silently. Per doctrine "اربط كل حلقة علاجية
+  // بالمستفيد والزمن", the discharge now lands on the timeline linked to its
+  // episode, closing the loop that opened with the W929 `admission` entry.
+  subscribers.push({
+    name: 'episodes:closed → timeline:record',
+    pattern: 'episodes.episode.closed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const outcome = event.payload.outcome || 'completed';
+          const days = event.payload.durationDays;
+          const daysText = typeof days === 'number' ? ` (${days} يوم)` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'discharge',
+            category: 'clinical',
+            severity: 'info',
+            title: `Episode of care closed: ${outcome}${typeof days === 'number' ? ` (${days} days)` : ''}`,
+            title_ar: `إغلاق حلقة علاجية: ${outcome}${daysText}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline episode-close record failed: ${err.message}`);
+      }
+    },
+  });
+
   // W390 DELETED: 'family:engagement_low' subscriber.
   // Listened for 'family.family.engagement_low' which W377 deleted (FAMILY_EVENTS
   // whole group). Dead-on-arrival — no producer existed.

@@ -690,3 +690,4 @@ __tests__/capa-reject-inprogress-behavioral-wave848.test.js
 __tests__/spasticity-injection-api-wave715.test.js
 __tests__/spasticity-injection-behavioral-wave715.test.js
 __tests__/quality-enhanced-branch-isolation-wave923.test.js
+__tests__/morning-health-check-branch-isolation-wave924.test.js

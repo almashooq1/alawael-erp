@@ -23,10 +23,20 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const MorningHealthCheck = require('../models/MorningHealthCheck');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const {
+  bodyScopedBeneficiaryGuard,
+  enforceBeneficiaryBranch,
+} = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W924 — populate req.branchScope before bodyScopedBeneficiaryGuard (W441 was inert without it).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 const READ_ROLES = [
   'admin',
@@ -79,10 +89,7 @@ async function hydrate(items) {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
-      filter.branchId = req.query.branchId;
-    }
+    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) }, ...branchFilter(req) };
     if (req.query.decision && DECISIONS.includes(String(req.query.decision))) {
       filter.decision = String(req.query.decision);
     }
@@ -104,8 +111,9 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
+      await enforceBeneficiaryBranch(req, req.query.beneficiaryId);
       filter.beneficiaryId = req.query.beneficiaryId;
     }
     if (req.query.decision && DECISIONS.includes(String(req.query.decision))) {
@@ -146,7 +154,7 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MorningHealthCheck.findById(req.params.id).lean();
+    const row = await MorningHealthCheck.findOne(scopedById(req, req.params.id)).lean();
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -180,8 +188,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       reason: body.reason || '',
       nurseId: req.user?.id || null,
       nurseName: req.user?.name || body.nurseName || '',
+      branchId:
+        req.branchScope?.branchId ||
+        (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
     };
-    if (body.branchId && mongoose.isValidObjectId(body.branchId)) update.branchId = body.branchId;
     if (typeof body.temperatureC === 'number') update.temperatureC = body.temperatureC;
     if (body.mood) update.mood = body.mood;
     if (body.symptoms && typeof body.symptoms === 'object') update.symptoms = body.symptoms;
@@ -213,7 +223,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.decision === 'send_home' && !String(body.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'السبب مطلوب' });
     }
-    const row = await MorningHealthCheck.findByIdAndUpdate(req.params.id, body, {
+    const row = await MorningHealthCheck.findOneAndUpdate(scopedById(req, req.params.id), body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -230,8 +240,8 @@ router.post('/:id/notify-parent', requireRole(WRITE_ROLES), async (req, res) => 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MorningHealthCheck.findByIdAndUpdate(
-      req.params.id,
+    const row = await MorningHealthCheck.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { parentNotified: true, parentNotifiedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -248,7 +258,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MorningHealthCheck.findByIdAndDelete(req.params.id);
+    const row = await MorningHealthCheck.findOneAndDelete(scopedById(req, req.params.id));
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

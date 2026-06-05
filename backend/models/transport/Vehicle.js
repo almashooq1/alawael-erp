@@ -49,12 +49,14 @@ const vehicleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-vehicleSchema.pre('save', async function (next) {
+// W933 — pure async hook. The mixed `async function (next) { … next() }` style
+// breaks under Mongoose 9 (it doesn't pass `next` to async hooks → "next is not a
+// function" on every save). Drop the next param + call.
+vehicleSchema.pre('save', async function () {
   if (!this.vehicle_number) {
     const count = await this.constructor.countDocuments({ deleted_at: null });
     this.vehicle_number = `VH-${String(count + 1).padStart(3, '0')}`;
   }
-  next();
 });
 
 vehicleSchema.virtual('is_registration_expiring').get(function () {

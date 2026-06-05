@@ -96,6 +96,15 @@ const DocumentSchema = new mongoose.Schema(
     },
     tags: [String],
 
+    // W933 — web-admin metadata/URL documents: link a stored-file URL to an
+    // entity (e.g. a beneficiary) without a multipart upload. All optional +
+    // untyped-ObjectId (String) so existing upload docs are unaffected.
+    entityType: { type: String },
+    entityId: { type: String },
+    fileUrl: { type: String },
+    isConfidential: { type: Boolean, default: false },
+    expiryDate: { type: Date },
+
     // التنظيم
     folder: {
       type: String,

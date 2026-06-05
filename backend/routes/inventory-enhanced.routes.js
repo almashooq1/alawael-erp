@@ -363,7 +363,20 @@ router.get('/purchase-orders', authenticate, requireBranchAccess, async (req, re
 
 router.post('/purchase-orders', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const po = await svc.createPurchaseOrder({ ...req.body, requestedBy: req.user._id });
+    // W933 — branchId is required on PurchaseOrder. Stamp the creator's branch
+    // (W269: scoped for restricted users via ENABLE_USER_BRANCH_ENRICH; explicit
+    // body branch only for cross-branch creators). Pass requestedBy as the proper
+    // 2nd arg (the service signature is createPurchaseOrder(data, requestedBy);
+    // JWT carries id, not _id).
+    const { branchId: _b1, branch_id: _b2, ...rest } = req.body || {};
+    const branchId =
+      req.branchScope?.branchId ||
+      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+    const actorId = req.user?.id || req.user?._id;
+    const po = await svc.createPurchaseOrder(
+      { ...rest, ...(branchId ? { branchId } : {}) },
+      actorId
+    );
     res.status(201).json({ success: true, data: po });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

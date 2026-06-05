@@ -256,7 +256,19 @@ router.get(
 router.post(
   '/vehicles',
   asyncHandler(async (req, res) => {
-    const vehicle = new Vehicle({ ...req.body, created_by: req.user?._id });
+    // W933 — branch_id is required on Vehicle but the web-admin form never sent
+    // it. Stamp the creator's branch (W269: restricted users get their scoped
+    // branch — enriched via ENABLE_USER_BRANCH_ENRICH; never trust a body branch
+    // for them). A cross-branch creator may name an explicit branch in the body.
+    const { branch_id: _b1, branchId: _b2, ...rest } = req.body || {};
+    const branchId =
+      req.branchScope?.branchId ||
+      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+    const vehicle = new Vehicle({
+      ...rest,
+      ...(branchId ? { branch_id: branchId } : {}),
+      created_by: req.user?.id || req.user?._id,
+    });
     await vehicle.save();
     res.status(201).json({ success: true, data: vehicle, message: 'تم إضافة المركبة بنجاح' });
   })

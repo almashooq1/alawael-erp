@@ -1215,6 +1215,11 @@ on:
       - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-json-create-wave933.test.js'
+      - 'backend/__tests__/vehicle-create-branch-hook-wave933.test.js'
+      - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
+      - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2413,6 +2418,11 @@ on:
       - 'backend/__tests__/untenanted-aggregations-ratchet-wave944.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-updated-timeline-subscriber-wave945.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-json-create-wave933.test.js'
+      - 'backend/__tests__/vehicle-create-branch-hook-wave933.test.js'
+      - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
+      - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

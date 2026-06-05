@@ -210,8 +210,10 @@ employeeSchema.index({ hire_date: 1 });
 // REMOVED DUPLICATE: employeeSchema.index({ national_id: 1 }); — field already has index:true
 employeeSchema.index({ deleted_at: 1 });
 
-// Auto-generate employee_number before save
-employeeSchema.pre('save', async function (next) {
+// Auto-generate employee_number before save.
+// W933 — pure async hook (the mixed `async function (next){…next()}` style breaks
+// under Mongoose 9 → "next is not a function" on every save).
+employeeSchema.pre('save', async function () {
   if (!this.employee_number) {
     const year = new Date().getFullYear();
     const last = await this.constructor.findOne(
@@ -227,7 +229,6 @@ employeeSchema.pre('save', async function (next) {
     d.setDate(d.getDate() + 90);
     this.probation_end_date = d;
   }
-  next();
 });
 
 // Virtuals

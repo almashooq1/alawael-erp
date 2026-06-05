@@ -682,30 +682,32 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `asset-catalog-branch-isolation-wave917.test.js` (3 tests). W912 WO tests still pass (catalog vs sub-resource split).
 - **Verify (W914–W917)**: **4 suites / 12 tests** ✅ (+ W912 regression 7 tests).
 - **PR #267 merged** (`ad3406e8f`, 2026-06-05): squash of W890–W918 on `main`; CI green (683 sprint suites / 13345 tests).
-- ~~W919 asset-management dashboard tenant counters~~ — **done** (local): `GET /dashboard` pending WO/transfers/
-  overdue/active-bookings counts now use `branchFilter(req)`; W912 test +1 (8 tests).
-- ~~W920 contracts routes branch isolation~~ — **done** (local): closed tenant leak in `contracts.routes.js` where
+- **PR #268 merged** (`5f75bfa67`, 2026-06-05): W919 dashboard counters + W920–W922 contracts/facilities/subsidies;
+  CI green (sprint gate ~23m).
+- ~~W919 asset-management dashboard tenant counters~~ — **done** (PR #268): `GET /dashboard` pending WO/
+  transfers/overdue/active-bookings counts use `branchFilter(req)`; W912 test +1 (8 tests).
+- ~~W920 contracts routes branch isolation~~ — **done** (PR #268): closed tenant leak in `contracts.routes.js` where
   `requireBranchAccess` existed but list/stats + id-keyed read/write/delete/renew paths still queried globally.
   Added `branchFilter`/`scopedById` across list, `/stats/summary`, `GET/:id`, `PUT/:id`, `DELETE/:id`,
   `POST/:id/renew`. `POST /` now stamps `branchId` from scope and passes `liabilityInsurance` through to model
   (schema-required), with `aggregateScope()` ObjectId casting to keep branch-scoped aggregation accurate.
   - `contracts-routes-branch-isolation-wave920.test.js` (6 tests: scoped list, foreign GET/PUT 404,
     scoped stats summary, branch stamping on create, foreign branchId spoof 403).
-- ~~W921 facilities routes branch isolation~~ — **done** (local): hardened `facilities.routes.js` across all four
+- ~~W921 facilities routes branch isolation~~ — **done** (PR #268): hardened `facilities.routes.js` across all four
   surfaces (rooms, bookings, maintenance, dashboard). Added `branchFilter` + `scopedById` on room CRUD, room-derived
   scope for `RoomBooking` (list + create/update/delete), branch-aware + room-fallback scope for `MaintenanceRequest`,
   and dashboard counter scoping (`total/occupied/bookings/pendingMaintenance`) with aggregate ObjectId casting via
   `aggregateScope()`. Also stamps `branchId` on maintenance create and blocks foreign-room booking/maintenance writes.
   - `facilities-routes-branch-isolation-wave921.test.js` (8 tests: scoped rooms/maintenance/dashboard,
     foreign room+booking 404 regressions, foreign-room booking create denied, maintenance create branch stamp).
-- ~~W922 subsidies routes branch isolation~~ — **done** (local): `subsidies.routes.js` now enforces tenant scope via
+- ~~W922 subsidies routes branch isolation~~ — **done** (PR #268): `subsidies.routes.js` now enforces tenant scope via
   beneficiary ownership for list/summary/id-keyed mutation surfaces. Added `requireBranchAccess` + scoped beneficiary
   cache helpers (`getScopedBeneficiaryIds` / `mergeScopedBeneficiaryFilter`), gated `GET /by-beneficiary/:id` and
   `POST /` with `assertBeneficiaryInScope`, and converted `PATCH /:id`, `POST /:id/mark-received`, `DELETE /:id`
   to scoped `findOneAnd*` filters. `POST /` now stamps `branchId` from the beneficiary record (ignores caller-supplied
   branch spoofing). + `subsidies-routes-branch-isolation-wave922.test.js` (7 tests: scoped list/summary,
   foreign beneficiary/read+write 404 regressions, scoped create branch stamping).
-- **Targeted verify refresh (W920–W922)**: **4 suites / 25 tests** ✅
+- **Targeted verify refresh (W920–W922)**: **3 suites / 21 tests** ✅
   (`contracts-routes-branch-isolation-wave920`, `facilities-routes-branch-isolation-wave921`,
   `subsidies-routes-branch-isolation-wave922`, `ci-path-triggers-exist`) +
   `check:routes-load` + `check:wave-collision` + `sync:sprint-paths` ✅.

@@ -6,6 +6,7 @@
  *
  * Event flows:
  *  core → timeline/episodes/dashboards    : beneficiary registered/status changed
+ *  appointments → timeline/dashboards     : booked/cancelled/no-show (W928)
  *  episodes → timeline/workflow/dashboards : phase transitioned/closed
  *  assessments → care-plans/goals/ai      : assessment completed
  *  sessions → timeline/goals/dashboards   : session completed/no-show
@@ -46,16 +47,15 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       try {
         const mongoose = require('mongoose');
         const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline) {
+        if (CareTimeline && event.payload.beneficiaryId) {
           await CareTimeline.create({
-            beneficiary: event.payload.beneficiaryId,
-            eventType: 'beneficiary-registered',
-            title: 'تسجيل مستفيد جديد',
-            titleEn: 'New Beneficiary Registered',
-            description: `تم تسجيل المستفيد ${event.payload.name}`,
-            data: event.payload,
-            source: 'core',
-            importance: 'high',
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'registration',
+            category: 'administrative',
+            severity: 'info',
+            title: `New beneficiary registered: ${event.payload.name || ''}`.trim(),
+            title_ar: `تسجيل مستفيد جديد: ${event.payload.name || ''}`.trim(),
+            metadata: event.payload,
           });
         }
       } catch (err) {
@@ -64,30 +64,48 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  // ─── Core → Dashboards: Update beneficiary KPI ─────────────────────
+  // W928 REMOVED: 'core:registered → dashboards:kpi' subscriber.
+  // It wrote a KPISnapshot per registration with `kpiId: 'beneficiary-total'`
+  // (a string) — but KPISnapshot.kpiId is a REQUIRED ObjectId ref to
+  // DashboardKPIDefinition, so every create() threw a CastError swallowed by
+  // the try/catch (zero rows ever persisted). The design was also wrong: a
+  // per-event "daily" snapshot spams one row per registration. Beneficiary-
+  // count KPIs are derived by the scheduled KPI job + dashboard aggregate
+  // queries, not by this event. The CareTimeline `registration` entry above is
+  // the durable core-linkage artifact for a new beneficiary.
+
+  // ─── Episodes → Timeline: Episode opened (فتح حلقة علاجية) ──────────
+  // W929: closes the loop on the W928 registration→episode wiring. The
+  // student-management route publishes `episodes.episode.created` when a new
+  // beneficiary's care pathway is opened, but no subscriber recorded it on the
+  // unified timeline (only phase_transitioned was wired). Without this entry
+  // the timeline jumped straight from "registration" to the first phase
+  // transition, hiding the moment the Episode of Care موحد was actually opened.
   subscribers.push({
-    name: 'core:registered → dashboards:kpi',
-    pattern: 'core.beneficiary.registered',
-    handler: async _event => {
+    name: 'episodes:created → timeline:record',
+    pattern: 'episodes.episode.created',
+    handler: async event => {
+      logger.info(
+        `[DDD-CrossModule] Episode ${event.payload.episodeId} opened → recording in timeline`
+      );
       try {
         const mongoose = require('mongoose');
-        const KPISnapshot = mongoose.models.KPISnapshot;
-        if (KPISnapshot) {
-          const Beneficiary = mongoose.models.Beneficiary;
-          const count = Beneficiary
-            ? await Beneficiary.countDocuments({ isDeleted: { $ne: true } })
-            : 0;
-          await KPISnapshot.create({
-            kpiId: 'beneficiary-total',
-            value: count,
-            period: 'daily',
-            periodStart: new Date(),
-            periodEnd: new Date(),
-            metadata: { trigger: 'beneficiary.registered' },
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const phase = event.payload.phase || 'intake';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'admission',
+            category: 'clinical',
+            severity: 'info',
+            title: `Episode of care opened (phase: ${phase})`,
+            title_ar: `فتح حلقة علاجية (المرحلة: ${phase})`,
+            metadata: event.payload,
           });
         }
       } catch (err) {
-        logger.error(`[DDD-CrossModule] KPI snapshot failed: ${err.message}`);
+        logger.error(`[DDD-CrossModule] Timeline episode-open record failed: ${err.message}`);
       }
     },
   });
@@ -103,17 +121,17 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       try {
         const mongoose = require('mongoose');
         const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline) {
+        if (CareTimeline && event.payload.beneficiaryId) {
           await CareTimeline.create({
-            beneficiary: event.payload.beneficiaryId,
-            episode: event.payload.episodeId,
-            eventType: 'phase-transition',
-            title: `انتقال مرحلة: ${event.payload.toPhase}`,
-            titleEn: `Phase Transition: ${event.payload.toPhase}`,
-            description: `من ${event.payload.fromPhase} إلى ${event.payload.toPhase}`,
-            data: event.payload,
-            source: 'episodes',
-            importance: 'high',
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'phase_advanced',
+            category: 'clinical',
+            severity: 'info',
+            title: `Phase transition: ${event.payload.toPhase}`,
+            title_ar: `انتقال مرحلة: ${event.payload.toPhase}`,
+            description: `from ${event.payload.fromPhase} to ${event.payload.toPhase}`,
+            metadata: event.payload,
           });
         }
       } catch (err) {
@@ -168,16 +186,16 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       try {
         const mongoose = require('mongoose');
         const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline) {
+        if (CareTimeline && event.payload.beneficiaryId) {
           await CareTimeline.create({
-            beneficiary: event.payload.beneficiaryId,
-            episode: event.payload.episodeId,
-            eventType: 'session-completed',
-            title: `جلسة مكتملة (${event.payload.sessionType})`,
-            titleEn: `Session completed (${event.payload.sessionType})`,
-            data: event.payload,
-            source: 'sessions',
-            importance: 'normal',
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'session_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Session completed (${event.payload.sessionType || ''})`.trim(),
+            title_ar: `جلسة مكتملة (${event.payload.sessionType || ''})`.trim(),
+            metadata: event.payload,
           });
         }
       } catch (err) {
@@ -200,15 +218,15 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       try {
         const mongoose = require('mongoose');
         const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline) {
+        if (CareTimeline && event.payload.beneficiaryId) {
           await CareTimeline.create({
-            beneficiary: event.payload.beneficiaryId,
-            eventType: 'goal-achieved',
-            title: 'تم تحقيق هدف علاجي',
-            titleEn: 'Therapeutic goal achieved',
-            data: event.payload,
-            source: 'goals',
-            importance: 'high',
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'goal_achieved',
+            category: 'clinical',
+            severity: 'success',
+            title: 'Therapeutic goal achieved',
+            title_ar: 'تم تحقيق هدف علاجي',
+            metadata: event.payload,
           });
         }
       } catch (err) {
@@ -285,15 +303,15 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       try {
         const mongoose = require('mongoose');
         const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline) {
+        if (CareTimeline && event.payload.beneficiaryId) {
           await CareTimeline.create({
-            beneficiary: event.payload.beneficiaryId,
-            eventType: 'behavior-incident',
-            title: `حادثة سلوكية (${event.payload.severity})`,
-            titleEn: `Behavior incident (${event.payload.severity})`,
-            data: event.payload,
-            source: 'behavior',
-            importance: event.payload.severity === 'severe' ? 'critical' : 'high',
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'behavior_incident',
+            category: 'clinical',
+            severity: event.payload.severity === 'severe' ? 'critical' : 'warning',
+            title: `Behavior incident (${event.payload.severity || ''})`.trim(),
+            title_ar: `حادثة سلوكية (${event.payload.severity || ''})`.trim(),
+            metadata: event.payload,
           });
         }
       } catch (err) {
@@ -339,6 +357,42 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Assessment → Timeline: Completed (W930) ──────────────────────
+  // Closes the next pathway link after W929: when an assessment is completed
+  // (AssessmentsService emits `assessment.completed` → bridged to
+  // `assessments.assessment.completed`), the only subscriber was the AI
+  // recommendation generator — nothing recorded the completion on the unified
+  // CareTimeline. Per doctrine "اربط كل تقييم بالمستفيد والحلقة والزمن", the
+  // assessment now lands on the timeline linked to its episode.
+  subscribers.push({
+    name: 'assessments:completed → timeline:record',
+    pattern: 'assessments.assessment.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const score = event.payload.overallScore;
+          const scoreText = score === undefined || score === null ? '' : ` (${score}%)`;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'assessment_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Assessment completed: ${event.payload.type || ''}${scoreText}`.trim(),
+            title_ar: `اكتمال تقييم: ${event.payload.type || ''}${scoreText}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(
+          `[DDD-CrossModule] Timeline assessment-complete record failed: ${err.message}`
+        );
+      }
+    },
+  });
+
   // ─── Assessment → AI: Trigger recommendations ─────────────────────
   subscribers.push({
     name: 'assessments:completed → ai:generate',
@@ -371,9 +425,120 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care plan → Timeline: Activated (W931) ───────────────────────
+  // Next pathway link after W930: CarePlansService.activatePlan emits
+  // `careplan.activated` (bridged to `care-plans.careplan.activated`), consumed
+  // until now only by downstream services — nothing recorded the activation on
+  // the unified CareTimeline. Per doctrine "اربط كل خطة بالمستفيد والحلقة والزمن"
+  // the activated plan now lands on the timeline linked to its episode.
+  subscribers.push({
+    name: 'care-plans:activated → timeline:record',
+    pattern: 'care-plans.careplan.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const goalCount = event.payload.goalCount;
+          const goalText = typeof goalCount === 'number' ? ` (${goalCount} هدف)` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'care_plan_approved',
+            category: 'clinical',
+            severity: 'success',
+            title: `Care plan activated${typeof goalCount === 'number' ? ` (${goalCount} goals)` : ''}`,
+            title_ar: `تفعيل خطة الرعاية${goalText}`,
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Timeline care-plan-activate record failed: ${err.message}`);
+      }
+    },
+  });
+
   // W390 DELETED: 'family:engagement_low' subscriber.
   // Listened for 'family.family.engagement_low' which W377 deleted (FAMILY_EVENTS
   // whole group). Dead-on-arrival — no producer existed.
+
+  // ─── Appointments → Timeline: Booked (W928) ───────────────────────
+  subscribers.push({
+    name: 'appointments:booked → timeline:record',
+    pattern: 'appointments.appointment.booked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'appointment_booked',
+            category: 'clinical',
+            severity: 'info',
+            title: `Appointment booked (${event.payload.appointmentType || ''})`.trim(),
+            title_ar: `حجز موعد (${event.payload.appointmentType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Appointment booked timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Appointments → Timeline: Cancelled (W928) ────────────────────
+  subscribers.push({
+    name: 'appointments:cancelled → timeline:record',
+    pattern: 'appointments.appointment.cancelled',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'appointment_cancelled',
+            category: 'administrative',
+            severity: 'info',
+            title: 'Appointment cancelled',
+            title_ar: 'إلغاء موعد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Appointment cancelled timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Appointments → Timeline: No-show (W928) ──────────────────────
+  // A no-show is a clinical-risk signal (disengagement / drop-out predictor),
+  // so it lands as a HIGH-importance timeline entry the director dashboard
+  // surfaces — not buried in the appointments grid.
+  subscribers.push({
+    name: 'appointments:no_show → timeline:record',
+    pattern: 'appointments.appointment.no_show',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'appointment_no_show',
+            category: 'clinical',
+            severity: 'warning',
+            title: 'Appointment no-show',
+            title_ar: 'تغيّب عن موعد (عدم حضور)',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Appointment no-show timeline failed: ${err.message}`);
+      }
+    },
+  });
 
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;

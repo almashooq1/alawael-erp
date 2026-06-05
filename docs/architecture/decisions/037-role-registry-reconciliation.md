@@ -1,4 +1,4 @@
-# ADR-037 — Reconcile the two role registries into one canonical union (close the 26+9 bidirectional divergence) (🟡 Proposed)
+# ADR-037 — Reconcile the two role registries into one canonical union (close the 26+9 bidirectional divergence) (✅ Accepted — FULLY implemented 2026-06-01, D1–D5 done)
 
 **Date**: 2026-05-30
 **Type**: ADR (consolidation / reconciliation — unblocks authz modernization Phase 1)
@@ -96,10 +96,51 @@ reconciled into both). This ADR is the plan to drive that gap to zero.
 
 ## Status
 
-🟡 **Proposed.** The two guards freeze the gap now; D2 (add the 26) is
-agent-executable and low-risk once confirmed; D3 (map the 9) needs the Q1–Q2
-sign-off; D4/D5 follow. Cross-refs: [ADR-036](036-role-archetype-reconciliation.md)
-(archetypes the merged roles map to), ADR-005 (canonical role hierarchy),
-ADR-020 (Student/Beneficiary consolidation pattern),
+✅ **Accepted — FULLY implemented 2026-06-01** (re-verified 2026-06-05 by the
+authz-backlog-truthing pass): D1–D5 are ALL DONE. The history of the final gate
+(Q5 → D4) is preserved below for the record:
+
+- **D2 ✅ done** — `config/constants/roles.constants.js` now declares **54 roles**
+  (was 28); the 26 rbac-only roles were added.
+- **D3 ✅ done** — all 9 formerly-const-only roles (`dpo`, `nurse`, `head_nurse`,
+  `nursing_supervisor`, `independent_advocate`, `cultural_officer`,
+  `family_counsellor`, `patient_relations_officer`, `crm_supervisor`) now carry a
+  real `ROLE_PERMISSIONS` entry in `rbac.config.js`.
+- **D5 ✅ done** — `check:role-divergence` reads **0 rbac-only + 0 const-only**;
+  the guard now enforces parity.
+- **D4 ✅ DONE (2026-06-01, `acc82b9d5`).** Q5 was resolved (`ceo` = distinct
+  role; `c619240c5` added it to constants + removed the buggy alias), making
+  constants a verified superset. `rbac.config.ROLES` is now
+  `require('./constants/roles.constants').ROLES` — the duplicated literal is gone.
+  Verified safe before + after: identical 55 keys/values, no circular require, no
+  identity comparisons; rbac engine works identically; 49 role/authz tests pass;
+  consolidation guard baseline ratcheted 16→15.
+
+  **D4 was previously blocked on (now-resolved) Q5:** The re-export
+  `rbac.config.ROLES = require('./constants/roles.constants').ROLES` would still
+  **drop `'ceo'`**: `ceo` is a value in `rbac.config.ROLES` but NOT in
+  `roles.constants.ROLES`. It is a GENUINELY DISTINCT live role — it has its own
+  `ROLE_PERMISSIONS` (≠ `head_office_admin`), its own `ROLE_HIERARCHY` entry, and
+  is gated on directly in live routes (`authorize(['ceo', …])` in
+  `auditScheduler.routes.js`, `alerts-dashboard.routes.js`, …). Complication:
+  `roles.constants.ROLE_ALIASES.ceo → head_office_admin`, so `resolveRole('ceo')`
+  currently COLLAPSES ceo into head-office-admin permissions — inconsistent with
+  rbac.config giving ceo a distinct set. **Resolving this changes CEO
+  authorization behavior**, so it is an owner decision, not a mechanical add:
+
+  - **Q5 (new, gates D4)** — Is `ceo` a distinct role (→ add `CEO:'ceo'` to
+    `roles.constants.ROLES` AND remove the `ROLE_ALIASES.ceo` entry; CEO keeps its
+    own permission set) OR a true alias of `head_office_admin` (→ delete the
+    distinct `ROLES.CEO` + `ROLE_PERMISSIONS.ceo` + `ROLE_HIERARCHY.ceo` from
+    `rbac.config`, migrate the `authorize(['ceo'])` call-sites)? The first is the
+    likely answer (distinct perms + distinct hierarchy + live gates), but it
+    over/under-grants real CEO users if wrong — hence owner sign-off.
+
+  Once Q5 is answered and `ceo` is reconciled, D4 (the re-export shim) becomes a
+  safe, mechanical one-liner and D5's guard already protects it.
+
+Cross-refs: [ADR-036](036-role-archetype-reconciliation.md) (archetypes the
+merged roles map to), ADR-005 (canonical role hierarchy), ADR-020
+(Student/Beneficiary consolidation pattern),
 [AUTHZ_MODERNIZATION_PLAN.md](../AUTHZ_MODERNIZATION_PLAN.md) (Phase 1), and the
-`check:role-divergence` guard (the enforcement that ratchets this to zero).
+`check:role-divergence` guard (now enforcing parity at zero).

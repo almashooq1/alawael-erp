@@ -25,6 +25,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 router.use(authenticate);
@@ -93,6 +94,55 @@ const publishBeneficiaryRegistered = doc => {
     ).catch(() => {});
   } catch (_) {
     /* bus not wired (e.g. unit tests) — never block registration */
+  }
+};
+
+/**
+ * Open the canonical care pathway for a freshly-registered beneficiary by
+ * creating an initial EpisodeOfCare (status 'planned', phase 'intake'). The
+ * project doctrine mandates "Episode of Care موحد لكل مسار علاجي" — every
+ * beneficiary's clinical journey must hang off an episode, so registration
+ * opens one immediately and the rest of the system (assessments, plans,
+ * sessions, measures) links to it.
+ *
+ * Awaited (so the episodeId can be returned to the wizard) but fully guarded:
+ * the beneficiary is already persisted, so an episode hiccup logs + degrades
+ * gracefully (episodeId:null) rather than failing the registration. Also
+ * publishes `episodes.episode.created` for downstream subscribers (timeline).
+ *
+ * @returns {Promise<import('mongoose').Types.ObjectId|null>} the new episode id
+ */
+const ensureInitialEpisode = async (doc, req) => {
+  const EpisodeOfCare = safeModel('EpisodeOfCare');
+  if (!EpisodeOfCare) return null;
+  try {
+    const episode = await EpisodeOfCare.create({
+      beneficiaryId: doc._id,
+      type: 'initial',
+      status: 'planned',
+      currentPhase: 'intake',
+      startDate: new Date(),
+      branchId: req.user.branchId,
+      createdBy: req.user._id,
+    });
+    try {
+      const { integrationBus } = require('../integration/systemIntegrationBus');
+      if (integrationBus && typeof integrationBus.publish === 'function') {
+        Promise.resolve(
+          integrationBus.publish('episodes', 'episode.created', {
+            episodeId: episode._id,
+            beneficiaryId: doc._id,
+            phase: episode.currentPhase,
+          })
+        ).catch(() => {});
+      }
+    } catch (_) {
+      /* bus not wired — episode still created */
+    }
+    return episode._id;
+  } catch (err) {
+    logger.error(`[student-management] initial episode creation failed: ${err.message}`);
+    return null;
   }
 };
 
@@ -274,7 +324,9 @@ router.post('/', requireRole('admin', 'manager', 'receptionist'), async (req, re
     });
     // Link the new student into the unified core (timeline + dashboards).
     publishBeneficiaryRegistered(doc);
-    res.status(201).json({ success: true, data: doc });
+    // Open the canonical care pathway (Episode of Care موحد لكل مسار علاجي).
+    const episodeId = await ensureInitialEpisode(doc, req);
+    res.status(201).json({ success: true, data: doc, episodeId });
   } catch (err) {
     safeError(res, err, 'register student');
   }

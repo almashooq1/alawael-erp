@@ -523,6 +523,7 @@ __tests__/revenue-forecast-service.test.js
 __tests__/revenue-service.test.js
 __tests__/review-link-expected-target-wave247.test.js
 __tests__/risk-appointment-branch-scope-wave663.test.js
+__tests__/role-levels-coverage-wave932.test.js
 __tests__/root-proxy-scripts.test.js
 __tests__/runbooks-referenced.test.js
 __tests__/safe-error.test.js
@@ -693,6 +694,10 @@ __tests__/quality-enhanced-branch-isolation-wave923.test.js
 __tests__/morning-health-check-branch-isolation-wave924.test.js
 __tests__/beneficiary-create-branchid-wave926.test.js
 __tests__/student-registration-core-event-wave927.test.js
+__tests__/student-registration-episode-of-care-wave928.test.js
+__tests__/episode-created-timeline-subscriber-wave929.test.js
+__tests__/assessment-completed-timeline-subscriber-wave930.test.js
+__tests__/care-plan-activated-timeline-subscriber-wave931.test.js
 __tests__/no-inmemory-route-store.test.js
 __tests__/icf-assessment-create-assessor-wave930.test.js
 __tests__/branch-scope-user-enrich-wave930.test.js

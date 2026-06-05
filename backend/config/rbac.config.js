@@ -14,84 +14,15 @@
 // ROLES — تعريف الأدوار
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ROLES = {
-  // Level 0 — HQ / Group
-  SUPER_ADMIN: 'super_admin',
-  HEAD_OFFICE_ADMIN: 'head_office_admin',
-  CEO: 'ceo',
-  GROUP_GM: 'group_gm',
-  GROUP_CFO: 'group_cfo',
-  GROUP_CHRO: 'group_chro',
-  GROUP_QUALITY_OFFICER: 'group_quality_officer',
-  COMPLIANCE_OFFICER: 'compliance_officer',
-  INTERNAL_AUDITOR: 'internal_auditor',
-  IT_ADMIN: 'it_admin',
-
-  // Level 1 — Region (Phase 7)
-  REGIONAL_DIRECTOR: 'regional_director',
-  REGIONAL_QUALITY: 'regional_quality',
-
-  // Level 2 — Branch
-  ADMIN: 'admin',
-  MANAGER: 'manager',
-  BRANCH_MANAGER: 'branch_manager',
-  CLINICAL_DIRECTOR: 'clinical_director',
-  QUALITY_COORDINATOR: 'quality_coordinator',
-
-  // Level 3 — Department supervisors
-  SUPERVISOR: 'supervisor',
-  HR_SUPERVISOR: 'hr_supervisor',
-  FINANCE_SUPERVISOR: 'finance_supervisor',
-  THERAPY_SUPERVISOR: 'therapy_supervisor',
-  SPECIAL_ED_SUPERVISOR: 'special_ed_supervisor',
-
-  // Level 4 — Specialty / Program
-  DOCTOR: 'doctor',
-  THERAPIST: 'therapist',
-  THERAPIST_SLP: 'therapist_slp',
-  THERAPIST_OT: 'therapist_ot',
-  THERAPIST_PT: 'therapist_pt',
-  THERAPIST_PSYCH: 'therapist_psych',
-  TEACHER: 'teacher',
-  SPECIAL_ED_TEACHER: 'special_ed_teacher',
-  THERAPY_ASSISTANT: 'therapy_assistant',
-  // ── ADR-037 D3 (W731, 2026-06-01): the 9 roles that lived ONLY in
-  //    roles.constants.js and resolved to NOTHING here. Given real hierarchy +
-  //    permission maps below, least-privilege, each modelled on a sibling.
-  //    Nursing clinical ladder:
-  NURSE: 'nurse',
-  HEAD_NURSE: 'head_nurse',
-  NURSING_SUPERVISOR: 'nursing_supervisor',
-  // PDPL / data protection:
-  DPO: 'dpo',
-  // Family wellbeing (THERAPIST archetype):
-  FAMILY_COUNSELLOR: 'family_counsellor',
-  // CRPD rights (conflict-of-interest-free):
-  INDEPENDENT_ADVOCATE: 'independent_advocate',
-  CULTURAL_OFFICER: 'cultural_officer',
-  // CRM / patient relations:
-  PATIENT_RELATIONS_OFFICER: 'patient_relations_officer',
-  CRM_SUPERVISOR: 'crm_supervisor',
-
-  // Level 5 — Support
-  HR: 'hr',
-  HR_MANAGER: 'hr_manager',
-  HR_OFFICER: 'hr_officer',
-  ACCOUNTANT: 'accountant',
-  FINANCE: 'finance',
-  RECEPTIONIST: 'receptionist',
-  DATA_ENTRY: 'data_entry',
-  DRIVER: 'driver',
-  BUS_ASSISTANT: 'bus_assistant',
-
-  // External
-  PARENT: 'parent',
-  GUARDIAN: 'guardian',
-  STUDENT: 'student',
-  VIEWER: 'viewer',
-  USER: 'user',
-  GUEST: 'guest',
-};
+// ADR-037 D4 (2026-06-01): rbac.config.ROLES is now a RE-EXPORT of the single
+// canonical role registry in config/constants/roles.constants.js — NOT a second
+// literal. Verified safe before the cutover: both had the identical 55 keys AND
+// 55 values (constants is a superset after the ADR-037 D2/D3 merges + the Q5 ceo
+// fix), roles.constants does NOT require rbac.config (no cycle), and no caller
+// does identity comparison on this object. The divergence guard (check:role-
+// divergence) now enforces parity at zero permanently. This removes the last
+// duplicated ROLES definition (check:authz-consolidation P2).
+const ROLES = require('./constants/roles.constants').ROLES;
 
 /** All valid role values (for validation) */
 const ALL_ROLES = Object.values(ROLES);

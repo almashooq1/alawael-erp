@@ -1202,6 +1202,8 @@ on:
       - 'backend/__tests__/no-audit-write-in-transaction-wave936.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-created-timeline-subscriber-wave937.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-sole-dead-gate-requirerole-wave938.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2387,6 +2389,8 @@ on:
       - 'backend/__tests__/no-audit-write-in-transaction-wave936.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-created-timeline-subscriber-wave937.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-sole-dead-gate-requirerole-wave938.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

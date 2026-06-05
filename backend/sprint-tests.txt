@@ -394,6 +394,7 @@ __tests__/no-float-money-fields-finance-wave579.test.js
 __tests__/no-it-only-or-skip.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js
+__tests__/no-sole-dead-gate-requirerole-wave938.test.js
 __tests__/no-unprotected-beneficiary-param-wave440.test.js
 __tests__/no-wrapper-export-direct-call-wave278k.test.js
 __tests__/notify-channel-email-wave519.test.js

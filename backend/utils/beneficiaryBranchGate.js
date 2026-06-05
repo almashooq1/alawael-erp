@@ -103,22 +103,26 @@ async function fetchScopedByBeneficiary(Model, id, req, res, opts = {}) {
     res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     return { doc: null, denied: true };
   }
-  // We need beneficiary to enforce scope, so always select it.
+  // Gate on beneficiary BEFORE populate — avoids loading foreign PHI and
+  // prevents populate() from throwing when optional refs (User, etc.) are
+  // not registered in lightweight test harnesses.
+  const benField = opts.beneficiaryField || 'beneficiary';
+  const gateDoc = await Model.findById(id).select(benField).lean();
+  if (!gateDoc) {
+    res.status(404).json({ success: false, message: 'غير موجود' });
+    return { doc: null, denied: true };
+  }
+  const rawBen = gateDoc[benField];
+  const benId = rawBen?._id || rawBen;
+  const denied = await assertBeneficiaryInScope(req, benId, res);
+  if (denied) return { doc: null, denied: true };
+
   const query = Model.findById(id);
   if (opts.select) query.select(opts.select);
   if (opts.populate) {
     for (const p of [].concat(opts.populate)) query.populate(p);
   }
   const doc = opts.lean ? await query.lean() : await query;
-  if (!doc) {
-    res.status(404).json({ success: false, message: 'غير موجود' });
-    return { doc: null, denied: true };
-  }
-  // Handle populated vs raw — `doc.beneficiary` may be an ObjectId, a
-  // populated subdoc, or a populated Mongoose document.
-  const benId = doc.beneficiary?._id || doc.beneficiary;
-  const denied = await assertBeneficiaryInScope(req, benId, res);
-  if (denied) return { doc: null, denied: true };
   return { doc, denied: false };
 }
 

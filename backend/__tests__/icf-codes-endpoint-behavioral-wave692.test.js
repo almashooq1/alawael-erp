@@ -13,6 +13,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(30000);
 
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, _res, next) => {
+    req.user = { id: 'w692-user', role: 'admin' };
+    next();
+  },
+}));
+
 const fs = require('fs');
 const path = require('path');
 const express = require('express');

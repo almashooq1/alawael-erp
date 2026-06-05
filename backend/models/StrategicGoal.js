@@ -33,11 +33,13 @@ const strategicGoalSchema = new mongoose.Schema(
     department: { type: String },
     relatedInitiatives: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StrategicInitiative' }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
 
 strategicGoalSchema.index({ perspective: 1, status: 1 });
+strategicGoalSchema.index({ branchId: 1, status: 1 });
 strategicGoalSchema.index({ createdBy: 1 });
 
 module.exports =

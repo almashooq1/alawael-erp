@@ -35,11 +35,13 @@ const strategicInitiativeSchema = new mongoose.Schema(
     department: { type: String },
     milestones: [milestoneSchema],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
 
 strategicInitiativeSchema.index({ goalId: 1, status: 1 });
+strategicInitiativeSchema.index({ branchId: 1, status: 1 });
 strategicInitiativeSchema.index({ owner: 1 });
 
 module.exports =

@@ -1121,6 +1121,48 @@ on:
       - 'backend/__tests__/cpe-admin-branch-isolation-wave888.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/guardians-branch-isolation-wave889.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-portal-v1-guardian-ownership-wave890.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-home-program-routes-wave891.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-capacity-optimizer-wave892.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-offer-batch-wave893.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-schedule-suggestions-wave894.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/insurance-claims-denial-precheck-wave895.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-pathway-routes-wave896.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/equity-outcome-benchmarking-wave897.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-routes-branch-isolation-wave898.test.js'
+      - 'backend/__tests__/clinical-docs-branch-isolation-wave899.test.js'
+      - 'backend/__tests__/care-plans-admin-branch-isolation-wave900.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/emr-routes-branch-isolation-wave901.test.js'
+      - 'backend/__tests__/medical-referrals-branch-isolation-wave902.test.js'
+      - 'backend/__tests__/insurance-claims-branch-isolation-wave903.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/payroll-routes-branch-isolation-wave904.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/episodes-routes-branch-isolation-wave905.test.js'
+      - 'backend/__tests__/icf-assessments-branch-isolation-wave906.test.js'
+      - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/outcomes-admin-branch-isolation-wave908.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crisis-routes-branch-isolation-wave909.test.js'
+      - 'backend/__tests__/asset-management-work-orders-branch-isolation-wave912.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/referrals-portal-branch-isolation-wave913.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meetings-routes-branch-isolation-wave914.test.js'
+      - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
+      - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
+      - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2225,6 +2267,48 @@ on:
       - 'backend/__tests__/cpe-admin-branch-isolation-wave888.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/guardians-branch-isolation-wave889.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-portal-v1-guardian-ownership-wave890.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-home-program-routes-wave891.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-capacity-optimizer-wave892.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-offer-batch-wave893.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-schedule-suggestions-wave894.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/insurance-claims-denial-precheck-wave895.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-pathway-routes-wave896.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/equity-outcome-benchmarking-wave897.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-routes-branch-isolation-wave898.test.js'
+      - 'backend/__tests__/clinical-docs-branch-isolation-wave899.test.js'
+      - 'backend/__tests__/care-plans-admin-branch-isolation-wave900.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/emr-routes-branch-isolation-wave901.test.js'
+      - 'backend/__tests__/medical-referrals-branch-isolation-wave902.test.js'
+      - 'backend/__tests__/insurance-claims-branch-isolation-wave903.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/payroll-routes-branch-isolation-wave904.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/episodes-routes-branch-isolation-wave905.test.js'
+      - 'backend/__tests__/icf-assessments-branch-isolation-wave906.test.js'
+      - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/outcomes-admin-branch-isolation-wave908.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crisis-routes-branch-isolation-wave909.test.js'
+      - 'backend/__tests__/asset-management-work-orders-branch-isolation-wave912.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/referrals-portal-branch-isolation-wave913.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/meetings-routes-branch-isolation-wave914.test.js'
+      - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
+      - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
+      - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

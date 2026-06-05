@@ -84,8 +84,20 @@ function generateToken(...args) {
 async function guardianOwnsBeneficiary(userId, beneficiaryId) {
   if (!userId || !beneficiaryId) return false;
   if (!isValidObjectId(beneficiaryId)) return false;
-  const g = await Guardian().findOne({ userId, beneficiaries: beneficiaryId }).select('_id').lean();
-  return !!g;
+  const guardian = await Guardian().findOne({ userId }).select('_id').lean();
+  if (!guardian) return false;
+  const linked = await Beneficiary()
+    .findOne({
+      _id: beneficiaryId,
+      $or: [
+        { guardians: guardian._id },
+        { 'guardians.guardian': guardian._id },
+        { primaryGuardian: guardian._id },
+      ],
+    })
+    .select('_id')
+    .lean();
+  return !!linked;
 }
 
 const DISABILITY_LEVEL_MAP = {

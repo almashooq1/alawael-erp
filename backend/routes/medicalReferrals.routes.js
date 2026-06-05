@@ -14,6 +14,10 @@ const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const {
+  fetchScopedByBeneficiary,
+  assertBeneficiaryInScope,
+} = require('../utils/beneficiaryBranchGate');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
@@ -75,14 +79,23 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findById(req.params.id)
-      .populate('beneficiary', 'name')
-      .populate('referringProvider.practitioner', 'name')
-      .populate('referredTo.practitioner', 'name')
-      .populate('referredTo.department', 'name')
-      .populate('statusHistory.changedBy', 'name')
-      .populate('communicationLog.by', 'name');
-    if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
+    const { doc: referral, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res,
+      {
+        populate: [
+          { path: 'beneficiary', select: 'name' },
+          { path: 'referringProvider.practitioner', select: 'name' },
+          { path: 'referredTo.practitioner', select: 'name' },
+          { path: 'referredTo.department', select: 'name' },
+          { path: 'statusHistory.changedBy', select: 'name' },
+          { path: 'communicationLog.by', select: 'name' },
+        ],
+      }
+    );
+    if (denied) return;
 
     const followUps = await ReferralFollowUp.find({
       referral: referral._id,
@@ -99,6 +112,8 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const referral = new MedicalReferral({
       ...req.body,
       createdBy: req.user?.id,
@@ -114,11 +129,20 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findByIdAndUpdate(
+    const { doc: existing, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
       req.params.id,
-      stripUpdateMeta(req.body),
-      { returnDocument: 'after', runValidators: true }
+      req,
+      res,
+      { select: 'beneficiary', lean: true }
     );
+    if (denied) return;
+    const body = stripUpdateMeta(req.body);
+    delete body.beneficiary;
+    const referral = await MedicalReferral.findByIdAndUpdate(existing._id, body, {
+      returnDocument: 'after',
+      runValidators: true,
+    });
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     res.json({ success: true, data: referral });
   } catch (error) {
@@ -128,7 +152,15 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await MedicalReferral.findByIdAndUpdate(req.params.id, { isDeleted: true });
+    const { doc: existing, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res,
+      { select: '_id', lean: true }
+    );
+    if (denied) return;
+    await MedicalReferral.findByIdAndUpdate(existing._id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف الإحالة بنجاح' });
   } catch (error) {
     safeError(res, error, '[Referrals] Delete referral error');
@@ -138,8 +170,13 @@ router.delete('/:id', async (req, res) => {
 // ─── Status transitions ────────────────────────────────────────────────
 router.patch('/:id/approve', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findById(req.params.id);
-    if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
+    const { doc: referral, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     referral.status = 'approved';
     referral.statusHistory.push({
       status: 'approved',
@@ -159,8 +196,13 @@ router.patch('/:id/approve', async (req, res) => {
 
 router.patch('/:id/reject', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findById(req.params.id);
-    if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
+    const { doc: referral, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     referral.status = 'rejected';
     referral.statusHistory.push({
       status: 'rejected',
@@ -177,8 +219,13 @@ router.patch('/:id/reject', async (req, res) => {
 
 router.patch('/:id/send', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findById(req.params.id);
-    if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
+    const { doc: referral, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     referral.status = 'sent';
     referral.statusHistory.push({
       status: 'sent',
@@ -194,8 +241,13 @@ router.patch('/:id/send', async (req, res) => {
 
 router.patch('/:id/complete', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findById(req.params.id);
-    if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
+    const { doc: referral, denied } = await fetchScopedByBeneficiary(
+      MedicalReferral,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     referral.status = 'completed';
     referral.consultationResponse = { ...req.body, receivedDate: new Date() };
     referral.statusHistory.push({

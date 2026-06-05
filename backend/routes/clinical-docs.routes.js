@@ -14,9 +14,10 @@
 
 const express = require('express');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 const router = express.Router();
-router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
@@ -57,6 +58,10 @@ const upload = multer({
 });
 
 router.use(authenticateToken);
+// W899 — activate branch scope before bodyScopedBeneficiaryGuard (W441).
+// Pre-W899 guard was inert: req.branchScope unset → cross-branch clinical doc leak.
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard);
 
 const STAFF_ROLES = [
   'admin',
@@ -81,6 +86,22 @@ const WRITE_ROLES = [
 ];
 
 const HQ_ROLES = ['admin', 'superadmin', 'super_admin'];
+
+async function assertClinicalDocInScope(req, docId, res) {
+  if (!mongoose.isValidObjectId(docId)) {
+    res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    return true;
+  }
+  const meta = await Document.findById(docId).select('metadata.beneficiary').lean();
+  if (!meta) {
+    res.status(404).json({ success: false, message: 'غير موجود' });
+    return true;
+  }
+  const benId = meta.metadata?.beneficiary;
+  if (!benId) return false;
+  const denied = await assertBeneficiaryInScope(req, benId, res);
+  return !!denied;
+}
 
 // Map extension → enum fileType
 function pickFileType(name) {
@@ -174,8 +195,7 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
 // ── GET /:id ─────────────────────────────────────────────────────────────
 router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id))
-      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const doc = await Document.findById(req.params.id)
       .populate('uploadedBy', 'name firstName lastName email')
       .lean();
@@ -189,8 +209,7 @@ router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
 // ── GET /:id/download ────────────────────────────────────────────────────
 router.get('/:id/download', async (req, res) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id))
-      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const doc = await Document.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
 
@@ -268,6 +287,7 @@ router.post('/', requireRole(WRITE_ROLES), upload.single('file'), async (req, re
 // ── PATCH /:id ───────────────────────────────────────────────────────────
 router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const body = { ...req.body };
     delete body.filePath;
     delete body.fileName;
@@ -291,6 +311,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/share — share with guardian / user ─────────────────────────
 router.post('/:id/share', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const { userId, guardianId, permission = 'view' } = req.body || {};
     let targetUserId = userId;
     let name = '';
@@ -337,6 +358,7 @@ router.post('/:id/share', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/sign — e-signature ─────────────────────────────────────────
 router.post('/:id/sign', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const doc = await Document.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
 
@@ -366,6 +388,7 @@ router.post('/:id/sign', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id — soft delete ────────────────────────────────────────────
 router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (await assertClinicalDocInScope(req, req.params.id, res)) return;
     const doc = await Document.findByIdAndUpdate(
       req.params.id,
       { isArchived: true, archivedAt: new Date(), archivedBy: req.user?.id },

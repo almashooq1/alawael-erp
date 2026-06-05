@@ -37,7 +37,9 @@
 
 const express = require('express');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const router = express.Router();
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 const ICFAssessmentController = require('../controllers/icfAssessment.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
 

@@ -50,6 +50,11 @@ const assetSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      index: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

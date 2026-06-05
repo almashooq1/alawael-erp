@@ -37,18 +37,37 @@ const fail = (res, msg, status = 400, extra = {}) =>
 const isValidId = id => mongoose.Types.ObjectId.isValid(id);
 const hasBranchScope = req => Object.keys(branchFilter(req)).length > 0;
 
+/** Beneficiary.guardians may be ObjectId[] or { guardian, relationship }[] in stored docs. */
+function guardianIdFromLink(entry) {
+  if (!entry) return null;
+  if (entry.guardian) return String(entry.guardian);
+  if (mongoose.Types.ObjectId.isValid(entry)) return String(entry);
+  if (entry._id && mongoose.Types.ObjectId.isValid(entry._id)) return String(entry._id);
+  return null;
+}
+
+function guardianBeneficiaryClause(guardianId) {
+  const gid = mongoose.Types.ObjectId.isValid(guardianId)
+    ? new mongoose.Types.ObjectId(String(guardianId))
+    : guardianId;
+  return {
+    $or: [{ guardians: gid }, { 'guardians.guardian': gid }],
+  };
+}
+
 async function scopedGuardianIds(req) {
   if (!hasBranchScope(req)) return null;
   const rows = await Beneficiary.find({
     ...branchFilter(req),
-    'guardians.guardian': { $exists: true },
+    $or: [{ guardians: { $exists: true, $ne: [] } }, { 'guardians.guardian': { $exists: true } }],
   })
-    .select('guardians.guardian')
+    .select('guardians')
     .lean();
   const ids = new Set();
   for (const row of rows) {
     for (const link of row.guardians || []) {
-      if (link.guardian) ids.add(String(link.guardian));
+      const gid = guardianIdFromLink(link);
+      if (gid) ids.add(gid);
     }
   }
   return Array.from(ids);
@@ -68,7 +87,7 @@ async function loadGuardianOr404(req, res, id = req.params.id) {
   }
   const linkedInScope = await Beneficiary.exists({
     ...branchFilter(req),
-    'guardians.guardian': id,
+    ...guardianBeneficiaryClause(id),
   });
   if (!linkedInScope) return null;
   return Guardian.findById(id);
@@ -77,8 +96,8 @@ async function loadGuardianOr404(req, res, id = req.params.id) {
 async function assertGuardianInScopeForLink(req, res, guardianId) {
   if (!hasBranchScope(req)) return null;
   const [linkedInScope, linkedAnywhere] = await Promise.all([
-    Beneficiary.exists({ ...branchFilter(req), 'guardians.guardian': guardianId }),
-    Beneficiary.exists({ 'guardians.guardian': guardianId }),
+    Beneficiary.exists({ ...branchFilter(req), ...guardianBeneficiaryClause(guardianId) }),
+    Beneficiary.exists(guardianBeneficiaryClause(guardianId)),
   ]);
   if (linkedInScope || !linkedAnywhere) return null;
   return fail(res, 'ولي الأمر غير موجود', 404);
@@ -210,7 +229,7 @@ router.get('/:id', validateId, async (req, res) => {
     // جلب المستفيدين المرتبطين
     const beneficiaries = await Beneficiary.find({
       ...branchFilter(req),
-      'guardians.guardian': req.params.id,
+      ...guardianBeneficiaryClause(req.params.id),
     })
       .select('fileNumber firstName_ar lastName_ar status disabilityType branch')
       .populate('branch', 'nameAr code')
@@ -356,7 +375,7 @@ router.delete('/:id', validateId, async (req, res) => {
     // التحقق من عدم وجود مستفيدين نشطين مرتبطين
     const activeBeneficiaries = await Beneficiary.countDocuments({
       ...beneficiaryScope,
-      'guardians.guardian': req.params.id,
+      ...guardianBeneficiaryClause(req.params.id),
       status: 'active',
     });
 
@@ -410,7 +429,7 @@ router.post('/:id/link', validateId, async (req, res) => {
 
     // إضافة الربط في مصفوفة الأولياء داخل المستفيد
     const alreadyLinked = beneficiary.guardians?.some(
-      g => g.guardian?.toString() === req.params.id
+      g => guardianIdFromLink(g) === String(req.params.id)
     );
 
     if (alreadyLinked) {
@@ -460,7 +479,7 @@ router.delete('/:id/unlink/:beneficiaryId', validateId, async (req, res) => {
 
     const originalLen = beneficiary.guardians?.length || 0;
     beneficiary.guardians = (beneficiary.guardians || []).filter(
-      g => g.guardian?.toString() !== req.params.id
+      g => guardianIdFromLink(g) !== String(req.params.id)
     );
 
     if (beneficiary.guardians.length === originalLen) {

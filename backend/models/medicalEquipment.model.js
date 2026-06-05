@@ -145,12 +145,14 @@ const MedicalEquipmentSchema = new Schema(
     ],
     notes: String,
     isDeleted: { type: Boolean, default: false },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
 
 MedicalEquipmentSchema.index({ category: 1, status: 1 });
+MedicalEquipmentSchema.index({ branchId: 1, status: 1 });
 MedicalEquipmentSchema.index({ 'location.department': 1 });
 MedicalEquipmentSchema.index({ 'calibration.nextCalibrationDate': 1 });
 MedicalEquipmentSchema.index({ 'maintenance.nextMaintenanceDate': 1 });

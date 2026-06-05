@@ -62,6 +62,41 @@ const splitName = full => {
 };
 
 /**
+ * Fire the canonical `core.beneficiary.registered` event so the new student
+ * is linked into the unified core: CareTimeline entry + beneficiary KPI
+ * snapshot (dddCrossModuleSubscribers). The W394 model post-save hook already
+ * fires `beneficiary.beneficiary.registered` (→ medical initial record), but
+ * that's a DIFFERENT pattern; this raw-create path must publish the `core.`
+ * event explicitly or Timeline + Dashboards subscribers never fire.
+ *
+ * Fire-and-forget + fully guarded so a bus hiccup never fails registration
+ * nor adds latency (mirrors serviceEventBridge / modelEventBridge style).
+ */
+const publishBeneficiaryRegistered = doc => {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    const name =
+      doc.fullNameArabic ||
+      doc.fullNameEnglish ||
+      `${doc.firstName || ''} ${doc.lastName || ''}`.trim() ||
+      'Unknown';
+    Promise.resolve(
+      integrationBus.publish('core', 'beneficiary.registered', {
+        beneficiaryId: doc._id,
+        mrn: doc.mrn || '',
+        name,
+        disabilityType:
+          (doc.disability && (doc.disability.primaryType || doc.disability.type)) || '',
+        disabilityLevel: doc.disabilityLevel || (doc.disability && doc.disability.severity) || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block registration */
+  }
+};
+
+/**
  * Normalize the multi-step registration wizard payload (nested:
  * { personal, address, disability, guardian, programs, medicalHistory })
  * into the flat shape the Beneficiary schema expects.
@@ -237,6 +272,8 @@ router.post('/', requireRole('admin', 'manager', 'receptionist'), async (req, re
       branchId: req.user.branchId,
       createdBy: req.user._id,
     });
+    // Link the new student into the unified core (timeline + dashboards).
+    publishBeneficiaryRegistered(doc);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     safeError(res, err, 'register student');

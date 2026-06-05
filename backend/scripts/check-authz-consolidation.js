@@ -111,7 +111,8 @@ const BASELINE = new Set([
   'resolver:rbac.js',
   // ── ROLES registries (P2) ──
   'roles:config/constants/roles.constants.js', // CANONICAL — keep (the one true source)
-  'roles:config/rbac.config.js', // Phase-7 superset — collapse to a re-export (Phase 1)
+  // 'roles:config/rbac.config.js' — REMOVED 2026-06-01 (ADR-037 D4): rbac.config no
+  //   longer DEFINES ROLES, it re-exports constants. P2 dup count: 3 → 2.
   'roles:services/branchPermission.service.js', // legacy kebab — migrate to constants + aliases
 ]);
 

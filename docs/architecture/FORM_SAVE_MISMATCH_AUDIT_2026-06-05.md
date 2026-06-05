@@ -67,6 +67,49 @@ nutrition-plans, telehealth.
 5. **Systemic (high leverage):** carry `branchId` in the JWT or enrich `req.user`
    from DB so branch-scoped injection works platform-wide (also hardens W926/W930).
 
+## Design-surface options (researched 2026-06-05) — recommended option in **bold**
+
+### hr/employees
+- New fact: `POST /api/v1/hr/employees` has **no handler** (the admin router only does
+  GET/PATCH). The working create route is `/api/v1/hr-module/employees`
+  (`hr-module.routes.js` → `Employee.create`), but the form posts to `/api/v1/hr` and
+  in camelCase vs the snake_case model.
+- **Option A (recommended):** add a real `POST /employees` on `routes/hr/employee-admin.routes.js`
+  reusing its existing camel→snake adapter; expand the form to collect the genuinely-
+  required HR fields (national_id, date_of_birth, gender, phone, email, basic_salary,
+  department[enum], specialization[enum], hire_date, contract_type[map values]); default
+  branch_id from req.user. Fix the `contractType` value set (EMPLOYMENT/… → fixed/indefinite/…).
+- Option B: relax national_id/dob/gender/phone/email/basic_salary/specialization to optional
+  (weakens HR integrity; national_id/email carry unique indexes + GOSI/WPS assume them). Still
+  needs the POST route.
+
+### quality/incidents
+- New fact: a clinical model **`models/quality/IncidentReport.js`** already has a LIVE endpoint
+  `POST /api/v1/quality-module/incidents` (lifecycle-complete). The form currently hits the
+  IT-ops `models/Incident.js` (SECURITY_BREACH/SYSTEM_OUTAGE…).
+- **Recommended:** repoint `incidentApi` → `/api/v1/quality-module/incidents`; map the form's
+  `type`(SAFETY/CLINICAL/…) → `incident_type`(fall/medication_error/…/other), `severity`
+  (LOW/MED/HIGH/CRITICAL → minor/moderate/major/critical), add `title`+`incident_date`,
+  default branch_id from req.user. (Alternative: build a route for `QualityIncident` which has
+  first-class beneficiary-360 red-flag linkage but no endpoint today.)
+
+### documents
+- New fact: the route has **no JSON `POST /`** — only multipart `POST /upload` (multer,
+  requires `req.file`). Model uses fileName/filePath/fileSize; `category` enum is **Arabic**.
+- **Option B (recommended):** switch the form to a real multipart upload to `/upload` (the form
+  already labels `fileUrl` as a temporary placeholder) + map English category → Arabic enum.
+  Entity linkage (entityType/entityId) has no model home → separate schema extension if needed.
+- Option A: add a metadata-only JSON `POST /` that stores a URL — bends a file-oriented model.
+
+### sessions / assessments / care-plans
+- New fact: validators require `episodeId`; the **episodes list endpoint + web-admin
+  `episodeApi.listForBeneficiary` already exist** and are wired. The 3 forms just don't use them.
+- **Option A (recommended):** add an episode selector to each form (on beneficiary select →
+  `episodeApi.listForBeneficiary`, prefer active; include episodeId in payload). Pure frontend,
+  no backend/validator change. Add an inline "create episode" affordance for beneficiaries with none.
+- Option B: backend auto-find/create an active episode when none supplied (smoother but
+  silently manufactures clinical episodes — weakens the episode-of-care model).
+
 ## Verification harness
 
 Replay any surface against the live model before/after a fix:

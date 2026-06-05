@@ -389,6 +389,7 @@ __tests__/no-duplicate-service-pairs.test.js
 __tests__/no-duplicate-ttl-index-wave495.test.js
 __tests__/no-flaky-relative-date-month-math.test.js
 __tests__/no-float-money-fields-finance-wave579.test.js
+__tests__/no-inmemory-route-store.test.js
 __tests__/no-it-only-or-skip.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js

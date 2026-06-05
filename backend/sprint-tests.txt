@@ -694,3 +694,4 @@ __tests__/morning-health-check-branch-isolation-wave924.test.js
 __tests__/beneficiary-create-branchid-wave926.test.js
 __tests__/student-registration-core-event-wave927.test.js
 __tests__/no-inmemory-route-store.test.js
+__tests__/icf-assessment-create-assessor-wave930.test.js

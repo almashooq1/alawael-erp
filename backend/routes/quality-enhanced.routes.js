@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../middleware/assertBranchMatch');
+
+const scopedById = (req, id) => ({ _id: id, ...branchFilter(req) });
+const mergeTenantFilter = (req, extra = {}) => ({ ...extra, ...branchFilter(req) });
 // Service exports a singleton instance — use directly (no `new`)
 const svc = require('../services/quality/quality-enhanced.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -10,6 +14,7 @@ const safeError = require('../utils/safeError');
 // ── لوحة مؤشرات الجودة ───────────────────────────────
 router.get('/dashboard/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
+    assertBranchMatch(req, req.params.branchId, 'quality dashboard');
     const data = await svc.getQualityDashboard(req.params.branchId, req.query.period || 'month');
     res.json({ success: true, data });
   } catch (err) {
@@ -74,11 +79,15 @@ router.put(
 router.get('/checklists', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Checklist } = require('../models/QualityModels');
-    const { type, frequency, branchId } = req.query;
-    const filter = { isActive: true };
+    const { type, frequency } = req.query;
+    const filter = mergeTenantFilter(req, { isActive: true });
     if (type) filter.type = type;
     if (frequency) filter.frequency = frequency;
-    if (branchId) filter.$or = [{ branchId }, { branchId: null }];
+    if (filter.branchId) {
+      const scopedBranch = filter.branchId;
+      delete filter.branchId;
+      filter.$or = [{ branchId: scopedBranch }, { branchId: null }];
+    }
     const checklists = await Checklist.find(filter).sort({ titleAr: 1 });
     res.json({ success: true, data: checklists });
   } catch (err) {
@@ -112,11 +121,17 @@ router.put(
   async (req, res) => {
     try {
       const { Checklist } = require('../models/QualityModels');
-      const checklist = await Checklist.findByIdAndUpdate(
-        req.params.id,
-        stripUpdateMeta(req.body),
-        { returnDocument: 'after' }
-      );
+      const tenant = branchFilter(req);
+      const query = { _id: req.params.id };
+      if (tenant.branchId) {
+        query.$or = [{ branchId: tenant.branchId }, { branchId: null }];
+      }
+      const checklist = await Checklist.findOneAndUpdate(query, stripUpdateMeta(req.body), {
+        returnDocument: 'after',
+      });
+      if (!checklist) {
+        return res.status(404).json({ success: false, message: 'قائمة الفحص غير موجودة' });
+      }
       res.json({ success: true, data: checklist });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -128,9 +143,8 @@ router.put(
 router.get('/checklist-submissions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ChecklistSubmission } = require('../models/QualityModels');
-    const { branchId, checklistId, status, from, to } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { checklistId, status, from, to } = req.query;
+    const filter = mergeTenantFilter(req);
     if (checklistId) filter.checklistId = checklistId;
     if (status) filter.status = status;
     if (from || to) filter.submissionDate = {};
@@ -159,9 +173,8 @@ router.post('/checklist-submissions', authenticate, requireBranchAccess, async (
 router.get('/incidents', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const { branchId, status, severity, type, from, to } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, severity, type, from, to } = req.query;
+    const filter = mergeTenantFilter(req);
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
     if (type) filter.type = type;
@@ -189,7 +202,7 @@ router.post('/incidents', authenticate, requireBranchAccess, async (req, res) =>
 router.get('/incidents/:incidentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const incident = await Incident.findById(req.params.incidentId).populate(
+    const incident = await Incident.findOne(scopedById(req, req.params.incidentId)).populate(
       'reportedBy assignedTo closedBy branchId'
     );
     if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
@@ -202,11 +215,12 @@ router.get('/incidents/:incidentId', authenticate, requireBranchAccess, async (r
 router.put('/incidents/:incidentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const incident = await Incident.findByIdAndUpdate(
-      req.params.incidentId,
+    const incident = await Incident.findOneAndUpdate(
+      scopedById(req, req.params.incidentId),
       stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
+    if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -216,7 +230,7 @@ router.put('/incidents/:incidentId', authenticate, requireBranchAccess, async (r
 router.post('/incidents/:incidentId/rca', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const incident = await Incident.findById(req.params.incidentId);
+    const incident = await Incident.findOne(scopedById(req, req.params.incidentId));
     if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     const updated = await svc.submitRca(
       incident._id,
@@ -237,8 +251,8 @@ router.post(
   async (req, res) => {
     try {
       const { Incident } = require('../models/QualityModels');
-      const incident = await Incident.findByIdAndUpdate(
-        req.params.incidentId,
+      const incident = await Incident.findOneAndUpdate(
+        scopedById(req, req.params.incidentId),
         {
           $push: {
             correctiveActions: {
@@ -249,6 +263,7 @@ router.post(
         },
         { returnDocument: 'after' }
       );
+      if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
       res.json({ success: true, data: incident });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -265,8 +280,8 @@ router.put(
   async (req, res) => {
     try {
       const { Incident } = require('../models/QualityModels');
-      const incident = await Incident.findByIdAndUpdate(
-        req.params.incidentId,
+      const incident = await Incident.findOneAndUpdate(
+        scopedById(req, req.params.incidentId),
         {
           status: 'closed',
           closedBy: req.user._id,
@@ -275,6 +290,7 @@ router.put(
         },
         { returnDocument: 'after' }
       );
+      if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
       res.json({ success: true, data: incident });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -286,9 +302,8 @@ router.put(
 router.get('/complaints', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
-    const { branchId, status, category, priority } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, category, priority } = req.query;
+    const filter = mergeTenantFilter(req);
     if (status) filter.status = status;
     if (category) filter.category = category;
     if (priority) filter.priority = priority;
@@ -313,7 +328,7 @@ router.post('/complaints', authenticate, requireBranchAccess, async (req, res) =
 router.get('/complaints/:complaintId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
-    const complaint = await Complaint.findById(req.params.complaintId).populate(
+    const complaint = await Complaint.findOne(scopedById(req, req.params.complaintId)).populate(
       'assignedTo resolvedBy'
     );
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
@@ -326,11 +341,12 @@ router.get('/complaints/:complaintId', authenticate, requireBranchAccess, async 
 router.put('/complaints/:complaintId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
-    const complaint = await Complaint.findByIdAndUpdate(
-      req.params.complaintId,
+    const complaint = await Complaint.findOneAndUpdate(
+      scopedById(req, req.params.complaintId),
       stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
+    if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, data: complaint });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -343,6 +359,9 @@ router.put(
   requireBranchAccess,
   async (req, res) => {
     try {
+      const { Complaint } = require('../models/QualityModels');
+      const exists = await Complaint.findOne(scopedById(req, req.params.complaintId)).select('_id');
+      if (!exists) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       const result = await svc.resolveComplaint(
         req.params.complaintId,
         req.body.resolution,
@@ -359,9 +378,8 @@ router.put(
 router.get('/surveys', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { SatisfactionSurvey } = require('../models/QualityModels');
-    const { branchId, surveyType, from, to } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { surveyType, from, to } = req.query;
+    const filter = mergeTenantFilter(req);
     if (surveyType) filter.surveyType = surveyType;
     if (from || to) filter.createdAt = {};
     if (from) filter.createdAt.$gte = new Date(from);
@@ -386,6 +404,7 @@ router.post('/surveys', async (req, res) => {
 
 router.get('/surveys/nps/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
+    assertBranchMatch(req, req.params.branchId, 'NPS survey');
     const { from, to } = req.query;
     const data = await svc.calculateNps(req.params.branchId, from, to);
     res.json({ success: true, data });
@@ -398,9 +417,8 @@ router.get('/surveys/nps/:branchId', authenticate, requireBranchAccess, async (r
 router.get('/audits', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Audit } = require('../models/QualityModels');
-    const { branchId, standard, status, type } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { standard, status, type } = req.query;
+    const filter = mergeTenantFilter(req);
     if (standard) filter.standard = standard;
     if (status) filter.status = status;
     if (type) filter.type = type;
@@ -430,7 +448,7 @@ router.post(
 router.get('/audits/:auditId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Audit } = require('../models/QualityModels');
-    const audit = await Audit.findById(req.params.auditId);
+    const audit = await Audit.findOne(scopedById(req, req.params.auditId));
     if (!audit) return res.status(404).json({ success: false, message: 'التدقيق غير موجود' });
     res.json({ success: true, data: audit });
   } catch (err) {
@@ -447,9 +465,12 @@ router.put(
   async (req, res) => {
     try {
       const { Audit } = require('../models/QualityModels');
-      const audit = await Audit.findByIdAndUpdate(req.params.auditId, stripUpdateMeta(req.body), {
-        returnDocument: 'after',
-      });
+      const audit = await Audit.findOneAndUpdate(
+        scopedById(req, req.params.auditId),
+        stripUpdateMeta(req.body),
+        { returnDocument: 'after' }
+      );
+      if (!audit) return res.status(404).json({ success: false, message: 'التدقيق غير موجود' });
       res.json({ success: true, data: audit });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -461,9 +482,8 @@ router.put(
 router.get('/improvements', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
-    const { branchId, status, currentPhase } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, currentPhase } = req.query;
+    const filter = mergeTenantFilter(req);
     if (status) filter.status = status;
     if (currentPhase) filter.currentPhase = currentPhase;
     const projects = await ImprovementProject.find(filter)
@@ -487,7 +507,9 @@ router.post('/improvements', authenticate, requireBranchAccess, async (req, res)
 router.get('/improvements/:projectId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
-    const project = await ImprovementProject.findById(req.params.projectId).populate('ownerId');
+    const project = await ImprovementProject.findOne(
+      scopedById(req, req.params.projectId)
+    ).populate('ownerId');
     if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project });
   } catch (err) {
@@ -498,11 +520,12 @@ router.get('/improvements/:projectId', authenticate, requireBranchAccess, async 
 router.put('/improvements/:projectId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
-    const project = await ImprovementProject.findByIdAndUpdate(
-      req.params.projectId,
+    const project = await ImprovementProject.findOneAndUpdate(
+      scopedById(req, req.params.projectId),
       stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
+    if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -519,9 +542,12 @@ router.put(
       const { phase, data: phaseData } = req.body;
       const update = { currentPhase: phase };
       update[`${phase}Phase`] = phaseData;
-      const project = await ImprovementProject.findByIdAndUpdate(req.params.projectId, update, {
-        returnDocument: 'after',
-      });
+      const project = await ImprovementProject.findOneAndUpdate(
+        scopedById(req, req.params.projectId),
+        update,
+        { returnDocument: 'after' }
+      );
+      if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
       res.json({ success: true, data: project });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -533,9 +559,8 @@ router.put(
 router.get('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
-    const { branchId, category, status, riskLevel } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { category, status, riskLevel } = req.query;
+    const filter = mergeTenantFilter(req);
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (riskLevel) filter.riskLevel = riskLevel;
@@ -558,6 +583,7 @@ router.post('/risks', authenticate, requireBranchAccess, async (req, res) => {
 
 router.get('/risks/matrix/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
+    assertBranchMatch(req, req.params.branchId, 'risk matrix');
     const { Risk } = require('../models/QualityModels');
     const risks = await Risk.find({
       branchId: req.params.branchId,
@@ -580,7 +606,7 @@ router.get('/risks/matrix/:branchId', authenticate, requireBranchAccess, async (
 router.get('/risks/:riskId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
-    const risk = await Risk.findById(req.params.riskId).populate('ownerId');
+    const risk = await Risk.findOne(scopedById(req, req.params.riskId)).populate('ownerId');
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk });
   } catch (err) {
@@ -592,14 +618,19 @@ router.put('/risks/:riskId', authenticate, requireBranchAccess, async (req, res)
   try {
     const { Risk } = require('../models/QualityModels');
     if (req.body.likelihood || req.body.impact) {
-      const existing = await Risk.findById(req.params.riskId);
+      const existing = await Risk.findOne(scopedById(req, req.params.riskId));
+      if (!existing)
+        return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
       const likelihood = req.body.likelihood || existing.likelihood;
       const impact = req.body.impact || existing.impact;
       req.body.riskLevel = svc.assessRiskLevel(likelihood, impact);
     }
-    const risk = await Risk.findByIdAndUpdate(req.params.riskId, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-    });
+    const risk = await Risk.findOneAndUpdate(
+      scopedById(req, req.params.riskId),
+      stripUpdateMeta(req.body),
+      { returnDocument: 'after' }
+    );
+    if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

@@ -665,7 +665,7 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `referrals-portal-branch-isolation-wave913.test.js` (3 tests: scoped list, foreign GET/PATCH 404).
 - **Targeted verify refresh (W909–W913)**: **3 suites / 13 tests** ✅ (`crisis-routes-branch-isolation-wave909`,
   `asset-management-work-orders-branch-isolation-wave912`, `referrals-portal-branch-isolation-wave913`).
-- ~~W918 CI fix (StrategicKPI index + crisis seeds + ICF catalog mount)~~ — **done** (local): duplicate
+- ~~W918 CI fix (StrategicKPI index + crisis seeds + ICF catalog mount)~~ — **done** (`c2e24e68e`, pushed; CI green): duplicate
   `branchId` index on StrategicKPI; W909 `incidentNumber` seeds; ICF `/codes` + `/benchmarks` before
   `requireBranchAccess`; W692/W706 auth mock + W706 beneficiary seed for `/:id/benchmark`.
 - ~~W914 meetings routes branch isolation~~ — **done** (`cd01073e9`, pushed): optional `branchId` on `Meeting.js`;
@@ -681,6 +681,9 @@ isolation-wave872.test.js` (5 tests). Existing W277f MFA + service tests still g
   `effectiveBranchScope`; removed `?branchId` spoof via `location` regex; CRUD scoped. +
   `asset-catalog-branch-isolation-wave917.test.js` (3 tests). W912 WO tests still pass (catalog vs sub-resource split).
 - **Verify (W914–W917)**: **4 suites / 12 tests** ✅ (+ W912 regression 7 tests).
+- **PR #267 merged** (`ad3406e8f`, 2026-06-05): squash of W890–W918 on `main`; CI green (683 sprint suites / 13345 tests).
+- ~~W919 asset-management dashboard tenant counters~~ — **done** (local): `GET /dashboard` pending WO/transfers/
+  overdue/active-bookings counts now use `branchFilter(req)`; W912 test +1 (8 tests).
 - ~~W884 Mongoose duplicate schema.index drift guard + 25-index cleanup~~ — **done** (local, not yet pushed; renumbered from W880 — W880 taken by invoices-admin isolation):
   - **Cleanup**: removed redundant `schema.index({field:1})` where the field already declares `unique:true`
     (or a duplicate compound unique) across 19 models — 25 warnings → 0 (AssetTransfer, Volunteer×3,

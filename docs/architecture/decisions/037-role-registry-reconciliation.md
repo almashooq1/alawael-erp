@@ -1,4 +1,4 @@
-# ADR-037 — Reconcile the two role registries into one canonical union (close the 26+9 bidirectional divergence) (🟢 Mostly implemented — D2/D3/D5 done; D4 blocked on the `ceo` decision Q5)
+# ADR-037 — Reconcile the two role registries into one canonical union (close the 26+9 bidirectional divergence) (✅ Accepted — FULLY implemented 2026-06-01, D1–D5 done)
 
 **Date**: 2026-05-30
 **Type**: ADR (consolidation / reconciliation — unblocks authz modernization Phase 1)
@@ -108,7 +108,15 @@ Q1–Q4 sign-off, which D3 resolved by mapping all 9):
   real `ROLE_PERMISSIONS` entry in `rbac.config.js`.
 - **D5 ✅ done** — `check:role-divergence` reads **0 rbac-only + 0 const-only**;
   the guard now enforces parity.
-- **D4 ⚠️ BLOCKED — one role decision.** The re-export
+- **D4 ✅ DONE (2026-06-01, `acc82b9d5`).** Q5 was resolved (`ceo` = distinct
+  role; `c619240c5` added it to constants + removed the buggy alias), making
+  constants a verified superset. `rbac.config.ROLES` is now
+  `require('./constants/roles.constants').ROLES` — the duplicated literal is gone.
+  Verified safe before + after: identical 55 keys/values, no circular require, no
+  identity comparisons; rbac engine works identically; 49 role/authz tests pass;
+  consolidation guard baseline ratcheted 16→15.
+
+  **D4 was previously blocked on (now-resolved) Q5:** The re-export
   `rbac.config.ROLES = require('./constants/roles.constants').ROLES` would still
   **drop `'ceo'`**: `ceo` is a value in `rbac.config.ROLES` but NOT in
   `roles.constants.ROLES`. It is a GENUINELY DISTINCT live role — it has its own

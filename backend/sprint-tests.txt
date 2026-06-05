@@ -383,6 +383,7 @@ __tests__/money-lib-wave579.test.js
 __tests__/mudad-wps-bootstrap-wave282b.test.js
 __tests__/mudad-wps-orchestrator-wave282.test.js
 __tests__/new-admin-routes.api.test.js
+__tests__/no-audit-write-in-transaction-wave936.test.js
 __tests__/no-beneficiary-eager-fetch.test.js
 __tests__/no-broken-req-branchid-wave269h.test.js
 __tests__/no-broken-requires.test.js

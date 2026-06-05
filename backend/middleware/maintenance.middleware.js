@@ -56,7 +56,8 @@ const maintenanceMiddleware = (req, res, next) => {
         if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'DEVELOPER')) {
           // Add header to warn admin
           res.set('X-System-Status', 'MAINTENANCE_MODE');
-          // Store user for later middleware
+          // Store user for later middleware (W947 — alias _id from JWT id)
+          if (decoded && decoded.id && !decoded._id) decoded._id = decoded.id;
           req.user = decoded;
           return next();
         }

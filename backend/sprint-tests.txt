@@ -724,3 +724,4 @@ __tests__/appointments-core-linkage-wave970.test.js
 __tests__/care-plan-workers-bootstrap-wave973.test.js
 __tests__/quality-bus-unification-wave974.test.js
 __tests__/model-event-bridge-global-plugin-wave974.test.js
+__tests__/auth-alias-user-id-wave947.test.js

@@ -247,6 +247,58 @@ const ROLE_LEVELS = {
   [ROLES.CULTURAL_OFFICER]: 5,
   [ROLES.FAMILY_COUNSELLOR]: 5,
 
+  // ── ADR-037 D2 union roles — H1 fix (W932, 2026-06-05) ───────────────────
+  // The D2 union (W730) added these 26 org/exec/clinical roles + `ceo` to ROLES
+  // but NEVER to ROLE_LEVELS, so levelOf() fell back to L6 for every one of them
+  // and managers/directors/specialists silently failed hasLevel() tier gates
+  // (the backlog H1 finding). Levels are DERIVED, not invented:
+  //   • rbac.config ROLE_HIERARCHY section tiers (Level 0 HQ / 1 Region /
+  //     2 Branch / 3 Dept-supervisors / 4 Specialty / 5 Support / External), and
+  //   • the scope lists above: HQ roles are in CROSS_BRANCH_ROLES (all-branch) so
+  //     they are L2 — matching the "L1/L2 = cross-branch" ABAC semantics in
+  //     authorization/abac/policies/cross-branch-access.js + regional-scope.js's
+  //     `levelOf(r) <= 2` HQ marker. Regional roles are REGION_SCOPED (region-only,
+  //     NOT all-branch), so they are L3 — assigning L2 would falsely read as HQ
+  //     all-branch bypass; their region visibility is enforced separately via
+  //     REGION_SCOPED_ROLES in branchScope.middleware, independent of this tier.
+  // L2 — Group (HQ), cross-branch supervision (every one is in CROSS_BRANCH_ROLES)
+  [ROLES.CEO]: 2,
+  [ROLES.GROUP_GM]: 2,
+  [ROLES.GROUP_CFO]: 2,
+  [ROLES.GROUP_CHRO]: 2,
+  [ROLES.GROUP_QUALITY_OFFICER]: 2,
+  [ROLES.COMPLIANCE_OFFICER]: 2,
+  [ROLES.INTERNAL_AUDITOR]: 2,
+  [ROLES.IT_ADMIN]: 2,
+  // L3 — Branch (single-branch ops) + Region (region-scoped, NOT all-branch)
+  [ROLES.REGIONAL_DIRECTOR]: 3,
+  [ROLES.REGIONAL_QUALITY]: 3,
+  [ROLES.BRANCH_MANAGER]: 3,
+  [ROLES.CLINICAL_DIRECTOR]: 3,
+  [ROLES.QUALITY_COORDINATOR]: 3,
+  // L4 — Department supervisors (within a branch)
+  [ROLES.HR_SUPERVISOR]: 4,
+  [ROLES.FINANCE_SUPERVISOR]: 4,
+  [ROLES.THERAPY_SUPERVISOR]: 4,
+  [ROLES.SPECIAL_ED_SUPERVISOR]: 4,
+  // L5 — Professional caseload / role-specific (clinical specialties + support)
+  [ROLES.THERAPIST_SLP]: 5,
+  [ROLES.THERAPIST_OT]: 5,
+  [ROLES.THERAPIST_PT]: 5,
+  [ROLES.THERAPIST_PSYCH]: 5,
+  [ROLES.SPECIAL_ED_TEACHER]: 5,
+  [ROLES.THERAPY_ASSISTANT]: 5,
+  [ROLES.HR_OFFICER]: 5,
+  // L6 — Own-records / self-service. driver + bus_assistant are NON_MATRIX
+  // transport roles (rbac.config level 25 — BELOW parent's 30; perm maps are
+  // own-records only: vehicles:read + own attendance), so the faithful tier is
+  // own-records, NOT professional caseload — assigning L5 would let a transport
+  // worker pass a generic hasLevel(5) professional gate (W932 adversarial review,
+  // over-grant lens). guardian == parent.
+  [ROLES.DRIVER]: 6,
+  [ROLES.BUS_ASSISTANT]: 6,
+  [ROLES.GUARDIAN]: 6,
+
   [ROLES.PARENT]: 6,
   [ROLES.STUDENT]: 6,
   [ROLES.VIEWER]: 6,

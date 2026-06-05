@@ -16,6 +16,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 // ─── Models ───────────────────────────────────────────────────────────────────
 const Announcement = require('../models/communication/Announcement');
 const InternalMessage = require('../models/communication/InternalMessage');
@@ -280,6 +281,7 @@ router.post('/messages', async (req, res) => {
     const { subject, body, recipient_ids, message_type, priority, attachments } = req.body;
     const recipients = (recipient_ids || []).map(uid => ({ user_id: uid, is_read: false }));
 
+    const scope = effectiveBranchScope(req); // caller's real branch (req.user snake form is never populated)
     const message = await InternalMessage.create({
       sender_id: req.user._id,
       recipients,
@@ -290,7 +292,7 @@ router.post('/messages', async (req, res) => {
       attachments,
       is_draft: false,
       sent_at: new Date(),
-      branch_id: req.user.branch_id,
+      ...(scope ? { branch_id: scope } : {}),
     });
 
     res.status(201).json({ success: true, data: message });
@@ -479,10 +481,11 @@ router.get('/contacts', async (req, res) => {
 // POST /contacts
 router.post('/contacts', async (req, res) => {
   try {
+    const scope = effectiveBranchScope(req);
     const contact = await ContactDirectory.create({
       ...stripUpdateMeta(req.body),
       created_by: req.user._id,
-      branch_id: req.user.branch_id,
+      ...(scope ? { branch_id: scope } : {}),
     });
     res.status(201).json({ success: true, data: contact });
   } catch (err) {

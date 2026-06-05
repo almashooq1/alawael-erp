@@ -51,7 +51,8 @@ const PATTERNS = [/req\.user\??\.branch_id\b/, /req\.user\??\.branch\b/];
 const BASELINE = new Set([
   'routes/ai-analytics.routes.js',
   'routes/beneficiary-transfers.routes.js',
-  'routes/communication-module.routes.js',
+  // 'routes/communication-module.routes.js' — FIXED W946 (InternalMessage +
+  //   ContactDirectory CREATE stamps now use effectiveBranchScope(req)).
   // 'routes/files-module.routes.js' — FIXED W946 (both CREATE stamps now use
   //   effectiveBranchScope(req)); pruned from baseline (ratchet-down).
   'routes/hr/employee-admin.routes.js',

@@ -350,8 +350,17 @@ router.get('/incidents/:id', async (req, res) => {
 // POST /api/quality-module/incidents
 router.post('/incidents', async (req, res) => {
   try {
+    // W930 — branch_id is required on IncidentReport (W277h) but the web-admin
+    // form never sends it. Stamp the reporter's branch (W269: restricted users
+    // get their scoped branch — enriched from the User row when the JWT lacks it,
+    // see ENABLE_USER_BRANCH_ENRICH; never trust a body branchId for them). A
+    // cross-branch reporter (allBranches) may name an explicit branch in the body.
+    const branchId =
+      req.branchScope?.branchId ||
+      (req.branchScope?.allBranches ? req.body.branch_id || req.body.branchId : undefined);
     const incident = new IncidentReport({
       ...req.body,
+      ...(branchId ? { branch_id: branchId } : {}),
       reported_by: req.user._id,
       status: 'reported',
     });

@@ -699,3 +699,6 @@ __tests__/episode-created-timeline-subscriber-wave929.test.js
 __tests__/assessment-completed-timeline-subscriber-wave930.test.js
 __tests__/care-plan-activated-timeline-subscriber-wave931.test.js
 __tests__/no-inmemory-route-store.test.js
+__tests__/icf-assessment-create-assessor-wave930.test.js
+__tests__/branch-scope-user-enrich-wave930.test.js
+__tests__/form-save-bridge-complaints-groups-wave930.test.js

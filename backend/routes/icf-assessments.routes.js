@@ -260,7 +260,15 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const M = getIcfAssessmentModel();
-    const doc = await M.create(stripUpdateMeta(req.body));
+    // W930 — `assessorId` is required on the model but the web-admin form never
+    // sends it (the assessor IS the authenticated user). Without this injection
+    // every ICF create threw a ValidationError → 500 → "data not saved". Derive
+    // it server-side; honour an explicit body value if a privileged caller sets
+    // one. JWT payload carries `id` (not `_id`); read both.
+    const actorId = req.user?.id || req.user?._id;
+    const payload = stripUpdateMeta(req.body);
+    if (!payload.assessorId && actorId) payload.assessorId = actorId;
+    const doc = await M.create(payload);
     res.status(201).json({ success: true, data: doc });
   })
 );

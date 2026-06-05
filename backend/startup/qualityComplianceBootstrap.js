@@ -62,7 +62,10 @@ const {
 const {
   createComplianceCalendarAlertSweeper,
 } = require('../services/quality/complianceCalendarAlertSweeper.service');
-const { createQualityEventBus } = require('../services/quality/qualityEventBus.service');
+const {
+  createQualityEventBus,
+  getDefault: getQualityBusDefault,
+} = require('../services/quality/qualityEventBus.service');
 const { createCapaAgingScheduler } = require('../services/quality/capaAgingScheduler.service');
 const {
   createRiskReassessmentScheduler,
@@ -230,6 +233,7 @@ function bootstrapQualityCompliance({
   // NotificationLog or emailService are unavailable, we skip
   // quietly rather than blocking bootstrap.
   let notificationRouter = null;
+  let _auditBridgeUnsub = null;
   try {
     const NotificationLog = require('../models/quality/NotificationLog.model');
     notificationRouter = createNotificationRouter({
@@ -298,6 +302,32 @@ function bootstrapQualityCompliance({
     if (notificationRouter) {
       try {
         notificationRouter.start();
+        // ── W941 — audit-event bridge ───────────────────────────────
+        // The auditScheduler (and other lazy quality services) emit on
+        // qualityEventBus.getDefault() — the SINGLETON — while this router
+        // subscribes to `bus`, the fresh instance created above. That two-bus
+        // split left quality.audit.scheduled/nc_recorded/closed with NO email
+        // path (the W349/W387 silent-no-op class). We forward ONLY
+        // `quality.audit.*` one-way from the singleton to the router's bus: the
+        // narrowest fix that delivers audit notifications WITHOUT disturbing
+        // phase29-subscribers (which stay on getDefault) or activating unrelated
+        // cross-bus flows. The `singleton !== bus` guard prevents a self-emit
+        // loop in the (future) case the two buses are unified.
+        try {
+          const singleton = getQualityBusDefault();
+          if (singleton && singleton !== bus && typeof singleton.on === 'function') {
+            _auditBridgeUnsub = singleton.on('quality.audit.*', (payload, name) => {
+              try {
+                bus.emit(name, payload);
+              } catch (e) {
+                logger.warn(`[QMS] audit-event bridge emit failed: ${e.message}`);
+              }
+            });
+            logger.info('[QMS] W941 audit-event bridge installed (getDefault → router bus)');
+          }
+        } catch (bridgeErr) {
+          logger.warn(`[QMS] audit-event bridge install failed: ${bridgeErr.message}`);
+        }
       } catch (err) {
         logger.warn(`[QMS] notification router failed to start: ${err.message}`);
       }
@@ -346,6 +376,11 @@ function bootstrapQualityCompliance({
     }
     try {
       notificationRouter?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      _auditBridgeUnsub?.(); // W941 — detach the audit-event bridge
     } catch {
       /* ignore */
     }

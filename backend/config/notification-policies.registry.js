@@ -197,6 +197,38 @@ const NOTIFICATION_POLICIES = Object.freeze([
     dedupWindowMs: ONE_HOUR,
   },
 
+  // ── Internal Audit (W941) ─────────────────────────────────────
+  // The auditScheduler emits these on qualityEventBus.getDefault(); the
+  // bootstrap installs a one-way `quality.audit.*` bridge to the router's bus
+  // (see qualityComplianceBootstrap "audit-event bridge") so they reach here.
+  {
+    id: 'audit.scheduled',
+    pattern: 'quality.audit.scheduled',
+    recipients: { roles: ['quality_manager'] },
+    channels: ['email'],
+    priority: 'normal',
+    template: 'audit.scheduled',
+    dedupWindowMs: ONE_DAY,
+  },
+  {
+    id: 'audit.nc_recorded',
+    pattern: 'quality.audit.nc_recorded',
+    recipients: { roles: ['quality_manager', 'compliance_officer'] },
+    channels: ['email'],
+    priority: 'high',
+    template: 'audit.nc_recorded',
+    dedupWindowMs: ONE_HOUR,
+  },
+  {
+    id: 'audit.closed',
+    pattern: 'quality.audit.closed',
+    recipients: { roles: ['quality_manager', 'compliance_officer'] },
+    channels: ['email'],
+    priority: 'normal',
+    template: 'audit.closed',
+    dedupWindowMs: ONE_HOUR,
+  },
+
   // ── Catch-all for observability ───────────────────────────────
   {
     id: 'audit.all',

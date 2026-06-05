@@ -508,4 +508,135 @@ function wireModelEventBridge(integrationBus) {
   return { wiredCount: wired, skippedMappings: skipped };
 }
 
-module.exports = { wireModelEventBridge, MAPPINGS };
+// ═══════════════════════════════════════════════════════════════════════════
+//  W974 — GLOBAL PRE-COMPILE PLUGIN (the resurrection)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// `wireModelEventBridge` (above) attaches schema.post('save') hooks AT STARTUP,
+// i.e. AFTER the models were already compiled by app.js's route/domain requires.
+// Mongoose compiles a schema's middleware into the model at `mongoose.model()`
+// time; hooks added to the schema afterwards NEVER FIRE. Verified empirically:
+// every one of the 16 mappings was producing nothing in production.
+//
+// The fix: register a GLOBAL plugin via `mongoose.plugin()` BEFORE any model
+// compiles (app.js, right after `require('mongoose')`). A global plugin runs
+// against every schema at construction time — pre-compile — so its hooks DO
+// fire. The plugin attaches ONE generic set of hooks to every schema; at
+// save-time the hook looks up `this.constructor.modelName` in the mapping
+// registry and dispatches only for mapped models (a cheap Map.get for the rest).
+//
+// Env-gated (`ENABLE_MODEL_EVENT_BRIDGE=true`, default OFF) so the deployed
+// behaviour is unchanged until an owner activates it. integrationBus is
+// lazy-resolved at fire-time, decoupling registration from bus init.
+
+const MAPPINGS_BY_MODEL = (() => {
+  const m = new Map();
+  for (const mapping of MAPPINGS) {
+    if (!m.has(mapping.modelName)) m.set(mapping.modelName, []);
+    m.get(mapping.modelName).push(mapping);
+  }
+  return m;
+})();
+
+function _evalAndPublish(doc, self, mapping, bus) {
+  const { domain, eventType, trigger, flipField, flipTo, payload, predicate } = mapping;
+  try {
+    if (trigger === 'create-only' && !self.$__wasNew) return;
+
+    if (trigger === 'status-flip') {
+      const previous = self[`$__previous_${flipField || 'status'}`];
+      const current = doc[flipField || 'status'];
+      if (current === previous) return;
+      if (Array.isArray(flipTo) && !flipTo.includes(current)) return;
+    }
+
+    if (trigger === 'status-flip-any') {
+      const previous = self[`$__previous_${flipField || 'status'}`];
+      const current = doc[flipField || 'status'];
+      if (current === previous) return;
+      doc.$__previousStatus = previous;
+    }
+
+    if (typeof predicate === 'function' && !predicate(doc)) return;
+
+    const eventPayload = payload(doc);
+    Promise.resolve()
+      .then(() => bus.publish(domain, eventType, eventPayload))
+      .catch(err =>
+        logger.error(`[ModelEventBridge] forward failed for ${domain}.${eventType}: ${err.message}`)
+      );
+  } catch (err) {
+    logger.error(`[ModelEventBridge] hook error in ${eventType}: ${err.message}`);
+  }
+}
+
+/**
+ * Global mongoose plugin — attached to EVERY schema (pre-compile). Generic
+ * hooks that dispatch only for models present in MAPPINGS_BY_MODEL.
+ */
+function bridgeGlobalPlugin(schema) {
+  schema.pre('save', function () {
+    this.$__wasNew = this.isNew;
+  });
+
+  // Capture the persisted value of every flip-field this model's mappings watch,
+  // so a status flip is detectable in post('save'). modelName is known here.
+  schema.post('init', function () {
+    const ms = MAPPINGS_BY_MODEL.get(this.constructor && this.constructor.modelName);
+    if (!ms) return;
+    for (const m of ms) {
+      if (m.trigger === 'status-flip' || m.trigger === 'status-flip-any') {
+        const f = m.flipField || 'status';
+        this[`$__previous_${f}`] = this[f];
+      }
+    }
+  });
+
+  schema.post('save', function (doc) {
+    const name = this.constructor && this.constructor.modelName;
+    const ms = name && MAPPINGS_BY_MODEL.get(name);
+    if (!ms) return; // fast skip for the vast majority of (unmapped) models
+    let bus;
+    try {
+      bus = require('./systemIntegrationBus').integrationBus;
+    } catch (_) {
+      return; // bus not loadable (e.g. some unit-test contexts)
+    }
+    if (!bus || typeof bus.publish !== 'function') return;
+    for (const mapping of ms) _evalAndPublish(doc, this, mapping, bus);
+  });
+}
+
+const PLUGIN_FLAG = Symbol.for('w974.modelEventBridge.globalPluginRegistered');
+
+/**
+ * Register the global bridge plugin. MUST be called before any model compiles
+ * (app.js, right after the mongoose require). Idempotent + env-gated.
+ *
+ * @returns {{registered: boolean, reason?: string, mappingCount?: number}}
+ */
+function registerModelEventBridgePlugin() {
+  if (process.env.ENABLE_MODEL_EVENT_BRIDGE !== 'true') {
+    return { registered: false, reason: 'ENABLE_MODEL_EVENT_BRIDGE not enabled' };
+  }
+  const mongoose = require('mongoose');
+  if (mongoose[PLUGIN_FLAG]) {
+    return { registered: false, reason: 'already registered' };
+  }
+  mongoose.plugin(bridgeGlobalPlugin);
+  mongoose[PLUGIN_FLAG] = true;
+  logger.info(
+    `[ModelEventBridge] global pre-compile plugin registered — ${MAPPINGS.length} mappings live ` +
+      `across ${MAPPINGS_BY_MODEL.size} models`
+  );
+  return { registered: true, mappingCount: MAPPINGS.length, modelCount: MAPPINGS_BY_MODEL.size };
+}
+
+module.exports = {
+  wireModelEventBridge,
+  MAPPINGS,
+  // W974 — global pre-compile plugin (the working mechanism)
+  bridgeGlobalPlugin,
+  registerModelEventBridgePlugin,
+  MAPPINGS_BY_MODEL,
+};

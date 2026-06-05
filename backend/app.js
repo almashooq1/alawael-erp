@@ -29,6 +29,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const logger = require('./utils/logger');
 
+// W974 — register the model-event-bridge GLOBAL plugin here, BEFORE any route/
+// domain require below compiles a model. A mongoose global plugin only applies
+// to schemas constructed AFTER it is registered, and Mongoose bakes middleware
+// into a model at compile time — so the old startup-time `wireModelEventBridge`
+// (which attaches hooks after compilation) never fired. Env-gated
+// (ENABLE_MODEL_EVENT_BRIDGE=true, default OFF) → no-op unless an owner enables.
+try {
+  require('./integration/modelEventBridge').registerModelEventBridgePlugin();
+} catch (err) {
+  logger.warn?.(`[ModelEventBridge] plugin registration skipped: ${err.message}`);
+}
+
 const {
   errorHandler,
   notFoundHandler,

@@ -43,6 +43,88 @@ const STATUS_LABELS = {
   graduated: 'متخرج',
 };
 
+// ─── Disability taxonomy bridge (W926) ───────────────────────────────────────
+// The web-admin form sends Arabic disability-type labels, a {primaryType,
+// types[], level} disability shape, and a top-level disabilityLevel. The
+// Beneficiary model stores a coarse English enum on `category` + `disability.type`
+// (physical|mental|sensory|multiple|learning|speech|other) and `disability.severity`
+// (mild|moderate|severe|profound). Without this bridge an Arabic value fails enum
+// validation → .save()/findOneAndUpdate(runValidators) throws → the API returns
+// 500 and registration "doesn't save" (the reported bug). This maps the Arabic
+// label to a valid slug, derives severity, and preserves the precise Arabic
+// values in additive optional fields so the UI round-trips unchanged.
+const DISABILITY_TYPE_TO_SLUG = {
+  'اضطراب طيف التوحد': 'other',
+  'إعاقة ذهنية': 'mental',
+  'إعاقة حركية': 'physical',
+  'إعاقة سمعية': 'sensory',
+  'إعاقة بصرية': 'sensory',
+  'اضطراب النطق والكلام': 'speech',
+  'صعوبات التعلم': 'learning',
+  'اضطرابات سلوكية': 'other',
+  'إعاقات متعددة': 'multiple',
+  // English slugs pass through unchanged (idempotent for non-UI API clients):
+  physical: 'physical',
+  mental: 'mental',
+  sensory: 'sensory',
+  multiple: 'multiple',
+  learning: 'learning',
+  speech: 'speech',
+  other: 'other',
+};
+const VALID_SEVERITY = new Set(['mild', 'moderate', 'severe', 'profound']);
+
+const toCategorySlug = value => {
+  if (!value) return undefined;
+  return DISABILITY_TYPE_TO_SLUG[String(value).trim()] || 'other';
+};
+
+/**
+ * Bridge the web-admin disability payload onto the Beneficiary model shape.
+ * Returns a shallow copy of body with category/disability normalized.
+ * Idempotent — a payload already using model slugs passes through unchanged.
+ * @param {object} body - req.body
+ * @returns {object}
+ */
+function normalizeBeneficiaryInput(body) {
+  const out = { ...body };
+  const dis = out.disability && typeof out.disability === 'object' ? { ...out.disability } : {};
+
+  // Gather the raw (possibly Arabic) type(s) from any shape the client sends.
+  const rawTypes = Array.isArray(dis.types)
+    ? dis.types.filter(Boolean)
+    : dis.primaryType
+      ? [dis.primaryType]
+      : out.category
+        ? [out.category]
+        : [];
+
+  if (rawTypes.length) {
+    // More than one selected disability → 'multiple'; else map the single value.
+    const slug = rawTypes.length > 1 ? 'multiple' : toCategorySlug(rawTypes[0]);
+    dis.type = slug;
+    out.category = slug;
+    // Preserve the precise value(s) for the UI round-trip.
+    dis.primaryType = rawTypes[0];
+    dis.types = rawTypes;
+  } else if (out.category) {
+    out.category = toCategorySlug(out.category);
+  }
+
+  // Severity: accept disability.severity | disability.level | top-level
+  // disabilityLevel; normalize to the model's lowercase enum when valid.
+  const rawLevel = dis.severity || dis.level || out.disabilityLevel;
+  if (rawLevel) {
+    const lvl = String(rawLevel).toLowerCase();
+    if (VALID_SEVERITY.has(lvl)) dis.severity = lvl;
+    dis.level = lvl;
+    out.disabilityLevel = String(rawLevel).toUpperCase();
+  }
+
+  if (Object.keys(dis).length) out.disability = dis;
+  return out;
+}
+
 /**
  * GET /api/beneficiaries
  * List beneficiaries with filtering, search, pagination
@@ -476,6 +558,9 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
+    // W926 — bridge the web-admin disability taxonomy onto the model enum
+    // before destructuring, so Arabic labels don't fail enum validation.
+    const body = normalizeBeneficiaryInput(req.body);
     const {
       firstName,
       middleName,
@@ -493,6 +578,7 @@ router.post('/', async (req, res) => {
       address,
       disability,
       category,
+      disabilityLevel,
       medicalInfo,
       educationInfo,
       familyMembers,
@@ -500,7 +586,7 @@ router.post('/', async (req, res) => {
       status,
       tags,
       generalNotes,
-    } = req.body;
+    } = body;
 
     // Validate required fields
     if (!firstName && !firstName_ar) {
@@ -544,6 +630,7 @@ router.post('/', async (req, res) => {
       address,
       disability,
       category: category || disability?.type,
+      disabilityLevel,
       medicalInfo,
       educationInfo,
       familyMembers,
@@ -588,7 +675,9 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', validateObjectId('id'), async (req, res) => {
   try {
-    const updateData = { ...stripUpdateMeta(req.body) };
+    // W926 — same disability taxonomy bridge as create (PUT runs with
+    // runValidators:true, so an Arabic category would 500 here too).
+    const updateData = { ...stripUpdateMeta(normalizeBeneficiaryInput(req.body)) };
 
     // Don't allow password update via this route
     delete updateData.password;
@@ -915,3 +1004,5 @@ router.get('/:id/progress', validateObjectId('id'), async (req, res) => {
 });
 
 module.exports = router;
+// W926 — exported for unit testing the disability-taxonomy bridge in isolation.
+module.exports.normalizeBeneficiaryInput = normalizeBeneficiaryInput;

@@ -241,6 +241,13 @@ const beneficiarySchema = new mongoose.Schema(
       },
       severity: { type: String, enum: ['mild', 'moderate', 'severe', 'profound'] },
       description: String,
+      // W926 — precise (often Arabic) disability label(s) as captured by the
+      // web-admin form. `type`/`severity` above stay the coarse English enum
+      // for filtering + labels; these preserve the exact clinical value so the
+      // UI round-trips. Optional + no enum → no break to existing docs.
+      primaryType: String,
+      types: [String],
+      level: String,
       diagnosisDate: Date,
       diagnosedBy: String,
       certificationNumber: String,
@@ -249,6 +256,9 @@ const beneficiarySchema = new mongoose.Schema(
       cardIssueDate: Date,
       cardExpiryDate: Date,
     },
+    // W926 — top-level disability level mirror the web-admin form sends/reads
+    // ('MILD'|'MODERATE'|'SEVERE'|'PROFOUND'). Optional, no enum.
+    disabilityLevel: String,
 
     // Consent-program opt-in gate. Default false so beneficiaries
     // admitted before the consent digitization rollout don't

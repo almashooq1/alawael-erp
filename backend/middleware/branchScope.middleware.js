@@ -53,6 +53,50 @@ const isBranchScopeFailClosed = () =>
 const isBranchDenialAuditEnabled = () =>
   String(process.env.ENABLE_BRANCH_DENIAL_AUDIT || '').toLowerCase() === 'true';
 
+// W930 — systemic branch enrichment. The JWT (generateToken in auth.js) carries
+// only {id,email,role,permissions} — NO branchId — and `authenticate` does no DB
+// enrichment, so req.user.branchId is undefined for everyone. That (a) sent every
+// restricted user down the fail-open allBranches path, and (b) left branch_id-
+// required create handlers (Vehicle/Invoice/Employee/PurchaseOrder) with no valid
+// branch source → save 500s ("data not saved"). When enabled, this lazily loads
+// the caller's branchId/branchIds from the User row when the token lacks them.
+// Env-gated DEFAULT OFF — inert on deploy AND in the middleware unit tests (which
+// call requireBranchAccess directly with a mock req.user and no Mongo connection;
+// an un-gated User.findById would buffer/hang per the CLAUDE.md gotcha). Flip
+// ENABLE_USER_BRANCH_ENRICH=true once `npm run audit:no-branch-users` confirms the
+// branch assignments are populated. Lazy process.env read (Dynatrace doctrine).
+const isUserBranchEnrichEnabled = () =>
+  String(process.env.ENABLE_USER_BRANCH_ENRICH || '').toLowerCase() === 'true';
+
+/**
+ * Resolve a user's primary branchId (+ any branchIds[]) from the User row when
+ * the JWT didn't carry it. Lazy-require the model (circular-import safety). On
+ * ANY error returns {} — enrichment NEVER changes scope on failure (fail-safe:
+ * the caller keeps exactly the pre-W930 behaviour).
+ *
+ * @param {object} user - req.user
+ * @returns {Promise<{branchId?: string, branchIds?: string[]}>}
+ */
+async function resolveUserBranchFromDb(user) {
+  try {
+    const userId = user.id || user._id;
+    if (!userId) return {};
+    const User = require('../models/User');
+    const row = await User.findById(userId).select('branchId branchIds').lean();
+    if (!row) return {};
+    const out = {};
+    if (row.branchId) out.branchId = String(row.branchId);
+    if (Array.isArray(row.branchIds) && row.branchIds.length) {
+      out.branchIds = [...new Set(row.branchIds.map(String).filter(Boolean))];
+      if (!out.branchId && out.branchIds.length) out.branchId = out.branchIds[0];
+    }
+    return out;
+  } catch (err) {
+    logger.error('[BranchScope] user-branch enrichment failed (fail-safe → {}):', err.message);
+    return {};
+  }
+}
+
 /**
  * Resolve the set of branch IDs a user is actively seconded into via
  * UserBranchRole (status=active + window covers now). Lazy-require the
@@ -167,7 +211,17 @@ const requireBranchAccess = async (req, res, next) => {
 
   // إذا طُلب فرع محدد عبر query parameter وكان المستخدم يملك صلاحية
   const requestedBranchId = req.query.branchId || req.body?.branchId || req.params?.branchId;
-  const userBranchId = req.user.branchId || req.user.branch_id || req.user.branch;
+  let userBranchId = req.user.branchId || req.user.branch_id || req.user.branch;
+
+  // W930 — the JWT omits branchId, so enrich from the User row when missing
+  // (env-gated, default off, fail-safe → {}). This is what makes branch scoping
+  // and branch_id injection actually work for token-authenticated users.
+  let enrichedBranchIds = [];
+  if (!userBranchId && isUserBranchEnrichEnabled()) {
+    const enriched = await resolveUserBranchFromDb(req.user);
+    if (enriched.branchId) userBranchId = enriched.branchId;
+    if (Array.isArray(enriched.branchIds)) enrichedBranchIds = enriched.branchIds;
+  }
 
   // W597 — active secondments / acting-role grants (env-gated, default
   // off → []). These widen the restricted user's accessible branch set
@@ -204,8 +258,10 @@ const requireBranchAccess = async (req, res, next) => {
     return next();
   }
 
-  // The user's full allowed set = primary branch ∪ active secondments.
-  const allowedBranchIds = [...new Set([String(userBranchId), ...secondedBranchIds])];
+  // The user's full allowed set = primary branch ∪ DB-enriched branches ∪ active secondments.
+  const allowedBranchIds = [
+    ...new Set([String(userBranchId), ...enrichedBranchIds, ...secondedBranchIds]),
+  ];
 
   // إذا طلب المستخدم فرعاً مختلفاً، اسمح فقط إن كان ضمن نطاقه (فرعه أو ندب فعّال)
   if (requestedBranchId && !allowedBranchIds.includes(String(requestedBranchId))) {

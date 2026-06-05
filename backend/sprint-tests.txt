@@ -695,3 +695,4 @@ __tests__/beneficiary-create-branchid-wave926.test.js
 __tests__/student-registration-core-event-wave927.test.js
 __tests__/no-inmemory-route-store.test.js
 __tests__/icf-assessment-create-assessor-wave930.test.js
+__tests__/branch-scope-user-enrich-wave930.test.js

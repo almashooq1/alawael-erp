@@ -17,13 +17,16 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const Subsidy = require('../models/BeneficiarySubsidyEntry');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -39,6 +42,25 @@ const READ_ROLES = [
 const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'social_worker', 'finance'];
 
 const { TYPES, STATUSES } = Subsidy;
+
+async function getScopedBeneficiaryIds(req) {
+  if (req.branchScope?.allBranches) return null;
+  if (Array.isArray(req._subsidyScopedBeneficiaryIds)) return req._subsidyScopedBeneficiaryIds;
+  const kids = await Beneficiary.find(branchFilter(req)).select('_id').lean();
+  req._subsidyScopedBeneficiaryIds = kids.map(k => k._id);
+  return req._subsidyScopedBeneficiaryIds;
+}
+
+async function mergeScopedBeneficiaryFilter(req, filter = {}) {
+  const scopedIds = await getScopedBeneficiaryIds(req);
+  if (scopedIds === null) return filter;
+  if (filter.beneficiaryId) {
+    const inScope = scopedIds.some(id => String(id) === String(filter.beneficiaryId));
+    if (!inScope) return { ...filter, beneficiaryId: { $in: [] } };
+    return filter;
+  }
+  return { ...filter, beneficiaryId: { $in: scopedIds } };
+}
 
 async function hydrate(items) {
   const ids = [...new Set(items.map(r => String(r.beneficiaryId)).filter(Boolean))].filter(id =>
@@ -68,15 +90,16 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
       filter.status = String(req.query.status);
     }
+    const scopedFilter = await mergeScopedBeneficiaryFilter(req, filter);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [raw, total] = await Promise.all([
-      Subsidy.find(filter)
+      Subsidy.find(scopedFilter)
         .sort({ year: -1, month: -1, subsidyType: 1 })
         .skip((p - 1) * l)
         .limit(l)
         .lean(),
-      Subsidy.countDocuments(filter),
+      Subsidy.countDocuments(scopedFilter),
     ]);
     const items = await hydrate(raw);
     res.json({
@@ -95,6 +118,8 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return denied;
     const items = await Subsidy.find({ beneficiaryId: req.params.id })
       .sort({ year: -1, month: -1 })
       .lean();
@@ -112,6 +137,10 @@ router.get('/summary', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.month) match.month = parseInt(req.query.month, 10);
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       match.branchId = new mongoose.Types.ObjectId(req.query.branchId);
+    }
+    const scopedBeneficiaryIds = await getScopedBeneficiaryIds(req);
+    if (scopedBeneficiaryIds !== null) {
+      match.beneficiaryId = { $in: scopedBeneficiaryIds };
     }
     const rows = await Subsidy.aggregate([
       { $match: match },
@@ -166,6 +195,9 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (!body.beneficiaryId || !mongoose.isValidObjectId(body.beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
+    const denied = await assertBeneficiaryInScope(req, body.beneficiaryId, res);
+    if (denied) return denied;
+    const beneficiary = await Beneficiary.findById(body.beneficiaryId).select('branchId').lean();
     const year = parseInt(body.year, 10);
     const month = parseInt(body.month, 10);
     if (!year || year < 2020 || year > 2050) {
@@ -185,7 +217,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const update = {
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: beneficiary?.branchId || null,
       year,
       month,
       subsidyType: body.subsidyType,
@@ -224,7 +256,8 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     }
     if (body.expectedDate) body.expectedDate = new Date(body.expectedDate);
     if (body.receivedDate) body.receivedDate = new Date(body.receivedDate);
-    const row = await Subsidy.findByIdAndUpdate(req.params.id, body, {
+    const scopedFilter = await mergeScopedBeneficiaryFilter(req, { _id: req.params.id });
+    const row = await Subsidy.findOneAndUpdate(scopedFilter, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -248,7 +281,8 @@ router.post('/:id/mark-received', requireRole(WRITE_ROLES), async (req, res) => 
     if (req.body?.receiptNumber) {
       update.receiptNumber = String(req.body.receiptNumber).slice(0, 50);
     }
-    const row = await Subsidy.findByIdAndUpdate(req.params.id, update, {
+    const scopedFilter = await mergeScopedBeneficiaryFilter(req, { _id: req.params.id });
+    const row = await Subsidy.findOneAndUpdate(scopedFilter, update, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -265,7 +299,8 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Subsidy.findByIdAndDelete(req.params.id);
+    const scopedFilter = await mergeScopedBeneficiaryFilter(req, { _id: req.params.id });
+    const row = await Subsidy.findOneAndDelete(scopedFilter);
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

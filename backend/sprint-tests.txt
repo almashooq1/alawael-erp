@@ -483,6 +483,9 @@ __tests__/nps-admin-branch-isolation-wave882.test.js
 __tests__/beneficiary-day-attendance-branch-isolation-wave883.test.js
 __tests__/events-management-branch-isolation-wave885.test.js
 __tests__/contract-management-branch-isolation-wave886.test.js
+__tests__/contracts-routes-branch-isolation-wave920.test.js
+__tests__/facilities-routes-branch-isolation-wave921.test.js
+__tests__/subsidies-routes-branch-isolation-wave922.test.js
 __tests__/therapy-sessions-admin-branch-isolation-wave887.test.js
 __tests__/cpe-admin-branch-isolation-wave888.test.js
 __tests__/guardians-branch-isolation-wave889.test.js

@@ -270,6 +270,34 @@ SafeguardingConcernSchema.virtual('isCriticalAwaitingSupervisor').get(function (
 SafeguardingConcernSchema.set('toJSON', { virtuals: true });
 SafeguardingConcernSchema.set('toObject', { virtuals: true });
 
+// W977 — surface a raised safeguarding concern on the beneficiary's unified-core
+// timeline at once (regulatory artifact). Only fires when the concern is ABOUT a
+// beneficiary (subjectKind='beneficiary' → subjectBeneficiaryId is the
+// beneficiary ref); a concern about staff/other has no beneficiary timeline.
+// Native pre-compile hooks, create-only, guarded, fire-and-forget. Consumed by
+// dddCrossModuleSubscribers.js.
+SafeguardingConcernSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+SafeguardingConcernSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return;
+    if (doc.subjectKind !== 'beneficiary' || !doc.subjectBeneficiaryId) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    Promise.resolve(
+      integrationBus.publish('safety', 'safeguarding.raised', {
+        concernId: String(doc._id),
+        beneficiaryId: String(doc.subjectBeneficiaryId),
+        category: doc.category || '',
+        severity: doc.severity || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.SafeguardingConcern ||
   mongoose.model('SafeguardingConcern', SafeguardingConcernSchema);

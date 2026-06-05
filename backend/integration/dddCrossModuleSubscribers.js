@@ -766,6 +766,86 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Safety → Timeline: Seizure recorded (W977, CRITICAL) ─────────
+  subscribers.push({
+    name: 'safety:seizure → timeline:record',
+    pattern: 'safety.seizure.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const emergency = event.payload.statusEpilepticus === true;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'seizure_event',
+            category: 'clinical',
+            severity: emergency ? 'critical' : 'warning',
+            title: emergency
+              ? 'Seizure — STATUS EPILEPTICUS (emergency)'
+              : `Seizure recorded (${event.payload.severity || ''})`.trim(),
+            title_ar: emergency
+              ? 'نوبة صرع — حالة صرعية مستمرة (طارئ)'
+              : `تسجيل نوبة صرع (${event.payload.severity || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Seizure timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Safety → Timeline: Safeguarding concern raised (W977, CRITICAL) ─
+  subscribers.push({
+    name: 'safety:safeguarding → timeline:record',
+    pattern: 'safety.safeguarding.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'safeguarding_concern',
+            category: 'clinical',
+            severity: event.payload.severity === 'critical' ? 'critical' : 'warning',
+            title: `Safeguarding concern raised (${event.payload.category || ''})`.trim(),
+            title_ar: `بلاغ حماية (${event.payload.category || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Safeguarding timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Safety → Timeline: Restraint/seclusion applied (W977) ────────
+  subscribers.push({
+    name: 'safety:restraint → timeline:record',
+    pattern: 'safety.restraint.applied',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'restraint_applied',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Restraint/seclusion applied (${event.payload.restraintType || ''})`.trim(),
+            title_ar: `تطبيق تقييد/عزل (${event.payload.restraintType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Restraint timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

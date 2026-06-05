@@ -96,9 +96,9 @@ reconciled into both). This ADR is the plan to drive that gap to zero.
 
 ## Status
 
-🟢 **Mostly implemented (verified 2026-06-01)** — D2, D3, D5 are DONE; only D4
-remains, and it is blocked on a single concrete role decision (not the original
-Q1–Q4 sign-off, which D3 resolved by mapping all 9):
+✅ **Accepted — FULLY implemented 2026-06-01** (re-verified 2026-06-05 by the
+authz-backlog-truthing pass): D1–D5 are ALL DONE. The history of the final gate
+(Q5 → D4) is preserved below for the record:
 
 - **D2 ✅ done** — `config/constants/roles.constants.js` now declares **54 roles**
   (was 28); the 26 rbac-only roles were added.

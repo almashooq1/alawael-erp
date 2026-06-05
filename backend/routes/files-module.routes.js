@@ -15,6 +15,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const FileRecord = require('../models/documents/FileRecord');
 const FileFolder = require('../models/documents/FileFolder');
 const safeError = require('../utils/safeError');
@@ -44,10 +45,15 @@ router.get('/folders', async (req, res) => {
 // POST /folders
 router.post('/folders', async (req, res) => {
   try {
+    // W269: stamp the caller's actual branch. The snake `branch_id` form is
+    // never populated on the user object (only the camelCase `branchId` is) —
+    // the old code orphaned every folder with branch_id:undefined. Restricted →
+    // their branch (overrides any body spoof); HQ → body branch_id or unset.
+    const scope = effectiveBranchScope(req);
     const folder = await FileFolder.create({
       ...req.body,
       created_by: req.user._id,
-      branch_id: req.user.branch_id,
+      ...(scope ? { branch_id: scope } : {}),
     });
     res.status(201).json({ success: true, data: folder });
   } catch (err) {
@@ -154,11 +160,12 @@ router.get('/files', async (req, res) => {
 // POST /files — رفع ملف جديد
 router.post('/files', async (req, res) => {
   try {
+    const scope = effectiveBranchScope(req);
     const file = await FileRecord.create({
       ...req.body,
       uploaded_by: req.user._id,
       created_by: req.user._id,
-      branch_id: req.user.branch_id,
+      ...(scope ? { branch_id: scope } : {}),
     });
     res.status(201).json({ success: true, data: file });
   } catch (err) {

@@ -52,7 +52,8 @@ const BASELINE = new Set([
   'routes/ai-analytics.routes.js',
   'routes/beneficiary-transfers.routes.js',
   'routes/communication-module.routes.js',
-  'routes/files-module.routes.js',
+  // 'routes/files-module.routes.js' — FIXED W946 (both CREATE stamps now use
+  //   effectiveBranchScope(req)); pruned from baseline (ratchet-down).
   'routes/hr/employee-admin.routes.js',
   'routes/hr/hr-change-requests.routes.js',
   'routes/hr/hr-inbox.routes.js',

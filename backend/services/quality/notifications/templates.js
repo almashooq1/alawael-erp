@@ -218,6 +218,44 @@ ${p.nextReviewScheduledFor ? `• المراجعة التالية: ${when(p.next
 `,
   }),
 
+  // ── Internal Audit (W941) ───────────────────────────────────────
+  'audit.scheduled': p => ({
+    subject: `📋 تدقيق داخلي مجدول`,
+    body: `تم جدولة تدقيق داخلي جديد.
+
+• معرّف التدقيق: ${p.occurrenceId || '—'}
+• التاريخ المخطط: ${p.plannedFor ? when(p.plannedFor) : '—'}
+• مستوى المخاطرة: ${p.riskLevel || '—'}
+
+يرجى الاستعداد وتجهيز الأدلة المطلوبة.
+`,
+  }),
+
+  'audit.nc_recorded': p => ({
+    subject: `⚠️ عدم مطابقة في تدقيق داخلي: ${p.type === 'major_nc' ? 'كبرى' : 'صغرى'}`,
+    body: `سُجّلت حالة عدم مطابقة أثناء تدقيق داخلي.
+
+• معرّف التدقيق: ${p.occurrenceId || '—'}
+• النوع: ${p.type === 'major_nc' ? 'عدم مطابقة كبرى' : p.type === 'minor_nc' ? 'عدم مطابقة صغرى' : p.type || '—'}
+• البند المرجعي: ${p.clauseRef || '—'}
+
+يلزم فتح إجراء تصحيحي (CAPA) ومتابعة المعالجة.
+`,
+  }),
+
+  'audit.closed': p => ({
+    subject: `✅ أُغلق تدقيق داخلي ${p.auditNumber || ''} — ${p.outcome === 'conform' ? 'مطابق' : p.outcome === 'major_nc' ? 'عدم مطابقة كبرى' : p.outcome === 'minor_nc' ? 'عدم مطابقة صغرى' : p.outcome || ''}`,
+    body: `أُغلق تدقيق داخلي.
+
+• رقم التدقيق: ${p.auditNumber || '—'}
+• معرّف التدقيق: ${p.occurrenceId || '—'}
+• النتيجة: ${p.outcome === 'conform' ? 'مطابق' : p.outcome === 'major_nc' ? 'عدم مطابقة كبرى' : p.outcome === 'minor_nc' ? 'عدم مطابقة صغرى' : p.outcome || '—'}
+• عدد الملاحظات: ${p.findingsCount ?? 0}
+
+يمكن الاطلاع على التقرير الكامل عبر لوحة الجودة.
+`,
+  }),
+
   // ── Generic fallback ────────────────────────────────────────────
   generic: (p, eventName) => ({
     subject: `🔔 ${eventName || 'حدث جودة'}`,

@@ -1208,6 +1208,8 @@ on:
       - 'backend/__tests__/goal-created-timeline-subscriber-wave939.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/complaints-normalize-bridge-reconcile-wave940.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-audit-notify-wave941.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2399,6 +2401,8 @@ on:
       - 'backend/__tests__/goal-created-timeline-subscriber-wave939.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/complaints-normalize-bridge-reconcile-wave940.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-audit-notify-wave941.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

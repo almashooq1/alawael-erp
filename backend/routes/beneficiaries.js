@@ -639,7 +639,9 @@ router.post('/', async (req, res) => {
       tags,
       generalNotes,
       registrationDate: new Date(),
-      createdBy: req.user?._id,
+      // W926 — the JWT payload carries `id` (not `_id`); read both so createdBy
+      // is actually populated (it had been silently null on every record).
+      createdBy: req.user?.id || req.user?._id,
       // Multi-tenant isolation (W269): stamp the creating user's branch so the
       // new record matches branchFilter(req) on the list query. Without this the
       // beneficiary saves with branchId=null and is invisible to the branch-scoped
@@ -684,8 +686,8 @@ router.put('/:id', validateObjectId('id'), async (req, res) => {
     delete updateData.twoFactorSecret;
     delete updateData.accountVerificationCode;
 
-    // Track who modified
-    updateData.lastModifiedBy = req.user?._id;
+    // Track who modified (JWT payload uses `id`, not `_id` — W926)
+    updateData.lastModifiedBy = req.user?.id || req.user?._id;
 
     // Sync category from disability
     if (updateData.disability?.type && !updateData.category) {

@@ -19,7 +19,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  assertBeneficiaryInScope,
+} = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
@@ -28,6 +32,11 @@ const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
+
+function episodeTenantFilter(req) {
+  return branchFilter(req);
+}
 
 const READ_ROLES = [
   'admin',
@@ -56,16 +65,18 @@ const WRITE_ROLES = [
 /* ── GET /stats ── */
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
+    const tenant = episodeTenantFilter(req);
+    const baseMatch = { isArchived: false, ...tenant };
     const [byPhase, byStatus, total] = await Promise.all([
       EpisodeOfCare.aggregate([
-        { $match: { isArchived: false } },
+        { $match: baseMatch },
         { $group: { _id: '$currentPhase', count: { $sum: 1 } } },
       ]),
       EpisodeOfCare.aggregate([
-        { $match: { isArchived: false } },
+        { $match: baseMatch },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
-      EpisodeOfCare.countDocuments({ isArchived: false }),
+      EpisodeOfCare.countDocuments(baseMatch),
     ]);
     return res.json({ success: true, data: { total, byPhase, byStatus } });
   } catch (err) {
@@ -80,10 +91,11 @@ router.get('/beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req, r
       return res.status(400).json({ success: false, error: 'Invalid beneficiary ID' });
     }
     const episodes = await EpisodeOfCare.find({
-      beneficiary: req.params.beneficiaryId,
+      beneficiaryId: req.params.beneficiaryId,
       isArchived: false,
+      ...episodeTenantFilter(req),
     })
-      .populate('primaryTherapist', 'firstName lastName role')
+      .populate('leadTherapistId', 'firstName lastName role')
       .sort({ createdAt: -1 });
     return res.json({ success: true, data: episodes });
   } catch (err) {
@@ -96,11 +108,11 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const { page = 1, limit = 15, search = '', status, currentPhase, beneficiary } = req.query;
 
-    const filter = { isArchived: false };
+    const filter = { isArchived: false, ...episodeTenantFilter(req) };
     if (status) filter.status = status;
     if (currentPhase) filter.currentPhase = currentPhase;
     if (beneficiary && mongoose.Types.ObjectId.isValid(beneficiary)) {
-      filter.beneficiary = beneficiary;
+      filter.beneficiaryId = beneficiary;
     }
     if (search) {
       filter.$or = [
@@ -114,7 +126,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     const [data, total] = await Promise.all([
       EpisodeOfCare.find(filter)
         .populate('beneficiary', 'firstNameAr lastNameAr firstNameEn lastNameEn fileNumber')
-        .populate('primaryTherapist', 'firstName lastName role')
+        .populate('leadTherapistId', 'name firstName lastName role')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
@@ -142,12 +154,14 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid ID' });
     }
-    const episode = await EpisodeOfCare.findById(req.params.id)
+    const episode = await EpisodeOfCare.findOne({
+      _id: req.params.id,
+      isArchived: false,
+      ...episodeTenantFilter(req),
+    })
       .populate('beneficiary', 'firstNameAr lastNameAr firstNameEn lastNameEn fileNumber photo')
-      .populate('primaryTherapist', 'firstName lastName role')
-      .populate('team', 'firstName lastName role')
-      .populate('assessments', 'type date status')
-      .populate('carePlan', 'planNumber status');
+      .populate('leadTherapistId', 'firstName lastName role')
+      .populate({ path: 'careTeam.userId', select: 'firstName lastName role' });
     if (!episode) {
       return res.status(404).json({ success: false, error: 'Episode not found' });
     }
@@ -160,8 +174,13 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
 /* ── POST / ── */
 router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    const benId = req.body.beneficiaryId || req.body.beneficiary;
+    const denied = await assertBeneficiaryInScope(req, benId, res);
+    if (denied) return;
+    const scope = episodeTenantFilter(req);
     const episode = new EpisodeOfCare({
       ...req.body,
+      ...(scope.branchId && { branchId: scope.branchId }),
       createdBy: req.user._id || req.user.id,
       phaseHistory: [
         {
@@ -186,8 +205,8 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid ID' });
     }
     const { currentPhase: _currentPhase, phaseHistory: _phaseHistory, ...rest } = req.body; // phase change handled separately
-    const episode = await EpisodeOfCare.findByIdAndUpdate(
-      req.params.id,
+    const episode = await EpisodeOfCare.findOneAndUpdate(
+      { _id: req.params.id, isArchived: false, ...episodeTenantFilter(req) },
       { $set: rest },
       { returnDocument: 'after', runValidators: true }
     );
@@ -210,7 +229,11 @@ router.patch('/:id/phase', requireRole(WRITE_ROLES), async (req, res) => {
     if (!phase) {
       return res.status(400).json({ success: false, error: 'phase is required' });
     }
-    const episode = await EpisodeOfCare.findById(req.params.id);
+    const episode = await EpisodeOfCare.findOne({
+      _id: req.params.id,
+      isArchived: false,
+      ...episodeTenantFilter(req),
+    });
     if (!episode) {
       return res.status(404).json({ success: false, error: 'Episode not found' });
     }
@@ -243,8 +266,8 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid ID' });
     }
-    const episode = await EpisodeOfCare.findByIdAndUpdate(
-      req.params.id,
+    const episode = await EpisodeOfCare.findOneAndUpdate(
+      { _id: req.params.id, isArchived: false, ...episodeTenantFilter(req) },
       { isArchived: true },
       { returnDocument: 'after' }
     );

@@ -24,7 +24,12 @@ const {
   Allergy,
 } = require('../models/emr.model');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const {
+  fetchScopedByBeneficiary,
+  assertBeneficiaryInScope,
+} = require('../utils/beneficiaryBranchGate');
+const Beneficiary = require('../models/Beneficiary');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
@@ -56,6 +61,35 @@ const EMR_ROLES = [
 router.use(authenticate);
 router.use(requireBranchAccess);
 router.use(authorize(EMR_ROLES)); // W466: clinical roles only — PHI surface
+
+async function beneficiaryIdsInScope(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return null;
+  const rows = await Beneficiary.find(scope).select('_id').lean();
+  return rows.map(r => r._id);
+}
+
+/** Restrict list filters to beneficiaries in caller branch (W901). */
+async function applyBeneficiaryListScope(req, filter) {
+  const ids = await beneficiaryIdsInScope(req);
+  if (!ids) return filter;
+  if (filter.beneficiary) {
+    const bid = String(filter.beneficiary);
+    if (!ids.some(id => String(id) === bid)) return { ...filter, beneficiary: { $in: [] } };
+    return filter;
+  }
+  return { ...filter, beneficiary: { $in: ids } };
+}
+
+async function scopedMedicalRecordUpdate(req, res, id, update, opts = {}) {
+  const { doc, denied } = await fetchScopedByBeneficiary(MedicalRecord, id, req, res, {
+    select: 'beneficiary',
+    lean: true,
+  });
+  if (denied) return null;
+  return MedicalRecord.findByIdAndUpdate(doc._id, update, opts);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MEDICAL RECORDS — السجلات الطبية
 // ═══════════════════════════════════════════════════════════════════════════
@@ -63,11 +97,12 @@ router.use(authorize(EMR_ROLES)); // W466: clinical roles only — PHI surface
 router.get('/records', async (req, res) => {
   try {
     const { beneficiary, search, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (search) {
       filter.$or = [{ mrn: { $regex: escapeRegex(search), $options: 'i' } }];
     }
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
       MedicalRecord.find(filter)
@@ -89,13 +124,16 @@ router.get('/records', async (req, res) => {
 
 router.get('/records/:id', async (req, res) => {
   try {
-    const record = await MedicalRecord.findById(req.params.id)
-      .populate('beneficiary', 'name dateOfBirth gender')
-      .populate('primaryProvider', 'name')
-      .populate('careTeam.provider', 'name')
-      .populate('primaryDiagnosis.diagnosedBy', 'name');
-    if (!record) return res.status(404).json({ success: false, message: 'السجل الطبي غير موجود' });
-    res.json({ success: true, data: record });
+    const { doc, denied } = await fetchScopedByBeneficiary(MedicalRecord, req.params.id, req, res, {
+      populate: [
+        { path: 'beneficiary', select: 'name dateOfBirth gender' },
+        { path: 'primaryProvider', select: 'name' },
+        { path: 'careTeam.provider', select: 'name' },
+        { path: 'primaryDiagnosis.diagnosedBy', select: 'name' },
+      ],
+    });
+    if (denied) return;
+    res.json({ success: true, data: doc });
   } catch (error) {
     logger.error('[EMR] Get record error:', { message: error.message });
     res
@@ -137,6 +175,8 @@ router.get('/records/beneficiary/:beneficiaryId', async (req, res) => {
 
 router.post('/records', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const record = new MedicalRecord({ ...req.body, createdBy: req.user?.id });
     await record.save();
     logger.info(`[EMR] Medical record created: ${record.mrn}`);
@@ -151,11 +191,13 @@ router.post('/records', async (req, res) => {
 
 router.put('/records/:id', async (req, res) => {
   try {
-    const record = await MedicalRecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const body = stripUpdateMeta(req.body);
+    delete body.beneficiary;
+    const record = await scopedMedicalRecordUpdate(req, res, req.params.id, body, {
       returnDocument: 'after',
       runValidators: true,
     });
-    if (!record) return res.status(404).json({ success: false, message: 'السجل الطبي غير موجود' });
+    if (!record) return;
     res.json({ success: true, data: record });
   } catch (error) {
     logger.error('[EMR] Update record error:', { message: error.message });
@@ -172,13 +214,14 @@ router.put('/records/:id', async (req, res) => {
 router.get('/vitals', async (req, res) => {
   try {
     const { beneficiary, dateFrom, dateTo, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (dateFrom || dateTo) {
       filter.recordedAt = {};
       if (dateFrom) filter.recordedAt.$gte = new Date(dateFrom);
       if (dateTo) filter.recordedAt.$lte = new Date(dateTo);
     }
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [vitals, total] = await Promise.all([
       VitalSign.find(filter)
@@ -218,12 +261,16 @@ router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
 
 router.post('/vitals', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const vital = new VitalSign({ ...req.body, recordedBy: req.body.recordedBy || req.user?.id });
     await vital.save();
 
     // Update medical record last visit
     if (req.body.medicalRecord) {
-      await MedicalRecord.findByIdAndUpdate(req.body.medicalRecord, { lastVisitDate: new Date() });
+      await scopedMedicalRecordUpdate(req, res, req.body.medicalRecord, {
+        lastVisitDate: new Date(),
+      });
     }
 
     res.status(201).json({ success: true, data: vital });
@@ -265,7 +312,7 @@ router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
 router.get('/lab-results', async (req, res) => {
   try {
     const { beneficiary, category, overallStatus, search, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (category) filter.category = category;
     if (overallStatus) filter.overallStatus = overallStatus;
@@ -276,6 +323,7 @@ router.get('/lab-results', async (req, res) => {
         { 'testName.en': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [results, total] = await Promise.all([
       LabResult.find(filter)
@@ -297,12 +345,14 @@ router.get('/lab-results', async (req, res) => {
 
 router.get('/lab-results/:id', async (req, res) => {
   try {
-    const result = await LabResult.findById(req.params.id)
-      .populate('beneficiary', 'name')
-      .populate('orderedBy', 'name');
-    if (!result)
-      return res.status(404).json({ success: false, message: 'نتيجة المختبر غير موجودة' });
-    res.json({ success: true, data: result });
+    const { doc, denied } = await fetchScopedByBeneficiary(LabResult, req.params.id, req, res, {
+      populate: [
+        { path: 'beneficiary', select: 'name' },
+        { path: 'orderedBy', select: 'name' },
+      ],
+    });
+    if (denied) return;
+    res.json({ success: true, data: doc });
   } catch (error) {
     safeError(res, error, '[EMR] Get lab result error');
   }
@@ -310,6 +360,8 @@ router.get('/lab-results/:id', async (req, res) => {
 
 router.post('/lab-results', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const result = new LabResult(stripUpdateMeta(req.body));
     await result.save();
     logger.info(`[EMR] Lab result created: ${result.labOrderNumber}`);
@@ -324,7 +376,14 @@ router.post('/lab-results', async (req, res) => {
 
 router.put('/lab-results/:id', async (req, res) => {
   try {
-    const result = await LabResult.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const { doc, denied } = await fetchScopedByBeneficiary(LabResult, req.params.id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (denied) return;
+    const body = stripUpdateMeta(req.body);
+    delete body.beneficiary;
+    const result = await LabResult.findByIdAndUpdate(doc._id, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -338,11 +397,13 @@ router.put('/lab-results/:id', async (req, res) => {
 // Critical lab results needing attention
 router.get('/lab-results-critical', async (req, res) => {
   try {
-    const results = await LabResult.find({
+    let filter = {
       'criticalValues.hasCritical': true,
       'criticalValues.acknowledgedBy': { $exists: false },
       isDeleted: { $ne: true },
-    })
+    };
+    filter = await applyBeneficiaryListScope(req, filter);
+    const results = await LabResult.find(filter)
       .populate('beneficiary', 'name')
       .populate('orderedBy', 'name')
       .sort({ orderedDate: -1 });
@@ -362,11 +423,12 @@ router.get('/lab-results-critical', async (req, res) => {
 router.get('/clinical-notes', async (req, res) => {
   try {
     const { beneficiary, noteType, author, status, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (noteType) filter.noteType = noteType;
     if (author) filter.author = author;
     if (status) filter.status = status;
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [notes, total] = await Promise.all([
       ClinicalNote.find(filter)
@@ -388,14 +450,16 @@ router.get('/clinical-notes', async (req, res) => {
 
 router.get('/clinical-notes/:id', async (req, res) => {
   try {
-    const note = await ClinicalNote.findById(req.params.id)
-      .populate('beneficiary', 'name')
-      .populate('author', 'name')
-      .populate('coSignedBy', 'name')
-      .populate('objective.vitalSigns');
-    if (!note)
-      return res.status(404).json({ success: false, message: 'الملاحظة السريرية غير موجودة' });
-    res.json({ success: true, data: note });
+    const { doc, denied } = await fetchScopedByBeneficiary(ClinicalNote, req.params.id, req, res, {
+      populate: [
+        { path: 'beneficiary', select: 'name' },
+        { path: 'author', select: 'name' },
+        { path: 'coSignedBy', select: 'name' },
+        { path: 'objective.vitalSigns' },
+      ],
+    });
+    if (denied) return;
+    res.json({ success: true, data: doc });
   } catch (error) {
     safeError(res, error, '[EMR] Get clinical note error');
   }
@@ -403,12 +467,16 @@ router.get('/clinical-notes/:id', async (req, res) => {
 
 router.post('/clinical-notes', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const note = new ClinicalNote({ ...req.body, author: req.body.author || req.user?.id });
     await note.save();
 
     // Update medical record last visit
     if (req.body.medicalRecord) {
-      await MedicalRecord.findByIdAndUpdate(req.body.medicalRecord, { lastVisitDate: new Date() });
+      await scopedMedicalRecordUpdate(req, res, req.body.medicalRecord, {
+        lastVisitDate: new Date(),
+      });
     }
 
     logger.info(`[EMR] Clinical note created: ${note.noteType} for ${note.beneficiary}`);
@@ -423,8 +491,13 @@ router.post('/clinical-notes', async (req, res) => {
 
 router.put('/clinical-notes/:id', async (req, res) => {
   try {
-    const note = await ClinicalNote.findById(req.params.id);
-    if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
+    const { doc: note, denied } = await fetchScopedByBeneficiary(
+      ClinicalNote,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     if (note.status === 'final') {
       return res
         .status(400)
@@ -443,8 +516,19 @@ router.put('/clinical-notes/:id', async (req, res) => {
 
 router.patch('/clinical-notes/:id/finalize', async (req, res) => {
   try {
-    const note = await ClinicalNote.findByIdAndUpdate(
+    const { doc: scoped, denied } = await fetchScopedByBeneficiary(
+      ClinicalNote,
       req.params.id,
+      req,
+      res,
+      {
+        select: 'beneficiary',
+        lean: true,
+      }
+    );
+    if (denied) return;
+    const note = await ClinicalNote.findByIdAndUpdate(
+      scoped._id,
       { status: 'final' },
       { returnDocument: 'after' }
     );
@@ -461,8 +545,13 @@ router.patch('/clinical-notes/:id/finalize', async (req, res) => {
 
 router.patch('/clinical-notes/:id/amend', async (req, res) => {
   try {
-    const note = await ClinicalNote.findById(req.params.id);
-    if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
+    const { doc: note, denied } = await fetchScopedByBeneficiary(
+      ClinicalNote,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     note.status = 'amended';
     note.amendments.push({
       date: new Date(),
@@ -487,10 +576,11 @@ router.patch('/clinical-notes/:id/amend', async (req, res) => {
 router.get('/allergies', async (req, res) => {
   try {
     const { beneficiary, allergenType, clinicalStatus, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (allergenType) filter['allergen.type'] = allergenType;
     if (clinicalStatus) filter.clinicalStatus = clinicalStatus;
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [allergies, total] = await Promise.all([
       Allergy.find(filter)
@@ -525,6 +615,8 @@ router.get('/allergies/patient/:beneficiaryId', async (req, res) => {
 
 router.post('/allergies', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+    if (denied) return;
     const allergy = new Allergy({ ...req.body, recordedBy: req.body.recordedBy || req.user?.id });
     await allergy.save();
     logger.info(`[EMR] Allergy recorded: ${allergy.allergen.name.ar} for ${allergy.beneficiary}`);
@@ -539,7 +631,14 @@ router.post('/allergies', async (req, res) => {
 
 router.put('/allergies/:id', async (req, res) => {
   try {
-    const allergy = await Allergy.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const { doc, denied } = await fetchScopedByBeneficiary(Allergy, req.params.id, req, res, {
+      select: 'beneficiary',
+      lean: true,
+    });
+    if (denied) return;
+    const body = stripUpdateMeta(req.body);
+    delete body.beneficiary;
+    const allergy = await Allergy.findByIdAndUpdate(doc._id, body, {
       returnDocument: 'after',
       runValidators: true,
     });

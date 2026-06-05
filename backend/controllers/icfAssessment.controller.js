@@ -4,10 +4,43 @@
  * معالجات HTTP لجميع عمليات التقييم الوظيفي وفق التصنيف الدولي ICF
  */
 
+const mongoose = require('mongoose');
 const ICFAssessmentService = require('../services/icfAssessment.service');
 const ICFReportService = require('../services/icfReport.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const { branchFilter } = require('../middleware/branchScope.middleware');
+const {
+  fetchScopedByBeneficiary,
+  assertBeneficiaryInScope,
+} = require('../utils/beneficiaryBranchGate');
+
+function getIcfAssessmentModel() {
+  try {
+    return require('../models/ICFAssessment').ICFAssessment;
+  } catch (_e) {
+    return mongoose.model('ICFAssessment');
+  }
+}
+
+async function icfTenantBeneficiaryIds(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return null;
+  const Beneficiary = require('../models/Beneficiary');
+  const rows = await Beneficiary.find(scope).select('_id').lean();
+  return rows.map(r => r._id);
+}
+
+/** W908 — gate instance routes before service loads foreign PHI. */
+async function gateIcfAssessmentId(req, res, id) {
+  const M = getIcfAssessmentModel();
+  const { denied } = await fetchScopedByBeneficiary(M, id, req, res, {
+    beneficiaryField: 'beneficiaryId',
+    select: 'beneficiaryId',
+    lean: true,
+  });
+  return !denied;
+}
 
 class ICFAssessmentController {
   /* ═══════════════════════════════════════════════════════════════════════ *
@@ -20,6 +53,8 @@ class ICFAssessmentController {
    */
   static async create(req, res) {
     try {
+      const denied = await assertBeneficiaryInScope(req, req.body?.beneficiaryId, res);
+      if (denied) return;
       const userId = req.user?.id || req.user?._id;
       const assessment = await ICFAssessmentService.create(req.body, userId);
       res.status(201).json({
@@ -62,24 +97,42 @@ class ICFAssessmentController {
         search,
       } = req.query;
 
-      const result = await ICFAssessmentService.list(
-        {
-          beneficiaryId,
-          assessorId,
-          assessmentType,
-          status,
-          icfVersion,
-          organization,
-          programId,
-          fromDate,
-          toDate,
-          minScore,
-          maxScore,
-          severity,
-          search,
-        },
-        { page, limit, sort }
-      );
+      const filters = {
+        beneficiaryId,
+        assessorId,
+        assessmentType,
+        status,
+        icfVersion,
+        organization,
+        programId,
+        fromDate,
+        toDate,
+        minScore,
+        maxScore,
+        severity,
+        search,
+      };
+      const tenantIds = await icfTenantBeneficiaryIds(req);
+      if (tenantIds) {
+        if (beneficiaryId) {
+          if (!tenantIds.some(id => String(id) === String(beneficiaryId))) {
+            return res.json({
+              success: true,
+              data: [],
+              pagination: {
+                total: 0,
+                page: Number(page) || 1,
+                limit: Number(limit) || 20,
+                pages: 0,
+              },
+            });
+          }
+        } else {
+          filters.beneficiaryId = { $in: tenantIds };
+        }
+      }
+
+      const result = await ICFAssessmentService.list(filters, { page, limit, sort });
 
       res.json({ success: true, ...result });
     } catch (err) {
@@ -93,6 +146,7 @@ class ICFAssessmentController {
    */
   static async getById(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const assessment = await ICFAssessmentService.getById(req.params.id);
       res.json({ success: true, data: assessment });
     } catch (err) {
@@ -107,6 +161,7 @@ class ICFAssessmentController {
    */
   static async update(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const userId = req.user?.id || req.user?._id;
       const assessment = await ICFAssessmentService.update(req.params.id, req.body, userId);
       res.json({
@@ -126,6 +181,7 @@ class ICFAssessmentController {
    */
   static async delete(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const userId = req.user?.id || req.user?._id;
       await ICFAssessmentService.delete(req.params.id, userId);
       res.json({ success: true, message: 'تم حذف التقييم بنجاح' });
@@ -141,6 +197,7 @@ class ICFAssessmentController {
    */
   static async changeStatus(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const userId = req.user?.id || req.user?._id;
       const { status, notes } = req.body;
       const assessment = await ICFAssessmentService.changeStatus(
@@ -169,6 +226,7 @@ class ICFAssessmentController {
    */
   static async compare(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const result = await ICFAssessmentService.compareWithPrevious(req.params.id);
       res.json({ success: true, data: result });
     } catch (err) {
@@ -199,6 +257,7 @@ class ICFAssessmentController {
    */
   static async benchmark(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const population = req.query.population || 'general';
       const result = await ICFAssessmentService.benchmarkAssessment(req.params.id, population);
       res.json({ success: true, data: result });
@@ -329,6 +388,7 @@ class ICFAssessmentController {
    */
   static async getReport(req, res) {
     try {
+      if (!(await gateIcfAssessmentId(req, res, req.params.id))) return;
       const format = req.query.format || 'json';
       const report = await ICFReportService.generateFullReport(req.params.id);
 

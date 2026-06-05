@@ -18,7 +18,12 @@ const {
   ClaimItem,
 } = require('../models/insuranceClaim.model');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const {
+  assertBeneficiaryInScope,
+  fetchScopedByBeneficiary,
+} = require('../utils/beneficiaryBranchGate');
+const Beneficiary = require('../models/Beneficiary');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { body, param, validationResult } = require('express-validator');
@@ -39,6 +44,176 @@ const reqMongoId = field => body(field).isMongoId().withMessage(`${field} مطل
 const reqString = (field, label) => body(field).trim().notEmpty().withMessage(`${label} مطلوب`);
 const _optNumber = (field, label) =>
   body(field).optional().isNumeric().withMessage(`${label} يجب أن يكون رقماً`);
+
+async function beneficiaryIdsInScope(req) {
+  const scope = branchFilter(req);
+  if (!Object.keys(scope).length) return null;
+  const rows = await Beneficiary.find(scope).select('_id').lean();
+  return rows.map(r => r._id);
+}
+
+async function applyBeneficiaryListScope(req, filter) {
+  const ids = await beneficiaryIdsInScope(req);
+  if (!ids) return filter;
+  if (filter.beneficiary) {
+    const bid = String(filter.beneficiary);
+    if (!ids.some(id => String(id) === bid)) return { ...filter, beneficiary: { $in: [] } };
+    return filter;
+  }
+  return { ...filter, beneficiary: { $in: ids } };
+}
+
+function normalizeCategory(category) {
+  const map = {
+    therapy: 'therapy_session',
+    consultation: 'consultation',
+    diagnostic: 'diagnostic',
+    laboratory: 'laboratory',
+    radiology: 'radiology',
+    pharmacy: 'pharmacy',
+    procedure: 'surgical',
+  };
+  return map[category] || category || 'other';
+}
+
+function computeClaimPrecheck({ claim, items, contract, preAuth, now = new Date() }) {
+  const blockers = [];
+  const warnings = [];
+
+  if (!Array.isArray(items) || items.length === 0) {
+    blockers.push({
+      code: 'CLAIM_NO_ITEMS',
+      severity: 'critical',
+      message: 'المطالبة لا تحتوي على بنود',
+    });
+  }
+
+  const totalFromItems = (items || []).reduce((sum, i) => sum + (Number(i.totalNet) || 0), 0);
+  const totalNet = Number(claim.totalNet) || 0;
+  if (Math.abs(totalFromItems - totalNet) > 1) {
+    warnings.push({
+      code: 'CLAIM_TOTAL_MISMATCH',
+      severity: 'warning',
+      message: 'إجمالي البنود لا يطابق إجمالي المطالبة',
+      details: { claimTotalNet: totalNet, itemsTotalNet: totalFromItems },
+    });
+  }
+
+  const principalDx = (claim.diagnosis || []).some(d => d?.type === 'principal' && d?.code);
+  if (!principalDx) {
+    blockers.push({
+      code: 'CLAIM_MISSING_PRINCIPAL_DIAGNOSIS',
+      severity: 'critical',
+      message: 'التشخيص الرئيسي (principal diagnosis) مطلوب قبل الإرسال',
+    });
+  }
+
+  const missingCodes = (items || []).filter(i => !i?.serviceCode);
+  if (missingCodes.length > 0) {
+    blockers.push({
+      code: 'CLAIM_ITEMS_MISSING_SERVICE_CODE',
+      severity: 'critical',
+      message: 'بعض البنود لا تحتوي على رمز خدمة',
+      details: { count: missingCodes.length },
+    });
+  }
+
+  if (!claim.membershipNumber) {
+    warnings.push({
+      code: 'CLAIM_MEMBERSHIP_NUMBER_MISSING',
+      severity: 'warning',
+      message: 'رقم عضوية التأمين غير مضاف',
+    });
+  }
+
+  if (!contract || contract.isDeleted) {
+    blockers.push({
+      code: 'CLAIM_CONTRACT_NOT_FOUND',
+      severity: 'critical',
+      message: 'عقد التأمين غير موجود أو محذوف',
+    });
+  } else {
+    if (contract.status !== 'active') {
+      blockers.push({
+        code: 'CLAIM_CONTRACT_NOT_ACTIVE',
+        severity: 'critical',
+        message: 'عقد التأمين غير نشط',
+      });
+    }
+    if (
+      contract.startDate &&
+      claim.visitDate &&
+      new Date(claim.visitDate) < new Date(contract.startDate)
+    ) {
+      blockers.push({
+        code: 'CLAIM_VISIT_BEFORE_CONTRACT',
+        severity: 'critical',
+        message: 'تاريخ الخدمة قبل بداية العقد',
+      });
+    }
+    if (
+      contract.endDate &&
+      claim.visitDate &&
+      new Date(claim.visitDate) > new Date(contract.endDate)
+    ) {
+      blockers.push({
+        code: 'CLAIM_VISIT_AFTER_CONTRACT',
+        severity: 'critical',
+        message: 'تاريخ الخدمة بعد انتهاء العقد',
+      });
+    }
+  }
+
+  const requiredPreAuth = new Set(
+    (contract?.coveredServices || [])
+      .filter(s => s?.requiresPreAuth)
+      .map(s => s?.serviceCategory)
+      .filter(Boolean)
+  );
+  const itemCategories = new Set((items || []).map(i => normalizeCategory(i?.category)));
+  const requiresPreAuthForClaim = Array.from(itemCategories).some(c => requiredPreAuth.has(c));
+  if (requiresPreAuthForClaim) {
+    if (!preAuth) {
+      blockers.push({
+        code: 'CLAIM_PREAUTH_REQUIRED',
+        severity: 'critical',
+        message: 'هذه المطالبة تتطلب موافقة مسبقة معتمدة',
+      });
+    } else {
+      const statusOk = ['approved', 'partially_approved'].includes(preAuth.status);
+      if (!statusOk) {
+        blockers.push({
+          code: 'CLAIM_PREAUTH_NOT_APPROVED',
+          severity: 'critical',
+          message: 'الموافقة المسبقة غير معتمدة',
+        });
+      }
+      if (preAuth.approvalDetails?.validTo && new Date(preAuth.approvalDetails.validTo) < now) {
+        blockers.push({
+          code: 'CLAIM_PREAUTH_EXPIRED',
+          severity: 'critical',
+          message: 'الموافقة المسبقة منتهية',
+        });
+      }
+    }
+  }
+
+  return {
+    readyToSubmit: blockers.length === 0,
+    blockers,
+    warnings,
+    riskScore: blockers.length * 30 + warnings.length * 10,
+  };
+}
+
+async function runClaimPrecheck(claim, now = new Date()) {
+  const [items, contract, preAuth] = await Promise.all([
+    ClaimItem.find({ claim: claim._id, isDeleted: { $ne: true } }).lean(),
+    InsuranceContract.findById(claim.contract).lean(),
+    claim.preAuthorization ? PreAuthorization.findById(claim.preAuthorization).lean() : null,
+  ]);
+  return computeClaimPrecheck({ claim, items, contract, preAuth, now });
+}
 
 // ── Auth: all insurance routes require authentication ────────────────────
 router.use(authenticate);
@@ -158,11 +333,12 @@ router.get('/contracts-expiring', async (req, res) => {
 router.get('/pre-auth', async (req, res) => {
   try {
     const { beneficiary, contract, status, urgency, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (contract) filter.contract = contract;
     if (status) filter.status = status;
     if (urgency) filter.urgency = urgency;
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [preAuths, total] = await Promise.all([
       PreAuthorization.find(filter)
@@ -184,11 +360,19 @@ router.get('/pre-auth', async (req, res) => {
 
 router.get('/pre-auth/:id', async (req, res) => {
   try {
-    const preAuth = await PreAuthorization.findById(req.params.id)
-      .populate('beneficiary', 'name')
-      .populate('contract', 'contractNumber name');
-    if (!preAuth)
-      return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
+    const { doc: preAuth, denied } = await fetchScopedByBeneficiary(
+      PreAuthorization,
+      req.params.id,
+      req,
+      res,
+      {
+        populate: [
+          { path: 'beneficiary', select: 'name' },
+          { path: 'contract', select: 'contractNumber name' },
+        ],
+      }
+    );
+    if (denied) return;
     res.json({ success: true, data: preAuth });
   } catch (error) {
     logger.error('[InsuranceClaims] Get pre-auth error:', { message: error.message });
@@ -208,6 +392,8 @@ router.post(
   ],
   async (req, res) => {
     try {
+      const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+      if (denied) return;
       const preAuth = new PreAuthorization({ ...req.body, requestedBy: req.user?.id });
       await preAuth.save();
       logger.info(`[InsuranceClaims] Pre-auth created: ${preAuth.preAuthNumber}`);
@@ -220,8 +406,16 @@ router.post(
 
 router.patch('/pre-auth/:id/approve', [mongoId('id'), validate], async (req, res) => {
   try {
-    const preAuth = await PreAuthorization.findByIdAndUpdate(
+    const { doc: scoped, denied } = await fetchScopedByBeneficiary(
+      PreAuthorization,
       req.params.id,
+      req,
+      res,
+      { select: 'beneficiary', lean: true }
+    );
+    if (denied) return;
+    const preAuth = await PreAuthorization.findByIdAndUpdate(
+      scoped._id,
       {
         status: 'approved',
         approvalDetails: {
@@ -245,8 +439,16 @@ router.patch(
   [mongoId('id'), reqString('reason', 'سبب الرفض'), validate],
   async (req, res) => {
     try {
-      const preAuth = await PreAuthorization.findByIdAndUpdate(
+      const { doc: scoped, denied } = await fetchScopedByBeneficiary(
+        PreAuthorization,
         req.params.id,
+        req,
+        res,
+        { select: 'beneficiary', lean: true }
+      );
+      if (denied) return;
+      const preAuth = await PreAuthorization.findByIdAndUpdate(
+        scoped._id,
         { status: 'denied', denialReason: req.body.reason },
         { returnDocument: 'after' }
       );
@@ -277,7 +479,7 @@ router.get('/claims', async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    let filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (contract) filter.contract = contract;
     if (status) filter.status = status;
@@ -290,6 +492,7 @@ router.get('/claims', async (req, res) => {
       if (dateFrom) filter.visitDate.$gte = new Date(dateFrom);
       if (dateTo) filter.visitDate.$lte = new Date(dateTo);
     }
+    filter = await applyBeneficiaryListScope(req, filter);
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [claims, total] = await Promise.all([
       InsuranceClaim.find(filter)
@@ -311,11 +514,20 @@ router.get('/claims', async (req, res) => {
 
 router.get('/claims/:id', async (req, res) => {
   try {
-    const claim = await InsuranceClaim.findById(req.params.id)
-      .populate('beneficiary', 'name')
-      .populate('contract', 'contractNumber name insuranceCompany')
-      .populate('preAuthorization', 'preAuthNumber status');
-    if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+    const { doc: claim, denied } = await fetchScopedByBeneficiary(
+      InsuranceClaim,
+      req.params.id,
+      req,
+      res,
+      {
+        populate: [
+          { path: 'beneficiary', select: 'name' },
+          { path: 'contract', select: 'contractNumber name insuranceCompany' },
+          { path: 'preAuthorization', select: 'preAuthNumber status' },
+        ],
+      }
+    );
+    if (denied) return;
 
     const items = await ClaimItem.find({ claim: claim._id, isDeleted: { $ne: true } }).sort({
       sequence: 1,
@@ -329,6 +541,23 @@ router.get('/claims/:id', async (req, res) => {
   }
 });
 
+router.get('/claims/:id/denial-precheck', async (req, res) => {
+  try {
+    const { doc: claim, denied } = await fetchScopedByBeneficiary(
+      InsuranceClaim,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
+
+    const result = await runClaimPrecheck(claim);
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    return safeError(res, error, '[InsuranceClaims] denial-precheck error');
+  }
+});
+
 router.post(
   '/claims',
   [
@@ -339,6 +568,8 @@ router.post(
   ],
   async (req, res) => {
     try {
+      const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
+      if (denied) return;
       const { items, ...claimData } = req.body;
       const claim = new InsuranceClaim({ ...claimData, createdBy: req.user?.id });
       await claim.save();
@@ -369,7 +600,17 @@ router.post(
 
 router.put('/claims/:id', async (req, res) => {
   try {
-    const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+    const { doc: scoped, denied } = await fetchScopedByBeneficiary(
+      InsuranceClaim,
+      req.params.id,
+      req,
+      res,
+      { select: 'beneficiary', lean: true }
+    );
+    if (denied) return;
+    const body = stripUpdateMeta(req.body);
+    delete body.beneficiary;
+    const claim = await InsuranceClaim.findByIdAndUpdate(scoped._id, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -386,8 +627,13 @@ router.put('/claims/:id', async (req, res) => {
 // Submit claim
 router.patch('/claims/:id/submit', async (req, res) => {
   try {
-    const claim = await InsuranceClaim.findById(req.params.id);
-    if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+    const { doc: claim, denied } = await fetchScopedByBeneficiary(
+      InsuranceClaim,
+      req.params.id,
+      req,
+      res
+    );
+    if (denied) return;
     if (claim.status !== 'draft') {
       return res.status(400).json({ success: false, message: 'المطالبة مرسلة مسبقاً' });
     }
@@ -399,6 +645,15 @@ router.patch('/claims/:id/submit', async (req, res) => {
     });
     if (itemCount === 0) {
       return res.status(400).json({ success: false, message: 'المطالبة لا تحتوي على بنود' });
+    }
+
+    const precheck = await runClaimPrecheck(claim);
+    if (!precheck.readyToSubmit) {
+      return res.status(409).json({
+        success: false,
+        message: 'تعذر إرسال المطالبة بسبب أخطاء تمنع الإرسال',
+        precheck,
+      });
     }
 
     claim.status = 'submitted';
@@ -427,8 +682,13 @@ router.patch(
   async (req, res) => {
     try {
       const { approvedAmount, deniedAmount, adjustmentAmount, denialReasons } = req.body;
-      const claim = await InsuranceClaim.findById(req.params.id);
-      if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+      const { doc: claim, denied } = await fetchScopedByBeneficiary(
+        InsuranceClaim,
+        req.params.id,
+        req,
+        res
+      );
+      if (denied) return;
 
       claim.adjudication = {
         processDate: new Date(),
@@ -466,6 +726,14 @@ router.patch(
 
 router.get('/claim-items/:claimId', async (req, res) => {
   try {
+    const { denied } = await fetchScopedByBeneficiary(
+      InsuranceClaim,
+      req.params.claimId,
+      req,
+      res,
+      { select: '_id', lean: true }
+    );
+    if (denied) return;
     const items = await ClaimItem.find({
       claim: req.params.claimId,
       isDeleted: { $ne: true },
@@ -489,6 +757,11 @@ router.post(
   ],
   async (req, res) => {
     try {
+      const { denied } = await fetchScopedByBeneficiary(InsuranceClaim, req.body.claim, req, res, {
+        select: '_id',
+        lean: true,
+      });
+      if (denied) return;
       const count = await ClaimItem.countDocuments({ claim: req.body.claim });
       const item = new ClaimItem({
         ...req.body,

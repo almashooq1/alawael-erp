@@ -28,6 +28,8 @@ module.exports = function registerFeatureRoutes(
   // ── Route Imports ─────────────────────────────────────────────────────────
   const missingModelsRoutes = safeRequire('../routes/missing-models.routes');
   const guardiansRoutes = safeRequire('../routes/guardians.routes');
+  const familyHomeProgramRoutes = safeRequire('../routes/family-home-program.routes');
+  const clinicalPathwayRoutes = safeRequire('../routes/clinical-pathway.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
   const beneficiaryDayAttendanceRoutes = safeRequire('../routes/beneficiary-day-attendance.routes');
   const beneficiarySectionsRoutes = safeRequire('../routes/beneficiary-sections.routes');
@@ -118,6 +120,10 @@ module.exports = function registerFeatureRoutes(
 
   // ─── prompt_04: وحدة إدارة المستفيدين — Beneficiary Management Module ─────────
   dualMount(app, 'guardians', guardiansRoutes);
+  // Wave 891: Family Home Program — structured at-home therapeutic tasks
+  dualMountAuth(app, 'family-home-program', familyHomeProgramRoutes, authenticate);
+  // Wave 896: Clinical Pathway Engine — staged rehab pathway per beneficiary
+  dualMountAuth(app, 'clinical-pathway', clinicalPathwayRoutes, authenticate);
   dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
   // Wave 174: Daily rollcall (مركز تأهيل نهاري) — distinct from session attendance
   dualMountAuth(app, 'beneficiary-day-attendance', beneficiaryDayAttendanceRoutes, authenticate);

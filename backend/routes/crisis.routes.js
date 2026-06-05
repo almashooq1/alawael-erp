@@ -104,6 +104,22 @@ const pick = (src, fields) => {
   return out;
 };
 
+/** Legacy crisis models use `center` (ref Branch) — map canonical branchFilter (W909). */
+function crisisCenterFilter(req) {
+  const f = branchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { center: { $in: f.branchId.$in } };
+  return { center: f.branchId };
+}
+
+function mergeCrisisFilter(req, base = {}) {
+  return { ...base, ...crisisCenterFilter(req) };
+}
+
+function crisisScopedById(req, id) {
+  return { _id: id, ...crisisCenterFilter(req) };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // EMERGENCY PLANS — خطط الطوارئ
 // ═══════════════════════════════════════════════════════════════════════════
@@ -111,7 +127,7 @@ const pick = (src, fields) => {
 router.get('/plans', async (req, res) => {
   try {
     const { type, status, riskLevel, center, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    const filter = mergeCrisisFilter(req, { isDeleted: { $ne: true } });
     if (type) filter.type = type;
     if (status) filter.status = status;
     if (riskLevel) filter.riskLevel = riskLevel;
@@ -145,7 +161,7 @@ router.get('/plans', async (req, res) => {
 
 router.get('/plans/:id', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.findById(req.params.id)
+    const plan = await EmergencyPlan.findOne(crisisScopedById(req, req.params.id))
       .populate('approvedBy', 'name')
       .populate('procedures.responsible', 'name phone')
       .populate('communicationTree.person', 'name phone')
@@ -159,8 +175,10 @@ router.get('/plans/:id', async (req, res) => {
 
 router.post('/plans', async (req, res) => {
   try {
+    const payload = pick(req.body, PLAN_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
     const plan = await EmergencyPlan.create({
-      ...pick(req.body, PLAN_FIELDS),
+      ...payload,
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, data: plan });
@@ -171,10 +189,14 @@ router.post('/plans', async (req, res) => {
 
 router.put('/plans/:id', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.findByIdAndUpdate(req.params.id, pick(req.body, PLAN_FIELDS), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const plan = await EmergencyPlan.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
+      pick(req.body, PLAN_FIELDS),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, data: plan });
   } catch (error) {
@@ -184,8 +206,8 @@ router.put('/plans/:id', async (req, res) => {
 
 router.patch('/plans/:id/approve', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.findByIdAndUpdate(
-      req.params.id,
+    const plan = await EmergencyPlan.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
       { status: 'active', approvedBy: req.user._id, approvedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -198,8 +220,8 @@ router.patch('/plans/:id/approve', async (req, res) => {
 
 router.delete('/plans/:id', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.findByIdAndUpdate(
-      req.params.id,
+    const plan = await EmergencyPlan.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
       { isDeleted: true },
       { returnDocument: 'after' }
     );
@@ -217,7 +239,7 @@ router.delete('/plans/:id', async (req, res) => {
 router.get('/incidents', async (req, res) => {
   try {
     const { type, severity, status, center, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
+    const filter = mergeCrisisFilter(req, { isDeleted: { $ne: true } });
     if (type) filter.type = type;
     if (severity) filter.severity = severity;
     if (status) filter.status = status;
@@ -252,7 +274,7 @@ router.get('/incidents', async (req, res) => {
 
 router.get('/incidents/:id', async (req, res) => {
   try {
-    const incident = await CrisisIncident.findById(req.params.id)
+    const incident = await CrisisIncident.findOne(crisisScopedById(req, req.params.id))
       .populate('reportedBy', 'name phone')
       .populate('incidentCommander', 'name phone')
       .populate('assignedTeam', 'name phone')
@@ -268,8 +290,10 @@ router.get('/incidents/:id', async (req, res) => {
 
 router.post('/incidents', async (req, res) => {
   try {
+    const payload = pick(req.body, INCIDENT_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
     const incident = await CrisisIncident.create({
-      ...pick(req.body, INCIDENT_FIELDS),
+      ...payload,
       reportedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: incident });
@@ -280,8 +304,8 @@ router.post('/incidents', async (req, res) => {
 
 router.put('/incidents/:id', async (req, res) => {
   try {
-    const incident = await CrisisIncident.findByIdAndUpdate(
-      req.params.id,
+    const incident = await CrisisIncident.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
       pick(req.body, INCIDENT_FIELDS),
       { returnDocument: 'after', runValidators: true }
     );
@@ -295,7 +319,7 @@ router.put('/incidents/:id', async (req, res) => {
 router.patch('/incidents/:id/status', async (req, res) => {
   try {
     const { status: newStatus, notes } = req.body;
-    const incident = await CrisisIncident.findById(req.params.id);
+    const incident = await CrisisIncident.findOne(crisisScopedById(req, req.params.id));
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
 
     incident.status = newStatus;
@@ -318,7 +342,7 @@ router.patch('/incidents/:id/status', async (req, res) => {
 
 router.post('/incidents/:id/timeline', async (req, res) => {
   try {
-    const incident = await CrisisIncident.findById(req.params.id);
+    const incident = await CrisisIncident.findOne(crisisScopedById(req, req.params.id));
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
 
     const { action, notes } = req.body;
@@ -332,7 +356,7 @@ router.post('/incidents/:id/timeline', async (req, res) => {
 
 router.post('/incidents/:id/corrective-action', async (req, res) => {
   try {
-    const incident = await CrisisIncident.findById(req.params.id);
+    const incident = await CrisisIncident.findOne(crisisScopedById(req, req.params.id));
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
 
     const { description: caDesc, assignedTo, dueDate, priority: caPriority } = req.body;
@@ -356,7 +380,7 @@ router.post('/incidents/:id/corrective-action', async (req, res) => {
 router.get('/drills', async (req, res) => {
   try {
     const { type, status, center, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeCrisisFilter(req, {});
     if (type) filter.type = type;
     if (status) filter.status = status;
     if (center) filter.center = center;
@@ -390,8 +414,10 @@ router.get('/drills', async (req, res) => {
 
 router.post('/drills', async (req, res) => {
   try {
+    const payload = pick(req.body, DRILL_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
     const drill = await EmergencyDrill.create({
-      ...pick(req.body, DRILL_FIELDS),
+      ...payload,
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, data: drill });
@@ -402,8 +428,8 @@ router.post('/drills', async (req, res) => {
 
 router.put('/drills/:id', async (req, res) => {
   try {
-    const drill = await EmergencyDrill.findByIdAndUpdate(
-      req.params.id,
+    const drill = await EmergencyDrill.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
       pick(req.body, DRILL_FIELDS),
       { returnDocument: 'after', runValidators: true }
     );
@@ -417,7 +443,7 @@ router.put('/drills/:id', async (req, res) => {
 router.patch('/drills/:id/complete', async (req, res) => {
   try {
     const { results, duration, participants, evacuationTime } = req.body;
-    const drill = await EmergencyDrill.findById(req.params.id);
+    const drill = await EmergencyDrill.findOne(crisisScopedById(req, req.params.id));
     if (!drill) return res.status(404).json({ success: false, error: 'التمرين غير موجود' });
 
     drill.status = 'completed';
@@ -441,7 +467,7 @@ router.patch('/drills/:id/complete', async (req, res) => {
 router.get('/contacts', async (req, res) => {
   try {
     const { category, center, active } = req.query;
-    const filter = {};
+    const filter = mergeCrisisFilter(req, {});
     if (category) filter.category = category;
     if (center) filter.center = center;
     if (active !== undefined) filter.isActive = active === 'true';
@@ -459,7 +485,9 @@ router.get('/contacts', async (req, res) => {
 
 router.post('/contacts', async (req, res) => {
   try {
-    const contact = await EmergencyContact.create(pick(req.body, CONTACT_FIELDS));
+    const payload = pick(req.body, CONTACT_FIELDS);
+    if (req.branchScope?.branchId) payload.center = req.branchScope.branchId;
+    const contact = await EmergencyContact.create(payload);
     res.status(201).json({ success: true, data: contact });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -468,8 +496,8 @@ router.post('/contacts', async (req, res) => {
 
 router.put('/contacts/:id', async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndUpdate(
-      req.params.id,
+    const contact = await EmergencyContact.findOneAndUpdate(
+      crisisScopedById(req, req.params.id),
       pick(req.body, CONTACT_FIELDS),
       { returnDocument: 'after', runValidators: true }
     );
@@ -482,7 +510,7 @@ router.put('/contacts/:id', async (req, res) => {
 
 router.delete('/contacts/:id', async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndDelete(req.params.id);
+    const contact = await EmergencyContact.findOneAndDelete(crisisScopedById(req, req.params.id));
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (error) {
@@ -505,34 +533,38 @@ router.get('/dashboard', async (req, res) => {
       incidentsBySeverity,
       recentIncidents,
     ] = await Promise.all([
-      EmergencyPlan.countDocuments({ status: 'active', isDeleted: { $ne: true } }),
-      CrisisIncident.countDocuments({
-        status: { $in: ['reported', 'acknowledged', 'in_progress', 'escalated'] },
-        isDeleted: { $ne: true },
-      }),
-      CrisisIncident.countDocuments({
-        severity: 'critical',
-        status: { $nin: ['resolved', 'closed'] },
-        isDeleted: { $ne: true },
-      }),
-      EmergencyDrill.countDocuments({
-        status: 'scheduled',
-        scheduledDate: { $gte: new Date() },
-      }),
-      // R4: aggregate() bypasses the tenantScope plugin. CrisisIncident is
-      // beneficiary-clinical (ADR-033) + carries branchId → scope it.
-      // branchFilter(req) = {} for cross-branch/HQ roles, so emergency-ops
-      // oversight keeps all-branch visibility; single-branch users see theirs.
+      EmergencyPlan.countDocuments(
+        mergeCrisisFilter(req, { status: 'active', isDeleted: { $ne: true } })
+      ),
+      CrisisIncident.countDocuments(
+        mergeCrisisFilter(req, {
+          status: { $in: ['reported', 'acknowledged', 'in_progress', 'escalated'] },
+          isDeleted: { $ne: true },
+        })
+      ),
+      CrisisIncident.countDocuments(
+        mergeCrisisFilter(req, {
+          severity: 'critical',
+          status: { $nin: ['resolved', 'closed'] },
+          isDeleted: { $ne: true },
+        })
+      ),
+      EmergencyDrill.countDocuments(
+        mergeCrisisFilter(req, {
+          status: 'scheduled',
+          scheduledDate: { $gte: new Date() },
+        })
+      ),
       CrisisIncident.aggregate([
-        { $match: { ...branchFilter(req), isDeleted: { $ne: true } } },
+        { $match: mergeCrisisFilter(req, { isDeleted: { $ne: true } }) },
         { $group: { _id: '$type', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
       CrisisIncident.aggregate([
-        { $match: { ...branchFilter(req), isDeleted: { $ne: true } } },
+        { $match: mergeCrisisFilter(req, { isDeleted: { $ne: true } }) },
         { $group: { _id: '$severity', count: { $sum: 1 } } },
       ]),
-      CrisisIncident.find({ isDeleted: { $ne: true } })
+      CrisisIncident.find(mergeCrisisFilter(req, { isDeleted: { $ne: true } }))
         .sort({ reportedAt: -1 })
         .limit(10)
         .populate('reportedBy', 'name')

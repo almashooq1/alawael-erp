@@ -24,6 +24,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Beneficiary = require('../models/Beneficiary');
@@ -32,6 +34,7 @@ const safeError = require('../utils/safeError');
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 const READ_ROLES = [
   'admin',
@@ -45,8 +48,8 @@ const READ_ROLES = [
 ];
 const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_manager'];
 
-function buildFilter(query) {
-  const filter = {};
+function buildFilter(req, query) {
+  const filter = { ...branchFilter(req) };
   if (query.beneficiaryId && mongoose.isValidObjectId(query.beneficiaryId)) {
     filter.beneficiary = query.beneficiaryId;
   }
@@ -66,7 +69,11 @@ function buildFilter(query) {
 // ── GET / — per-tool rollup ─────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
+      const denied = await assertBeneficiaryInScope(req, req.query.beneficiaryId, res);
+      if (denied) return;
+    }
+    const filter = buildFilter(req, req.query);
     const items = await ClinicalAssessment.find(filter).limit(10_000).lean();
     const summary = outcome.summarizeByTool(items);
     res.json({ success: true, summary, totalAssessments: items.length });
@@ -81,7 +88,12 @@ router.get('/beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await ClinicalAssessment.find({ beneficiary: req.params.id })
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
+    const items = await ClinicalAssessment.find({
+      beneficiary: req.params.id,
+      ...branchFilter(req),
+    })
       .sort({ assessmentDate: 1 })
       .lean();
     const tool = req.query.tool ? String(req.query.tool) : null;
@@ -107,7 +119,12 @@ router.get('/beneficiary/:id/comparison', requireRole(READ_ROLES), async (req, r
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await ClinicalAssessment.find({ beneficiary: req.params.id })
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
+    const items = await ClinicalAssessment.find({
+      beneficiary: req.params.id,
+      ...branchFilter(req),
+    })
       .sort({ assessmentDate: 1 })
       .lean();
     const tool = req.query.tool ? String(req.query.tool) : null;
@@ -127,7 +144,10 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
     // Pull beneficiaries with at least one assessment in the last year.
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-    const recent = await ClinicalAssessment.find({ assessmentDate: { $gte: oneYearAgo } }).lean();
+    const recent = await ClinicalAssessment.find({
+      assessmentDate: { $gte: oneYearAgo },
+      ...branchFilter(req),
+    }).lean();
 
     // Group assessments by beneficiary in memory (no N+1).
     const byBenef = new Map();
@@ -158,6 +178,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
     const ids = declining.map(d => d.beneficiaryId).filter(id => mongoose.isValidObjectId(id));
     const benefs = ids.length
       ? await Beneficiary.find({ _id: { $in: ids } })
+          .find(branchFilter(req))
           .select('firstName_ar lastName_ar beneficiaryNumber')
           .lean()
       : [];
@@ -188,7 +209,11 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /export.csv ─────────────────────────────────────────────────────
 router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
+      const denied = await assertBeneficiaryInScope(req, req.query.beneficiaryId, res);
+      if (denied) return;
+    }
+    const filter = buildFilter(req, req.query);
     const EXPORT_LIMIT = 10_000;
     const totalMatching = await ClinicalAssessment.countDocuments(filter);
     const items = await ClinicalAssessment.find(filter)

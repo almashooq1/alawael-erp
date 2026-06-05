@@ -17,7 +17,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const _logger = require('../utils/logger');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -49,6 +50,15 @@ const genCode = prefix => {
   const ts = Date.now().toString(36).slice(-4).toUpperCase();
   return `${prefix}-${year}-${ts}${rnd}`;
 };
+
+/** W912 — branch-scoped models (work orders, transfers, bookings, inventories). */
+function mergeTenantFilter(req, base = {}) {
+  return { ...base, ...branchFilter(req) };
+}
+
+function scopedById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -125,14 +135,17 @@ router.delete('/categories/:id', authorize(['admin']), async (req, res) => {
 // Dashboard stats
 router.get('/assets/stats', async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const [total, byStatus, _byCategory, warrantyExpiringSoon, maintenanceDue] = await Promise.all([
-      Asset.countDocuments(),
-      Asset.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Asset.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
+      Asset.countDocuments(scope),
+      Asset.aggregate([{ $match: scope }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Asset.aggregate([{ $match: scope }, { $group: { _id: '$category', count: { $sum: 1 } } }]),
       Asset.countDocuments({
+        ...scope,
         warrantyExpiryDate: { $gte: new Date(), $lte: new Date(Date.now() + 60 * 864e5) },
       }),
       Asset.countDocuments({
+        ...scope,
         lastMaintenanceDate: { $lte: new Date(Date.now() - 30 * 864e5) },
         status: 'active',
       }),
@@ -149,11 +162,12 @@ router.get('/assets/stats', async (req, res) => {
 
 router.get('/assets', async (req, res) => {
   try {
-    const { search, status, category, branchId, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const { search, status, category, page = 1, limit: rawLimit = 20 } = req.query;
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (branchId) filter.location = { $regex: escapeRegex(branchId), $options: 'i' };
+    const scopedBranch = effectiveBranchScope(req);
+    if (scopedBranch) filter.branchId = scopedBranch;
     if (search) {
       const safe = escapeRegex(String(search));
       filter.$or = [
@@ -178,7 +192,13 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
     const { name, category } = req.body;
     if (!name || !category)
       return res.status(400).json({ success: false, message: 'الاسم والفئة مطلوبان' });
-    const asset = await Asset.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
+    const payload = stripUpdateMeta(req.body);
+    delete payload.branchId;
+    const asset = await Asset.create({
+      ...payload,
+      createdBy: req.user?.id,
+      ...(req.branchScope?.branchId && { branchId: req.branchScope.branchId }),
+    });
     res.status(201).json({ success: true, data: asset, message: 'تم إضافة الأصل' });
   } catch (err) {
     safeError(res, err, 'assets create error');
@@ -188,7 +208,7 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
 router.get('/assets/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findById(req.params.id).lean();
+    const asset = await Asset.findOne(scopedById(req, req.params.id)).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset });
   } catch (err) {
@@ -199,9 +219,11 @@ router.get('/assets/:id', async (req, res) => {
 router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findByIdAndUpdate(
-      req.params.id,
-      { ...stripUpdateMeta(req.body), updatedAt: new Date() },
+    const body = stripUpdateMeta(req.body);
+    delete body.branchId;
+    const asset = await Asset.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      { ...body, updatedAt: new Date() },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
@@ -214,7 +236,7 @@ router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
 router.delete('/assets/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const asset = await Asset.findById(req.params.id);
+    const asset = await Asset.findOne(scopedById(req, req.params.id));
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (asset.status === 'active')
       return res.status(409).json({ success: false, message: 'لا يمكن حذف أصل نشط' });
@@ -229,6 +251,7 @@ router.delete('/assets/:id', authorize(['admin']), async (req, res) => {
 router.get('/assets/scan/:barcode', async (req, res) => {
   try {
     const asset = await Asset.findOne({
+      ...branchFilter(req),
       $or: [{ tags: req.params.barcode }, { location: req.params.barcode }],
     }).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'لم يُعثر على الأصل' });
@@ -322,7 +345,7 @@ router.get('/work-orders', async (req, res) => {
       page = 1,
       limit: rawLimit = 20,
     } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (type) filter.type = type;
@@ -358,16 +381,28 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
         .status(400)
         .json({ success: false, message: 'الأصل، النوع، العنوان، والتاريخ مطلوبة' });
     }
+    const scope = branchFilter(req);
+    if (Object.keys(scope).length) {
+      const owned = await Asset.findOne({ _id: assetId, ...scope })
+        .select('_id')
+        .lean();
+      if (!owned) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
+    }
     const workOrderNumber = genCode('WO');
-    const workOrder = await MaintenanceWorkOrder.create({
+    const woPayload = {
       ...stripUpdateMeta(req.body),
       workOrderNumber,
       status: 'pending',
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) woPayload.branchId = req.branchScope.branchId;
+    const workOrder = await MaintenanceWorkOrder.create(woPayload);
     // Update asset status to under_maintenance for corrective/emergency
     if (['corrective', 'emergency'].includes(type)) {
-      await Asset.findByIdAndUpdate(assetId, { status: 'maintenance' });
+      await Asset.findOneAndUpdate(
+        Object.keys(scope).length ? { _id: assetId, ...scope } : { _id: assetId },
+        { status: 'maintenance' }
+      );
     }
     res.status(201).json({ success: true, data: workOrder, message: 'تم إنشاء أمر العمل' });
   } catch (err) {
@@ -378,7 +413,7 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
 router.get('/work-orders/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findById(req.params.id)
+    const wo = await MaintenanceWorkOrder.findOne(scopedById(req, req.params.id))
       .populate('assetId', 'name category location')
       .populate('assignedTo', 'name email')
       .lean();
@@ -392,8 +427,8 @@ router.get('/work-orders/:id', async (req, res) => {
 router.put('/work-orders/:id', authorize(['admin', 'manager', 'technician']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
-      req.params.id,
+    const wo = await MaintenanceWorkOrder.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
       { returnDocument: 'after', runValidators: true }
     ).lean();
@@ -415,8 +450,8 @@ router.patch(
       if (!findings || !resolution) {
         return res.status(400).json({ success: false, message: 'النتائج والإجراء مطلوبان' });
       }
-      const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
-        req.params.id,
+      const wo = await MaintenanceWorkOrder.findOneAndUpdate(
+        scopedById(req, req.params.id),
         {
           status: 'completed',
           findings,
@@ -444,7 +479,7 @@ router.patch(
 router.delete('/work-orders/:id', authorize(['admin']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const wo = await MaintenanceWorkOrder.findByIdAndDelete(req.params.id);
+    const wo = await MaintenanceWorkOrder.findOneAndDelete(scopedById(req, req.params.id));
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
@@ -459,7 +494,7 @@ router.delete('/work-orders/:id', authorize(['admin']), async (req, res) => {
 router.get('/transfers', async (req, res) => {
   try {
     const { assetId, status, fromBranchId, toBranchId, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (fromBranchId) filter.fromBranchId = fromBranchId;
@@ -489,13 +524,15 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
     }
     const transferNumber = genCode('TR');
-    const transfer = await AssetTransfer.create({
+    const trPayload = {
       ...stripUpdateMeta(req.body),
       transferNumber,
       status: 'pending',
       requestedBy: req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) trPayload.branchId = req.branchScope.branchId;
+    const transfer = await AssetTransfer.create(trPayload);
     res.status(201).json({ success: true, data: transfer, message: 'تم إنشاء طلب النقل' });
   } catch (err) {
     safeError(res, err, 'transfers create error');
@@ -505,8 +542,8 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
 router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findByIdAndUpdate(
-      req.params.id,
+    const transfer = await AssetTransfer.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'approved', approvedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -520,7 +557,7 @@ router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (r
 router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findById(req.params.id);
+    const transfer = await AssetTransfer.findOne(scopedById(req, req.params.id));
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     transfer.status = 'received';
     transfer.receivedDate = new Date();
@@ -540,8 +577,8 @@ router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (r
 router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const transfer = await AssetTransfer.findByIdAndUpdate(
-      req.params.id,
+    const transfer = await AssetTransfer.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'rejected', updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -559,7 +596,7 @@ router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (re
 router.get('/bookings', async (req, res) => {
   try {
     const { assetId, status, date, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (date) filter.bookingDate = new Date(date);
@@ -598,12 +635,14 @@ router.post('/bookings', async (req, res) => {
       return res.status(409).json({ success: false, message: 'المورد محجوز في هذا الوقت' });
     }
     const bookingNumber = genCode('BK');
-    const booking = await ResourceBooking.create({
+    const bkPayload = {
       ...stripUpdateMeta(req.body),
       bookingNumber,
       bookedBy: req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) bkPayload.branchId = req.branchScope.branchId;
+    const booking = await ResourceBooking.create(bkPayload);
     res.status(201).json({ success: true, data: booking, message: 'تم إنشاء الحجز' });
   } catch (err) {
     safeError(res, err, 'bookings create error');
@@ -613,8 +652,8 @@ router.post('/bookings', async (req, res) => {
 router.patch('/bookings/:id/cancel', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const booking = await ResourceBooking.findByIdAndUpdate(
-      req.params.id,
+    const booking = await ResourceBooking.findOneAndUpdate(
+      scopedById(req, req.params.id),
       { status: 'cancelled', updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
@@ -632,7 +671,7 @@ router.patch('/bookings/:id/cancel', async (req, res) => {
 router.get('/inventories', async (req, res) => {
   try {
     const { status, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    const filter = mergeTenantFilter(req, {});
     if (status) filter.status = status;
     const limit = clamp(rawLimit);
     const skip = (Math.max(1, +page) - 1) * limit;
@@ -657,12 +696,14 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
     if (!title || !inventoryDate)
       return res.status(400).json({ success: false, message: 'العنوان والتاريخ مطلوبان' });
     const inventoryNumber = genCode('INV');
-    const inventory = await AssetInventory.create({
+    const invPayload = {
       ...stripUpdateMeta(req.body),
       inventoryNumber,
       conductedBy: req.body.conductedBy || req.user?.id,
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) invPayload.branchId = req.branchScope.branchId;
+    const inventory = await AssetInventory.create(invPayload);
     res.status(201).json({ success: true, data: inventory, message: 'تم إنشاء سجل الجرد' });
   } catch (err) {
     safeError(res, err, 'inventories create error');
@@ -672,7 +713,7 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
 router.get('/inventories/:id', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const inventory = await AssetInventory.findById(req.params.id)
+    const inventory = await AssetInventory.findOne(scopedById(req, req.params.id))
       .populate('conductedBy', 'name email')
       .lean();
     if (!inventory) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
@@ -689,9 +730,14 @@ router.get('/inventories/:id', async (req, res) => {
 router.post('/inventories/:id/items', async (req, res) => {
   if (!validId(req, res)) return;
   try {
+    const parent = await AssetInventory.findOne(scopedById(req, req.params.id))
+      .select('_id branchId')
+      .lean();
+    if (!parent) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
     const { assetId, status, condition, actualLocation, marketValue, notes } = req.body;
     if (!assetId || !status)
       return res.status(400).json({ success: false, message: 'الأصل والحالة مطلوبان' });
+    const scopedBranchId = parent.branchId || req.branchScope?.branchId;
     const item = await AssetInventoryItem.create({
       inventoryId: req.params.id,
       assetId,
@@ -702,7 +748,7 @@ router.post('/inventories/:id/items', async (req, res) => {
       notes,
       scannedBy: req.user?.name || req.user?.email,
       scannedAt: new Date(),
-      branchId: req.body.branchId,
+      ...(scopedBranchId ? { branchId: scopedBranchId } : {}),
       createdBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: item, message: 'تم تسجيل بند الجرد' });
@@ -719,8 +765,8 @@ router.patch('/inventories/:id/complete', authorize(['admin', 'manager']), async
     const found = items.filter(i => i.status === 'found').length;
     const missing = items.filter(i => i.status === 'missing').length;
     const damaged = items.filter(i => i.status === 'damaged').length;
-    const inventory = await AssetInventory.findByIdAndUpdate(
-      req.params.id,
+    const inventory = await AssetInventory.findOneAndUpdate(
+      scopedById(req, req.params.id),
       {
         status: 'completed',
         totalAssetsCounted: items.length,
@@ -748,6 +794,7 @@ router.get('/dashboard', async (req, res) => {
     const now = new Date();
     const _soon30 = new Date(now.getTime() + 30 * 864e5);
     const soon60 = new Date(now.getTime() + 60 * 864e5);
+    const tenant = branchFilter(req);
     const [
       totalAssets,
       activeAssets,
@@ -762,15 +809,17 @@ router.get('/dashboard', async (req, res) => {
       Asset.countDocuments(),
       Asset.countDocuments({ status: 'active' }),
       Asset.countDocuments({ status: 'maintenance' }),
-      MaintenanceWorkOrder.countDocuments({ status: 'pending' }),
+      MaintenanceWorkOrder.countDocuments({ ...tenant, status: 'pending' }),
       MaintenanceWorkOrder.countDocuments({
+        ...tenant,
         scheduledDate: { $lt: now },
         status: { $in: ['pending', 'approved'] },
       }),
-      AssetTransfer.countDocuments({ status: 'pending' }),
+      AssetTransfer.countDocuments({ ...tenant, status: 'pending' }),
       Asset.countDocuments({ lastMaintenanceDate: { $lte: now }, status: 'active' }),
       Asset.countDocuments({ warrantyExpiryDate: { $gte: now, $lte: soon60 } }),
       ResourceBooking.countDocuments({
+        ...tenant,
         bookingDate: {
           $gte: new Date(now.toDateString()),
           $lt: new Date(new Date(now.toDateString()).getTime() + 864e5),

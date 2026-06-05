@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const Contract = require('../models/Contract.model');
 const safeError = require('../utils/safeError');
@@ -17,6 +17,10 @@ const safeError = require('../utils/safeError');
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
 const clampLimit = v => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
+const randomContractSuffix = () =>
+  typeof crypto.randomInt === 'function'
+    ? crypto.randomInt(1000, 9999)
+    : 1000 + Math.floor(Math.random() * 9000);
 
 /** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
 const validObjectId = (req, res) => {
@@ -27,6 +31,25 @@ const validObjectId = (req, res) => {
   return true;
 };
 
+const scopedById = (req, id) => ({ _id: id, ...branchFilter(req) });
+const aggregateScope = scope => {
+  if (!scope?.branchId) return scope || {};
+  if (scope.branchId.$in && Array.isArray(scope.branchId.$in)) {
+    return {
+      ...scope,
+      branchId: {
+        $in: scope.branchId.$in
+          .filter(id => mongoose.isValidObjectId(id))
+          .map(id => new mongoose.Types.ObjectId(id)),
+      },
+    };
+  }
+  if (mongoose.isValidObjectId(scope.branchId)) {
+    return { ...scope, branchId: new mongoose.Types.ObjectId(scope.branchId) };
+  }
+  return scope;
+};
+
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ─── List contracts ──────────────────────────────────────────────────────────
@@ -34,7 +57,7 @@ router.get('/', async (req, res) => {
   try {
     const { status, type, page = 1, limit: rawLimit = 20 } = req.query;
     const limit = clampLimit(rawLimit);
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status.toUpperCase();
     if (type) filter.contractType = type.toUpperCase();
     const skip = (Math.max(1, +page) - 1) * limit;
@@ -56,9 +79,14 @@ router.get('/', async (req, res) => {
 // ─── Contract statistics (must be before /:id) ───────────────────────────────
 router.get('/stats/summary', async (req, res) => {
   try {
+    const scope = branchFilter(req);
+    const scopedForAggregate = aggregateScope(scope);
     const [total, byStatus] = await Promise.all([
-      Contract.countDocuments(),
-      Contract.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Contract.countDocuments(scope),
+      Contract.aggregate([
+        { $match: scopedForAggregate },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
     ]);
     const stats = { total, active: 0, expired: 0, draft: 0, suspended: 0, terminated: 0 };
     byStatus.forEach(s => {
@@ -68,6 +96,7 @@ router.get('/stats/summary', async (req, res) => {
     const now = new Date();
     const soon = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     stats.expiringSoon = await Contract.countDocuments({
+      ...scope,
       status: 'ACTIVE',
       endDate: { $gte: now, $lte: soon },
     });
@@ -81,7 +110,7 @@ router.get('/stats/summary', async (req, res) => {
 router.get('/:id', async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id).lean();
+    const contract = await Contract.findOne(scopedById(req, req.params.id)).lean();
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'بيانات العقد' });
   } catch (error) {
@@ -102,14 +131,23 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const { contractTitle, contractType, supplier, startDate, endDate, value } = req.body;
+      const {
+        contractTitle,
+        contractType,
+        supplier,
+        startDate,
+        endDate,
+        value,
+        branchId,
+        liabilityInsurance,
+      } = req.body;
       if (!contractTitle || !contractType) {
         return res.status(400).json({ success: false, message: 'العنوان والنوع مطلوبان' });
       }
       // Atomic counter — avoids race condition where two concurrent requests
       // both read the same countDocuments() value and produce duplicate numbers.
       const year = new Date().getFullYear();
-      const seq = crypto.randomInt(1000, 9999);
+      const seq = randomContractSuffix();
       const ts = Date.now().toString(36).slice(-4).toUpperCase();
       const contractNumber = `CT-${year}-${ts}${seq}`;
       const contract = await Contract.create({
@@ -120,7 +158,9 @@ router.post(
         startDate,
         endDate,
         value,
+        liabilityInsurance,
         status: 'DRAFT',
+        branchId: req.branchScope?.branchId || branchId || null,
         createdBy: req.user?.id,
       });
       res.status(201).json({ success: true, data: contract, message: 'تم إنشاء العقد بنجاح' });
@@ -144,10 +184,22 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
       status,
       terms,
       notes,
+      liabilityInsurance,
     } = req.body;
-    const contract = await Contract.findByIdAndUpdate(
-      req.params.id,
-      { contractTitle, contractType, supplier, startDate, endDate, value, status, terms, notes },
+    const contract = await Contract.findOneAndUpdate(
+      scopedById(req, req.params.id),
+      {
+        contractTitle,
+        contractType,
+        supplier,
+        startDate,
+        endDate,
+        value,
+        status,
+        terms,
+        notes,
+        liabilityInsurance,
+      },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
@@ -161,7 +213,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
 router.delete('/:id', authorize(['admin']), async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const contract = await Contract.findByIdAndDelete(req.params.id);
+    const contract = await Contract.findOneAndDelete(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, message: 'تم حذف العقد بنجاح' });
   } catch (error) {
@@ -173,7 +225,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
 router.post('/:id/renew', authorize(['admin', 'manager']), async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const contract = await Contract.findById(req.params.id);
+    const contract = await Contract.findOne(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     contract.status = 'ACTIVE';
     if (contract.endDate) {

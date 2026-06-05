@@ -60,11 +60,19 @@ function generatePlanNumber() {
   return `CP-${y}-${rand}`;
 }
 
+function scopedCarePlanQuery(req, id, extra = {}) {
+  const scope = branchFilter(req);
+  const base = { _id: id, ...extra };
+  return Object.keys(scope).length
+    ? CarePlan.findOne({ ...base, ...scope })
+    : CarePlan.findById(id);
+}
+
 // ── GET / — list ─────────────────────────────────────────────────────────
 router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
   try {
     const { status, beneficiary, q, from, to, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (beneficiary && mongoose.isValidObjectId(beneficiary)) filter.beneficiary = beneficiary;
     if (from || to) {
@@ -216,11 +224,8 @@ router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('CarePlan'), async (re
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const doc = await CarePlan.findById(req.params.id).lean();
+    const doc = await scopedCarePlanQuery(req, req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
-    // Plan-level branch gate via parent beneficiary (CarePlan has no
-    // direct branchId field). Uniform 404 if the linked beneficiary is
-    // out of scope.
     const denied = await assertBeneficiaryInScope(req, doc.beneficiary, res);
     if (denied) return;
     res.json({ success: true, data: doc });
@@ -259,7 +264,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     // Pre-fetch the existing plan to learn its beneficiary, then enforce
     // the branch gate before applying any mutation. Body must NOT be able
     // to switch which beneficiary the plan belongs to.
-    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    const existing = await scopedCarePlanQuery(req, req.params.id).select('beneficiary').lean();
     if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
     const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
     if (denied) return;
@@ -268,10 +273,15 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body._id;
     delete body.createdAt;
     delete body.beneficiary; // forbid moving a plan to another beneficiary
-    const doc = await CarePlan.findByIdAndUpdate(req.params.id, body, {
-      returnDocument: 'after',
-      runValidators: true,
-    }).lean();
+    const scope = branchFilter(req);
+    const doc = await CarePlan.findOneAndUpdate(
+      Object.keys(scope).length ? { _id: req.params.id, ...scope } : { _id: req.params.id },
+      body,
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     logger.info('[care-plans] updated', { id: req.params.id, by: req.user?.id });
     res.json({ success: true, data: doc, message: 'تم التحديث' });
@@ -294,14 +304,15 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
 
     // Pre-fetch beneficiary to enforce branch gate. Without this, anyone
     // could push goals onto any care plan in any branch.
-    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    const existing = await scopedCarePlanQuery(req, req.params.id).select('beneficiary').lean();
     if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
     const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
     if (denied) return;
 
     const path = `${plan}.domains.${domain}.goals`;
-    const doc = await CarePlan.findByIdAndUpdate(
-      req.params.id,
+    const scope = branchFilter(req);
+    const doc = await CarePlan.findOneAndUpdate(
+      Object.keys(scope).length ? { _id: req.params.id, ...scope } : { _id: req.params.id },
       {
         $push: { [path]: req.body },
         [`${plan}.enabled`]: true,
@@ -320,7 +331,7 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const plan = await CarePlan.findById(req.params.id);
+    const plan = await scopedCarePlanQuery(req, req.params.id);
     if (!plan) return res.status(404).json({ success: false, message: 'غير موجود' });
     // Branch gate via parent beneficiary — close cross-tenant goal-edit.
     const denied = await assertBeneficiaryInScope(req, plan.beneficiary, res);
@@ -380,13 +391,14 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     // Pre-fetch to enforce branch gate before archiving.
-    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    const existing = await scopedCarePlanQuery(req, req.params.id).select('beneficiary').lean();
     if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
     const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
     if (denied) return;
 
-    const doc = await CarePlan.findByIdAndUpdate(
-      req.params.id,
+    const scope = branchFilter(req);
+    const doc = await CarePlan.findOneAndUpdate(
+      Object.keys(scope).length ? { _id: req.params.id, ...scope } : { _id: req.params.id },
       { status: 'ARCHIVED' },
       { returnDocument: 'after' }
     ).lean();

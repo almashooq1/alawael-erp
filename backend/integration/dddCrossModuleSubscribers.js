@@ -846,6 +846,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Waitlist → Timeline: Added (W979) ────────────────────────────
+  subscribers.push({
+    name: 'waitlist:added → timeline:record',
+    pattern: 'waitlist.waitlist.added',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'waitlisted',
+            category: 'administrative',
+            severity: 'info',
+            title: `Added to waitlist (${event.payload.department || ''})`.trim(),
+            title_ar: `إضافة لقائمة الانتظار (${event.payload.department || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Waitlist-added timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Waitlist → Timeline: Booked = admission (W979) ───────────────
+  subscribers.push({
+    name: 'waitlist:booked → timeline:record',
+    pattern: 'waitlist.waitlist.booked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'waitlist_booked',
+            category: 'administrative',
+            severity: 'success',
+            title: `Booked from waitlist — admission (${event.payload.department || ''})`.trim(),
+            title_ar: `حجز/قبول من قائمة الانتظار (${event.payload.department || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Waitlist-booked timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

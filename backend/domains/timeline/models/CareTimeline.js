@@ -31,6 +31,8 @@ const careTimelineSchema = new mongoose.Schema(
       enum: [
         // Lifecycle
         'registration',
+        'waitlisted', // W979
+        'waitlist_booked', // W979 — booked from the waitlist (admission)
         'admission',
         'discharge',
         'transfer',

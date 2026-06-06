@@ -40,6 +40,8 @@ const careTimelineSchema = new mongoose.Schema(
         // Clinical
         'assessment_completed',
         'screening_completed', // W980 — vision/hearing screening finalized
+        'medication_administered', // W981
+        'medication_not_given', // W981
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',

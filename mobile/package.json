@@ -50,7 +50,7 @@
     "@reduxjs/toolkit": "^1.9.6",
     "@types/react": "^18.2.0",
     "@types/react-native": "^0.72.0",
-    "axios": "^1.16.1",
+    "axios": "^1.17.0",
     "date-fns": "^2.30.0",
     "expo": "^49.0.0",
     "expo-device": "^5.4.0",

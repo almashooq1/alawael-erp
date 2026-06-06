@@ -143,18 +143,16 @@ BeneficiaryVoiceLogSchema.index({ beneficiaryId: 1, entryKind: 1, capturedAt: -1
 BeneficiaryVoiceLogSchema.index({ branchId: 1, entryKind: 1, capturedAt: -1 });
 
 // W460 Wave-18 invariants
-BeneficiaryVoiceLogSchema.pre('save', function (next) {
+BeneficiaryVoiceLogSchema.pre('save', async function () {
   // Anti-substitution doctrine: proxy + capacityGrade='absent' is the
   // ONLY case where we tolerate no content beyond proxy interpretation.
   // Other proxy entries MUST document why direct capture was infeasible.
   if (this.captureModality === 'proxy' && this.capacityGrade !== 'absent') {
     if (!this.supportArrangement || this.supportArrangement.trim().length < 10) {
-      return next(
-        new Error(
+      throw new Error(
           'BeneficiaryVoiceLog: proxy capture requires supportArrangement (≥10 chars) ' +
             'documenting why direct capture from beneficiary was infeasible'
-        )
-      );
+        );
     }
   }
 
@@ -163,9 +161,7 @@ BeneficiaryVoiceLogSchema.pre('save', function (next) {
     (this.entryKind === 'daily_rating' || this.entryKind === 'session_rating') &&
     (this.content?.ratingValue == null || this.content?.ratingScale == null)
   ) {
-    return next(
-      new Error(`BeneficiaryVoiceLog: ${this.entryKind} requires content.ratingValue + ratingScale`)
-    );
+    throw new Error(`BeneficiaryVoiceLog: ${this.entryKind} requires content.ratingValue + ratingScale`);
   }
 
   // AAC entries must have aacSymbols populated
@@ -173,10 +169,10 @@ BeneficiaryVoiceLogSchema.pre('save', function (next) {
     this.captureModality === 'aac' &&
     (!this.content?.aacSymbols || this.content.aacSymbols.length === 0)
   ) {
-    return next(new Error('BeneficiaryVoiceLog: aac capture requires content.aacSymbols[]'));
+    throw new Error('BeneficiaryVoiceLog: aac capture requires content.aacSymbols[]');
   }
 
-  next();
+  
 });
 
 module.exports =

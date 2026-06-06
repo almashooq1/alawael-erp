@@ -59,15 +59,15 @@ const UserPreferencesSchema = new mongoose.Schema(
 // savedViews where shareWithRole=true authored by another member.
 UserPreferencesSchema.index({ 'savedViews.shareWithRole': 1 });
 
-UserPreferencesSchema.pre('save', function (next) {
+UserPreferencesSchema.pre('save', async function () {
   this.updatedAt = new Date();
   // Enforce pin limit at the DB layer as a backstop (service layer
   // already rejects with PIN_LIMIT_EXCEEDED, but if a bad caller
   // sneaks past, this catches it).
   if (Array.isArray(this.pinnedWidgets) && this.pinnedWidgets.length > 6) {
-    return next(new Error('UserPreferences: pinnedWidgets exceeds max of 6'));
+    throw new Error('UserPreferences: pinnedWidgets exceeds max of 6');
   }
-  next();
+  
 });
 
 module.exports =

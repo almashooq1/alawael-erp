@@ -106,16 +106,16 @@ const IMMUTABLE_FIELDS = [
   'rawPayload',
 ];
 
-HikvisionRawEventSchema.pre('save', function (next) {
-  if (this.isNew) return next();
+HikvisionRawEventSchema.pre('save', async function () {
+  if (this.isNew) return;
   for (const f of IMMUTABLE_FIELDS) {
     if (this.isModified(f)) {
       const err = new Error(`HikvisionRawEvent: field "${f}" is immutable after creation`);
       err.name = 'ImmutableFieldError';
-      return next(err);
+      throw err;
     }
   }
-  return next();
+  return;
 });
 
 module.exports =

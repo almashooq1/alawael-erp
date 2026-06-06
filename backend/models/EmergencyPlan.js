@@ -116,13 +116,11 @@ const EmergencyPlanSchema = new mongoose.Schema(
 );
 
 // Wave-18 invariant: at most ONE primary emergency contact.
-EmergencyPlanSchema.pre('save', function (next) {
+EmergencyPlanSchema.pre('save', async function () {
   if (Array.isArray(this.emergencyContacts)) {
     const primaries = this.emergencyContacts.filter(c => c.isPrimary === true);
     if (primaries.length > 1) {
-      return next(
-        new Error('EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true')
-      );
+      throw new Error('EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true');
     }
   }
 
@@ -134,7 +132,7 @@ EmergencyPlanSchema.pre('save', function (next) {
     this.nextReviewDue = next;
   }
 
-  next();
+  
 });
 
 module.exports =

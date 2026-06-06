@@ -183,22 +183,20 @@ goalSchema.index({ createdBy: 1, createdAt: -1 });
 goalSchema.index({ 'icfMapping.icfCode': 1 });
 
 // W452 — ICF mapping invariants enforced before save.
-goalSchema.pre('save', function (next) {
+goalSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   if (Array.isArray(this.icfMapping) && this.icfMapping.length > 0) {
     // Invariant 1: at most one primary
     const primaries = this.icfMapping.filter(m => m.isPrimary === true);
     if (primaries.length > 1) {
-      return next(new Error('Goal.icfMapping: at most one entry may have isPrimary: true'));
+      throw new Error('Goal.icfMapping: at most one entry may have isPrimary: true');
     }
 
     // Invariant 2: targetQualifier requires baselineQualifier
     for (const m of this.icfMapping) {
       if (typeof m.targetQualifier === 'number' && typeof m.baselineQualifier !== 'number') {
-        return next(
-          new Error(`Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`)
-        );
+        throw new Error(`Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`);
       }
     }
 
@@ -206,13 +204,13 @@ goalSchema.pre('save', function (next) {
     const seen = new Set();
     for (const m of this.icfMapping) {
       if (seen.has(m.icfCode)) {
-        return next(new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`));
+        throw new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`);
       }
       seen.add(m.icfCode);
     }
   }
 
-  next();
+  
 });
 
 module.exports = mongoose.models.Goal || mongoose.model('Goal', goalSchema);

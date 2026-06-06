@@ -132,7 +132,7 @@ SiblingAdjustmentRecordSchema.index({ branchId: 1, totalBand: 1, assessmentDate:
 SiblingAdjustmentRecordSchema.index({ siblingId: 1, assessmentDate: -1 });
 
 // W468 Wave-18 — recompute SDQ totals via lib
-SiblingAdjustmentRecordSchema.pre('save', function (next) {
+SiblingAdjustmentRecordSchema.pre('save', async function () {
   const lib = require('../intelligence/sdq-scoring.lib');
   const scoresObj = this.scores ? this.scores.toObject?.() || this.scores : {};
   const result = lib.scoreSDQ({
@@ -144,9 +144,7 @@ SiblingAdjustmentRecordSchema.pre('save', function (next) {
   });
 
   if (!result.valid) {
-    return next(
-      new Error(`SiblingAdjustmentRecord: invalid SDQ scores: ${result.errors.join(', ')}`)
-    );
+    throw new Error(`SiblingAdjustmentRecord: invalid SDQ scores: ${result.errors.join(', ')}`);
   }
 
   this.totalDifficulties = result.total;
@@ -162,7 +160,7 @@ SiblingAdjustmentRecordSchema.pre('save', function (next) {
     }
   }
 
-  next();
+  
 });
 
 module.exports =

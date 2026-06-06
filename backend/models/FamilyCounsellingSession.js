@@ -158,24 +158,20 @@ FamilyCounsellingSessionSchema.index({ branchId: 1, sessionDate: -1, sessionType
 FamilyCounsellingSessionSchema.index({ counsellorUserId: 1, sessionDate: -1 });
 
 // W470 Wave-18 invariants
-FamilyCounsellingSessionSchema.pre('save', function (next) {
+FamilyCounsellingSessionSchema.pre('save', async function () {
   // Cancelled/no_show require cancellationReason
   if (
     (this.status === 'cancelled' || this.status === 'no_show') &&
     (!this.cancellationReason || this.cancellationReason.trim().length < 5)
   ) {
-    return next(
-      new Error(
+    throw new Error(
         `FamilyCounsellingSession: status="${this.status}" requires cancellationReason (≥5 chars)`
-      )
-    );
+      );
   }
 
   // completed status: sessionDate should be in the past or now
   if (this.status === 'completed' && this.sessionDate && this.sessionDate > new Date()) {
-    return next(
-      new Error('FamilyCounsellingSession: completed session cannot have sessionDate in future')
-    );
+    throw new Error('FamilyCounsellingSession: completed session cannot have sessionDate in future');
   }
 
   // followUpActions[].completed requires completedAt
@@ -185,7 +181,7 @@ FamilyCounsellingSessionSchema.pre('save', function (next) {
     }
   }
 
-  next();
+  
 });
 
 module.exports =

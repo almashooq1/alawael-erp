@@ -82,25 +82,10 @@ const HOOK_RE =
 // entry from this Set, commit. Same wave pattern that drove W325c
 // phantom-ref baseline 58 → 0 across ~12 waves.
 const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
-  // W948 — remaining SYNC callback hooks with next(arg) bodies (need manual
-  // throw-conversion); the 50 bare-next baseline files were converted to async.
-  "models/AccountingExpense.js",
-  "models/AiRecommendationBundle.js",
-  "models/BeneficiaryVoiceLog.js",
-  "models/CulturalProfile.js",
-  "models/DecisionRightsAssessment.js",
-  "models/EmergencyPlan.js",
-  "models/FamilyCounsellingSession.js",
-  "models/FinancialTransaction.js",
-  "models/Goal.js",
-  "models/HikvisionRawEvent.js",
-  "models/InsuranceTariff.js",
-  "models/ParentChatbotSession.js",
-  "models/Productivity/UserPreferences.js",
-  "models/SiblingAdjustmentRecord.js",
+  // W949 — only guarded false-positives remain (auditLog hooks guard
+  // `typeof next === 'function'`, so they are Mongoose-9-safe). All real
+  // callback hooks (async+next W946, sync W948, next(arg) W949) are converted.
   "models/auditLog.model.js",
-  "privacy/consent.model.js",
-  "services/whatsapp/templateSync.service.js",
 ]);
 
 function listSchemaFiles(roots) {

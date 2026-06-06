@@ -237,16 +237,16 @@ FinancialTransactionSchema.index({ status: 1, transactionDate: -1 });
 FinancialTransactionSchema.index({ transactionType: 1, transactionDate: -1 });
 
 // Validation: Ensure debit and credit amounts are equal
-FinancialTransactionSchema.pre('save', function (next) {
+FinancialTransactionSchema.pre('save', async function () {
   if (this.debitAccount.amount !== this.creditAccount.amount) {
-    return next(new Error('Debit and credit amounts must be equal'));
+    throw new Error('Debit and credit amounts must be equal');
   }
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
   require('../intelligence/money.lib').deriveHalalas(this, [
     'debitAccount.amount',
     'creditAccount.amount',
   ]);
-  next();
+  
 });
 
 // Method to post transaction

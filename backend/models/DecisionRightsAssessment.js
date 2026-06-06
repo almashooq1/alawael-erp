@@ -115,7 +115,7 @@ DecisionRightsAssessmentSchema.index({ branchId: 1, routedLayer: 1, assessedAt: 
 // W461 Wave-18 invariants — compute composite + route layer + enforce
 // support arrangement on Layer 2/3 + advocate involvement on Layer 3 +
 // research-consent/restraint/seclusion.
-DecisionRightsAssessmentSchema.pre('save', function (next) {
+DecisionRightsAssessmentSchema.pre('save', async function () {
   const lib = require('../intelligence/decision-rights.lib');
 
   // Always recompute composite + layer from capacity scores
@@ -129,25 +129,21 @@ DecisionRightsAssessmentSchema.pre('save', function (next) {
     this.status === 'finalized' &&
     (!this.supportArrangement || this.supportArrangement.trim().length < 20)
   ) {
-    return next(
-      new Error(
+    throw new Error(
         `DecisionRightsAssessment: ${this.routedLayer} layer requires supportArrangement (≥20 chars) before finalization`
-      )
-    );
+      );
   }
 
   // Decisions that always require advocate involvement regardless of layer
   if (lib.requiresAdvocate(this.decisionType, this.routedLayer)) {
     if (this.status === 'finalized' && !this.advocateInvolved) {
-      return next(
-        new Error(
+      throw new Error(
           `DecisionRightsAssessment: decisionType="${this.decisionType}" or layer="${this.routedLayer}" requires advocateInvolved=true before finalization`
-        )
-      );
+        );
     }
   }
 
-  next();
+  
 });
 
 module.exports =

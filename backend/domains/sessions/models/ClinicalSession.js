@@ -303,7 +303,7 @@ clinicalSessionSchema.virtual('averageGoalProgress').get(function () {
 
 // ─── Pre-save ───────────────────────────────────────────────────────────────
 
-clinicalSessionSchema.pre('save', function (next) {
+clinicalSessionSchema.pre('save', async function () {
   if (!this.sessionNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -317,7 +317,6 @@ clinicalSessionSchema.pre('save', function (next) {
     );
   }
 
-  next();
 });
 
 // ─── Static Methods ─────────────────────────────────────────────────────────

@@ -22,6 +22,7 @@ __tests__/adjunct-therapy-wave693.test.js
 __tests__/admin-anomaly-wiring-wave257e.test.js
 __tests__/admin-pages-routed.test.js
 __tests__/admin-routes-auth-wiring.test.js
+__tests__/ai-analytics-branch-isolation-wave973.test.js
 __tests__/alert-schema-wave11.test.js
 __tests__/anomalous-admins-csv-wave257k.test.js
 __tests__/anomalous-admins-route-wave257h.test.js
@@ -458,6 +459,7 @@ __tests__/reassessment-lifecycle-wave222.test.js
 __tests__/reassessment-reminder-cascade-wave225.test.js
 __tests__/reassessment-trigger-service-wave220.test.js
 __tests__/referral-branch-tenancy-wave621.test.js
+__tests__/referral-routes-branch-isolation-wave973.test.js
 __tests__/referral-tracking-service.test.js
 __tests__/referrals-digest-script.test.js
 __tests__/referralticket-branch-tenancy-wave633.test.js
@@ -710,6 +712,7 @@ __tests__/goal-created-timeline-subscriber-wave939.test.js
 __tests__/complaints-normalize-bridge-reconcile-wave940.test.js
 __tests__/care-plan-updated-timeline-subscriber-wave945.test.js
 __tests__/care-plan-completed-timeline-subscriber-wave947.test.js
+__tests__/session-lifecycle-timeline-subscriber-wave974.test.js
 __tests__/no-inmemory-route-store.test.js
 __tests__/icf-assessment-create-assessor-wave930.test.js
 __tests__/branch-scope-user-enrich-wave930.test.js
@@ -720,3 +723,9 @@ __tests__/documents-json-create-wave933.test.js
 __tests__/vehicle-create-branch-hook-wave933.test.js
 __tests__/employee-create-route-hook-wave933.test.js
 __tests__/purchase-order-create-branch-wave933.test.js
+__tests__/appointments-core-linkage-wave970.test.js
+__tests__/care-plan-workers-bootstrap-wave973.test.js
+__tests__/quality-bus-unification-wave974.test.js
+__tests__/model-event-bridge-global-plugin-wave974.test.js
+__tests__/incident-ncr-producer-wave976.test.js
+__tests__/safety-core-linkage-wave977.test.js

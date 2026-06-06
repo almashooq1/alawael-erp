@@ -206,6 +206,36 @@ SeizureEventSchema.virtual('isStatusEpilepticusCandidate').get(function () {
 SeizureEventSchema.set('toJSON', { virtuals: true });
 SeizureEventSchema.set('toObject', { virtuals: true });
 
+// W977 — surface a newly-recorded seizure on the unified-core timeline at once
+// (durationSeconds ≥ 300 = status epilepticus = a medical emergency). Native
+// pre-compile hooks (schema middleware added after mongoose.model() never
+// fires); 0-arg pre + function(doc) post per the proven W970 pattern;
+// create-only, fully guarded, fire-and-forget. Consumed by
+// dddCrossModuleSubscribers.js.
+SeizureEventSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+SeizureEventSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return; // record once, on creation
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('safety', 'seizure.recorded', {
+        seizureEventId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        seizureType: doc.type || '',
+        severity: doc.severity || '',
+        durationSeconds: doc.durationSeconds || 0,
+        statusEpilepticus: (doc.durationSeconds || 0) >= 300,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports = mongoose.models.SeizureEvent || mongoose.model('SeizureEvent', SeizureEventSchema);
 
 module.exports.TYPES = TYPES;

@@ -84,7 +84,7 @@ MChatAssessmentSchema.index({ notes: 'text' });
 
 // ─── Pre-save Hook ────────────────────────────────────────────────────────────
 
-MChatAssessmentSchema.pre('save', function (next) {
+MChatAssessmentSchema.pre('save', async function () {
   if (typeof this.total_risk_score === 'number' && !this.risk_level) {
     if (this.total_risk_score <= 2) this.risk_level = 'low';
     else if (this.total_risk_score <= 7) this.risk_level = 'medium';
@@ -93,7 +93,6 @@ MChatAssessmentSchema.pre('save', function (next) {
   if (this.risk_level === 'low') this.risk_level_ar = 'منخفض';
   else if (this.risk_level === 'medium') this.risk_level_ar = 'متوسط';
   else if (this.risk_level === 'high') this.risk_level_ar = 'مرتفع';
-  next();
 });
 
 // ─── Virtuals ─────────────────────────────────────────────────────────────────

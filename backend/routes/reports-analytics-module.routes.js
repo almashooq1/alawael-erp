@@ -219,7 +219,7 @@ router.post('/jobs', authenticate, requireBranchAccess, async (req, res) => {
     const job = await ReportJob.create({
       template_id,
       requested_by: req.user?._id,
-      branch_id: parameters.branch_id || req.user?.branch_id || null,
+      branch_id: parameters.branch_id || scopedBranch || null,
       parameters,
       export_format,
       triggered_by: 'manual',

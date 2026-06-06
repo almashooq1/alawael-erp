@@ -30,9 +30,8 @@ const complaintCategorySchema = new mongoose.Schema(
 );
 
 complaintCategorySchema.index({ branchId: 1, isActive: 1 });
-complaintCategorySchema.pre('save', function (next) {
+complaintCategorySchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 // ── Complaint SLA Config ──────────────────────────────────────────────────
@@ -63,9 +62,8 @@ const complaintSlaConfigSchema = new mongoose.Schema(
 );
 
 complaintSlaConfigSchema.index({ branchId: 1, priority: 1 }, { unique: true });
-complaintSlaConfigSchema.pre('save', function (next) {
+complaintSlaConfigSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 // ── Complaint Workflow Step ───────────────────────────────────────────────
@@ -205,9 +203,8 @@ complaintV2Schema.virtual('slaProgress').get(function () {
 });
 
 // ── Pre-save: auto number & uuid ──────────────────────────────────────────
-complaintV2Schema.pre('save', function (next) {
+complaintV2Schema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 // ── Static: generate complaint number ────────────────────────────────────
@@ -355,9 +352,8 @@ crmFeedbackSchema.index({ branchId: 1, type: 1 });
 crmFeedbackSchema.index({ branchId: 1, status: 1 });
 crmFeedbackSchema.index({ sentiment: 1 });
 
-crmFeedbackSchema.pre('save', function (next) {
+crmFeedbackSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 // ── Exports ───────────────────────────────────────────────────────────────

@@ -229,7 +229,7 @@ integrationAssessmentSchema.index({ overallIntegrationScore: -1 });
 integrationAssessmentSchema.index({ assessor: 1, assessmentDate: -1 });
 
 // ─── Pre-save: determine integration level ───────────────────────────────────
-integrationAssessmentSchema.pre('save', function (next) {
+integrationAssessmentSchema.pre('save', async function () {
   const score = this.overallIntegrationScore;
   if (score <= 20) this.integrationLevel = 'minimal';
   else if (score <= 40) this.integrationLevel = 'partial';
@@ -245,7 +245,6 @@ integrationAssessmentSchema.pre('save', function (next) {
     else this.trend = 'stable';
   }
 
-  next();
 });
 
 module.exports =

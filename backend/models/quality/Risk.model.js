@@ -60,7 +60,7 @@ const riskSchema = new mongoose.Schema(
 );
 
 // حساب درجة المخاطرة تلقائياً
-riskSchema.pre('save', function (next) {
+riskSchema.pre('save', async function () {
   this.riskScore = this.likelihood * this.impact;
   const score = this.riskScore;
   if (score >= 17) this.riskLevel = 'critical';
@@ -71,7 +71,6 @@ riskSchema.pre('save', function (next) {
   if (this.residualLikelihood && this.residualImpact) {
     this.residualRiskScore = this.residualLikelihood * this.residualImpact;
   }
-  next();
 });
 
 riskSchema.index({ branchId: 1, riskLevel: 1, status: 1 });

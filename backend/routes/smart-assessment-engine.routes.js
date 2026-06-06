@@ -69,6 +69,7 @@ const mongoose = require('mongoose');
 const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../middleware/assertBranchMatch');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
@@ -142,7 +143,7 @@ router.post(
     const assessment = await MChatAssessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       age_months,
       informant,
       items: scoring.items,
@@ -181,7 +182,7 @@ router.post(
       saved = await StandardAssessment.create({
         beneficiary,
         assessor: req.user?._id || req.user?.id,
-        branch: req.user?.branch,
+        branch: effectiveBranchScope(req),
         assessment_type: 'CARS-2',
         form_type: form_type || 'ST',
         age_months,
@@ -213,7 +214,7 @@ router.post(
     const assessment = await SensoryProfileAssessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       age_months,
       respondent,
       form_type,
@@ -242,7 +243,7 @@ router.post(
     const assessment = await BRIEF2Assessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       age_months,
       respondent,
       form_type,
@@ -271,7 +272,7 @@ router.post(
     const assessment = await SRS2Assessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       age_months,
       respondent,
       form_type,
@@ -304,7 +305,7 @@ router.post(
     const assessment = await PortageAssessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       age_months,
       items,
       domain_summaries: scoring.domain_summaries,
@@ -327,7 +328,7 @@ router.post(
     const { beneficiary, target_behaviors, collection_period } = req.body;
     const collection = await ABCDataCollection.create({
       beneficiary,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       target_behaviors,
       collection_period,
       records: [],
@@ -399,7 +400,7 @@ router.post(
     const survey = await FamilyNeedsSurvey.create({
       ...req.body,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       status: 'completed',
     });
     res.status(201).json({ success: true, data: survey });
@@ -420,7 +421,7 @@ router.post(
     const assessment = await QualityOfLifeAssessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       respondent,
       domains,
       overall_qol,
@@ -448,7 +449,7 @@ router.post(
     const assessment = await TransitionReadinessAssessment.create({
       beneficiary,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       transition_type,
       domains: scoring.domains,
       overall_readiness: scoring.overall_readiness,
@@ -470,7 +471,7 @@ router.post(
     const screening = await SaudiDevelopmentalScreening.create({
       ...req.body,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       status: 'completed',
     });
     res.status(201).json({ success: true, data: screening });
@@ -487,7 +488,7 @@ router.post(
     const assessment = await BehavioralFunctionAssessment.create({
       ...req.body,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
     });
     res.status(201).json({ success: true, data: assessment });
   })
@@ -508,7 +509,7 @@ router.post(
       caregiver_name,
       caregiver_relationship,
       assessor: req.user?._id || req.user?.id,
-      branch: req.user?.branch,
+      branch: effectiveBranchScope(req),
       items,
       dimension_scores: scoring.dimension_scores,
       total_score: scoring.total_score,

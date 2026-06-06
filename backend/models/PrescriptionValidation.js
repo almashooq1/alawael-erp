@@ -44,9 +44,8 @@ const prescriptionValidationSchema = new mongoose.Schema(
 prescriptionValidationSchema.index({ branchId: 1, beneficiaryId: 1, status: 1 });
 prescriptionValidationSchema.index({ prescriptionId: 1 });
 
-prescriptionValidationSchema.pre('save', function (next) {
+prescriptionValidationSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

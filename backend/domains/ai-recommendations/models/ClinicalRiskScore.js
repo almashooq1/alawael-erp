@@ -152,7 +152,7 @@ clinicalRiskScoreSchema.virtual('topFactors').get(function () {
 });
 
 // ── Pre-save: compute weighted scores & category scores ─────────────────────
-clinicalRiskScoreSchema.pre('save', function (next) {
+clinicalRiskScoreSchema.pre('save', async function () {
   if (this.factors && this.factors.length) {
     this.factors.forEach(f => {
       f.weightedScore = (f.weight || 1) * (f.score || 0);
@@ -171,7 +171,6 @@ clinicalRiskScoreSchema.pre('save', function (next) {
       }
     }
   }
-  next();
 });
 
 module.exports =

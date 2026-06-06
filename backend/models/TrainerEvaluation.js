@@ -39,9 +39,8 @@ const trainerEvaluationSchema = new mongoose.Schema(
 trainerEvaluationSchema.index({ enrollmentId: 1, trainerId: 1 }, { unique: true });
 trainerEvaluationSchema.index({ branchId: 1, trainerId: 1, courseId: 1 });
 
-trainerEvaluationSchema.pre('save', function (next) {
+trainerEvaluationSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

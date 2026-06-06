@@ -129,7 +129,10 @@ class SessionService extends BaseService {
 
     const result = await session.save();
     this._invalidateCache();
-    this.emit('sessionCompleted', {
+    // W974: canonical dotted contract event (was ad-hoc 'sessionCompleted').
+    // The serviceEventBridge listens for 'session.completed' → publishes
+    // 'sessions.session.completed' → timeline session_completed subscriber.
+    this.emit('session.completed', {
       sessionId,
       beneficiaryId: session.beneficiaryId,
       episodeId: session.episodeId,
@@ -151,7 +154,14 @@ class SessionService extends BaseService {
 
     const result = await session.save();
     this._invalidateCache();
-    this.emit('sessionCancelled', { sessionId, reason });
+    // W974: canonical dotted contract event + enriched payload (was ad-hoc
+    // 'sessionCancelled' with {sessionId, reason} only — missing the links).
+    this.emit('session.cancelled', {
+      sessionId,
+      beneficiaryId: session.beneficiaryId,
+      episodeId: session.episodeId,
+      reason,
+    });
     return result;
   }
 
@@ -162,7 +172,14 @@ class SessionService extends BaseService {
       lastModifiedBy: userId,
     });
     this._invalidateCache();
-    this.emit('sessionNoShow', { sessionId });
+    // W974: canonical dotted contract event + enriched payload (was ad-hoc
+    // 'sessionNoShow' with {sessionId} only). updateById returns the updated
+    // lean doc so beneficiaryId/episodeId are available for the timeline link.
+    this.emit('session.no_show', {
+      sessionId,
+      beneficiaryId: result && result.beneficiaryId,
+      episodeId: result && result.episodeId,
+    });
     return result;
   }
 

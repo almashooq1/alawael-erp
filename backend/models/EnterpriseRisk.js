@@ -127,9 +127,8 @@ const enterpriseRiskSchema = new mongoose.Schema(
 const PROB_MAP = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
 const IMP_MAP = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
 
-enterpriseRiskSchema.pre('save', function (next) {
+enterpriseRiskSchema.pre('save', async function () {
   this.riskScore = (PROB_MAP[this.probability] || 3) * (IMP_MAP[this.impact] || 3);
-  next();
 });
 
 const EnterpriseRisk =

@@ -171,6 +171,37 @@ const ASSESSMENT_EVENTS = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CARE_PLAN_EVENTS = {
+  CREATED: {
+    domain: 'care-plans',
+    eventType: 'careplan.created',
+    version: 1,
+    description: 'تم إنشاء خطة رعاية — Care plan created',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      type: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  UPDATED: {
+    domain: 'care-plans',
+    eventType: 'careplan.updated',
+    version: 1,
+    description: 'تم تعديل خطة رعاية — Care plan updated',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
   ACTIVATED: {
     domain: 'care-plans',
     eventType: 'careplan.activated',
@@ -225,6 +256,41 @@ const SESSION_EVENTS = {
     priority: PRIORITY.NORMAL,
     consumers: ['timeline', 'goals', 'dashboards', 'reports', 'ai-recommendations'],
   },
+
+  // W977 — re-add contracts for the session.cancelled / session.no_show
+  // subscribers a parallel session landed (producers exist via SessionService
+  // emits + serviceEventBridge); W377 had deleted these contracts, leaving the
+  // re-added subscribers orphan (W389 red).
+  CANCELLED: {
+    domain: 'sessions',
+    eventType: 'session.cancelled',
+    version: 1,
+    description: 'تم إلغاء جلسة — Session cancelled',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      reason: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  NO_SHOW: {
+    domain: 'sessions',
+    eventType: 'session.no_show',
+    version: 1,
+    description: 'تغيّب المستفيد عن جلسة — Session no-show',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -232,6 +298,22 @@ const SESSION_EVENTS = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const GOAL_EVENTS = {
+  CREATED: {
+    domain: 'goals',
+    eventType: 'goal.created',
+    version: 1,
+    description: 'تم إنشاء هدف علاجي — Therapy goal created',
+    payload: {
+      goalId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      goalNumber: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
   ACHIEVED: {
     domain: 'goals',
     eventType: 'goal.achieved',
@@ -364,6 +446,134 @@ const AI_RECOMMENDATION_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Appointment Events — أحداث المواعيد (W970)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// The appointment timeline subscribers landed on main (alongside the W928/W929
+// episode work) but their contracts + producer + CareTimeline enum never did —
+// leaving `appointments.appointment.*` as orphan subscribers (W389 red) that
+// would also throw at runtime. W970 completes the slice. Producer: Appointment
+// post-save hooks (models/Appointment.js, pre-compile). Consumers: the
+// CareTimeline subscribers in dddCrossModuleSubscribers.js.
+
+const APPOINTMENT_EVENTS = {
+  BOOKED: {
+    domain: 'appointments',
+    eventType: 'appointment.booked',
+    version: 1,
+    description: 'تم حجز موعد — Appointment booked',
+    payload: {
+      appointmentId: 'string',
+      beneficiaryId: 'string',
+      beneficiaryName: 'string',
+      therapistId: 'string',
+      appointmentType: 'string',
+      date: 'date',
+      startTime: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  CANCELLED: {
+    domain: 'appointments',
+    eventType: 'appointment.cancelled',
+    version: 1,
+    description: 'تم إلغاء موعد — Appointment cancelled',
+    payload: {
+      appointmentId: 'string',
+      beneficiaryId: 'string',
+      appointmentType: 'string',
+      date: 'date',
+      reason: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  NO_SHOW: {
+    domain: 'appointments',
+    eventType: 'appointment.no_show',
+    version: 1,
+    description: 'تغيّب المستفيد عن موعد — Beneficiary no-show',
+    payload: {
+      appointmentId: 'string',
+      beneficiaryId: 'string',
+      appointmentType: 'string',
+      date: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Safety Events — أحداث السلامة (W977)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Clinical safety events that MUST surface on the per-beneficiary timeline the
+// moment they're recorded: a seizure (status-epilepticus = medical emergency),
+// a safeguarding concern (regulatory), and a restraint/seclusion episode.
+// Producers: native pre-compile post-save hooks in the respective models.
+// Consumers: HIGH/CRITICAL-importance CareTimeline rows in
+// dddCrossModuleSubscribers.js.
+
+const SAFETY_EVENTS = {
+  SEIZURE_RECORDED: {
+    domain: 'safety',
+    eventType: 'seizure.recorded',
+    version: 1,
+    description: 'تم تسجيل نوبة صرع — Seizure event recorded',
+    payload: {
+      seizureEventId: 'string',
+      beneficiaryId: 'string',
+      seizureType: 'string',
+      severity: 'string',
+      durationSeconds: 'number',
+      statusEpilepticus: 'boolean',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.CRITICAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  SAFEGUARDING_RAISED: {
+    domain: 'safety',
+    eventType: 'safeguarding.raised',
+    version: 1,
+    description: 'تم رفع بلاغ حماية — Safeguarding concern raised',
+    payload: {
+      concernId: 'string',
+      beneficiaryId: 'string',
+      category: 'string',
+      severity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.CRITICAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  RESTRAINT_APPLIED: {
+    domain: 'safety',
+    eventType: 'restraint.applied',
+    version: 1,
+    description: 'تم تطبيق تقييد/عزل — Restraint or seclusion applied',
+    payload: {
+      restraintEventId: 'string',
+      beneficiaryId: 'string',
+      restraintType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -377,6 +587,8 @@ const DDD_CONTRACTS = {
   quality: QUALITY_EVENTS,
   behavior: BEHAVIOR_EVENTS,
   'ai-recommendations': AI_RECOMMENDATION_EVENTS,
+  appointments: APPOINTMENT_EVENTS,
+  safety: SAFETY_EVENTS,
 };
 
 /**
@@ -403,6 +615,8 @@ module.exports = {
   QUALITY_EVENTS,
   BEHAVIOR_EVENTS,
   AI_RECOMMENDATION_EVENTS,
+  APPOINTMENT_EVENTS,
+  SAFETY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

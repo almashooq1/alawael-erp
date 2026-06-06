@@ -253,7 +253,7 @@ awarenessProgramSchema.index({ status: 1, createdAt: -1 });
 awarenessProgramSchema.index({ coverageArea: 1, status: 1 });
 
 // ─── Pre-save: recalculate totals ────────────────────────────────────────────
-awarenessProgramSchema.pre('save', function (next) {
+awarenessProgramSchema.pre('save', async function () {
   if (this.workshops && this.workshops.length > 0) {
     this.totalWorkshopsCompleted = this.workshops.filter(w => w.status === 'completed').length;
     const ratedWorkshops = this.workshops.filter(w => w.satisfactionScore > 0);
@@ -262,7 +262,6 @@ awarenessProgramSchema.pre('save', function (next) {
         ratedWorkshops.reduce((sum, w) => sum + w.satisfactionScore, 0) / ratedWorkshops.length;
     }
   }
-  next();
 });
 
 module.exports =

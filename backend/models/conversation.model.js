@@ -343,17 +343,15 @@ conversationSchema.statics.createGroupConversation = async function (
 };
 
 // Hook: قبل الحفظ
-conversationSchema.pre('save', function (next) {
+conversationSchema.pre('save', async function () {
   // تحديث عدد المشاركين النشطين
   this.stats.totalParticipants = this.participants.filter(p => p.isActive).length;
-  next();
 });
 
 // Hook: تنظيف المستخدمين الذين يكتبون (إزالة القديم)
-conversationSchema.pre('save', function (next) {
+conversationSchema.pre('save', async function () {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
   this.typingUsers = this.typingUsers.filter(t => t.startedAt > fiveMinutesAgo);
-  next();
 });
 
 const Conversation =

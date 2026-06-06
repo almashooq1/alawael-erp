@@ -1221,6 +1221,22 @@ on:
       - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
       - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/__tests__/care-plan-completed-timeline-subscriber-wave947.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/appointments-core-linkage-wave970.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-workers-bootstrap-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-bus-unification-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/model-event-bridge-global-plugin-wave974.test.js'
+      - 'backend/__tests__/referral-routes-branch-isolation-wave973.test.js'
+      - 'backend/__tests__/ai-analytics-branch-isolation-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2425,6 +2441,22 @@ on:
       - 'backend/__tests__/employee-create-route-hook-wave933.test.js'
       - 'backend/__tests__/purchase-order-create-branch-wave933.test.js'
       - 'backend/__tests__/care-plan-completed-timeline-subscriber-wave947.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/appointments-core-linkage-wave970.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-workers-bootstrap-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-bus-unification-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/model-event-bridge-global-plugin-wave974.test.js'
+      - 'backend/__tests__/referral-routes-branch-isolation-wave973.test.js'
+      - 'backend/__tests__/ai-analytics-branch-isolation-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -98,7 +98,7 @@ FamilyWellbeingSnapshotSchema.index({ beneficiaryId: 1, snapshotDate: -1 });
 FamilyWellbeingSnapshotSchema.index({ branchId: 1, band: 1, snapshotDate: -1 });
 
 // W467 Wave-18 — recompute composite + band + triggers from components
-FamilyWellbeingSnapshotSchema.pre('save', function (next) {
+FamilyWellbeingSnapshotSchema.pre('save', async function () {
   const lib = require('../intelligence/family-wbci.lib');
   const componentsObj = this.components ? this.components.toObject?.() || this.components : {};
   const result = lib.computeWBCI({
@@ -116,7 +116,6 @@ FamilyWellbeingSnapshotSchema.pre('save', function (next) {
   this.missingComponents = result.missingComponents ?? 5;
   this.triggeredActions = result.triggers || [];
 
-  next();
 });
 
 module.exports =

@@ -29,6 +29,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const logger = require('./utils/logger');
 
+// W974 — register the model-event-bridge GLOBAL plugin here, BEFORE any route/
+// domain require below compiles a model. A mongoose global plugin only applies
+// to schemas constructed AFTER it is registered, and Mongoose bakes middleware
+// into a model at compile time — so the old startup-time `wireModelEventBridge`
+// (which attaches hooks after compilation) never fired. Env-gated
+// (ENABLE_MODEL_EVENT_BRIDGE=true, default OFF) → no-op unless an owner enables.
+try {
+  require('./integration/modelEventBridge').registerModelEventBridgePlugin();
+} catch (err) {
+  logger.warn?.(`[ModelEventBridge] plugin registration skipped: ${err.message}`);
+}
+
 const {
   errorHandler,
   notFoundHandler,
@@ -2302,6 +2314,12 @@ try {
 // Identical behaviour: same bootstrapCarePlanning() call, same dep-loading order,
 // same /api/v1/care-plans mount, same 7 app._carePlanXxx references.
 require('./startup/carePlanningBootstrap').wireCarePlanning(app, { logger });
+// W973 — schedule the dormant care-plan background workers (overdue-review
+// scanner W50 + family-retry worker W45). They expose runOnce() and explicitly
+// leave scheduling to the caller; nothing did, so they were dead. Env-gated,
+// default OFF (ENABLE_CARE_PLAN_WORKERS=true). Runs after carePlanning so
+// app._carePlanWorkers is populated.
+require('./startup/carePlanWorkersBootstrap').wireCarePlanWorkers(app, { logger });
 
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {

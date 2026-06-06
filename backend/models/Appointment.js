@@ -168,6 +168,12 @@ const appointmentSchema = new mongoose.Schema(
 
 // Auto-generate appointment number
 appointmentSchema.pre('save', function () {
+  // W970: capture create-vs-update + the pre-save status so the post('save')
+  // hook below can publish the right unified-core event. Mongoose resets
+  // `isNew`/modified state after save, so we snapshot here. (Promise-style hook
+  // — no `next` — to match the model's other hooks per CLAUDE.md gate #4.)
+  this.$__wasNew = this.isNew;
+
   if (!this.appointmentNumber) {
     const d = new Date();
     const prefix = 'APT';
@@ -185,6 +191,61 @@ appointmentSchema.pre('save', function () {
     const [eh, em] = this.endTime.split(':').map(Number);
     const mins = eh * 60 + em - (sh * 60 + sm);
     if (mins > 0) this.duration = mins;
+  }
+});
+
+// W970 — snapshot the persisted status on load so a status flip is detectable
+// in post('save'). These hooks live IN the model file (pre-compile) on purpose:
+// schema middleware added AFTER mongoose.model() compilation does NOT fire,
+// which is why the generic modelEventBridge never produced these events.
+appointmentSchema.post('init', function () {
+  this.$__prevApptStatus = this.status;
+});
+
+// W970 — link the appointment lifecycle into the unified core (CareTimeline +
+// dashboards) via the integration bus. Booking and, critically, no-shows (a
+// clinical disengagement / drop-out risk signal) were previously invisible to
+// the per-beneficiary timeline. Completes the appointment subscribers that
+// landed on main (W928/W929) without a producer. Fully guarded + fire-and-
+// forget so a bus hiccup never fails or slows a save. The literal
+// `integrationBus.publish('appointments', …)` calls keep the W389/W392
+// producer-coverage guards satisfied.
+appointmentSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiary) return; // no beneficiary → nothing to place on a timeline
+
+    const base = {
+      appointmentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiary),
+      appointmentType: doc.type || '',
+      date: doc.date,
+    };
+
+    if (this.$__wasNew) {
+      Promise.resolve(
+        integrationBus.publish('appointments', 'appointment.booked', {
+          ...base,
+          beneficiaryName: doc.beneficiaryName || '',
+          therapistId: String(doc.therapist || ''),
+          startTime: doc.startTime || '',
+        })
+      ).catch(() => {});
+    } else if (doc.status === 'CANCELLED' && this.$__prevApptStatus !== 'CANCELLED') {
+      Promise.resolve(
+        integrationBus.publish('appointments', 'appointment.cancelled', {
+          ...base,
+          reason: doc.cancellationReason || doc.reason || 'unspecified',
+        })
+      ).catch(() => {});
+    } else if (doc.status === 'NO_SHOW' && this.$__prevApptStatus !== 'NO_SHOW') {
+      Promise.resolve(
+        integrationBus.publish('appointments', 'appointment.no_show', base)
+      ).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
   }
 });
 

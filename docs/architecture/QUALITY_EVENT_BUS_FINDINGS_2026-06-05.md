@@ -1,6 +1,8 @@
 # Quality / Compliance event-bus disconnects — findings & holistic-fix plan
 
-**Status:** 🟡 Findings (one targeted fix shipped as W941; the systemic fix is open)
+**Status:** 🟢 Disconnect #1 RESOLVED at the root (W974 bus unification; W941 was the
+audit-only stopgap, now self-disabled). #2 (incident producer) unblocked by W974 but
+unshipped — state-mutating, needs an env-gate + product intent. #3 (HR egress) product-gated.
 **Date:** 2026-06-05
 **Scope:** `backend/services/quality/**`, `backend/startup/qualityComplianceBootstrap.js`,
 `backend/server.js` (phase29 wiring), `backend/config/notification-policies.registry.js`
@@ -20,7 +22,7 @@ event-wiring effort (CareTimeline / KPI subscribers / modelEventBridge).
 
 | # | Disconnect | Effect | Status |
 |---|-----------|--------|--------|
-| 1 | **Two buses** — emitters on `getDefault()` singleton, the email router on a fresh `createQualityEventBus()` | `quality.audit.*` / `fmea.*` / `coq.*` / `calibration.*` never reach the email/policy router → no policy emails | Audit events patched via a one-way bridge (**W941**); the rest still disconnected |
+| 1 | **Two buses** — emitters on `getDefault()` singleton, the email router on a fresh `createQualityEventBus()` | `quality.audit.*` / `fmea.*` / `coq.*` / `calibration.*` never reach the email/policy router → no policy emails | ✅ **RESOLVED — W974**: bootstrap binds `bus` to `getDefault()` (one bus for all). W941 audit-bridge self-disabled. |
 | 2 | **Missing producer** — `quality.incident.reported` has a subscriber (NCR auto-link → auto NCR+CAPA) but **nothing emits it** | Serious incidents never auto-create an NCR/CAPA — a CBAHI safety automation is dead | Open |
 | 3 | **HR webhook cluster unwired** (adjacent, same class) | HR webhook subscriptions are configurable but no producer dispatches to them | Open — and **owner/product-gated** (external egress) |
 
@@ -59,12 +61,19 @@ policies exist**. Adding a notification policy alone is a **silent no-op** (the
 W349 / W387 class). Management-review emails work only because those services sit on
 Bus B. Auto-CAPA works only because phase29 is also on Bus A (coincidence).
 
-**Shipped mitigation (W941, `e85967242`):** the bootstrap installs a one-way,
-`quality.audit.*`-only bridge `getDefault().on('quality.audit.*', (p,n)=>bus.emit(n,p))`
-(guarded `singleton !== bus`, detached on shutdown) + the 3 audit policies + Arabic
-templates + an integration test. This delivers **audit** notifications without
-disturbing phase29. It does **not** fix `fmea.*`/`coq.*`/`calibration.*` (those have no
-policies anyway → only the console catch-all).
+**✅ RESOLVED at the root (W974, `2f8e88316`):** `qualityComplianceBootstrap` now binds
+`const bus = getQualityBusDefault()` (the singleton) instead of a fresh
+`createQualityEventBus()`, so every lazy producer + phase29 + the router + ncrPipeline
+share ONE bus. Order-independent (no `_replaceDefault` re-seat → no startup-ordering
+hazard → phase29 auto-CAPA safe). Blast radius verified: the newly-connected
+`fmea.*`/`coq.*`/`calibration.*`/`doc.*`/`change.*`/`inspection.*` events match no email
+policy → console catch-all only (no surprise emails, no state mutation). 5 tests + a
+45/45 regression sweep.
+
+> The earlier **stopgap (W941, `e85967242`)** installed a one-way `quality.audit.*`-only
+> bridge + the 3 audit policies + Arabic templates. Under W974 unification it
+> self-disables via its `singleton !== bus` guard (now `singleton === bus`); the audit
+> policies it added remain live and fire via the unified bus directly.
 
 ## 2. `quality.incident.reported` — subscriber with no producer
 
@@ -97,19 +106,19 @@ hardening required. Not autonomously fixable.
 
 ## Recommended holistic fix
 
-**A. Unify the quality bus (root cause of #1 and #2).** Make the schedulers bootstrap
-re-seat the singleton to its configured instance —
-`require('.../qualityEventBus.service')._replaceDefault(bus)` — so `getDefault()` and
-the bootstrap bus are one object, **before** `server.js` captures `getDefault()` to
-wire phase29.
+**A. Unify the quality bus (root cause of #1 and #2). ✅ DONE — W974.** Shipped the
+**order-independent** variant: the bootstrap simply binds its `bus` to `getDefault()`
+(rather than `_replaceDefault`-ing a fresh instance). Because `getDefault()` always
+returns the same singleton no matter who calls first, there is **no re-seat and thus no
+startup-ordering hazard** — phase29's `getDefault()` capture in `server.js` and the
+bootstrap's `getDefault()` resolve to the same object regardless of order, so auto-CAPA
+is never orphaned. The W941 bridge self-disables (its `singleton !== bus` guard is now
+false); left in place inert (removing it is optional cleanup).
 
-> **Startup-ordering hazard (must resolve first):** `server.js` wires phase29 on
-> `getDefault()`. If the re-seat happens *after* that capture, phase29 subscribes to the
-> orphaned old singleton while emitters move to the new bus → **auto-CAPA from audit
-> findings silently breaks** (a clinical flow). Guarantee the bootstrap re-seat runs
-> before the phase29 wiring (or have both call `getDefault()` so order is irrelevant).
-> Once unified, the W941 bridge becomes redundant and can be removed (its
-> `singleton !== bus` guard already makes it inert under unification).
+> Historical note: the originally-recommended approach here was
+> `_replaceDefault(bus)` **before** the phase29 wiring — which carried a real
+> startup-ordering hazard (re-seat after phase29's capture → orphaned auto-CAPA).
+> W974 sidestepped that entirely by using `getDefault()` on both sides.
 
 **B. Add the missing producer (#2).** Emit `quality.incident.reported` at the incident-
 creation site on the unified bus; ship **env-gated default OFF**; integration-test it.

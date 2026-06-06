@@ -239,7 +239,7 @@ financialSupportSchema.index({ approvalDate: -1 });
 financialSupportSchema.index({ branchId: 1, requestStatus: 1 });
 
 // Pre-save middleware
-financialSupportSchema.pre('save', function (next) {
+financialSupportSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   // Validate amount consistency
@@ -247,7 +247,6 @@ financialSupportSchema.pre('save', function (next) {
     throw new Error('Disbursed amount cannot exceed approved amount');
   }
 
-  next();
 });
 
 // Methods

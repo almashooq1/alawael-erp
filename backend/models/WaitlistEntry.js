@@ -278,14 +278,13 @@ waitlistEntrySchema.virtual('priorityScore').get(function () {
 });
 
 // ─── Middleware: تسجيل تاريخ تغيير الحالة ─────────────────────────────────────
-waitlistEntrySchema.pre('save', function (next) {
+waitlistEntrySchema.pre('save', async function () {
   if (this.isModified('status') && !this.isNew) {
     this.statusHistory.push({
       status: this.status,
       changedAt: new Date(),
     });
   }
-  next();
 });
 
 // ─── Methods ───────────────────────────────────────────────────────────────────

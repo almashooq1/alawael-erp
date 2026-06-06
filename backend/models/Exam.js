@@ -194,11 +194,10 @@ ExamSubmissionSchema.index({ exam: 1, student: 1 }, { unique: true });
 ExamSubmissionSchema.index({ student: 1, status: 1 });
 
 // Auto-calculate totalPoints
-ExamSchema.pre('save', function (next) {
+ExamSchema.pre('save', async function () {
   if (this.questions && this.questions.length > 0) {
     this.totalPoints = this.questions.reduce((sum, q) => sum + (q.points || 0), 0);
   }
-  next();
 });
 
 module.exports = {

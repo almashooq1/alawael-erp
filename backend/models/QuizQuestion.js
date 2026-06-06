@@ -42,9 +42,8 @@ const quizQuestionSchema = new mongoose.Schema(
 quizQuestionSchema.index({ quizId: 1, orderIndex: 1 });
 quizQuestionSchema.index({ difficulty: 1 });
 
-quizQuestionSchema.pre('save', function (next) {
+quizQuestionSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.QuizQuestion || mongoose.model('QuizQuestion', quizQuestionSchema);

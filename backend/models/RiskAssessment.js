@@ -204,7 +204,7 @@ riskAssessmentSchema.virtual('riskLevel').get(function () {
 });
 
 // ===== HOOKS =====
-riskAssessmentSchema.pre('save', function (next) {
+riskAssessmentSchema.pre('save', async function () {
   // تحديد درجة الخطورة بناءً على الاحتمالية والتأثير
   const severity = this.riskScore;
   if (severity >= 0.75) {
@@ -217,7 +217,6 @@ riskAssessmentSchema.pre('save', function (next) {
     this.assessment.severity = 'low';
   }
 
-  next();
 });
 
 // ===== METHODS =====

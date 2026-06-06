@@ -37,9 +37,8 @@ trainingComplianceSchema.index({ userId: 1, courseId: 1, year: 1 }, { unique: tr
 trainingComplianceSchema.index({ branchId: 1, status: 1, dueDate: 1 });
 trainingComplianceSchema.index({ userId: 1 });
 
-trainingComplianceSchema.pre('save', function (next) {
+trainingComplianceSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

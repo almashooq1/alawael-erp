@@ -132,12 +132,11 @@ programSchema.virtual('type_label').get(function () {
 });
 
 // ── Pre-save ──────────────────────────────────────────────────────────────────
-programSchema.pre('save', function (next) {
+programSchema.pre('save', async function () {
   // تأكد من أن مدة البرامج المهنية لا تتجاوز 3 سنوات
   if (this.program_type === 'vocational') {
     this.max_duration_years = 3;
   }
-  next();
 });
 
 // ── Statics ───────────────────────────────────────────────────────────────────

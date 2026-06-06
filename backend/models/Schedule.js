@@ -89,9 +89,8 @@ scheduleSchema.index({ status: 1, startDate: 1 });
 scheduleSchema.index({ createdBy: 1, createdAt: -1 });
 
 // Middleware to update updatedAt
-scheduleSchema.pre('save', function (next) {
+scheduleSchema.pre('save', async function () {
   this.updatedAt = Date.now();
-  next();
 });
 
 module.exports = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);

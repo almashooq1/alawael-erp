@@ -47,9 +47,8 @@ rehabPlanSuggestionSchema.index({ branchId: 1, beneficiaryId: 1, status: 1 });
 rehabPlanSuggestionSchema.index({ generationMethod: 1 });
 rehabPlanSuggestionSchema.index({ confidenceScore: -1 });
 
-rehabPlanSuggestionSchema.pre('save', function (next) {
+rehabPlanSuggestionSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

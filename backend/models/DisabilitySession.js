@@ -84,9 +84,8 @@ disabilitySessionSchema.index({ status: 1, date: -1 });
 disabilitySessionSchema.index({ participantId: 1, date: -1 });
 
 // Pre-save middleware
-disabilitySessionSchema.pre('save', function (next) {
+disabilitySessionSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports =

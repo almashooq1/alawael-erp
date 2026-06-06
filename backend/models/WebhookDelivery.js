@@ -116,9 +116,8 @@ webhookDeliverySchema.index(
 );
 
 // Pre-save middleware
-webhookDeliverySchema.pre('save', function (next) {
+webhookDeliverySchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports =

@@ -250,8 +250,11 @@ describe('check-mongoose-hook-style — KNOWN_CALLBACK_HOOK_BASELINE structure',
     expect(KNOWN_CALLBACK_HOOK_BASELINE).toBeInstanceOf(Set);
   });
 
-  it('contains at least 50 entries (W494 baseline reality — was 99 at install)', () => {
-    expect(KNOWN_CALLBACK_HOOK_BASELINE.size).toBeGreaterThanOrEqual(50);
+  it('is non-empty (W494/W948 ratchet — 99 at install → 67 → 17 after W948)', () => {
+    // W948 converted the 50 bare-next() baseline files (+17 unbaselined) to async;
+    // the remaining entries are the harder next(arg) hooks awaiting manual
+    // throw-conversion. Lower bound is just "not accidentally wiped".
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.size).toBeGreaterThanOrEqual(1);
   });
 
   it('every entry uses POSIX paths (no backslashes, no absolute paths)', () => {

@@ -110,9 +110,8 @@ maintenancePredictionSchema.index({ status: 1, urgency: 1 });
 maintenancePredictionSchema.index({ predictionType: 1, status: 1 });
 
 // Pre-save middleware
-maintenancePredictionSchema.pre('save', function (next) {
+maintenancePredictionSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports =

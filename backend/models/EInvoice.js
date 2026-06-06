@@ -69,7 +69,7 @@ const eInvoiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-eInvoiceSchema.pre('save', function (next) {
+eInvoiceSchema.pre('save', async function () {
   if (this.lineItems && this.lineItems.length > 0) {
     this.lineItems.forEach(item => {
       item.taxAmount = item.quantity * item.unitPrice * (item.taxRate / 100);
@@ -88,7 +88,6 @@ eInvoiceSchema.pre('save', function (next) {
     'totalDiscount',
     'totalAmount',
   ]);
-  next();
 });
 
 eInvoiceSchema.index({ status: 1, issueDate: -1 });

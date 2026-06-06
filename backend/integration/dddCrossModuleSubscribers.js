@@ -956,6 +956,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Medication → Timeline: Administered (W981) ───────────────────
+  subscribers.push({
+    name: 'medication:administered → timeline:record',
+    pattern: 'medication.medication.administered',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'medication_administered',
+            category: 'clinical',
+            severity: 'info',
+            title: `Medication administered (${event.payload.medicationName || ''})`.trim(),
+            title_ar: `إعطاء دواء (${event.payload.medicationName || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Medication-administered timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Medication → Timeline: NOT given = refused/missed/held (W981) ─
+  subscribers.push({
+    name: 'medication:not_given → timeline:record',
+    pattern: 'medication.medication.not_given',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'medication_not_given',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Medication NOT given — ${event.payload.status || ''} (${event.payload.medicationName || ''})`.trim(),
+            title_ar: `لم يُعطَ الدواء — ${event.payload.status || ''} (${event.payload.medicationName || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Medication-not-given timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

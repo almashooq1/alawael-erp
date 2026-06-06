@@ -102,6 +102,41 @@ MarSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W981 — surface medication administration on the unified-core timeline: an
+// `administered` dose, and — clinically significant — a dose NOT given
+// (refused/missed/held) as a warning. Fires on the status flip away from
+// 'scheduled' (once per terminal state). Native pre-compile hooks per the proven
+// W970 pattern; guarded, fire-and-forget. Consumed by dddCrossModuleSubscribers.
+MarSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+MarSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    if (doc.status === this.$__prevStatus) return; // no status change
+    const base = {
+      marId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      medicationName: doc.medicationName || '',
+      route: doc.route || '',
+      status: doc.status || '',
+    };
+    if (doc.status === 'administered') {
+      Promise.resolve(
+        integrationBus.publish('medication', 'medication.administered', base)
+      ).catch(() => {});
+    } else if (['refused', 'missed', 'held'].includes(doc.status)) {
+      Promise.resolve(
+        integrationBus.publish('medication', 'medication.not_given', base)
+      ).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.MedicationAdministrationRecord ||
   mongoose.model('MedicationAdministrationRecord', MarSchema);

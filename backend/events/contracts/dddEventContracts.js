@@ -659,6 +659,50 @@ const SCREENING_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Medication Events — أحداث الدواء (W981)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Medication administration on the timeline: an administered dose, and — the
+// clinically significant signal — a dose NOT given (refused/missed/held).
+// Producer: native MedicationAdministrationRecord post-save hooks.
+
+const MEDICATION_EVENTS = {
+  ADMINISTERED: {
+    domain: 'medication',
+    eventType: 'medication.administered',
+    version: 1,
+    description: 'تم إعطاء دواء — Medication administered',
+    payload: {
+      marId: 'string',
+      beneficiaryId: 'string',
+      medicationName: 'string',
+      route: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  NOT_GIVEN: {
+    domain: 'medication',
+    eventType: 'medication.not_given',
+    version: 1,
+    description: 'لم يُعطَ الدواء (رفض/فوات/تأجيل) — Medication not given',
+    payload: {
+      marId: 'string',
+      beneficiaryId: 'string',
+      medicationName: 'string',
+      route: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -676,6 +720,7 @@ const DDD_CONTRACTS = {
   safety: SAFETY_EVENTS,
   waitlist: WAITLIST_EVENTS,
   screenings: SCREENING_EVENTS,
+  medication: MEDICATION_EVENTS,
 };
 
 /**
@@ -706,6 +751,7 @@ module.exports = {
   SAFETY_EVENTS,
   WAITLIST_EVENTS,
   SCREENING_EVENTS,
+  MEDICATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

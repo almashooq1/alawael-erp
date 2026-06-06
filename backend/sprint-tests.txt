@@ -731,3 +731,4 @@ __tests__/incident-ncr-producer-wave976.test.js
 __tests__/safety-core-linkage-wave977.test.js
 __tests__/waitlist-core-linkage-wave979.test.js
 __tests__/screening-core-linkage-wave980.test.js
+__tests__/auth-alias-user-id-wave947.test.js

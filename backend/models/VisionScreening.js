@@ -240,6 +240,33 @@ VisionScreeningSchema.virtual('cviSignCount').get(function () {
 VisionScreeningSchema.set('toJSON', { virtuals: true });
 VisionScreeningSchema.set('toObject', { virtuals: true });
 
+// W980 — surface a finalized vision screening on the unified-core timeline,
+// flagging outcome='refer' (needs ophthalmology/optometry) as a warning. Fires
+// when status reaches 'finalized' (created-as-finalized OR draft→finalized,
+// once). Native pre-compile hooks per the proven W970 pattern; guarded,
+// fire-and-forget. Consumed by dddCrossModuleSubscribers.js.
+VisionScreeningSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+VisionScreeningSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('screenings', 'screening.vision_completed', {
+        screeningId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        outcome: doc.outcome || '',
+        referralTo: doc.referralTo || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.VisionScreening || mongoose.model('VisionScreening', VisionScreeningSchema);
 

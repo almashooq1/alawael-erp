@@ -574,6 +574,48 @@ const SAFETY_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Waitlist Events — أحداث قائمة الانتظار (W979)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// The start of a beneficiary's care journey: added to the waitlist, then —
+// the high-value moment — BOOKED into active care (admission). Producer:
+// native Waitlist post-save hooks. Consumers: CareTimeline subscribers.
+
+const WAITLIST_EVENTS = {
+  ADDED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.added',
+    version: 1,
+    description: 'تمت إضافة المستفيد لقائمة الانتظار — Beneficiary waitlisted',
+    payload: {
+      waitlistId: 'string',
+      beneficiaryId: 'string',
+      department: 'string',
+      priority: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  BOOKED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.booked',
+    version: 1,
+    description: 'تم حجز/قبول مستفيد من قائمة الانتظار — Waitlist entry booked (admission)',
+    payload: {
+      waitlistId: 'string',
+      beneficiaryId: 'string',
+      department: 'string',
+      priority: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -589,6 +631,7 @@ const DDD_CONTRACTS = {
   'ai-recommendations': AI_RECOMMENDATION_EVENTS,
   appointments: APPOINTMENT_EVENTS,
   safety: SAFETY_EVENTS,
+  waitlist: WAITLIST_EVENTS,
 };
 
 /**
@@ -617,6 +660,7 @@ module.exports = {
   AI_RECOMMENDATION_EVENTS,
   APPOINTMENT_EVENTS,
   SAFETY_EVENTS,
+  WAITLIST_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -350,7 +350,9 @@ function autoNumberPlugin(schema, options = {}) {
   const field = options.field || 'code';
   const counter = options.counter || 'document';
 
-  schema.pre('save', async function (next) {
+  // W946 — pure async hook (Mongoose 9 doesn't pass `next` to async hooks →
+  // calling next() throws on every save of any schema using this plugin).
+  schema.pre('save', async function () {
     if (this.isNew && !this[field]) {
       try {
         this[field] = await getNextNumber(counter, options);
@@ -358,7 +360,6 @@ function autoNumberPlugin(schema, options = {}) {
         logger.error(`[counter] failed to assign ${field}: ${err.message}`);
       }
     }
-    next();
   });
 }
 

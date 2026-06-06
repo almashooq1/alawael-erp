@@ -54,7 +54,7 @@ const internalMessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-internalMessageSchema.pre('save', async function (next) {
+internalMessageSchema.pre('save', async function () {
   if (!this.message_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('InternalMessage').countDocuments();
@@ -63,7 +63,6 @@ internalMessageSchema.pre('save', async function (next) {
   if (!this.thread_id) {
     this.thread_id = this._id;
   }
-  next();
 });
 
 internalMessageSchema.index({ sender_id: 1, sent_at: -1 });

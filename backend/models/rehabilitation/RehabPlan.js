@@ -212,7 +212,7 @@ planSchema.index({ specialist_id: 1, status: 1 });
 planSchema.index({ next_review_date: 1, status: 1 });
 
 // ── Pre-save: توليد رقم الخطة ────────────────────────────────
-planSchema.pre('save', async function (next) {
+planSchema.pre('save', async function () {
   if (!this.plan_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -229,7 +229,6 @@ planSchema.pre('save', async function (next) {
     d.setMonth(d.getMonth() + 3);
     this.next_review_date = d;
   }
-  next();
 });
 
 const RehabPlan = mongoose.models.RehabPlan || mongoose.model('RehabPlan', planSchema);

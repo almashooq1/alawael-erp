@@ -50,7 +50,7 @@ const qualityMeasurementSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-qualityMeasurementSchema.pre('save', async function (next) {
+qualityMeasurementSchema.pre('save', async function () {
   if (!this.measurement_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('QualityMeasurement').countDocuments();
@@ -62,7 +62,6 @@ qualityMeasurementSchema.pre('save', async function (next) {
     this.variance_percentage =
       this.target_value !== 0 ? (this.variance / this.target_value) * 100 : 0;
   }
-  next();
 });
 
 qualityMeasurementSchema.index({ indicator_id: 1, period_start: -1 });

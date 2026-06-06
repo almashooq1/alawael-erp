@@ -44,7 +44,7 @@ const leaveSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-leaveSchema.pre('save', async function (next) {
+leaveSchema.pre('save', async function () {
   if (!this.leave_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -52,7 +52,6 @@ leaveSchema.pre('save', async function (next) {
     });
     this.leave_number = `LV-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 leaveSchema.virtual('duration_days').get(function () {

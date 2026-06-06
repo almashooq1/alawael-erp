@@ -87,7 +87,7 @@ const reportJobSchema = new mongoose.Schema(
 );
 
 // === Pre-save: رقم تلقائي ===
-reportJobSchema.pre('save', async function (next) {
+reportJobSchema.pre('save', async function () {
   if (this.isNew && !this.job_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -95,7 +95,6 @@ reportJobSchema.pre('save', async function (next) {
     });
     this.job_number = `RPT-JOB-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 reportJobSchema.index({ template_id: 1, status: 1 });

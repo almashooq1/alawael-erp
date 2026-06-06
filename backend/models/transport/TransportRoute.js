@@ -50,7 +50,7 @@ const transportRouteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-transportRouteSchema.pre('save', async function (next) {
+transportRouteSchema.pre('save', async function () {
   if (!this.route_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -58,7 +58,6 @@ transportRouteSchema.pre('save', async function (next) {
     });
     this.route_number = `RT-${year}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 transportRouteSchema.index({ branch_id: 1, is_active: 1 });

@@ -57,7 +57,7 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-paymentSchema.pre('save', async function (next) {
+paymentSchema.pre('save', async function () {
   if (!this.payment_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -67,7 +67,6 @@ paymentSchema.pre('save', async function (next) {
   }
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../../intelligence/money.lib').deriveHalalas(this, ['amount', 'refund_amount']);
-  next();
 });
 
 // REMOVED DUPLICATE: paymentSchema.index({ payment_number: 1 }); — field already has index:true

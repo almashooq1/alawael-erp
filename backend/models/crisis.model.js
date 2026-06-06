@@ -99,12 +99,11 @@ const emergencyPlanSchema = new Schema(
 emergencyPlanSchema.index({ type: 1, status: 1 });
 emergencyPlanSchema.index({ center: 1 });
 
-emergencyPlanSchema.pre('save', async function (next) {
+emergencyPlanSchema.pre('save', async function () {
   if (!this.planNumber) {
     const count = await mongoose.model('CrisisEmergencyPlan').countDocuments();
     this.planNumber = `EP-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -204,7 +203,7 @@ crisisIncidentSchema.index({ type: 1, severity: 1, status: 1 });
 crisisIncidentSchema.index({ reportedAt: -1 });
 crisisIncidentSchema.index({ center: 1, status: 1 });
 
-crisisIncidentSchema.pre('save', async function (next) {
+crisisIncidentSchema.pre('save', async function () {
   if (!this.incidentNumber) {
     // Query against THIS model (CrisisCrisisIncident), not the canonical
     // EnterpriseUltra CrisisIncident, so the auto-number counter doesn't
@@ -212,7 +211,6 @@ crisisIncidentSchema.pre('save', async function (next) {
     const count = await mongoose.model('CrisisCrisisIncident').countDocuments();
     this.incidentNumber = `INC-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -273,14 +271,13 @@ const emergencyDrillSchema = new Schema(
 emergencyDrillSchema.index({ scheduledDate: 1, status: 1 });
 emergencyDrillSchema.index({ center: 1, type: 1 });
 
-emergencyDrillSchema.pre('save', async function (next) {
+emergencyDrillSchema.pre('save', async function () {
   if (!this.drillNumber) {
     // Query against this scoped model name, not the civilDefense.model.js
     // EmergencyDrill, so the counter is stable per-collection.
     const count = await mongoose.model('CrisisEmergencyDrill').countDocuments();
     this.drillNumber = `DRL-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

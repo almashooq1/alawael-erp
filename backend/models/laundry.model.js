@@ -95,12 +95,11 @@ laundryOrderSchema.index({ beneficiary: 1, createdAt: -1 });
 laundryOrderSchema.index({ center: 1, status: 1 });
 
 // Auto-generate order number
-laundryOrderSchema.pre('save', async function (next) {
+laundryOrderSchema.pre('save', async function () {
   if (!this.orderNumber) {
     const count = await mongoose.model('LaundryOrder').countDocuments();
     this.orderNumber = `LND-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 // ─── Laundry Machine ─────────────────────────────────────────────────────────

@@ -146,12 +146,11 @@ const earlyReferralSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-earlyReferralSchema.pre('save', async function (next) {
+earlyReferralSchema.pre('save', async function () {
   if (!this.referralNumber) {
     const count = await mongoose.model('EarlyReferral').countDocuments();
     this.referralNumber = `REF-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 earlyReferralSchema.index({ child: 1 });

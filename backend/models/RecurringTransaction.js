@@ -98,9 +98,8 @@ const recurringTransactionSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-recurringTransactionSchema.pre('save', async function (next) {
+recurringTransactionSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
-  next();
 });
 
 recurringTransactionSchema.index({ status: 1, nextExecutionDate: 1 });

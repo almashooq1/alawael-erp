@@ -135,7 +135,7 @@ const vatReturnSchema = new mongoose.Schema(
 // فهرسة
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
 // Nested sales/purchases amount+vat sub-objects are deferred (per-category).
-vatReturnSchema.pre('save', async function (next) {
+vatReturnSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'totalOutputVAT',
     'totalInputVAT',
@@ -150,7 +150,6 @@ vatReturnSchema.pre('save', async function (next) {
     'taxablePurchases.imports.amount',
     'taxablePurchases.imports.vat',
   ]);
-  next();
 });
 
 vatReturnSchema.index({ 'period.startDate': 1, 'period.endDate': 1 });

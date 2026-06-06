@@ -101,12 +101,11 @@ const controlSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-controlSchema.pre('save', async function (next) {
+controlSchema.pre('save', async function () {
   if (!this.controlNumber) {
     const count = await this.constructor.countDocuments({ organization: this.organization });
     this.controlNumber = `CTL-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 const InternalControl =
@@ -153,12 +152,11 @@ const complianceItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-complianceItemSchema.pre('save', async function (next) {
+complianceItemSchema.pre('save', async function () {
   if (!this.itemNumber) {
     const count = await this.constructor.countDocuments({ organization: this.organization });
     this.itemNumber = `CMP-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 const ComplianceItem =

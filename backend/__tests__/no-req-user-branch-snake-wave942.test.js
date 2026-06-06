@@ -49,7 +49,11 @@ const PATTERNS = [/req\.user\??\.branch_id\b/, /req\.user\??\.branch\b/];
 // Baseline (2026-06-05): consumer files currently reading the never-populated
 // snake/bare branch field. Ratchet DOWN as each adopts effectiveBranchScope(req).
 const BASELINE = new Set([
-  'routes/ai-analytics.routes.js',
+  // 'routes/ai-analytics.routes.js' — FIXED W973: 7 filter sites → aiBranchFilter(req)
+  //   (snake adapter, de-shadowed import); restricted scoped + ?branch_id spoof blocked;
+  //   isolation test (branchId-only user + spoof case, 3/3).
+  // 'routes/beneficiary-transfers.routes.js' — DEFERRED: deeper field-drift (service writes
+  //   fromBranch, schema declares fromBranchId strict:true → stripped; docs persist no branch).
   'routes/beneficiary-transfers.routes.js',
   // 'routes/communication-module.routes.js' — FIXED W946 (InternalMessage +
   //   ContactDirectory CREATE stamps now use effectiveBranchScope(req)).
@@ -58,10 +62,14 @@ const BASELINE = new Set([
   'routes/hr/employee-admin.routes.js',
   'routes/hr/hr-change-requests.routes.js',
   'routes/hr/hr-inbox.routes.js',
-  'routes/hr-module.routes.js',
-  'routes/referral.routes.js',
-  'routes/reports-analytics-module.routes.js',
-  'routes/smart-assessment-engine.routes.js',
+  // 'routes/hr-module.routes.js' — FIXED W973: POST /leaves branch stamp now uses
+  //   effectiveBranchScope(req) (was req.user.branch_id → undefined on a required field).
+  // 'routes/referral.routes.js' — FIXED W973: 2 list filters → referralBranchFilter(req),
+  //   value/stamps → effectiveBranchScope(req); list-isolation test (branchId-only user, 2/2).
+  // 'routes/reports-analytics-module.routes.js' — FIXED W973: inert never-populated
+  //   fallback swapped to scopedBranch (C3a already forces the real branch at the caller).
+  // 'routes/smart-assessment-engine.routes.js' — FIXED W973: 13 assessment CREATE
+  //   stamps now use effectiveBranchScope(req); reads already scoped (W907).
   // 'routes/telehealth.routes.js' — FIXED W946: all 11 req.user.branch sites now
   //   use telehealthBranchFilter(req) (lists) / effectiveBranchScope(req) (values
   //   + stamps); proven by the branchId-only-user cases in the W871 test (9/9).

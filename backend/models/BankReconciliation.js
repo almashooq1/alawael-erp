@@ -123,14 +123,13 @@ const bankReconciliationSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-bankReconciliationSchema.pre('save', async function (next) {
+bankReconciliationSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'bankStatementBalance',
     'bookBalance',
     'adjustedBankBalance',
     'adjustedBookBalance',
   ]);
-  next();
 });
 
 bankReconciliationSchema.index({ accountId: 1, periodEnd: -1 });

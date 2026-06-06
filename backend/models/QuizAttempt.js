@@ -43,9 +43,8 @@ const quizAttemptSchema = new mongoose.Schema(
 quizAttemptSchema.index({ branchId: 1, userId: 1, quizId: 1 });
 quizAttemptSchema.index({ enrollmentId: 1, attemptNumber: 1 });
 
-quizAttemptSchema.pre('save', function (next) {
+quizAttemptSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.QuizAttempt || mongoose.model('QuizAttempt', quizAttemptSchema);

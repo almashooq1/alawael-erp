@@ -82,90 +82,25 @@ const HOOK_RE =
 // entry from this Set, commit. Same wave pattern that drove W325c
 // phantom-ref baseline 58 → 0 across ~12 waves.
 const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
-  'domains/care-plans/models/UnifiedCarePlan.js',
-  'domains/sessions/models/ClinicalSession.js',
-  'models/AccountingExpense.js',
-  'models/AiRecommendationBundle.js',
-  'models/Assessment.js',
-  'models/Asset.js',
-  'models/AwarenessProgram.js',
-  'models/BeneficiaryManagement/AcademicRecord.js',
-  'models/BeneficiaryManagement/Achievement.js',
-  'models/BeneficiaryManagement/AttendanceRecord.js',
-  'models/BeneficiaryManagement/CounselingSession.js',
-  'models/BeneficiaryManagement/FinancialSupport.js',
-  'models/BeneficiaryManagement/Scholarship.js',
-  'models/BeneficiaryManagement/SkillsDevelopment.js',
-  'models/BeneficiaryManagement/SupportPlan.js',
-  'models/BeneficiaryVoiceLog.js',
-  // W494 ratchet wave 3: 3 Cdss* + ClinicalRule + CpdRecord (-5)
-  // W494 ratchet wave 4: CommunityActivity + ComplianceMetric +
-  //   CourseEnrollment + CourseModule + CrisisIncident (-5)
-  'models/ComplaintEnhanced.js',
-  // W494 ratchet wave 1: Webhook + EmailPreference + CrmCampaign (-3)
-  // W494 ratchet wave 2: 5 Crm* models (CrmLead/Partner/Referral/Segment/Survey)
-  //   — all single uuid-fill hooks, trivial async conversion.
-  'models/CulturalProfile.js',
-  'models/DecisionRightsAssessment.js',
-  // W494 ratchet wave 4 (parallel agent): Delegation + DifferentialDiagnosis + DisabilityProgram
-  // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
-  'models/DisabilitySession.js',
-  // W494 ratchet (mine, +2): DiscussionForum + DrugLibrary converted to async.
-  // W494 ratchet wave 6: ESignature + EStamp + ElearningCourse +
-  //   ElearningQuiz (-4) — auto-expiry + uuid-fill hooks.
-  'models/EmergencyPlan.js',
-  'models/EnterpriseRisk.js',
-  'models/EventParticipation.js',
-  'models/Exam.js',
-  'models/FamilyCounsellingSession.js',
-  'models/FinancialTransaction.js',
-  // (ForumReply removed — W494 ratchet wave 6 bonus)
-  'models/Goal.js',
-  'models/HikvisionRawEvent.js',
-  'models/ImportExportJob.js',
-  'models/ImportExportTemplate.js',
-  'models/Incident.js',
-  'models/InsuranceTariff.js',
-  'models/LearningPath.js',
-  // models/MDTCoordination.js — removed W629: unifiedRehabPlanSchema callback
-  // hook converted to async (ratchet-DOWN) so the sibling
-  // deriveBranchFromBeneficiary hook can be async on the same event.
-  'models/Maintenance.js',
-  'models/MaintenancePrediction.js',
-  'models/ModuleProgress.js',
-  'models/ParentChatbotSession.js',
-  'models/PaymentVoucher.js',
-  'models/PrescriptionValidation.js',
-  'models/Product.js',
-  'models/Productivity/UserPreferences.js',
-  'models/QuizAttempt.js',
-  'models/QuizQuestion.js',
-  'models/RehabPlanSuggestion.js',
-  'models/RiskAssessment.js',
-  'models/Schedule.js',
-  'models/SiblingAdjustmentRecord.js',
-  'models/SmartIRP.js',
-  'models/TaxFiling.js',
-  'models/TrainerEvaluation.js',
-  'models/TrainingCompliance.js',
-  'models/WaitlistEntry.js',
-  'models/WebhookDelivery.js',
-  'models/auditLog.model.js',
-  'models/clinical-assessment/caregiver-burden-assessment.model.js',
-  'models/clinical-assessment/mchat-assessment.model.js',
-  'models/clinical-assessment/quality-of-life-assessment.model.js',
-  'models/conversation.model.js',
-  'models/disability-assessment.model.js',
-  'models/emr.model.js',
-  // models/gratuity.model.js — removed: hook converted to async (W494/audit #5)
-  'models/pharmacy.model.js',
-  // W503: CapaItem converted to async style — unblocks auto-CAPA on major equity disparity.
-  'models/quality/Risk.model.js',
-  'models/rehabilitation/Program.js',
-  'models/reports/ReportSchedule.js',
-  'privacy/consent.model.js',
-  'privacy/data-subject-request.model.js',
-  'services/whatsapp/templateSync.service.js',
+  // W948 — remaining SYNC callback hooks with next(arg) bodies (need manual
+  // throw-conversion); the 50 bare-next baseline files were converted to async.
+  "models/AccountingExpense.js",
+  "models/AiRecommendationBundle.js",
+  "models/BeneficiaryVoiceLog.js",
+  "models/CulturalProfile.js",
+  "models/DecisionRightsAssessment.js",
+  "models/EmergencyPlan.js",
+  "models/FamilyCounsellingSession.js",
+  "models/FinancialTransaction.js",
+  "models/Goal.js",
+  "models/HikvisionRawEvent.js",
+  "models/InsuranceTariff.js",
+  "models/ParentChatbotSession.js",
+  "models/Productivity/UserPreferences.js",
+  "models/SiblingAdjustmentRecord.js",
+  "models/auditLog.model.js",
+  "privacy/consent.model.js",
+  "services/whatsapp/templateSync.service.js",
 ]);
 
 function listSchemaFiles(roots) {
@@ -200,11 +135,16 @@ function listSchemaFiles(roots) {
 function classifyHook(isAsync, params, bodyAhead) {
   const paramsTrim = params.trim();
   const hasNext = /\bnext\b/.test(paramsTrim);
-  if (isAsync) return 'async';
+  const callsNext = /\bnext\s*\(/.test(bodyAhead);
+  // W946 — an `async function (next)` hook that calls next() is ALSO broken
+  // under Mongoose 9: async hooks don't receive `next` (it's undefined), so
+  // next() throws "next is not a function" on every save. Fold it into the
+  // dangerous 'callback' class so the W494 ratchet + mixed-detection catch it.
+  if (isAsync) return hasNext && callsNext ? 'callback' : 'async';
   if (!hasNext) return 'sync';
   // sync with `next` param — check if body actually calls next(). If it
   // does, it's the dangerous callback style. If it doesn't, treat as sync.
-  if (/\bnext\s*\(/.test(bodyAhead)) return 'callback';
+  if (callsNext) return 'callback';
   return 'sync';
 }
 

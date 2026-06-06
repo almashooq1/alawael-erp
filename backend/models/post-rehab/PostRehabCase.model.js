@@ -212,13 +212,12 @@ postRehabCaseSchema.index({ assignedSpecialist: 1, status: 1 });
 postRehabCaseSchema.index({ dischargeDate: 1 });
 
 // ── Auto-generate case number ──
-postRehabCaseSchema.pre('save', async function (next) {
+postRehabCaseSchema.pre('save', async function () {
   if (!this.caseNumber) {
     const count = await mongoose.model('PostRehabCase').countDocuments();
     const year = new Date().getFullYear();
     this.caseNumber = `PRF-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ── Virtuals ──

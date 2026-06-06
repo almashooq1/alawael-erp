@@ -1229,6 +1229,18 @@ on:
       - 'backend/__tests__/quality-bus-unification-wave974.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/model-event-bridge-global-plugin-wave974.test.js'
+      - 'backend/__tests__/referral-routes-branch-isolation-wave973.test.js'
+      - 'backend/__tests__/ai-analytics-branch-isolation-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-core-linkage-wave979.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/screening-core-linkage-wave980.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-alias-user-id-wave947.test.js'
       - 'backend/package.json'
@@ -2443,6 +2455,18 @@ on:
       - 'backend/__tests__/quality-bus-unification-wave974.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/model-event-bridge-global-plugin-wave974.test.js'
+      - 'backend/__tests__/referral-routes-branch-isolation-wave973.test.js'
+      - 'backend/__tests__/ai-analytics-branch-isolation-wave973.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/session-lifecycle-timeline-subscriber-wave974.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/incident-ncr-producer-wave976.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/safety-core-linkage-wave977.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waitlist-core-linkage-wave979.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/screening-core-linkage-wave980.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-alias-user-id-wave947.test.js'
       - 'backend/package.json'

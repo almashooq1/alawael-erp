@@ -101,11 +101,10 @@ reportScheduleSchema.index({ template_id: 1 });
 reportScheduleSchema.index({ deleted_at: 1 });
 
 // حساب next_run_at تلقائياً قبل الحفظ
-reportScheduleSchema.pre('save', function (next) {
+reportScheduleSchema.pre('save', async function () {
   if (this.isModified('frequency') || this.isModified('time_of_day') || this.isNew) {
     this.next_run_at = this._computeNextRun();
   }
-  next();
 });
 
 reportScheduleSchema.methods._computeNextRun = function () {

@@ -83,7 +83,7 @@ gosiSubscriptionSchema.index({ organization: 1, status: 1 });
 gosiSubscriptionSchema.index({ nationality: 1, isSaudi: 1 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-gosiSubscriptionSchema.pre('save', async function (next) {
+gosiSubscriptionSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'basicSalary',
     'housingAllowance',
@@ -93,7 +93,6 @@ gosiSubscriptionSchema.pre('save', async function (next) {
     'totalContribution',
     'balanceDue',
   ]);
-  next();
 });
 
 const GOSISubscription =
@@ -137,14 +136,13 @@ const gosiContributionSchema = new Schema(
 gosiContributionSchema.index({ subscription: 1, period: 1 }, { unique: true });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-gosiContributionSchema.pre('save', async function (next) {
+gosiContributionSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'subscriberWage',
     'employeeContribution',
     'employerContribution',
     'totalContribution',
   ]);
-  next();
 });
 
 const GOSIContribution =
@@ -327,13 +325,12 @@ gosiPaymentSchema.index({ organization: 1, period: 1 }, { unique: true });
 gosiPaymentSchema.index({ status: 1, dueDate: 1 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-gosiPaymentSchema.pre('save', async function (next) {
+gosiPaymentSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'totalEmployeeShare',
     'totalEmployerShare',
     'grandTotal',
   ]);
-  next();
 });
 
 const GOSIPayment = mongoose.models.GOSIPayment || mongoose.model('GOSIPayment', gosiPaymentSchema);
@@ -408,7 +405,7 @@ endOfServiceSchema.index({ employee: 1, status: 1 });
 endOfServiceSchema.index({ organization: 1, createdAt: -1 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-endOfServiceSchema.pre('save', async function (next) {
+endOfServiceSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'lastSalary',
     'basicSalary',
@@ -421,7 +418,6 @@ endOfServiceSchema.pre('save', async function (next) {
     'fullEntitlement',
     'finalAmount',
   ]);
-  next();
 });
 
 const EndOfServiceCalculation =

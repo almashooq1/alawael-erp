@@ -209,6 +209,65 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // NO_SHOW + CANCELLED). Subscriber was dead-on-arrival — its handler's
   // integrationBus.publish('ai-recommendations', 'ai.risk_elevated', ...) chain
   // also became unreachable. Removal closes the W389 baseline by 1 entry.
+
+  // ─── Sessions → Timeline: Session cancelled (W974) ──────────────────
+  // SessionService.cancelSession emits the canonical `session.cancelled`
+  // (was ad-hoc `sessionCancelled`, never bridged), enriched with
+  // beneficiaryId + episodeId so the cancellation lands on the timeline.
+  subscribers.push({
+    name: 'sessions:cancelled → timeline:record',
+    pattern: 'sessions.session.cancelled',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const reason = event.payload.reason;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'session_cancelled',
+            category: 'clinical',
+            severity: 'warning',
+            title: 'Session cancelled',
+            title_ar: reason ? `إلغاء الجلسة (${reason})` : 'إلغاء الجلسة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Session cancel timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Sessions → Timeline: Session no-show (W974) ────────────────────
+  // SessionService.markNoShow emits the canonical `session.no_show` (was
+  // ad-hoc `sessionNoShow`, never bridged), enriched with the links so a
+  // missed appointment is visible on the unified timeline.
+  subscribers.push({
+    name: 'sessions:no_show → timeline:record',
+    pattern: 'sessions.session.no_show',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'session_no_show',
+            category: 'clinical',
+            severity: 'warning',
+            title: 'Session no-show',
+            title_ar: 'تغيّب عن الجلسة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Session no-show timeline failed: ${err.message}`);
+      }
+    },
+  });
   // ─── Goals → Timeline: Goal created (W939) ──────────────────
   // GoalService.afterCreate emits `goal.created` (normalized from the dead
   // `goalCreated` ad-hoc name + enriched with episodeId, bridged to
@@ -703,6 +762,196 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
         }
       } catch (err) {
         logger.error(`[DDD-CrossModule] Appointment no-show timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Safety → Timeline: Seizure recorded (W977, CRITICAL) ─────────
+  subscribers.push({
+    name: 'safety:seizure → timeline:record',
+    pattern: 'safety.seizure.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const emergency = event.payload.statusEpilepticus === true;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'seizure_event',
+            category: 'clinical',
+            severity: emergency ? 'critical' : 'warning',
+            title: emergency
+              ? 'Seizure — STATUS EPILEPTICUS (emergency)'
+              : `Seizure recorded (${event.payload.severity || ''})`.trim(),
+            title_ar: emergency
+              ? 'نوبة صرع — حالة صرعية مستمرة (طارئ)'
+              : `تسجيل نوبة صرع (${event.payload.severity || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Seizure timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Safety → Timeline: Safeguarding concern raised (W977, CRITICAL) ─
+  subscribers.push({
+    name: 'safety:safeguarding → timeline:record',
+    pattern: 'safety.safeguarding.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'safeguarding_concern',
+            category: 'clinical',
+            severity: event.payload.severity === 'critical' ? 'critical' : 'warning',
+            title: `Safeguarding concern raised (${event.payload.category || ''})`.trim(),
+            title_ar: `بلاغ حماية (${event.payload.category || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Safeguarding timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Safety → Timeline: Restraint/seclusion applied (W977) ────────
+  subscribers.push({
+    name: 'safety:restraint → timeline:record',
+    pattern: 'safety.restraint.applied',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'restraint_applied',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Restraint/seclusion applied (${event.payload.restraintType || ''})`.trim(),
+            title_ar: `تطبيق تقييد/عزل (${event.payload.restraintType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Restraint timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Waitlist → Timeline: Added (W979) ────────────────────────────
+  subscribers.push({
+    name: 'waitlist:added → timeline:record',
+    pattern: 'waitlist.waitlist.added',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'waitlisted',
+            category: 'administrative',
+            severity: 'info',
+            title: `Added to waitlist (${event.payload.department || ''})`.trim(),
+            title_ar: `إضافة لقائمة الانتظار (${event.payload.department || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Waitlist-added timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Waitlist → Timeline: Booked = admission (W979) ───────────────
+  subscribers.push({
+    name: 'waitlist:booked → timeline:record',
+    pattern: 'waitlist.waitlist.booked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'waitlist_booked',
+            category: 'administrative',
+            severity: 'success',
+            title: `Booked from waitlist — admission (${event.payload.department || ''})`.trim(),
+            title_ar: `حجز/قبول من قائمة الانتظار (${event.payload.department || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Waitlist-booked timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Screenings → Timeline: Vision finalized (W980) ───────────────
+  subscribers.push({
+    name: 'screenings:vision → timeline:record',
+    pattern: 'screenings.screening.vision_completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const refer = event.payload.outcome === 'refer';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'screening_completed',
+            category: 'clinical',
+            severity: refer ? 'warning' : 'info',
+            title: refer
+              ? `Vision screening → REFER (${event.payload.referralTo || 'ophthalmology'})`
+              : `Vision screening finalized (${event.payload.outcome || ''})`.trim(),
+            title_ar: refer
+              ? `فحص بصر → إحالة (${event.payload.referralTo || 'عيون'})`
+              : `إنهاء فحص بصر (${event.payload.outcome || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Vision-screening timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Screenings → Timeline: Hearing finalized (W980) ──────────────
+  subscribers.push({
+    name: 'screenings:hearing → timeline:record',
+    pattern: 'screenings.screening.hearing_completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const refer = event.payload.outcome === 'refer';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'screening_completed',
+            category: 'clinical',
+            severity: refer ? 'warning' : 'info',
+            title: refer
+              ? 'Hearing screening → REFER (audiology/ENT)'
+              : `Hearing screening finalized (${event.payload.outcome || ''})`.trim(),
+            title_ar: refer
+              ? 'فحص سمع → إحالة (سمعيات/أنف وأذن)'
+              : `إنهاء فحص سمع (${event.payload.outcome || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Hearing-screening timeline failed: ${err.message}`);
       }
     },
   });

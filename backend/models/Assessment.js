@@ -347,7 +347,7 @@ programAssessmentSchema.statics.getDomainAnalysis = async function (beneficiaryI
 };
 
 // Pre-save middleware
-programAssessmentSchema.pre('save', function (next) {
+programAssessmentSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   // Auto-calculate weighted score
@@ -361,7 +361,6 @@ programAssessmentSchema.pre('save', function (next) {
     this.improvement = this.scoreChange > 0;
   }
 
-  next();
 });
 
 module.exports =

@@ -94,13 +94,45 @@ const incidentReportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-incidentReportSchema.pre('save', async function (next) {
+// W976 — async-no-next form. Mongoose 9 does NOT pass `next` to an async hook, so
+// the prior `async function (next) { … next(); }` threw "next is not a function" on
+// EVERY save (the documented Mongoose-9 hazard; see feedback_mongoose_9_pre_save_callback_silent_break).
+// Completing via promise resolution is the canonical Mongoose-9 form.
+incidentReportSchema.pre('save', async function () {
+  this.$locals.wasNew = this.isNew; // capture for the post-save NCR producer
   if (!this.incident_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('IncidentReport').countDocuments();
     this.incident_number = `INC-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
+});
+
+// W976 — producer for the NCR auto-link pipeline (services/quality/ncrAutoLinkPipeline).
+// On a NEW incident, emit `quality.incident.reported` on the unified quality bus
+// (the singleton, W974) so the pipeline can auto-create an NCR + CAPA. The pipeline
+// SELF-FILTERS by severity (major/critical/sentinel) and dedups by incidentId, so the
+// "which incidents qualify" decision lives there, not here, and emitting is idempotent.
+// ENV-GATED, default OFF (ENABLE_INCIDENT_NCR_AUTOLINK=true) — ships inert; auto-creating
+// corrective-action records is a behaviour an operator opts into. Fully guarded: a bus
+// or emit error must NEVER break the incident save.
+incidentReportSchema.post('save', async function (doc) {
+  if (process.env.ENABLE_INCIDENT_NCR_AUTOLINK !== 'true') return;
+  if (!doc || !doc.$locals || !doc.$locals.wasNew) return; // creation only
+  try {
+    const { getDefault } = require('../../services/quality/qualityEventBus.service');
+    const bus = getDefault();
+    if (bus && typeof bus.emit === 'function') {
+      await bus.emit('quality.incident.reported', {
+        incidentId: String(doc._id),
+        severity: doc.severity ? String(doc.severity).toLowerCase() : null,
+        title: doc.title || null,
+        branchId: doc.branch_id ? String(doc.branch_id) : null,
+        reportedBy: doc.reported_by ? String(doc.reported_by) : null,
+      });
+    }
+  } catch (_) {
+    /* best-effort producer — never break the incident save */
+  }
 });
 
 incidentReportSchema.index({ incident_type: 1, severity: 1, incident_date: -1 });

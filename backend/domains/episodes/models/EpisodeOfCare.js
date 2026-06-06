@@ -396,7 +396,7 @@ episodeOfCareSchema.virtual('timelineEvents', {
 
 // ─── Pre-save Middleware ─────────────────────────────────────────────────────
 
-episodeOfCareSchema.pre('save', function (next) {
+episodeOfCareSchema.pre('save', async function () {
   // Auto-generate episode number
   if (!this.episodeNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -436,7 +436,6 @@ episodeOfCareSchema.pre('save', function (next) {
     ];
   }
 
-  next();
 });
 
 // ─── Instance Methods ───────────────────────────────────────────────────────

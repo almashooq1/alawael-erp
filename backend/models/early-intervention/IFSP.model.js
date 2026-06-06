@@ -235,12 +235,11 @@ const ifspSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ifspSchema.pre('save', async function (next) {
+ifspSchema.pre('save', async function () {
   if (!this.planNumber) {
     const count = await mongoose.model('IFSP').countDocuments();
     this.planNumber = `IFSP-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 ifspSchema.index({ child: 1 });

@@ -76,13 +76,12 @@ const announcementSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-announcementSchema.pre('save', async function (next) {
+announcementSchema.pre('save', async function () {
   if (!this.announcement_number) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('Announcement').countDocuments({ deleted_at: null });
     this.announcement_number = `ANN-${year}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 announcementSchema.index({ is_published: 1, publish_at: -1 });

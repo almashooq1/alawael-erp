@@ -52,9 +52,8 @@ const paymentRefundSchema = new mongoose.Schema(
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
 // New async hook (none existed) per the W483/Mongoose-9 async doctrine.
-paymentRefundSchema.pre('save', async function (next) {
+paymentRefundSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
-  next();
 });
 
 paymentRefundSchema.index({ branchId: 1, status: 1 });

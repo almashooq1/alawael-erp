@@ -638,20 +638,17 @@ compensationStructureSchema.statics.getActiveStructures = function () {
 // ========== التصدير ==========
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
 // compensationStructure allowance/deduction array items are deferred.
-compensationStructureSchema.pre('save', async function (next) {
+compensationStructureSchema.pre('save', async function () {
   const { deriveHalalas } = require('../intelligence/money.lib');
   ((this.baseSalary || {}).ranges || []).forEach(r => deriveHalalas(r, ['amount']));
   (this.fixedAllowances || []).forEach(a => deriveHalalas(a, ['amount']));
   (this.variableAllowances || []).forEach(a => deriveHalalas(a, ['amount']));
-  next();
 });
-individualIncentiveSchema.pre('save', async function (next) {
+individualIncentiveSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
-  next();
 });
-performancePenaltySchema.pre('save', async function (next) {
+performancePenaltySchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
-  next();
 });
 
 module.exports = {

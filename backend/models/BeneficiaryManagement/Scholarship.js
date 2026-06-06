@@ -197,9 +197,8 @@ scholarshipSchema.index({ approvalDate: -1 });
 scholarshipSchema.index({ branchId: 1, applicationStatus: 1 });
 
 // Pre-save middleware
-scholarshipSchema.pre('save', function (next) {
+scholarshipSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 // Methods

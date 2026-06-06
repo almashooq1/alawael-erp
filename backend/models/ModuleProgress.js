@@ -41,9 +41,8 @@ const moduleProgressSchema = new mongoose.Schema(
 moduleProgressSchema.index({ enrollmentId: 1, moduleId: 1 }, { unique: true });
 moduleProgressSchema.index({ branchId: 1, userId: 1, status: 1 });
 
-moduleProgressSchema.pre('save', function (next) {
+moduleProgressSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

@@ -221,7 +221,14 @@ function wireServiceEventBridge(integrationBus) {
       }
     }
     if (sessionSvc) {
-      attachBridge('sessions', sessionSvc, ['session.completed']);
+      // W974: cancelled + no_show join completed so the full session lifecycle
+      // (live SessionService now emits the canonical dotted names) reaches the
+      // unified timeline.
+      attachBridge('sessions', sessionSvc, [
+        'session.completed',
+        'session.cancelled',
+        'session.no_show',
+      ]);
     } else {
       skipped.push('sessions (service not initialized)');
     }

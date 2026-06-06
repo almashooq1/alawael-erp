@@ -66,9 +66,8 @@ const bankAccountSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-bankAccountSchema.pre('save', async function (next) {
+bankAccountSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['openingBalance', 'currentBalance']);
-  next();
 });
 
 bankAccountSchema.index({ organization: 1, status: 1 });

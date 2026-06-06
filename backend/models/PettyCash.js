@@ -79,7 +79,7 @@ const pettyCashTransactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-pettyCashTransactionSchema.pre('save', async function (next) {
+pettyCashTransactionSchema.pre('save', async function () {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'balanceAfter']);
   if (!this.transactionNumber) {
@@ -87,16 +87,14 @@ pettyCashTransactionSchema.pre('save', async function (next) {
     const count = await mongoose.model('PettyCashTransaction').countDocuments();
     this.transactionNumber = `${prefix}-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (main fund).
-pettyCashSchema.pre('save', async function (next) {
+pettyCashSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'currentBalance',
     'lastReplenishmentAmount',
   ]);
-  next();
 });
 
 pettyCashSchema.index({ organization: 1, status: 1 });

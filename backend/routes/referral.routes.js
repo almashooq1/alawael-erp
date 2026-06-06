@@ -6,7 +6,8 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
@@ -71,6 +72,15 @@ const upload = multer({
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// Referral model uses the LEGACY `branch` field (not branchId). Map the canonical
+// branchFilter onto it (telehealth template). Returns {} for HQ / cross-branch.
+function referralBranchFilter(req) {
+  const f = branchFilter(req);
+  if (!f.branchId) return {};
+  if (f.branchId.$in) return { branch: { $in: f.branchId.$in } };
+  return { branch: f.branchId };
+}
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 /**
@@ -82,7 +92,7 @@ router.get(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
-      const branchId = req.user.branch;
+      const branchId = effectiveBranchScope(req);
       const analytics = await getAnalytics(branchId, req.query);
       res.json({ success: true, data: analytics });
     } catch (err) {
@@ -206,9 +216,7 @@ router.get('/', async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const branchId = req.user.branch;
-
-    const filter = { branch: branchId };
+    const filter = { ...referralBranchFilter(req) };
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (specialty) filter.specialtyRequired = specialty;
@@ -256,7 +264,7 @@ router.post('/', async (req, res) => {
   try {
     const referral = await receiveReferral({
       ...req.body,
-      branchId: req.user.branch,
+      branchId: req.body.branch || req.body.branchId || effectiveBranchScope(req),
     });
     res.status(201).json({
       success: true,
@@ -623,7 +631,8 @@ router.post(
         return res.status(400).json({ success: false, message: 'fhirResource مطلوب' });
       }
 
-      const referral = await importFromFhir(fhirResource, req.user.branch, facilityId);
+      const branchId = req.body.branch || req.body.branchId || effectiveBranchScope(req);
+      const referral = await importFromFhir(fhirResource, branchId, facilityId);
       res.status(201).json({
         success: true,
         message: `تم استيراد التحويل من FHIR — ${referral.referralNumber}`,
@@ -645,7 +654,7 @@ router.get(
   async (req, res) => {
     try {
       const { resourceType, status, page = 1, limit = 50 } = req.query;
-      const filter = { branch: req.user.branch };
+      const filter = { ...referralBranchFilter(req) };
       if (resourceType) filter.resourceType = resourceType;
       if (status) filter.status = status;
 

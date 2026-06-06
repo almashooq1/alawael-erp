@@ -62,6 +62,9 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'behavior',
   'ai-recommendations',
   'appointments', // W970 — appointment booking/cancellation/no-show → core timeline
+  'safety', // W977 — seizure / safeguarding / restraint → core timeline
+  'waitlist', // W979 — waitlist added / booked (admission) → core timeline
+  'screenings', // W980 — vision / hearing screening finalized → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -96,6 +99,11 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'ai',
     'recommendation',
     'appointment', // W970 — appointment.booked / .cancelled / .no_show
+    'seizure', // W977
+    'safeguarding', // W977
+    'restraint', // W977
+    'waitlist', // W979
+    'screening', // W980
   ])
 );
 
@@ -140,6 +148,9 @@ describe('W374 DDD event-contracts drift guard', () => {
         behavior: 'BEHAVIOR_EVENTS',
         'ai-recommendations': 'AI_RECOMMENDATION_EVENTS',
         appointments: 'APPOINTMENT_EVENTS', // W970
+        safety: 'SAFETY_EVENTS', // W977
+        waitlist: 'WAITLIST_EVENTS', // W979
+        screenings: 'SCREENING_EVENTS', // W980
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {
         expect(contracts[exportName]).toBe(contracts.DDD_CONTRACTS[group]);

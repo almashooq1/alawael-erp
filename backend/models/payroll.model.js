@@ -260,7 +260,7 @@ const payrollSchema = new mongoose.Schema(
 // ========== المؤشرات (Indexes) ==========
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
 // Array allowance/deduction item amounts are deferred (per-element handling).
-payrollSchema.pre('save', async function (next) {
+payrollSchema.pre('save', async function () {
   const { deriveHalalas } = require('../intelligence/money.lib');
   deriveHalalas(this, [
     'baseSalary',
@@ -275,7 +275,6 @@ payrollSchema.pre('save', async function (next) {
   ]);
   (this.allowances || []).forEach(a => deriveHalalas(a, ['amount']));
   (this.deductions || []).forEach(d => deriveHalalas(d, ['amount']));
-  next();
 });
 
 payrollSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true });

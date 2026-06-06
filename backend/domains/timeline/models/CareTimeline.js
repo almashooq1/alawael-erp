@@ -31,12 +31,15 @@ const careTimelineSchema = new mongoose.Schema(
       enum: [
         // Lifecycle
         'registration',
+        'waitlisted', // W979
+        'waitlist_booked', // W979 — booked from the waitlist (admission)
         'admission',
         'discharge',
         'transfer',
         'readmission',
         // Clinical
         'assessment_completed',
+        'screening_completed', // W980 — vision/hearing screening finalized
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',
@@ -72,6 +75,10 @@ const careTimelineSchema = new mongoose.Schema(
         'quality_alert',
         'compliance_issue',
         'behavior_incident', // W970 — behavior subscriber (already on main) needs this enum value
+        // Safety (W977)
+        'seizure_event',
+        'safeguarding_concern',
+        'restraint_applied',
         // Family
         'family_contact',
         'family_meeting',

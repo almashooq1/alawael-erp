@@ -616,6 +616,49 @@ const WAITLIST_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Screening Events — أحداث الفحوصات (W980)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// A finalized vision/hearing screening surfaces on the timeline; outcome='refer'
+// is the high-value signal (needs ophthalmology/optometry or audiology/ENT).
+// Producers: native VisionScreening/HearingScreening post-save hooks.
+
+const SCREENING_EVENTS = {
+  VISION_COMPLETED: {
+    domain: 'screenings',
+    eventType: 'screening.vision_completed',
+    version: 1,
+    description: 'تم إنهاء فحص بصر — Vision screening finalized',
+    payload: {
+      screeningId: 'string',
+      beneficiaryId: 'string',
+      outcome: 'string',
+      referralTo: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  HEARING_COMPLETED: {
+    domain: 'screenings',
+    eventType: 'screening.hearing_completed',
+    version: 1,
+    description: 'تم إنهاء فحص سمع — Hearing screening finalized',
+    payload: {
+      screeningId: 'string',
+      beneficiaryId: 'string',
+      outcome: 'string',
+      lossType: 'string',
+      severity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -632,6 +675,7 @@ const DDD_CONTRACTS = {
   appointments: APPOINTMENT_EVENTS,
   safety: SAFETY_EVENTS,
   waitlist: WAITLIST_EVENTS,
+  screenings: SCREENING_EVENTS,
 };
 
 /**
@@ -661,6 +705,7 @@ module.exports = {
   APPOINTMENT_EVENTS,
   SAFETY_EVENTS,
   WAITLIST_EVENTS,
+  SCREENING_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

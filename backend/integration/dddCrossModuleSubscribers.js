@@ -896,6 +896,66 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Screenings → Timeline: Vision finalized (W980) ───────────────
+  subscribers.push({
+    name: 'screenings:vision → timeline:record',
+    pattern: 'screenings.screening.vision_completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const refer = event.payload.outcome === 'refer';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'screening_completed',
+            category: 'clinical',
+            severity: refer ? 'warning' : 'info',
+            title: refer
+              ? `Vision screening → REFER (${event.payload.referralTo || 'ophthalmology'})`
+              : `Vision screening finalized (${event.payload.outcome || ''})`.trim(),
+            title_ar: refer
+              ? `فحص بصر → إحالة (${event.payload.referralTo || 'عيون'})`
+              : `إنهاء فحص بصر (${event.payload.outcome || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Vision-screening timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Screenings → Timeline: Hearing finalized (W980) ──────────────
+  subscribers.push({
+    name: 'screenings:hearing → timeline:record',
+    pattern: 'screenings.screening.hearing_completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const refer = event.payload.outcome === 'refer';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'screening_completed',
+            category: 'clinical',
+            severity: refer ? 'warning' : 'info',
+            title: refer
+              ? 'Hearing screening → REFER (audiology/ENT)'
+              : `Hearing screening finalized (${event.payload.outcome || ''})`.trim(),
+            title_ar: refer
+              ? 'فحص سمع → إحالة (سمعيات/أنف وأذن)'
+              : `إنهاء فحص سمع (${event.payload.outcome || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Hearing-screening timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

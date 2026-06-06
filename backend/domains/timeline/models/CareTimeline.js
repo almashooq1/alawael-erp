@@ -39,6 +39,7 @@ const careTimelineSchema = new mongoose.Schema(
         'readmission',
         // Clinical
         'assessment_completed',
+        'screening_completed', // W980 — vision/hearing screening finalized
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',

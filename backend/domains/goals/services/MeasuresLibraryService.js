@@ -107,11 +107,13 @@ class MeasuresLibraryService {
     // 8. Save
     const application = await MeasureApplication.create(applicationData);
 
-    // 9. Record in timeline
+    // 9. Record in timeline (W975: canonical measure_applied event — keeps
+    // measure administrations distinct from assessment completions so the
+    // unified CareTimeline stays per-event actionable, not conflated)
     await this._recordTimeline({
       beneficiaryId,
       episodeId,
-      eventType: 'assessment_completed',
+      eventType: 'measure_applied',
       title: `تطبيق مقياس: ${measure.name_ar || measure.name}`,
       description: `النتيجة: ${scored.totalRawScore} — ${scored.overallInterpretation_ar || scored.overallInterpretation || ''}`,
       userId: assessorId,

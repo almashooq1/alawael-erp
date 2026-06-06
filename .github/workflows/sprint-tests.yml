@@ -1243,6 +1243,8 @@ on:
       - 'backend/__tests__/screening-core-linkage-wave980.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-alias-user-id-wave947.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-async-next-save-hooks-wave978.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2469,6 +2471,8 @@ on:
       - 'backend/__tests__/screening-core-linkage-wave980.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-alias-user-id-wave947.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-async-next-save-hooks-wave978.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

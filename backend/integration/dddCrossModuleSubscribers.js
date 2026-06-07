@@ -1006,6 +1006,41 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Core → Timeline: Beneficiary status changed (W982) ───────────
+  subscribers.push({
+    name: 'core:status_changed → timeline:record',
+    pattern: 'core.beneficiary.status_changed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const ns = event.payload.newStatus;
+          // deceased = critical; transferred/inactive = warning; graduated = success
+          const severity =
+            ns === 'deceased'
+              ? 'critical'
+              : ns === 'transferred' || ns === 'inactive'
+                ? 'warning'
+                : ns === 'graduated'
+                  ? 'success'
+                  : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'status_changed',
+            category: 'administrative',
+            severity,
+            title: `Status: ${event.payload.oldStatus || ''} → ${event.payload.newStatus || ''}`.trim(),
+            title_ar: `تغيّر الحالة: ${event.payload.oldStatus || ''} ← ${event.payload.newStatus || ''}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Status-changed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

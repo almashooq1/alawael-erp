@@ -734,3 +734,4 @@ __tests__/screening-core-linkage-wave980.test.js
 __tests__/auth-alias-user-id-wave947.test.js
 __tests__/no-async-next-save-hooks-wave978.test.js
 __tests__/medication-core-linkage-wave981.test.js
+__tests__/beneficiary-status-core-linkage-wave982.test.js

@@ -703,6 +703,33 @@ const MEDICATION_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Complaint Events — أحداث الشكاوى (W984)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// A complaint/grievance ABOUT a beneficiary surfaces on the timeline at filing
+// (CRPD-relevant). Producer: native Complaint post-save hook (beneficiary-linked
+// only). Consumer: CareTimeline subscriber.
+
+const COMPLAINT_EVENTS = {
+  FILED: {
+    domain: 'complaints',
+    eventType: 'complaint.filed',
+    version: 1,
+    description: 'تم تقديم شكوى عن مستفيد — Complaint filed about a beneficiary',
+    payload: {
+      complaintId: 'string',
+      beneficiaryId: 'string',
+      type: 'string',
+      category: 'string',
+      subject: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -721,6 +748,7 @@ const DDD_CONTRACTS = {
   waitlist: WAITLIST_EVENTS,
   screenings: SCREENING_EVENTS,
   medication: MEDICATION_EVENTS,
+  complaints: COMPLAINT_EVENTS,
 };
 
 /**
@@ -752,6 +780,7 @@ module.exports = {
   WAITLIST_EVENTS,
   SCREENING_EVENTS,
   MEDICATION_EVENTS,
+  COMPLAINT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

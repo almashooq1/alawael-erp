@@ -163,4 +163,32 @@ complaintSchema.pre('save', async function () {
   }
 });
 
+// W984 — surface a complaint/grievance ABOUT a beneficiary on the unified-core
+// timeline at filing time (a grievance is a CRPD-relevant signal). Only fires
+// when the complaint is linked to a beneficiary (org/staff complaints have no
+// beneficiary timeline). Native pre-compile hooks per the proven W970 pattern;
+// create-only, guarded, fire-and-forget. Consumed by dddCrossModuleSubscribers.
+complaintSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+complaintSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return; // record once, at filing
+    if (!doc.beneficiaryId) return; // only beneficiary-linked complaints
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    Promise.resolve(
+      integrationBus.publish('complaints', 'complaint.filed', {
+        complaintId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        type: doc.type || 'complaint',
+        category: doc.category || '',
+        subject: doc.subject || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);

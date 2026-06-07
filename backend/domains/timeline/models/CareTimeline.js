@@ -77,6 +77,7 @@ const careTimelineSchema = new mongoose.Schema(
         'risk_flag_resolved',
         'quality_alert',
         'compliance_issue',
+        'complaint_filed', // W984
         'behavior_incident', // W970 — behavior subscriber (already on main) needs this enum value
         // Safety (W977)
         'seizure_event',

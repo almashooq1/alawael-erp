@@ -639,6 +639,36 @@ const DISCHARGE_EVENTS = {
     consumers: ['timeline', 'dashboards', 'notification'],
   },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Admission Events — أحداث القبول / التسجيل من قائمة الانتظار (W996)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Enrolling a waitlist applicant (WaitlistEntry.status → 'enrolled') is the
+// admission milestone that opens the beneficiary's episode of care. It MUST
+// appear at the head of the longitudinal timeline. Emitted once when status
+// reaches 'enrolled' via the model's existing pre-compile save middleware.
+
+const ADMISSION_EVENTS = {
+  ADMISSION_ENROLLED: {
+    domain: 'admissions',
+    eventType: 'admission.enrolled',
+    version: 1,
+    description:
+      'تم تسجيل متقدم من قائمة الانتظار كمستفيد فعلي — Waitlist applicant enrolled (admission)',
+    payload: {
+      waitlistEntryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      applicantName: 'string',
+      disabilityType: 'string',
+      enrolledAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -656,6 +686,7 @@ const DDD_CONTRACTS = {
   screenings: SCREENING_EVENTS,
   medications: MEDICATION_EVENTS,
   discharge: DISCHARGE_EVENTS,
+  admissions: ADMISSION_EVENTS,
 };
 
 /**
@@ -687,6 +718,7 @@ module.exports = {
   SCREENING_EVENTS,
   MEDICATION_EVENTS,
   DISCHARGE_EVENTS,
+  ADMISSION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

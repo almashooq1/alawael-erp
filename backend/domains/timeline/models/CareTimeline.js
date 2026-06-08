@@ -82,6 +82,8 @@ const careTimelineSchema = new mongoose.Schema(
         'medication_dose_recorded',
         // Discharge / end of service (W995 — unified-core linkage)
         'discharge_completed',
+        // Admission / enrollment from waitlist (W996 — unified-core linkage)
+        'admission_enrolled',
         // Family
         'family_contact',
         'family_meeting',

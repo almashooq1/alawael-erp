@@ -967,6 +967,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Waitlist enrollment (admission) → unified-core timeline (W996) ─
+  // Enrolling a waitlist applicant opens the beneficiary's episode of care.
+  // It lands at the head of the beneficiary timeline as an administrative
+  // success milestone.
+  subscribers.push({
+    name: 'admissions:enrolled → timeline:record',
+    pattern: 'admissions.admission.enrolled',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const name = event.payload.applicantName || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'admission_enrolled',
+            category: 'administrative',
+            severity: 'success',
+            title: `Admission — enrolled from waitlist${name ? `: ${name}` : ''}`,
+            title_ar: 'تم القبول والتسجيل من قائمة الانتظار',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Admission timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

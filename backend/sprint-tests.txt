@@ -747,5 +747,6 @@ __tests__/core-timeline-subscriber-shape-wave998.test.js
 __tests__/consent-core-linkage-wave1002.test.js
 __tests__/home-program-core-linkage-wave1003.test.js
 __tests__/crisis-core-linkage-wave1004.test.js
+__tests__/careteam-core-linkage-wave1005.test.js
 __tests__/legacy-hook-adapter-wave954.test.js
 __tests__/legacy-hook-no-hang-behavioral-wave954.test.js

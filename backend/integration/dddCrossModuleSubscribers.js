@@ -1542,6 +1542,84 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Care-team → Timeline: member added (W1005) ───────────────────
+  subscribers.push({
+    name: 'careteam:member_added → timeline:record',
+    pattern: 'careteam.careteam.member_added',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'team_member_added',
+            category: 'clinical',
+            severity: 'info',
+            title: 'Care-team member added',
+            title_ar: 'إضافة عضو لفريق الرعاية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Careteam-member-added timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Care-team → Timeline: member removed (W1005) ─────────────────
+  subscribers.push({
+    name: 'careteam:member_removed → timeline:record',
+    pattern: 'careteam.careteam.member_removed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'team_member_removed',
+            category: 'clinical',
+            severity: 'info',
+            title: 'Care-team member removed',
+            title_ar: 'إزالة عضو من فريق الرعاية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Careteam-member-removed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Care-team → Timeline: lead changed (W1005) ───────────────────
+  subscribers.push({
+    name: 'careteam:lead_changed → timeline:record',
+    pattern: 'careteam.careteam.lead_changed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'lead_changed',
+            category: 'clinical',
+            severity: 'info',
+            title: 'Lead therapist changed',
+            title_ar: 'تغيير المعالج الرئيسي',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Careteam-lead-changed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

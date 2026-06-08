@@ -58,6 +58,7 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Consent (PDPL/CRPD)** — obtained / revoked (W1002)
 - **Home programs** — assigned / completed across FamilyHomeProgram + HomeAssignment (W1003)
 - **Acute crises** — reported / resolved (W1004)
+- **Care team** — member added / removed + lead changed (W1005)
 - **(env-gated, W974)** HR (hire/terminate/leave/salary/transfer), Finance
   (invoice/payment/expense/payroll), Medical (record/therapy/prescription/risk),
   Attendance (check-in/out), Notification (delivery_failed)
@@ -119,6 +120,7 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Follow-up cases | `PostRehabCase` | `followup.case.completed` / `.lost` → `followup_completed` / `followup_lost` | ✅ **W987** |
 | Follow-up visits | `FollowUpVisit` | `followup.visit.attended` / `.missed` → `followup_visit` | ✅ **W992** |
 | Home programs | `FamilyHomeProgram` · `HomeAssignment` | `home_program.assigned` / `.completed` → `home_program_assigned` / `home_program_completed` (shared domain, `programType` discriminator) | ✅ **W1003** — filled the long-declared but producerless `home_program_assigned` enum |
+| Care team | `EpisodeOfCare.careTeam[]` (embedded) | `careteam.member_added` / `.member_removed` / `.lead_changed` → `team_member_added` / `team_member_removed` / `lead_changed` | ✅ **W1005** — embedded-array DIFF (post-init snapshot vs save); filled 3 producerless enum values |
 
 ### Tier 2 — family / CRM visibility
 | Domain | Model | Event | Status |
@@ -157,13 +159,13 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 17 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 18 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
   W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) ·
-  W1002 consent (PDPL/CRPD) · W1003 home programs · W1004 acute crises — all
-  merged to main). All shape-guarded by W998.
+  W1002 consent (PDPL/CRPD) · W1003 home programs · W1004 acute crises ·
+  W1005 care-team — all merged to main). All shape-guarded by W998.
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

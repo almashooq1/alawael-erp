@@ -72,6 +72,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'measurements', // W999 — measurement result approved → core timeline
   'insurance-claims', // W1000 — insurance claim paid → core timeline
   'invoices', // W1023 — invoice fully paid → core timeline
+  'teleconsultations', // W1024 — tele-rehab consultation completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -118,6 +119,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'measurement', // W999 — measurement.result_approved (MeasurementResult)
     'insurance_claim', // W1000 — insurance_claim.paid (InsuranceClaim)
     'invoice', // W1023 — invoice.paid (Invoice)
+    'teleconsultation', // W1024 — teleconsultation.completed (Teleconsultation)
   ])
 );
 

@@ -802,6 +802,32 @@ const INVOICE_EVENTS = {
     priority: PRIORITY.HIGH,
     consumers: ['timeline', 'dashboards', 'notification'],
   },
+};
+
+// ── W1024: Teleconsultation completed → unified core ─────────────────
+// A beneficiary's tele-rehab consultation reaching 'completed' is a clinical
+// milestone (remote session) on the longitudinal record.
+
+const TELECONSULTATION_EVENTS = {
+  TELECONSULTATION_COMPLETED: {
+    domain: 'teleconsultations',
+    eventType: 'teleconsultation.completed',
+    version: 1,
+    description: 'اكتملت جلسة تأهيل عن بُعد للمستفيد — Tele-rehab consultation completed',
+    payload: {
+      teleconsultationId: 'string',
+      consultationNumber: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      specialty: 'string',
+      type: 'string',
+      durationMinutes: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -825,6 +851,7 @@ const DDD_CONTRACTS = {
   measurements: MEASUREMENT_EVENTS,
   'insurance-claims': INSURANCE_CLAIM_EVENTS,
   invoices: INVOICE_EVENTS,
+  teleconsultations: TELECONSULTATION_EVENTS,
 };
 
 /**
@@ -862,6 +889,7 @@ module.exports = {
   MEASUREMENT_EVENTS,
   INSURANCE_CLAIM_EVENTS,
   INVOICE_EVENTS,
+  TELECONSULTATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

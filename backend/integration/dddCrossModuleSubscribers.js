@@ -1140,6 +1140,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Teleconsultation completed → unified-core timeline (W1024) ─────
+  // A beneficiary's tele-rehab consultation reaching 'completed' is a clinical
+  // milestone (remote session) on the longitudinal record.
+  subscribers.push({
+    name: 'teleconsultations:completed → timeline:record',
+    pattern: 'teleconsultations.teleconsultation.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const num = event.payload.consultationNumber
+            ? ` (${event.payload.consultationNumber})`
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'teleconsultation_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Tele-rehab consultation completed${num}`,
+            title_ar: 'اكتملت جلسة التأهيل عن بُعد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Teleconsultation timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -745,3 +745,5 @@ __tests__/pressure-injury-wave1011.test.js
 __tests__/pressure-injury-behavioral-wave1011.test.js
 __tests__/sleep-assessment-wave1020.test.js
 __tests__/sleep-assessment-behavioral-wave1020.test.js
+__tests__/orientation-mobility-wave1021.test.js
+__tests__/orientation-mobility-behavioral-wave1021.test.js

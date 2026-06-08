@@ -1217,6 +1217,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Follow-up → Timeline: visit attended (W992, engagement) ──────
+  subscribers.push({
+    name: 'followup:visit_attended → timeline:record',
+    pattern: 'followup.visit.attended',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'followup_visit',
+            category: 'clinical',
+            severity: 'success',
+            title: `Follow-up visit attended (${event.payload.visitType || ''})`.trim(),
+            title_ar: `حضور زيارة متابعة (${event.payload.visitType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Followup-visit-attended timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Follow-up → Timeline: visit missed (W992, disengagement) ─────
+  subscribers.push({
+    name: 'followup:visit_missed → timeline:record',
+    pattern: 'followup.visit.missed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'followup_visit',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Follow-up visit missed (${event.payload.visitType || ''})`.trim(),
+            title_ar: `تغيّب عن زيارة متابعة (${event.payload.visitType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Followup-visit-missed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -1259,6 +1259,8 @@ on:
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2501,6 +2503,8 @@ on:
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

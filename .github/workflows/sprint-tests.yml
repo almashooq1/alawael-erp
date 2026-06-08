@@ -1265,6 +1265,8 @@ on:
       - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referrals-core-linkage-wave997.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-timeline-subscriber-shape-wave998.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2513,6 +2515,8 @@ on:
       - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/referrals-core-linkage-wave997.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-timeline-subscriber-shape-wave998.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

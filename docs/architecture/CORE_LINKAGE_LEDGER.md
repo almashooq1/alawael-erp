@@ -81,6 +81,11 @@ catches these.**
    `ValidationError`, swallowed by the handler `try/catch` → **0 rows persisted**.
    Same class on `KPISnapshot` (`kpiId` string vs required ObjectId ref).
    _Fix pattern:_ a behavioral round-trip test that asserts a row actually lands.
+   _Now also guarded statically (W998):_
+   `core-timeline-subscriber-shape-wave998.test.js` asserts every
+   `eventType`/`category`/`severity` literal any subscriber writes is a member of
+   the `CareTimeline` enum, and that no subscriber writes a bare `beneficiary:`
+   key — turning the silent no-op into a build error for every future subscriber.
 3. **Orphan subscribers.** A timeline subscriber lands with a real producer but
    no contract in `dddEventContracts.js` → W389 red (careplan.created/updated,
    goal.created — fixed W970). _Fix pattern:_ ship the contract in the same PR.

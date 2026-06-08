@@ -1167,6 +1167,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Follow-up → Timeline: post-rehab case completed (W987) ───────
+  subscribers.push({
+    name: 'followup:case_completed → timeline:record',
+    pattern: 'followup.case.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'followup_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Post-rehab follow-up completed (${event.payload.caseNumber || ''})`.trim(),
+            title_ar: `اكتملت متابعة ما بعد التأهيل (${event.payload.caseNumber || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Followup-completed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Follow-up → Timeline: lost to follow-up (W987, disengagement) ─
+  subscribers.push({
+    name: 'followup:case_lost → timeline:record',
+    pattern: 'followup.case.lost',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'followup_lost',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Lost to post-rehab follow-up (${event.payload.caseNumber || ''})`.trim(),
+            title_ar: `فقدان متابعة ما بعد التأهيل (${event.payload.caseNumber || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Followup-lost timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

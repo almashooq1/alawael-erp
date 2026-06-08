@@ -814,6 +814,49 @@ const LIFECYCLE_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Follow-up Events — أحداث متابعة ما بعد التأهيل (W987)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Post-rehabilitation follow-up cases. A completed case = the beneficiary was
+// successfully followed through (positive); a lost-to-follow-up case = the
+// beneficiary disengaged (a clinically important warning). Producer: native
+// PostRehabCase post-save hook.
+
+const FOLLOWUP_EVENTS = {
+  CASE_COMPLETED: {
+    domain: 'followup',
+    eventType: 'case.completed',
+    version: 1,
+    description: 'اكتملت متابعة ما بعد التأهيل — Post-rehab follow-up case completed',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      caseNumber: 'string',
+      originalProgramName: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  CASE_LOST: {
+    domain: 'followup',
+    eventType: 'case.lost',
+    version: 1,
+    description: 'فقدان المتابعة — Beneficiary lost to post-rehab follow-up',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      caseNumber: 'string',
+      originalProgramName: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -835,6 +878,7 @@ const DDD_CONTRACTS = {
   complaints: COMPLAINT_EVENTS,
   family: FAMILY_EVENTS,
   lifecycle: LIFECYCLE_EVENTS,
+  followup: FOLLOWUP_EVENTS,
 };
 
 /**
@@ -869,6 +913,7 @@ module.exports = {
   COMPLAINT_EVENTS,
   FAMILY_EVENTS,
   LIFECYCLE_EVENTS,
+  FOLLOWUP_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

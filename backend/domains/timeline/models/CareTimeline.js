@@ -44,6 +44,8 @@ const careTimelineSchema = new mongoose.Schema(
         'screening_completed', // W980 — vision/hearing screening finalized
         'medication_administered', // W981
         'medication_not_given', // W981
+        'followup_completed', // W987 — post-rehab follow-up case completed
+        'followup_lost', // W987 — beneficiary lost to post-rehab follow-up
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',

@@ -1392,6 +1392,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Consent → Timeline: obtained (W1002, PDPL/CRPD) ───────────────
+  subscribers.push({
+    name: 'consent:obtained → timeline:record',
+    pattern: 'consent.consent.obtained',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'consent_obtained',
+            category: 'administrative',
+            severity: 'success',
+            title: `Consent obtained (${event.payload.consentType || ''})`.trim(),
+            title_ar: `منح موافقة (${event.payload.consentType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Consent-obtained timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Consent → Timeline: revoked (W1002, withdrawal — warning) ─────
+  subscribers.push({
+    name: 'consent:revoked → timeline:record',
+    pattern: 'consent.consent.revoked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'consent_revoked',
+            category: 'administrative',
+            severity: 'warning',
+            title: `Consent revoked (${event.payload.consentType || ''})`.trim(),
+            title_ar: `سحب موافقة (${event.payload.consentType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Consent-revoked timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

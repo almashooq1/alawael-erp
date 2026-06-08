@@ -55,6 +55,7 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Post-rehab follow-up** — case completed / lost-to-follow-up (W987) + visit attended / missed (W992)
 - **Insurance claims** — approved / rejected (W994)
 - **Referrals** — accepted / completed / rejected across all 4 referral subsystems (W997)
+- **Consent (PDPL/CRPD)** — obtained / revoked (W1002)
 - **(env-gated, W974)** HR (hire/terminate/leave/salary/transfer), Finance
   (invoice/payment/expense/payroll), Medical (record/therapy/prescription/risk),
   Attendance (check-in/out), Notification (delivery_failed)
@@ -121,6 +122,7 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Beneficiary status lifecycle | `Beneficiary` | `beneficiary.status_changed` → `status_changed` | ✅ **W982** |
 | Complaints (CRM) | `Complaint` | `complaint.filed` → `complaint_filed` | ✅ **W984** |
 | Family visits | `FamilyVisitRequest` | `family.visit.completed` / `.no_show` → `family_meeting` | ✅ **W985** |
+| Consent (PDPL/CRPD) | `Consent` | `consent.obtained` / `.revoked` → `consent_obtained` / `consent_revoked` | ✅ **W1002** — filled the long-declared but producerless `consent_obtained` enum |
 | Guardian-portal engagement | — | — | Open |
 
 ### Tier 3 — operational / governance
@@ -151,12 +153,12 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 14 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 15 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
-  W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) —
-  all merged to main).
+  W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) ·
+  W1002 consent (PDPL/CRPD) — all merged to main). All shape-guarded by W998.
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

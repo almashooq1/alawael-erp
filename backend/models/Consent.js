@@ -86,6 +86,45 @@ const consentSchema = new mongoose.Schema(
 // Primary lookup: latest records of this type for this beneficiary.
 consentSchema.index({ beneficiaryId: 1, type: 1, grantedAt: -1 });
 
+// W1002 — surface consent lifecycle on the unified-core timeline (PDPL/CRPD):
+// a consent OBTAINED (granted — care/data processing now permitted) and a consent
+// REVOKED (withdrawn — care/data access at risk). Fills the CareTimeline's
+// long-declared but producerless `consent_obtained` enum value + a new
+// `consent_revoked`. Native pre-compile hooks per the W970 pattern (the
+// modelEventBridge-is-dead workaround); guarded + fire-and-forget.
+//
+// W954-SAFE hook signatures: the global legacy-hook shim only wraps a hook whose
+// sole param is literally named `next`. `post('save', function (doc) {…})`,
+// `pre('save', function () {…})` (0-param) and `post('init', …)` all pass through
+// untouched — no save-hang. The append-only model has no `status` enum, so the
+// pre-save captures `isNew` (reliable create-detection, no double-fire on
+// re-save) and post-init captures the prior `revokedAt` (revoke transition).
+consentSchema.post('init', function () {
+  this.$__prevRevokedAt = this.revokedAt;
+});
+consentSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+consentSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    const base = {
+      consentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      consentType: doc.type,
+    };
+    if (doc.$__wasNew) {
+      Promise.resolve(integrationBus.publish('consent', 'consent.obtained', base)).catch(() => {});
+    } else if (!doc.$__prevRevokedAt && doc.revokedAt) {
+      Promise.resolve(integrationBus.publish('consent', 'consent.revoked', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 const Consent = mongoose.models.Consent || mongoose.model('Consent', consentSchema);
 
 module.exports = { Consent, CONSENT_TYPES, REQUIRED_TYPES };

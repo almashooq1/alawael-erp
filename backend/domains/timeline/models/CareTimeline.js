@@ -93,6 +93,7 @@ const careTimelineSchema = new mongoose.Schema(
         'family_contact',
         'family_meeting',
         'consent_obtained',
+        'consent_revoked', // W1002 — consent withdrawn (PDPL/CRPD)
         'home_program_assigned',
         // Communication
         'note_added',

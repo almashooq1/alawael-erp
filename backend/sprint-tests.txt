@@ -83,6 +83,7 @@ __tests__/beneficiary-lifecycle-side-effects-wave583.test.js
 __tests__/beneficiary-lifecycle-summarize-results-wave595.test.js
 __tests__/beneficiary-lifecycle-transition-behavioral-wave39.test.js
 __tests__/beneficiary-lifecycle-wave39.test.js
+__tests__/beneficiary-transfer-field-drift-wave990.test.js
 __tests__/beneficiary-voice-log-behavioral-wave460.test.js
 __tests__/beneficiary-voice-log-wave460.test.js
 __tests__/bi-analytics-branch-scope-wave656.test.js

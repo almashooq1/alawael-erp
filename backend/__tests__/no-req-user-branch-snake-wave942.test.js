@@ -52,9 +52,12 @@ const BASELINE = new Set([
   // 'routes/ai-analytics.routes.js' — FIXED W973: 7 filter sites → aiBranchFilter(req)
   //   (snake adapter, de-shadowed import); restricted scoped + ?branch_id spoof blocked;
   //   isolation test (branchId-only user + spoof case, 3/3).
-  // 'routes/beneficiary-transfers.routes.js' — DEFERRED: deeper field-drift (service writes
-  //   fromBranch, schema declares fromBranchId strict:true → stripped; docs persist no branch).
-  'routes/beneficiary-transfers.routes.js',
+  // 'routes/beneficiary-transfers.routes.js' — FIXED W990 (Direction A of the
+  //   field-drift finding): the underlying FK drift is resolved (schema FKs renamed
+  //   *Id→bare to match the writers, so transfers persist beneficiary+fromBranch+
+  //   toBranch), and the GET / list scope swapped req.user.branch →
+  //   effectiveBranchScope(req) ($or over fromBranch/toBranch). Proven by
+  //   beneficiary-transfer-field-drift-wave990.test.js (persistence + restricted/HQ scope).
   // 'routes/communication-module.routes.js' — FIXED W946 (InternalMessage +
   //   ContactDirectory CREATE stamps now use effectiveBranchScope(req)).
   // 'routes/files-module.routes.js' — FIXED W946 (both CREATE stamps now use

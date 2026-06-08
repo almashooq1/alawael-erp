@@ -207,8 +207,8 @@ class BranchEnhancedService {
       // تحديث الفرع في سجل المستفيد
       const Beneficiary = require('../../models/Beneficiary');
       await Beneficiary.findByIdAndUpdate(
-        transfer.beneficiaryId,
-        { branchId: transfer.toBranchId },
+        transfer.beneficiary,
+        { branchId: transfer.toBranch },
         { session }
       );
 
@@ -217,8 +217,8 @@ class BranchEnhancedService {
         const Appointment = require('../../models/Appointment');
         await Appointment.updateMany(
           {
-            beneficiaryId: transfer.beneficiaryId,
-            branchId: transfer.fromBranchId,
+            beneficiaryId: transfer.beneficiary,
+            branchId: transfer.fromBranch,
             date: { $gte: transfer.transferDate },
             status: 'scheduled',
           },
@@ -237,7 +237,7 @@ class BranchEnhancedService {
 
       await session.commitTransaction();
       logger.info(
-        `[Transfer] اكتمل نقل المستفيد ${transfer.beneficiaryId} إلى الفرع ${transfer.toBranchId}`
+        `[Transfer] اكتمل نقل المستفيد ${transfer.beneficiary} إلى الفرع ${transfer.toBranch}`
       );
     } catch (err) {
       await session.abortTransaction();

@@ -4,13 +4,18 @@ const mongoose = require('mongoose');
 
 const beneficiaryTransferSchema = new mongoose.Schema(
   {
-    beneficiaryId: {
+    // FK field names are BARE (beneficiary/fromBranch/toBranch) to match the
+    // service writer + both list routes, which were always bare. Direction A of
+    // docs/architecture/findings/beneficiary-transfer-field-drift-2026-06-06.md
+    // (schema→bare, non-breaking): the prior *Id schema names were silently
+    // stripped on write under strict:true → transfers persisted no FK at all.
+    beneficiary: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Beneficiary',
       required: true,
     },
-    fromBranchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
-    toBranchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    fromBranch: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    toBranch: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     reason: { type: String, required: true },
@@ -30,9 +35,9 @@ const beneficiaryTransferSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-beneficiaryTransferSchema.index({ beneficiaryId: 1, status: 1 });
-beneficiaryTransferSchema.index({ fromBranchId: 1, status: 1 });
-beneficiaryTransferSchema.index({ toBranchId: 1, status: 1 });
+beneficiaryTransferSchema.index({ beneficiary: 1, status: 1 });
+beneficiaryTransferSchema.index({ fromBranch: 1, status: 1 });
+beneficiaryTransferSchema.index({ toBranch: 1, status: 1 });
 
 module.exports =
   mongoose.models.BeneficiaryTransfer ||

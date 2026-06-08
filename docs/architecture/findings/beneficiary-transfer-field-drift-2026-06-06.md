@@ -1,13 +1,13 @@
 # Finding — BeneficiaryTransfer FK field-drift (broken feature + isolation gap)
 
-**Discovered:** 2026-06-06 (W973 M-naming sweep). **Deepened + corrected** 2026-06-06
-after attempting the fix.
-**Status:** 🔴 Real bug, **DEFERRED** — a two-directional reconcile across the
-model + ~4 files where each direction has a tradeoff (one is API-breaking). Needs
-an owner decision; NOT a safe autonomous change on a hot branch.
-**Severity:** the beneficiary-transfer feature persists **no FK data at all**
-(beneficiary + both branches), so the transfer is unlinked AND branch isolation is
-moot. One list route also over-restricts to empty.
+**Discovered:** 2026-06-06 (W973 M-naming sweep). **Deepened + corrected** 2026-06-06.
+**Resolved:** 2026-06-08 — **Direction A implemented as W990** (owner chose the
+non-breaking schema→bare reconcile).
+**Status:** ✅ FIXED (W990). Was: 🔴 real bug — the feature persisted **no FK data
+at all** (beneficiary + both branches), so every transfer was unlinked AND branch
+isolation was moot; the list route also leaked all branches via the never-populated
+`req.user.branch` scope (W942 class).
+**Severity (historical):** broken core feature + cross-branch read leak.
 
 ## The drift — THREE FK fields, not just branch
 
@@ -18,13 +18,14 @@ indexed). The `requestedBy`/`approvedBy` FKs match the code (no drift). But the
 `toBranch` → strict mode **strips them on write** (doc saved with none of the three
 FKs) and queries/populates hit non-existent paths.
 
-| Site                                                                                                                       | Field style | Effect                                                                                                                  |
-| -------------------------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `services/BeneficiaryService.js` (`initiateTransfer` create + activity reads + history populate, ~248-256/282/285/390-401) | **bare**    | create strips beneficiary/fromBranch/toBranch → doc has only requestedBy/transferDate/reason/status                     |
-| `routes/beneficiary-transfers.routes.js` (list query/$or-scope/populate, /:id, /complete)                                  | **bare**    | query/populate non-existent fields; the `$or` branch scope reads the never-populated `req.user.branch` too (W942 class) |
-| `routes/missing-models.routes.js:135-152` (GET /beneficiary-transfers)                                                     | **bare**    | same fields — **but its branch scope is CORRECT** (`req.branchScope.branchId`)                                          |
-| `routes/branch-enhanced.routes.js:58-59` (`.populate('fromBranchId'/'toBranchId')`)                                        | **`*Id`**   | schema-aligned, but docs have no value (writer wrote the stripped bare names) → null                                    |
-| `services/branches/branch-enhanced.service.js:175` (`requestTransfer` → `.create({...data})`)                              | passthrough | **dormant** — no live route caller found                                                                                |
+| Site                                                                                                                               | Field style | Effect                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `services/BeneficiaryService.js` (`initiateTransfer` create + activity reads + history populate, ~248-256/282/285/390-401)         | **bare**    | create strips beneficiary/fromBranch/toBranch → doc has only requestedBy/transferDate/reason/status                                                                                                                                                                                    |
+| `routes/beneficiary-transfers.routes.js` (list query/$or-scope/populate, /:id, /complete)                                          | **bare**    | query/populate non-existent fields; the `$or` branch scope reads the never-populated `req.user.branch` too (W942 class)                                                                                                                                                                |
+| `routes/missing-models.routes.js:135-152` (GET /beneficiary-transfers)                                                             | **bare**    | same fields — **but its branch scope is CORRECT** (`req.branchScope.branchId`)                                                                                                                                                                                                         |
+| `routes/branch-enhanced.routes.js:58-59` (`.populate('fromBranchId'/'toBranchId')`)                                                | **`*Id`**   | schema-aligned, but docs have no value (writer wrote the stripped bare names) → null                                                                                                                                                                                                   |
+| `services/branches/branch-enhanced.service.js:175` (`requestTransfer` → `.create({...data})`)                                      | passthrough | **dormant** — no live route caller found                                                                                                                                                                                                                                               |
+| `services/branches/branch-enhanced.service.js:198` (`completeTransfer` reads `transfer.beneficiaryId`/`toBranchId`/`fromBranchId`) | **`*Id`**   | **LIVE** via `branch-enhanced.routes.js:335` (mounted `features.registry.js:310`) — read `undefined` off bare docs → its Beneficiary branch-update + appointment-cancel were silent no-ops. Fixed to bare in W990 (the finding originally mislabelled this service as wholly dormant). |
 
 So the CODE is internally consistent on **bare** names at 3 of the 4 live sites;
 only `branch-enhanced.routes` + the schema use `*Id`. **NOT** a sibling-wide
@@ -70,14 +71,38 @@ PERSISTS the beneficiary + both branch FKs, and the list is branch-scoped
 (restricted → own only, HQ → all) across BOTH `beneficiary-transfers.routes` and
 `missing-models.routes`. Watch the unique-index race → `await Model.init()`.
 
+## Implemented — Direction A (W990, 2026-06-08)
+
+Owner chose Direction A (non-breaking). Changes (5 files):
+
+1. **`models/BeneficiaryTransfer.js`** — renamed the 3 FK fields `beneficiaryId→
+beneficiary`, `fromBranchId→fromBranch`, `toBranchId→toBranch` (kept
+   `ref:'Beneficiary'` so the W324 canonical-ref guard stays satisfied) + the 3
+   matching indexes. Now the bare writes persist under `strict:true`.
+2. **`routes/branch-enhanced.routes.js`** — the GET `/transfers` populate outlier:
+   `beneficiaryId/fromBranchId/toBranchId` → bare (it was the only schema-aligned
+   reader; now aligned to the renamed schema).
+3. **`routes/beneficiary-transfers.routes.js`** — the W942 scope fix: GET `/` `$or`
+   now uses `effectiveBranchScope(req)` instead of the never-populated
+   `req.user.branch` (restricted → own from/to only; cross-branch → all). The rest
+   of the file was already bare → now works end-to-end.
+4. **`services/branches/branch-enhanced.service.js`** — `completeTransfer` (LIVE,
+   not dormant) `*Id` reads → bare; its Beneficiary branch-update + appointment
+   cancel now actually fire.
+5. **`__tests__/beneficiary-transfer-field-drift-wave990.test.js`** — MongoMemoryServer:
+   persistence round-trip (the discriminator — `.create` with bare names THREW
+   pre-fix) + restricted/HQ list scope. 4 tests, all green. Enumerated in
+   `sprint-tests.txt`.
+
+`BeneficiaryService.js` + `routes/missing-models.routes.js` needed **no** change
+(already bare + correctly scoped). The API response shape is unchanged
+(`.populate('beneficiary')` → `response.beneficiary`, as before) → **no frontend
+change**.
+
 ## Existing data
 
-Every existing transfer doc has NONE of the three FKs (all stripped) → no migration
+Every pre-fix transfer doc has NONE of the three FKs (all stripped) → no migration
 is _required_ for correctness; a one-off backfill (from the beneficiary's branch /
 history) would resurrect old transfers for restricted users. Decide per volume.
-
-## Why deferred (not done autonomously)
-
-Two-directional, one direction API-breaking + cross-repo, a schema rename with
-index recreation, on a fast-moving shared branch with no integration coverage.
-Characterized here so the chosen direction is a mechanical PR.
+The old `*Id` indexes become unused after the rename (harmless; drop on a later
+maintenance pass).

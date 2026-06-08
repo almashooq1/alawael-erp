@@ -21,6 +21,7 @@
 
 const express = require('express');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -81,9 +82,14 @@ router.get('/', async (req, res) => {
     if (toBranch && isValidId(toBranch)) filter.toBranch = toBranch;
     if (beneficiaryId && isValidId(beneficiaryId)) filter.beneficiary = beneficiaryId;
 
-    // إذا لم يكن super-admin، يرى فقط طلبات فرعه
-    if (!req.user?.isSuperAdmin && req.user?.branch) {
-      filter.$or = [{ fromBranch: req.user.branch }, { toBranch: req.user.branch }];
+    // إذا كان المستخدم مقيّداً بفرع، يرى فقط طلبات فرعه (مُرسِلاً أو مستقبِلاً).
+    // W990/Direction-A: استخدم effectiveBranchScope (يقرأ req.branchScope الذي
+    // يضبطه requireBranchAccess). الحقل القديم البسيط (branch) على كائن المستخدم
+    // لا يُملأ أبداً (صنف W942) فكان يُسرّب كل الفروع للمستخدم المقيّد. القيمة null
+    // للأدوار عبر-الفروع → بلا تصفية.
+    const scope = effectiveBranchScope(req);
+    if (scope) {
+      filter.$or = [{ fromBranch: scope }, { toBranch: scope }];
     }
 
     const pageNum = Math.max(1, parseInt(page, 10));

@@ -937,6 +937,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Discharge plan completion → unified-core timeline (W995) ───────
+  // Completing a discharge plan is a terminal milestone of the episode of care.
+  // It lands on the beneficiary timeline as a clinical success so the full
+  // journey reads end-to-end.
+  subscribers.push({
+    name: 'discharge:completed → timeline:record',
+    pattern: 'discharge.discharge.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const dtype = event.payload.dischargeType || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'discharge_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Discharge completed${dtype ? ` (${dtype})` : ''}`,
+            title_ar: 'تم إنهاء الخدمة (خطة الخروج)',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Discharge timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

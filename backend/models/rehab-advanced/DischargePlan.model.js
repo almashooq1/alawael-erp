@@ -180,6 +180,42 @@ const dischargePlanSchema = new Schema(
 
 dischargePlanSchema.index({ beneficiary_id: 1, status: 1 });
 
+// ── Unified-core producer (W995) ────────────────────────────────────────────
+// Completing a discharge plan is a terminal milestone of the episode of care —
+// it MUST land on the per-beneficiary timeline (CareTimeline) so the journey
+// reads end-to-end. Native pre-compile hooks (schema middleware added AFTER
+// mongoose.model() never fires). Emit once when status reaches 'completed'
+// (new-as-completed OR …→completed). Literal `integrationBus.publish` keeps the
+// W389/W392 producer-coverage guards green.
+dischargePlanSchema.pre('save', function () {
+  this.$__dischargeCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+dischargePlanSchema.post('save', function (doc) {
+  try {
+    if (!this.$__dischargeCompletedNow) return; // only emit on completion
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiary_id) return; // no beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('discharge', 'discharge.completed', {
+        dischargePlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary_id),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        dischargeType: (doc.discharge_info && doc.discharge_info.discharge_type) || '',
+        actualDischargeDate:
+          (doc.discharge_info && doc.discharge_info.actual_discharge_date) || undefined,
+        overallProgressRating:
+          (doc.final_assessment && doc.final_assessment.overall_progress_rating) || undefined,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 const DischargePlan =
   mongoose.models.DischargePlan || mongoose.model('DischargePlan', dischargePlanSchema);
 

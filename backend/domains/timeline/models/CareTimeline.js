@@ -80,6 +80,8 @@ const careTimelineSchema = new mongoose.Schema(
         'screening_completed',
         // Medication administration (W994 — unified-core linkage)
         'medication_dose_recorded',
+        // Discharge / end of service (W995 — unified-core linkage)
+        'discharge_completed',
         // Family
         'family_contact',
         'family_meeting',

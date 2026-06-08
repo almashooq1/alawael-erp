@@ -65,6 +65,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'safety', // W992 — seizure / safeguarding / restraint clinical safety events → core timeline
   'screenings', // W993 — vision / hearing functional screenings → core timeline
   'medications', // W994 — MAR dose outcomes (administered/refused/missed/held) → core timeline
+  'discharge', // W995 — discharge plan completion → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -104,6 +105,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'restraint', // W992 — restraint.applied
     'screening', // W993 — screening.completed (vision + hearing)
     'medication', // W994 — medication.dose_recorded (MAR)
+    'discharge', // W995 — discharge.completed
   ])
 );
 

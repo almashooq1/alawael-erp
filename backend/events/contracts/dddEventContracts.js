@@ -610,6 +610,35 @@ const MEDICATION_EVENTS = {
     consumers: ['timeline', 'dashboards', 'notification'],
   },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Discharge Events — أحداث إنهاء الخدمة / الخروج (W995)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Completing a discharge plan (DischargePlan, rehab-advanced) is a terminal
+// milestone in the beneficiary's episode of care — it MUST appear on the
+// longitudinal timeline so the full journey reads end-to-end. Emitted when a
+// plan reaches status 'completed' via native pre-compile post-save hooks.
+
+const DISCHARGE_EVENTS = {
+  DISCHARGE_COMPLETED: {
+    domain: 'discharge',
+    eventType: 'discharge.completed',
+    version: 1,
+    description: 'تم إنهاء خدمة المستفيد (خطة الخروج) — Discharge plan completed',
+    payload: {
+      dischargePlanId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      dischargeType: 'string',
+      actualDischargeDate: 'date',
+      overallProgressRating: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -626,6 +655,7 @@ const DDD_CONTRACTS = {
   safety: SAFETY_EVENTS,
   screenings: SCREENING_EVENTS,
   medications: MEDICATION_EVENTS,
+  discharge: DISCHARGE_EVENTS,
 };
 
 /**
@@ -656,6 +686,7 @@ module.exports = {
   SAFETY_EVENTS,
   SCREENING_EVENTS,
   MEDICATION_EVENTS,
+  DISCHARGE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

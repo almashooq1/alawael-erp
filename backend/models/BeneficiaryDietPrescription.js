@@ -278,6 +278,34 @@ BeneficiaryDietPrescriptionSchema.virtual('isEnteral').get(function () {
 BeneficiaryDietPrescriptionSchema.set('toJSON', { virtuals: true });
 BeneficiaryDietPrescriptionSchema.set('toObject', { virtuals: true });
 
+// ── W1031: producer hooks — emit on diet-prescription activation → core ──
+// A prescription reaching 'active' (IDDSI / NPO / enteral plan now in effect)
+// is a clinical nutrition milestone. Non-callback hook style (W483-safe).
+BeneficiaryDietPrescriptionSchema.pre('save', function () {
+  this.$__dietActivatedNow = this.status === 'active' && (this.isNew || this.isModified('status'));
+});
+
+BeneficiaryDietPrescriptionSchema.post('save', function emitDietActivated(doc) {
+  if (!this.$__dietActivatedNow) return;
+  if (!doc.beneficiaryId) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('diet-prescription', 'diet_prescription.activated', {
+        prescriptionId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        npo: !!doc.npo,
+        foodIddsiLevel: doc.foodIddsiLevel ?? null,
+        drinkIddsiLevel: doc.drinkIddsiLevel ?? null,
+        prescribedAt: doc.prescribedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_err) {
+    // bus optional — never block persistence
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryDietPrescription ||
   mongoose.model('BeneficiaryDietPrescription', BeneficiaryDietPrescriptionSchema);

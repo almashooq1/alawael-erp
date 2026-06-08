@@ -967,6 +967,29 @@ const TRANSITION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1031 — Diet prescription lifecycle → unified core.
+const DIET_PRESCRIPTION_EVENTS = {
+  DIET_PRESCRIPTION_ACTIVATED: {
+    domain: 'diet-prescription',
+    eventType: 'diet_prescription.activated',
+    version: 1,
+    description:
+      'تفعيل وصفة تغذية — Diet prescription activated (IDDSI / NPO / enteral plan in effect)',
+    payload: {
+      prescriptionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      npo: 'boolean',
+      foodIddsiLevel: 'number',
+      drinkIddsiLevel: 'number',
+      prescribedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -994,6 +1017,7 @@ const DDD_CONTRACTS = {
   'assistive-devices': ASSISTIVE_DEVICE_EVENTS,
   respite: RESPITE_EVENTS,
   transition: TRANSITION_EVENTS,
+  'diet-prescription': DIET_PRESCRIPTION_EVENTS,
 };
 
 /**
@@ -1037,6 +1061,7 @@ module.exports = {
   ASSISTIVE_DEVICE_EVENTS,
   RESPITE_EVENTS,
   TRANSITION_EVENTS,
+  DIET_PRESCRIPTION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

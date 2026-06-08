@@ -746,3 +746,4 @@ __tests__/safeguarding-closure-core-linkage-wave1027.test.js
 __tests__/assistive-device-return-core-linkage-wave1028.test.js
 __tests__/respite-completion-core-linkage-wave1029.test.js
 __tests__/transition-completion-core-linkage-wave1030.test.js
+__tests__/diet-prescription-activation-core-linkage-wave1031.test.js

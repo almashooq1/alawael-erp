@@ -1343,6 +1343,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Diet prescription activated → unified-core timeline (W1031) ────
+  // A diet prescription reaching 'active' (IDDSI / NPO / enteral plan now in
+  // effect) is a clinical nutrition milestone on the beneficiary's record.
+  subscribers.push({
+    name: 'diet-prescription:activated → timeline:record',
+    pattern: 'diet-prescription.diet_prescription.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const mode = event.payload.npo
+            ? ' (NPO)'
+            : event.payload.foodIddsiLevel != null
+              ? ` (IDDSI ${event.payload.foodIddsiLevel})`
+              : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'diet_prescription_activated',
+            category: 'clinical',
+            severity: 'info',
+            title: `Diet prescription activated${mode}`,
+            title_ar: 'تم تفعيل وصفة التغذية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Diet prescription timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

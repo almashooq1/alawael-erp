@@ -53,6 +53,8 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Family visits** — completed / no-show (W985)
 - **Life-stage transitions** — transition plan completed / cancelled (W986)
 - **Post-rehab follow-up** — case completed / lost-to-follow-up (W987) + visit attended / missed (W992)
+- **Insurance claims** — approved / rejected (W994)
+- **Referrals** — accepted / completed / rejected across all 4 referral subsystems (W997)
 - **(env-gated, W974)** HR (hire/terminate/leave/salary/transfer), Finance
   (invoice/payment/expense/payroll), Medical (record/therapy/prescription/risk),
   Attendance (check-in/out), Notification (delivery_failed)
@@ -104,7 +106,7 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Screenings | `VisionScreening` · `HearingScreening` | `screening.completed` | ✅ **W980** |
 | Medication admin (MAR) | `MedicationAdministrationRecord` | `medication.administered` / `.not_given` | ✅ **W981** |
 | Discharge / transition | `TransitionPlan` | `lifecycle.transition.completed` / `.cancelled` → `care_transition` | ✅ **W986** |
-| Referrals | `TherapyReferral` / `CommunityReferral` / `medicalReferral` / `ReferralTracking` | `referral.made/accepted` | ⏳ **DEFERRED** — 4-model fragmentation; pick a canonical with domain input before wiring (`Referral` is the referring-ORG directory, not a beneficiary referral) |
+| Referrals | `TherapyReferral` · `CommunityReferral` · `MedicalReferral` · `Referral` (FHIR portal) | `referral.accepted` / `.completed` / `.rejected` → `referral` (shared domain, `referralType` discriminator) | ✅ **W997** — wired all 4 subsystems to ONE shared `referral` vocabulary instead of forcing a consolidation. `ReferralTracking` left out (orthogonal CRM analytics, not beneficiary-keyed). A future ADR may still consolidate the 4 models. |
 | Follow-up cases | `PostRehabCase` | `followup.case.completed` / `.lost` → `followup_completed` / `followup_lost` | ✅ **W987** |
 | Follow-up visits | `FollowUpVisit` | `followup.visit.attended` / `.missed` → `followup_visit` | ✅ **W992** |
 
@@ -144,11 +146,12 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 13 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 14 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
-  W992 follow-up visits · W994 insurance claims — all merged to main).
+  W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) —
+  all merged to main).
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

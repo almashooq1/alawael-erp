@@ -1317,6 +1317,81 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Referral → Timeline: accepted (W997, shared across 4 subsystems) ─
+  subscribers.push({
+    name: 'referral:accepted → timeline:record',
+    pattern: 'referral.referral.accepted',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'referral',
+            category: 'clinical',
+            severity: 'info',
+            title: `Referral accepted (${event.payload.referralType || ''})`.trim(),
+            title_ar: `قبول إحالة (${event.payload.referralType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Referral-accepted timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Referral → Timeline: completed (W997) ────────────────────────
+  subscribers.push({
+    name: 'referral:completed → timeline:record',
+    pattern: 'referral.referral.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'referral',
+            category: 'clinical',
+            severity: 'success',
+            title: `Referral completed (${event.payload.referralType || ''})`.trim(),
+            title_ar: `اكتمال إحالة (${event.payload.referralType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Referral-completed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Referral → Timeline: rejected/declined (W997, warning) ───────
+  subscribers.push({
+    name: 'referral:rejected → timeline:record',
+    pattern: 'referral.referral.rejected',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'referral',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Referral rejected (${event.payload.referralType || ''})`.trim(),
+            title_ar: `رفض إحالة (${event.payload.referralType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Referral-rejected timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

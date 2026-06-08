@@ -747,3 +747,5 @@ __tests__/sleep-assessment-wave1020.test.js
 __tests__/sleep-assessment-behavioral-wave1020.test.js
 __tests__/orientation-mobility-wave1021.test.js
 __tests__/orientation-mobility-behavioral-wave1021.test.js
+__tests__/driving-rehab-wave1022.test.js
+__tests__/driving-rehab-behavioral-wave1022.test.js

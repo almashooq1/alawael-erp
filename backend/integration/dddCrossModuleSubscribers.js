@@ -1492,6 +1492,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Crisis → Timeline: reported (W1004, acute crisis) ────────────
+  subscribers.push({
+    name: 'crisis:reported → timeline:record',
+    pattern: 'crisis.crisis.reported',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'crisis_reported',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Crisis reported (${event.payload.crisisType || ''}, ${event.payload.crisisSeverity || ''})`.trim(),
+            title_ar: `الإبلاغ عن أزمة (${event.payload.crisisType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Crisis-reported timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Crisis → Timeline: resolved (W1004) ──────────────────────────
+  subscribers.push({
+    name: 'crisis:resolved → timeline:record',
+    pattern: 'crisis.crisis.resolved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'crisis_resolved',
+            category: 'clinical',
+            severity: 'success',
+            title: `Crisis resolved (${event.payload.crisisType || ''})`.trim(),
+            title_ar: `حل أزمة (${event.payload.crisisType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Crisis-resolved timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

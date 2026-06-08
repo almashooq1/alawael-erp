@@ -797,6 +797,13 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       if (date_to) matchInvoice.invoice_date.$lte = new Date(date_to + 'T23:59:59.999Z');
     }
 
+    // W957 — branch-only scope (no date filter) for the sibling invoices
+    // aggregations below that previously matched raw `{ deleted_at: null }` and
+    // leaked every branch's revenue to a restricted caller. {} for an HQ caller
+    // (sees all — correct); { branch_id } for a restricted caller (fail-closed).
+    const branchOnly = {};
+    applyRawBranchScope(branchOnly, req, branch_id);
+
     const [
       revenueSummary,
       revenueByMonth,
@@ -830,7 +837,7 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       db
         .collection('invoices')
         .aggregate([
-          { $match: { deleted_at: null, status: 'paid' } },
+          { $match: { ...branchOnly, deleted_at: null, status: 'paid' } },
           {
             $group: {
               _id: { year: { $year: '$invoice_date' }, month: { $month: '$invoice_date' } },
@@ -852,6 +859,11 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
         .toArray(),
 
       // الإيرادات حسب طريقة الدفع
+      // W957 RESIDUAL cross-branch leak: the `finance_payments` (Payment model)
+      // collection has NO branch field (audit: NEEDS DENORMALIZATION), so it
+      // can't be branch-scoped here without first denormalizing branch_id onto
+      // Payment (W613-style migration). Tracked; do NOT add a branch_id match
+      // until the field exists (would fail-closed to empty for every caller).
       db
         .collection('finance_payments')
         .aggregate([
@@ -871,10 +883,13 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       // الفواتير حسب الحالة
       db
         .collection('invoices')
-        .aggregate([{ $match: { deleted_at: null } }, ...groupByField('status')])
+        .aggregate([{ $match: { ...branchOnly, deleted_at: null } }, ...groupByField('status')])
         .toArray(),
 
       // المصروفات حسب الفئة
+      // W957 RESIDUAL cross-branch leak: `expenses` (Expense model) has NO branch
+      // field (audit: NEEDS DENORMALIZATION) — same as finance_payments above.
+      // Blocked on a branch_id denormalization migration before it can be scoped.
       db
         .collection('expenses')
         .aggregate([
@@ -889,7 +904,7 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       db
         .collection('invoices')
         .aggregate([
-          { $match: { deleted_at: null, status: 'paid' } },
+          { $match: { ...branchOnly, deleted_at: null, status: 'paid' } },
           {
             $group: {
               _id: null,

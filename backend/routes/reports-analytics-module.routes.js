@@ -804,6 +804,13 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
     const branchOnly = {};
     applyRawBranchScope(branchOnly, req, branch_id);
 
+    // W958 — finance_payments + expenses carry NO branch field, so they can't be
+    // per-branch scoped. Until they're denormalized, restrict the cross-branch
+    // breakdowns to HQ / cross-branch callers (effectiveBranchScope === null) and
+    // return [] for a branch-restricted caller (fail-closed — closes the W957
+    // residual leak without emptying the data for the HQ callers who may see all).
+    const hqOnly = effectiveBranchScope(req) == null;
+
     const [
       revenueSummary,
       revenueByMonth,
@@ -859,26 +866,28 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
         .toArray(),
 
       // الإيرادات حسب طريقة الدفع
-      // W957 RESIDUAL cross-branch leak: the `finance_payments` (Payment model)
-      // collection has NO branch field (audit: NEEDS DENORMALIZATION), so it
-      // can't be branch-scoped here without first denormalizing branch_id onto
-      // Payment (W613-style migration). Tracked; do NOT add a branch_id match
-      // until the field exists (would fail-closed to empty for every caller).
-      db
-        .collection('finance_payments')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          {
-            $group: {
-              _id: '$payment_method',
-              total: { $sum: '$amount' },
-              count: { $sum: 1 },
-            },
-          },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, method: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
-        ])
-        .toArray(),
+      // W957/W958 cross-branch leak: `finance_payments` (Payment) has NO branch
+      // field (audit: NEEDS DENORMALIZATION), so it can't be per-branch scoped.
+      // W958 gates it to HQ callers (hqOnly) and returns [] for a restricted
+      // caller — closes the leak fail-closed. Restore full per-branch data once
+      // branch_id is denormalized onto Payment (W613-style migration).
+      hqOnly
+        ? db
+            .collection('finance_payments')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              {
+                $group: {
+                  _id: '$payment_method',
+                  total: { $sum: '$amount' },
+                  count: { $sum: 1 },
+                },
+              },
+              { $sort: { total: -1 } },
+              { $project: { _id: 0, method: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
+            ])
+            .toArray()
+        : Promise.resolve([]),
 
       // الفواتير حسب الحالة
       db
@@ -887,18 +896,21 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
         .toArray(),
 
       // المصروفات حسب الفئة
-      // W957 RESIDUAL cross-branch leak: `expenses` (Expense model) has NO branch
-      // field (audit: NEEDS DENORMALIZATION) — same as finance_payments above.
-      // Blocked on a branch_id denormalization migration before it can be scoped.
-      db
-        .collection('expenses')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
-        ])
-        .toArray(),
+      // W957/W958 cross-branch leak: `expenses` (Expense) has NO branch field
+      // (audit: NEEDS DENORMALIZATION) — same as finance_payments above. W958
+      // gates it to HQ callers and returns [] for a restricted caller. Restore
+      // per-branch data after a branch_id denormalization migration.
+      hqOnly
+        ? db
+            .collection('expenses')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
+              { $sort: { total: -1 } },
+              { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
+            ])
+            .toArray()
+        : Promise.resolve([]),
 
       // ملخص الضريبة (ZATCA)
       db

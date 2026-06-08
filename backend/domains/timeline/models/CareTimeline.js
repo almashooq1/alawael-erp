@@ -88,6 +88,8 @@ const careTimelineSchema = new mongoose.Schema(
         'referral_converted',
         // Medical referral completion (W1001 — unified-core linkage)
         'medical_referral_completed',
+        // Measurement/assessment result approved (W1022 — unified-core linkage)
+        'measurement_result_approved',
         // Family
         'family_contact',
         'family_meeting',

@@ -340,6 +340,39 @@ MeasurementResultSchema.index({ status: 1 });
 MeasurementResultSchema.index({ overallLevel: 1 });
 MeasurementResultSchema.index({ 'linkedPrograms.programId': 1 });
 
+// ─── W1022: Measurement result APPROVED → unified core ──────────────────
+// A standardized measurement/assessment result reaching APPROVED status is a
+// clinical milestone on the beneficiary's longitudinal record. Native model
+// hooks (sync, no-next — matching the W994…W998 linkage style) publish the
+// canonical event exactly once on the transition into APPROVED. Subscribers
+// in integration/dddCrossModuleSubscribers.js project it onto the CareTimeline.
+MeasurementResultSchema.pre('save', function flagMeasurementApproved() {
+  this.$__measurementApprovedNow =
+    this.status === 'APPROVED' && (this.isNew || this.isModified('status'));
+});
+
+MeasurementResultSchema.post('save', function publishMeasurementApproved(doc) {
+  try {
+    if (!this.$__measurementApprovedNow) return;
+    if (!doc.beneficiaryId) return;
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('measurements', 'measurement.result_approved', {
+      resultId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      measurementId: doc.measurementId ? String(doc.measurementId) : null,
+      overallLevel: doc.overallLevel || null,
+      rawScore: typeof doc.rawScore === 'number' ? doc.rawScore : null,
+      standardScore: typeof doc.standardScore === 'number' ? doc.standardScore : null,
+      dateAdministrated: doc.dateAdministrated || null,
+      approvedAt:
+        (doc.approvalInfo && doc.approvalInfo.approvalDate) || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a projection failure */
+  }
+});
+
 const MeasurementResult =
   mongoose.models.MeasurementResult || mongoose.model('MeasurementResult', MeasurementResultSchema);
 

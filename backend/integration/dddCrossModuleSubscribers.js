@@ -1056,6 +1056,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Measurement result approved → unified-core timeline (W1022) ─────
+  // A standardized measurement/assessment result reaching APPROVED is a
+  // clinical milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'measurements:approved → timeline:record',
+    pattern: 'measurements.measurement.result_approved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const lvl = event.payload.overallLevel ? ` — ${event.payload.overallLevel}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'measurement_result_approved',
+            category: 'clinical',
+            severity: 'success',
+            title: `Measurement result approved${lvl}`,
+            title_ar: 'تم اعتماد نتيجة القياس',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Measurement timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

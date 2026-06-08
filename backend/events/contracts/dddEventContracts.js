@@ -727,6 +727,34 @@ const MEDICAL_REFERRAL_EVENTS = {
 };
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ── W1022: Measurement result approved → unified core ────────────────────
+// A standardized measurement/assessment result reaching APPROVED is a clinical
+// milestone; the longitudinal record must carry the finalized score + level.
+
+const MEASUREMENT_EVENTS = {
+  MEASUREMENT_RESULT_APPROVED: {
+    domain: 'measurements',
+    eventType: 'measurement.result_approved',
+    version: 1,
+    description:
+      'تم اعتماد نتيجة قياس/تقييم معياري — Measurement result approved (finalized score)',
+    payload: {
+      resultId: 'string',
+      beneficiaryId: 'string',
+      measurementId: 'string',
+      overallLevel: 'string',
+      rawScore: 'number',
+      standardScore: 'number',
+      dateAdministrated: 'date',
+      approvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -745,6 +773,7 @@ const DDD_CONTRACTS = {
   admissions: ADMISSION_EVENTS,
   referrals: REFERRAL_EVENTS,
   'medical-referrals': MEDICAL_REFERRAL_EVENTS,
+  measurements: MEASUREMENT_EVENTS,
 };
 
 /**
@@ -779,6 +808,7 @@ module.exports = {
   ADMISSION_EVENTS,
   REFERRAL_EVENTS,
   MEDICAL_REFERRAL_EVENTS,
+  MEASUREMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

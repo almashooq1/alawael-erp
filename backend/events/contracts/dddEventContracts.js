@@ -1000,6 +1000,46 @@ const REFERRAL_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Consent Events — أحداث الموافقات (W1002, PDPL/CRPD)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Consent lifecycle on the beneficiary timeline. obtained = care/data processing
+// permitted (positive); revoked = consent withdrawn (care/data access at risk —
+// a compliance-significant warning). Producer: native Consent post-save hook.
+
+const CONSENT_EVENTS = {
+  OBTAINED: {
+    domain: 'consent',
+    eventType: 'consent.obtained',
+    version: 1,
+    description: 'منح موافقة — Consent granted for the beneficiary',
+    payload: {
+      consentId: 'string',
+      beneficiaryId: 'string',
+      consentType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  REVOKED: {
+    domain: 'consent',
+    eventType: 'consent.revoked',
+    version: 1,
+    description: 'سحب موافقة — Consent revoked / withdrawn',
+    payload: {
+      consentId: 'string',
+      beneficiaryId: 'string',
+      consentType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1024,6 +1064,7 @@ const DDD_CONTRACTS = {
   followup: FOLLOWUP_EVENTS,
   insurance: INSURANCE_EVENTS,
   referral: REFERRAL_EVENTS,
+  consent: CONSENT_EVENTS,
 };
 
 /**
@@ -1061,6 +1102,7 @@ module.exports = {
   FOLLOWUP_EVENTS,
   INSURANCE_EVENTS,
   REFERRAL_EVENTS,
+  CONSENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

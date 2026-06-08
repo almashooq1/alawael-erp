@@ -270,6 +270,37 @@ SafeguardingConcernSchema.virtual('isCriticalAwaitingSupervisor').get(function (
 SafeguardingConcernSchema.set('toJSON', { virtuals: true });
 SafeguardingConcernSchema.set('toObject', { virtuals: true });
 
+// W992 — surface a new safeguarding concern on the subject beneficiary's unified
+// timeline. Only concerns ABOUT a beneficiary (subjectKind='beneficiary') land
+// on a timeline; staff/other-subject concerns have no beneficiary timeline to
+// attach to. Pre-compile native hooks (the W970 mechanism) — fire-and-forget +
+// fully guarded. The literal `integrationBus.publish` keeps the W389/W392
+// producer-coverage guards satisfied.
+SafeguardingConcernSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+
+SafeguardingConcernSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return; // only emit when a new concern is raised
+    if (doc.subjectKind !== 'beneficiary' || !doc.subjectBeneficiaryId) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+
+    Promise.resolve(
+      integrationBus.publish('safety', 'safeguarding.concern_raised', {
+        concernId: String(doc._id),
+        beneficiaryId: String(doc.subjectBeneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        category: doc.category || '',
+        severity: doc.severity || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.SafeguardingConcern ||
   mongoose.model('SafeguardingConcern', SafeguardingConcernSchema);

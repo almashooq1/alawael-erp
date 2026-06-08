@@ -62,6 +62,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'behavior',
   'ai-recommendations',
   'appointments', // W970 — appointment booking/cancellation/no-show → core timeline
+  'safety', // W992 — seizure / safeguarding / restraint clinical safety events → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -96,6 +97,9 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'ai',
     'recommendation',
     'appointment', // W970 — appointment.booked / .cancelled / .no_show
+    'seizure', // W992 — seizure.recorded
+    'safeguarding', // W992 — safeguarding.concern_raised
+    'restraint', // W992 — restraint.applied
   ])
 );
 

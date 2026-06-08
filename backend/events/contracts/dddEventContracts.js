@@ -476,6 +476,77 @@ const APPOINTMENT_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Safety Events — أحداث السلامة (W992)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Tier-1 clinical safety events from the Core Linkage Ledger roadmap. These were
+// standalone CRUD ledgers (W356 SeizureEvent / W357 SafeguardingConcern / W193b
+// RestraintSeclusionEvent) that never surfaced on the per-beneficiary unified
+// timeline — so a seizure, a safeguarding concern, or a restraint application was
+// invisible to the care team's longitudinal view. W992 wires them via native
+// pre-compile post-save hooks (the W970 mechanism — the generic modelEventBridge
+// produces nothing for these because its hooks attach post-compile). Consumers:
+// the CareTimeline subscribers in dddCrossModuleSubscribers.js.
+
+const SAFETY_EVENTS = {
+  SEIZURE_RECORDED: {
+    domain: 'safety',
+    eventType: 'seizure.recorded',
+    version: 1,
+    description: 'تم تسجيل نوبة صرعية — Seizure event recorded',
+    payload: {
+      seizureEventId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      seizureType: 'string',
+      severity: 'string',
+      durationSeconds: 'number',
+      statusEpilepticus: 'boolean',
+      date: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  SAFEGUARDING_CONCERN_RAISED: {
+    domain: 'safety',
+    eventType: 'safeguarding.concern_raised',
+    version: 1,
+    description: 'تم رفع بلاغ حماية — Safeguarding concern raised',
+    payload: {
+      concernId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      category: 'string',
+      severity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.CRITICAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  RESTRAINT_APPLIED: {
+    domain: 'safety',
+    eventType: 'restraint.applied',
+    version: 1,
+    description: 'تم تطبيق تقييد/عزل — Restraint or seclusion applied',
+    payload: {
+      restraintEventId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      restraintType: 'string',
+      techniqueUsed: 'string',
+      durationMinutes: 'number',
+      date: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -490,6 +561,7 @@ const DDD_CONTRACTS = {
   behavior: BEHAVIOR_EVENTS,
   'ai-recommendations': AI_RECOMMENDATION_EVENTS,
   appointments: APPOINTMENT_EVENTS,
+  safety: SAFETY_EVENTS,
 };
 
 /**
@@ -517,6 +589,7 @@ module.exports = {
   BEHAVIOR_EVENTS,
   AI_RECOMMENDATION_EVENTS,
   APPOINTMENT_EVENTS,
+  SAFETY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

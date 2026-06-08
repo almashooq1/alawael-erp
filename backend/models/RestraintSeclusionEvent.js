@@ -155,6 +155,38 @@ RestraintSeclusionEventSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W992 — record a restraint/seclusion application on the beneficiary's unified
+// timeline. Restraint is a staff-applied, high-scrutiny intervention (CBAHI +
+// MOHRSD mandated); the care team must see it longitudinally. Pre-compile native
+// hooks (the W970 mechanism) — fire-and-forget + fully guarded. The literal
+// `integrationBus.publish` keeps the W389/W392 producer-coverage guards satisfied.
+RestraintSeclusionEventSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+
+RestraintSeclusionEventSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return; // only emit when a new restraint event is opened
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return; // no beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('safety', 'restraint.applied', {
+        restraintEventId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        restraintType: doc.type || '',
+        techniqueUsed: doc.techniqueUsed || '',
+        durationMinutes: typeof doc.durationMinutes === 'number' ? doc.durationMinutes : null,
+        date: doc.date,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.RestraintSeclusionEvent ||
   mongoose.model('RestraintSeclusionEvent', RestraintSeclusionEventSchema);

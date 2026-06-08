@@ -206,6 +206,42 @@ SeizureEventSchema.virtual('isStatusEpilepticusCandidate').get(function () {
 SeizureEventSchema.set('toJSON', { virtuals: true });
 SeizureEventSchema.set('toObject', { virtuals: true });
 
+// W992 — link a newly recorded seizure into the unified core (CareTimeline +
+// dashboards). A seizure (especially a status-epilepticus candidate ≥ 5 min) is
+// a clinical event the care team must see on the per-beneficiary timeline. These
+// hooks live IN the model file (pre-compile) on purpose: schema middleware added
+// AFTER mongoose.model() compilation never fires — which is why the generic
+// modelEventBridge produced nothing here. Fire-and-forget + fully guarded so a
+// bus hiccup never fails or slows a save. The literal `integrationBus.publish`
+// call keeps the W389/W392 producer-coverage guards satisfied.
+SeizureEventSchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+
+SeizureEventSchema.post('save', function (doc) {
+  try {
+    if (!this.$__wasNew) return; // only emit when a new seizure is recorded
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return; // no beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('safety', 'seizure.recorded', {
+        seizureEventId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        seizureType: doc.type || '',
+        severity: doc.severity || '',
+        durationSeconds: typeof doc.durationSeconds === 'number' ? doc.durationSeconds : null,
+        statusEpilepticus: !!doc.isStatusEpilepticusCandidate,
+        date: doc.date,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports = mongoose.models.SeizureEvent || mongoose.model('SeizureEvent', SeizureEventSchema);
 
 module.exports.TYPES = TYPES;

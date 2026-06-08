@@ -59,6 +59,11 @@ module.exports = function registerFeatureRoutes(
   );
   const visionScreeningRoutes = safeRequire('../routes/vision-screening.routes');
   const hearingScreeningRoutes = safeRequire('../routes/hearing-screening.routes');
+  const fallsRiskAssessmentRoutes = safeRequire('../routes/falls-risk-assessment.routes');
+  const pressureInjuryRoutes = safeRequire('../routes/pressure-injury.routes');
+  const sleepAssessmentRoutes = safeRequire('../routes/sleep-assessment.routes');
+  const orientationMobilityRoutes = safeRequire('../routes/orientation-mobility.routes');
+  const drivingRehabRoutes = safeRequire('../routes/driving-rehab.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -179,6 +184,21 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'vision-screening', visionScreeningRoutes, authenticate);
   // Wave 724: Hearing screening (فحص السمع) — functional hearing + WHO grade + loss type + ENT/audiology referral
   dualMountAuth(app, 'hearing-screening', hearingScreeningRoutes, authenticate);
+  // Wave 1010: Falls-risk assessment + prevention (تقييم خطر السقوط والوقاية) — Morse/Humpty-Dumpty/STRATIFY
+  // tool-based screen → risk level → prevention plan → re-assessment cadence; CBAHI/JCI mandatory
+  dualMountAuth(app, 'falls-risk-assessment', fallsRiskAssessmentRoutes, authenticate);
+  // Wave 1011: Pressure-injury / skin-integrity register (سجل إصابات الضغط والعناية بالجلد) — NPIAP
+  // staging + Braden risk + offloading plan + healing trajectory + HAPI origin; CBAHI/JCI mandatory
+  dualMountAuth(app, 'pressure-injury', pressureInjuryRoutes, authenticate);
+  // Wave 1020: Sleep assessment + hygiene plan (تقييم النوم وبرنامج نظافة النوم) — CSHQ/SDSC/BEARS
+  // screen → severity → behavioral plan → OSA-suspicion referral gate → re-assessment cadence
+  dualMountAuth(app, 'sleep-assessment', sleepAssessmentRoutes, authenticate);
+  // Wave 1021: Orientation & Mobility assessment (تقييم التوجّه والحركة) — O&M skill-domain
+  // proficiency → independence level → training plan → re-assessment; blind/low-vision/deafblind
+  dualMountAuth(app, 'orientation-mobility', orientationMobilityRoutes, authenticate);
+  // Wave 1022: Driving-rehab / fitness-to-drive (تقييم تأهيل القيادة) — pre-driving clinical screen
+  // → readiness → adaptive-equipment + on-road → fitness recommendation; CDRS workflow
+  dualMountAuth(app, 'driving-rehab', drivingRehabRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

@@ -1278,6 +1278,17 @@ on:
       - 'backend/__tests__/crisis-core-linkage-wave1004.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/careteam-core-linkage-wave1005.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
+      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
+      - 'backend/__tests__/pressure-injury-wave1011.test.js'
+      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
+      - 'backend/__tests__/sleep-assessment-wave1020.test.js'
+      - 'backend/__tests__/sleep-assessment-behavioral-wave1020.test.js'
+      - 'backend/__tests__/orientation-mobility-wave1021.test.js'
+      - 'backend/__tests__/orientation-mobility-behavioral-wave1021.test.js'
+      - 'backend/__tests__/driving-rehab-wave1022.test.js'
+      - 'backend/__tests__/driving-rehab-behavioral-wave1022.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2539,6 +2550,17 @@ on:
       - 'backend/__tests__/crisis-core-linkage-wave1004.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/careteam-core-linkage-wave1005.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
+      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
+      - 'backend/__tests__/pressure-injury-wave1011.test.js'
+      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
+      - 'backend/__tests__/sleep-assessment-wave1020.test.js'
+      - 'backend/__tests__/sleep-assessment-behavioral-wave1020.test.js'
+      - 'backend/__tests__/orientation-mobility-wave1021.test.js'
+      - 'backend/__tests__/orientation-mobility-behavioral-wave1021.test.js'
+      - 'backend/__tests__/driving-rehab-wave1022.test.js'
+      - 'backend/__tests__/driving-rehab-behavioral-wave1022.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

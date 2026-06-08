@@ -19,8 +19,10 @@
  *   • (+ W370 facility/diet additions, env-gated)
  *   • ENABLE_ASSESSMENT_OVERDUE_SWEEPER     — daily 04:00, emit assessment.overdue per ClinicalAssessment past dueDate (W383)
  *   • ENABLE_CAREGIVER_SUPPORT_OVERDUE_SWEEPER — daily 10:30, CaregiverSupportProgram active past targetCompletionDate (W393)
+ *   • ENABLE_FALLS_REASSESSMENT_SWEEPER     — daily 10:45, finalized high-risk FallsRiskAssessment past nextReviewDue (W1010/W1012)
+ *   • ENABLE_PRESSURE_INJURY_REASSESSMENT_SWEEPER — daily 11:00, open PressureInjuryRecord past nextReviewDue (W1011/W1012)
  *
- * Twelve of thirteen sweepers ONLY query + log (no state mutation). The
+ * Fourteen of fifteen sweepers ONLY query + log (no state mutation). The
  * exception is RESPITE_NOSHOW which auto-flips status approved/confirmed
  * → no_show when the booking startAt is more than 24h in the past with
  * no check-in — operationally safer than leaving the slot blocked.
@@ -580,10 +582,88 @@ function wireClinicalSweepers(app, deps = {}) {
     );
   }
 
+  // ── 14) Falls-risk reassessment-overdue flagger (W1012 / read-only) ──
+  // High-risk finalized falls assessments whose nextReviewDue has lapsed.
+  // Pure query + log — a high-risk beneficiary must never silently drift
+  // past their supervision-review cadence.
+  if (process.env.ENABLE_FALLS_REASSESSMENT_SWEEPER === 'true') {
+    cron.schedule(
+      '45 10 * * *',
+      async () => {
+        try {
+          const Falls = safeModel('FallsRiskAssessment');
+          if (!Falls) return;
+          const now = new Date();
+          const overdue = await Falls.find({
+            status: 'finalized',
+            riskLevel: 'high',
+            nextReviewDue: { $ne: null, $lt: now },
+          })
+            .select('_id beneficiaryId branchId riskLevel riskScore nextReviewDue')
+            .limit(500)
+            .lean();
+          logger.info(
+            `[falls-risk] reassessment sweep: ${overdue.length} high-risk assessments past nextReviewDue`
+          );
+          for (const a of overdue.slice(0, 20)) {
+            logger.warn(
+              `[falls-risk] reassessment overdue id=${a._id} beneficiary=${a.beneficiaryId} branch=${a.branchId} score=${a.riskScore} due=${a.nextReviewDue}`
+            );
+          }
+        } catch (err) {
+          logger.error('[falls-risk] reassessment sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info(
+      '[startup] W1010 falls-risk reassessment sweeper scheduled (daily 10:45 Asia/Riyadh)'
+    );
+  }
+
+  // ── 15) Pressure-injury reassessment-overdue flagger (W1012 / read-only) ──
+  // Open pressure injuries (active/monitoring/healing) whose nextReviewDue
+  // has lapsed. Pure query + log — an open wound must not miss its review.
+  if (process.env.ENABLE_PRESSURE_INJURY_REASSESSMENT_SWEEPER === 'true') {
+    cron.schedule(
+      '0 11 * * *',
+      async () => {
+        try {
+          const Injury = safeModel('PressureInjuryRecord');
+          if (!Injury) return;
+          const now = new Date();
+          const overdue = await Injury.find({
+            status: { $in: ['active', 'monitoring', 'healing'] },
+            nextReviewDue: { $ne: null, $lt: now },
+          })
+            .select('_id beneficiaryId branchId stage bodySite origin nextReviewDue')
+            .limit(500)
+            .lean();
+          logger.info(
+            `[pressure-injury] reassessment sweep: ${overdue.length} open injuries past nextReviewDue`
+          );
+          for (const w of overdue.slice(0, 20)) {
+            logger.warn(
+              `[pressure-injury] reassessment overdue id=${w._id} beneficiary=${w.beneficiaryId} branch=${w.branchId} stage=${w.stage} site=${w.bodySite} due=${w.nextReviewDue}`
+            );
+          }
+        } catch (err) {
+          logger.error('[pressure-injury] reassessment sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info(
+      '[startup] W1011 pressure-injury reassessment sweeper scheduled (daily 11:00 Asia/Riyadh)'
+    );
+  }
+
   if (scheduledCount === 0) {
-    logger.info('[startup] clinical sweepers: all 13 disabled (no ENABLE_*_SWEEPER=true)');
+    logger.info('[startup] clinical sweepers: all 15 disabled (no ENABLE_*_SWEEPER=true)');
   } else {
-    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/13 enabled`);
+    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/15 enabled`);
   }
 }
 

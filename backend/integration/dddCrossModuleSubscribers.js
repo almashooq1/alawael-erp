@@ -1067,6 +1067,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Family → Timeline: Visit completed (W985, engagement) ────────
+  subscribers.push({
+    name: 'family:visit_completed → timeline:record',
+    pattern: 'family.visit.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'family_meeting',
+            category: 'family',
+            severity: 'success',
+            title: `Family visit completed (${event.payload.relationship || ''})`.trim(),
+            title_ar: `زيارة أسرية مكتملة (${event.payload.relationship || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Family-visit-completed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Family → Timeline: Visit no-show (W985, disengagement) ───────
+  subscribers.push({
+    name: 'family:visit_no_show → timeline:record',
+    pattern: 'family.visit.no_show',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'family_meeting',
+            category: 'family',
+            severity: 'warning',
+            title: `Family visit no-show (${event.payload.relationship || ''})`.trim(),
+            title_ar: `تغيّب الأسرة عن زيارة (${event.payload.relationship || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Family-visit-no-show timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -92,6 +92,37 @@ FamilyVisitRequestSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W985 — surface family engagement on the unified-core timeline: a completed
+// family visit (positive engagement) and a no-show (disengagement signal).
+// Fires on the status flip to completed / no_show (once). Native pre-compile
+// hooks per the proven W970 pattern; guarded, fire-and-forget. Consumed by
+// dddCrossModuleSubscribers → CareTimeline (reuses the existing family_meeting
+// eventType, severity by outcome).
+FamilyVisitRequestSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+FamilyVisitRequestSchema.post('save', function (doc) {
+  try {
+    if (doc.status === this.$__prevStatus) return; // no status change
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    const base = {
+      visitId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      relationship: doc.relationship || '',
+      requestedDate: doc.requestedDate,
+    };
+    if (doc.status === 'completed') {
+      Promise.resolve(integrationBus.publish('family', 'visit.completed', base)).catch(() => {});
+    } else if (doc.status === 'no_show') {
+      Promise.resolve(integrationBus.publish('family', 'visit.no_show', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.FamilyVisitRequest ||
   mongoose.model('FamilyVisitRequest', FamilyVisitRequestSchema);

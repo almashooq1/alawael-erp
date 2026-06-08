@@ -730,6 +730,47 @@ const COMPLAINT_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Family Events — أحداث الأسرة (W985)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Family engagement on the timeline: a completed visit (positive) and a no-show
+// (disengagement signal). Producer: native FamilyVisitRequest post-save hook.
+
+const FAMILY_EVENTS = {
+  VISIT_COMPLETED: {
+    domain: 'family',
+    eventType: 'visit.completed',
+    version: 1,
+    description: 'تمت زيارة أسرية — Family visit completed',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      relationship: 'string',
+      requestedDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  VISIT_NO_SHOW: {
+    domain: 'family',
+    eventType: 'visit.no_show',
+    version: 1,
+    description: 'تغيّبت الأسرة عن زيارة — Family visit no-show',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      relationship: 'string',
+      requestedDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -749,6 +790,7 @@ const DDD_CONTRACTS = {
   screenings: SCREENING_EVENTS,
   medication: MEDICATION_EVENTS,
   complaints: COMPLAINT_EVENTS,
+  family: FAMILY_EVENTS,
 };
 
 /**
@@ -781,6 +823,7 @@ module.exports = {
   SCREENING_EVENTS,
   MEDICATION_EVENTS,
   COMPLAINT_EVENTS,
+  FAMILY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

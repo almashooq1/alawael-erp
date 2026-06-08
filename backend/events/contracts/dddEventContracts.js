@@ -902,6 +902,28 @@ const FAMILY_COUNSELLING_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1028 — Assistive-device loan lifecycle → unified core.
+const ASSISTIVE_DEVICE_EVENTS = {
+  ASSISTIVE_DEVICE_RETURNED: {
+    domain: 'assistive-devices',
+    eventType: 'assistive_device.returned',
+    version: 1,
+    description: 'تم إرجاع جهاز مساعد — Assistive device returned by a beneficiary (loan closed)',
+    payload: {
+      deviceId: 'string',
+      assetTag: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      category: 'string',
+      conditionOnReturn: 'string',
+      returnedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -926,6 +948,7 @@ const DDD_CONTRACTS = {
   teleconsultations: TELECONSULTATION_EVENTS,
   'home-visits': HOME_VISIT_EVENTS,
   'family-counselling': FAMILY_COUNSELLING_EVENTS,
+  'assistive-devices': ASSISTIVE_DEVICE_EVENTS,
 };
 
 /**
@@ -966,6 +989,7 @@ module.exports = {
   TELECONSULTATION_EVENTS,
   HOME_VISIT_EVENTS,
   FAMILY_COUNSELLING_EVENTS,
+  ASSISTIVE_DEVICE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

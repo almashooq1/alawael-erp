@@ -299,6 +299,53 @@ AssistiveDeviceSchema.virtual('isMaintenanceOverdue').get(function () {
 AssistiveDeviceSchema.set('toJSON', { virtuals: true });
 AssistiveDeviceSchema.set('toObject', { virtuals: true });
 
+// ── W1028 — assistive-device loan-return producer ────────────────────
+// When a loaned device is handed back (availability flips to 'available'
+// and a loan reaches status 'returned'), emit a closure milestone onto the
+// beneficiary's unified-core timeline. Non-callback hook family → W483-safe
+// even under the global async mongoose plugins. The literal
+// `integrationBus.publish` keeps the W389/W392 producer-coverage guards happy.
+AssistiveDeviceSchema.pre('save', function () {
+  this.$__deviceReturnedNow = false;
+  this.$__returnedLoan = null;
+  const becameAvailable = this.isModified('availability') && this.availability === 'available';
+  if (becameAvailable && Array.isArray(this.loans) && this.loans.length) {
+    let best = null;
+    for (const l of this.loans) {
+      if (l.status === 'returned' && l.returnedAt && l.beneficiaryId) {
+        if (!best || new Date(l.returnedAt) >= new Date(best.returnedAt)) best = l;
+      }
+    }
+    if (best) {
+      this.$__deviceReturnedNow = true;
+      this.$__returnedLoan = best;
+    }
+  }
+});
+
+AssistiveDeviceSchema.post('save', function emitAssistiveDeviceReturned(doc) {
+  try {
+    if (!this.$__deviceReturnedNow || !this.$__returnedLoan) return;
+    const loan = this.$__returnedLoan;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+
+    Promise.resolve(
+      integrationBus.publish('assistive-devices', 'assistive_device.returned', {
+        deviceId: String(doc._id),
+        assetTag: doc.assetTag || '',
+        beneficiaryId: String(loan.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        category: doc.category || '',
+        conditionOnReturn: loan.conditionOnReturn || '',
+        returnedAt: loan.returnedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.AssistiveDevice || mongoose.model('AssistiveDevice', AssistiveDeviceSchema);
 

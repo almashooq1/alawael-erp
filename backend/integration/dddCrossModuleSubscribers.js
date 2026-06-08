@@ -1256,6 +1256,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Assistive device returned → unified-core timeline (W1028) ──────
+  // A loaned assistive device reaching 'returned' closes that loan on the
+  // beneficiary's longitudinal record (equipment-handover milestone).
+  subscribers.push({
+    name: 'assistive-devices:returned → timeline:record',
+    pattern: 'assistive-devices.assistive_device.returned',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const tag = event.payload.assetTag ? ` (${event.payload.assetTag})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'assistive_device_returned',
+            category: 'administrative',
+            severity: 'success',
+            title: `Assistive device returned${tag}`,
+            title_ar: 'تم إرجاع جهاز مساعد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Assistive device timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

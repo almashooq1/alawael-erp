@@ -743,3 +743,4 @@ __tests__/teleconsultation-core-linkage-wave1024.test.js
 __tests__/home-visit-core-linkage-wave1025.test.js
 __tests__/family-counselling-core-linkage-wave1026.test.js
 __tests__/safeguarding-closure-core-linkage-wave1027.test.js
+__tests__/assistive-device-return-core-linkage-wave1028.test.js

@@ -120,21 +120,24 @@ jobs:
   # --audit-level=critical is informational and can flake from registry
   # outages we can't fix.
   test:
-    name: "🧪 Run Tests"
+    name: "🧪 Run Tests (shard ${{ matrix.shard }}/4)"
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    # W951 (2026-06-08): raised 35 → 55. The 35-min cap recurred — the sprint
-    # suite kept growing (25,115+ tests, accelerated by the 2026-06 W98x core-
-    # linkage wave series) so `test:sprint` now runs ~35m on the GitHub runner
-    # and hit the cap on EVERY deploy → "🧪 Run Tests" cancelled → "🚀 Deploy to
-    # VPS" skipped → production stale on W976 for ~2 days while ~6 waves piled up
-    # merged-but-undeployed. The same suite is already proven green by the
-    # separate "🧪 Sprint Tests" push workflow, so this gate is a redundant
-    # re-run; 55m gives headroom until it's split or dropped (owner decision).
-    # History: an identical cap bit the 2026-05-13 lockfile-refresh deploy (25m16s,
-    # prod stale 11+ hours on e06a7667).
-    timeout-minutes: 55
+    # W952 (2026-06-08) — PERMANENT root fix for the recurring deploy-test
+    # timeout (W552 @ 25m → W951 @ 55m band-aids). The canonical `test:sprint`
+    # suite (25,115+ tests, growing with the 2026-06 W98x wave series) ran as a
+    # single ~35-min job and kept hitting the cap → "Run Tests" cancelled →
+    # "Deploy to VPS" skipped → prod silently stale (W976 stale ~2 days). Root
+    # cause = one serial run of an ever-growing suite. Fix = shard it 4 ways via
+    # jest --shard (deploy gates on ALL shards: needs.test.result=='success'
+    # requires every matrix leg green). Each shard ≈ suite/4 (~9 min) → scales as
+    # the suite grows. fail-fast:false so one failing shard still reports the rest.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 
@@ -146,20 +149,22 @@ jobs:
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Run backend tests (canonical sprint gate)
+      - name: Run backend tests (sharded sprint gate)
         working-directory: backend
-        # W552: was bare `npm test` (the entire 2000+ file Jest surface) which hit
-        # the 35-min cap on every run → "🧪 Run Tests" cancelled → "🚀 Deploy to
-        # VPS" skipped → automated prod deploys silently dormant. Mirror W547 (the
-        # CI Pipeline fix): run the canonical gate (~13 min, well under the cap),
-        # the same suite Sprint Tests already proves green.
-        run: npm run test:guard && npm run test:sprint
+        # jest --shard partitions the explicit sprint file list (run-sprint.js
+        # forwards extra argv to jest). test:guard is a fast meta-gate — run it
+        # once (shard 1) to avoid 4× redundancy. Same suite Sprint Tests proves
+        # green; this in-deploy run is the deploy's own gate.
+        run: |
+          if [ "${{ matrix.shard }}" = "1" ]; then npm run test:guard; fi
+          npm run test:sprint -- --shard=${{ matrix.shard }}/4
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
           MONGODB_URI: ""
 
       - name: Security audit
+        if: ${{ matrix.shard == 1 }}
         working-directory: backend
         run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found (non-blocking)"
 

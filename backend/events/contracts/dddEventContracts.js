@@ -779,7 +779,30 @@ const INSURANCE_CLAIM_EVENTS = {
     consumers: ['timeline', 'dashboards', 'notification'],
   },
 };
-// ═══════════════════════════════════════════════════════════════════════════════
+// ── W1023: Invoice paid → unified core ────────────────────────────
+// A beneficiary's invoice reaching 'PAID' is a financial milestone closing the
+// billing loop on the longitudinal record.
+
+const INVOICE_EVENTS = {
+  INVOICE_PAID: {
+    domain: 'invoices',
+    eventType: 'invoice.paid',
+    version: 1,
+    description: 'تم سداد فاتورة المستفيد بالكامل — Invoice fully paid (billing loop closed)',
+    payload: {
+      invoiceId: 'string',
+      invoiceNumber: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      totalAmount: 'number',
+      paymentMethod: 'string',
+      paidAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
@@ -801,6 +824,7 @@ const DDD_CONTRACTS = {
   'medical-referrals': MEDICAL_REFERRAL_EVENTS,
   measurements: MEASUREMENT_EVENTS,
   'insurance-claims': INSURANCE_CLAIM_EVENTS,
+  invoices: INVOICE_EVENTS,
 };
 
 /**
@@ -837,6 +861,7 @@ module.exports = {
   MEDICAL_REFERRAL_EVENTS,
   MEASUREMENT_EVENTS,
   INSURANCE_CLAIM_EVENTS,
+  INVOICE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

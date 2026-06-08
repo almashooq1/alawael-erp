@@ -92,6 +92,8 @@ const careTimelineSchema = new mongoose.Schema(
         'measurement_result_approved',
         // Insurance claim paid (W1000 — unified-core linkage)
         'insurance_claim_paid',
+        // Invoice fully paid (W1023 — unified-core linkage)
+        'invoice_paid',
         // Family
         'family_contact',
         'family_meeting',

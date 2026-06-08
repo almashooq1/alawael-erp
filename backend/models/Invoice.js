@@ -160,4 +160,32 @@ try {
   /* loaded before services exist — skip silently */
 }
 
+// ─── W1023: Invoice paid → unified core ──────────────────────────────────────
+// When an invoice reaches 'PAID', emit `invoices.invoice.paid` so the
+// per-beneficiary CareTimeline (and dashboards/notifications) record the
+// billing-loop closure. Sync hooks (no `next`) to match the existing hook
+// style on this schema (check:hook-style gate). Never blocks the save.
+invoiceSchema.pre('save', function flagInvoicePaid() {
+  this.$__invoicePaidNow = this.status === 'PAID' && (this.isNew || this.isModified('status'));
+});
+invoiceSchema.post('save', function emitInvoicePaid(doc) {
+  try {
+    if (!this.$__invoicePaidNow) return;
+    if (!doc || !doc.beneficiary) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('invoices', 'invoice.paid', {
+      invoiceId: String(doc._id),
+      invoiceNumber: doc.invoiceNumber,
+      beneficiaryId: String(doc.beneficiary),
+      branchId: doc.branchId ? String(doc.branchId) : undefined,
+      totalAmount: doc.totalAmount,
+      paymentMethod: doc.paymentMethod,
+      paidAt: new Date(),
+    });
+  } catch {
+    /* never block the save */
+  }
+});
+
 module.exports = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);

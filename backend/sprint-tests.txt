@@ -738,3 +738,4 @@ __tests__/referral-core-linkage-wave997.test.js
 __tests__/medical-referral-core-linkage-wave1001.test.js
 __tests__/measurement-result-core-linkage-wave1022.test.js
 __tests__/insurance-claim-core-linkage-wave1000.test.js
+__tests__/invoice-core-linkage-wave1023.test.js

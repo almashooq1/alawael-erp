@@ -1112,6 +1112,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Invoice paid → unified-core timeline (W1023) ───────────────────
+  // A beneficiary's invoice reaching 'PAID' closes the billing loop — a
+  // financial milestone on the longitudinal record.
+  subscribers.push({
+    name: 'invoices:paid → timeline:record',
+    pattern: 'invoices.invoice.paid',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const num = event.payload.invoiceNumber ? ` (${event.payload.invoiceNumber})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'invoice_paid',
+            category: 'administrative',
+            severity: 'success',
+            title: `Invoice paid${num}`,
+            title_ar: 'تم سداد الفاتورة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Invoice timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

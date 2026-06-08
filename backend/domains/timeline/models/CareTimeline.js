@@ -96,6 +96,8 @@ const careTimelineSchema = new mongoose.Schema(
         'invoice_paid',
         // Tele-rehab consultation completed (W1024 — unified-core linkage)
         'teleconsultation_completed',
+        // Home visit completed (W1025 — unified-core linkage)
+        'home_visit_completed',
         // Family
         'family_contact',
         'family_meeting',

@@ -828,6 +828,31 @@ const TELECONSULTATION_EVENTS = {
     priority: PRIORITY.HIGH,
     consumers: ['timeline', 'dashboards', 'notification'],
   },
+};
+
+// ── W1025: Home visit completed → unified core ───────────────────────
+// A social/family home visit reaching 'completed' is a family-engagement
+// milestone on the beneficiary's longitudinal record.
+
+const HOME_VISIT_EVENTS = {
+  HOME_VISIT_COMPLETED: {
+    domain: 'home-visits',
+    eventType: 'home_visit.completed',
+    version: 1,
+    description: 'اكتملت زيارة منزلية للمستفيد — Home visit completed (family engagement)',
+    payload: {
+      homeVisitId: 'string',
+      visitNumber: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      visitType: 'string',
+      overallConcernLevel: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -852,6 +877,7 @@ const DDD_CONTRACTS = {
   'insurance-claims': INSURANCE_CLAIM_EVENTS,
   invoices: INVOICE_EVENTS,
   teleconsultations: TELECONSULTATION_EVENTS,
+  'home-visits': HOME_VISIT_EVENTS,
 };
 
 /**
@@ -890,6 +916,7 @@ module.exports = {
   INSURANCE_CLAIM_EVENTS,
   INVOICE_EVENTS,
   TELECONSULTATION_EVENTS,
+  HOME_VISIT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

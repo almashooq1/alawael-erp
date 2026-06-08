@@ -275,6 +275,33 @@ homeVisitSchema.set('toObject', { virtuals: true });
 // trail. OCC closes the race.
 homeVisitSchema.set('optimisticConcurrency', true);
 
+// ── W1025: producer hooks — home visit completed → unified core ──────
+// Flag on transition into 'completed'; emit after the write commits.
+homeVisitSchema.pre('save', function flagHomeVisitDone() {
+  this.$__homeVisitDoneNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+homeVisitSchema.post('save', function emitHomeVisitDone(doc) {
+  if (!this.$__homeVisitDoneNow) return;
+  if (!doc.beneficiaryId) return;
+  try {
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('home-visits', 'home_visit.completed', {
+      homeVisitId: String(doc._id),
+      visitNumber: doc.visitNumber,
+      beneficiaryId: String(doc.beneficiaryId),
+      branchId: doc.branchId ? String(doc.branchId) : undefined,
+      visitType: doc.visitType,
+      overallConcernLevel: doc.overallConcernLevel,
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch {
+    /* never block the save */
+  }
+});
+
 const HomeVisit = mongoose.models.HomeVisit || mongoose.model('HomeVisit', homeVisitSchema);
 
 module.exports = HomeVisit;

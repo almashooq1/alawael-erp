@@ -1259,6 +1259,8 @@ on:
       - 'backend/__tests__/invoice-core-linkage-wave1023.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/teleconsultation-core-linkage-wave1024.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-visit-core-linkage-wave1025.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2501,6 +2503,8 @@ on:
       - 'backend/__tests__/invoice-core-linkage-wave1023.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/teleconsultation-core-linkage-wave1024.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-visit-core-linkage-wave1025.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -1170,6 +1170,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Home visit completed → unified-core timeline (W1025) ───────────
+  // A social/family home visit reaching 'completed' is a family-engagement
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'home-visits:completed → timeline:record',
+    pattern: 'home-visits.home_visit.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const num = event.payload.visitNumber ? ` (${event.payload.visitNumber})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'home_visit_completed',
+            category: 'family',
+            severity: 'info',
+            title: `Home visit completed${num}`,
+            title_ar: 'اكتملت الزيارة المنزلية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Home visit timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

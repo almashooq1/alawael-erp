@@ -89,6 +89,8 @@ const careTimelineSchema = new mongoose.Schema(
         'seizure_event',
         'safeguarding_concern',
         'restraint_applied',
+        'crisis_reported', // W1004 — acute crisis reported
+        'crisis_resolved', // W1004 — acute crisis resolved / closed
         // Family
         'family_contact',
         'family_meeting',

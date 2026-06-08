@@ -151,5 +151,43 @@ CrisisIncidentSchema.pre('save', async function () {
   }
 });
 
+// W1004 — surface acute crises on the unified-core timeline. A CrisisIncident
+// (acute behavioral/psychiatric/medical/safeguarding crisis with its own
+// active→resolved/closed lifecycle) is distinct from the W977 safety events
+// (seizure/safeguarding/restraint) and the W970 behavior incident — it needs its
+// own reported/resolved timeline entry. Native pre-compile hooks per the W970
+// pattern; guarded + fire-and-forget. W954-SAFE signatures (post(doc) / 0-param) —
+// coexist with the existing async 0-param pre('save') (different event). Create
+// is detected via post('init') NOT having run (a fresh instance) — CrisisIncident
+// is always created as a new instance (report route) and mutated via a hydrated
+// instance (escalate/close routes), so this is reliable here.
+CrisisIncidentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+CrisisIncidentSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    const base = {
+      crisisId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      crisisType: doc.crisisType || '',
+      crisisSeverity: doc.severity || '',
+    };
+    const created = doc.$__prevStatus === undefined; // post('init') didn't run → new
+    const isTerminal = doc.status === 'resolved' || doc.status === 'closed';
+    const wasTerminal =
+      doc.$__prevStatus === 'resolved' || doc.$__prevStatus === 'closed';
+    if (created) {
+      Promise.resolve(integrationBus.publish('crisis', 'crisis.reported', base)).catch(() => {});
+    } else if (isTerminal && !wasTerminal) {
+      Promise.resolve(integrationBus.publish('crisis', 'crisis.resolved', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', CrisisIncidentSchema);

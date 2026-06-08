@@ -1267,6 +1267,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Insurance → Timeline: claim approved (W994, care funded) ─────
+  subscribers.push({
+    name: 'insurance:claim_approved → timeline:record',
+    pattern: 'insurance.claim.approved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'insurance_claim',
+            category: 'administrative',
+            severity: 'success',
+            title: `Insurance claim approved (${event.payload.claimNumber || ''})`.trim(),
+            title_ar: `اعتماد مطالبة تأمينية (${event.payload.claimNumber || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Insurance-claim-approved timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Insurance → Timeline: claim rejected (W994, funding denied) ──
+  subscribers.push({
+    name: 'insurance:claim_rejected → timeline:record',
+    pattern: 'insurance.claim.rejected',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'insurance_claim',
+            category: 'administrative',
+            severity: 'warning',
+            title: `Insurance claim rejected (${event.payload.claimNumber || ''})`.trim(),
+            title_ar: `رفض مطالبة تأمينية (${event.payload.claimNumber || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Insurance-claim-rejected timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

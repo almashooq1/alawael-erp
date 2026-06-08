@@ -145,6 +145,41 @@ insuranceClaimSchema.virtual('approvalRate').get(function () {
   return ((this.approvedAmount / this.totalAmount) * 100).toFixed(1);
 });
 
+// W994 — surface insurance-claim outcomes on the unified-core timeline: an
+// approved (or partially-approved) claim means the beneficiary's care is funded
+// (positive) and a rejected claim means funding was denied (an actionable
+// warning — care access at risk). Fires once on the status flip to approved /
+// partially_approved / rejected. Native pre-compile hooks per the proven W970
+// pattern (the modelEventBridge-is-dead workaround); guarded + fire-and-forget so
+// persistence never blocks. Consumed by dddCrossModuleSubscribers → CareTimeline
+// (administrative category). NOT covered by the modelEventBridge finance mappings
+// (those are invoice/payment/expense/payroll), so this native hook is additive.
+insuranceClaimSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+insuranceClaimSchema.post('save', function (doc) {
+  try {
+    if (doc.status === this.$__prevStatus) return; // no status change
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    const base = {
+      claimId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      claimNumber: doc.claimNumber || '',
+      totalAmount: doc.totalAmount,
+      approvedAmount: doc.approvedAmount,
+    };
+    if (doc.status === 'approved' || doc.status === 'partially_approved') {
+      Promise.resolve(integrationBus.publish('insurance', 'claim.approved', base)).catch(() => {});
+    } else if (doc.status === 'rejected') {
+      Promise.resolve(integrationBus.publish('insurance', 'claim.rejected', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 // Registered as `NphiesInsuranceClaim` (not `InsuranceClaim`) so it
 // doesn't collide with models/insuranceClaim.model.js (the canonical
 // 400-line schema). The default export still resolves to a usable

@@ -894,6 +894,52 @@ const FOLLOWUP_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Insurance Events — أحداث المطالبات التأمينية (W994)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Insurance-claim outcomes that gate a beneficiary's funded care. An approved
+// (or partially-approved) claim = care is funded (positive); a rejected claim =
+// funding denied (an actionable warning — access at risk). Producer: native
+// NphiesInsuranceClaim post-save hook. (Not covered by the modelEventBridge
+// finance mappings, which are invoice/payment/expense/payroll.)
+
+const INSURANCE_EVENTS = {
+  CLAIM_APPROVED: {
+    domain: 'insurance',
+    eventType: 'claim.approved',
+    version: 1,
+    description: 'اعتماد مطالبة تأمينية — Insurance claim approved (care funded)',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      claimNumber: 'string',
+      totalAmount: 'number',
+      approvedAmount: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  CLAIM_REJECTED: {
+    domain: 'insurance',
+    eventType: 'claim.rejected',
+    version: 1,
+    description: 'رفض مطالبة تأمينية — Insurance claim rejected (funding denied)',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      claimNumber: 'string',
+      totalAmount: 'number',
+      approvedAmount: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -916,6 +962,7 @@ const DDD_CONTRACTS = {
   family: FAMILY_EVENTS,
   lifecycle: LIFECYCLE_EVENTS,
   followup: FOLLOWUP_EVENTS,
+  insurance: INSURANCE_EVENTS,
 };
 
 /**
@@ -951,6 +998,7 @@ module.exports = {
   FAMILY_EVENTS,
   LIFECYCLE_EVENTS,
   FOLLOWUP_EVENTS,
+  INSURANCE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

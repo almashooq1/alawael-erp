@@ -1126,6 +1126,61 @@ const CRISIS_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Care-team Events — أحداث فريق الرعاية (W1005)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Who is responsible for the beneficiary's care: a team member added / removed
+// and a lead/primary-therapist change. Producer: native EpisodeOfCare post-save
+// hook (diffs the embedded `careTeam[]` array snapshot).
+
+const CARETEAM_EVENTS = {
+  MEMBER_ADDED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_added',
+    version: 1,
+    description: 'إضافة عضو لفريق الرعاية — Care-team member added',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  MEMBER_REMOVED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_removed',
+    version: 1,
+    description: 'إزالة عضو من فريق الرعاية — Care-team member removed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  LEAD_CHANGED: {
+    domain: 'careteam',
+    eventType: 'careteam.lead_changed',
+    version: 1,
+    description: 'تغيير المعالج الرئيسي — Lead/primary therapist changed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1153,6 +1208,7 @@ const DDD_CONTRACTS = {
   consent: CONSENT_EVENTS,
   home_program: HOME_PROGRAM_EVENTS,
   crisis: CRISIS_EVENTS,
+  careteam: CARETEAM_EVENTS,
 };
 
 /**
@@ -1193,6 +1249,7 @@ module.exports = {
   CONSENT_EVENTS,
   HOME_PROGRAM_EVENTS,
   CRISIS_EVENTS,
+  CARETEAM_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

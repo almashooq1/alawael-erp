@@ -771,6 +771,49 @@ const FAMILY_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Lifecycle Events — أحداث الانتقال بين مراحل الحياة (W986)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Life-stage transition plans (early→school, school→work, rehab→community, …).
+// A completed plan = the beneficiary successfully transitioned (positive); a
+// cancelled plan = the transition was abandoned. Producer: native
+// TransitionPlan post-save hook.
+
+const LIFECYCLE_EVENTS = {
+  TRANSITION_COMPLETED: {
+    domain: 'lifecycle',
+    eventType: 'transition.completed',
+    version: 1,
+    description: 'اكتملت خطة الانتقال — Life-stage transition plan completed',
+    payload: {
+      transitionPlanId: 'string',
+      beneficiaryId: 'string',
+      transitionType: 'string',
+      targetPlacement: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  TRANSITION_CANCELLED: {
+    domain: 'lifecycle',
+    eventType: 'transition.cancelled',
+    version: 1,
+    description: 'أُلغيت خطة الانتقال — Life-stage transition plan cancelled',
+    payload: {
+      transitionPlanId: 'string',
+      beneficiaryId: 'string',
+      transitionType: 'string',
+      targetPlacement: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -791,6 +834,7 @@ const DDD_CONTRACTS = {
   medication: MEDICATION_EVENTS,
   complaints: COMPLAINT_EVENTS,
   family: FAMILY_EVENTS,
+  lifecycle: LIFECYCLE_EVENTS,
 };
 
 /**
@@ -824,6 +868,7 @@ module.exports = {
   MEDICATION_EVENTS,
   COMPLAINT_EVENTS,
   FAMILY_EVENTS,
+  LIFECYCLE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

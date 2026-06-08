@@ -738,3 +738,4 @@ __tests__/beneficiary-status-core-linkage-wave982.test.js
 __tests__/retention-sweeper-bootstrap-wave983.test.js
 __tests__/complaint-core-linkage-wave984.test.js
 __tests__/family-visit-core-linkage-wave985.test.js
+__tests__/transition-plan-core-linkage-wave986.test.js

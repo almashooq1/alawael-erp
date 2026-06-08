@@ -44,6 +44,14 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Behavior** — incident_recorded
 - **Appointments** — booked / cancelled / no-show (W970)
 - **Quality** — corrective_action_required
+- **Safety** — seizure / safeguarding / restraint (W977)
+- **Waitlist → admission** — added / booked (W979)
+- **Screenings** — vision / hearing finalized (W980)
+- **Medication (MAR)** — administered / not-given (W981)
+- **Beneficiary status lifecycle** — graduated / transferred / deceased / … (W982)
+- **Complaints (CRM)** — filed about a beneficiary (W984)
+- **Family visits** — completed / no-show (W985)
+- **Life-stage transitions** — transition plan completed / cancelled (W986)
 - **(env-gated, W974)** HR (hire/terminate/leave/salary/transfer), Finance
   (invoice/payment/expense/payroll), Medical (record/therapy/prescription/risk),
   Attendance (check-in/out), Notification (delivery_failed)
@@ -88,17 +96,23 @@ Out of **498 route files**, only ~a dozen feed the core. The bridge (once
 enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 
 ### Tier 1 — clinical, belongs on the timeline
-| Domain | Model (exists) | Suggested event | Mechanism |
+| Domain | Model (exists) | Event | Status |
 | --- | --- | --- | --- |
-| Referrals | `Referral` / `medicalReferrals` | `referral.made/accepted` | B or C |
-| Waitlist → admission | `Waitlist` | `admission.confirmed` | C |
-| Safety events | `SeizureEvent` · `SafeguardingConcern` · `RestraintSeclusion` | `seizure_event` / `safeguarding_concern` (enum reserved in CareTimeline) | C native hook |
-| Screenings | `VisionScreening` · `HearingScreening` | `screening.completed` | C native hook |
-| Medication admin (MAR) | verify model name | `medication.administered` | B or C |
-| Discharge / follow-up | `post-rehab-followup` · `transition-plan` | `discharge.followup_due` | C |
+| Waitlist → admission | `Waitlist` | `waitlist.*` → `waitlisted` / `waitlist_booked` | ✅ **W979** |
+| Safety events | `SeizureEvent` · `SafeguardingConcern` · `RestraintSeclusion` | `safety.*` → `seizure_event` / `safeguarding_concern` / `restraint_applied` | ✅ **W977** |
+| Screenings | `VisionScreening` · `HearingScreening` | `screening.completed` | ✅ **W980** |
+| Medication admin (MAR) | `MedicationAdministrationRecord` | `medication.administered` / `.not_given` | ✅ **W981** |
+| Discharge / transition | `TransitionPlan` | `lifecycle.transition.completed` / `.cancelled` → `care_transition` | ✅ **W986** |
+| Referrals | `TherapyReferral` / `CommunityReferral` / `medicalReferral` / `ReferralTracking` | `referral.made/accepted` | ⏳ **DEFERRED** — 4-model fragmentation; pick a canonical with domain input before wiring (`Referral` is the referring-ORG directory, not a beneficiary referral) |
+| Follow-up cases | `PostRehabCase` | `followup.*` | Candidate — beneficiary-keyed + active routes; not yet wired |
 
 ### Tier 2 — family / CRM visibility
-Complaints (`Complaint`), family visits, guardian-portal engagement.
+| Domain | Model | Event | Status |
+| --- | --- | --- | --- |
+| Beneficiary status lifecycle | `Beneficiary` | `beneficiary.status_changed` → `status_changed` | ✅ **W982** |
+| Complaints (CRM) | `Complaint` | `complaint.filed` → `complaint_filed` | ✅ **W984** |
+| Family visits | `FamilyVisitRequest` | `family.visit.completed` / `.no_show` → `family_meeting` | ✅ **W985** |
+| Guardian-portal engagement | — | — | Open |
 
 ### Tier 3 — operational / governance
 Inventory low-stock, maintenance overdue, contract/document expiry, insurance/
@@ -124,11 +138,14 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ---
 
-## 6. Coverage snapshot (2026-06-05)
+## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** (≈ a dozen domains).
+- Real timeline/dashboard linkage: the **clinical spine** + 10 leaf domains wired
+  since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
+  W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
+  W985 family-visits · W986 transitions — all merged to main).
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
-- ≈ **470 route files** still operate as standalone CRUD with no core emission.
+- ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of
   scope here.
 
@@ -139,4 +156,4 @@ and the remaining work is now a list — not a discovery.
 ---
 
 _See agent memory `project_core_linkage_silent_failures_2026-06-05` for the
-full incident detail (PRs #276 W970, #283 W974)._
+full incident detail + the per-wave PR list (PRs #276 W970 … #316 W985, + W986)._

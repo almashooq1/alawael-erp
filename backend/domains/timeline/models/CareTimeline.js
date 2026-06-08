@@ -38,6 +38,7 @@ const careTimelineSchema = new mongoose.Schema(
         'transfer',
         'readmission',
         'status_changed', // W982 — beneficiary lifecycle status change
+        'care_transition', // W986 — life-stage transition plan completed / cancelled
         // Clinical
         'assessment_completed',
         'screening_completed', // W980 — vision/hearing screening finalized

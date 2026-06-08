@@ -1117,6 +1117,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Lifecycle → Timeline: transition plan completed (W986) ───────
+  subscribers.push({
+    name: 'lifecycle:transition_completed → timeline:record',
+    pattern: 'lifecycle.transition.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'care_transition',
+            category: 'clinical',
+            severity: 'success',
+            title: `Transition plan completed (${event.payload.transitionType || ''})`.trim(),
+            title_ar: `اكتملت خطة الانتقال (${event.payload.transitionType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Transition-completed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Lifecycle → Timeline: transition plan cancelled (W986) ───────
+  subscribers.push({
+    name: 'lifecycle:transition_cancelled → timeline:record',
+    pattern: 'lifecycle.transition.cancelled',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'care_transition',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Transition plan cancelled (${event.payload.transitionType || ''})`.trim(),
+            title_ar: `أُلغيت خطة الانتقال (${event.payload.transitionType || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Transition-cancelled timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -68,6 +68,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'medication', // W981 — medication administered / not-given → core timeline
   'complaints', // W984 — complaint filed about a beneficiary → core timeline
   'family', // W985 — family visit completed / no-show → core timeline
+  'lifecycle', // W986 — life-stage transition plan completed / cancelled → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -110,6 +111,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'medication', // W981
     'complaint', // W984
     'visit', // W985
+    'transition', // W986
   ])
 );
 
@@ -160,6 +162,7 @@ describe('W374 DDD event-contracts drift guard', () => {
         medication: 'MEDICATION_EVENTS', // W981
         complaints: 'COMPLAINT_EVENTS', // W984
         family: 'FAMILY_EVENTS', // W985
+        lifecycle: 'LIFECYCLE_EVENTS', // W986
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {
         expect(contracts[exportName]).toBe(contracts.DDD_CONTRACTS[group]);

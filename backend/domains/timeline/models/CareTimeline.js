@@ -105,6 +105,8 @@ const careTimelineSchema = new mongoose.Schema(
         'assistive_device_returned',
         // Respite booking completed (W1029 — unified-core linkage)
         'respite_completed',
+        // Transition plan completed (W1030 — unified-core linkage)
+        'transition_completed',
         // Family
         'family_contact',
         'family_meeting',

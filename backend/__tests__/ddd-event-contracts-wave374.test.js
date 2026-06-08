@@ -77,6 +77,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'family-counselling', // W1026 — family counselling session completed → core timeline
   'assistive-devices', // W1028 — assistive device returned → core timeline
   'respite', // W1029 — respite booking completed → core timeline
+  'transition', // W1030 — transition plan completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -128,6 +129,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'family_counselling', // W1026 — family_counselling.completed (FamilyCounsellingSession)
     'assistive_device', // W1028 — assistive_device.returned (AssistiveDevice)
     'respite', // W1029 — respite.completed (RespiteBooking)
+    'transition', // W1030 — transition.completed (TransitionPlan)
   ])
 );
 

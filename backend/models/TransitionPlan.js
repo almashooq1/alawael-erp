@@ -260,6 +260,34 @@ TransitionPlanSchema.virtual('isOverdue').get(function () {
 TransitionPlanSchema.set('toJSON', { virtuals: true });
 TransitionPlanSchema.set('toObject', { virtuals: true });
 
+// ── W1030: producer hooks — emit on transition completion → unified core ──
+// A transition plan reaching 'completed' is a life-stage milestone on the
+// beneficiary's longitudinal record. Non-callback hook style (W483-safe).
+TransitionPlanSchema.pre('save', function () {
+  this.$__transitionCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+TransitionPlanSchema.post('save', function emitTransitionCompleted(doc) {
+  if (!this.$__transitionCompletedNow) return;
+  if (!doc.beneficiaryId) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('transition', 'transition.completed', {
+        transitionPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        transitionType: doc.transitionType,
+        compositeReadinessScore: doc.compositeReadinessScore ?? null,
+        actualTransitionDate: doc.actualTransitionDate || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_err) {
+    // bus optional — never block persistence
+  }
+});
+
 module.exports =
   mongoose.models.TransitionPlan || mongoose.model('TransitionPlan', TransitionPlanSchema);
 

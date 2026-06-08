@@ -946,6 +946,27 @@ const RESPITE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1030 — Transition plan lifecycle → unified core.
+const TRANSITION_EVENTS = {
+  TRANSITION_COMPLETED: {
+    domain: 'transition',
+    eventType: 'transition.completed',
+    version: 1,
+    description: 'اكتملت خطة الانتقال — Transition plan completed (life-stage milestone reached)',
+    payload: {
+      transitionPlanId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      transitionType: 'string',
+      compositeReadinessScore: 'number',
+      actualTransitionDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -972,6 +993,7 @@ const DDD_CONTRACTS = {
   'family-counselling': FAMILY_COUNSELLING_EVENTS,
   'assistive-devices': ASSISTIVE_DEVICE_EVENTS,
   respite: RESPITE_EVENTS,
+  transition: TRANSITION_EVENTS,
 };
 
 /**
@@ -1014,6 +1036,7 @@ module.exports = {
   FAMILY_COUNSELLING_EVENTS,
   ASSISTIVE_DEVICE_EVENTS,
   RESPITE_EVENTS,
+  TRANSITION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -1314,6 +1314,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Transition plan completed → unified-core timeline (W1030) ────
+  // A transition plan reaching 'completed' (life-stage milestone reached,
+  // e.g. school→work, rehab→community) is a significant longitudinal event.
+  subscribers.push({
+    name: 'transition:completed → timeline:record',
+    pattern: 'transition.transition.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const tType = event.payload.transitionType ? ` (${event.payload.transitionType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'transition_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Transition plan completed${tType}`,
+            title_ar: 'اكتملت خطة الانتقال',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Transition timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

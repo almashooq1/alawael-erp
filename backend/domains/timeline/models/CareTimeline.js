@@ -48,6 +48,7 @@ const careTimelineSchema = new mongoose.Schema(
         'followup_completed', // W987 — post-rehab follow-up case completed
         'followup_lost', // W987 — beneficiary lost to post-rehab follow-up
         'followup_visit', // W992 — post-rehab follow-up visit attended / missed
+        'referral', // W997 — referral accepted / completed / rejected (any of 4 referral subsystems)
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',

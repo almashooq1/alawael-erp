@@ -940,6 +940,66 @@ const INSURANCE_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Referral Events — أحداث الإحالات (W997)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// A SHARED referral vocabulary across the 4 fragmented referral subsystems
+// (medical / therapy / community / FHIR-portal). Each model's native post-save
+// hook publishes the same 3 outcomes — accepted / completed / rejected — with a
+// `referralType` discriminator in the payload, so the beneficiary timeline shows
+// referral activity uniformly without forcing a model consolidation.
+
+const REFERRAL_EVENTS = {
+  ACCEPTED: {
+    domain: 'referral',
+    eventType: 'referral.accepted',
+    version: 1,
+    description: 'قبول إحالة — Referral accepted by the receiving service',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  COMPLETED: {
+    domain: 'referral',
+    eventType: 'referral.completed',
+    version: 1,
+    description: 'اكتمال إحالة — Referral fulfilled / completed',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  REJECTED: {
+    domain: 'referral',
+    eventType: 'referral.rejected',
+    version: 1,
+    description: 'رفض إحالة — Referral rejected / declined',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -963,6 +1023,7 @@ const DDD_CONTRACTS = {
   lifecycle: LIFECYCLE_EVENTS,
   followup: FOLLOWUP_EVENTS,
   insurance: INSURANCE_EVENTS,
+  referral: REFERRAL_EVENTS,
 };
 
 /**
@@ -999,6 +1060,7 @@ module.exports = {
   LIFECYCLE_EVENTS,
   FOLLOWUP_EVENTS,
   INSURANCE_EVENTS,
+  REFERRAL_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

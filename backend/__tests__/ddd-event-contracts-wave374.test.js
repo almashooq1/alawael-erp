@@ -74,6 +74,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'referral', // W997 — referral accepted / completed / rejected (shared across 4 models) → core timeline
   'consent', // W1002 — consent obtained / revoked (PDPL/CRPD) → core timeline
   'home_program', // W1003 — home program assigned / completed → core timeline
+  'crisis', // W1004 — acute crisis reported / resolved → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -122,6 +123,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'referral', // W997
     'consent', // W1002
     'home_program', // W1003
+    'crisis', // W1004
   ])
 );
 
@@ -178,6 +180,7 @@ describe('W374 DDD event-contracts drift guard', () => {
         referral: 'REFERRAL_EVENTS', // W997
         consent: 'CONSENT_EVENTS', // W1002
         home_program: 'HOME_PROGRAM_EVENTS', // W1003
+        crisis: 'CRISIS_EVENTS', // W1004
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {
         expect(contracts[exportName]).toBe(contracts.DDD_CONTRACTS[group]);

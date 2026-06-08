@@ -1083,6 +1083,49 @@ const HOME_PROGRAM_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Crisis Events — أحداث الأزمات الحادة (W1004)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Acute crisis incidents (behavioral / psychiatric / medical / safeguarding) with
+// their own active→resolved/closed lifecycle — distinct from the W977 safety
+// events and the W970 behavior incident. Producer: native CrisisIncident
+// post-save hook.
+
+const CRISIS_EVENTS = {
+  REPORTED: {
+    domain: 'crisis',
+    eventType: 'crisis.reported',
+    version: 1,
+    description: 'الإبلاغ عن أزمة حادة — Acute crisis reported',
+    payload: {
+      crisisId: 'string',
+      beneficiaryId: 'string',
+      crisisType: 'string',
+      crisisSeverity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+
+  RESOLVED: {
+    domain: 'crisis',
+    eventType: 'crisis.resolved',
+    version: 1,
+    description: 'حل أزمة حادة — Acute crisis resolved / closed',
+    payload: {
+      crisisId: 'string',
+      beneficiaryId: 'string',
+      crisisType: 'string',
+      crisisSeverity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1109,6 +1152,7 @@ const DDD_CONTRACTS = {
   referral: REFERRAL_EVENTS,
   consent: CONSENT_EVENTS,
   home_program: HOME_PROGRAM_EVENTS,
+  crisis: CRISIS_EVENTS,
 };
 
 /**
@@ -1148,6 +1192,7 @@ module.exports = {
   REFERRAL_EVENTS,
   CONSENT_EVENTS,
   HOME_PROGRAM_EVENTS,
+  CRISIS_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

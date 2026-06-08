@@ -577,6 +577,39 @@ const SCREENING_EVENTS = {
     consumers: ['timeline', 'dashboards', 'notification'],
   },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Medication Administration Events — أحداث تعاطي الدواء (W994)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// A recorded dose outcome (MAR, W191b) is a clinical event the care team must
+// see on the per-beneficiary timeline — especially a REFUSED or MISSED dose
+// (a missed anti-epileptic can precede a seizure). One contract covers every
+// terminal outcome (administered/refused/missed/held); the `status` payload
+// field distinguishes them. Emitted when a dose leaves 'scheduled' via native
+// pre-compile post-save hooks (new-as-terminal OR scheduled→terminal).
+
+const MEDICATION_EVENTS = {
+  MEDICATION_DOSE_RECORDED: {
+    domain: 'medications',
+    eventType: 'medication.dose_recorded',
+    version: 1,
+    description: 'تم تسجيل نتيجة جرعة دوائية — Medication dose outcome recorded (MAR)',
+    payload: {
+      marId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      medicationName: 'string',
+      status: 'string',
+      route: 'string',
+      isControlled: 'boolean',
+      date: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -592,6 +625,7 @@ const DDD_CONTRACTS = {
   appointments: APPOINTMENT_EVENTS,
   safety: SAFETY_EVENTS,
   screenings: SCREENING_EVENTS,
+  medications: MEDICATION_EVENTS,
 };
 
 /**
@@ -621,6 +655,7 @@ module.exports = {
   APPOINTMENT_EVENTS,
   SAFETY_EVENTS,
   SCREENING_EVENTS,
+  MEDICATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

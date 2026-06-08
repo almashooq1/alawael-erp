@@ -731,3 +731,4 @@ __tests__/model-event-bridge-global-plugin-wave974.test.js
 __tests__/measure-applied-timeline-event-wave975.test.js
 __tests__/safety-core-linkage-wave992.test.js
 __tests__/screening-core-linkage-wave993.test.js
+__tests__/mar-core-linkage-wave994.test.js

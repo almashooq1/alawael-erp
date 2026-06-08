@@ -894,6 +894,49 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Medication dose outcome → unified-core timeline (W994) ─────────
+  // A recorded MAR dose lands on the beneficiary timeline. A refused or missed
+  // dose is clinically significant (a missed anti-epileptic can precede a
+  // seizure) → warning; administered/held are informational. One subscriber
+  // serves every terminal outcome — the `status` payload field carries detail.
+  subscribers.push({
+    name: 'medications:dose_recorded → timeline:record',
+    pattern: 'medications.medication.dose_recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const status = event.payload.status || '';
+          const med = event.payload.medicationName || 'medication';
+          const elevated = status === 'refused' || status === 'missed';
+          const statusAr =
+            status === 'administered'
+              ? 'تم إعطاؤها'
+              : status === 'refused'
+                ? 'مرفوضة'
+                : status === 'missed'
+                  ? 'فائتة'
+                  : status === 'held'
+                    ? 'مؤجلة'
+                    : status;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'medication_dose_recorded',
+            category: 'clinical',
+            severity: elevated ? 'warning' : 'info',
+            title: `Medication dose ${status}: ${med}`.trim(),
+            title_ar: `جرعة دواء ${statusAr}: ${med}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Medication timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

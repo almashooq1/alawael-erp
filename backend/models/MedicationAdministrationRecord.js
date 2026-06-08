@@ -102,6 +102,43 @@ MarSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// ── Unified-core producer (W994) ────────────────────────────────────────────
+// A recorded dose outcome is a clinical event the care team must see on the
+// per-beneficiary timeline (CareTimeline) + dashboards — a REFUSED or MISSED
+// dose is especially significant (a missed anti-epileptic can precede a
+// seizure). Native pre-compile hooks (schema middleware added AFTER
+// mongoose.model() never fires). Emit when a dose leaves 'scheduled' —
+// new-as-terminal OR scheduled→terminal. Literal `integrationBus.publish`
+// keeps the W389/W392 producer-coverage guards green.
+MarSchema.pre('save', function () {
+  this.$__doseRecordedNow =
+    this.status !== 'scheduled' && (this.isNew || this.isModified('status'));
+});
+
+MarSchema.post('save', function (doc) {
+  try {
+    if (!this.$__doseRecordedNow) return; // only emit on a terminal dose outcome
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return; // no beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('medications', 'medication.dose_recorded', {
+        marId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        medicationName: doc.medicationName || '',
+        status: doc.status || '',
+        route: doc.route || '',
+        isControlled: !!doc.isControlled,
+        date: doc.date,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.MedicationAdministrationRecord ||
   mongoose.model('MedicationAdministrationRecord', MarSchema);

@@ -78,6 +78,8 @@ const careTimelineSchema = new mongoose.Schema(
         'restraint_seclusion',
         // Sensory screenings (W993 — unified-core linkage)
         'screening_completed',
+        // Medication administration (W994 — unified-core linkage)
+        'medication_dose_recorded',
         // Family
         'family_contact',
         'family_meeting',

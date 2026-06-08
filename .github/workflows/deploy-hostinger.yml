@@ -133,6 +133,20 @@ jobs:
     # jest --shard (deploy gates on ALL shards: needs.test.result=='success'
     # requires every matrix leg green). Each shard ≈ suite/4 (~9 min) → scales as
     # the suite grows. fail-fast:false so one failing shard still reports the rest.
+    #
+    # W953/W954 (2026-06-08) — the first run that actually COMPLETED (sharding
+    # let it finish instead of being cancelled at the cap) exposed TWO problems
+    # masked for months on Mongo-backed behavioral/route suites:
+    #   W953 (this step) — ~349 suites call `MongoMemoryServer.create()`, which
+    #     cold-downloads a ~90s mongod binary; on CI each is invoked INSIDE a
+    #     30-45s jest test, so the download is KILLED before it finishes. Fix =
+    #     download the binary ONCE in an unbounded pre-warm step + cache
+    #     ~/.cache/mongodb-binaries, so every MMS.create() then starts in ~1s.
+    #   W954 (config/mongoose.plugins.js) — the deeper cause, proven by the same
+    #     suites hanging LOCALLY where the binary was already cached: the global
+    #     legacy-hook shim wrapped `post('save', function(doc){})` hooks, leaving
+    #     the wrapper Promise unresolved → every .save() hung. Fixed separately;
+    #     this pre-warm only removes the CI cold-download half.
     strategy:
       fail-fast: false
       matrix:
@@ -148,6 +162,22 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+
+      # W953 — cache + pre-warm the MongoMemoryServer mongod binary (see comment
+      # above). restore-keys falls back to the most recent prior binary cache so
+      # a package-lock bump that doesn't change the mongod version is a cache hit.
+      - name: Cache MongoMemoryServer binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            mongodb-binaries-${{ runner.os }}-
+      - name: Pre-warm MongoMemoryServer binary (unbounded — avoids per-test download timeout)
+        working-directory: backend
+        run: |
+          node -e "const{MongoMemoryServer}=require('mongodb-memory-server');MongoMemoryServer.create().then(async m=>{console.log('mongod ready at',m.getUri());await m.stop();process.exit(0)}).catch(e=>{console.error('prewarm failed:',e&&e.message);process.exit(1)})" \
+            || echo '⚠️ MMS pre-warm failed — Mongo-backed tests may time out (binary mirror unreachable?)'
 
       - name: Run backend tests (sharded sprint gate)
         working-directory: backend

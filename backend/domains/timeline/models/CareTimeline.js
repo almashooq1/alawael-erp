@@ -95,6 +95,7 @@ const careTimelineSchema = new mongoose.Schema(
         'consent_obtained',
         'consent_revoked', // W1002 — consent withdrawn (PDPL/CRPD)
         'home_program_assigned',
+        'home_program_completed', // W1003 — home program completed
         // Communication
         'note_added',
         'document_uploaded',

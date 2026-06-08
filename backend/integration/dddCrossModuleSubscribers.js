@@ -1442,6 +1442,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Home program → Timeline: assigned (W1003) ────────────────────
+  subscribers.push({
+    name: 'home_program:assigned → timeline:record',
+    pattern: 'home_program.home_program.assigned',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'home_program_assigned',
+            category: 'clinical',
+            severity: 'info',
+            title: `Home program assigned (${event.payload.title || event.payload.programType || ''})`.trim(),
+            title_ar: `إسناد برنامج منزلي (${event.payload.title || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Home-program-assigned timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  // ─── Home program → Timeline: completed (W1003) ───────────────────
+  subscribers.push({
+    name: 'home_program:completed → timeline:record',
+    pattern: 'home_program.home_program.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'home_program_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Home program completed (${event.payload.title || event.payload.programType || ''})`.trim(),
+            title_ar: `اكتمال برنامج منزلي (${event.payload.title || ''})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Home-program-completed timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

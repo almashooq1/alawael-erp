@@ -149,6 +149,42 @@ followUpVisitSchema.index({ beneficiary: 1, status: 1 });
 followUpVisitSchema.index({ conductedBy: 1, scheduledDate: 1 });
 followUpVisitSchema.index({ status: 1, scheduledDate: 1 });
 
+// W992 — surface post-rehab follow-up visits on the unified-core timeline: an
+// attended visit (an engagement touchpoint — positive) and a missed one (the
+// family didn't show for a scheduled follow-up — an actionable warning). Fires
+// once on the status flip to COMPLETED / MISSED. Native pre-compile hooks per the
+// proven W970 pattern (the modelEventBridge-is-dead workaround); guarded +
+// fire-and-forget so persistence never blocks. Consumed by
+// dddCrossModuleSubscribers → CareTimeline. Companion to the case-level W987
+// (PostRehabCase completed / lost). NOTE: the beneficiary ref field is
+// `beneficiary` (not `beneficiaryId`). eventTypes are visit.attended/visit.missed
+// (NOT visit.completed/no_show — those are owned by the W985 family domain).
+followUpVisitSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+followUpVisitSchema.post('save', function (doc) {
+  try {
+    if (doc.status === this.$__prevStatus) return; // no status change
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiary) return;
+    const base = {
+      visitId: String(doc._id),
+      beneficiaryId: String(doc.beneficiary),
+      caseId: doc.postRehabCase ? String(doc.postRehabCase) : '',
+      visitType: doc.visitType || '',
+      visitNumber: doc.visitNumber,
+    };
+    if (doc.status === 'COMPLETED') {
+      Promise.resolve(integrationBus.publish('followup', 'visit.attended', base)).catch(() => {});
+    } else if (doc.status === 'MISSED') {
+      Promise.resolve(integrationBus.publish('followup', 'visit.missed', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 const FollowUpVisit =
   mongoose.models.FollowUpVisit || mongoose.model('FollowUpVisit', followUpVisitSchema);
 

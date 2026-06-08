@@ -854,6 +854,43 @@ const FOLLOWUP_EVENTS = {
     priority: PRIORITY.HIGH,
     consumers: ['timeline', 'dashboards', 'ai-recommendations'],
   },
+
+  // W992 — visit-level follow-up (companion to the case-level events above).
+  // eventTypes are visit.attended/visit.missed (NOT visit.completed/no_show,
+  // which the W985 family domain owns — registry-wide eventType strings are unique).
+  VISIT_ATTENDED: {
+    domain: 'followup',
+    eventType: 'visit.attended',
+    version: 1,
+    description: 'حضور زيارة متابعة — Post-rehab follow-up visit attended',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      visitNumber: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  VISIT_MISSED: {
+    domain: 'followup',
+    eventType: 'visit.missed',
+    version: 1,
+    description: 'تغيّب عن زيارة متابعة — Post-rehab follow-up visit missed',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      visitNumber: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

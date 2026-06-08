@@ -536,14 +536,15 @@ class AuditTrail {
       const modelName = pluginOptions.modelName || 'Unknown';
 
       // Track saves (create/update)
-      schema.pre('save', function (next) {
+      // W955 — async (Mongoose-9 native); no longer depends on the
+      // config/mongoose.plugins legacy-hook shim to supply `next`.
+      schema.pre('save', async function () {
         if (this.isNew) {
           this._auditAction = 'create';
         } else {
           this._auditAction = 'update';
           this._auditBefore = this._original || {};
         }
-        next();
       });
 
       schema.post('save', function (doc) {

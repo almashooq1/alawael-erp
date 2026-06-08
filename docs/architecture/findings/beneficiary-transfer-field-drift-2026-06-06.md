@@ -1,72 +1,83 @@
-# Finding — BeneficiaryTransfer branch field-drift (broken feature + isolation gap)
+# Finding — BeneficiaryTransfer FK field-drift (broken feature + isolation gap)
 
-**Discovered:** 2026-06-06, during the W973 M-naming branch-isolation sweep.
-**Status:** 🔴 Real bug, **DEFERRED** from the autonomous M-naming pass — needs a
-coordinated multi-file fix + a data decision (behavior-changing). NOT shippable as
-a one-file change.
-**Severity:** the beneficiary-transfer feature persists **no branch data at all**,
-so branch isolation on it is moot and one list route over-restricts to empty.
+**Discovered:** 2026-06-06 (W973 M-naming sweep). **Deepened + corrected** 2026-06-06
+after attempting the fix.
+**Status:** 🔴 Real bug, **DEFERRED** — a two-directional reconcile across the
+model + ~4 files where each direction has a tradeoff (one is API-breaking). Needs
+an owner decision; NOT a safe autonomous change on a hot branch.
+**Severity:** the beneficiary-transfer feature persists **no FK data at all**
+(beneficiary + both branches), so the transfer is unlinked AND branch isolation is
+moot. One list route also over-restricts to empty.
 
-## The drift (one model, three disagreeing field names)
+## The drift — THREE FK fields, not just branch
 
-`models/BeneficiaryTransfer.js` schema declares the branch FKs as
-**`fromBranchId` / `toBranchId`** (`ref:'Branch'`, `required:true`, indexed),
-under default `strict:true`. But its writers and most readers use
-**`fromBranch` / `toBranch`**:
+`models/BeneficiaryTransfer.js` declares its FKs with the **`*Id` suffix**
+(`strict:true`): `beneficiaryId`, `fromBranchId`, `toBranchId` (all `required:true`,
+indexed). The `requestedBy`/`approvedBy` FKs match the code (no drift). But the
+**writers + most readers use the BARE names** `beneficiary` / `fromBranch` /
+`toBranch` → strict mode **strips them on write** (doc saved with none of the three
+FKs) and queries/populates hit non-existent paths.
 
-| Site                                                                                                | Uses                              | Effect                                                                                                                    |
-| --------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `services/BeneficiaryService.js:250-251` (`initiateTransfer` → `.create({ fromBranch, toBranch })`) | `fromBranch`/`toBranch`           | **stripped** by strict mode → doc saved with NO branch field                                                              |
-| `services/BeneficiaryService.js:158/223/279/458` (activity log, completion)                         | `transfer.fromBranch`/`.toBranch` | read `undefined`                                                                                                          |
-| `routes/beneficiary-transfers.routes.js` (GET / list, $or scope, populate, GET /:id)                | `fromBranch`/`toBranch`           | query/populate a non-existent field                                                                                       |
-| `routes/missing-models.routes.js:138-152` (GET /beneficiary-transfers)                              | `fromBranch`/`toBranch`           | same — **but its branch scope is CORRECT** (`req.branchScope.branchId`, line 142-143)                                     |
-| `routes/employee-affairs-phase3.routes.js:118`                                                      | `transfer.toBranch`               | reads `undefined`                                                                                                         |
-| `routes/branch-enhanced.routes.js:58-59` (`.populate('fromBranchId')`)                              | **`fromBranchId`**                | schema-aligned, but the docs have no `fromBranchId` value (writer wrote the stripped `fromBranch`) → populate yields null |
-| `services/branches/branch-enhanced.service.js:176` (`.create({ ...data })`)                         | depends on caller `data`          | inherits the caller's field name                                                                                          |
+| Site                                                                                                                       | Field style | Effect                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `services/BeneficiaryService.js` (`initiateTransfer` create + activity reads + history populate, ~248-256/282/285/390-401) | **bare**    | create strips beneficiary/fromBranch/toBranch → doc has only requestedBy/transferDate/reason/status                     |
+| `routes/beneficiary-transfers.routes.js` (list query/$or-scope/populate, /:id, /complete)                                  | **bare**    | query/populate non-existent fields; the `$or` branch scope reads the never-populated `req.user.branch` too (W942 class) |
+| `routes/missing-models.routes.js:135-152` (GET /beneficiary-transfers)                                                     | **bare**    | same fields — **but its branch scope is CORRECT** (`req.branchScope.branchId`)                                          |
+| `routes/branch-enhanced.routes.js:58-59` (`.populate('fromBranchId'/'toBranchId')`)                                        | **`*Id`**   | schema-aligned, but docs have no value (writer wrote the stripped bare names) → null                                    |
+| `services/branches/branch-enhanced.service.js:175` (`requestTransfer` → `.create({...data})`)                              | passthrough | **dormant** — no live route caller found                                                                                |
 
-Net: **every transfer document is created with no branch field**, and the readers
-are split `fromBranch` (5 sites) vs `fromBranchId` (1 site). My W942 `req.user.branch`
-fix for this route was **reverted** — scoping a field that doesn't persist would
-have matched nothing (over-restrict), not fixed the leak.
+So the CODE is internally consistent on **bare** names at 3 of the 4 live sites;
+only `branch-enhanced.routes` + the schema use `*Id`. **NOT** a sibling-wide
+pattern: `AssetTransfer` (twin model) is fully correct on `*Id`
+(`routes/asset-management.routes.js`). `employee-affairs-phase3.routes.js:118` is a
+DIFFERENT model (`models/HR/Transfer`, employee transfer) — **out of scope**.
 
-## NOT a sibling-wide pattern
+## Two fix directions — each with a tradeoff (OWNER DECISION)
 
-`AssetTransfer` (the structural twin, also `fromBranchId`/`toBranchId`) is **correct**
-— `routes/asset-management.routes.js` uses `fromBranchId`/`toBranchId` consistently
-(query, body, create). The drift is isolated to **BeneficiaryTransfer**.
+**Direction A — schema → bare names (RECOMMENDED: minimal + NON-breaking).**
+Rename the schema FKs `beneficiaryId→beneficiary`, `fromBranchId→fromBranch`,
+`toBranchId→toBranch` (+ the `fromBranchId`/`beneficiaryId` indexes). Then the
+service writes persist, all list routes' query/populate work, and **the API
+response shape is unchanged** (`.populate('beneficiary')` → `response.beneficiary`,
+exactly as today). Cost: 1 schema file + the **1 outlier** `branch-enhanced.routes`
+(2 populates `fromBranchId`→`fromBranch`) + an index recreation on deploy. Audit
+first: grep `beneficiaryId|fromBranchId|toBranchId` for BeneficiaryTransfer readers
+(found: only `branch-enhanced.routes` + the schema/indexes).
 
-## Canonical target = `fromBranchId` / `toBranchId`
+**Direction B — code → `*Id` (matches schema + AssetTransfer + the `branchId`
+convention, but BREAKING).** Change the service write + both list routes to
+`beneficiaryId/fromBranchId/toBranchId`. Cost: ~4 files / ~15 sites, AND the
+populated key changes `response.beneficiary` → `response.beneficiaryId` — a
+**cross-repo frontend (web-admin) change**. This is what W973 started and **reverted**
+(it was incomplete — only branch fields, not `beneficiary` — and API-breaking).
 
-Reasons: the schema already declares it (ref + indexes); `AssetTransfer` (sibling)
-uses it; `branch-enhanced.routes.js` already uses it; it matches the codebase
-`branchId` camelCase FK convention (W269 / M-naming doctrine).
+Recommendation: **Direction A** — it preserves the API contract and the code is
+already 4/5 bare. (The `*Id` convention argument applies to the single-branch
+`branchId` doctrine; a from/to pair on a legacy model doesn't have to follow it.)
 
-## Fix plan (coordinated, one PR, reviewed)
+## Either way: also re-apply the branch-scope fix
 
-1. **Service write** `services/BeneficiaryService.js:250-251` →
-   `.create({ fromBranchId: beneficiary.branch, toBranchId })`; update the
-   `transfer.fromBranch`/`.toBranch` reads at 158/223/279/458 → `…BranchId`.
-2. **`routes/beneficiary-transfers.routes.js`** → switch the explicit query filters
-   (80-82), the branch `$or` scope (85-87 — re-apply the W973 helper but on
-   `fromBranchId`/`toBranchId`), and every `.populate('fromBranch'|'toBranch')`
-   (96-97, 124-125) to `fromBranchId`/`toBranchId`. Then prune from the W942 baseline.
-3. **`routes/missing-models.routes.js:138-152`** → same field swap (its scope is
-   already correct).
-4. **`routes/employee-affairs-phase3.routes.js:118`** → `transfer.toBranchId`.
-5. **`services/branches/branch-enhanced.service.js`** → ensure callers pass
-   `fromBranchId`/`toBranchId`.
-6. **Data**: existing BeneficiaryTransfer docs have NEITHER field (all stripped) →
-   they stay branch-less; no migration _required_ for correctness, but a one-off
-   backfill (from the beneficiary's branch / transfer history) would make old
-   transfers visible to restricted users again. Decide per data volume.
-7. **Test**: a MongoMemoryServer cross-branch test (like
-   `referral-routes-branch-isolation-wave973.test.js`) proving a created transfer
-   PERSISTS `fromBranchId`/`toBranchId` and the list is branch-scoped (restricted →
-   own only, HQ → all) — across BOTH `beneficiary-transfers.routes` and
-   `missing-models.routes`.
+`beneficiary-transfers.routes.js` GET `/` scopes via the never-populated
+`req.user.branch` (W942 class). Re-apply the `transferBranchScope(req)` helper
+(maps `branchFilter(req)` → the chosen field) for the `$or`. `missing-models.routes`
+already scopes correctly via `req.branchScope.branchId`.
+
+## Test (post-fix)
+
+MongoMemoryServer cross-branch test (template:
+`referral-routes-branch-isolation-wave973.test.js`): assert a created transfer
+PERSISTS the beneficiary + both branch FKs, and the list is branch-scoped
+(restricted → own only, HQ → all) across BOTH `beneficiary-transfers.routes` and
+`missing-models.routes`. Watch the unique-index race → `await Model.init()`.
+
+## Existing data
+
+Every existing transfer doc has NONE of the three FKs (all stripped) → no migration
+is _required_ for correctness; a one-off backfill (from the beneficiary's branch /
+history) would resurrect old transfers for restricted users. Decide per volume.
 
 ## Why deferred (not done autonomously)
 
-~5 files / ~15 sites, behavior-changing, touches a shared service, on a fast-moving
-shared branch with no integration coverage for all transfer paths — exactly the
-"reviewed, coordinated" class. Characterized here so the fix is mechanical.
+Two-directional, one direction API-breaking + cross-repo, a schema rename with
+index recreation, on a fast-moving shared branch with no integration coverage.
+Characterized here so the chosen direction is a mechanical PR.

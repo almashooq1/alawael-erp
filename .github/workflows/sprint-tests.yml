@@ -1258,11 +1258,11 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
+      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
+      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
+      - 'backend/__tests__/pressure-injury-wave1011.test.js'
+      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2504,11 +2504,11 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
+      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
+      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
+      - 'backend/__tests__/pressure-injury-wave1011.test.js'
+      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

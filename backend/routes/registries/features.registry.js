@@ -59,6 +59,8 @@ module.exports = function registerFeatureRoutes(
   );
   const visionScreeningRoutes = safeRequire('../routes/vision-screening.routes');
   const hearingScreeningRoutes = safeRequire('../routes/hearing-screening.routes');
+  const fallsRiskAssessmentRoutes = safeRequire('../routes/falls-risk-assessment.routes');
+  const pressureInjuryRoutes = safeRequire('../routes/pressure-injury.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -179,6 +181,12 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'vision-screening', visionScreeningRoutes, authenticate);
   // Wave 724: Hearing screening (فحص السمع) — functional hearing + WHO grade + loss type + ENT/audiology referral
   dualMountAuth(app, 'hearing-screening', hearingScreeningRoutes, authenticate);
+  // Wave 1010: Falls-risk assessment + prevention (تقييم خطر السقوط والوقاية) — Morse/Humpty-Dumpty/STRATIFY
+  // tool-based screen → risk level → prevention plan → re-assessment cadence; CBAHI/JCI mandatory
+  dualMountAuth(app, 'falls-risk-assessment', fallsRiskAssessmentRoutes, authenticate);
+  // Wave 1011: Pressure-injury / skin-integrity register (سجل إصابات الضغط والعناية بالجلد) — NPIAP
+  // staging + Braden risk + offloading plan + healing trajectory + HAPI origin; CBAHI/JCI mandatory
+  dualMountAuth(app, 'pressure-injury', pressureInjuryRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

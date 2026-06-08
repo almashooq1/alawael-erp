@@ -762,3 +762,4 @@ __tests__/legacy-hook-adapter-wave954.test.js
 __tests__/legacy-hook-no-hang-behavioral-wave954.test.js
 __tests__/reports-analytics-branch-isolation-behavioral-wave959.test.js
 __tests__/reports-analytics-hr-isolation-behavioral-wave961.test.js
+__tests__/reports-analytics-executive-isolation-behavioral-wave962.test.js

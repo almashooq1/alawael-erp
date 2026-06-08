@@ -1027,6 +1027,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Medical referral completion → unified-core timeline (W1001) ────
+  // A beneficiary's medical referral reaching 'completed' (consultation /
+  // treatment loop closed) is a clinical milestone on the longitudinal record.
+  subscribers.push({
+    name: 'medical-referrals:completed → timeline:record',
+    pattern: 'medical-referrals.medical_referral.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const spec = event.payload.specialty ? `: ${event.payload.specialty}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'medical_referral_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Medical referral completed${spec}`,
+            title_ar: 'اكتملت الإحالة الطبية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Medical referral timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

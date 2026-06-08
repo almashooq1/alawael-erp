@@ -699,6 +699,34 @@ const REFERRAL_EVENTS = {
 };
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ── W1001: Medical referral completion → unified core ────────────────────────
+// MedicalReferral is the clinical, beneficiary-required referral record. When
+// a referral reaches 'completed' (the consultation/treatment loop concluded),
+// the longitudinal record must carry it as a clinical milestone.
+
+const MEDICAL_REFERRAL_EVENTS = {
+  MEDICAL_REFERRAL_COMPLETED: {
+    domain: 'medical-referrals',
+    eventType: 'medical_referral.completed',
+    version: 1,
+    description:
+      'اكتملت الإحالة الطبية واستُلمت الاستشارة — Medical referral completed (consultation loop closed)',
+    payload: {
+      referralId: 'string',
+      referralNumber: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      referralType: 'string',
+      specialty: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -716,6 +744,7 @@ const DDD_CONTRACTS = {
   discharge: DISCHARGE_EVENTS,
   admissions: ADMISSION_EVENTS,
   referrals: REFERRAL_EVENTS,
+  'medical-referrals': MEDICAL_REFERRAL_EVENTS,
 };
 
 /**
@@ -749,6 +778,7 @@ module.exports = {
   DISCHARGE_EVENTS,
   ADMISSION_EVENTS,
   REFERRAL_EVENTS,
+  MEDICAL_REFERRAL_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

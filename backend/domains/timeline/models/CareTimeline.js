@@ -86,6 +86,8 @@ const careTimelineSchema = new mongoose.Schema(
         'admission_enrolled',
         // Referral conversion / loop closed (W997 — unified-core linkage)
         'referral_converted',
+        // Medical referral completion (W1001 — unified-core linkage)
+        'medical_referral_completed',
         // Family
         'family_contact',
         'family_meeting',

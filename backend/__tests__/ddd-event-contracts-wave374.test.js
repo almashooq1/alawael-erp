@@ -68,6 +68,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'discharge', // W995 — discharge plan completion → core timeline
   'admissions', // W996 — waitlist enrollment (admission) → core timeline
   'referrals', // W997 — referral conversion (loop closed) → core timeline
+  'medical-referrals', // W998 — medical referral completion → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -110,6 +111,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'discharge', // W995 — discharge.completed
     'admission', // W996 — admission.enrolled (waitlist)
     'referral', // W997 — referral.converted (ReferralTracking)
+    'medical_referral', // W998 — medical_referral.completed (MedicalReferral)
   ])
 );
 

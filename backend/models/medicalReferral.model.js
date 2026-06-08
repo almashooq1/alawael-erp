@@ -287,6 +287,36 @@ const ReferralFollowUpSchema = new Schema(
 
 ReferralFollowUpSchema.index({ referral: 1, date: -1 });
 
+// ─── Unified-core producer (W1001) ───────────────────────────────────────────
+// Emit medical_referral.completed exactly once when a beneficiary's medical
+// referral reaches 'completed' (the consultation/treatment loop concluded). The
+// flag is computed in an async pre('save') to match the existing async hook
+// style on this schema (W483 gate); the event publishes in post('save').
+MedicalReferralSchema.pre('save', async function markCompletedTransition() {
+  this.$__referralCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+MedicalReferralSchema.post('save', async function publishReferralCompleted(doc) {
+  try {
+    if (!this.$__referralCompletedNow) return;
+    if (!doc.beneficiary) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('medical-referrals', 'medical_referral.completed', {
+      referralId: String(doc._id),
+      referralNumber: doc.referralNumber || null,
+      beneficiaryId: String(doc.beneficiary),
+      branchId: doc.branchId ? String(doc.branchId) : null,
+      referralType: doc.referralType || null,
+      specialty: (doc.referredTo && doc.referredTo.specialty) || null,
+      completedAt: doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    // Producer must never break the save path.
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════

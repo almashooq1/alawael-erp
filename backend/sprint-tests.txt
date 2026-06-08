@@ -735,3 +735,4 @@ __tests__/mar-core-linkage-wave994.test.js
 __tests__/discharge-core-linkage-wave995.test.js
 __tests__/admission-core-linkage-wave996.test.js
 __tests__/referral-core-linkage-wave997.test.js
+__tests__/medical-referral-core-linkage-wave1001.test.js

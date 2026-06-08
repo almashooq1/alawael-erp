@@ -148,7 +148,6 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/TaxFiling.js',
   'models/TrainerEvaluation.js',
   'models/TrainingCompliance.js',
-  'models/WaitlistEntry.js',
   'models/WebhookDelivery.js',
   'models/auditLog.model.js',
   'models/clinical-assessment/caregiver-burden-assessment.model.js',

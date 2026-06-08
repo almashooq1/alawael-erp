@@ -1272,6 +1272,8 @@ on:
       - 'backend/__tests__/legacy-hook-no-hang-behavioral-wave954.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/consent-core-linkage-wave1002.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-program-core-linkage-wave1003.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2527,6 +2529,8 @@ on:
       - 'backend/__tests__/legacy-hook-no-hang-behavioral-wave954.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/consent-core-linkage-wave1002.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-program-core-linkage-wave1003.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

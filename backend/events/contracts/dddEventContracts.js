@@ -1040,6 +1040,49 @@ const CONSENT_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Home Program Events — أحداث البرنامج المنزلي (W1003)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Parent-administered home exercise programs (care extends into the home). A
+// shared vocabulary across FamilyHomeProgram + HomeAssignment, with a
+// `programType` discriminator. assigned = a program was given to the family;
+// completed = the program ran its course. Producer: native post-save hooks.
+
+const HOME_PROGRAM_EVENTS = {
+  ASSIGNED: {
+    domain: 'home_program',
+    eventType: 'home_program.assigned',
+    version: 1,
+    description: 'إسناد برنامج منزلي — Home program assigned to the family',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  COMPLETED: {
+    domain: 'home_program',
+    eventType: 'home_program.completed',
+    version: 1,
+    description: 'اكتمال برنامج منزلي — Home program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1065,6 +1108,7 @@ const DDD_CONTRACTS = {
   insurance: INSURANCE_EVENTS,
   referral: REFERRAL_EVENTS,
   consent: CONSENT_EVENTS,
+  home_program: HOME_PROGRAM_EVENTS,
 };
 
 /**
@@ -1103,6 +1147,7 @@ module.exports = {
   INSURANCE_EVENTS,
   REFERRAL_EVENTS,
   CONSENT_EVENTS,
+  HOME_PROGRAM_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

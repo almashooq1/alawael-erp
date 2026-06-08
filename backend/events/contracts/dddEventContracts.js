@@ -924,6 +924,28 @@ const ASSISTIVE_DEVICE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1029 — Respite booking lifecycle → unified core.
+const RESPITE_EVENTS = {
+  RESPITE_COMPLETED: {
+    domain: 'respite',
+    eventType: 'respite.completed',
+    version: 1,
+    description:
+      'اكتملت رعاية مؤقتة — Respite booking completed (caregiver-relief stay closed out)',
+    payload: {
+      respiteBookingId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      bookingType: 'string',
+      nightCount: 'number',
+      checkedOutAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -949,6 +971,7 @@ const DDD_CONTRACTS = {
   'home-visits': HOME_VISIT_EVENTS,
   'family-counselling': FAMILY_COUNSELLING_EVENTS,
   'assistive-devices': ASSISTIVE_DEVICE_EVENTS,
+  respite: RESPITE_EVENTS,
 };
 
 /**
@@ -990,6 +1013,7 @@ module.exports = {
   HOME_VISIT_EVENTS,
   FAMILY_COUNSELLING_EVENTS,
   ASSISTIVE_DEVICE_EVENTS,
+  RESPITE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

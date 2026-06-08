@@ -241,6 +241,39 @@ RespiteBookingSchema.virtual('isActive').get(function () {
 RespiteBookingSchema.set('toJSON', { virtuals: true });
 RespiteBookingSchema.set('toObject', { virtuals: true });
 
+// ── W1029 — respite-completion producer ─────────────────────────
+// When a respite booking reaches the terminal 'completed' status (checked
+// out), emit a caregiver-relief milestone onto the beneficiary's unified-core
+// timeline. Non-callback hook family → W483-safe under the global async
+// mongoose plugins. The literal `integrationBus.publish` keeps the W389/W392
+// producer-coverage guards satisfied.
+RespiteBookingSchema.pre('save', function () {
+  this.$__respiteCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+RespiteBookingSchema.post('save', function emitRespiteCompleted(doc) {
+  try {
+    if (!this.$__respiteCompletedNow) return;
+    if (!doc.beneficiaryId) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+
+    Promise.resolve(
+      integrationBus.publish('respite', 'respite.completed', {
+        respiteBookingId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        bookingType: doc.bookingType || '',
+        nightCount: doc.nightCount || 0,
+        checkedOutAt: doc.checkedOutAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.RespiteBooking || mongoose.model('RespiteBooking', RespiteBookingSchema);
 

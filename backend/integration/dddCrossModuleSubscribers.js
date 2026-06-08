@@ -1285,6 +1285,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Respite booking completed → unified-core timeline (W1029) ────
+  // A respite stay reaching 'completed' (checked out) is a caregiver-relief
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'respite:completed → timeline:record',
+    pattern: 'respite.respite.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const bType = event.payload.bookingType ? ` (${event.payload.bookingType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'respite_completed',
+            category: 'family',
+            severity: 'success',
+            title: `Respite booking completed${bType}`,
+            title_ar: 'اكتملت الرعاية المؤقتة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Respite timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -83,9 +83,9 @@ const WhatsAppDlqSchema = new mongoose.Schema(
   { collection: 'whatsapp_dlq' }
 );
 
-WhatsAppDlqSchema.pre('save', function preSave(next) {
+// W956 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+WhatsAppDlqSchema.pre('save', async function preSave() {
   this.updatedAt = new Date();
-  next();
 });
 
 WhatsAppDlqSchema.index({ status: 1, nextRetryAt: 1 });

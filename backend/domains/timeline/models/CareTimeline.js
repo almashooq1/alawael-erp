@@ -90,6 +90,8 @@ const careTimelineSchema = new mongoose.Schema(
         'medical_referral_completed',
         // Measurement/assessment result approved (W1022 — unified-core linkage)
         'measurement_result_approved',
+        // Insurance claim paid (W1000 — unified-core linkage)
+        'insurance_claim_paid',
         // Family
         'family_contact',
         'family_meeting',

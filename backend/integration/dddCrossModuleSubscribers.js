@@ -1084,6 +1084,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Insurance claim paid → unified-core timeline (W1000) ───────────
+  // A beneficiary's insurance claim reaching 'paid' closes the reimbursement
+  // loop — a financial milestone on the longitudinal record.
+  subscribers.push({
+    name: 'insurance-claims:paid → timeline:record',
+    pattern: 'insurance-claims.insurance_claim.paid',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const num = event.payload.claimNumber ? ` (${event.payload.claimNumber})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'insurance_claim_paid',
+            category: 'administrative',
+            severity: 'success',
+            title: `Insurance claim paid${num}`,
+            title_ar: 'تم سداد مطالبة التأمين',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Insurance claim timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

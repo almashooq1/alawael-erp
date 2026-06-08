@@ -755,6 +755,32 @@ const MEASUREMENT_EVENTS = {
 };
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ── W1000: Insurance claim paid → unified core ───────────────────────
+// A beneficiary's insurance claim reaching 'paid' closes the reimbursement
+// loop — a financial/operational milestone on the longitudinal record.
+
+const INSURANCE_CLAIM_EVENTS = {
+  INSURANCE_CLAIM_PAID: {
+    domain: 'insurance-claims',
+    eventType: 'insurance_claim.paid',
+    version: 1,
+    description: 'تم سداد مطالبة تأمين للمستفيد — Insurance claim paid (reimbursement loop closed)',
+    payload: {
+      claimId: 'string',
+      claimNumber: 'string',
+      beneficiaryId: 'string',
+      claimType: 'string',
+      payerShare: 'number',
+      paymentAmount: 'number',
+      paidAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -774,6 +800,7 @@ const DDD_CONTRACTS = {
   referrals: REFERRAL_EVENTS,
   'medical-referrals': MEDICAL_REFERRAL_EVENTS,
   measurements: MEASUREMENT_EVENTS,
+  'insurance-claims': INSURANCE_CLAIM_EVENTS,
 };
 
 /**
@@ -809,6 +836,7 @@ module.exports = {
   REFERRAL_EVENTS,
   MEDICAL_REFERRAL_EVENTS,
   MEASUREMENT_EVENTS,
+  INSURANCE_CLAIM_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -109,6 +109,8 @@ const careTimelineSchema = new mongoose.Schema(
         'transition_completed',
         // Diet prescription activated (W1031 — unified-core linkage)
         'diet_prescription_activated',
+        // Behavior plan completed (W1032 — unified-core linkage)
+        'behavior_plan_completed',
         // Family
         'family_contact',
         'family_meeting',

@@ -25,5 +25,18 @@
     "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.js"],
-  "exclude": ["node_modules", "coverage", "dist", "logs", ".jest-cache", "_archived"]
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "coverage",
+    "dist",
+    "build",
+    "logs",
+    ".jest-cache",
+    "_archived",
+    "uploads",
+    "tests",
+    "__tests__",
+    "**/__snapshots__"
+  ]
 }

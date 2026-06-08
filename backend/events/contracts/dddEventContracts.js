@@ -369,6 +369,24 @@ const BEHAVIOR_EVENTS = {
     priority: PRIORITY.NORMAL,
     consumers: ['timeline', 'care-plans'],
   },
+
+  // W1032 — Behavior plan reaching 'completed' (BIP goals met / cycle finished)
+  PLAN_COMPLETED: {
+    domain: 'behavior',
+    eventType: 'behavior.plan_completed',
+    version: 1,
+    description: 'اكتملت خطة إدارة السلوك — Behavior management plan completed',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      title: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

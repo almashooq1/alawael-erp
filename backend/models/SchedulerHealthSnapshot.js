@@ -27,9 +27,9 @@ const SchedulerHealthSnapshotSchema = new mongoose.Schema(
   { collection: 'scheduler_health_snapshots' }
 );
 
-SchedulerHealthSnapshotSchema.pre('save', function preSave(next) {
+// W956 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+SchedulerHealthSnapshotSchema.pre('save', async function preSave() {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports =

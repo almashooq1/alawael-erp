@@ -74,11 +74,11 @@ const clinicalPathwayPlanSchema = new mongoose.Schema(
 clinicalPathwayPlanSchema.index({ branchId: 1, status: 1, createdAt: -1 });
 clinicalPathwayPlanSchema.index({ beneficiaryId: 1, pathwayType: 1, status: 1 });
 
-clinicalPathwayPlanSchema.pre('validate', function validateInvariants(next) {
+// W956 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+clinicalPathwayPlanSchema.pre('validate', async function validateInvariants() {
   if (this.targetEndDate && this.startDate && this.targetEndDate < this.startDate) {
     this.invalidate('targetEndDate', 'targetEndDate must be greater than or equal to startDate');
   }
-  next();
 });
 
 module.exports =

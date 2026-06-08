@@ -60,8 +60,17 @@ const SKIP_DIR_NAMES = new Set([
 // Match `<Schema>.pre('event', <opts?>, <fn>)` or .post(...). Capture
 // event name + signature start. We need to read forward to see whether
 // the function is `async function` / `function (next)` / arrow.
+//
+// W956 — closed two blind spots that hid the W946/W954 callback class:
+//   (a) `\w*(?:Schema|schema)` (was `\w+…`) now matches a BARE `schema` /
+//       `Schema` var (the universal plugin-function param name), not just
+//       `fooSchema`. A bare 6-char `schema` failed the old `\w+…` (needed ≥7).
+//   (b) `function\s*\w*\s*\(` (was `function\s*\(`) now matches a NAMED
+//       function expression — `function preSave(next)` — not just anonymous.
+// Residual (not yet covered): array-event hooks `pre(['a','b'], fn)` still need
+// a string event literal here, so they remain invisible — documented follow-up.
 const HOOK_RE =
-  /(\w+(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\(([^)]*)\)/g;
+  /(\w*(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\w*\s*\(([^)]*)\)/g;
 
 // W494 baseline (2026-05-27): files with at least one pure callback-
 // style pre/post hook. Under Mongoose 9, EVERY callback hook throws
@@ -86,6 +95,16 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   // `typeof next === 'function'`, so they are Mongoose-9-safe). All real
   // callback hooks (async+next W946, sync W948, next(arg) W949) are converted.
   "models/auditLog.model.js",
+  // W956 — surfaced ONLY after the regex was tightened to catch bare-`Schema`
+  // vars + named function expressions (these were invisible to the old regex,
+  // so they were never in the baseline). Both are in the parallel agent's
+  // active core-linkage hot-zone (modelEventBridge had commits this session;
+  // FamilyHomeProgram was edited ~26 min before W956), so converting them now
+  // would collide. They WORK today via the (now-correct, W954) shim; ratchet
+  // each to `async function () {}` + prune from this set once the hot-zone
+  // settles. The W955 global plugins + 4 W956 model files are already converted.
+  "integration/modelEventBridge.js",
+  "models/FamilyHomeProgram.js",
 ]);
 
 function listSchemaFiles(roots) {

@@ -741,3 +741,4 @@ __tests__/family-visit-core-linkage-wave985.test.js
 __tests__/transition-plan-core-linkage-wave986.test.js
 __tests__/postrehab-case-core-linkage-wave987.test.js
 __tests__/followup-visit-core-linkage-wave992.test.js
+__tests__/insurance-claim-core-linkage-wave994.test.js

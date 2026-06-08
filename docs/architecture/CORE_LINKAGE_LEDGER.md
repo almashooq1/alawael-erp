@@ -117,8 +117,10 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Guardian-portal engagement | — | — | Open |
 
 ### Tier 3 — operational / governance
-Inventory low-stock, maintenance overdue, contract/document expiry, insurance/
-NPHIES claim lifecycle, transport incidents.
+| Domain | Model | Event | Status |
+| --- | --- | --- | --- |
+| Insurance / NPHIES claims | `NphiesInsuranceClaim` | `insurance.claim.approved` / `.rejected` → `insurance_claim` | ✅ **W994** |
+| Inventory low-stock · maintenance overdue · contract/document expiry · transport incidents | — | — | Open — mostly **not** beneficiary-keyed, so they belong on dashboards/KPIs, not the per-beneficiary `CareTimeline` |
 
 **Mechanism guidance:** prefer **native pre-compile model hooks (C)** for models
 created via many routes (path-agnostic, reliable). Use a **bridge MAPPING (A)**
@@ -142,11 +144,11 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 12 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 13 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
-  W992 follow-up visits — all merged to main).
+  W992 follow-up visits · W994 insurance claims — all merged to main).
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

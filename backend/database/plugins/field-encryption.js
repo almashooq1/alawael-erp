@@ -233,54 +233,46 @@ function encryptedFieldsPlugin(schema, options = {}) {
   }
 
   // ── Encrypt on save ──
-  schema.pre('save', function (next) {
-    try {
-      for (const fieldPath of fields) {
-        const value = this.get(fieldPath);
-        if (value && typeof value === 'string' && !value.startsWith(ENCRYPTION_PREFIX)) {
-          // Encrypt the value
-          this.set(fieldPath, encrypt(value));
+  // W955 — async (Mongoose-9 native); a throw rejects the save exactly as
+  // next(err) did. No longer depends on the legacy-hook shim.
+  schema.pre('save', async function () {
+    for (const fieldPath of fields) {
+      const value = this.get(fieldPath);
+      if (value && typeof value === 'string' && !value.startsWith(ENCRYPTION_PREFIX)) {
+        // Encrypt the value
+        this.set(fieldPath, encrypt(value));
 
-          // Update search hash if searchable
-          if (searchable.includes(fieldPath)) {
-            const hashField = `_hash_${fieldPath.replace(/\./g, '_')}`;
-            this.set(hashField, deterministicHash(value, fieldPath));
-          }
+        // Update search hash if searchable
+        if (searchable.includes(fieldPath)) {
+          const hashField = `_hash_${fieldPath.replace(/\./g, '_')}`;
+          this.set(hashField, deterministicHash(value, fieldPath));
         }
       }
-      next();
-    } catch (err) {
-      next(err);
     }
   });
 
   // ── Encrypt on update ──
-  schema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) {
-    try {
-      const update = this.getUpdate();
-      if (!update) return next();
+  // W955 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+  schema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], async function () {
+    const update = this.getUpdate();
+    if (!update) return;
 
-      const processObj = obj => {
-        for (const fieldPath of fields) {
-          const value = obj[fieldPath];
-          if (value && typeof value === 'string' && !value.startsWith(ENCRYPTION_PREFIX)) {
-            obj[fieldPath] = encrypt(value);
+    const processObj = obj => {
+      for (const fieldPath of fields) {
+        const value = obj[fieldPath];
+        if (value && typeof value === 'string' && !value.startsWith(ENCRYPTION_PREFIX)) {
+          obj[fieldPath] = encrypt(value);
 
-            if (searchable.includes(fieldPath)) {
-              const hashField = `_hash_${fieldPath.replace(/\./g, '_')}`;
-              obj[hashField] = deterministicHash(value, fieldPath);
-            }
+          if (searchable.includes(fieldPath)) {
+            const hashField = `_hash_${fieldPath.replace(/\./g, '_')}`;
+            obj[hashField] = deterministicHash(value, fieldPath);
           }
         }
-      };
+      }
+    };
 
-      processObj(update);
-      if (update.$set) processObj(update.$set);
-
-      next();
-    } catch (err) {
-      next(err);
-    }
+    processObj(update);
+    if (update.$set) processObj(update.$set);
   });
 
   // ── Decrypt after find ──

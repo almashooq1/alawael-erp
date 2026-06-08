@@ -19,14 +19,13 @@ function timestampsPlugin(schema) {
     updatedAt: { type: Date, default: Date.now },
   });
 
-  schema.pre('save', function (next) {
+  // W955 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+  schema.pre('save', async function () {
     if (!this.isNew) this.updatedAt = new Date();
-    next();
   });
 
-  schema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) {
+  schema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], async function () {
     this.set({ updatedAt: new Date() });
-    next();
   });
 
   // Virtual: age in days since creation

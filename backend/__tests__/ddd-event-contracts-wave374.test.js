@@ -71,6 +71,9 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'lifecycle', // W986 — life-stage transition plan completed / cancelled → core timeline
   'followup', // W987 — post-rehab follow-up case completed / lost-to-follow-up → core timeline
   'insurance', // W994 — insurance claim approved / rejected → core timeline
+  'referral', // W997 — referral accepted / completed / rejected (shared across 4 models) → core timeline
+  'consent', // W1002 — consent obtained / revoked (PDPL/CRPD) → core timeline
+  'home_program', // W1003 — home program assigned / completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -116,6 +119,9 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'transition', // W986
     'case', // W987
     'claim', // W994
+    'referral', // W997
+    'consent', // W1002
+    'home_program', // W1003
   ])
 );
 
@@ -169,6 +175,9 @@ describe('W374 DDD event-contracts drift guard', () => {
         lifecycle: 'LIFECYCLE_EVENTS', // W986
         followup: 'FOLLOWUP_EVENTS', // W987
         insurance: 'INSURANCE_EVENTS', // W994
+        referral: 'REFERRAL_EVENTS', // W997
+        consent: 'CONSENT_EVENTS', // W1002
+        home_program: 'HOME_PROGRAM_EVENTS', // W1003
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {
         expect(contracts[exportName]).toBe(contracts.DDD_CONTRACTS[group]);

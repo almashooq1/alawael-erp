@@ -749,3 +749,12 @@ __tests__/orientation-mobility-wave1021.test.js
 __tests__/orientation-mobility-behavioral-wave1021.test.js
 __tests__/driving-rehab-wave1022.test.js
 __tests__/driving-rehab-behavioral-wave1022.test.js
+__tests__/postrehab-case-core-linkage-wave987.test.js
+__tests__/followup-visit-core-linkage-wave992.test.js
+__tests__/insurance-claim-core-linkage-wave994.test.js
+__tests__/referrals-core-linkage-wave997.test.js
+__tests__/core-timeline-subscriber-shape-wave998.test.js
+__tests__/consent-core-linkage-wave1002.test.js
+__tests__/home-program-core-linkage-wave1003.test.js
+__tests__/legacy-hook-adapter-wave954.test.js
+__tests__/legacy-hook-no-hang-behavioral-wave954.test.js

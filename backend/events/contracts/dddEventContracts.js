@@ -940,6 +940,149 @@ const INSURANCE_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  Referral Events — أحداث الإحالات (W997)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// A SHARED referral vocabulary across the 4 fragmented referral subsystems
+// (medical / therapy / community / FHIR-portal). Each model's native post-save
+// hook publishes the same 3 outcomes — accepted / completed / rejected — with a
+// `referralType` discriminator in the payload, so the beneficiary timeline shows
+// referral activity uniformly without forcing a model consolidation.
+
+const REFERRAL_EVENTS = {
+  ACCEPTED: {
+    domain: 'referral',
+    eventType: 'referral.accepted',
+    version: 1,
+    description: 'قبول إحالة — Referral accepted by the receiving service',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  COMPLETED: {
+    domain: 'referral',
+    eventType: 'referral.completed',
+    version: 1,
+    description: 'اكتمال إحالة — Referral fulfilled / completed',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  REJECTED: {
+    domain: 'referral',
+    eventType: 'referral.rejected',
+    version: 1,
+    description: 'رفض إحالة — Referral rejected / declined',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Consent Events — أحداث الموافقات (W1002, PDPL/CRPD)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Consent lifecycle on the beneficiary timeline. obtained = care/data processing
+// permitted (positive); revoked = consent withdrawn (care/data access at risk —
+// a compliance-significant warning). Producer: native Consent post-save hook.
+
+const CONSENT_EVENTS = {
+  OBTAINED: {
+    domain: 'consent',
+    eventType: 'consent.obtained',
+    version: 1,
+    description: 'منح موافقة — Consent granted for the beneficiary',
+    payload: {
+      consentId: 'string',
+      beneficiaryId: 'string',
+      consentType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  REVOKED: {
+    domain: 'consent',
+    eventType: 'consent.revoked',
+    version: 1,
+    description: 'سحب موافقة — Consent revoked / withdrawn',
+    payload: {
+      consentId: 'string',
+      beneficiaryId: 'string',
+      consentType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Home Program Events — أحداث البرنامج المنزلي (W1003)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Parent-administered home exercise programs (care extends into the home). A
+// shared vocabulary across FamilyHomeProgram + HomeAssignment, with a
+// `programType` discriminator. assigned = a program was given to the family;
+// completed = the program ran its course. Producer: native post-save hooks.
+
+const HOME_PROGRAM_EVENTS = {
+  ASSIGNED: {
+    domain: 'home_program',
+    eventType: 'home_program.assigned',
+    version: 1,
+    description: 'إسناد برنامج منزلي — Home program assigned to the family',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  COMPLETED: {
+    domain: 'home_program',
+    eventType: 'home_program.completed',
+    version: 1,
+    description: 'اكتمال برنامج منزلي — Home program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Aggregated Contracts Registry
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -963,6 +1106,9 @@ const DDD_CONTRACTS = {
   lifecycle: LIFECYCLE_EVENTS,
   followup: FOLLOWUP_EVENTS,
   insurance: INSURANCE_EVENTS,
+  referral: REFERRAL_EVENTS,
+  consent: CONSENT_EVENTS,
+  home_program: HOME_PROGRAM_EVENTS,
 };
 
 /**
@@ -999,6 +1145,9 @@ module.exports = {
   LIFECYCLE_EVENTS,
   FOLLOWUP_EVENTS,
   INSURANCE_EVENTS,
+  REFERRAL_EVENTS,
+  CONSENT_EVENTS,
+  HOME_PROGRAM_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

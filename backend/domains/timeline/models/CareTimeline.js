@@ -48,6 +48,7 @@ const careTimelineSchema = new mongoose.Schema(
         'followup_completed', // W987 — post-rehab follow-up case completed
         'followup_lost', // W987 — beneficiary lost to post-rehab follow-up
         'followup_visit', // W992 — post-rehab follow-up visit attended / missed
+        'referral', // W997 — referral accepted / completed / rejected (any of 4 referral subsystems)
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',
@@ -92,7 +93,9 @@ const careTimelineSchema = new mongoose.Schema(
         'family_contact',
         'family_meeting',
         'consent_obtained',
+        'consent_revoked', // W1002 — consent withdrawn (PDPL/CRPD)
         'home_program_assigned',
+        'home_program_completed', // W1003 — home program completed
         // Communication
         'note_added',
         'document_uploaded',

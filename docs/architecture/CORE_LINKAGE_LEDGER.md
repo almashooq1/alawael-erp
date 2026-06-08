@@ -53,6 +53,10 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Family visits** — completed / no-show (W985)
 - **Life-stage transitions** — transition plan completed / cancelled (W986)
 - **Post-rehab follow-up** — case completed / lost-to-follow-up (W987) + visit attended / missed (W992)
+- **Insurance claims** — approved / rejected (W994)
+- **Referrals** — accepted / completed / rejected across all 4 referral subsystems (W997)
+- **Consent (PDPL/CRPD)** — obtained / revoked (W1002)
+- **Home programs** — assigned / completed across FamilyHomeProgram + HomeAssignment (W1003)
 - **(env-gated, W974)** HR (hire/terminate/leave/salary/transfer), Finance
   (invoice/payment/expense/payroll), Medical (record/therapy/prescription/risk),
   Attendance (check-in/out), Notification (delivery_failed)
@@ -79,6 +83,11 @@ catches these.**
    `ValidationError`, swallowed by the handler `try/catch` → **0 rows persisted**.
    Same class on `KPISnapshot` (`kpiId` string vs required ObjectId ref).
    _Fix pattern:_ a behavioral round-trip test that asserts a row actually lands.
+   _Now also guarded statically (W998):_
+   `core-timeline-subscriber-shape-wave998.test.js` asserts every
+   `eventType`/`category`/`severity` literal any subscriber writes is a member of
+   the `CareTimeline` enum, and that no subscriber writes a bare `beneficiary:`
+   key — turning the silent no-op into a build error for every future subscriber.
 3. **Orphan subscribers.** A timeline subscriber lands with a real producer but
    no contract in `dddEventContracts.js` → W389 red (careplan.created/updated,
    goal.created — fixed W970). _Fix pattern:_ ship the contract in the same PR.
@@ -104,9 +113,10 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Screenings | `VisionScreening` · `HearingScreening` | `screening.completed` | ✅ **W980** |
 | Medication admin (MAR) | `MedicationAdministrationRecord` | `medication.administered` / `.not_given` | ✅ **W981** |
 | Discharge / transition | `TransitionPlan` | `lifecycle.transition.completed` / `.cancelled` → `care_transition` | ✅ **W986** |
-| Referrals | `TherapyReferral` / `CommunityReferral` / `medicalReferral` / `ReferralTracking` | `referral.made/accepted` | ⏳ **DEFERRED** — 4-model fragmentation; pick a canonical with domain input before wiring (`Referral` is the referring-ORG directory, not a beneficiary referral) |
+| Referrals | `TherapyReferral` · `CommunityReferral` · `MedicalReferral` · `Referral` (FHIR portal) | `referral.accepted` / `.completed` / `.rejected` → `referral` (shared domain, `referralType` discriminator) | ✅ **W997** — wired all 4 subsystems to ONE shared `referral` vocabulary instead of forcing a consolidation. `ReferralTracking` left out (orthogonal CRM analytics, not beneficiary-keyed). A future ADR may still consolidate the 4 models. |
 | Follow-up cases | `PostRehabCase` | `followup.case.completed` / `.lost` → `followup_completed` / `followup_lost` | ✅ **W987** |
 | Follow-up visits | `FollowUpVisit` | `followup.visit.attended` / `.missed` → `followup_visit` | ✅ **W992** |
+| Home programs | `FamilyHomeProgram` · `HomeAssignment` | `home_program.assigned` / `.completed` → `home_program_assigned` / `home_program_completed` (shared domain, `programType` discriminator) | ✅ **W1003** — filled the long-declared but producerless `home_program_assigned` enum |
 
 ### Tier 2 — family / CRM visibility
 | Domain | Model | Event | Status |
@@ -114,6 +124,7 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Beneficiary status lifecycle | `Beneficiary` | `beneficiary.status_changed` → `status_changed` | ✅ **W982** |
 | Complaints (CRM) | `Complaint` | `complaint.filed` → `complaint_filed` | ✅ **W984** |
 | Family visits | `FamilyVisitRequest` | `family.visit.completed` / `.no_show` → `family_meeting` | ✅ **W985** |
+| Consent (PDPL/CRPD) | `Consent` | `consent.obtained` / `.revoked` → `consent_obtained` / `consent_revoked` | ✅ **W1002** — filled the long-declared but producerless `consent_obtained` enum |
 | Guardian-portal engagement | — | — | Open |
 
 ### Tier 3 — operational / governance
@@ -144,11 +155,13 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ## 6. Coverage snapshot (updated 2026-06-08)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 13 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 16 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
-  W992 follow-up visits · W994 insurance claims — all merged to main).
+  W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) ·
+  W1002 consent (PDPL/CRPD) · W1003 home programs — all merged to main). All
+  shape-guarded by W998.
 - + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

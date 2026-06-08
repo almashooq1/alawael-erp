@@ -1258,20 +1258,22 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
-      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
+      - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/pressure-injury-wave1011.test.js'
-      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
+      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/sleep-assessment-wave1020.test.js'
-      - 'backend/__tests__/sleep-assessment-behavioral-wave1020.test.js'
+      - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/orientation-mobility-wave1021.test.js'
-      - 'backend/__tests__/orientation-mobility-behavioral-wave1021.test.js'
+      - 'backend/__tests__/referrals-core-linkage-wave997.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/driving-rehab-wave1022.test.js'
-      - 'backend/__tests__/driving-rehab-behavioral-wave1022.test.js'
+      - 'backend/__tests__/core-timeline-subscriber-shape-wave998.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/legacy-hook-adapter-wave954.test.js'
+      - 'backend/__tests__/legacy-hook-no-hang-behavioral-wave954.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/consent-core-linkage-wave1002.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-program-core-linkage-wave1003.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2513,20 +2515,22 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-core-linkage-wave986.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/falls-risk-assessment-wave1010.test.js'
-      - 'backend/__tests__/falls-risk-assessment-behavioral-wave1010.test.js'
+      - 'backend/__tests__/postrehab-case-core-linkage-wave987.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/pressure-injury-wave1011.test.js'
-      - 'backend/__tests__/pressure-injury-behavioral-wave1011.test.js'
+      - 'backend/__tests__/followup-visit-core-linkage-wave992.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/sleep-assessment-wave1020.test.js'
-      - 'backend/__tests__/sleep-assessment-behavioral-wave1020.test.js'
+      - 'backend/__tests__/insurance-claim-core-linkage-wave994.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/orientation-mobility-wave1021.test.js'
-      - 'backend/__tests__/orientation-mobility-behavioral-wave1021.test.js'
+      - 'backend/__tests__/referrals-core-linkage-wave997.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/driving-rehab-wave1022.test.js'
-      - 'backend/__tests__/driving-rehab-behavioral-wave1022.test.js'
+      - 'backend/__tests__/core-timeline-subscriber-shape-wave998.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/legacy-hook-adapter-wave954.test.js'
+      - 'backend/__tests__/legacy-hook-no-hang-behavioral-wave954.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/consent-core-linkage-wave1002.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-program-core-linkage-wave1003.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

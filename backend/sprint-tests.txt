@@ -741,3 +741,4 @@ __tests__/insurance-claim-core-linkage-wave1000.test.js
 __tests__/invoice-core-linkage-wave1023.test.js
 __tests__/teleconsultation-core-linkage-wave1024.test.js
 __tests__/home-visit-core-linkage-wave1025.test.js
+__tests__/family-counselling-core-linkage-wave1026.test.js

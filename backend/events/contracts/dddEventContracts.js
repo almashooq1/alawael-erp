@@ -855,6 +855,31 @@ const HOME_VISIT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// ── W1026: Family counselling session completed → unified core ─────────
+// A family counselling encounter reaching 'completed' is a family-wellbeing
+// milestone on the beneficiary's longitudinal record.
+
+const FAMILY_COUNSELLING_EVENTS = {
+  FAMILY_COUNSELLING_COMPLETED: {
+    domain: 'family-counselling',
+    eventType: 'family_counselling.completed',
+    version: 1,
+    description: 'اكتملت جلسة إرشاد أسري — Family counselling session completed (family wellbeing)',
+    payload: {
+      familyCounsellingSessionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      sessionType: 'string',
+      triggerSource: 'string',
+      durationMinutes: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -878,6 +903,7 @@ const DDD_CONTRACTS = {
   invoices: INVOICE_EVENTS,
   teleconsultations: TELECONSULTATION_EVENTS,
   'home-visits': HOME_VISIT_EVENTS,
+  'family-counselling': FAMILY_COUNSELLING_EVENTS,
 };
 
 /**
@@ -917,6 +943,7 @@ module.exports = {
   INVOICE_EVENTS,
   TELECONSULTATION_EVENTS,
   HOME_VISIT_EVENTS,
+  FAMILY_COUNSELLING_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

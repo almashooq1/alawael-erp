@@ -117,7 +117,7 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/EnterpriseRisk.js',
   'models/EventParticipation.js',
   'models/Exam.js',
-  'models/FamilyCounsellingSession.js',
+  // (FamilyCounsellingSession removed — W1026 converted callback pre('save') → async)
   'models/FinancialTransaction.js',
   // (ForumReply removed — W494 ratchet wave 6 bonus)
   'models/Goal.js',

@@ -1261,6 +1261,8 @@ on:
       - 'backend/__tests__/teleconsultation-core-linkage-wave1024.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/home-visit-core-linkage-wave1025.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-counselling-core-linkage-wave1026.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2505,6 +2507,8 @@ on:
       - 'backend/__tests__/teleconsultation-core-linkage-wave1024.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/home-visit-core-linkage-wave1025.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-counselling-core-linkage-wave1026.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -1198,6 +1198,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Family counselling completed → unified-core timeline (W1026) ───
+  // A family counselling encounter reaching 'completed' is a family-wellbeing
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'family-counselling:completed → timeline:record',
+    pattern: 'family-counselling.family_counselling.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sType = event.payload.sessionType ? ` (${event.payload.sessionType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'family_counselling_completed',
+            category: 'family',
+            severity: 'success',
+            title: `Family counselling session completed${sType}`,
+            title_ar: 'اكتملت جلسة الإرشاد الأسري',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Family counselling timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

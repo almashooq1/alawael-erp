@@ -98,6 +98,8 @@ const careTimelineSchema = new mongoose.Schema(
         'teleconsultation_completed',
         // Home visit completed (W1025 — unified-core linkage)
         'home_visit_completed',
+        // Family counselling session completed (W1026 — unified-core linkage)
+        'family_counselling_completed',
         // Family
         'family_contact',
         'family_meeting',

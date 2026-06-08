@@ -833,6 +833,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ─── Safety → Timeline: Safeguarding concern closed (W1027) ───────
+  // Terminal resolution of a child/vulnerable-adult protection concern
+  // (outcomeSummary + closedBy + closedAt). Records the closure milestone
+  // on the subject beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'safety:safeguarding_closed → timeline:record',
+    pattern: 'safety.safeguarding.concern_closed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const out = event.payload.outcome ? ` — ${event.payload.outcome}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'safeguarding_concern_closed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Safeguarding concern closed${out}`,
+            title_ar: 'تم إغلاق بلاغ الحماية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Safeguarding closure timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ─── Safety → Timeline: Restraint/seclusion applied (W992) ────────
   // Staff-applied, high-scrutiny intervention (CBAHI/MOHRSD mandated review) —
   // recorded as a warning-level clinical event on the beneficiary timeline.

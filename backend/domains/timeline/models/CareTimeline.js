@@ -75,6 +75,7 @@ const careTimelineSchema = new mongoose.Schema(
         // Clinical safety (W992 — unified-core linkage)
         'seizure_event',
         'safeguarding_concern',
+        'safeguarding_concern_closed', // W1027 — safeguarding concern closed → unified core
         'restraint_seclusion',
         // Sensory screenings (W993 — unified-core linkage)
         'screening_completed',

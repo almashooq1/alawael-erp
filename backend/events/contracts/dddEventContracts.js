@@ -526,6 +526,28 @@ const SAFETY_EVENTS = {
     consumers: ['timeline', 'dashboards', 'notification'],
   },
 
+  // W1027 — safeguarding concern reached terminal 'closed' status. A closure
+  // (with outcomeSummary + closedBy + closedAt) is a child-protection
+  // resolution milestone on the subject beneficiary's longitudinal record.
+  SAFEGUARDING_CONCERN_CLOSED: {
+    domain: 'safety',
+    eventType: 'safeguarding.concern_closed',
+    version: 1,
+    description: 'تم إغلاق بلاغ حماية — Safeguarding concern closed',
+    payload: {
+      concernId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      category: 'string',
+      severity: 'string',
+      outcome: 'string',
+      closedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
   RESTRAINT_APPLIED: {
     domain: 'safety',
     eventType: 'restraint.applied',

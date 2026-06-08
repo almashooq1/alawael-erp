@@ -76,6 +76,8 @@ const careTimelineSchema = new mongoose.Schema(
         'seizure_event',
         'safeguarding_concern',
         'restraint_seclusion',
+        // Sensory screenings (W993 — unified-core linkage)
+        'screening_completed',
         // Family
         'family_contact',
         'family_meeting',

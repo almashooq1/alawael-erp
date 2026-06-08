@@ -861,6 +861,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Screening completed → unified-core timeline (W993) ─────────────
+  // A finalized vision/hearing screening is a clinical milestone. Outcome
+  // 'refer' (sensory loss suspected → onward referral) lands as a warning so
+  // it stands out; 'pass'/'monitor' land as informational. One subscriber
+  // serves both modalities — screeningType in the payload distinguishes them.
+  subscribers.push({
+    name: 'screenings:screening_completed → timeline:record',
+    pattern: 'screenings.screening.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.screeningType || 'sensory';
+          const outcome = event.payload.outcome || '';
+          const typeAr = type === 'vision' ? 'النظر' : type === 'hearing' ? 'السمع' : 'حسي';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'screening_completed',
+            category: 'clinical',
+            severity: outcome === 'refer' ? 'warning' : 'info',
+            title: `${type} screening completed (${outcome})`.trim(),
+            title_ar: `اكتمل مسح ${typeAr} (${outcome})`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Screening timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

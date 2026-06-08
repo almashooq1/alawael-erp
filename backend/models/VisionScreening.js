@@ -240,6 +240,40 @@ VisionScreeningSchema.virtual('cviSignCount').get(function () {
 VisionScreeningSchema.set('toJSON', { virtuals: true });
 VisionScreeningSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core producer (W993) ────────────────────────────────────────────
+// A finalized sensory screening is a clinical milestone: undetected vision loss
+// silently undermines every other therapy, so the care team must see it on the
+// per-beneficiary timeline (CareTimeline) + dashboards, not buried in a grid.
+// Native pre-compile hooks (schema middleware added AFTER mongoose.model() never
+// fires). Emit on finalize only — new-as-finalized OR draft→finalized. Literal
+// `integrationBus.publish` keeps the W389/W392 producer-coverage guards green.
+VisionScreeningSchema.pre('save', function () {
+  this.$__finalizedNow = this.status === 'finalized' && (this.isNew || this.isModified('status'));
+});
+
+VisionScreeningSchema.post('save', function (doc) {
+  try {
+    if (!this.$__finalizedNow) return; // only emit on finalize transition
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return; // no beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('screenings', 'screening.completed', {
+        screeningId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        screeningType: 'vision',
+        screeningMethod: doc.screeningMethod || '',
+        outcome: doc.outcome || '',
+        date: doc.date,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.VisionScreening || mongoose.model('VisionScreening', VisionScreeningSchema);
 

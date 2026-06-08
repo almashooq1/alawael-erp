@@ -547,7 +547,36 @@ const SAFETY_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  Aggregated Contracts Registry
+//  Screening Events — أحداث المسح الصحي (W993)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Vision (W720) + Hearing (W724) functional screenings. Undetected sensory loss
+// silently undermines every other therapy, so a finalized screen is a first-class
+// clinical milestone that belongs on the per-beneficiary timeline (CareTimeline)
+// and dashboards — not buried in a standalone screening grid. Emitted on finalize
+// (new-as-finalized OR draft→finalized) via native pre-compile post-save hooks.
+// One contract serves both modalities (screeningType field distinguishes them).
+
+const SCREENING_EVENTS = {
+  SCREENING_COMPLETED: {
+    domain: 'screenings',
+    eventType: 'screening.completed',
+    version: 1,
+    description: 'تم إنهاء مسح صحي (نظر/سمع) — Vision/hearing screening finalized',
+    payload: {
+      screeningId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      screeningType: 'string',
+      screeningMethod: 'string',
+      outcome: 'string',
+      date: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const DDD_CONTRACTS = {
@@ -562,6 +591,7 @@ const DDD_CONTRACTS = {
   'ai-recommendations': AI_RECOMMENDATION_EVENTS,
   appointments: APPOINTMENT_EVENTS,
   safety: SAFETY_EVENTS,
+  screenings: SCREENING_EVENTS,
 };
 
 /**
@@ -590,6 +620,7 @@ module.exports = {
   AI_RECOMMENDATION_EVENTS,
   APPOINTMENT_EVENTS,
   SAFETY_EVENTS,
+  SCREENING_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

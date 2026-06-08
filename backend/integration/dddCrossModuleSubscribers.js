@@ -997,6 +997,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Referral conversion (loop closed) → unified-core timeline (W997) ─
+  // A referral for a known beneficiary that reaches 'converted' means the
+  // referral resulted in the beneficiary entering/continuing care. It lands as
+  // an administrative success milestone, preserving the referral attribution.
+  subscribers.push({
+    name: 'referrals:converted → timeline:record',
+    pattern: 'referrals.referral.converted',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const dir = event.payload.direction ? ` (${event.payload.direction})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            branchId: event.payload.branchId || undefined,
+            eventType: 'referral_converted',
+            category: 'administrative',
+            severity: 'success',
+            title: `Referral converted to enrollment${dir}`,
+            title_ar: 'تم تحويل الإحالة إلى التحاق فعلي',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Referral timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

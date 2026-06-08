@@ -68,5 +68,34 @@ const ReferralTrackingSchema = new mongoose.Schema(
 ReferralTrackingSchema.index({ direction: 1, status: 1, receivedAt: -1 });
 ReferralTrackingSchema.index({ sourceOrgSlug: 1, status: 1 });
 
+// ─── Unified-core producer (W997) ────────────────────────────────────────────
+// Emit referrals.referral.converted exactly once when a referral for a KNOWN
+// beneficiary reaches 'converted' (the referral resulted in the beneficiary
+// entering/continuing care). The flag is computed in a sync pre('save') and the
+// event is published in post('save'). Prospective referrals (no beneficiaryId)
+// stay invisible to the longitudinal record — guarded in the post hook.
+ReferralTrackingSchema.pre('save', function () {
+  this.$__convertedNow = this.status === 'converted' && (this.isNew || this.isModified('status'));
+});
+
+ReferralTrackingSchema.post('save', function (doc) {
+  try {
+    if (!this.$__convertedNow) return;
+    if (!doc.beneficiaryId) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('referrals', 'referral.converted', {
+      referralId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      branchId: doc.branchId ? String(doc.branchId) : null,
+      direction: doc.direction || null,
+      serviceType: doc.serviceType || null,
+      convertedAt: doc.settledAt || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    // Producer must never break the save path.
+  }
+});
+
 module.exports =
   mongoose.models.ReferralTracking || mongoose.model('ReferralTracking', ReferralTrackingSchema);

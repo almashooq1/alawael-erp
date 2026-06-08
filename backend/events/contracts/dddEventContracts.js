@@ -671,6 +671,34 @@ const ADMISSION_EVENTS = {
 };
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ── W997: Referral conversion → unified core ────────────────────────────────────
+// ReferralTracking is the canonical, beneficiary-keyed referral record. When an
+// incoming/outgoing referral for a KNOWN beneficiary reaches 'converted' (the
+// referral resulted in the beneficiary entering/continuing care — the model's
+// own "% convert to enrollments" KPI), the longitudinal record must show it.
+
+const REFERRAL_EVENTS = {
+  REFERRAL_CONVERTED: {
+    domain: 'referrals',
+    eventType: 'referral.converted',
+    version: 1,
+    description:
+      'تم تحويل إحالة إلى التحاق فعلي للمستفيد — Referral converted to enrollment (loop closed)',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      direction: 'string',
+      serviceType: 'string',
+      convertedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+};
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -687,6 +715,7 @@ const DDD_CONTRACTS = {
   medications: MEDICATION_EVENTS,
   discharge: DISCHARGE_EVENTS,
   admissions: ADMISSION_EVENTS,
+  referrals: REFERRAL_EVENTS,
 };
 
 /**
@@ -719,6 +748,7 @@ module.exports = {
   MEDICATION_EVENTS,
   DISCHARGE_EVENTS,
   ADMISSION_EVENTS,
+  REFERRAL_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -64,6 +64,7 @@ module.exports = function registerFeatureRoutes(
   const sleepAssessmentRoutes = safeRequire('../routes/sleep-assessment.routes');
   const orientationMobilityRoutes = safeRequire('../routes/orientation-mobility.routes');
   const drivingRehabRoutes = safeRequire('../routes/driving-rehab.routes');
+  const clinicalSafetySummaryRoutes = safeRequire('../routes/clinical-safety-summary.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -199,6 +200,9 @@ module.exports = function registerFeatureRoutes(
   // Wave 1022: Driving-rehab / fitness-to-drive (تقييم تأهيل القيادة) — pre-driving clinical screen
   // → readiness → adaptive-equipment + on-road → fitness recommendation; CDRS workflow
   dualMountAuth(app, 'driving-rehab', drivingRehabRoutes, authenticate);
+  // Wave 1040: Clinical-safety summary (ملخّص السلامة السريرية) — READ-ONLY aggregation across the
+  // W1010-W1022 modules + seizure log: per-beneficiary unified risk view + branch-wide flagged-alerts
+  dualMountAuth(app, 'clinical-safety-summary', clinicalSafetySummaryRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

@@ -1297,6 +1297,9 @@ on:
       - 'backend/__tests__/reports-analytics-executive-isolation-behavioral-wave962.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-safety-summary-wave1040.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/medication-reconciliation-wave1041.test.js'
+      - 'backend/__tests__/medication-reconciliation-behavioral-wave1041.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2577,6 +2580,9 @@ on:
       - 'backend/__tests__/reports-analytics-executive-isolation-behavioral-wave962.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-safety-summary-wave1040.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/medication-reconciliation-wave1041.test.js'
+      - 'backend/__tests__/medication-reconciliation-behavioral-wave1041.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -72,9 +72,15 @@ surfaces. Locked by drift guard
      subset_ (beneficiaryId-linked) by the beneficiary's branch; general tasks
      (no beneficiary) are intentionally untouched — their ownership model
      (assignedTo/assignedBy vs manager override) is a separate product decision.
-     Guard `branch-isolation-tasks-wave1125`. **Still open:** `hr-modules` update
-     path (employee/branch-scoped, not beneficiary) + the `tasks` list `GET /`
-     (returns all tasks, no scope) + the general-task ownership decision.
+     Guard `branch-isolation-tasks-wave1125`. **`hr-modules` — BLOCKED on a
+     schema/data-model decision (not a route fix):** verified that **10 of the 11**
+     `attachCrud` HR models carry **no `branchId`** (only `WorkforcePosition` does),
+     so a route-level branch gate would either fail-closed (break the 10) or no-op.
+     Branch-scoping HR needs denormalizing `branchId` onto the models OR gating via
+     each record's employee FK (field name varies per model) — a data-model effort
+     for the owner. **Other open (product decisions):** the `tasks` list `GET /`
+     (returns all tasks, no scope) + the general-task ownership model
+     (assignedTo/assignedBy owner vs manager override).
 2. **Possible auth-bypass mount** — `therapist-extended` is mounted **both** via
    `dualMountAuth` (`_registry.js:661`) **and** plain `dualMount`
    (`clinical-therapy.registry.js:44`). Per the codebase's "never plain

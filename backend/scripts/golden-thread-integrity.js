@@ -103,44 +103,20 @@ function summarizeThread(stats = {}) {
   return { total, counts, percentages, grade, findings };
 }
 
-function resolveTherapeuticGoal(mongoose) {
-  try {
-    return mongoose.model('TherapeuticGoal');
-  } catch {
-    /* not registered yet */
-  }
-  try {
-    const mod = require('../domains/goals/models/TherapeuticGoal');
-    return mod.TherapeuticGoal || mongoose.model('TherapeuticGoal');
-  } catch {
-    return null;
-  }
-}
-
-async function main() {
-  if (!process.env.MONGODB_URI) {
-    console.error('Error: MONGODB_URI environment variable required.');
-    process.exit(2);
-  }
-
-  const mongoose = require('mongoose');
-  await mongoose.connect(process.env.MONGODB_URI);
-
-  const Goal = resolveTherapeuticGoal(mongoose);
-  if (!Goal) {
-    console.error('Error: TherapeuticGoal model could not be resolved.');
-    await mongoose.disconnect();
-    process.exit(2);
-  }
-
-  const match = { isDeleted: { $ne: true } };
-  if (BRANCH_ARG && mongoose.isValidObjectId(BRANCH_ARG)) {
-    match.branchId = new mongoose.Types.ObjectId(BRANCH_ARG);
-  }
-
-  // Single read-only pass: project the three thread booleans per goal, derive a
-  // break-stage, then histogram the stages.
-  const rows = await Goal.aggregate([
+/**
+ * PURE — build the READ-ONLY aggregation pipeline that classifies each goal by
+ * the FIRST stage at which its golden thread breaks. Exported so the behavioral
+ * test can run it against an in-memory MongoDB without booting the CLI.
+ *
+ * A goal "has a measure link" iff ≥1 objective carries a non-`unlinked`
+ * measureLink; "has a baseline" iff `baseline.value` is set; "has an outcome"
+ * iff it has ≥1 progressHistory entry OR currentProgress > 0.
+ *
+ * @param {object} match - the $match filter (e.g. { isDeleted: { $ne: true } })
+ * @returns {object[]} aggregation pipeline → [{ _id: <stage>, count: <n> }]
+ */
+function buildStagePipeline(match) {
+  return [
     { $match: match },
     {
       $project: {
@@ -190,7 +166,46 @@ async function main() {
       },
     },
     { $group: { _id: '$stage', count: { $sum: 1 } } },
-  ]);
+  ];
+}
+
+function resolveTherapeuticGoal(mongoose) {
+  try {
+    return mongoose.model('TherapeuticGoal');
+  } catch {
+    /* not registered yet */
+  }
+  try {
+    const mod = require('../domains/goals/models/TherapeuticGoal');
+    return mod.TherapeuticGoal || mongoose.model('TherapeuticGoal');
+  } catch {
+    return null;
+  }
+}
+
+async function main() {
+  if (!process.env.MONGODB_URI) {
+    console.error('Error: MONGODB_URI environment variable required.');
+    process.exit(2);
+  }
+
+  const mongoose = require('mongoose');
+  await mongoose.connect(process.env.MONGODB_URI);
+
+  const Goal = resolveTherapeuticGoal(mongoose);
+  if (!Goal) {
+    console.error('Error: TherapeuticGoal model could not be resolved.');
+    await mongoose.disconnect();
+    process.exit(2);
+  }
+
+  const match = { isDeleted: { $ne: true } };
+  if (BRANCH_ARG && mongoose.isValidObjectId(BRANCH_ARG)) {
+    match.branchId = new mongoose.Types.ObjectId(BRANCH_ARG);
+  }
+
+  // Single read-only pass: classify each goal by the first broken thread stage.
+  const rows = await Goal.aggregate(buildStagePipeline(match));
 
   const byStage = {};
   let total = 0;
@@ -225,8 +240,9 @@ async function main() {
   process.exit(0);
 }
 
-// Export the pure helper for unit tests; only run the CLI when invoked directly.
-module.exports = { summarizeThread, STAGES, STAGE_LABELS };
+// Export the pure helpers for unit + behavioral tests; only run the CLI when
+// invoked directly.
+module.exports = { summarizeThread, buildStagePipeline, STAGES, STAGE_LABELS };
 
 if (require.main === module) {
   main().catch(err => {

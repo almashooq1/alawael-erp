@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * branch-isolation-hr-domain-wave1140.test.js — W269 static drift guard.
+ * branch-isolation-hr-domain-wave1141.test.js — W269 static drift guard.
  *
  * domains/hr/routes/hr.routes.js is LIVE (dualMountAuth at /api/hr + /api/v1/hr)
  * and was a second cross-branch IDOR surface alongside hr-attendance:
@@ -16,9 +16,9 @@
  * spoof) + guardEmployeeBranch (enforceEmployeeBranch) on every employee-keyed
  * route + guardLeaveBranch (LeaveRequest.branchId + assertBranchMatch) on the
  * leave-id mutations. Behavioral counterpart: hr-domain-branch-isolation-
- * behavioral-wave1140.
+ * behavioral-wave1141.
  *
- * Run: cd backend && npx jest --config=jest.config.js __tests__/branch-isolation-hr-domain-wave1140.test.js
+ * Run: cd backend && npx jest --config=jest.config.js __tests__/branch-isolation-hr-domain-wave1141.test.js
  */
 
 const fs = require('fs');

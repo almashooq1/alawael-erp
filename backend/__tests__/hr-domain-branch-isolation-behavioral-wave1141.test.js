@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * hr-domain-branch-isolation-behavioral-wave1140.test.js — W269 behavioral.
+ * hr-domain-branch-isolation-behavioral-wave1141.test.js — W269 behavioral.
  *
  * Proves the runtime isolation of domains/hr/routes/hr.routes.js: a branch-A
  * manager is denied (403) another branch's employee profile + leave mutation +
@@ -10,7 +10,7 @@
  * BRANCH-GATE; Employee + LeaveRequest are real MMS models so the guards resolve
  * branch_id / branchId for real.
  *
- * Run: cd backend && npx jest --config=jest.config.js __tests__/hr-domain-branch-isolation-behavioral-wave1140.test.js
+ * Run: cd backend && npx jest --config=jest.config.js __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
  */
 
 jest.unmock('mongoose');
@@ -59,7 +59,7 @@ const asSuperAdmin = () => {
 };
 
 beforeAll(async () => {
-  mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1140-hr-domain' } });
+  mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1141-hr-domain' } });
   await mongoose.connect(mongod.getUri());
   require('../config/mongoose.plugins');
 

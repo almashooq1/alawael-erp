@@ -1291,6 +1291,8 @@ on:
       - 'backend/__tests__/spasticity-injection-completion-core-linkage-wave1048.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/prosthetic-orthotic-delivery-core-linkage-wave1049.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seating-postural-finalized-core-linkage-wave1050.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2565,6 +2567,8 @@ on:
       - 'backend/__tests__/spasticity-injection-completion-core-linkage-wave1048.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/prosthetic-orthotic-delivery-core-linkage-wave1049.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seating-postural-finalized-core-linkage-wave1050.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

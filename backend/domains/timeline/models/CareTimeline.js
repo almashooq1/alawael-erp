@@ -126,6 +126,7 @@ const careTimelineSchema = new mongoose.Schema(
         // Spasticity injection completed (W1048 — unified-core linkage)
         'spasticity_injection_completed',
         'prosthetic_orthotic_delivered',
+        'seating_postural_finalized',
         // Family
         'family_contact',
         'family_meeting',

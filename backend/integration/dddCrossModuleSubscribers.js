@@ -1648,6 +1648,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1050: seating/postural assessment finalized → core timeline ───
+  // When a seating & postural assessment is finalized, record it as a
+  // clinical milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'seating-postural-assessment:finalized → timeline:record',
+    pattern: 'seating-postural-assessment.seating_postural.finalized',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const risk = event.payload.pressureInjuryRisk
+            ? ` (pressure risk: ${event.payload.pressureInjuryRisk})`
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'seating_postural_finalized',
+            category: 'clinical',
+            severity: 'success',
+            title: `Seating/postural assessment finalized${risk}`,
+            title_ar: 'تم اعتماد تقييم الجلوس والوضعية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SeatingPostural timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

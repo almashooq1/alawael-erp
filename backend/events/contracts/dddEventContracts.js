@@ -1176,6 +1176,26 @@ const PROSTHETIC_ORTHOTIC_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SEATING_POSTURAL_EVENTS = {
+  SEATING_POSTURAL_FINALIZED: {
+    domain: 'seating-postural-assessment',
+    eventType: 'seating_postural.finalized',
+    version: 1,
+    description: 'اعتماد تقييم الجلوس والوضعية — Seating & postural assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      assessmentType: 'string',
+      pressureInjuryRisk: 'string',
+      finalizedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1212,6 +1232,7 @@ const DDD_CONTRACTS = {
   'family-home-program': FAMILY_HOME_PROGRAM_EVENTS,
   'spasticity-injection': SPASTICITY_INJECTION_EVENTS,
   'prosthetic-orthotic-order': PROSTHETIC_ORTHOTIC_EVENTS,
+  'seating-postural-assessment': SEATING_POSTURAL_EVENTS,
 };
 
 /**
@@ -1264,6 +1285,7 @@ module.exports = {
   FAMILY_HOME_PROGRAM_EVENTS,
   SPASTICITY_INJECTION_EVENTS,
   PROSTHETIC_ORTHOTIC_EVENTS,
+  SEATING_POSTURAL_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

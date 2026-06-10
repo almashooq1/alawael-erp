@@ -809,6 +809,7 @@ __tests__/student-registration-core-event-wave927.test.js
 __tests__/student-registration-episode-of-care-wave928.test.js
 __tests__/subsidies-routes-branch-isolation-wave922.test.js
 __tests__/subsidy-payment-received-core-linkage-wave1074.test.js
+__tests__/smartgoal-consolidation-wave1185.test.js
 __tests__/supervisor-ops-route-wave1170.test.js
 __tests__/supervisor-ops-service-behavioral-wave1169.test.js
 __tests__/supervisor-ops-service-wave1169.test.js

@@ -1560,6 +1560,8 @@ on:
       - 'backend/__tests__/form-templates-contract-wave1179.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unescaped-regexp-redos-wave1180.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smartgoal-consolidation-wave1185.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3103,6 +3105,8 @@ on:
       - 'backend/__tests__/form-templates-contract-wave1179.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unescaped-regexp-redos-wave1180.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smartgoal-consolidation-wave1185.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

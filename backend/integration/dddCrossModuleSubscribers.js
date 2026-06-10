@@ -3363,6 +3363,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'red-flag-override:recorded → timeline:record',
+    pattern: 'red-flag-override.red_flag_override.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const n = Number(event.payload.blockingFlagCount);
+          const flagLabel =
+            Number.isFinite(n) && n > 0 ? ` (${n} blocking flag${n === 1 ? '' : 's'})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'red_flag_override_recorded',
+            category: 'quality',
+            severity: 'warning',
+            title: `Clinical red-flag override recorded${flagLabel}`,
+            title_ar: 'تم تسجيل تجاوز سريري لعلامة حمراء حاجبة للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] RedFlagOverride timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -61,5 +61,32 @@ const RedFlagOverrideSchema = new mongoose.Schema(
 RedFlagOverrideSchema.index({ beneficiaryId: 1, overriddenAt: -1 });
 RedFlagOverrideSchema.index({ overriddenAt: -1 });
 
+// ── W1107 core-linkage: emit when a blocking red-flag is overridden ──
+RedFlagOverrideSchema.pre('save', function flagRedFlagOverrideRecorded() {
+  this.$__redFlagOverrideRecorded = this.isNew;
+});
+
+RedFlagOverrideSchema.post('save', function emitRedFlagOverrideRecorded(doc) {
+  if (!doc.$__redFlagOverrideRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const ctx = doc.context || {};
+    const flagCount = Array.isArray(doc.blockingFlagIds) ? doc.blockingFlagIds.length : 0;
+    integrationBus.publish('red-flag-override', 'red_flag_override.recorded', {
+      overrideId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(ctx.branchId ? { branchId: String(ctx.branchId) } : {}),
+      overriddenBy: String(doc.overriddenBy),
+      reason: doc.reason,
+      blockingFlagCount: flagCount,
+      ...(ctx.sessionId ? { sessionId: String(ctx.sessionId) } : {}),
+      ...(ctx.therapistId ? { therapistId: String(ctx.therapistId) } : {}),
+      overriddenAt: doc.overriddenAt || new Date(),
+    });
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.RedFlagOverride || mongoose.model('RedFlagOverride', RedFlagOverrideSchema);

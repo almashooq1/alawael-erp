@@ -2376,6 +2376,30 @@ const INSURANCE_POLICY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const RED_FLAG_OVERRIDE_EVENTS = {
+  RED_FLAG_OVERRIDE_RECORDED: {
+    domain: 'red-flag-override',
+    eventType: 'red_flag_override.recorded',
+    version: 1,
+    description:
+      'تجاوز سريري لعلامة حمراء حاجبة لبدء جلسة المستفيد — سجل أدلة CBAHI — A clinician overrode a blocking red flag to start a beneficiary session (CBAHI evidence trail)',
+    payload: {
+      overrideId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      overriddenBy: 'string',
+      reason: 'string',
+      blockingFlagCount: 'number',
+      sessionId: 'string',
+      therapistId: 'string',
+      overriddenAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2469,6 +2493,7 @@ const DDD_CONTRACTS = {
   'caregiver-support': CAREGIVER_SUPPORT_EVENTS,
   'coupon-usage': COUPON_USAGE_EVENTS,
   'insurance-policy': INSURANCE_POLICY_EVENTS,
+  'red-flag-override': RED_FLAG_OVERRIDE_EVENTS,
 };
 
 /**
@@ -2574,6 +2599,7 @@ module.exports = {
   CAREGIVER_SUPPORT_EVENTS,
   COUPON_USAGE_EVENTS,
   INSURANCE_POLICY_EVENTS,
+  RED_FLAG_OVERRIDE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

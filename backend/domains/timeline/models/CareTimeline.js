@@ -183,6 +183,7 @@ const careTimelineSchema = new mongoose.Schema(
         'caregiver_support_completed',
         'coupon_usage_redeemed',
         'insurance_policy_activated',
+        'red_flag_override_recorded',
         // Family
         'family_contact',
         'family_meeting',

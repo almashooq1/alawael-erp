@@ -2489,6 +2489,29 @@ const PROGRAM_ENROLLMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const FAMILY_COMMUNICATION_EVENTS = {
+  FAMILY_COMMUNICATION_LOGGED: {
+    domain: 'family-communication',
+    eventType: 'family_communication.logged',
+    version: 1,
+    description:
+      'تم تسجيل تواصل مع أسرة المستفيد — A family communication touchpoint for a beneficiary was logged',
+    payload: {
+      communicationId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      familyMemberId: 'string',
+      type: 'string',
+      direction: 'string',
+      communicatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2587,6 +2610,7 @@ const DDD_CONTRACTS = {
   'story-surface': STORY_SURFACE_EVENTS,
   'arvr-session': ARVR_SESSION_EVENTS,
   'program-enrollment': PROGRAM_ENROLLMENT_EVENTS,
+  'family-communication': FAMILY_COMMUNICATION_EVENTS,
 };
 
 /**
@@ -2697,6 +2721,7 @@ module.exports = {
   STORY_SURFACE_EVENTS,
   ARVR_SESSION_EVENTS,
   PROGRAM_ENROLLMENT_EVENTS,
+  FAMILY_COMMUNICATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

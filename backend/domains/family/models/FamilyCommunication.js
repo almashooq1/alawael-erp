@@ -165,6 +165,30 @@ familyCommunicationSchema.index({ beneficiaryId: 1, type: 1, createdAt: -1 });
 familyCommunicationSchema.index({ requiresFollowUp: 1, followUpStatus: 1, followUpDate: 1 });
 familyCommunicationSchema.index({ staffId: 1, createdAt: -1 });
 
+// ── W1112 — publish family_communication.logged when a touchpoint is recorded ─
+familyCommunicationSchema.pre('save', function flagFamilyCommunicationLogged() {
+  this.$__familyCommunicationLogged = this.isNew;
+});
+
+familyCommunicationSchema.post('save', function emitFamilyCommunicationLogged(doc) {
+  if (!doc.$__familyCommunicationLogged) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('family-communication', 'family_communication.logged', {
+      communicationId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.familyMemberId ? { familyMemberId: String(doc.familyMemberId) } : {}),
+      ...(doc.type ? { type: doc.type } : {}),
+      ...(doc.direction ? { direction: doc.direction } : {}),
+      communicatedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.FamilyCommunication ||
   mongoose.model('FamilyCommunication', familyCommunicationSchema);

@@ -105,4 +105,8 @@ module.exports = [
   // ── W1135 — compliance / training (1) ───────────────────────
   // Staff mandatory training overdue (TrainingCompliance). Self-loading.
   require('./training-compliance-overdue'),
+
+  // ── W1138 — quality / supplier (1) ──────────────────────────
+  // Supplier corrective action (SCAR) response overdue. Self-loading.
+  require('./supplier-scar-response-overdue'),
 ];

@@ -111,10 +111,10 @@ describe('buildEngine() with bundled rules', () => {
   // baseline of 5. Wave 5 (2026-05-16) added the EWMA anomaly
   // bridge. Pin the exact total so accidental rule removal shows
   // up as a test regression rather than a silent gap.
-  test('registers all 26 bundled rules (5 baseline + 13 wave-3 + 1 wave-5 + 5 operational W1006-W1009/W1070 + 2 quality W1121)', () => {
-    expect(rules.length).toBe(26);
+  test('registers all 27 bundled rules (5 baseline + 13 wave-3 + 1 wave-5 + 5 operational W1006-W1009/W1070 + 2 quality W1121 + 1 waste W1124)', () => {
+    expect(rules.length).toBe(27);
     const eng = buildEngine();
-    expect(eng.rules.size).toBe(26);
+    expect(eng.rules.size).toBe(27);
   });
 
   test('credential-expiry-30d fires on near-expiry records', async () => {

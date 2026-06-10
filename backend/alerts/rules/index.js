@@ -87,4 +87,9 @@ module.exports = [
   require('./capa-overdue'),
   // Calibrated equipment overdue, or a failed calibration (→ critical).
   require('./calibration-overdue'),
+
+  // ── W1124 — operational / waste (1) ─────────────────────────
+  // Biomedical waste stored on-site past its WHO/CBAHI time limit
+  // (links the W1123 waste system into the Alert sink). Self-loading.
+  require('./biomedical-waste-storage-overdue'),
 ];

@@ -2218,6 +2218,27 @@ const STUDENT_ACTIVITY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const STORY_BOOK_EVENTS = {
+  STORY_BOOK_PUBLISHED: {
+    domain: 'story-book',
+    eventType: 'story_book.published',
+    version: 1,
+    description:
+      'نشر كتاب قصة المستفيد الفترية لمشاركته مع الأسرة — A beneficiary quarterly story book was published',
+    payload: {
+      storyBookId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      periodType: 'string',
+      coverage: 'number',
+      publishedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2304,6 +2325,7 @@ const DDD_CONTRACTS = {
   'pdpl-request': PDPL_REQUEST_EVENTS,
   'bip-effectiveness': BIP_EFFECTIVENESS_EVENTS,
   'seat-allocation': SEAT_ALLOCATION_EVENTS,
+  'story-book': STORY_BOOK_EVENTS,
 };
 
 /**
@@ -2406,6 +2428,7 @@ module.exports = {
   PDPL_REQUEST_EVENTS,
   BIP_EFFECTIVENESS_EVENTS,
   SEAT_ALLOCATION_EVENTS,
+  STORY_BOOK_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

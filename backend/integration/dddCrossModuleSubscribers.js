@@ -3170,6 +3170,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'story-book:published → timeline:record',
+    pattern: 'story-book.story_book.published',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const cov = Number(event.payload.coverage);
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'story_book_published',
+            category: 'family',
+            severity: 'success',
+            title: `Story book published${event.payload.periodType ? ` (${event.payload.periodType})` : ''}${Number.isFinite(cov) ? ` — ${cov}% coverage` : ''}`,
+            title_ar: 'تم نشر كتاب قصة المستفيد الفترية لمشاركته مع الأسرة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] StoryBook timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -124,4 +124,26 @@ StoryBookSchema.pre('save', async function () {
   }
 });
 
+// ── Unified-core producer (W1100): emit on quarterly story book publication ──
+StoryBookSchema.pre('save', function flagStoryBookPublished() {
+  this.$__storyBookPublished = this.isModified('status') && this.status === 'published';
+});
+
+StoryBookSchema.post('save', function emitStoryBookPublished(doc) {
+  if (!doc.$__storyBookPublished) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('story-book', 'story_book.published', {
+      storyBookId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      periodType: doc.periodType,
+      coverage: doc.coverage,
+      publishedAt: doc.publishedAt || new Date(),
+    });
+  } catch (_err) {
+    /* non-blocking: timeline linkage must never break a save */
+  }
+});
+
 module.exports = mongoose.models.StoryBook || mongoose.model('StoryBook', StoryBookSchema);

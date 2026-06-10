@@ -176,6 +176,7 @@ const careTimelineSchema = new mongoose.Schema(
         'bip_effectiveness_recorded',
         'seat_allocation_assigned',
         'student_activity_completed',
+        'story_book_published',
         // Family
         'family_contact',
         'family_meeting',

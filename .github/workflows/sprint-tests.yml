@@ -1454,6 +1454,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/goal-therapeutic-bridge-wave1133.test.js'
       - 'backend/__tests__/beneficiary-transfer-completed-core-linkage-wave1135.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-resolved-core-linkage-wave1136.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2891,6 +2893,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/goal-therapeutic-bridge-wave1133.test.js'
       - 'backend/__tests__/beneficiary-transfer-completed-core-linkage-wave1135.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-resolved-core-linkage-wave1136.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

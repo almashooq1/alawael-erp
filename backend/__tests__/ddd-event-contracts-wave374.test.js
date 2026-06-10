@@ -163,6 +163,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'clinical-risk-score', // W1131 — clinical risk score escalated → core timeline
   'corrective-action', // W1134 — beneficiary corrective action opened → core timeline
   'beneficiary-transfer', // W1135 — beneficiary branch transfer completed → core timeline
+  'complaint', // W1136 — beneficiary-linked complaint resolved → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -300,6 +301,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'clinical_risk_score', // W1131 — clinical_risk_score.escalated (ClinicalRiskScore)
     'corrective_action', // W1134 — corrective_action.opened (CorrectiveAction)
     'transfer', // W1135 — transfer.completed (BeneficiaryTransfer)
+    'complaint', // W1136 — complaint.resolved (Complaint)
   ])
 );
 

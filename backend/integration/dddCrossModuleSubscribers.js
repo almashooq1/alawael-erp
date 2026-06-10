@@ -3890,6 +3890,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1136: beneficiary-linked complaint resolved → core timeline ───
+  // Canonical Complaint (W465) resolves via TWO writer paths: the PUT /:id
+  // route's branch-scoped findOneAndUpdate and any doc.save() transition.
+  // The W465 CRPD Art. 12 invariant guarantees advocateInvolved=true on
+  // every beneficiary-linked resolution — surfaced in the metadata.
+  subscribers.push({
+    name: 'complaint:resolved → timeline:record',
+    pattern: 'complaint.complaint.resolved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'complaint_resolved',
+            category: 'family',
+            severity: 'success',
+            title: 'Beneficiary-related complaint resolved',
+            title_ar: 'تم حل الشكوى المتعلقة بالمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Complaint timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -201,6 +201,7 @@ const careTimelineSchema = new mongoose.Schema(
         'quality_audit_record_completed',
         'clinical_risk_score_escalated',
         'corrective_action_opened',
+        'complaint_resolved', // W1136 — beneficiary-linked complaint resolved → unified core
         // Family
         'family_contact',
         'family_meeting',

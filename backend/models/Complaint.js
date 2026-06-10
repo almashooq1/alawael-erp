@@ -163,4 +163,47 @@ complaintSchema.pre('save', async function () {
   }
 });
 
+// ── W1136 — beneficiary-linked complaint resolved → unified core timeline ──
+// Complaints resolve via TWO writer paths: doc.save() transitions and the
+// PUT /:id route's findOneAndUpdate (returnDocument:'after'). Both producer
+// hooks emit the same contract event; lazy require + try/catch so the bus
+// can never block or fail a complaint write. async style per W483.
+function emitComplaintResolved(doc, resolvedAt) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('complaint', 'complaint.resolved', {
+      complaintId: doc._id,
+      ...(doc.complaintId ? { complaintNumber: doc.complaintId } : {}),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      type: doc.type,
+      priority: doc.priority,
+      source: doc.source,
+      advocateInvolved: Boolean(doc.advocateInvolved),
+      resolvedAt: resolvedAt || doc.resolvedAt || new Date(),
+    });
+  } catch (err) {
+    void err; // bus unavailable — never block the complaint write
+  }
+}
+
+complaintSchema.pre('save', async function flagComplaintResolved() {
+  this.$__complaintResolved =
+    this.isModified('status') && this.status === 'resolved' && Boolean(this.beneficiaryId);
+});
+
+complaintSchema.post('save', function onComplaintSaved(doc) {
+  if (!doc.$__complaintResolved) return;
+  doc.$__complaintResolved = false;
+  emitComplaintResolved(doc);
+});
+
+complaintSchema.post('findOneAndUpdate', async function onComplaintUpdated(doc) {
+  if (!doc || !doc.beneficiaryId) return;
+  const update = this.getUpdate() || {};
+  const set = update.$set || update;
+  if (set.status !== 'resolved') return;
+  emitComplaintResolved(doc, set.resolvedAt);
+});
+
 module.exports = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);

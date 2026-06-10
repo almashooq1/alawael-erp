@@ -2814,6 +2814,30 @@ const BENEFICIARY_TRANSFER_EVENTS = Object.freeze({
   },
 }); // ═══ W1135 — beneficiary branch transfer completed → unified core timeline ═══
 
+const COMPLAINT_EVENTS = Object.freeze({
+  COMPLAINT_RESOLVED: {
+    domain: 'complaint',
+    eventType: 'complaint.resolved',
+    version: 1,
+    description:
+      'A beneficiary-linked complaint was resolved (advocate involvement guaranteed by the W465 CRPD Article 12 invariant).',
+    payload: {
+      complaintId: 'string',
+      complaintNumber: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      type: 'string',
+      priority: 'string',
+      source: 'string',
+      advocateInvolved: 'boolean',
+      resolvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1136 — beneficiary-linked complaint resolved → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2926,6 +2950,7 @@ const DDD_CONTRACTS = {
   'clinical-risk-score': CLINICAL_RISK_SCORE_EVENTS,
   'corrective-action': CORRECTIVE_ACTION_EVENTS,
   'beneficiary-transfer': BENEFICIARY_TRANSFER_EVENTS,
+  complaint: COMPLAINT_EVENTS,
 };
 
 /**
@@ -3050,6 +3075,7 @@ module.exports = {
   CLINICAL_RISK_SCORE_EVENTS,
   CORRECTIVE_ACTION_EVENTS,
   BENEFICIARY_TRANSFER_EVENTS,
+  COMPLAINT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

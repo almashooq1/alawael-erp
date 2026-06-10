@@ -821,3 +821,17 @@ __tests__/dashboard-saved-views-auth-behavioral-wave1190.test.js
 __tests__/dashboard-rehab-safemount-auth-wave1191.test.js
 __tests__/dashboard-rehab-safemount-auth-behavioral-wave1191.test.js
 __tests__/check-phantom-schema-writes-script.test.js
+__tests__/golden-thread-attention-behavioral-wave1165.test.js
+__tests__/golden-thread-attention-wave1165.test.js
+__tests__/golden-thread-caseload-route-wave1167.test.js
+__tests__/golden-thread-integrity-behavioral.test.js
+__tests__/golden-thread-integrity-script.test.js
+__tests__/golden-thread-next-actions-behavioral-wave1158.test.js
+__tests__/golden-thread-next-actions-wave1158.test.js
+__tests__/golden-thread-service-behavioral-wave1156.test.js
+__tests__/golden-thread-service-wave1156.test.js
+__tests__/operations-health-route-wave1196.test.js
+__tests__/operations-health-wave1195.test.js
+__tests__/supervisor-ops-route-wave1170.test.js
+__tests__/supervisor-ops-service-behavioral-wave1169.test.js
+__tests__/supervisor-ops-service-wave1169.test.js

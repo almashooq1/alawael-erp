@@ -816,3 +816,4 @@ __tests__/finance-cheques-branch-isolation-wave1172.test.js
 __tests__/finance-cheques-branch-isolation-behavioral-wave1172.test.js
 __tests__/forms-approval-chain-wave1186.test.js
 __tests__/forms-approval-chain-behavioral-wave1186.test.js
+__tests__/check-phantom-schema-writes-script.test.js

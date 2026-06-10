@@ -23,6 +23,8 @@ const express = require('express');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../middleware/assertBranchMatch');
 
 const Cheque = require('../models/Cheque');
 const JournalEntry = require('../models/finance/JournalEntry');
@@ -54,9 +56,38 @@ const WRITE_ROLES = [
 ];
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 function ok(res, data) {
   return res.json({ ok: true, data });
+}
+
+// W269 — list-scope clause: own branch (restricted) + null-branch (org-level /
+// standalone cheques) so unanchored cheques stay visible; `{}` for HQ/cross-branch.
+function chequeListScope(req) {
+  const bf = branchFilter(req);
+  if (!bf.branchId) return {};
+  return { $or: [{ branchId: bf.branchId }, { branchId: null }] };
+}
+
+// W269 — load a cheque by id + assert its (invoice-derived, nullable) branch. Returns
+// the cheque when allowed, or null after sending a 403/404. Null-branch (org-level)
+// cheques are allowed through.
+async function loadChequeInBranch(req, res, id) {
+  const doc = await Cheque.findById(id).lean();
+  if (!doc) {
+    bad(res, 'not found', 404);
+    return null;
+  }
+  if (doc.branchId != null) {
+    try {
+      assertBranchMatch(req, doc.branchId, 'cheque');
+    } catch (e) {
+      res.status(e.status || 403).json({ ok: false, error: e.message });
+      return null;
+    }
+  }
+  return doc;
 }
 
 function bad(res, msg, status = 400) {
@@ -85,10 +116,9 @@ function actorId(req) {
 
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...chequeListScope(req) }; // W269 branch isolation (was dead branch_id)
     if (req.query.status) filter.status = req.query.status;
     if (req.query.type) filter.type = req.query.type;
-    if (req.query.branchId) filter.branch_id = req.query.branchId;
     if (req.query.payee) {
       // escapeRegex + bound length — without these, a payee=`(a+)+$`-style
       // search pattern can pin the Mongo query in catastrophic backtracking.
@@ -118,8 +148,8 @@ router.get('/aging', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const doc = await Cheque.findById(req.params.id).lean();
-    if (!doc) return bad(res, 'not found', 404);
+    const doc = await loadChequeInBranch(req, res, req.params.id); // W269
+    if (!doc) return; // 403/404 already sent
     ok(res, doc);
   } catch (e) {
     mapError(e, res);
@@ -143,6 +173,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
 
 router.post('/:id/deposit', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.depositCheque({
       ChequeModel: Cheque,
       JournalEntryModel: JournalEntry,
@@ -158,6 +189,7 @@ router.post('/:id/deposit', requireRole(WRITE_ROLES), async (req, res) => {
 
 router.post('/:id/clear', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.clearCheque({
       ChequeModel: Cheque,
       JournalEntryModel: JournalEntry,
@@ -174,6 +206,7 @@ router.post('/:id/clear', requireRole(WRITE_ROLES), async (req, res) => {
 router.post('/:id/bounce', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!req.body || !req.body.reason) return bad(res, 'reason is required');
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.bounceCheque({
       ChequeModel: Cheque,
       JournalEntryModel: JournalEntry,
@@ -190,6 +223,7 @@ router.post('/:id/bounce', requireRole(WRITE_ROLES), async (req, res) => {
 
 router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.cancelCheque({
       ChequeModel: Cheque,
       id: req.params.id,
@@ -204,6 +238,7 @@ router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
 
 router.post('/:id/hold', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.holdCheque({
       ChequeModel: Cheque,
       id: req.params.id,
@@ -217,6 +252,7 @@ router.post('/:id/hold', requireRole(WRITE_ROLES), async (req, res) => {
 
 router.post('/:id/release', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!(await loadChequeInBranch(req, res, req.params.id))) return; // W269
     const data = await svc.releaseHold({ ChequeModel: Cheque, id: req.params.id });
     ok(res, data);
   } catch (e) {

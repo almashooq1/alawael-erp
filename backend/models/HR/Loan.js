@@ -65,4 +65,7 @@ const LoanSchema = new mongoose.Schema(
   { timestamps: true, collection: 'hr_loans' }
 );
 
+// W1133 — denormalize branchId from the employee for cross-branch isolation.
+LoanSchema.plugin(require('./hrBranchScope.plugin'));
+
 module.exports = mongoose.models.Loan || mongoose.model('Loan', LoanSchema);

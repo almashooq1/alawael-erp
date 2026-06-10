@@ -94,6 +94,9 @@ const chequeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    // W269 — denormalized from relatedInvoice for cross-branch isolation. Nullable:
+    // standalone / expense-only cheques have no branch anchor → treated as org-level.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', default: null, index: true },
   },
   {
     timestamps: true,
@@ -101,10 +104,25 @@ const chequeSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-chequeSchema.pre('save', async function () {
+chequeSchema.pre('save', async function (next) {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
+  next();
 });
 
+// W269 — derive branchId from the related invoice (best-effort; cheques without an
+// invoice link stay null = org-level). pre('validate') so it runs on every save.
+chequeSchema.pre('validate', async function () {
+  if (this.branchId || !this.relatedInvoice) return;
+  try {
+    const Invoice = mongoose.model('Invoice');
+    const inv = await Invoice.findById(this.relatedInvoice).select('branchId').lean();
+    if (inv && inv.branchId) this.branchId = inv.branchId;
+  } catch (_e) {
+    /* best-effort — never block a save on the derivation */
+  }
+});
+
+chequeSchema.index({ branchId: 1, status: 1 });
 chequeSchema.index({ chequeNumber: 1, bankName: 1 });
 chequeSchema.index({ status: 1, dueDate: 1 });
 chequeSchema.index({ type: 1, status: 1 });

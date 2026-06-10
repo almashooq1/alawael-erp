@@ -50,6 +50,9 @@ class FinanceOperationsService {
 
   async listInvoices(query = {}) {
     const filter = {};
+    // W269 — branch isolation: the route passes effectiveBranchScope(req) as branchId
+    // (own branch for restricted callers, undefined for HQ → no filter).
+    if (query.branchId) filter.branchId = query.branchId;
     if (query.status) filter.status = query.status;
     if (query.beneficiary) filter.beneficiary = query.beneficiary;
     if (query.search) {

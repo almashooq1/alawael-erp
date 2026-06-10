@@ -60,6 +60,7 @@
     "audit:golden-thread-attention": "node scripts/golden-thread-attention.js",
     "audit:session-documentation": "node scripts/session-documentation-audit.js",
     "audit:goal-consolidation": "node scripts/goal-model-consolidation-readiness.js",
+    "audit:operations-health": "node scripts/operations-health.js",
     "consolidate:smartgoal": "node scripts/consolidate-smartgoal.js",
     "audit:stub-routes:json": "node scripts/audit-stub-routes.js --json",
     "verify:supply-chain-staging": "node scripts/verify-supply-chain-staging.js",

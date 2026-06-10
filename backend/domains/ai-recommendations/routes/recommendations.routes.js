@@ -15,10 +15,21 @@ const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
   effectiveBranchScope,
+  branchScopedResourceParam,
 } = require('../../../middleware/assertBranchMatch');
 const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
 router.use(requireBranchAccess); // W1168 — must run before the param/body guards
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — /recommendations/:id/* ownership: restricted callers cannot act on a
+// foreign-branch Recommendation (respond / view / rate).
+router.param(
+  'id',
+  branchScopedResourceParam({
+    modelName: 'Recommendation',
+    label: 'توصية',
+    loadModel: () => require('../models/Recommendation'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const { riskScoringService } = require('../services/RiskScoringService');
 const {

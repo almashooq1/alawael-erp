@@ -15,10 +15,31 @@ const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
   effectiveBranchScope,
+  branchScopedResourceParam,
 } = require('../../../middleware/assertBranchMatch');
 const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
 router.use(requireBranchAccess); // W1168 — must run before the param/body guards
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — resource ownership: restricted callers cannot touch a foreign-branch
+// FamilyMember (update / consents) or FamilyCommunication (follow-ups /
+// homework). :consentId and :homeworkId are sub-documents of the hooked
+// parents — covered transitively.
+router.param(
+  'memberId',
+  branchScopedResourceParam({
+    modelName: 'FamilyMember',
+    label: 'فرد أسرة',
+    loadModel: () => require('../models/FamilyMember'),
+  })
+);
+router.param(
+  'commId',
+  branchScopedResourceParam({
+    modelName: 'FamilyCommunication',
+    label: 'تواصل أسري',
+    loadModel: () => require('../models/FamilyCommunication'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const { familyService } = require('../services/FamilyService');
 const {
@@ -65,12 +86,14 @@ router.get(
   })
 );
 
-/** PUT /members/:id — تحديث بيانات فرد أسرة */
+/** PUT /members/:memberId — تحديث بيانات فرد أسرة */
+// W1175 — renamed :id → :memberId (URL shape unchanged) so the FamilyMember
+// ownership hook fires.
 router.put(
-  '/members/:id',
+  '/members/:memberId',
   validate(validateUpdateFamilyMember),
   asyncHandler(async (req, res) => {
-    const data = await familyService.updateFamilyMember(req.params.id, req.body);
+    const data = await familyService.updateFamilyMember(req.params.memberId, req.body);
     res.json({ success: true, data });
   })
 );
@@ -159,11 +182,17 @@ router.get(
   })
 );
 
-/** POST /follow-ups/:id/complete — إتمام متابعة */
+/** POST /follow-ups/:commId/complete — إتمام متابعة */
+// W1175 — renamed :id → :commId (follow-ups live on FamilyCommunication; the
+// ownership hook fires; URL shape unchanged).
 router.post(
-  '/follow-ups/:id/complete',
+  '/follow-ups/:commId/complete',
   asyncHandler(async (req, res) => {
-    const data = await familyService.completeFollowUp(req.params.id, getUserId(req), req.body.note);
+    const data = await familyService.completeFollowUp(
+      req.params.commId,
+      getUserId(req),
+      req.body.note
+    );
     res.json({ success: true, data });
   })
 );

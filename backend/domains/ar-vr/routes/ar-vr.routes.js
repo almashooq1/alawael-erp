@@ -18,10 +18,22 @@ const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
   effectiveBranchScope,
+  branchScopedResourceParam,
 } = require('../../../middleware/assertBranchMatch');
 const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
 router.use(requireBranchAccess); // W1168 — must run before the param/body guards
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — /:id lifecycle ownership (start/pause/resume/complete/abort/safety):
+// restricted callers cannot drive a foreign-branch ARVRSession.
+// (:scenarioId is a static in-memory registry — not a DB resource, no guard.)
+router.param(
+  'id',
+  branchScopedResourceParam({
+    modelName: 'ARVRSession',
+    label: 'جلسة AR/VR',
+    loadModel: () => require('../models/ARVRSession'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const { arvrService } = require('../services/ARVRService');
 const {

@@ -275,6 +275,7 @@ __tests__/document-expiry-radar-service.test.js
 __tests__/documents-json-create-wave933.test.js
 __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
 __tests__/domain-mounts-central-branch-scope-wave1171.test.js
+__tests__/domain-resource-param-guards-wave1175.test.js
 __tests__/domain-sod-policy.test.js
 __tests__/domains-routes-branch-isolation-wave1140.test.js
 __tests__/dpia-lifecycle-wave285.test.js
@@ -328,8 +329,8 @@ __tests__/family-wbci-behavioral-wave467.test.js
 __tests__/family-wbci-wave467.test.js
 __tests__/finance-approvals-branch-isolation-behavioral-wave1163.test.js
 __tests__/finance-approvals-branch-isolation-wave1163.test.js
-__tests__/finance-cheques-branch-isolation-wave1172.test.js
 __tests__/finance-cheques-branch-isolation-behavioral-wave1172.test.js
+__tests__/finance-cheques-branch-isolation-wave1172.test.js
 __tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js
 __tests__/finance-invoice-branch-isolation-wave1161.test.js
 __tests__/finance-models-halalas-expand-wave579.test.js
@@ -807,9 +808,9 @@ __tests__/subsidy-payment-received-core-linkage-wave1074.test.js
 __tests__/supervisor-ops-route-wave1170.test.js
 __tests__/supervisor-ops-service-behavioral-wave1169.test.js
 __tests__/supervisor-ops-service-wave1169.test.js
+__tests__/supervisor-overdue-reports-wave1174.test.js
 __tests__/supervisor-productivity-behavioral-wave1173.test.js
 __tests__/supervisor-productivity-wave1173.test.js
-__tests__/supervisor-overdue-reports-wave1174.test.js
 __tests__/supply-chain-doc-sync-wave823.test.js
 __tests__/supply-chain-engineering-freeze-wave822.test.js
 __tests__/supply-chain-ops-closure-wave817.test.js

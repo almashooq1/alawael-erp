@@ -15,10 +15,21 @@ const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
   effectiveBranchScope,
+  branchScopedResourceParam,
 } = require('../../../middleware/assertBranchMatch');
 const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
 router.use(requireBranchAccess); // W1168 — must run before the param/body guards
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — /actions/:id/resolve ownership: restricted callers cannot resolve a
+// foreign-branch CorrectiveAction.
+router.param(
+  'id',
+  branchScopedResourceParam({
+    modelName: 'CorrectiveAction',
+    label: 'إجراء تصحيحي',
+    loadModel: () => require('../models/CorrectiveAction'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const { qualityEngine } = require('../services/QualityEngine');
 const { validateResolveAction, validate } = require('../validators/quality.validator');

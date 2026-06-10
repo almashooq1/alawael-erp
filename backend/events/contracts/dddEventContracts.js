@@ -2115,6 +2115,27 @@ const CDSS_ALERT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const GAS_SNAPSHOT_EVENTS = {
+  GAS_SCORE_SNAPSHOTTED: {
+    domain: 'gas-snapshot',
+    eventType: 'gas_snapshot.recorded',
+    version: 1,
+    description:
+      'تسجيل لقطة درجة تحقيق الأهداف GAS للمستفيد — A GAS T-score snapshot was recorded for a beneficiary',
+    payload: {
+      snapshotId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      tScore: 'number',
+      snapshotType: 'string',
+      goalCount: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2196,6 +2217,7 @@ const DDD_CONTRACTS = {
   'pickup-authorization': PICKUP_AUTHORIZATION_EVENTS,
   'meal-event': MEAL_EVENT_EVENTS,
   'cdss-alert': CDSS_ALERT_EVENTS,
+  'gas-snapshot': GAS_SNAPSHOT_EVENTS,
 };
 
 /**
@@ -2293,6 +2315,7 @@ module.exports = {
   PICKUP_AUTHORIZATION_EVENTS,
   MEAL_EVENT_EVENTS,
   CDSS_ALERT_EVENTS,
+  GAS_SNAPSHOT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

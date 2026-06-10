@@ -131,7 +131,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'waiting-list', // W1091 — known beneficiary joined the waiting list → core timeline
   'pickup-authorization', // W1092 — pickup authorization created → core timeline
   'meal-event', // W1093 — meal allergy incident → core timeline
-  'cdss-alert', // W1094 — critical CDSS alert → core timeline — BIP fidelity check recorded → core timeline
+  'cdss-alert', // W1094 — critical CDSS alert → core timeline
+  'gas-snapshot', // W1095 — GAS T-score snapshot → core timeline — BIP fidelity check recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -237,7 +238,8 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'waiting_list', // W1091 — waiting_list.joined (WaitingListEntry)
     'pickup_authorization', // W1092 — pickup_authorization.requested (PickupAuthorization)
     'meal_event', // W1093 — meal_event.allergy_incident (BeneficiaryMealEvent)
-    'cdss_alert', // W1094 — cdss_alert.raised (CdssAlert) — bip_fidelity.checked (BipFidelityCheck)
+    'cdss_alert', // W1094 — cdss_alert.raised (CdssAlert)
+    'gas_snapshot', // W1095 — gas_snapshot.recorded (GasScoreSnapshot) — bip_fidelity.checked (BipFidelityCheck)
   ])
 );
 

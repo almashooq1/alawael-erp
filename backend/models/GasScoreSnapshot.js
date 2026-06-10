@@ -95,5 +95,28 @@ GasScoreSnapshotSchema.index({ beneficiaryId: 1, snapshotDate: -1 });
 GasScoreSnapshotSchema.index({ branchId: 1, snapshotDate: -1, snapshotType: 1 });
 GasScoreSnapshotSchema.index({ episodeOfCareId: 1, snapshotDate: -1 });
 
+// W1095 — unified-core linkage: every new GAS T-score snapshot surfaces a
+// goal-attainment progress row on the per-beneficiary clinical timeline.
+GasScoreSnapshotSchema.pre('save', function flagGasScoreSnapshotted() {
+  this.$__gasScoreSnapshotted = this.isNew;
+});
+
+GasScoreSnapshotSchema.post('save', function emitGasScoreSnapshotted(doc) {
+  if (!doc.$__gasScoreSnapshotted) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('gas-snapshot', 'gas_snapshot.recorded', {
+      snapshotId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      tScore: doc.tScore,
+      snapshotType: doc.snapshotType,
+      goalCount: doc.goalCount,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.GasScoreSnapshot || mongoose.model('GasScoreSnapshot', GasScoreSnapshotSchema);

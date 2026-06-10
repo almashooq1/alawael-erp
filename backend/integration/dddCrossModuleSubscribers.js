@@ -3025,6 +3025,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1095 — GAS T-score snapshot → unified core timeline
+  subscribers.push({
+    name: 'gas-snapshot:recorded → timeline:record',
+    pattern: 'gas-snapshot.gas_snapshot.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const t = event.payload.tScore;
+          const severity =
+            typeof t === 'number' && t >= 50
+              ? 'success'
+              : typeof t === 'number' && t < 40
+                ? 'warning'
+                : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'gas_score_snapshotted',
+            category: 'clinical',
+            severity,
+            title: `GAS T-score: ${typeof t === 'number' ? t.toFixed(1) : 'n/a'} (${event.payload.snapshotType || 'snapshot'})`,
+            title_ar: 'تم تسجيل لقطة درجة تحقيق الأهداف للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] GasScoreSnapshot timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

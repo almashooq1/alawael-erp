@@ -200,7 +200,10 @@ router.get('/children/:id/appointments', async (req, res) => {
     if (!guardian) return res.status(403).json({ success: false, message: 'Access denied' });
     if (!Appointment) return res.json({ success: true, data: [] });
     const { upcoming = 'true' } = req.query;
-    const filter = { beneficiaryId: req.params.id, branchId: req.user.branchId };
+    // W1197 — Appointment's canonical field is `beneficiary` (ref); the old
+    // phantom `beneficiaryId` filter matched nothing → guardians always saw
+    // an empty appointment list.
+    const filter = { beneficiary: req.params.id, branchId: req.user.branchId };
     if (upcoming === 'true') filter.date = { $gte: new Date() };
     const data = await Appointment.find(filter).sort({ date: 1 }).limit(20).lean();
     res.json({ success: true, data });
@@ -224,20 +227,55 @@ router.post('/children/:id/appointments', async (req, res) => {
     if (!guardian) return res.status(403).json({ success: false, message: 'Access denied' });
     if (!Appointment)
       return res.status(503).json({ success: false, message: 'Appointment service unavailable' });
-    const { requestedDate, serviceType, notes } = req.body;
+    const { requestedDate, serviceType, notes, startTime } = req.body;
     if (!requestedDate || !serviceType)
       return res
         .status(400)
         .json({ success: false, message: 'requestedDate and serviceType are required' });
+    // W1197 — realigned to the REAL Appointment vocabulary. The old payload
+    // (beneficiaryId / serviceType / status:'pending' / requestedBy*) matched
+    // phantom fields, violated the UPPERCASE status enum, and never set the
+    // REQUIRED startTime → guardian booking threw ValidationError on every
+    // request since it shipped (caught by the W1189 phantom-writes audit).
+    const APPOINTMENT_TYPES = [
+      'استشارة أولية',
+      'متابعة',
+      'تقييم',
+      'فحص',
+      'علاج طبيعي',
+      'علاج وظيفي',
+      'نطق وتخاطب',
+      'علاج سلوكي',
+      'علاج نفسي',
+      'أخرى',
+    ];
+    const SERVICE_TYPE_MAP = {
+      consultation: 'استشارة أولية',
+      follow_up: 'متابعة',
+      assessment: 'تقييم',
+      examination: 'فحص',
+      physical_therapy: 'علاج طبيعي',
+      physiotherapy: 'علاج طبيعي',
+      occupational_therapy: 'علاج وظيفي',
+      speech_therapy: 'نطق وتخاطب',
+      behavioral_therapy: 'علاج سلوكي',
+      psychology: 'علاج نفسي',
+    };
+    const when = new Date(requestedDate);
+    const hhmm = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
     const doc = await Appointment.create({
-      beneficiaryId: req.params.id,
+      beneficiary: req.params.id,
       branchId: req.user.branchId,
-      date: new Date(requestedDate),
-      serviceType,
+      date: when,
+      startTime: startTime || hhmm,
+      type: APPOINTMENT_TYPES.includes(serviceType)
+        ? serviceType
+        : SERVICE_TYPE_MAP[serviceType] || 'أخرى',
+      reason: serviceType, // preserve the guardian's requested service verbatim
       notes,
-      status: 'pending',
-      requestedBy: 'guardian',
-      requestedByUserId: req.user._id,
+      status: 'PENDING',
+      bookedBy: req.user._id,
+      bookedByName: req.user.name || req.user.fullName || req.user.email,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {

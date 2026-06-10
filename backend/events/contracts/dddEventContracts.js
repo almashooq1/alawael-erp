@@ -1156,6 +1156,26 @@ const SPASTICITY_INJECTION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PROSTHETIC_ORTHOTIC_EVENTS = {
+  PROSTHETIC_ORTHOTIC_DELIVERED: {
+    domain: 'prosthetic-orthotic-order',
+    eventType: 'prosthetic_orthotic.delivered',
+    version: 1,
+    description: 'تسليم الجهاز التقويمي/الطرف الصناعي — Prosthetic/orthotic device delivered',
+    payload: {
+      orderId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      deviceCategory: 'string',
+      deliveredDate: 'date',
+      deliveredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1191,6 +1211,7 @@ const DDD_CONTRACTS = {
   vaccination: VACCINATION_EVENTS,
   'family-home-program': FAMILY_HOME_PROGRAM_EVENTS,
   'spasticity-injection': SPASTICITY_INJECTION_EVENTS,
+  'prosthetic-orthotic-order': PROSTHETIC_ORTHOTIC_EVENTS,
 };
 
 /**
@@ -1242,6 +1263,7 @@ module.exports = {
   VACCINATION_EVENTS,
   FAMILY_HOME_PROGRAM_EVENTS,
   SPASTICITY_INJECTION_EVENTS,
+  PROSTHETIC_ORTHOTIC_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

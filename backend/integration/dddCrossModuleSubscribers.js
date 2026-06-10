@@ -1618,6 +1618,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1049: prosthetic/orthotic delivered → core timeline ───────────
+  // When a custom prosthesis/orthosis/seating system is delivered to the
+  // beneficiary, record the delivery as a clinical milestone on the
+  // beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'prosthetic-orthotic-order:delivered → timeline:record',
+    pattern: 'prosthetic-orthotic-order.prosthetic_orthotic.delivered',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const cat = event.payload.deviceCategory ? ` (${event.payload.deviceCategory})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'prosthetic_orthotic_delivered',
+            category: 'clinical',
+            severity: 'success',
+            title: `Prosthetic/orthotic device delivered${cat}`,
+            title_ar: 'تم تسليم الجهاز التقويمي/الطرف الصناعي',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] ProstheticOrthotic timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

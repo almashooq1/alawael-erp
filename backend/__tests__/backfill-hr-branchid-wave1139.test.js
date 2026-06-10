@@ -53,17 +53,18 @@ describe('W1133 — backfill script contract', () => {
         'goals', // W1154
         'health-insurance',
         'loans',
+        'nitaqat-contracts', // W1159
         'onboarding',
         'shift-swaps',
         'travel',
         'visas',
       ].sort()
     );
-    // shift-swaps derives from the requester, the rest from employeeId
+    // Most derive from employeeId; shift-swaps from the requester, nitaqat from `employee`.
     expect(MODELS.find(m => m.key === 'shift-swaps').fk).toBe('requesterId');
-    expect(MODELS.filter(m => m.key !== 'shift-swaps').every(m => m.fk === 'employeeId')).toBe(
-      true
-    );
+    expect(MODELS.find(m => m.key === 'nitaqat-contracts').fk).toBe('employee');
+    const standard = MODELS.filter(m => !['shift-swaps', 'nitaqat-contracts'].includes(m.key));
+    expect(standard.every(m => m.fk === 'employeeId')).toBe(true);
   });
 });
 

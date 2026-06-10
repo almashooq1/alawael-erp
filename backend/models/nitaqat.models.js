@@ -229,6 +229,12 @@ employmentContractSchema.pre('save', async function (next) {
   next();
 });
 
+// W1159 — denormalize branchId from the employee (single-org, multi-branch
+// platform → branch is the isolation axis even though the contract keys on org).
+employmentContractSchema.plugin(require('./HR/hrBranchScope.plugin'), {
+  employeeField: 'employee',
+});
+
 const EmploymentContract =
   mongoose.models.NitaqatEmploymentContract ||
   mongoose.model('NitaqatEmploymentContract', employmentContractSchema);

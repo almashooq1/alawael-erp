@@ -33,6 +33,13 @@ const MODELS = [
   // W1154 — hr-extensions surfaces (documents + performance goals).
   { key: 'documents', modelPath: '../models/HR/EmployeeDocument', fk: 'employeeId' },
   { key: 'goals', modelPath: '../models/HR/EmployeeGoal', fk: 'employeeId' },
+  // W1159 — nitaqat/qiwa employment contracts (object-exported; keys on `employee`).
+  {
+    key: 'nitaqat-contracts',
+    modelPath: '../models/nitaqat.models',
+    export: 'EmploymentContract',
+    fk: 'employee',
+  },
 ];
 
 /**
@@ -41,7 +48,10 @@ const MODELS = [
  * @returns {{ key: string, missing: number, resolved: number, skipped: number, updated: number }}
  */
 async function backfillModel(model, Employee, { commit } = {}) {
-  const Model = require(model.modelPath);
+  const required = require(model.modelPath);
+  // Some model files export an object of models (e.g. nitaqat.models.js); pick
+  // the named member when `export` is set, else the default module export.
+  const Model = model.export ? required[model.export] : required;
   const docs = await Model.find({
     $or: [{ branchId: { $exists: false } }, { branchId: null }],
     [model.fk]: { $ne: null },

@@ -1,11 +1,11 @@
-# Production Cutover — Golden Thread arc (W1090 → W1165)
+# Production Cutover — Golden Thread + Supervisor-Ops arc (W1090 → W1174)
 
-> **Status:** built + verified (119/119 across 22 suites, run together 2026-06-10),
+> **Status:** built + verified (172/172 across 29 suites, run together 2026-06-10),
 > awaiting deploy. **Scope:** the beneficiary "golden thread"
-> (assessment → goal → measure → session → baseline → outcome) data layer + its
-> deterministic intelligence layer (traversal, next-best-action, caseload triage)
->
-> - the web-admin clinician view.
+> (assessment → goal → measure → session → baseline → outcome) data + deterministic
+> intelligence layer (traversal, next-best-action, caseload triage), the supervisor
+> operational-workflow layer (documentation backlog, productivity, overdue reports),
+> and the web-admin clinician + supervisor views (PR #57, #58).
 >
 > **Single source of truth** for activating this arc in production. Companion to
 > [`docs/blueprint/43-beneficiary-journey-operating-system.md`](../blueprint/43-beneficiary-journey-operating-system.md).
@@ -62,12 +62,36 @@ On first load of each model against prod, Mongoose builds these. All are additiv
   most-urgent first. Branch-scoped (restricted callers pinned to their branch; cross-branch
   roles must pass `?branchId`; scan capped). Mounted on the **goals** domain router.
 
+### 3b. Supervisor operations endpoints (W1169–W1174 — operational-workflow layer)
+
+All three on the **goals** domain router (no `features.registry` change), all
+W269 branch-scoped via `effectiveBranchScope` (restricted callers pinned; a
+cross-branch role passes `?branchId`), all **read-only**. They answer the
+supervisor's three operational questions:
+
+- **`GET /api/(v1/)goals/supervisor-ops/documentation-backlog[?branchId=&days=]`** (W1170) —
+  the "In-Process vs Complete" board: completed sessions still awaiting documentation
+  (empty SOAP + no goalProgress), grouped by therapist, + `documentedRate`. Window default 7, max 90.
+- **`GET /api/(v1/)goals/supervisor-ops/productivity[?branchId=&days=]`** (W1173) —
+  per-therapist throughput: completed (window + today), therapy minutes delivered,
+  documentation rate. Computed on the **canonical** `ClinicalSession` (NOT the legacy
+  `TherapySession` therapistUtilization service).
+- **`GET /api/(v1/)goals/supervisor-ops/overdue-reports[?branchId=]`** (W1174) —
+  beneficiaries with an overdue periodic report; reuses the W222 reassessment lifecycle
+  (`reassessmentLifecycle.listByPhase`, phases OVERDUE/ESCALATED/BREACHED). Reads the
+  `MeasureReassessmentTask.phase` field maintained by the W222 lifecycle tick — ensure that
+  scheduler is running for the phases to be fresh.
+
+web-admin: PR #58 (`feat/supervisor-ops-ui`) renders the documentation-backlog board;
+the productivity + overdue-reports sections are a follow-up on the same PR.
+
 ## 4. Operational audit CLIs (read-only, admin-run; no flags needed beyond `MONGODB_URI`)
 
 | Command                                                                    | Answers                                                                                                          |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `npm run audit:golden-thread [--branch=<id>] [--json]`                     | thread-completeness health: % of goals with a complete thread (HEALTHY/PARTIAL/FRAGMENTED) + where threads break |
 | `npm run audit:golden-thread-attention --branch=<id> [--limit=N] [--json]` | caseload triage — which beneficiaries need attention, ranked, with the single next-best-action                   |
+| `npm run audit:session-documentation --branch=<id> [--days=N] [--json]`    | supervisor documentation backlog — completed sessions still awaiting documentation, grouped by therapist (W1170) |
 | `npm run audit:goal-consolidation [--json]`                                | which goal/measure/plan models hold production data — **gates** the owner's model-convergence decision           |
 
 Run `audit:golden-thread` post-deploy to baseline thread health, and `audit:golden-thread-attention` as a clinician morning-triage report.

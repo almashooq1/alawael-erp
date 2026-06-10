@@ -2220,6 +2220,41 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1069: adjunct therapy session completed → core timeline ───────
+  // When an adjunct-therapy session (hydro / hippo / animal-assisted) is
+  // completed, log it on the beneficiary's timeline (clinical; warning if
+  // an in-session incident was logged, success otherwise).
+  subscribers.push({
+    name: 'adjunct-therapy:completed → timeline:record',
+    pattern: 'adjunct-therapy.adjunct_therapy.session_completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const incident = !!event.payload.hadIncident;
+          const modality = event.payload.modality || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'adjunct_therapy_completed',
+            category: 'clinical',
+            severity: incident ? 'warning' : 'success',
+            title: `Adjunct therapy session completed (${modality})${
+              incident ? ' — incident logged' : ''
+            }`,
+            title_ar: incident
+              ? 'اكتملت جلسة العلاج المساند — مع تسجيل حادثة'
+              : 'اكتملت جلسة العلاج المساند',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] AdjunctTherapy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

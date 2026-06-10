@@ -775,3 +775,4 @@ __tests__/dysphagia-assessment-finalized-core-linkage-wave1065.test.js
 __tests__/allergy-recorded-core-linkage-wave1066.test.js
 __tests__/dtt-session-completed-core-linkage-wave1067.test.js
 __tests__/goal-progress-achieved-core-linkage-wave1068.test.js
+__tests__/adjunct-therapy-completed-core-linkage-wave1069.test.js

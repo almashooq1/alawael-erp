@@ -162,6 +162,34 @@ AdjunctTherapySessionSchema.virtual('hadIncident').get(function () {
 AdjunctTherapySessionSchema.set('toJSON', { virtuals: true });
 AdjunctTherapySessionSchema.set('toObject', { virtuals: true });
 
+// ─── W1069: unified-core linkage — adjunct therapy session completed ────────
+// Milestone = the adjunct-therapy session transitions to 'completed'. Emits a
+// timeline event (surfacing any in-session incident) so the session is visible
+// on the unified core. Non-callback hook style.
+AdjunctTherapySessionSchema.pre('save', function flagAdjunctCompleted() {
+  this.$__adjunctCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+AdjunctTherapySessionSchema.post('save', function emitAdjunctTherapyCompleted(doc) {
+  if (!doc.$__adjunctCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('adjunct-therapy', 'adjunct_therapy.session_completed', {
+      sessionId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      modality: doc.modality,
+      beneficiaryResponse: doc.beneficiaryResponse || undefined,
+      hadIncident: !!doc.incidentDuringSession,
+      completedAt: doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.AdjunctTherapySession ||
   mongoose.model('AdjunctTherapySession', AdjunctTherapySessionSchema);

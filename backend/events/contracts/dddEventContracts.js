@@ -1558,6 +1558,27 @@ const GOAL_PROGRESS_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const ADJUNCT_THERAPY_EVENTS = {
+  ADJUNCT_THERAPY_COMPLETED: {
+    domain: 'adjunct-therapy',
+    eventType: 'adjunct_therapy.session_completed',
+    version: 1,
+    description: 'اكتمال جلسة علاج مساند (مائي/خيول/حيوان) — Adjunct therapy session completed',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      modality: 'string',
+      beneficiaryResponse: 'string',
+      hadIncident: 'boolean',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1613,6 +1634,7 @@ const DDD_CONTRACTS = {
   allergy: ALLERGY_EVENTS,
   'dtt-session': DTT_SESSION_EVENTS,
   'goal-progress': GOAL_PROGRESS_EVENTS,
+  'adjunct-therapy': ADJUNCT_THERAPY_EVENTS,
 };
 
 /**
@@ -1684,6 +1706,7 @@ module.exports = {
   ALLERGY_EVENTS,
   DTT_SESSION_EVENTS,
   GOAL_PROGRESS_EVENTS,
+  ADJUNCT_THERAPY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

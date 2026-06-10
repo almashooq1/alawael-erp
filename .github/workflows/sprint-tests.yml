@@ -1329,6 +1329,8 @@ on:
       - 'backend/__tests__/dtt-session-completed-core-linkage-wave1067.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/goal-progress-achieved-core-linkage-wave1068.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/adjunct-therapy-completed-core-linkage-wave1069.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2641,6 +2643,8 @@ on:
       - 'backend/__tests__/dtt-session-completed-core-linkage-wave1067.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/goal-progress-achieved-core-linkage-wave1068.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/adjunct-therapy-completed-core-linkage-wave1069.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

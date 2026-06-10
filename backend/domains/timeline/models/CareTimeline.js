@@ -145,6 +145,7 @@ const careTimelineSchema = new mongoose.Schema(
         'allergy_recorded',
         'dtt_session_completed',
         'goal_progress_achieved',
+        'adjunct_therapy_completed',
         // Family
         'family_contact',
         'family_meeting',

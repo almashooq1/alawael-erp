@@ -60,6 +60,10 @@ const ENTRIES = [
   require('./schemas/adjunct-therapy-session.canonical'),
   // W715 spasticity / botulinum-toxin injection procedure (2026-06-01):
   require('./schemas/spasticity-injection.canonical'),
+  // W1123 biomedical / clinical waste cradle-to-grave (2026-06-10):
+  require('./schemas/biomedical-waste-record.canonical'),
+  // W1125 staff occupational-health surveillance (2026-06-10):
+  require('./schemas/staff-health-record.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

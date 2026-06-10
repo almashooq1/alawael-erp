@@ -135,6 +135,8 @@ find frontend/src -name "*.test.js*" | wc -l                              # ← 
 | `/api/v1/ops/work-orders`                | أوامر الصيانة — 14 حالة + SLA؛ ربط `facilityAssetId` / `facilityId`؛ list/get مع populate (W801–W805) |
 | `/api/v1/facility-asset/:id/work-orders` | أوامر مرتبطة بأصل منشأة (W807)                                                                        |
 | `/api/v1/ops/facilities`                 | مرافق + تفتيش؛ spawn WO من بند التفتيش (Phase 16 + W801)                                              |
+| `/api/(v1/)?biomedical-waste`            | النفايات الطبية cradle-to-grave — 8 فئات WHO + توليد→تخزين→جمع→تخلّص (W1123)؛ تنبيه تخزين متجاوز (W1124) |
+| `/api/(v1/)?staff-health`                | الصحة المهنية للموظفين — تحصين/سل/لياقة/تعرّض/فحص كمامة، سرّي (W1125)؛ تنبيه مراقبة متأخّرة (W1126)        |
 | `/api/caregiver-support`                 | برامج دعم مقدمي الرعاية — Zarit pre/post + sessions (W384)                                            |
 
 > 📑 **W356-W390 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap. W384 added caregiver-support; W390 wired it into the `/clinical-services/[id]` aggregator (8 surfaces). Note: W381/W383/W384/W385/W386/W387/W388/W389 collide with a parallel agent session — see CLAUDE.md "Wave numbers consumed" line.

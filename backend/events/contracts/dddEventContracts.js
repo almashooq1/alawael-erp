@@ -2423,6 +2423,28 @@ const SMART_SCHEDULER_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const STORY_SURFACE_EVENTS = {
+  STORY_SURFACE_PUBLISHED: {
+    domain: 'story-surface',
+    eventType: 'story_surface.published',
+    version: 1,
+    description:
+      'نشر سرد قصصي مخصص لجمهور المستفيد (أسري/شقيق/سريري...) — An audience-specific story surface variant was published for a beneficiary',
+    payload: {
+      variantId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      storyBookId: 'string',
+      surfaceType: 'string',
+      lang: 'string',
+      publishedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2518,6 +2540,7 @@ const DDD_CONTRACTS = {
   'insurance-policy': INSURANCE_POLICY_EVENTS,
   'red-flag-override': RED_FLAG_OVERRIDE_EVENTS,
   'smart-scheduler': SMART_SCHEDULER_EVENTS,
+  'story-surface': STORY_SURFACE_EVENTS,
 };
 
 /**
@@ -2625,6 +2648,7 @@ module.exports = {
   INSURANCE_POLICY_EVENTS,
   RED_FLAG_OVERRIDE_EVENTS,
   SMART_SCHEDULER_EVENTS,
+  STORY_SURFACE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

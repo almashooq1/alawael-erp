@@ -64,7 +64,8 @@ router.post(
     const program = await programsService.createProgram({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data: program });
@@ -160,7 +161,8 @@ router.post(
     const enrollment = await programsService.enrollBeneficiary({
       ...req.body,
       userId: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data: enrollment });

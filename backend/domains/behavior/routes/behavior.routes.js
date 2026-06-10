@@ -57,7 +57,8 @@ router.post(
     const data = await behaviorService.createRecord({
       ...req.body,
       reportedBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -105,7 +106,8 @@ router.post(
     const data = await behaviorService.createPlan({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })

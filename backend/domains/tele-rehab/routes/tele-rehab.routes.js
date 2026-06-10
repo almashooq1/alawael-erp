@@ -52,7 +52,8 @@ router.post(
     const data = await teleRehabService.scheduleSession({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })

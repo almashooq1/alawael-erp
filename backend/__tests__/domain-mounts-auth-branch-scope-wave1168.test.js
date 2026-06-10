@@ -83,9 +83,16 @@ describe('W1168 — BaseDomainModule mounts are authenticated (static)', () => {
   });
 
   test('all three mounts (/api, /api/v1, /api/v2) include authenticate', () => {
-    expect(src).toMatch(/app\.use\(`\/api\/\$\{basePath\}`,\s*authenticate,\s*this\.router\)/);
-    expect(src).toMatch(/app\.use\(`\/api\/v1\/\$\{basePath\}`,\s*authenticate,\s*this\.router\)/);
-    expect(src).toMatch(/app\.use\(`\/api\/v2\/\$\{basePath\}`,\s*authenticate,\s*this\.router\)/);
+    // W1171 widened the chain: authenticate → requireBranchAccess → router.
+    expect(src).toMatch(
+      /app\.use\(`\/api\/\$\{basePath\}`,\s*authenticate,\s*requireBranchAccess,\s*this\.router\)/
+    );
+    expect(src).toMatch(
+      /app\.use\(`\/api\/v1\/\$\{basePath\}`,\s*authenticate,\s*requireBranchAccess,\s*this\.router\)/
+    );
+    expect(src).toMatch(
+      /app\.use\(`\/api\/v2\/\$\{basePath\}`,\s*authenticate,\s*requireBranchAccess,\s*this\.router\)/
+    );
   });
 
   test('NO bare (unauthenticated) domain mount remains', () => {
@@ -100,6 +107,7 @@ describe('W1168 — BaseDomainModule.mount behavioral', () => {
   test('mount(app) passes the real authenticate middleware to every app.use', () => {
     const { BaseDomainModule } = require('../domains/_base/BaseDomainModule');
     const { authenticate } = require('../middleware/auth');
+    const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 
     const mod = new BaseDomainModule({ name: 'w1168-probe' });
     // initialize() is async-flagged but body is sync (registerRoutes path).
@@ -116,9 +124,11 @@ describe('W1168 — BaseDomainModule.mount behavioral', () => {
     const paths = useCalls.map(c => c[0]).sort();
     expect(paths).toEqual(['/api/v1/w1168-probe', '/api/v2/w1168-probe', '/api/w1168-probe']);
     for (const call of useCalls) {
-      expect(call).toHaveLength(3); // path + authenticate + router
+      // W1171 — path + authenticate + requireBranchAccess + router
+      expect(call).toHaveLength(4);
       expect(call[1]).toBe(authenticate);
-      expect(call[2]).toBe(mod.router);
+      expect(call[2]).toBe(requireBranchAccess);
+      expect(call[3]).toBe(mod.router);
     }
   });
 

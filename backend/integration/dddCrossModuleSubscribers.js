@@ -2722,6 +2722,42 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1085: family NPS satisfaction → core timeline ─────────────────
+  // CBAHI family-satisfaction signal on the beneficiary's record.
+  // promoter → success, passive → info, detractor → warning (needs follow-up).
+  subscribers.push({
+    name: 'nps-response:recorded → timeline:record',
+    pattern: 'nps-response.nps_response.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev =
+            event.payload.bucket === 'promoter'
+              ? 'success'
+              : event.payload.bucket === 'detractor'
+                ? 'warning'
+                : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'nps_response_recorded',
+            category: 'quality',
+            severity: sev,
+            title: `Family NPS recorded: ${event.payload.score}/10 (${
+              event.payload.bucket || 'passive'
+            })`,
+            title_ar: 'تم تسجيل استبيان رضا الأسرة عن خدمات المستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] NpsResponse timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

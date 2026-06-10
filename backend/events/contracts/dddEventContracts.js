@@ -1899,6 +1899,28 @@ const SESSION_ATTENDANCE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const NPS_RESPONSE_EVENTS = {
+  NPS_RESPONSE_RECORDED: {
+    domain: 'nps-response',
+    eventType: 'nps_response.recorded',
+    version: 1,
+    description:
+      'تسجيل استبيان رضا الأسرة (NPS) للمستفيد — A family NPS satisfaction response was recorded',
+    payload: {
+      responseId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      surveyKey: 'string',
+      score: 'number',
+      bucket: 'string',
+      submittedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1970,6 +1992,7 @@ const DDD_CONTRACTS = {
   'cdss-risk': CDSS_RISK_EVENTS,
   'red-flag': RED_FLAG_EVENTS,
   'session-attendance': SESSION_ATTENDANCE_EVENTS,
+  'nps-response': NPS_RESPONSE_EVENTS,
 };
 
 /**
@@ -2057,6 +2080,7 @@ module.exports = {
   CDSS_RISK_EVENTS,
   RED_FLAG_EVENTS,
   SESSION_ATTENDANCE_EVENTS,
+  NPS_RESPONSE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

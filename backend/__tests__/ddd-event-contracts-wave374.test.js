@@ -121,7 +121,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'goal-entry', // W1081
   'cdss-risk', // W1082
   'red-flag', // W1083
-  'session-attendance', // W1084 — session missed (no_show/absent) → core timeline — BIP fidelity check recorded → core timeline
+  'session-attendance', // W1084 — session missed (no_show/absent) → core timeline
+  'nps-response', // W1085 — family NPS satisfaction recorded → core timeline — BIP fidelity check recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -217,7 +218,8 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'goal_entry', // W1081
     'cdss_risk', // W1082
     'red_flag', // W1083
-    'session_attendance', // W1084 — session_attendance.missed (SessionAttendance) — bip_fidelity.checked (BipFidelityCheck)
+    'session_attendance', // W1084 — session_attendance.missed (SessionAttendance)
+    'nps_response', // W1085 — nps_response.recorded (NpsResponse) — bip_fidelity.checked (BipFidelityCheck)
   ])
 );
 

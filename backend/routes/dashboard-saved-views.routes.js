@@ -22,6 +22,16 @@
 'use strict';
 
 const express = require('express');
+// W1190 — self-authenticate at the router level. This file is mounted TWICE:
+// (a) app.js `/api/v1/dashboards/saved-views` WITH an injected `authenticate`,
+// and (b) phases.registry `safeMount` at `/api/dashboard-saved-views` (+v1)
+// which injects NO middleware (safeMount = bare `app.use`). Without a router-
+// level gate, mount (b) was reachable ANONYMOUSLY: an attacker could list views,
+// POST an owner-less view (pickUserId → null), then PATCH/DELETE it (the owner
+// guard `if (view.ownerUserId && …)` is skipped when ownerUserId is falsy).
+// `authenticate` here protects every current and future mount; the redundant
+// injection on mount (a) is a harmless idempotent re-validation of the JWT.
+const { authenticate } = require('../middleware/auth');
 
 function asyncWrap(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -56,6 +66,7 @@ function canSee(view, { userId, role }) {
 function buildRouter() {
   const router = express.Router();
   router.use(express.json());
+  router.use(authenticate); // W1190 — gate EVERY mount (see file header)
 
   router.get(
     '/',

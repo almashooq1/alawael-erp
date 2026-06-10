@@ -2559,6 +2559,28 @@ const BEHAVIOR_RECORD_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const MEASURE_REASSESSMENT_EVENTS = {
+  MEASURE_REASSESSMENT_COMPLETED: {
+    domain: 'measure-reassessment',
+    eventType: 'measure_reassessment.completed',
+    version: 1,
+    description:
+      'اكتملت مهمة إعادة تطبيق مقياس للمستفيد — A beneficiary measure-reassessment task was completed',
+    payload: {
+      taskId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      measureCode: 'string',
+      measureId: 'string',
+      phase: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2660,6 +2682,7 @@ const DDD_CONTRACTS = {
   'family-communication': FAMILY_COMMUNICATION_EVENTS,
   'workflow-task': WORKFLOW_TASK_EVENTS,
   'behavior-record': BEHAVIOR_RECORD_EVENTS,
+  'measure-reassessment': MEASURE_REASSESSMENT_EVENTS,
 };
 
 /**
@@ -2773,6 +2796,7 @@ module.exports = {
   FAMILY_COMMUNICATION_EVENTS,
   WORKFLOW_TASK_EVENTS,
   BEHAVIOR_RECORD_EVENTS,
+  MEASURE_REASSESSMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

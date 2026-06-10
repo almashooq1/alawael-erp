@@ -152,6 +152,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'family-communication', // W1112 — beneficiary family communication logged → core timeline
   'workflow-task', // W1113 — beneficiary care-workflow task completed → core timeline
   'behavior-record', // W1114 — beneficiary behavior (ABC) record logged → core timeline
+  'measure-reassessment', // W1115 — beneficiary measure-reassessment task completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -278,6 +279,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'family_communication', // W1112 — family_communication.logged (FamilyCommunication)
     'workflow_task', // W1113 — workflow_task.completed (WorkflowTask)
     'behavior_record', // W1114 — behavior_record.logged (BehaviorRecord)
+    'measure_reassessment', // W1115 — measure_reassessment.completed (MeasureReassessmentTask)
   ])
 );
 

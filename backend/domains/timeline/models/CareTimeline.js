@@ -191,6 +191,7 @@ const careTimelineSchema = new mongoose.Schema(
         'family_communication_logged',
         'workflow_task_completed',
         'behavior_record_logged',
+        'measure_reassessment_completed',
         // Family
         'family_contact',
         'family_meeting',

@@ -3251,6 +3251,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'portal-payment:paid → timeline:record',
+    pattern: 'portal-payment.portal_payment.paid',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const amount = Number(event.payload.amount);
+          const currency = event.payload.currency || '';
+          const inv = event.payload.invoiceNumber;
+          const amountLabel = Number.isFinite(amount)
+            ? ` ${amount}${currency ? ` ${currency}` : ''}`
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'portal_payment_paid',
+            category: 'family',
+            severity: 'success',
+            title: `Portal invoice paid${amountLabel}${inv ? ` (#${inv})` : ''}`.trim(),
+            title_ar: 'تم سداد دفعة فاتورة المستفيد عبر بوابة ولي الأمر',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PortalPayment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

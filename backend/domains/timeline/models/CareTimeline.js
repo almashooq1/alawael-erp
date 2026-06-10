@@ -179,6 +179,7 @@ const careTimelineSchema = new mongoose.Schema(
         'story_book_published',
         'gas_scoring_recorded',
         'speech_session_analyzed',
+        'portal_payment_paid',
         // Family
         'family_contact',
         'family_meeting',

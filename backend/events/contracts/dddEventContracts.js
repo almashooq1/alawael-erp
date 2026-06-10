@@ -2285,6 +2285,30 @@ const SPEECH_SESSION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PORTAL_PAYMENT_EVENTS = {
+  PORTAL_PAYMENT_PAID: {
+    domain: 'portal-payment',
+    eventType: 'portal_payment.paid',
+    version: 1,
+    description:
+      'سداد دفعة فاتورة المستفيد عبر بوابة ولي الأمر — A beneficiary portal invoice was paid in full by the guardian',
+    payload: {
+      paymentId: 'string',
+      beneficiaryId: 'string',
+      guardianId: 'string',
+      branchId: 'string',
+      invoiceNumber: 'string',
+      amount: 'number',
+      currency: 'string',
+      paymentMethod: 'string',
+      paidDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2374,6 +2398,7 @@ const DDD_CONTRACTS = {
   'story-book': STORY_BOOK_EVENTS,
   'gas-scoring': GAS_SCORING_EVENTS,
   'speech-session': SPEECH_SESSION_EVENTS,
+  'portal-payment': PORTAL_PAYMENT_EVENTS,
 };
 
 /**
@@ -2475,6 +2500,7 @@ module.exports = {
   STORY_BOOK_EVENTS,
   GAS_SCORING_EVENTS,
   SPEECH_SESSION_EVENTS,
+  PORTAL_PAYMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -365,5 +365,30 @@ PortalPaymentSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
 
+// ── W1103 core-linkage: emit when an invoice transitions to fully paid ──
+PortalPaymentSchema.pre('save', function flagPortalPaymentPaid() {
+  this.$__portalPaymentPaid = this.isModified('status') && this.status === 'paid';
+});
+
+PortalPaymentSchema.post('save', function emitPortalPaymentPaid(doc) {
+  if (!doc.$__portalPaymentPaid) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('portal-payment', 'portal_payment.paid', {
+      paymentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.guardianId ? { guardianId: String(doc.guardianId) } : {}),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      invoiceNumber: doc.invoiceNumber,
+      amount: doc.finalAmount != null ? doc.finalAmount : doc.amount,
+      currency: doc.currency,
+      paymentMethod: doc.paymentMethod || undefined,
+      paidDate: doc.paidDate || new Date(),
+    });
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.PortalPayment || mongoose.model('PortalPayment', PortalPaymentSchema);

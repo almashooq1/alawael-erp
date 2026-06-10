@@ -795,3 +795,5 @@ __tests__/alert-engine-model-availability-wave1149.test.js
 __tests__/staff-certification-rules-wave1151.test.js
 __tests__/telehealth-v2-branch-isolation-wave925.test.js
 __tests__/form-templates-contract-wave1179.test.js
+__tests__/forms-approval-chain-wave1186.test.js
+__tests__/forms-approval-chain-behavioral-wave1186.test.js

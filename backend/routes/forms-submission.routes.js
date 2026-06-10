@@ -156,20 +156,29 @@ router.post('/:templateId/submit', async (req, res) => {
     const submitter = userInfo(req);
     const isDraft = req.body?.saveAsDraft === true;
 
-    // Build initial approval record list from the template's workflow.
+    // Build initial approval record list from the template's chain.
+    // W1186 — the model's declared field is approvalSteps; the old
+    // approvalWorkflow read was a phantom (strict mode never persisted it),
+    // so the step-wise review engine below never engaged for catalog forms.
     const approvals = [];
-    if (tpl.approvalWorkflow && tpl.approvalWorkflow.enabled) {
-      const steps = (tpl.approvalWorkflow.steps || [])
+    {
+      const wfSteps =
+        tpl.approvalSteps && tpl.approvalSteps.length > 0
+          ? tpl.approvalSteps
+          : (tpl.approvalWorkflow && tpl.approvalWorkflow.enabled
+              ? tpl.approvalWorkflow.steps
+              : []) || [];
+      wfSteps
         .slice()
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-      steps.forEach((s, i) => {
-        approvals.push({
-          step: i,
-          role: s.role,
-          label: s.label || s.role,
-          status: 'pending',
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .forEach((s, i) => {
+          approvals.push({
+            step: i,
+            role: s.role,
+            label: s.label || s.role,
+            status: 'pending',
+          });
         });
-      });
     }
 
     const submissionNumber = `SUB-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;

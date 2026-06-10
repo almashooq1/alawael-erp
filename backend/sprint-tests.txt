@@ -811,3 +811,4 @@ __tests__/seat-allocation-assigned-core-linkage-wave1098.test.js
 __tests__/student-activity-completed-core-linkage-wave1099.test.js
 __tests__/story-book-published-core-linkage-wave1100.test.js
 __tests__/gas-scoring-recorded-core-linkage-wave1101.test.js
+__tests__/speech-session-analyzed-core-linkage-wave1102.test.js

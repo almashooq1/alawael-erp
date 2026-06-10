@@ -116,6 +116,31 @@ recordingSchema.index({ beneficiaryId: 1, analysisStatus: 1, createdAt: -1 });
 // Compound: "expired recordings to purge"
 recordingSchema.index({ expiresAt: 1, audioPurgedAt: 1 });
 
+// ── Unified-core producer (W1102): emit when analysis completes ──
+recordingSchema.pre('save', function flagSpeechSessionAnalyzed() {
+  this.$__speechSessionAnalyzed =
+    this.isModified('analysisStatus') && this.analysisStatus === 'completed';
+});
+
+recordingSchema.post('save', function emitSpeechSessionAnalyzed(doc) {
+  if (!doc.$__speechSessionAnalyzed) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('speech-session', 'speech_session.analyzed', {
+      recordingId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.sessionId ? { sessionId: String(doc.sessionId) } : {}),
+      transcriptLanguage: doc.transcriptLanguage,
+      transcriptConfidence: doc.transcriptConfidence,
+      analysisProvider: doc.analysisProvider,
+      analysisCompletedAt: doc.analysisCompletedAt || new Date(),
+    });
+  } catch (_err) {
+    /* non-blocking: timeline linkage must never break a save */
+  }
+});
+
 module.exports =
   mongoose.models.SpeechSessionRecording ||
   mongoose.model('SpeechSessionRecording', recordingSchema);

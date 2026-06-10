@@ -3224,6 +3224,33 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'speech-session:analyzed → timeline:record',
+    pattern: 'speech-session.speech_session.analyzed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const conf = Number(event.payload.transcriptConfidence);
+          const lang = event.payload.transcriptLanguage;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'speech_session_analyzed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Speech session analyzed${lang ? ` (${lang})` : ''}${Number.isFinite(conf) ? ` — ${Math.round(conf * 100)}% confidence` : ''}`,
+            title_ar: 'اكتمل تحليل تسجيل جلسة النطق وتوفرت المؤشرات الصوتية واللغوية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SpeechSession timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

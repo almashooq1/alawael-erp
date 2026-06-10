@@ -2262,6 +2262,29 @@ const GAS_SCORING_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SPEECH_SESSION_EVENTS = {
+  SPEECH_SESSION_ANALYZED: {
+    domain: 'speech-session',
+    eventType: 'speech_session.analyzed',
+    version: 1,
+    description:
+      'اكتمال تحليل تسجيل جلسة النطق للمستفيد وتوفر المؤشرات الصوتية واللغوية — A beneficiary speech-session recording finished analysis and metrics are available',
+    payload: {
+      recordingId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      sessionId: 'string',
+      transcriptLanguage: 'string',
+      transcriptConfidence: 'number',
+      analysisProvider: 'string',
+      analysisCompletedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2350,6 +2373,7 @@ const DDD_CONTRACTS = {
   'seat-allocation': SEAT_ALLOCATION_EVENTS,
   'story-book': STORY_BOOK_EVENTS,
   'gas-scoring': GAS_SCORING_EVENTS,
+  'speech-session': SPEECH_SESSION_EVENTS,
 };
 
 /**
@@ -2380,10 +2404,6 @@ module.exports = {
   SAFETY_EVENTS,
   SCREENING_EVENTS,
   MEDICATION_EVENTS,
-  DISCHARGE_EVENTS,
-  ADMISSION_EVENTS,
-  REFERRAL_EVENTS,
-  MEDICAL_REFERRAL_EVENTS,
   MEASUREMENT_EVENTS,
   INSURANCE_CLAIM_EVENTS,
   INVOICE_EVENTS,
@@ -2454,6 +2474,7 @@ module.exports = {
   SEAT_ALLOCATION_EVENTS,
   STORY_BOOK_EVENTS,
   GAS_SCORING_EVENTS,
+  SPEECH_SESSION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

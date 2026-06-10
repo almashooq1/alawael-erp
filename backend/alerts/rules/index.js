@@ -74,4 +74,9 @@ module.exports = [
   // Contract still ACTIVE but past endDate. Needs `Contract.model`
   // in the app.js model loader to fire (file is Contract.model.js).
   require('./contract-expired'),
+
+  // ── W1070 — operational / inventory (1) ─────────────────────
+  // Item at/below its reorder point (a TWO-model join across
+  // InventoryStock + InventoryItem). Needs both in the app.js loader.
+  require('./inventory-low-stock'),
 ];

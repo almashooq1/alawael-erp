@@ -1473,6 +1473,8 @@ try {
       'MaintenanceWorkOrder', // W1007 — operational work-order-overdue rule
       'Vehicle', // W1008 — operational vehicle-document-expiry rule
       'Contract.model', // W1009 — operational contract-expired rule (file: Contract.model.js)
+      'InventoryStock', // W1070 — operational inventory-low-stock rule (object export)
+      'InventoryItem', // W1070 — inventory-low-stock threshold source (object export)
     ];
     const liveModels = {};
     for (const name of modelNames) {

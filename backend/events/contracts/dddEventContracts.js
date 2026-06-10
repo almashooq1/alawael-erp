@@ -2008,6 +2008,28 @@ const PROGRESS_REPORT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DAY_ATTENDANCE_EVENTS = {
+  DAY_ATTENDANCE_PRESENT: {
+    domain: 'day-attendance',
+    eventType: 'day_attendance.present',
+    version: 1,
+    description:
+      'حضور المستفيد اليومي في مركز التأهيل النهاري — Beneficiary marked present for the day at the day-rehab center',
+    payload: {
+      attendanceId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      date: 'date',
+      status: 'string',
+      checkInTime: 'date',
+      arrivedByBus: 'boolean',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2084,6 +2106,7 @@ const DDD_CONTRACTS = {
   'consent-record': CONSENT_RECORD_EVENTS,
   'risk-snapshot': RISK_SNAPSHOT_EVENTS,
   'progress-report': PROGRESS_REPORT_EVENTS,
+  'day-attendance': DAY_ATTENDANCE_EVENTS,
 };
 
 /**
@@ -2176,6 +2199,7 @@ module.exports = {
   CONSENT_RECORD_EVENTS,
   RISK_SNAPSHOT_EVENTS,
   PROGRESS_REPORT_EVENTS,
+  DAY_ATTENDANCE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

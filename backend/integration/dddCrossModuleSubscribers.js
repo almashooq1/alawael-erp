@@ -2882,6 +2882,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1090 — daily day-rehab rollcall (present/late) → unified core timeline
+  subscribers.push({
+    name: 'day-attendance:present → timeline:record',
+    pattern: 'day-attendance.day_attendance.present',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const status = event.payload.status;
+          const dayStr = event.payload.date
+            ? new Date(event.payload.date).toISOString().slice(0, 10)
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'day_attendance_present',
+            category: 'administrative',
+            severity: status === 'late' ? 'warning' : 'success',
+            title: `Day-center attendance: ${status}${dayStr ? ` (${dayStr})` : ''}${
+              event.payload.arrivedByBus ? ' — by bus' : ''
+            }`,
+            title_ar: 'سجّل المستفيد حضوره اليومي في مركز التأهيل النهاري',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DayAttendance timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

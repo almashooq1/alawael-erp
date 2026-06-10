@@ -126,7 +126,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'daily-comm-log', // W1086 — daily parent communication log published → core timeline
   'consent-record', // W1087 — consent granted (PDPL/CBAHI) → core timeline
   'risk-snapshot', // W1088 — clinical risk tier escalated → core timeline
-  'progress-report', // W1089 — monthly progress report recorded → core timeline — BIP fidelity check recorded → core timeline
+  'progress-report', // W1089 — monthly progress report recorded → core timeline
+  'day-attendance', // W1090 — daily day-rehab rollcall present → core timeline — BIP fidelity check recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -227,7 +228,8 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'daily_comm_log', // W1086 — daily_comm_log.published (DailyCommunicationLog)
     'consent_record', // W1087 — consent_record.granted (Consent)
     'risk_snapshot', // W1088 — risk_snapshot.escalated (RiskSnapshot)
-    'progress_report', // W1089 — progress_report.recorded (BeneficiaryProgress) — bip_fidelity.checked (BipFidelityCheck)
+    'progress_report', // W1089 — progress_report.recorded (BeneficiaryProgress)
+    'day_attendance', // W1090 — day_attendance.present (BeneficiaryDayAttendance) — bip_fidelity.checked (BipFidelityCheck)
   ])
 );
 

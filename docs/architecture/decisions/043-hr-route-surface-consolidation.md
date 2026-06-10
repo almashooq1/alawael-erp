@@ -1,8 +1,9 @@
 # ADR-043 — Consolidate + branch-isolate the HR route surface (🟢 Partially executed — W1143)
 
-> **Status**: isolation contract + owner-map + the 2 backlog-IDOR gates are DONE
-> (W1143); only the owner-gated cleanup remains (delete dormant `saudi-hr-routes`
-> Q1, decide `/api/hr` non-v1 mount Q3). Neither affects live behavior.
+> **Status**: isolation contract + owner-map + the 2 backlog-IDOR gates (W1143) +
+> the dormant `backend/hr/` retire (Q1, W1151) are all DONE. Only Q3 remains — the
+> `/api/hr` non-v1 mount fate, which needs mobile/legacy client knowledge. No live
+> behavior depends on it.
 
 **Date**: 2026-06-10
 **Type**: ADR (route-topology / canonical-mount + cross-branch-isolation contract — same shadow class as ADR-038 / ADR-042)
@@ -55,9 +56,10 @@ branch-isolated?" hard to answer at a glance.
 
 ## Decision (proposed — pending sign-off)
 
-1. **Retire `hr/saudi-hr-routes.js` + `hr/index.js`** (dormant; superseded by
-   `domains/hr` + `hr-modules`). Confirm no importer outside `hr/index.js` (Q1),
-   then delete + add a dead-route sentinel. _Claude-executable once Q1 confirmed._
+1. ✅ **DONE (2026-06-10)** — **Retired the dormant `backend/hr/` module**
+   (`index.js` + `saudi-hr-routes.js` + `saudi-hr-service.js` + 2 unit tests),
+   superseded by `domains/hr` + `hr-modules`. Verified no mount / no importer / no
+   model consumer before deleting; all guards green post-delete (see Q1).
 2. ✅ **DONE (W1143)** — **Keep the `/api/v1/hr` split documented, not merged**:
    `domains/hr` = core personnel (employees/leaves/attendance); `hr-modules` =
    Round-10 modules. An "owner map" comment was added at **both** mount sites
@@ -77,22 +79,16 @@ branch-isolated?" hard to answer at a glance.
 
 ## Open questions (blockers)
 
-- **Q1** — _Verified dormant 2026-06-10, but ENTANGLED — not the clean dead-code
-  delete first assumed._ `backend/hr/` holds 3 files: `index.js` + `saudi-hr-routes.js`
-  (22 endpoints) + **`saudi-hr-service.js` (28 KB)**. There is **no HTTP mount and no
-  external importer** (the only `require('./hr')` is `domains/index.js` → `domains/hr`,
-  a different path; `saudi-hr-service.js` is imported only by `saudi-hr-routes.js`).
-  BUT `saudi-hr-service.js` participates in **model registration**: it registers
-  `SaudiHrPayroll` and re-exports `Employee`/`LeaveRequest`/`Attendance` (per the
-  W342/W844 consolidation comments in `no-duplicate-model-registration-wave340.test.js`),
-  and it was modified recently (2026-06-04). So a clean retire is a **6-file change**,
-  not 1: delete the 3 sources + the 2 auto-gen unit tests
-  (`tests/unit/saudi-hr-{routes,service}.module.test.js`) + re-run the W340 guard
-  (confirm `SaudiHrPayroll` isn't in an active baseline Set — it appears only in
-  comments, so likely clean, but VERIFY) + `no-broken-requires` + `check:routes-load`.
-  **Left in place — NOT auto-executed**: destructive, touches a drift-guard's domain +
-  a recently-touched file on a shared branch, and the value (removing invisible dead
-  code) doesn't justify the risk mid-race. Owner's call; recipe above is ready.
+- **Q1** — ✅ **DONE (executed 2026-06-10)**. Retired the whole dormant `backend/hr/`
+  module: `index.js` + `saudi-hr-routes.js` (22 endpoints) + `saudi-hr-service.js`
+  (28 KB) + the 2 auto-gen unit tests (`tests/unit/saudi-hr-{routes,service}.module.test.js`).
+  Verified safe before deleting: **no HTTP mount, no external importer** (the only
+  `require('./hr')` is `domains/index.js` → `domains/hr`, a different path), the only
+  uniquely-registered model `SaudiHrPayroll` has **no consumer** and is **not in any
+  active W340 baseline Set** (comments only), and the unit tests are not in
+  `sprint-tests.txt`. Post-delete green: `no-broken-requires` + `W340` +
+  `check:routes-load` (548, unchanged → confirms it was never a loaded route) +
+  `check:gitignored-sources`. Fully git-reversible.
 - **Q2** — ✅ RESOLVED: `hr-copilot` (`ADMIN_ROLES` includes `manager`) and
   `hr-compliance` (`READ/WRITE_ROLES` include `manager`/`hr`/`hr_manager`) ARE
   reachable by branch-restricted roles → were live cross-branch reads → **gated in
@@ -105,6 +101,6 @@ branch-isolated?" hard to answer at a glance.
 - ✅ One documented HR topology (owner-map comments at both mount sites); branch
   isolation is guard-enforced for all future HR routes; the 2 backlog IDORs are
   closed (W1143) and the guard baseline is empty.
-- ⚪ Remaining (owner-gated): delete the verified-dormant `saudi-hr-routes.js` +
-  `hr/index.js` (Q1) and decide the `/api/hr` non-v1 mount fate (Q3). No live
-  behavior depends on either — these are cleanup, not security.
+- ✅ Dormant `backend/hr/` module retired (Q1, W1151). Only remaining: decide the
+  `/api/hr` non-v1 mount fate (Q3 — needs mobile/legacy client knowledge). No live
+  behavior depends on it — cleanup, not security.

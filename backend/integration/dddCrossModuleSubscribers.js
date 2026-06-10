@@ -1679,6 +1679,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1051: sensory diet program completed → core timeline ──────────
+  // When a sensory diet program is completed, record it as a clinical
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'sensory-diet-program:completed → timeline:record',
+    pattern: 'sensory-diet-program.sensory_diet.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'sensory_diet_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: 'Sensory diet program completed',
+            title_ar: 'اكتمل برنامج الحمية الحسية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SensoryDiet timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

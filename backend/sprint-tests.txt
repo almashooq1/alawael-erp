@@ -757,3 +757,4 @@ __tests__/family-home-program-completion-core-linkage-wave1047.test.js
 __tests__/spasticity-injection-completion-core-linkage-wave1048.test.js
 __tests__/prosthetic-orthotic-delivery-core-linkage-wave1049.test.js
 __tests__/seating-postural-finalized-core-linkage-wave1050.test.js
+__tests__/sensory-diet-completion-core-linkage-wave1051.test.js

@@ -1196,6 +1196,24 @@ const SEATING_POSTURAL_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SENSORY_DIET_EVENTS = {
+  SENSORY_DIET_COMPLETED: {
+    domain: 'sensory-diet-program',
+    eventType: 'sensory_diet.completed',
+    version: 1,
+    description: 'إكمال برنامج الحمية الحسية — Sensory diet program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1233,6 +1251,7 @@ const DDD_CONTRACTS = {
   'spasticity-injection': SPASTICITY_INJECTION_EVENTS,
   'prosthetic-orthotic-order': PROSTHETIC_ORTHOTIC_EVENTS,
   'seating-postural-assessment': SEATING_POSTURAL_EVENTS,
+  'sensory-diet-program': SENSORY_DIET_EVENTS,
 };
 
 /**
@@ -1286,6 +1305,7 @@ module.exports = {
   SPASTICITY_INJECTION_EVENTS,
   PROSTHETIC_ORTHOTIC_EVENTS,
   SEATING_POSTURAL_EVENTS,
+  SENSORY_DIET_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

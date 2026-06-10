@@ -88,6 +88,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'spasticity-injection', // W1048 — spasticity injection completed → core timeline
   'prosthetic-orthotic-order', // W1049 — prosthetic/orthotic delivered → core timeline
   'seating-postural-assessment', // W1050 — seating/postural finalized → core timeline
+  'sensory-diet-program', // W1051 — sensory diet completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -150,6 +151,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'spasticity_injection', // W1048 — spasticity_injection.completed (SpasticityInjection)
     'prosthetic_orthotic', // W1049 — prosthetic_orthotic.delivered (ProstheticOrthoticOrder)
     'seating_postural', // W1050 — seating_postural.finalized (SeatingPosturalAssessment)
+    'sensory_diet', // W1051 — sensory_diet.completed (SensoryDietProgram)
   ])
 );
 

@@ -104,9 +104,9 @@ const chequeSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-chequeSchema.pre('save', async function (next) {
+// W978 canonical form: async hooks must NOT declare `next` (Mongoose-9 throw class).
+chequeSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
-  next();
 });
 
 // W269 — derive branchId from the related invoice (best-effort; cheques without an

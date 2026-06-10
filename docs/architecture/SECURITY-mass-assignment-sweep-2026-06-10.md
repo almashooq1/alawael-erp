@@ -83,11 +83,19 @@ surfaces. Locked by drift guard
      for the owner. **Other open (product decisions):** the `tasks` list `GET /`
      (returns all tasks, no scope) + the general-task ownership model
      (assignedTo/assignedBy owner vs manager override).
-2. **Possible auth-bypass mount** — `therapist-extended` is mounted **both** via
-   `dualMountAuth` (`_registry.js:661`) **and** plain `dualMount`
-   (`clinical-therapy.registry.js:44`). Per the codebase's "never plain
-   dualMount" rule, confirm first-match-wins doesn't expose an unauthenticated
-   path.
+2. **Duplicate `therapist-extended` route file — INVESTIGATED, not an
+   auth-bypass; resolved.** Two _different_ files serve `/api/therapist-extended/*`:
+   the kebab `therapist-extended.routes.js` (mounted **first** via `dualMountAuth`,
+   `_registry.js:661`) and the camelCase `therapistExtended.routes.js` (a
+   service-based duplicate, mounted **later** via plain `dualMount` through
+   `phases.registry.js:803` → `clinical-therapy.registry.js:44`). The plain
+   `dualMount` is **not** an auth-bypass — the camelCase file applies
+   `authenticateToken` + `requireBranchAccess` internally. Express is
+   first-match-wins and 661 < 803, so the **hardened kebab file WINS** for the
+   overlapping paths (treatment-plans / prescriptions / professional-dev): this
+   session's W269 + mass-assignment fixes are **LIVE**. The camelCase service-based
+   file is **shadowed / dead** for those paths → a duplicate-route consolidation
+   candidate (ADR-038 class: pick one canonical `therapist-extended`).
 
 ## Recommended next steps
 

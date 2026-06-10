@@ -1469,6 +1469,7 @@ try {
       'Goal',
       'Vaccination',
       'EmploymentContract',
+      'FacilityAsset', // W1006 — operational PPM/inspection-overdue rule
     ];
     const liveModels = {};
     for (const name of modelNames) {

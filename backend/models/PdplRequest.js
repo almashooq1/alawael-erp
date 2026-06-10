@@ -87,6 +87,28 @@ const pdplRequestSchema = new mongoose.Schema(
 
 pdplRequestSchema.index({ beneficiaryId: 1, status: 1, requestedAt: -1 });
 
+// W1096 — unified-core linkage: every PDPL data-subject request surfaces a
+// governance row on the per-beneficiary timeline (SLA-clock visibility).
+pdplRequestSchema.pre('save', function flagPdplRequestReceived() {
+  this.$__pdplRequestReceived = this.isNew;
+});
+
+pdplRequestSchema.post('save', function emitPdplRequestReceived(doc) {
+  if (!doc.$__pdplRequestReceived) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('pdpl-request', 'pdpl_request.received', {
+      requestId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      requestType: doc.requestType,
+      status: doc.status,
+      requestedAt: doc.requestedAt,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 const PdplRequest = mongoose.models.PdplRequest || mongoose.model('PdplRequest', pdplRequestSchema);
 
 module.exports = {

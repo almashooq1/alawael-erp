@@ -2136,6 +2136,26 @@ const GAS_SNAPSHOT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PDPL_REQUEST_EVENTS = {
+  PDPL_REQUEST_RECEIVED: {
+    domain: 'pdpl-request',
+    eventType: 'pdpl_request.received',
+    version: 1,
+    description:
+      'استلام طلب حقوق صاحب بيانات (PDPL) من المستفيد — A PDPL data-subject request was received for a beneficiary',
+    payload: {
+      requestId: 'string',
+      beneficiaryId: 'string',
+      requestType: 'string',
+      status: 'string',
+      requestedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2218,6 +2238,7 @@ const DDD_CONTRACTS = {
   'meal-event': MEAL_EVENT_EVENTS,
   'cdss-alert': CDSS_ALERT_EVENTS,
   'gas-snapshot': GAS_SNAPSHOT_EVENTS,
+  'pdpl-request': PDPL_REQUEST_EVENTS,
 };
 
 /**
@@ -2316,6 +2337,7 @@ module.exports = {
   MEAL_EVENT_EVENTS,
   CDSS_ALERT_EVENTS,
   GAS_SNAPSHOT_EVENTS,
+  PDPL_REQUEST_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

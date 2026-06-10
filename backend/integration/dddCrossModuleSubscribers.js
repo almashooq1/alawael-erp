@@ -3058,6 +3058,31 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1096 — PDPL data-subject request → unified core timeline
+  subscribers.push({
+    name: 'pdpl-request:received → timeline:record',
+    pattern: 'pdpl-request.pdpl_request.received',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'pdpl_request_received',
+            category: 'administrative',
+            severity: 'info',
+            title: `PDPL request: ${event.payload.requestType || 'data-subject'}`,
+            title_ar: 'تم استلام طلب حقوق صاحب البيانات (PDPL) للمستفيد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PdplRequest timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

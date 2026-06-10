@@ -172,6 +172,7 @@ const careTimelineSchema = new mongoose.Schema(
         'meal_allergy_incident',
         'cdss_alert_raised',
         'gas_score_snapshotted',
+        'pdpl_request_received',
         // Family
         'family_contact',
         'family_meeting',

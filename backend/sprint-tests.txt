@@ -774,3 +774,4 @@ __tests__/pain-assessment-finalized-core-linkage-wave1064.test.js
 __tests__/dysphagia-assessment-finalized-core-linkage-wave1065.test.js
 __tests__/allergy-recorded-core-linkage-wave1066.test.js
 __tests__/dtt-session-completed-core-linkage-wave1067.test.js
+__tests__/goal-progress-achieved-core-linkage-wave1068.test.js

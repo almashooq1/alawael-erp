@@ -144,6 +144,7 @@ const careTimelineSchema = new mongoose.Schema(
         'dysphagia_assessment_finalized',
         'allergy_recorded',
         'dtt_session_completed',
+        'goal_progress_achieved',
         // Family
         'family_contact',
         'family_meeting',

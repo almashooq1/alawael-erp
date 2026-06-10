@@ -1538,6 +1538,26 @@ const DTT_SESSION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const GOAL_PROGRESS_EVENTS = {
+  GOAL_PROGRESS_ACHIEVED: {
+    domain: 'goal-progress',
+    eventType: 'goal_progress.goal_achieved',
+    version: 1,
+    description: 'تحقّق هدف علاجي (نسبة ≥ 100%) — Rehab goal achieved',
+    payload: {
+      snapshotId: 'string',
+      beneficiaryId: 'string',
+      goalId: 'string',
+      goalName: 'string',
+      progressPct: 'number',
+      measuredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1592,6 +1612,7 @@ const DDD_CONTRACTS = {
   'dysphagia-assessment': DYSPHAGIA_ASSESSMENT_EVENTS,
   allergy: ALLERGY_EVENTS,
   'dtt-session': DTT_SESSION_EVENTS,
+  'goal-progress': GOAL_PROGRESS_EVENTS,
 };
 
 /**
@@ -1662,6 +1683,7 @@ module.exports = {
   DYSPHAGIA_ASSESSMENT_EVENTS,
   ALLERGY_EVENTS,
   DTT_SESSION_EVENTS,
+  GOAL_PROGRESS_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

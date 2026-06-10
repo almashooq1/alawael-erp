@@ -2190,6 +2190,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1068: rehab goal achieved → core timeline ─────────────────────
+  // When a progress snapshot records a goal reaching ≥ 100%, log the
+  // achievement on the beneficiary's timeline (clinical/success).
+  subscribers.push({
+    name: 'goal-progress:achieved → timeline:record',
+    pattern: 'goal-progress.goal_progress.goal_achieved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const name = event.payload.goalName || '';
+          const pct = event.payload.progressPct;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'goal_progress_achieved',
+            category: 'clinical',
+            severity: 'success',
+            title: `Goal achieved: ${name} (${pct}%)`,
+            title_ar: `تحقّق هدف العلاج: ${name}`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] GoalProgress timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

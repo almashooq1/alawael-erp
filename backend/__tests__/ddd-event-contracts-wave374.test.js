@@ -105,6 +105,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'dysphagia-assessment', // W1065 — dysphagia assessment finalized → core timeline
   'allergy', // W1066 — allergy recorded → core timeline
   'dtt-session', // W1067 — DTT session completed → core timeline
+  'goal-progress', // W1068 — goal progress achieved → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -184,6 +185,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'dysphagia_assessment', // W1065 — dysphagia_assessment.finalized (DysphagiaAssessment)
     'allergy', // W1066 — allergy.recorded (Allergy)
     'dtt_session', // W1067 — dtt_session.completed (DttSession)
+    'goal_progress', // W1068 — goal_progress.goal_achieved (GoalProgressSnapshot)
   ])
 );
 

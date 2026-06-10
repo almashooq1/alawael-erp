@@ -12,6 +12,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { BranchERPIntegrationService } = require('../integration/erp-branch-integration');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const timingSafeCompare = require('../utils/timingSafeCompare'); // W1181 — constant-time key check
 
 // Initialize integration service
 const integrationService = new BranchERPIntegrationService();
@@ -31,7 +32,9 @@ const verifyIntegrationKey = (req, res, next) => {
   const apiKey =
     req.headers['x-integration-key'] || req.headers['authorization']?.replace('Bearer ', '');
 
-  if (!apiKey || apiKey !== process.env.INTEGRATION_SECRET_KEY) {
+  // W1181: constant-time compare — plain !== leaks matched-prefix length
+  // through response timing, enabling byte-by-byte key recovery.
+  if (!apiKey || !timingSafeCompare(apiKey, process.env.INTEGRATION_SECRET_KEY || '')) {
     return res.status(401).json({
       success: false,
       error: 'Invalid or missing integration API key',

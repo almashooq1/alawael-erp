@@ -13,6 +13,7 @@
 
 const crypto = require('crypto');
 const logger = require('../utils/logger');
+const timingSafeCompare = require('../utils/timingSafeCompare'); // W1181 — constant-time signature check
 
 class GPSSecurityService {
   /**
@@ -88,7 +89,10 @@ class GPSSecurityService {
       hash.update(JSON.stringify(gpsData) + deviceId);
       const expectedSignature = hash.digest('hex');
 
-      return expectedSignature === deviceSignature;
+      // W1181: constant-time compare — plain === on the hex digest leaks
+      // matched-prefix length through timing (same class W440 fixed for
+      // verifyAPIKey below at line ~409).
+      return timingSafeCompare(expectedSignature, deviceSignature);
     } catch (error) {
       logger.error('خطأ في التحقق من التوقيع:', error);
       return false;

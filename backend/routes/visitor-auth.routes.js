@@ -21,6 +21,7 @@ const jwt = require('jsonwebtoken');
 
 const FormSubmission = require('../models/FormSubmission');
 const safeError = require('../utils/safeError');
+const timingSafeCompare = require('../utils/timingSafeCompare'); // W1181 — constant-time OTP check
 
 let unifiedNotifier = null;
 try {
@@ -169,7 +170,10 @@ router.post('/verify-otp', rateLimit, async (req, res) => {
       otps.delete(contact);
       return res.status(429).json({ ok: false, error: 'TOO_MANY_ATTEMPTS' });
     }
-    if (record.code !== otp) {
+    // W1181: constant-time compare — plain !== leaks matched-prefix length
+    // through response timing, letting an attacker recover the OTP
+    // digit-by-digit within the 5-attempt budget across many contacts.
+    if (!timingSafeCompare(String(record.code ?? ''), String(otp ?? ''))) {
       return res.status(401).json({ ok: false, error: 'INVALID_OTP' });
     }
     otps.delete(contact);

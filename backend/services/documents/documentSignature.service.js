@@ -10,6 +10,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const logger = require('../../utils/logger');
+const timingSafeCompare = require('../../utils/timingSafeCompare'); // W1181 — constant-time hash check
 
 // ─────────────────────────────────────────────
 // أنواع التوقيع
@@ -364,7 +365,11 @@ class DocumentSignatureService {
           .createHash('sha256')
           .update(`${doc.title}:${doc.fileSize}:${signature.documentVersion}`)
           .digest('hex');
-        checks.documentUnmodified = currentDocHash === signature.documentHash;
+        // W1181: constant-time compare (document-hash integrity check)
+        checks.documentUnmodified = timingSafeCompare(
+          currentDocHash,
+          String(signature.documentHash ?? '')
+        );
       } else {
         checks.documentUnmodified = false;
       }

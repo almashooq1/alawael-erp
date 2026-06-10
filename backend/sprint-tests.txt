@@ -110,6 +110,8 @@ __tests__/hr-attendance-branch-isolation-behavioral-wave1137.test.js
 __tests__/backfill-hr-branchid-wave1139.test.js
 __tests__/hr-extensions-branch-isolation-wave1154.test.js
 __tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js
+__tests__/nitaqat-contract-branch-isolation-wave1156.test.js
+__tests__/nitaqat-contract-branch-isolation-behavioral-wave1156.test.js
 __tests__/branch-isolation-hr-domain-wave1141.test.js
 __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
 __tests__/hr-route-branch-isolation-guard-wave1142.test.js
@@ -864,6 +866,8 @@ __tests__/complaint-resolved-core-linkage-wave1136.test.js
 __tests__/timeline-routes-branch-isolation-wave1138.test.js
 __tests__/golden-thread-integrity-behavioral.test.js
 __tests__/golden-thread-integrity-script.test.js
+__tests__/golden-thread-next-actions-behavioral-wave1158.test.js
+__tests__/golden-thread-next-actions-wave1158.test.js
 __tests__/golden-thread-service-behavioral-wave1156.test.js
 __tests__/golden-thread-service-wave1156.test.js
 __tests__/domains-routes-branch-isolation-wave1140.test.js

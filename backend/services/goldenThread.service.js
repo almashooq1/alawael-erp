@@ -104,10 +104,58 @@ function assembleThread(data = {}) {
   return { threads, summary };
 }
 
+// W1158 — Smart Attention Queue: each break-stage maps to ONE concrete next
+// action (lower priority number = more urgent / earlier in the thread). This is
+// deterministic guidance — "الذكاء يقترح، الإنسان يقرّر" — not automation.
+const ACTION_BY_STAGE = Object.freeze({
+  no_measure_link: {
+    priority: 1,
+    code: 'LINK_MEASURE',
+    action: 'اربط مقياساً أساسياً (PRIMARY) بالهدف — لا يمكن حساب المخرجات بدونه',
+  },
+  linked_no_baseline: {
+    priority: 2,
+    code: 'CAPTURE_BASELINE',
+    action: 'سجّل قياس خط الأساس — التغيّر/MCID غير قابل للحساب بدونه',
+  },
+  linked_no_outcome: {
+    priority: 3,
+    code: 'RECORD_PROGRESS',
+    action: 'سجّل تقدّم الهدف في جلسة — حلقة المخرَج لم تُغلق بعد',
+  },
+});
+
+/**
+ * PURE — derive a prioritized next-best-action list from a thread trace. Each
+ * goal stuck at a break-stage yields one concrete action; a fully-linked goal
+ * with zero recorded sessions is flagged for review. Sorted most-urgent first.
+ * @param {{ threads?: any[] }} trace
+ * @returns {Array<{ goalId:any, title:any, priority:number, code:string, action:string }>}
+ */
+function deriveNextActions(trace) {
+  const threads = (trace && Array.isArray(trace.threads) && trace.threads) || [];
+  const actions = [];
+  for (const t of threads) {
+    const rule = ACTION_BY_STAGE[t.threadStage];
+    if (rule) {
+      actions.push({ goalId: t.goalId, title: t.title, ...rule });
+    } else if (t.threadStage === 'complete' && t.sessionCount === 0) {
+      actions.push({
+        goalId: t.goalId,
+        title: t.title,
+        priority: 4,
+        code: 'NO_SESSIONS',
+        action: 'هدف مكتمل الربط دون جلسات مسجّلة — جدوِل/سجّل جلسة لربط التقدّم بالجلسات',
+      });
+    }
+  }
+  return actions.sort((a, b) => a.priority - b.priority);
+}
+
 /**
  * Trace the full golden thread for a beneficiary (READ-ONLY).
  * @param {string|ObjectId} beneficiaryId
- * @returns {Promise<{ beneficiaryId: string, generatedAt: Date, threads: any[], summary: object }>}
+ * @returns {Promise<{ beneficiaryId: string, generatedAt: Date, threads: any[], summary: object, nextActions: any[] }>}
  */
 async function traceByBeneficiary(beneficiaryId) {
   const TherapeuticGoal = mongoose.model('TherapeuticGoal');
@@ -162,7 +210,15 @@ async function traceByBeneficiary(beneficiaryId) {
   }
 
   const { threads, summary } = assembleThread({ goals, sessionsByGoalId, applicationsById });
-  return { beneficiaryId: String(beneficiaryId), generatedAt: new Date(), threads, summary };
+  const result = {
+    beneficiaryId: String(beneficiaryId),
+    generatedAt: new Date(),
+    threads,
+    summary,
+  };
+  result.nextActions = deriveNextActions(result); // W1158 — Smart Attention Queue
+  result.summary.attentionCount = result.nextActions.length;
+  return result;
 }
 
-module.exports = { traceByBeneficiary, assembleThread, THREAD_STAGES };
+module.exports = { traceByBeneficiary, assembleThread, deriveNextActions, THREAD_STAGES };

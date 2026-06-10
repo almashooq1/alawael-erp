@@ -1508,6 +1508,9 @@ on:
       - 'backend/__tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-goal-linkage-behavioral-wave1154.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/golden-thread-next-actions-behavioral-wave1158.test.js'
+      - 'backend/__tests__/golden-thread-next-actions-wave1158.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2999,6 +3002,9 @@ on:
       - 'backend/__tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-goal-linkage-behavioral-wave1154.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/golden-thread-next-actions-behavioral-wave1158.test.js'
+      - 'backend/__tests__/golden-thread-next-actions-wave1158.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

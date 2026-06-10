@@ -754,3 +754,4 @@ __tests__/adaptive-sports-completion-core-linkage-wave1044.test.js
 __tests__/iep-activation-core-linkage-wave1045.test.js
 __tests__/vaccination-administered-core-linkage-wave1046.test.js
 __tests__/family-home-program-completion-core-linkage-wave1047.test.js
+__tests__/spasticity-injection-completion-core-linkage-wave1048.test.js

@@ -1135,6 +1135,27 @@ const FAMILY_HOME_PROGRAM_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1048 — Spasticity injection completed → unified core.
+const SPASTICITY_INJECTION_EVENTS = {
+  SPASTICITY_INJECTION_COMPLETED: {
+    domain: 'spasticity-injection',
+    eventType: 'spasticity_injection.completed',
+    version: 1,
+    description: 'اكتمال حقنة التشنج العضلي — Spasticity injection procedure completed',
+    payload: {
+      injectionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      agent: 'string',
+      procedureDate: 'date',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1169,6 +1190,7 @@ const DDD_CONTRACTS = {
   iep: IEP_EVENTS,
   vaccination: VACCINATION_EVENTS,
   'family-home-program': FAMILY_HOME_PROGRAM_EVENTS,
+  'spasticity-injection': SPASTICITY_INJECTION_EVENTS,
 };
 
 /**
@@ -1219,6 +1241,7 @@ module.exports = {
   IEP_EVENTS,
   VACCINATION_EVENTS,
   FAMILY_HOME_PROGRAM_EVENTS,
+  SPASTICITY_INJECTION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

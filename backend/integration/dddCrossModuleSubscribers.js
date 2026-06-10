@@ -1588,6 +1588,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Spasticity injection completed → unified-core timeline (W1048) ──
+  // When a SpasticityInjection reaches status 'completed' the invasive
+  // botulinum/phenol procedure was performed — record it as a clinical
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'spasticity-injection:completed → timeline:record',
+    pattern: 'spasticity-injection.spasticity_injection.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const agent = event.payload.agent ? ` (${event.payload.agent})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'spasticity_injection_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Spasticity injection completed${agent}`,
+            title_ar: 'اكتملت حقنة التشنج العضلي',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SpasticityInjection timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

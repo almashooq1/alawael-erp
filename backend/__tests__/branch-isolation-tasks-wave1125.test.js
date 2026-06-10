@@ -52,4 +52,15 @@ describe('W269 — tasks ID routes gate beneficiary-linked (clinical) tasks', ()
       ) || [];
     expect(denials.length).toBeGreaterThanOrEqual(2);
   });
+
+  test('W1131 — PUT + DELETE also enforce task-ownership (owner or manager/admin)', () => {
+    expect(SRC).toMatch(/function denyIfNotTaskOwnerOrManager/);
+    expect(SRC).toMatch(/TASK_PRIVILEGED_ROLES/);
+    const uses = SRC.match(/denyIfNotTaskOwnerOrManager\(req, res, existing\)/g) || [];
+    expect(uses.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('the ownership gate no-ops without an auth context (test/internal ergonomics)', () => {
+    expect(SRC).toMatch(/if \(!req \|\| !req\.user\) return false/);
+  });
 });

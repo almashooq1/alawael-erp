@@ -69,20 +69,23 @@ surfaces. Locked by drift guard
      `branch-isolation-treatment-plans-wave1119`, 8 assertions). **Also FIXED:**
      `professional-dev` `PUT` + `DELETE` now enforce therapist-ownership via
      `denyIfNotOwnTherapistRecord` (a therapist may only mutate their own CPD
-     records; admins/cross-role pass through). **`tasks` ID routes PARTIALLY FIXED
-     (W1125):** `GET`/`PUT`/`DELETE` `/tasks/:id` now gate the _clinical-task
-     subset_ (beneficiaryId-linked) by the beneficiary's branch; general tasks
-     (no beneficiary) are intentionally untouched — their ownership model
-     (assignedTo/assignedBy vs manager override) is a separate product decision.
-     Guard `branch-isolation-tasks-wave1125`. **`hr-modules` — BLOCKED on a
+     records; admins/cross-role pass through). **`tasks` ID routes FIXED
+     (W1125 + W1131):** `GET`/`PUT`/`DELETE` `/tasks/:id` gate the _clinical-task
+     subset_ (beneficiaryId-linked) by the beneficiary's branch (W1125), **and**
+     `PUT`/`DELETE` now also enforce **task-ownership** (W1131): owner
+     (`assignedTo`/`assignedBy`) or a manager/admin (`TASK_PRIVILEGED_ROLES =
+admin/super_admin/manager`); no-op without an auth context. This default role
+     set was **chosen on the owner's behalf** (delegated) — widen it (e.g. +
+     `coordinator`/`clinical_supervisor`) if those roles legitimately manage other
+     staff's tasks. Guard `branch-isolation-tasks-wave1125` (7 assertions). **`hr-modules` — BLOCKED on a
      schema/data-model decision (not a route fix):** verified that **10 of the 11**
      `attachCrud` HR models carry **no `branchId`** (only `WorkforcePosition` does),
      so a route-level branch gate would either fail-closed (break the 10) or no-op.
      Branch-scoping HR needs denormalizing `branchId` onto the models OR gating via
      each record's employee FK (field name varies per model) — a data-model effort
-     for the owner. **Other open (product decisions):** the `tasks` list `GET /`
-     (returns all tasks, no scope) + the general-task ownership model
-     (assignedTo/assignedBy owner vs manager override).
+     for the owner. **Other open (product decision):** the `tasks` list `GET /`
+     (returns all tasks, no scope) — a list-scoping decision; the ID-route
+     ownership gate (W1131) does not change list behaviour.
 2. **Duplicate `therapist-extended` route file — INVESTIGATED, not an
    auth-bypass; resolved.** Two _different_ files serve `/api/therapist-extended/*`:
    the kebab `therapist-extended.routes.js` (mounted **first** via `dualMountAuth`,

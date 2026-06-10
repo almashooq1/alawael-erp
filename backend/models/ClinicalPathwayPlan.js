@@ -74,12 +74,38 @@ const clinicalPathwayPlanSchema = new mongoose.Schema(
 clinicalPathwayPlanSchema.index({ branchId: 1, status: 1, createdAt: -1 });
 clinicalPathwayPlanSchema.index({ beneficiaryId: 1, pathwayType: 1, status: 1 });
 
-clinicalPathwayPlanSchema.pre('validate', function validateInvariants(next) {
+clinicalPathwayPlanSchema.pre('validate', function validateInvariants() {
   if (this.targetEndDate && this.startDate && this.targetEndDate < this.startDate) {
     this.invalidate('targetEndDate', 'targetEndDate must be greater than or equal to startDate');
   }
-  next();
 });
+
+// ── W1062: unified-core linkage ───────────────────────────────────────
+// Completing the pathway plan is the milestone. Publish
+// clinical_pathway.completed → CareTimeline. NON-callback save hooks only
+// (the pre('validate') above stays callback-style — different event).
+clinicalPathwayPlanSchema.pre('save', function () {
+  this.$__pathwayCompletedNow =
+    this.status === 'COMPLETED' && (this.isNew || this.isModified('status'));
+});
+
+function emitClinicalPathwayCompleted(doc) {
+  if (!doc || !doc.$__pathwayCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('clinical-pathway', 'clinical_pathway.completed', {
+      planId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      pathwayType: doc.pathwayType,
+      completedAt: doc.targetEndDate || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+clinicalPathwayPlanSchema.post('save', emitClinicalPathwayCompleted);
 
 module.exports =
   mongoose.models.ClinicalPathwayPlan ||

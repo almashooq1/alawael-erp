@@ -2003,6 +2003,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1062: completed clinical pathway plan → core timeline ─────────
+  // When a unified clinical pathway plan is completed, log it on the
+  // beneficiary's timeline (clinical, success).
+  subscribers.push({
+    name: 'clinical-pathway:completed → timeline:record',
+    pattern: 'clinical-pathway.clinical_pathway.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const t = event.payload.pathwayType ? ` (${event.payload.pathwayType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'clinical_pathway_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Clinical pathway plan completed${t}`,
+            title_ar: 'اكتمل المسار السريري الموحد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] ClinicalPathway timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

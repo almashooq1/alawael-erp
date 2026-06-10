@@ -1412,6 +1412,25 @@ const COMMUNITY_REFERRAL_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CLINICAL_PATHWAY_EVENTS = {
+  CLINICAL_PATHWAY_COMPLETED: {
+    domain: 'clinical-pathway',
+    eventType: 'clinical_pathway.completed',
+    version: 1,
+    description: 'إكمال مسار سريري موحد — Clinical pathway plan completed',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      pathwayType: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1460,6 +1479,7 @@ const DDD_CONTRACTS = {
   'morning-health-check': MORNING_HEALTH_CHECK_EVENTS,
   'differential-diagnosis': DIFFERENTIAL_DIAGNOSIS_EVENTS,
   'community-referral': COMMUNITY_REFERRAL_EVENTS,
+  'clinical-pathway': CLINICAL_PATHWAY_EVENTS,
 };
 
 /**
@@ -1524,6 +1544,7 @@ module.exports = {
   MORNING_HEALTH_CHECK_EVENTS,
   DIFFERENTIAL_DIAGNOSIS_EVENTS,
   COMMUNITY_REFERRAL_EVENTS,
+  CLINICAL_PATHWAY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

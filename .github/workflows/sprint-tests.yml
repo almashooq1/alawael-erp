@@ -1435,6 +1435,8 @@ on:
       - 'backend/__tests__/workflow-transition-recorded-core-linkage-wave1118.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/generated-report-completed-core-linkage-wave1119.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/decision-alert-raised-core-linkage-wave1120.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2853,6 +2855,8 @@ on:
       - 'backend/__tests__/workflow-transition-recorded-core-linkage-wave1118.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/generated-report-completed-core-linkage-wave1119.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/decision-alert-raised-core-linkage-wave1120.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

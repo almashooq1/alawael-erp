@@ -3705,6 +3705,41 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'decision-alert:raised → timeline:record',
+    pattern: 'decision-alert.decision_alert.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev = event.payload.severity;
+          const severity =
+            sev === 'critical'
+              ? 'critical'
+              : sev === 'high'
+                ? 'error'
+                : sev === 'info'
+                  ? 'info'
+                  : 'warning';
+          const cat = event.payload.category;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'decision_alert_raised',
+            category: 'system',
+            severity,
+            title: `Decision-support alert raised${cat ? ` (${cat})` : ''}`,
+            title_ar: 'تم رفع تنبيه دعم قرار للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DecisionAlert timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

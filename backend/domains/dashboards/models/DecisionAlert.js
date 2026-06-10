@@ -123,5 +123,30 @@ decisionAlertSchema.index({ assignedTo: 1, status: 1 });
 decisionAlertSchema.index({ category: 1, createdAt: -1 });
 decisionAlertSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// ── W1120 — publish decision_alert.raised when an alert is created ─────────────
+decisionAlertSchema.pre('save', function flagDecisionAlertRaised() {
+  this.$__decisionAlertRaised = this.isNew;
+});
+
+decisionAlertSchema.post('save', function emitDecisionAlertRaised(doc) {
+  if (!doc.$__decisionAlertRaised) return;
+  if (!doc.beneficiaryId) return; // only beneficiary-scoped alerts hit the per-beneficiary timeline
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('decision-alert', 'decision_alert.raised', {
+      alertId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.category ? { category: doc.category } : {}),
+      ...(doc.severity ? { severity: doc.severity } : {}),
+      ...(doc.title ? { title: doc.title } : {}),
+      raisedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.DecisionAlert || mongoose.model('DecisionAlert', decisionAlertSchema);

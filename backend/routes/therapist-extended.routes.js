@@ -20,6 +20,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 // ── Model helpers (lazy) ─────────────────────────────────────────────────────
 function model(name, fallbackPath) {
@@ -163,9 +165,19 @@ router.get(
 
 router.put(
   '/treatment-plans/:planId',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = CarePlan();
     if (!M) return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
+    // W269 — gate cross-branch edit via the plan's beneficiary BEFORE mutating.
+    // Was a bare findByIdAndUpdate(planId) → any authed therapist could edit
+    // any branch's clinical care plan. assertBeneficiaryInScope no-ops for
+    // cross-branch/HQ roles (empty branchFilter) and for unscoped test calls.
+    const existing = await M.findById(req.params.planId).select('beneficiary').lean();
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'Treatment plan not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
     const plan = await M.findByIdAndUpdate(
       req.params.planId,
       { $set: stripUpdateMeta(req.body) },

@@ -2673,6 +2673,29 @@ const GENERATED_REPORT_EVENTS = Object.freeze({
   },
 }); // ═══ W1119 — generated beneficiary report completed → unified core timeline ═══
 
+const DECISION_ALERT_EVENTS = Object.freeze({
+  DECISION_ALERT_RAISED: {
+    domain: 'decision-alert',
+    eventType: 'decision_alert.raised',
+    version: 1,
+    description:
+      'A decision-support alert was raised for a beneficiary (clinical risk, treatment gap, KPI breach, etc.).',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      category: 'string',
+      severity: 'string',
+      title: 'string',
+      raisedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1120 — decision-support alert raised → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2779,6 +2802,7 @@ const DDD_CONTRACTS = {
   'measure-baseline': MEASURE_BASELINE_EVENTS,
   'workflow-transition': WORKFLOW_TRANSITION_EVENTS,
   'generated-report': GENERATED_REPORT_EVENTS,
+  'decision-alert': DECISION_ALERT_EVENTS,
 };
 
 /**
@@ -2897,6 +2921,7 @@ module.exports = {
   MEASURE_BASELINE_EVENTS,
   WORKFLOW_TRANSITION_EVENTS,
   GENERATED_REPORT_EVENTS,
+  DECISION_ALERT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

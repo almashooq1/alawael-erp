@@ -883,3 +883,8 @@ __tests__/golden-thread-attention-behavioral-wave1165.test.js
 __tests__/golden-thread-attention-wave1165.test.js
 __tests__/notifications-security-reports-workflow-isolation-wave1166.test.js
 __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
+__tests__/golden-thread-caseload-route-wave1167.test.js
+__tests__/finance-invoice-branch-isolation-wave1161.test.js
+__tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js
+__tests__/finance-approvals-branch-isolation-wave1163.test.js
+__tests__/finance-approvals-branch-isolation-behavioral-wave1163.test.js

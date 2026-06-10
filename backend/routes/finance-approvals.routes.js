@@ -22,6 +22,8 @@ const express = require('express');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const svc = require('../services/finance/expenseApprovalService');
 const { createMongoStore } = require('../services/finance/expenseApprovalStore.mongo');
 const ExpenseApprovalChain = require('../models/finance/ExpenseApprovalChain');
@@ -42,7 +44,30 @@ const WRITE_ROLES = [
 ];
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 router.use(requireRole(WRITE_ROLES));
+
+// W269 — expense-approval chains carry a (nullable) branchId. The :expenseId routes
+// (view/approve/reject/PAY) take a bare id, so they MUST verify the caller's branch
+// before returning/mutating a financial authorization. Loads the chain + asserts
+// (null-branch chains are org-level → allowed). Returns the chain when allowed, or
+// null after sending a 403/404.
+async function loadChainInBranch(req, res, expenseId) {
+  const rec = await svc.getStatus({ store, expenseId });
+  if (!rec) {
+    bad(res, 'not found', 404);
+    return null;
+  }
+  if (rec.branchId != null) {
+    try {
+      assertBranchMatch(req, rec.branchId, 'expense approval');
+    } catch (e) {
+      res.status(e.status || 403).json({ ok: false, error: e.message });
+      return null;
+    }
+  }
+  return rec;
+}
 
 // Default to the Mongo-backed store so chains survive restarts.
 // Tests and scripts that want an in-memory store can call setStore(createMemoryStore()).
@@ -95,6 +120,7 @@ router.post('/submit', async (req, res) => {
 
 router.post('/:expenseId/approve', async (req, res) => {
   try {
+    if (!(await loadChainInBranch(req, res, req.params.expenseId))) return; // W269
     const rec = await svc.approve({
       store,
       expenseId: req.params.expenseId,
@@ -111,6 +137,7 @@ router.post('/:expenseId/reject', async (req, res) => {
   try {
     const reason = req.body && req.body.reason;
     if (!reason) return bad(res, 'reason is required');
+    if (!(await loadChainInBranch(req, res, req.params.expenseId))) return; // W269
     const rec = await svc.reject({
       store,
       expenseId: req.params.expenseId,
@@ -125,6 +152,7 @@ router.post('/:expenseId/reject', async (req, res) => {
 
 router.post('/:expenseId/pay', async (req, res) => {
   try {
+    if (!(await loadChainInBranch(req, res, req.params.expenseId))) return; // W269
     const rec = await svc.releasePayment({
       store,
       expenseId: req.params.expenseId,
@@ -141,7 +169,7 @@ router.get('/pending', async (req, res) => {
   try {
     const data = await svc.listPending({
       store,
-      branchId: req.query.branchId || null,
+      branchId: effectiveBranchScope(req), // W269 — own branch (restricted) / query|null (HQ)
       role: req.query.role || null,
     });
     res.json({ ok: true, data });
@@ -152,8 +180,8 @@ router.get('/pending', async (req, res) => {
 
 router.get('/:expenseId', async (req, res) => {
   try {
-    const rec = await svc.getStatus({ store, expenseId: req.params.expenseId });
-    if (!rec) return bad(res, 'not found', 404);
+    const rec = await loadChainInBranch(req, res, req.params.expenseId); // W269
+    if (!rec) return; // 403/404 already sent
     res.json({ ok: true, data: rec });
   } catch (e) {
     mapError(e, res);

@@ -9,6 +9,14 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 const {
   validateCreateCarePlan,
   validateUpdateCarePlan,
@@ -63,12 +71,12 @@ router.get(
   })
 );
 
-/* ─── GET /care-plans/beneficiary/:id — By beneficiary ──────────────────── */
+/* ─── GET /care-plans/beneficiary/:beneficiaryId — By beneficiary ──────── */
 router.get(
-  '/beneficiary/:id',
+  '/beneficiary/:beneficiaryId',
   requireService,
   asyncHandler(async (req, res) => {
-    const result = await carePlansService.getBeneficiaryPlans(req.params.id);
+    const result = await carePlansService.getBeneficiaryPlans(req.params.beneficiaryId);
     res.json({ success: true, ...result });
   })
 );

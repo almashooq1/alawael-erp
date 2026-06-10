@@ -8,6 +8,14 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 const { measuresLibraryService } = require('../services/MeasuresLibraryService');
 
 function asyncHandler(fn) {

@@ -1466,6 +1466,8 @@ on:
       - 'backend/__tests__/golden-thread-integrity-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/backfill-hr-branchid-wave1139.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/domains-routes-branch-isolation-wave1140.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2915,6 +2917,8 @@ on:
       - 'backend/__tests__/golden-thread-integrity-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/backfill-hr-branchid-wave1139.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/domains-routes-branch-isolation-wave1140.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

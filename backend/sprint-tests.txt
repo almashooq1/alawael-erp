@@ -815,3 +815,4 @@ __tests__/speech-session-analyzed-core-linkage-wave1102.test.js
 __tests__/portal-payment-paid-core-linkage-wave1103.test.js
 __tests__/caregiver-support-completed-core-linkage-wave1104.test.js
 __tests__/coupon-usage-redeemed-core-linkage-wave1105.test.js
+__tests__/insurance-policy-activated-core-linkage-wave1106.test.js

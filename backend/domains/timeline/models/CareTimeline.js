@@ -182,6 +182,7 @@ const careTimelineSchema = new mongoose.Schema(
         'portal_payment_paid',
         'caregiver_support_completed',
         'coupon_usage_redeemed',
+        'insurance_policy_activated',
         // Family
         'family_contact',
         'family_meeting',

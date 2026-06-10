@@ -96,6 +96,32 @@ insurancePolicySchema.virtual('daysUntilExpiry').get(function () {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 });
 
+// ── W1106 core-linkage: emit when an insurance policy becomes active ──
+insurancePolicySchema.pre('save', function flagInsurancePolicyActivated() {
+  const becameActive =
+    (this.isNew || this.isModified('status')) && this.status === 'active' && !this.deletedAt;
+  this.$__insurancePolicyActivated = becameActive;
+});
+
+insurancePolicySchema.post('save', function emitInsurancePolicyActivated(doc) {
+  if (!doc.$__insurancePolicyActivated) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('insurance-policy', 'insurance_policy.activated', {
+      policyId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      policyNumber: doc.policyNumber,
+      ...(doc.memberId ? { memberId: doc.memberId } : {}),
+      ...(doc.planType ? { planType: doc.planType } : {}),
+      startDate: doc.startDate,
+      endDate: doc.endDate,
+    });
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
+  }
+});
+
 const InsurancePolicy =
   mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', insurancePolicySchema);
 

@@ -3336,6 +3336,33 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'insurance-policy:activated → timeline:record',
+    pattern: 'insurance-policy.insurance_policy.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const plan = event.payload.planType;
+          const num = event.payload.policyNumber;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'insurance_policy_activated',
+            category: 'administrative',
+            severity: 'success',
+            title: `Insurance policy activated${plan ? ` (${plan})` : ''}${num ? ` — #${num}` : ''}`,
+            title_ar: 'تم تفعيل وثيقة تأمين للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] InsurancePolicy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

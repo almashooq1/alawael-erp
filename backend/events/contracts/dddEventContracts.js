@@ -2353,6 +2353,29 @@ const COUPON_USAGE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const INSURANCE_POLICY_EVENTS = {
+  INSURANCE_POLICY_ACTIVATED: {
+    domain: 'insurance-policy',
+    eventType: 'insurance_policy.activated',
+    version: 1,
+    description:
+      'تفعيل وثيقة تأمين للمستفيد (إصدار جديد أو استئناف نشط) — A beneficiary insurance policy became active (newly issued or resumed)',
+    payload: {
+      policyId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      policyNumber: 'string',
+      memberId: 'string',
+      planType: 'string',
+      startDate: 'date',
+      endDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2445,6 +2468,7 @@ const DDD_CONTRACTS = {
   'portal-payment': PORTAL_PAYMENT_EVENTS,
   'caregiver-support': CAREGIVER_SUPPORT_EVENTS,
   'coupon-usage': COUPON_USAGE_EVENTS,
+  'insurance-policy': INSURANCE_POLICY_EVENTS,
 };
 
 /**
@@ -2549,6 +2573,7 @@ module.exports = {
   PORTAL_PAYMENT_EVENTS,
   CAREGIVER_SUPPORT_EVENTS,
   COUPON_USAGE_EVENTS,
+  INSURANCE_POLICY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -2073,6 +2073,27 @@ const PICKUP_AUTHORIZATION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const MEAL_EVENT_EVENTS = {
+  MEAL_ALLERGY_INCIDENT: {
+    domain: 'meal-event',
+    eventType: 'meal_event.allergy_incident',
+    version: 1,
+    description:
+      'تسجيل حادثة حساسية غذائية أثناء وجبة للمستفيد — An allergy incident was recorded during a beneficiary meal',
+    payload: {
+      mealEventId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      date: 'date',
+      mealType: 'string',
+      refusedItems: 'array',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.CRITICAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2152,6 +2173,7 @@ const DDD_CONTRACTS = {
   'day-attendance': DAY_ATTENDANCE_EVENTS,
   'waiting-list': WAITING_LIST_EVENTS,
   'pickup-authorization': PICKUP_AUTHORIZATION_EVENTS,
+  'meal-event': MEAL_EVENT_EVENTS,
 };
 
 /**
@@ -2247,6 +2269,7 @@ module.exports = {
   DAY_ATTENDANCE_EVENTS,
   WAITING_LIST_EVENTS,
   PICKUP_AUTHORIZATION_EVENTS,
+  MEAL_EVENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

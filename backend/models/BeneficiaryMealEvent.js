@@ -49,6 +49,29 @@ BeneficiaryMealEventSchema.index({ beneficiaryId: 1, date: 1, mealType: 1 }, { u
 BeneficiaryMealEventSchema.index({ branchId: 1, date: -1 });
 BeneficiaryMealEventSchema.index({ allergyIncident: 1, date: -1 });
 
+// W1093 — unified-core linkage: emit only when an allergy incident is
+// recorded during a meal (routine meals stay off the clinical timeline).
+BeneficiaryMealEventSchema.pre('save', function flagMealAllergyIncident() {
+  this.$__mealAllergyIncident = this.isNew && this.allergyIncident === true;
+});
+
+BeneficiaryMealEventSchema.post('save', function emitMealAllergyIncident(doc) {
+  if (!doc.$__mealAllergyIncident) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('meal-event', 'meal_event.allergy_incident', {
+      mealEventId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      date: doc.date,
+      mealType: doc.mealType,
+      refusedItems: doc.refusedItems || [],
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryMealEvent ||
   mongoose.model('BeneficiaryMealEvent', BeneficiaryMealEventSchema);

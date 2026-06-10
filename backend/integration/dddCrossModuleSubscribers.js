@@ -2970,6 +2970,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1093 — meal allergy incident → unified core timeline
+  subscribers.push({
+    name: 'meal-event:allergy_incident → timeline:record',
+    pattern: 'meal-event.meal_event.allergy_incident',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'meal_allergy_incident',
+            category: 'clinical',
+            severity: 'warning',
+            title: `Allergy incident during ${event.payload.mealType || 'meal'}`,
+            title_ar: 'تم تسجيل حادثة حساسية غذائية أثناء وجبة المستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] MealEvent timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

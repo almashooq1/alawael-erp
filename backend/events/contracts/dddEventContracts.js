@@ -1834,6 +1834,28 @@ const GOAL_ENTRY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CDSS_RISK_EVENTS = {
+  CDSS_RISK_ASSESSED: {
+    domain: 'cdss-risk',
+    eventType: 'cdss_risk.assessed',
+    version: 1,
+    description:
+      'تسجيل تقييم مخاطر سريري (CDSS) للمستفيد — A clinical decision-support risk assessment was recorded',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      assessmentType: 'string',
+      riskLevel: 'string',
+      totalScore: 'number',
+      assessmentDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1902,6 +1924,7 @@ const DDD_CONTRACTS = {
   'family-visit': FAMILY_VISIT_EVENTS,
   'bip-fidelity': BIP_FIDELITY_EVENTS,
   'goal-entry': GOAL_ENTRY_EVENTS,
+  'cdss-risk': CDSS_RISK_EVENTS,
 };
 
 /**
@@ -1986,6 +2009,7 @@ module.exports = {
   FAMILY_VISIT_EVENTS,
   BIP_FIDELITY_EVENTS,
   GOAL_ENTRY_EVENTS,
+  CDSS_RISK_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

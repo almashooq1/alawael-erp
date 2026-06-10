@@ -2618,6 +2618,45 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1082: CDSS risk assessment recorded → core timeline ───────────
+  // A clinical decision-support risk score (fall / pressure-ulcer /
+  // malnutrition / deterioration) is a safety-critical milestone — record
+  // it on the timeline; severity tracks the assessed risk level.
+  subscribers.push({
+    name: 'cdss-risk:assessed → timeline:record',
+    pattern: 'cdss-risk.cdss_risk.assessed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev =
+            event.payload.riskLevel === 'very_high'
+              ? 'critical'
+              : event.payload.riskLevel === 'high'
+                ? 'error'
+                : event.payload.riskLevel === 'moderate'
+                  ? 'warning'
+                  : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'cdss_risk_assessed',
+            category: 'clinical',
+            severity: sev,
+            title: `Clinical risk assessment: ${event.payload.assessmentType || 'recorded'} — ${
+              event.payload.riskLevel || 'n/a'
+            }`,
+            title_ar: 'تم تسجيل تقييم مخاطر سريري للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CdssRisk timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -63,6 +63,33 @@ const vaccinationSchema = new mongoose.Schema(
 
 vaccinationSchema.index({ beneficiaryId: 1, status: 1, dueDate: 1 });
 
+// ── W1046: unified-core producer — vaccination administered ──
+// When a Vaccination row moves to status 'administered', publish a domain event
+// so the cross-module subscriber records an immunization milestone on the
+// beneficiary's longitudinal CareTimeline. Non-callback hook style (W483-safe).
+vaccinationSchema.pre('save', function () {
+  this.$__vaccinationAdministeredNow =
+    this.status === 'administered' && (this.isNew || this.isModified('status'));
+});
+
+vaccinationSchema.post('save', function emitVaccinationAdministered(doc) {
+  if (!doc || !doc.$__vaccinationAdministeredNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('vaccination', 'vaccination.administered', {
+        vaccinationId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        vaccine: doc.vaccine || null,
+        doseNumber: typeof doc.doseNumber === 'number' ? doc.doseNumber : null,
+        administeredAt: doc.administeredAt || doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 const Vaccination = mongoose.models.Vaccination || mongoose.model('Vaccination', vaccinationSchema);
 
 module.exports = { Vaccination, VACCINATION_STATUSES };

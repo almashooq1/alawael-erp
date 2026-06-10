@@ -83,6 +83,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'ai-report', // W1043 — AI-generated report sent → core timeline
   'adaptive-sports', // W1044 — adaptive sports program completed → core timeline
   'iep', // W1045 — individual education plan activated → core timeline
+  'vaccination', // W1046 — vaccination administered → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -140,6 +141,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'ai_report', // W1043 — ai_report.sent (AiGeneratedReport)
     'adaptive_sports', // W1044 — adaptive_sports.completed (AdaptiveSportsProgram)
     'iep', // W1045 — iep.activated (IndividualEducationPlan)
+    'vaccination', // W1046 — vaccination.administered (Vaccination)
   ])
 );
 

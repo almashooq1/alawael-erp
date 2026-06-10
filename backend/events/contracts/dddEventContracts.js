@@ -1094,6 +1094,26 @@ const IEP_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1046 — Vaccination administered → unified core.
+const VACCINATION_EVENTS = {
+  VACCINATION_ADMINISTERED: {
+    domain: 'vaccination',
+    eventType: 'vaccination.administered',
+    version: 1,
+    description: 'إعطاء تطعيم للمستفيد — Vaccination administered',
+    payload: {
+      vaccinationId: 'string',
+      beneficiaryId: 'string',
+      vaccine: 'string',
+      doseNumber: 'number',
+      administeredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1126,6 +1146,7 @@ const DDD_CONTRACTS = {
   'ai-report': AI_REPORT_EVENTS,
   'adaptive-sports': ADAPTIVE_SPORTS_EVENTS,
   iep: IEP_EVENTS,
+  vaccination: VACCINATION_EVENTS,
 };
 
 /**
@@ -1174,6 +1195,7 @@ module.exports = {
   AI_REPORT_EVENTS,
   ADAPTIVE_SPORTS_EVENTS,
   IEP_EVENTS,
+  VACCINATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

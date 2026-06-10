@@ -1529,6 +1529,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Vaccination administered → unified-core timeline (W1046) ──
+  // When a Vaccination row moves to status 'administered' (the beneficiary
+  // received a dose), record it as a clinical milestone on the longitudinal
+  // record so the immunization history is visible alongside all other care.
+  subscribers.push({
+    name: 'vaccination:administered → timeline:record',
+    pattern: 'vaccination.vaccination.administered',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const vaccine = event.payload.vaccine ? ` (${event.payload.vaccine})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'vaccination_administered',
+            category: 'clinical',
+            severity: 'success',
+            title: `Vaccine administered${vaccine}`,
+            title_ar: 'تم إعطاء التطعيم',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Vaccination timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

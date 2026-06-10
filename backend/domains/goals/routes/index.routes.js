@@ -15,5 +15,6 @@ const router = express.Router();
 
 router.use('/', require('./goals.routes'));
 router.use('/', require('./measures.routes'));
+router.use('/', require('./golden-thread.routes')); // W1167 — caseload attention triage
 
 module.exports = router;

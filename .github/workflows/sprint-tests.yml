@@ -1526,6 +1526,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/finance-invoice-branch-isolation-wave1161.test.js'
       - 'backend/__tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/golden-thread-caseload-route-wave1167.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3035,6 +3037,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/finance-invoice-branch-isolation-wave1161.test.js'
       - 'backend/__tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/golden-thread-caseload-route-wave1167.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

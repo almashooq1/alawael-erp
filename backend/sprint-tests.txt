@@ -881,4 +881,7 @@ __tests__/plan-goal-linkage-behavioral-wave1154.test.js
 __tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js
 __tests__/golden-thread-attention-behavioral-wave1165.test.js
 __tests__/golden-thread-attention-wave1165.test.js
+__tests__/golden-thread-caseload-route-wave1167.test.js
 __tests__/notifications-security-reports-workflow-isolation-wave1166.test.js
+__tests__/finance-invoice-branch-isolation-wave1161.test.js
+__tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js

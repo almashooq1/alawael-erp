@@ -238,6 +238,30 @@ DysphagiaAssessmentSchema.virtual('isUnsafeSwallow').get(function () {
 DysphagiaAssessmentSchema.set('toJSON', { virtuals: true });
 DysphagiaAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → dysphagia_assessment timeline row
+// (high aspiration risk escalates to warning).
+DysphagiaAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+DysphagiaAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'dysphagia.assessment_finalized', {
+        dysphagiaAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        aspirationRisk: doc.aspirationRisk,
+        npoRecommended: !!doc.npoRecommended,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.DysphagiaAssessment ||
   mongoose.model('DysphagiaAssessment', DysphagiaAssessmentSchema);

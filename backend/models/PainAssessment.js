@@ -237,6 +237,31 @@ PainAssessmentSchema.virtual('painReduction').get(function () {
 PainAssessmentSchema.set('toJSON', { virtuals: true });
 PainAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → pain_assessment timeline row (present pain
+// escalates to warning).
+PainAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+PainAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'pain.assessment_finalized', {
+        painAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        scale: doc.scale,
+        score: doc.score,
+        painPresent: !!doc.painPresent,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.PainAssessment || mongoose.model('PainAssessment', PainAssessmentSchema);
 

@@ -1833,6 +1833,73 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ═══ Clinical-assessment trio → Timeline (W1047 — W670-W673 islands) ═══
+  subscribers.push({
+    name: 'dysphagia:finalized → timeline:record',
+    pattern: 'clinical-assessment.dysphagia.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'dysphagia_assessment',
+          category: 'clinical',
+          severity: event.payload.aspirationRisk === 'high' ? 'warning' : 'info',
+          title: `Dysphagia assessment finalized (aspiration risk: ${event.payload.aspirationRisk || ''})`.trim(),
+          title_ar: `اعتماد تقييم البلع (خطر الشفط: ${event.payload.aspirationRisk || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] dysphagia timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'pain:finalized → timeline:record',
+    pattern: 'clinical-assessment.pain.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'pain_assessment',
+          category: 'clinical',
+          severity: event.payload.painPresent ? 'warning' : 'info',
+          title: `Pain assessment finalized (${event.payload.scale || ''}: ${event.payload.score ?? ''})`.trim(),
+          title_ar: `اعتماد تقييم الألم (${event.payload.scale || ''}: ${event.payload.score ?? ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] pain timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'physiotherapy:finalized → timeline:record',
+    pattern: 'clinical-assessment.physiotherapy.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'physiotherapy_assessment',
+          category: 'clinical',
+          severity: 'info',
+          title: `Physiotherapy assessment finalized (${event.payload.assessmentType || ''})`.trim(),
+          title_ar: `اعتماد تقييم العلاج الطبيعي (${event.payload.assessmentType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] physiotherapy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

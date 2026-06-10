@@ -101,6 +101,10 @@ const careTimelineSchema = new mongoose.Schema(
         'medication_reconciliation', // W1041 — medication reconciliation reconciled
         'infection_case', // W1042 — infection case opened / status change
         'infection_resolved', // W1042 — infection case resolved
+        // Clinical Assessments trio (W1047 — W670-W673 islands linked)
+        'dysphagia_assessment', // W670 — swallow-safety assessment finalized
+        'pain_assessment', // W671 — pain assessment finalized
+        'physiotherapy_assessment', // W672 — physiotherapy assessment finalized
         // Family
         'family_contact',
         'family_meeting',

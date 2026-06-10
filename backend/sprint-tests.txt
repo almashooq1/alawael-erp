@@ -782,3 +782,4 @@ __tests__/physiotherapy-assessment-finalized-core-linkage-wave1072.test.js
 __tests__/service-contract-activated-core-linkage-wave1073.test.js
 __tests__/subsidy-payment-received-core-linkage-wave1074.test.js
 __tests__/sponsorship-activated-core-linkage-wave1075.test.js
+__tests__/potty-request-milestone-core-linkage-wave1076.test.js

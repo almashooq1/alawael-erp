@@ -152,6 +152,7 @@ const careTimelineSchema = new mongoose.Schema(
         'service_contract_activated',
         'subsidy_payment_received',
         'sponsorship_activated',
+        'potty_request_milestone',
         // Family
         'family_contact',
         'family_meeting',

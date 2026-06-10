@@ -2435,6 +2435,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1076: potty request (toilet-training) → core timeline ─────────
+  // When a child independently requests the potty (a positive
+  // toilet-training milestone, not a routine diaper event), log it on the
+  // timeline as a clinical win.
+  subscribers.push({
+    name: 'toileting-event:potty_requested → timeline:record',
+    pattern: 'toileting-event.toileting_event.potty_requested',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'potty_request_milestone',
+            category: 'clinical',
+            severity: 'success',
+            title: 'Potty requested independently (toilet-training progress)',
+            title_ar: 'طلب الطفل الذهاب إلى الحمام (تقدّم في التدريب)',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] ToiletingEvent timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

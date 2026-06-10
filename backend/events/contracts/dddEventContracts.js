@@ -1710,6 +1710,27 @@ const SPONSORSHIP_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const TOILETING_EVENT_EVENTS = {
+  POTTY_REQUEST_MILESTONE: {
+    domain: 'toileting-event',
+    eventType: 'toileting_event.potty_requested',
+    version: 1,
+    description:
+      'طلب الطفل الذهاب للحمام — تقدّم في التدريب على استخدام الحمام — Child requested potty (toilet-training progress)',
+    payload: {
+      eventId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      type: 'string',
+      eventTime: 'date',
+      requestedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1772,6 +1793,7 @@ const DDD_CONTRACTS = {
   'beneficiary-contract': BENEFICIARY_CONTRACT_EVENTS,
   'subsidy-entry': SUBSIDY_ENTRY_EVENTS,
   sponsorship: SPONSORSHIP_EVENTS,
+  'toileting-event': TOILETING_EVENT_EVENTS,
 };
 
 /**
@@ -1850,6 +1872,7 @@ module.exports = {
   BENEFICIARY_CONTRACT_EVENTS,
   SUBSIDY_ENTRY_EVENTS,
   SPONSORSHIP_EVENTS,
+  TOILETING_EVENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -52,6 +52,35 @@ ToiletingEventSchema.index({ beneficiaryId: 1, date: 1 });
 ToiletingEventSchema.index({ beneficiaryId: 1, eventTime: -1 });
 ToiletingEventSchema.index({ branchId: 1, date: -1 });
 
+// ── W1076: unified-core producer ───────────────────────────────────
+// Emit toileting_event.potty_requested ONLY for the positive
+// toilet-training milestone (child independently asked for the potty),
+// NOT for routine wet/bowel/diaper-change/accident rows — those are
+// high-frequency care logs, not timeline milestones. Non-callback hook
+// style (W483 gate): the global async save plugin puts the whole hook
+// chain in promise-adapter mode.
+ToiletingEventSchema.pre('save', function flagPottyRequested() {
+  this.$__pottyRequestedNow =
+    this.isNew && this.type === 'requested_potty' && this.successful === true;
+});
+
+ToiletingEventSchema.post('save', function emitPottyRequested(doc) {
+  if (!doc.$__pottyRequestedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('toileting-event', 'toileting_event.potty_requested', {
+      eventId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      type: doc.type,
+      eventTime: doc.eventTime,
+      requestedAt: doc.eventTime || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.ToiletingEvent || mongoose.model('ToiletingEvent', ToiletingEventSchema);
 

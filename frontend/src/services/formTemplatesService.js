@@ -569,7 +569,8 @@ const formTemplatesService = {
       () =>
         apiClient
           .get('/form-templates', { params })
-          .then(r => r?.templates || (Array.isArray(r) ? r : [])),
+          // backend envelope is { success, data, pagination }
+          .then(r => r?.data || r?.templates || (Array.isArray(r) ? r : [])),
       FALLBACK_TEMPLATES.filter(
         t => !params.category || params.category === 'all' || t.category === params.category
       )
@@ -577,7 +578,7 @@ const formTemplatesService = {
 
   getTemplate: id =>
     safe(
-      () => apiClient.get(`/api/v1/form-templates/${id}`).then(r => r?.template || r),
+      () => apiClient.get(`/api/v1/form-templates/${id}`).then(r => r?.data || r?.template || r),
       FALLBACK_TEMPLATES.find(t => t.templateId === id) || null
     ),
 
@@ -599,37 +600,66 @@ const formTemplatesService = {
       () =>
         apiClient
           .get('/form-templates/categories')
-          .then(r => r?.categories || (Array.isArray(r) ? r : [])),
+          .then(r => r?.data || r?.categories || (Array.isArray(r) ? r : [])),
       FALLBACK_CATEGORIES
     ),
 
   // ─── Stats ───
   getStats: () =>
-    safe(() => apiClient.get('/api/v1/form-templates/stats'), {
-      stats: FALLBACK_STATS,
-      recentSubmissions: [],
-    }),
+    safe(
+      () =>
+        apiClient.get('/api/v1/form-templates/stats').then(r => ({
+          stats: r?.data || r?.stats || r,
+          recentSubmissions: r?.recentSubmissions || [],
+        })),
+      {
+        stats: FALLBACK_STATS,
+        recentSubmissions: [],
+      }
+    ),
 
   // ─── Submissions ───
   submitForm: (templateId, data) =>
-    safe(() => apiClient.post(`/api/v1/form-templates/${templateId}/submit`, data), {
-      success: true,
-      submission: { submissionNumber: `SUB-${Date.now()}`, status: 'submitted' },
-    }),
+    safe(
+      () =>
+        apiClient
+          .post(`/api/v1/form-templates/${templateId}/submit`, data)
+          .then(r => ({ ...(r || {}), submission: r?.submission || r?.data })),
+      {
+        success: true,
+        submission: { submissionNumber: `SUB-${Date.now()}`, status: 'submitted' },
+      }
+    ),
 
   getMySubmissions: (params = {}) =>
-    safe(() => apiClient.get('/api/v1/form-templates/submissions/my', { params }), {
-      submissions: [],
-      pagination: { total: 0 },
-    }),
+    safe(
+      () =>
+        apiClient
+          .get('/api/v1/form-templates/submissions/my', { params })
+          .then(r => ({ submissions: r?.data || r?.submissions || [], pagination: r?.pagination })),
+      {
+        submissions: [],
+        pagination: { total: 0 },
+      }
+    ),
 
   getPendingSubmissions: () =>
-    safe(() => apiClient.get('/api/v1/form-templates/submissions/pending'), { submissions: [] }),
+    safe(
+      () =>
+        apiClient
+          .get('/api/v1/form-templates/submissions/pending')
+          .then(r => ({ submissions: r?.data || r?.submissions || [], pagination: r?.pagination })),
+      { submissions: [] }
+    ),
 
+  // Review actions go through PATCH /submissions/:id/status on the backend.
   approveSubmission: (submissionId, comment) =>
     safe(
       () =>
-        apiClient.put(`/api/v1/form-templates/submissions/${submissionId}/approve`, { comment }),
+        apiClient.patch(`/api/v1/form-templates/submissions/${submissionId}/status`, {
+          status: 'approved',
+          reviewNote: comment,
+        }),
       {
         success: true,
       }
@@ -637,7 +667,11 @@ const formTemplatesService = {
 
   rejectSubmission: (submissionId, comment) =>
     safe(
-      () => apiClient.put(`/api/v1/form-templates/submissions/${submissionId}/reject`, { comment }),
+      () =>
+        apiClient.patch(`/api/v1/form-templates/submissions/${submissionId}/status`, {
+          status: 'rejected',
+          reviewNote: comment,
+        }),
       {
         success: true,
       }

@@ -81,9 +81,16 @@ ValidationError at runtime** because the real model has different *required* fie
    lacks (`directiveType, requiredSigners, signatureStatus, verificationCode…`).
    Needs per-surface decision (dedicated models vs Document.metadata).
 
-7. **guardian** (8 flat contact keys — `name_ar, name_en, phone2, employer, city,
-   preferredContactMethod, preferredLanguage, canPickup`) — probable class C quick
-   win; verify against `models/Guardian.js` vocabulary first.
+7. **guardian** (8 flat contact keys) — **RECLASSIFIED W1198: DORMANT ROUTE, defer to
+   ADR-030 (wire-vs-delete).** `routes/guardians.routes.js` is referenced by NO mount
+   pattern (checked all 4 families: safeRequire+dualMount, safeMount, direct app.use,
+   bootstrap) and prod `guardians` collection has **0 documents**. Do NOT repair before
+   the wiring decision. Notes for whoever revives it: model requires
+   `firstName_en`/`lastName_en`/`email`/`userId` (unique NON-sparse index in prod —
+   staff-side registration without a portal account needs `userId` optional + a sparse
+   index migration); class-B maps: `phone2→alternatePhone`, `employer→company`,
+   `city→address.city`, `preferredLanguage→language`; class-C declares needed:
+   `preferredContactMethod`, `canPickup`. Baseline ids stay (ratchet fires if revived).
 
 8. **leaverequest** (6), **user** (`name, status, branch` in admin/user-management),
    **documentversion** (2), **documentaccesslog** (1).

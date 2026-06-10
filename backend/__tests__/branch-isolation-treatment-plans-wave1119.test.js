@@ -71,4 +71,10 @@ describe('W269 — therapist-extended treatment-plan writes are branch-gated', (
     const gates = SRC.match(/assertBeneficiaryInScope\(req, existing\.beneficiaryId, res\)/g) || [];
     expect(gates.length).toBeGreaterThanOrEqual(2);
   });
+
+  test('professional-dev PUT + DELETE enforce therapist-ownership (denyIfNotOwnTherapistRecord)', () => {
+    expect(SRC).toMatch(/function denyIfNotOwnTherapistRecord/);
+    const uses = SRC.match(/denyIfNotOwnTherapistRecord\(req, res, existing\.therapistId\)/g) || [];
+    expect(uses.length).toBeGreaterThanOrEqual(2);
+  });
 });

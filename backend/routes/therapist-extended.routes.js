@@ -123,6 +123,20 @@ function getTherapistId(req) {
   return req.user?.employeeId || req.user?.therapistId || req.user?.id || req.user?._id;
 }
 
+// W269 — ownership gate for therapist-owned records (e.g. professional-dev),
+// which carry a `therapistId` but no beneficiary/branch. A caller WITH a
+// therapistId may only mutate records owned by that therapist; admins /
+// cross-role callers (no therapistId) pass through, and records with no owner
+// are not gated. Returns true (and writes 403) when denied.
+function denyIfNotOwnTherapistRecord(req, res, ownerTherapistId) {
+  const therapistId = getTherapistId(req);
+  if (therapistId && ownerTherapistId && String(ownerTherapistId) !== String(therapistId)) {
+    res.status(403).json({ success: false, message: 'غير مصرّح: السجل يخص أخصائياً آخر' });
+    return true;
+  }
+  return false;
+}
+
 /* ══════════════════════ TREATMENT PLANS ════════════════════════════════════ */
 
 router.get(
@@ -377,6 +391,10 @@ router.put(
   '/professional-dev/:id',
   asyncHandler(async (req, res) => {
     const M = ProfessionalDev();
+    // W269 — a therapist may only edit their OWN professional-dev record.
+    const existing = await M.findById(req.params.id).select('therapistId').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Record not found' });
+    if (denyIfNotOwnTherapistRecord(req, res, existing.therapistId)) return;
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: stripUpdateMeta(req.body) },
@@ -391,6 +409,10 @@ router.delete(
   '/professional-dev/:id',
   asyncHandler(async (req, res) => {
     const M = ProfessionalDev();
+    // W269 — a therapist may only delete their OWN professional-dev record.
+    const existing = await M.findById(req.params.id).select('therapistId').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Record not found' });
+    if (denyIfNotOwnTherapistRecord(req, res, existing.therapistId)) return;
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })

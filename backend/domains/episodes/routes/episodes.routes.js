@@ -13,11 +13,24 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1150 — episode-keyed ownership: every :episodeId param loads the episode's
+// own branchId and asserts it for restricted callers; list endpoints use
+// effectiveBranchScope() so `?branchId=` spoofing is ignored when restricted.
 const {
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'episodeId',
+  branchScopedResourceParam({
+    modelName: 'EpisodeOfCare',
+    label: 'episode',
+    loadModel: () => require('../models/EpisodeOfCare'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const {
   validateCreateEpisode,
@@ -57,10 +70,13 @@ router.get(
   '/',
   requireDomain,
   asyncHandler(async (req, res) => {
+    // W1150 — restricted callers are ALWAYS pinned to their own branch
+    // (effectiveBranchScope ignores ?branchId= spoofing for them).
+    const scopedBranchId = effectiveBranchScope(req);
     const result = await svc().list({
       filter: {
         isDeleted: { $ne: true },
-        ...(req.query.branchId && { branchId: req.query.branchId }),
+        ...(scopedBranchId && { branchId: scopedBranchId }),
         ...(req.query.status && { status: req.query.status }),
       },
       page: parseInt(req.query.page, 10) || 1,
@@ -76,7 +92,8 @@ router.get(
   '/statistics',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const stats = await svc().getStatistics(req.query.branchId || req.user?.branchId);
+    // W1150 — effectiveBranchScope first: restricted users cannot spoof ?branchId=
+    const stats = await svc().getStatistics(effectiveBranchScope(req) || req.user?.branchId);
     res.json({ success: true, data: stats });
   })
 );
@@ -86,7 +103,11 @@ router.get(
   '/phase/:phase',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const data = await svc().getByPhase(req.params.phase, req.query.branchId || req.user?.branchId);
+    // W1150 — effectiveBranchScope first: restricted users cannot spoof ?branchId=
+    const data = await svc().getByPhase(
+      req.params.phase,
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data, total: data.length });
   })
 );
@@ -99,6 +120,8 @@ router.get(
     const result = await svc().getByTherapist(req.params.therapistId, {
       page: parseInt(req.query.page, 10) || 1,
       limit: Math.min(parseInt(req.query.limit, 10) || 20, 100),
+      // W1150 — restricted callers only see their own branch's episodes
+      branchId: effectiveBranchScope(req),
     });
     res.json({ success: true, ...result });
   })
@@ -131,12 +154,12 @@ router.get(
 // Single resource routes
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** GET /:id — حلقة واحدة */
+/** GET /:episodeId — حلقة واحدة */
 router.get(
-  '/:id',
+  '/:episodeId',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const episode = await svc().getById(req.params.id, {
+    const episode = await svc().getById(req.params.episodeId, {
       populate: [
         {
           path: 'beneficiaryId',
@@ -162,14 +185,14 @@ router.post(
   })
 );
 
-/** PUT /:id — تحديث بيانات الحلقة */
+/** PUT /:episodeId — تحديث بيانات الحلقة */
 router.put(
-  '/:id',
+  '/:episodeId',
   requireDomain,
   validate(validateUpdateEpisode),
   asyncHandler(async (req, res) => {
     const context = { userId: req.user?._id };
-    const updated = await svc().update(req.params.id, req.body, context);
+    const updated = await svc().update(req.params.episodeId, req.body, context);
     res.json({ success: true, data: updated });
   })
 );
@@ -178,43 +201,43 @@ router.put(
 // Workflow transitions
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** POST /:id/advance-phase — تقدم مرحلة العلاج */
+/** POST /:episodeId/advance-phase — تقدم مرحلة العلاج */
 router.post(
-  '/:id/advance-phase',
+  '/:episodeId/advance-phase',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const result = await svc().advancePhase(req.params.id, req.user?._id);
+    const result = await svc().advancePhase(req.params.episodeId, req.user?._id);
     res.json({ success: true, data: result });
   })
 );
 
-/** POST /:id/suspend — تعليق الحلقة */
+/** POST /:episodeId/suspend — تعليق الحلقة */
 router.post(
-  '/:id/suspend',
+  '/:episodeId/suspend',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const result = await svc().suspendEpisode(req.params.id, req.body.reason, req.user?._id);
+    const result = await svc().suspendEpisode(req.params.episodeId, req.body.reason, req.user?._id);
     res.json({ success: true, data: result });
   })
 );
 
-/** POST /:id/resume — استئناف الحلقة */
+/** POST /:episodeId/resume — استئناف الحلقة */
 router.post(
-  '/:id/resume',
+  '/:episodeId/resume',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const result = await svc().resumeEpisode(req.params.id, req.user?._id);
+    const result = await svc().resumeEpisode(req.params.episodeId, req.user?._id);
     res.json({ success: true, data: result });
   })
 );
 
-/** POST /:id/discharge — إنهاء الحلقة وخروج المستفيد */
+/** POST /:episodeId/discharge — إنهاء الحلقة وخروج المستفيد */
 router.post(
-  '/:id/discharge',
+  '/:episodeId/discharge',
   requireDomain,
   validate(validateDischarge),
   asyncHandler(async (req, res) => {
-    const result = await svc().dischargeEpisode(req.params.id, {
+    const result = await svc().dischargeEpisode(req.params.episodeId, {
       ...req.body,
       dischargedBy: req.user?._id,
     });
@@ -226,23 +249,23 @@ router.post(
 // Care team management
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** POST /:id/team — إضافة عضو للفريق العلاجي */
+/** POST /:episodeId/team — إضافة عضو للفريق العلاجي */
 router.post(
-  '/:id/team',
+  '/:episodeId/team',
   requireDomain,
   validate(validateAddTeamMember),
   asyncHandler(async (req, res) => {
-    const result = await svc().addTeamMember(req.params.id, req.body);
+    const result = await svc().addTeamMember(req.params.episodeId, req.body);
     res.json({ success: true, data: result });
   })
 );
 
-/** DELETE /:id/team/:userId — إزالة عضو من الفريق */
+/** DELETE /:episodeId/team/:userId — إزالة عضو من الفريق */
 router.delete(
-  '/:id/team/:userId',
+  '/:episodeId/team/:userId',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const result = await svc().removeTeamMember(req.params.id, req.params.userId);
+    const result = await svc().removeTeamMember(req.params.episodeId, req.params.userId);
     res.json({ success: true, data: result });
   })
 );
@@ -251,13 +274,13 @@ router.delete(
 // Clinical Summary — ملخص سريري شامل للحلقة (Dashboard-ready)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** GET /:id/summary — ملخص الحلقة: تقييمات + جلسات + خطط + أهداف */
+/** GET /:episodeId/summary — ملخص الحلقة: تقييمات + جلسات + خطط + أهداف */
 router.get(
-  '/:id/summary',
+  '/:episodeId/summary',
   requireDomain,
   asyncHandler(async (req, res) => {
     const mongoose = require('mongoose');
-    const episodeId = req.params.id;
+    const episodeId = req.params.episodeId;
 
     if (!mongoose.isValidObjectId(episodeId)) {
       return res.status(400).json({ success: false, message: 'معرّف الحلقة غير صالح' });

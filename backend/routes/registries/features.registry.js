@@ -68,6 +68,7 @@ module.exports = function registerFeatureRoutes(
   const medicationReconciliationRoutes = safeRequire('../routes/medication-reconciliation.routes');
   const infectionSurveillanceRoutes = safeRequire('../routes/infection-surveillance.routes');
   const biomedicalWasteRoutes = safeRequire('../routes/biomedical-waste.routes'); // W1123
+  const staffHealthRoutes = safeRequire('../routes/staff-health.routes'); // W1125
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -214,6 +215,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'infection-surveillance', infectionSurveillanceRoutes, authenticate);
   // W1123: Biomedical / clinical waste cradle-to-grave (CBAHI + GAMEP/MOH) — generate→store→collect→dispose
   dualMountAuth(app, 'biomedical-waste', biomedicalWasteRoutes, authenticate);
+  // W1125: Staff occupational health (CBAHI) — immunization/TB/fitness/exposure/fit-test (confidential)
+  dualMountAuth(app, 'staff-health', staffHealthRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

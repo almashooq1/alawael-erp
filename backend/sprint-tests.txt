@@ -783,3 +783,5 @@ __tests__/operational-alerts-capa-calibration-wave1121.test.js
 __tests__/biomedical-waste-wave1123.test.js
 __tests__/biomedical-waste-behavioral-wave1123.test.js
 __tests__/biomedical-waste-storage-overdue-rule-wave1124.test.js
+__tests__/staff-health-wave1125.test.js
+__tests__/staff-health-behavioral-wave1125.test.js

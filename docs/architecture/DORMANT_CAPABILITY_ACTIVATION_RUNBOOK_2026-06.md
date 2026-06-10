@@ -44,6 +44,8 @@ to get value from reporting + quality + incident emails in one move.
 
 | **modelEventBridge** (PR #283, env `ENABLE_MODEL_EVENT_BRIDGE`) | `ENABLE_MODEL_EVENT_BRIDGE=true` | OFF | Activates **21 model→event mappings** at once (HR hire/terminate/leave/salary · finance invoice/payment/expense/payroll · medical record/therapy/prescription/risk · attendance check-in/out · notification delivery_failed). On every matching `.save()` it publishes the domain event → `crossModuleSubscribers` fire notifications + persist to the EventStore | **Emits notifications** (to staff/family via `notification.send`) + persists events; no NEW DB writes in the subscriber path (audited) | email/SMS channel (for the notifications to actually deliver) |
 
+| **Smart-Alerts engine** (Phase 11 + W1006–W1141) | `ALERTS_ENGINE_ENABLED=true` (optional `ALERTS_ENGINE_INTERVAL_MS`, default 5 min) | **OFF** | Starts the `AlertsScheduler` tick that runs **all 32 rules** (`alerts/rules/*`) every 5 min and upserts org-scoped `Alert` rows by `(ruleId,key)` → `/api/v1/dashboards/alerts`. Without it **NO new alerts are generated** (the read-only triage routes still work, so operators can view *existing* alerts). Covers clinical / financial / **operational** (facility-PPM, maintenance-WO, vehicle-docs, contract, inventory-low-stock, PO-overdue) / **quality** (CAPA, calibration, supplier-SCAR) / **compliance** (document, PDPL, training) / hr (credential, employment-contract) signals | **Creates** `Alert` rows; routes notifications by `(category,severity)` via `recipients.js` (in_app + email) | email/SMS channel for the notification side (dashboard works without) |
+
 > Always-on (no flag, shipped this session): **W941/W974** unified the quality event
 > bus so audit/quality events reach the email notification router. These need only
 > the email secret to actually send.
@@ -74,6 +76,14 @@ to get value from reporting + quality + incident emails in one move.
    paid, or one attendance check-in) and confirm the corresponding notification fires
    + an EventStore entry appears — then watch the notification volume for one cycle
    before considering it settled. Reversible like the rest (unset + restart).
+8. **`ALERTS_ENGINE_ENABLED`** — read-mostly + low blast radius (it only *creates*
+   `Alert` rows + sends category-routed notifications; no clinical/financial state
+   change). Safe to enable early. Set the email channel first if you want the
+   notification side; the `/api/v1/dashboards/alerts` dashboard works regardless.
+   Verify the boot log `[SmartAlerts] ✓ engine started — <N> rules` appears, then
+   on the next 5-min tick check that `Alert` rows materialise for any currently-true
+   condition (e.g. an overdue facility asset or an over-budget budget). **This is
+   what makes the whole alerts dashboard live — without it the 32 rules never run.**
 
 Each is independently reversible: unset the flag + `pm2 restart --update-env`.
 

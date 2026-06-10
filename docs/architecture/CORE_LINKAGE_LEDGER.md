@@ -153,6 +153,13 @@ now on the `/api/v1/dashboards/alerts` dashboard.** Newer rules use the
 **self-loading pattern** (`ctx.models.X || require('../../models/.../X')`) to avoid
 editing the app.js model loader (a parallel-work hot zone).
 
+> ⚠️ **The whole engine is env-gated `ALERTS_ENGINE_ENABLED` (default OFF).** The
+> `AlertsScheduler` 5-min tick only runs the 32 rules when that flag is set; the
+> read-only triage routes work regardless, so the dashboard shows *existing* alerts
+> but **no new ones are generated until an operator flips it.** Activation steps are
+> in `DORMANT_CAPABILITY_ACTIVATION_RUNBOOK_2026-06.md` (low blast radius — it only
+> creates `Alert` rows + category-routed notifications).
+
 > **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
 > per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →
 > `dddCrossModuleSubscribers`). **Org/operational** events (facilities, inventory,

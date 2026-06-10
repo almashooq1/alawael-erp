@@ -53,9 +53,9 @@ describe('domains/behavior/routes/behavior.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (3)', () => {
+  test('has local dependencies (5)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(3);
+    expect(locals.length).toBe(5);
   });
 
   test('has module.exports', () => {

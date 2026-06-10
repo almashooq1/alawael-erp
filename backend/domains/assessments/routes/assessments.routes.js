@@ -11,11 +11,24 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1155 — close the assessment-keyed :id gap + list/dashboard branch scoping:
+//   - :id renamed :assessmentId so the ownership hook actually fires
+//   - list + dashboard pass effectiveBranchScope(req) (ignores ?branchId= spoofing)
 const {
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'assessmentId',
+  branchScopedResourceParam({
+    modelName: 'ClinicalAssessment',
+    label: 'assessment',
+    loadModel: () => require('../models/ClinicalAssessment'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const {
   validateCreateAssessment,
@@ -61,6 +74,8 @@ router.get(
       beneficiary: beneficiary || beneficiaryId,
       category: category || type,
       status,
+      // W1155 — restricted callers are pinned to their own branch
+      branchId: effectiveBranchScope(req),
     };
     const { data, total } = await assessmentsService.listAssessments(filter, {
       limit: Number(limit),
@@ -76,7 +91,11 @@ router.get(
   requireService,
   asyncHandler(async (req, res) => {
     const { from, to } = req.query;
-    const stats = await assessmentsService.getDashboard({ from, to });
+    const stats = await assessmentsService.getDashboard({
+      from,
+      to,
+      branchId: effectiveBranchScope(req),
+    });
     res.json({ success: true, data: stats });
   })
 );
@@ -98,33 +117,36 @@ router.get(
   })
 );
 
-/* ─── GET /assessments/:id — Single assessment ───────────────────────────── */
+/* ─── GET /assessments/:assessmentId — Single assessment ─────────────────── */
 router.get(
-  '/:id',
+  '/:assessmentId',
   requireService,
   asyncHandler(async (req, res) => {
-    const assessment = await assessmentsService.getAssessmentById(req.params.id);
+    const assessment = await assessmentsService.getAssessmentById(req.params.assessmentId);
     res.json({ success: true, data: assessment });
   })
 );
 
-/* ─── PUT /assessments/:id — Update assessment ───────────────────────────── */
+/* ─── PUT /assessments/:assessmentId — Update assessment ─────────────────── */
 router.put(
-  '/:id',
+  '/:assessmentId',
   requireService,
   validate(validateUpdateAssessment),
   asyncHandler(async (req, res) => {
-    const assessment = await assessmentsService.updateAssessment(req.params.id, req.body);
+    const assessment = await assessmentsService.updateAssessment(req.params.assessmentId, req.body);
     res.json({ success: true, data: assessment });
   })
 );
 
-/* ─── PUT /assessments/:id/complete — Complete assessment ────────────────── */
+/* ─── PUT /assessments/:assessmentId/complete — Complete assessment ──────── */
 router.put(
-  '/:id/complete',
+  '/:assessmentId/complete',
   requireService,
   asyncHandler(async (req, res) => {
-    const assessment = await assessmentsService.completeAssessment(req.params.id, req.body);
+    const assessment = await assessmentsService.completeAssessment(
+      req.params.assessmentId,
+      req.body
+    );
     res.json({ success: true, data: assessment });
   })
 );

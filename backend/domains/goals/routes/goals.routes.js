@@ -11,11 +11,24 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1155 — close the goal-keyed :id gap + list branch scoping:
+//   - :id renamed :goalId so the ownership hook actually fires
+//   - list pins restricted callers via effectiveBranchScope(req)
 const {
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'goalId',
+  branchScopedResourceParam({
+    modelName: 'TherapeuticGoal',
+    label: 'goal',
+    loadModel: () => require('../models/TherapeuticGoal'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const mongoose = require('mongoose');
 const { TherapeuticGoal } = require('../models/TherapeuticGoal');
@@ -92,6 +105,9 @@ router.get(
     if (carePlanId && mongoose.Types.ObjectId.isValid(carePlanId)) filter.carePlanId = carePlanId;
     if (status) filter.status = status;
     if (type) filter.type = type;
+    // W1155 — restricted callers are pinned to their own branch
+    const scopedBranchId = effectiveBranchScope(req);
+    if (scopedBranchId) filter.branchId = scopedBranchId;
 
     const skip = (Number(page) - 1) * Number(limit);
     const [goals, total] = await Promise.all([
@@ -110,31 +126,31 @@ router.get(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// GET /goals/:id — get single goal
-// ═══════════════════════════════════════════════════════════════════════════════
+// GET /goals/:goalId — get single goal
+// ═════════════════════════════════════════════════════════════════════════════
 router.get(
-  '/goals/:id',
+  '/goals/:goalId',
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findById(req.params.id).lean();
+    const goal = await TherapeuticGoal.findById(req.params.goalId).lean();
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
     return res.json({ success: true, data: goal });
   })
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PUT /goals/:id — update goal
-// ═══════════════════════════════════════════════════════════════════════════════
+// PUT /goals/:goalId — update goal
+// ═════════════════════════════════════════════════════════════════════════════
 router.put(
-  '/goals/:id',
+  '/goals/:goalId',
   validate(validateUpdateGoal),
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.id, req.body, {
+    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.goalId, req.body, {
       returnDocument: 'after',
       runValidators: true,
     }).lean();
@@ -144,16 +160,16 @@ router.put(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// POST /goals/:id/progress — record progress entry
-// ═══════════════════════════════════════════════════════════════════════════════
+// POST /goals/:goalId/progress — record progress entry
+// ═════════════════════════════════════════════════════════════════════════════
 router.post(
-  '/goals/:id/progress',
+  '/goals/:goalId/progress',
   validate(validateLogProgress),
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findById(req.params.id);
+    const goal = await TherapeuticGoal.findById(req.params.goalId);
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
 
     goal.progressHistory = goal.progressHistory || [];

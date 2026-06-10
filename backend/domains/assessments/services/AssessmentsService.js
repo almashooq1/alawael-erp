@@ -86,6 +86,8 @@ class AssessmentsService extends BaseService {
     if (categoryValue) q.category = categoryValue;
     if (filter.status) q.status = filter.status;
     if (filter.therapist) q.therapist = filter.therapist;
+    // W1155 — cross-branch isolation: pin restricted callers to their branch
+    if (filter.branchId) q.branchId = filter.branchId;
     if (filter.from || filter.to) {
       q.assessmentDate = {};
       if (filter.from) q.assessmentDate.$gte = new Date(filter.from);
@@ -229,7 +231,7 @@ class AssessmentsService extends BaseService {
    * @param {Object} dateRange - { from, to }
    * @returns {Promise<Object>} مجموعة الإحصاءات
    */
-  async getDashboard({ from, to } = {}) {
+  async getDashboard({ from, to, branchId } = {}) {
     const ClinicalAssessment = mongoose.model('ClinicalAssessment');
     const dateFilter = {};
     if (from || to) {
@@ -237,6 +239,8 @@ class AssessmentsService extends BaseService {
       if (from) dateFilter.assessmentDate.$gte = new Date(from);
       if (to) dateFilter.assessmentDate.$lte = new Date(to);
     }
+    // W1155 — cross-branch isolation: dashboard stats scoped to caller's branch
+    if (branchId) dateFilter.branchId = branchId;
 
     const [total, byStatus, overdue, byTool] = await Promise.all([
       ClinicalAssessment.countDocuments(dateFilter),
@@ -247,6 +251,7 @@ class AssessmentsService extends BaseService {
       ClinicalAssessment.countDocuments({
         status: 'draft',
         assessmentDate: { $lt: new Date() },
+        ...(branchId && { branchId }),
       }),
       ClinicalAssessment.aggregate([
         { $match: dateFilter },

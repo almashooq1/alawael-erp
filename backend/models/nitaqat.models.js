@@ -129,8 +129,9 @@ wpsRecordSchema.index({ organization: 1, period: 1 }, { unique: true });
 // REMOVED DUPLICATE INDEX: wpsRecordSchema.index({ status: 1 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-wpsRecordSchema.pre('save', async function () {
+wpsRecordSchema.pre('save', async function (next) {
   require('../intelligence/money.lib').deriveHalalas(this, ['totalAmount', 'paidAmount']);
+  next();
 });
 
 const WpsRecord = mongoose.models.WpsRecord || mongoose.model('WpsRecord', wpsRecordSchema);
@@ -217,7 +218,7 @@ employmentContractSchema.index({ organization: 1, status: 1 });
 // Registered as `NitaqatEmploymentContract` to dodge the collision with
 // the canonical models/EmploymentContract.js + HR/EmploymentContract.js.
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-employmentContractSchema.pre('save', async function () {
+employmentContractSchema.pre('save', async function (next) {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'basicSalary',
     'housingAllowance',
@@ -225,6 +226,13 @@ employmentContractSchema.pre('save', async function () {
     'otherAllowances',
     'totalSalary',
   ]);
+  next();
+});
+
+// W1159 — denormalize branchId from the employee (single-org, multi-branch
+// platform → branch is the isolation axis even though the contract keys on org).
+employmentContractSchema.plugin(require('./HR/hrBranchScope.plugin'), {
+  employeeField: 'employee',
 });
 
 const EmploymentContract =

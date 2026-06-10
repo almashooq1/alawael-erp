@@ -19,8 +19,23 @@
 const express = require('express');
 const { authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../../middleware/assertBranchMatch');
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'hr_manager', 'manager'];
+
+// W269 — ADMIN_ROLES includes branch-restricted manager/hr_manager, so the
+// employee/evaluation-keyed routes must verify branch ownership. Returns true
+// (after sending 403) when denied, false when allowed.
+function denyCrossBranch(req, res, docBranchId, label) {
+  try {
+    assertBranchMatch(req, docBranchId, label);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
 
 /**
  * @param {{ logger, copilot, auditLogger? }} opts
@@ -31,6 +46,9 @@ function createHrCopilotRouter({ logger, copilot, auditLogger = null } = {}) {
   }
 
   const router = express.Router();
+
+  // W269 — populate req.branchScope so the per-employee gates below enforce.
+  router.use(requireBranchAccess);
 
   // Lazy model loaders — degrade if a model isn't available.
   const loaders = {};
@@ -77,6 +95,7 @@ function createHrCopilotRouter({ logger, copilot, auditLogger = null } = {}) {
 
       const emp = await Employee.findById(req.params.employeeId).lean();
       if (!emp) return res.status(404).json({ success: false, message: 'employee not found' });
+      if (denyCrossBranch(req, res, emp.branch_id, 'employee')) return; // W269
 
       // Build the input — pass through the body-supplied attendance/review
       // when the route caller has them in hand. Otherwise the copilot
@@ -119,6 +138,7 @@ function createHrCopilotRouter({ logger, copilot, auditLogger = null } = {}) {
         const Employee = loaders.Employee;
         const emp = Employee ? await Employee.findById(employeeId).lean() : null;
         if (!emp) return res.status(404).json({ success: false, message: 'employee not found' });
+        if (denyCrossBranch(req, res, emp.branch_id, 'employee')) return; // W269
 
         const result = await copilot.draftLetter({
           kind,
@@ -175,6 +195,7 @@ function createHrCopilotRouter({ logger, copilot, auditLogger = null } = {}) {
       }
       const ev = await PerformanceEvaluation.findById(req.params.evaluationId).lean();
       if (!ev) return res.status(404).json({ success: false, message: 'evaluation not found' });
+      if (denyCrossBranch(req, res, ev.branchId, 'performance evaluation')) return; // W269
 
       const result = await copilot.suggestImprovements({ evaluation: ev });
       await audit('hr.copilot.suggest', req, {

@@ -1493,6 +1493,9 @@ on:
       - 'backend/__tests__/assessment-goal-provenance-behavioral-wave1151.test.js'
       - 'backend/__tests__/assessment-goal-provenance-wave1151.test.js'
       - 'backend/__tests__/care-plans-sessions-branch-isolation-wave1152.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assessment-measure-bridge-behavioral-wave1153.test.js'
+      - 'backend/__tests__/assessment-measure-bridge-wave1153.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2969,6 +2972,9 @@ on:
       - 'backend/__tests__/assessment-goal-provenance-behavioral-wave1151.test.js'
       - 'backend/__tests__/assessment-goal-provenance-wave1151.test.js'
       - 'backend/__tests__/care-plans-sessions-branch-isolation-wave1152.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assessment-measure-bridge-behavioral-wave1153.test.js'
+      - 'backend/__tests__/assessment-measure-bridge-wave1153.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

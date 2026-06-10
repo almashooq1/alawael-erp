@@ -39,6 +39,8 @@ __tests__/assessment-goal-provenance-behavioral-wave1151.test.js
 __tests__/assessment-goal-provenance-wave1151.test.js
 __tests__/assessment-insight-behavioral-wave564.test.js
 __tests__/assessment-insight-wave563.test.js
+__tests__/assessment-measure-bridge-behavioral-wave1153.test.js
+__tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assistive-device-behavioral-wave359.test.js
 __tests__/assistive-device-routes-behavioral-wave860.test.js
 __tests__/assistive-device-wave359.test.js

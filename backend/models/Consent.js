@@ -86,6 +86,31 @@ const consentSchema = new mongoose.Schema(
 // Primary lookup: latest records of this type for this beneficiary.
 consentSchema.index({ beneficiaryId: 1, type: 1, grantedAt: -1 });
 
+// ── W1087: unified-core producer ───────────────────────────────────
+// Emit consent_record.granted for a NEW, non-revoked consent so the
+// PDPL/CBAHI consent grant lands on the beneficiary's core timeline.
+// Revocations are SET (revokedAt) on existing rows — those edits don't
+// fire here, and a row imported already-revoked is skipped. Non-callback (W483).
+consentSchema.pre('save', function flagConsentGranted() {
+  this.$__consentGranted = this.isNew && !this.revokedAt;
+});
+
+consentSchema.post('save', function emitConsentGranted(doc) {
+  if (!doc.$__consentGranted) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('consent-record', 'consent_record.granted', {
+      consentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      type: doc.type || null,
+      grantedAt: doc.grantedAt || doc.createdAt || new Date(),
+      expiresAt: doc.expiresAt || null,
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 const Consent = mongoose.models.Consent || mongoose.model('Consent', consentSchema);
 
 module.exports = { Consent, CONSENT_TYPES, REQUIRED_TYPES };

@@ -2788,6 +2788,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1087: consent granted → core timeline ─────────────────────────
+  // PDPL/CBAHI governance: every documented consent grant lands on the
+  // beneficiary's record so the consent trail is auditable on the timeline.
+  subscribers.push({
+    name: 'consent-record:granted → timeline:record',
+    pattern: 'consent-record.consent_record.granted',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'consent_record_granted',
+            category: 'administrative',
+            severity: 'success',
+            title: `Consent granted: ${event.payload.type || 'unspecified'}${
+              event.payload.expiresAt ? ' (expires)' : ''
+            }`,
+            title_ar: 'تم منح موافقة موثّقة باسم المستفيد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Consent timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

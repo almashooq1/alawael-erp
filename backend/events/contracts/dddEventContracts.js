@@ -1943,6 +1943,26 @@ const DAILY_COMM_LOG_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CONSENT_RECORD_EVENTS = {
+  CONSENT_GRANTED: {
+    domain: 'consent-record',
+    eventType: 'consent_record.granted',
+    version: 1,
+    description:
+      'منح موافقة موثّقة باسم المستفيد (PDPL/CBAHI) — A documented consent was granted for the beneficiary',
+    payload: {
+      consentId: 'string',
+      beneficiaryId: 'string',
+      type: 'string',
+      grantedAt: 'date',
+      expiresAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2016,6 +2036,7 @@ const DDD_CONTRACTS = {
   'session-attendance': SESSION_ATTENDANCE_EVENTS,
   'nps-response': NPS_RESPONSE_EVENTS,
   'daily-comm-log': DAILY_COMM_LOG_EVENTS,
+  'consent-record': CONSENT_RECORD_EVENTS,
 };
 
 /**
@@ -2105,6 +2126,7 @@ module.exports = {
   SESSION_ATTENDANCE_EVENTS,
   NPS_RESPONSE_EVENTS,
   DAILY_COMM_LOG_EVENTS,
+  CONSENT_RECORD_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -129,9 +129,9 @@ wpsRecordSchema.index({ organization: 1, period: 1 }, { unique: true });
 // REMOVED DUPLICATE INDEX: wpsRecordSchema.index({ status: 1 });
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-wpsRecordSchema.pre('save', async function (next) {
+// W978 canonical form: async hooks must NOT declare `next` (Mongoose-9 throw class).
+wpsRecordSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['totalAmount', 'paidAmount']);
-  next();
 });
 
 const WpsRecord = mongoose.models.WpsRecord || mongoose.model('WpsRecord', wpsRecordSchema);
@@ -218,7 +218,8 @@ employmentContractSchema.index({ organization: 1, status: 1 });
 // Registered as `NitaqatEmploymentContract` to dodge the collision with
 // the canonical models/EmploymentContract.js + HR/EmploymentContract.js.
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
-employmentContractSchema.pre('save', async function (next) {
+// W978 canonical form: async hooks must NOT declare `next` (Mongoose-9 throw class).
+employmentContractSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'basicSalary',
     'housingAllowance',
@@ -226,7 +227,6 @@ employmentContractSchema.pre('save', async function (next) {
     'otherAllowances',
     'totalSalary',
   ]);
-  next();
 });
 
 // W1159 — denormalize branchId from the employee (single-org, multi-branch

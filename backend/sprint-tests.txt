@@ -108,6 +108,8 @@ __tests__/hr-branch-scope-plugin-behavioral-wave1133.test.js
 __tests__/branch-isolation-hr-attendance-wave1137.test.js
 __tests__/hr-attendance-branch-isolation-behavioral-wave1137.test.js
 __tests__/backfill-hr-branchid-wave1139.test.js
+__tests__/hr-extensions-branch-isolation-wave1152.test.js
+__tests__/hr-extensions-branch-isolation-behavioral-wave1152.test.js
 __tests__/branch-isolation-hr-domain-wave1141.test.js
 __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
 __tests__/hr-route-branch-isolation-guard-wave1142.test.js
@@ -867,3 +869,4 @@ __tests__/core-routes-branch-isolation-wave1146.test.js
 __tests__/legacy-routes-branch-isolation-wave1148.test.js
 __tests__/episodes-domain-branch-isolation-wave1150.test.js
 __tests__/care-plans-sessions-branch-isolation-wave1152.test.js
+__tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js

@@ -302,6 +302,11 @@ therapeuticGoalSchema.index({ episodeId: 1, type: 1 });
 therapeuticGoalSchema.index({ assignedTo: 1, status: 1 });
 therapeuticGoalSchema.index({ status: 1, targetDate: 1 });
 therapeuticGoalSchema.index({ parentGoalId: 1 });
+// gap #4 (plan↔goal) — the canonical goal→plan edge is `carePlanId`
+// (ref UnifiedCarePlan). Index it so "which goals belong to this care plan?" is
+// fast. Sparse: not every goal is bound to a plan. The legacy CarePlan embedded-
+// goals[] subdoc structure is converged separately (ADR-026/040, owner-gated).
+therapeuticGoalSchema.index({ carePlanId: 1 }, { sparse: true });
 
 // ─── Virtuals ───────────────────────────────────────────────────────────────
 

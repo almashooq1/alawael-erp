@@ -1365,6 +1365,8 @@ on:
       - 'backend/__tests__/session-attendance-missed-core-linkage-wave1084.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/nps-response-recorded-core-linkage-wave1085.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/daily-comm-log-published-core-linkage-wave1086.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2713,6 +2715,8 @@ on:
       - 'backend/__tests__/session-attendance-missed-core-linkage-wave1084.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/nps-response-recorded-core-linkage-wave1085.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/daily-comm-log-published-core-linkage-wave1086.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

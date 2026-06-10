@@ -162,6 +162,7 @@ const careTimelineSchema = new mongoose.Schema(
         'red_flag_raised',
         'session_attendance_missed',
         'nps_response_recorded',
+        'daily_comm_log_published',
         // Family
         'family_contact',
         'family_meeting',

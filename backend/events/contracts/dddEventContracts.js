@@ -1921,6 +1921,28 @@ const NPS_RESPONSE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DAILY_COMM_LOG_EVENTS = {
+  DAILY_COMM_LOG_PUBLISHED: {
+    domain: 'daily-comm-log',
+    eventType: 'daily_comm_log.published',
+    version: 1,
+    description:
+      'نشر دفتر التواصل اليومي للمستفيد — A daily parent communication log was published',
+    payload: {
+      logId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      date: 'date',
+      mood: 'string',
+      engagement: 'string',
+      authorName: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1993,6 +2015,7 @@ const DDD_CONTRACTS = {
   'red-flag': RED_FLAG_EVENTS,
   'session-attendance': SESSION_ATTENDANCE_EVENTS,
   'nps-response': NPS_RESPONSE_EVENTS,
+  'daily-comm-log': DAILY_COMM_LOG_EVENTS,
 };
 
 /**
@@ -2081,6 +2104,7 @@ module.exports = {
   RED_FLAG_EVENTS,
   SESSION_ATTENDANCE_EVENTS,
   NPS_RESPONSE_EVENTS,
+  DAILY_COMM_LOG_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

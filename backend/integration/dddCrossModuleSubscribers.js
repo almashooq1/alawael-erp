@@ -2758,6 +2758,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1086: daily parent communication log → core timeline ──────────
+  // The most-touched parent-facing artifact in day rehab; surfacing each
+  // published log on the timeline gives a continuous family-engagement trail.
+  subscribers.push({
+    name: 'daily-comm-log:published → timeline:record',
+    pattern: 'daily-comm-log.daily_comm_log.published',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'daily_comm_log_published',
+            category: 'family',
+            severity: 'info',
+            title: `Daily communication log published${
+              event.payload.mood ? ` (mood: ${event.payload.mood})` : ''
+            }`,
+            title_ar: 'تم نشر دفتر التواصل اليومي للأسرة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DailyCommunicationLog timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

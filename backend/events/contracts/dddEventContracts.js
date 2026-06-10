@@ -1114,6 +1114,27 @@ const VACCINATION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1047 — Family home program completed → unified core.
+const FAMILY_HOME_PROGRAM_EVENTS = {
+  FAMILY_HOME_PROGRAM_COMPLETED: {
+    domain: 'family-home-program',
+    eventType: 'family_home_program.completed',
+    version: 1,
+    description: 'اكتمال برنامج منزلي أسري — Family home program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      title: 'string',
+      endDate: 'date',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1147,6 +1168,7 @@ const DDD_CONTRACTS = {
   'adaptive-sports': ADAPTIVE_SPORTS_EVENTS,
   iep: IEP_EVENTS,
   vaccination: VACCINATION_EVENTS,
+  'family-home-program': FAMILY_HOME_PROGRAM_EVENTS,
 };
 
 /**
@@ -1196,6 +1218,7 @@ module.exports = {
   ADAPTIVE_SPORTS_EVENTS,
   IEP_EVENTS,
   VACCINATION_EVENTS,
+  FAMILY_HOME_PROGRAM_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -1558,6 +1558,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Family home program completed → unified-core timeline (W1047) ──
+  // When a FamilyHomeProgram reaches status 'COMPLETED' the family has
+  // finished the prescribed home-practice plan — record it as a family
+  // milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'family-home-program:completed → timeline:record',
+    pattern: 'family-home-program.family_home_program.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const title = event.payload.title ? ` (${event.payload.title})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'family_home_program_completed',
+            category: 'family',
+            severity: 'success',
+            title: `Home program completed${title}`,
+            title_ar: 'اكتمل البرنامج المنزلي الأسري',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] FamilyHomeProgram timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

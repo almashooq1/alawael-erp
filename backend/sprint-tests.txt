@@ -753,3 +753,4 @@ __tests__/ai-report-sent-core-linkage-wave1043.test.js
 __tests__/adaptive-sports-completion-core-linkage-wave1044.test.js
 __tests__/iep-activation-core-linkage-wave1045.test.js
 __tests__/vaccination-administered-core-linkage-wave1046.test.js
+__tests__/family-home-program-completion-core-linkage-wave1047.test.js

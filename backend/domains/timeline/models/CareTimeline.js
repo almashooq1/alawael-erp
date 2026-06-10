@@ -121,6 +121,8 @@ const careTimelineSchema = new mongoose.Schema(
         'iep_activated',
         // Vaccination administered (W1046 — unified-core linkage)
         'vaccination_administered',
+        // Family home program completed (W1047 — unified-core linkage)
+        'family_home_program_completed',
         // Family
         'family_contact',
         'family_meeting',

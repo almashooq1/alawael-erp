@@ -63,12 +63,38 @@ const familyHomeProgramSchema = new mongoose.Schema(
 familyHomeProgramSchema.index({ beneficiaryId: 1, status: 1 });
 familyHomeProgramSchema.index({ branchId: 1, createdAt: -1 });
 
-familyHomeProgramSchema.pre('validate', function validateInvariants(next) {
+familyHomeProgramSchema.pre('validate', function validateInvariants() {
   if (this.endDate && this.startDate && this.endDate < this.startDate) {
     this.invalidate('endDate', 'endDate must be greater than or equal to startDate');
-    return next();
   }
-  return next();
+});
+
+// ── W1047: unified-core producer — family home program completed ──
+// When a FamilyHomeProgram reaches status 'COMPLETED', publish a domain event
+// so the cross-module subscriber records a family milestone on the
+// beneficiary's longitudinal CareTimeline. Non-callback hook style (W483-safe).
+familyHomeProgramSchema.pre('save', function () {
+  this.$__familyHomeProgramCompletedNow =
+    this.status === 'COMPLETED' && (this.isNew || this.isModified('status'));
+});
+
+familyHomeProgramSchema.post('save', function emitFamilyHomeProgramCompleted(doc) {
+  if (!doc || !doc.$__familyHomeProgramCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('family-home-program', 'family_home_program.completed', {
+        programId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        title: doc.title || null,
+        endDate: doc.endDate || doc.updatedAt || new Date(),
+        completedAt: doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
 });
 
 module.exports =

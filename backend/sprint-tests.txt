@@ -280,6 +280,7 @@ __tests__/gas-scale-builder-wave454.test.js
 __tests__/gas-snapshot-behavioral-wave455.test.js
 __tests__/gas-snapshot-wave455.test.js
 __tests__/gender-routing-wave476.test.js
+__tests__/goal-consolidation-readiness-script.test.js
 __tests__/goal-forecaster-service-wave430.test.js
 __tests__/goal-forecaster-wave429.test.js
 __tests__/goal-linkage-insights-wave237.test.js

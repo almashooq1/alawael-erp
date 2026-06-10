@@ -92,4 +92,8 @@ module.exports = [
   // Biomedical waste stored on-site past its WHO/CBAHI time limit
   // (links the W1123 waste system into the Alert sink). Self-loading.
   require('./biomedical-waste-storage-overdue'),
+
+  // ── W1126 — operational / occupational health (1) ───────────
+  // Staff occ-health surveillance overdue (links the W1125 system). Self-loading.
+  require('./staff-health-surveillance-overdue'),
 ];

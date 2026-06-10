@@ -823,3 +823,4 @@ __tests__/arvr-session-completed-core-linkage-wave1110.test.js
 __tests__/program-enrollment-activated-core-linkage-wave1111.test.js
 __tests__/family-communication-logged-core-linkage-wave1112.test.js
 __tests__/workflow-task-completed-core-linkage-wave1113.test.js
+__tests__/behavior-record-logged-core-linkage-wave1114.test.js

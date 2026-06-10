@@ -190,6 +190,7 @@ const careTimelineSchema = new mongoose.Schema(
         'program_enrollment_activated',
         'family_communication_logged',
         'workflow_task_completed',
+        'behavior_record_logged',
         // Family
         'family_contact',
         'family_meeting',

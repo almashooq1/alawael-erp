@@ -2535,6 +2535,30 @@ const WORKFLOW_TASK_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const BEHAVIOR_RECORD_EVENTS = {
+  BEHAVIOR_RECORD_LOGGED: {
+    domain: 'behavior-record',
+    eventType: 'behavior_record.logged',
+    version: 1,
+    description:
+      'تم تسجيل ملاحظة سلوكية (ABC) للمستفيد — A beneficiary behavior (ABC) record was logged',
+    payload: {
+      recordId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      behaviorPlanId: 'string',
+      reportedBy: 'string',
+      topography: 'string',
+      setting: 'string',
+      occurredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2635,6 +2659,7 @@ const DDD_CONTRACTS = {
   'program-enrollment': PROGRAM_ENROLLMENT_EVENTS,
   'family-communication': FAMILY_COMMUNICATION_EVENTS,
   'workflow-task': WORKFLOW_TASK_EVENTS,
+  'behavior-record': BEHAVIOR_RECORD_EVENTS,
 };
 
 /**
@@ -2747,6 +2772,7 @@ module.exports = {
   PROGRAM_ENROLLMENT_EVENTS,
   FAMILY_COMMUNICATION_EVENTS,
   WORKFLOW_TASK_EVENTS,
+  BEHAVIOR_RECORD_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

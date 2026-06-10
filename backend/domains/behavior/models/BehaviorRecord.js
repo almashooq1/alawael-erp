@@ -203,5 +203,31 @@ behaviorRecordSchema.index({ beneficiaryId: 1, occurredAt: -1 });
 behaviorRecordSchema.index({ 'behavior.topography': 1 });
 behaviorRecordSchema.index({ 'behavior.severity': 1, occurredAt: -1 });
 
+// ── W1114 — publish behavior_record.logged when a behavior (ABC) record is submitted ─
+behaviorRecordSchema.pre('save', function flagBehaviorRecordLogged() {
+  const becameSubmitted = (this.isNew || this.isModified('status')) && this.status === 'submitted';
+  this.$__behaviorRecordLogged = becameSubmitted;
+});
+
+behaviorRecordSchema.post('save', function emitBehaviorRecordLogged(doc) {
+  if (!doc.$__behaviorRecordLogged) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('behavior-record', 'behavior_record.logged', {
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.behaviorPlanId ? { behaviorPlanId: String(doc.behaviorPlanId) } : {}),
+      ...(doc.reportedBy ? { reportedBy: String(doc.reportedBy) } : {}),
+      ...(doc.behavior && doc.behavior.topography ? { topography: doc.behavior.topography } : {}),
+      ...(doc.setting ? { setting: doc.setting } : {}),
+      occurredAt: doc.occurredAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.BehaviorRecord || mongoose.model('BehaviorRecord', behaviorRecordSchema);

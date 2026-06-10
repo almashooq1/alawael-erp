@@ -156,6 +156,34 @@ CreativeArtsTherapySessionSchema.virtual('moodImproved').get(function () {
 CreativeArtsTherapySessionSchema.set('toJSON', { virtuals: true });
 CreativeArtsTherapySessionSchema.set('toObject', { virtuals: true });
 
+// ── W1057: unified-core linkage ───────────────────────────────────────
+// On completion (status → 'completed'), publish creative_arts_therapy.completed
+// so the cross-module subscriber records a clinical milestone on the
+// beneficiary's CareTimeline. NON-callback hooks only.
+CreativeArtsTherapySessionSchema.pre('save', function () {
+  this.$__creativeArtsCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+function emitCreativeArtsTherapyCompleted(doc) {
+  if (!doc || !doc.$__creativeArtsCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('creative-arts-therapy', 'creative_arts_therapy.completed', {
+      sessionId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      modality: doc.modality,
+      engagementLevel: doc.engagementLevel,
+      completedAt: doc.sessionDate || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+CreativeArtsTherapySessionSchema.post('save', emitCreativeArtsTherapyCompleted);
+
 module.exports =
   mongoose.models.CreativeArtsTherapySession ||
   mongoose.model('CreativeArtsTherapySession', CreativeArtsTherapySessionSchema);

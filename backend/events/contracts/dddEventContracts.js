@@ -1314,6 +1314,26 @@ const IQ_ASSESSMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CREATIVE_ARTS_THERAPY_EVENTS = {
+  CREATIVE_ARTS_THERAPY_COMPLETED: {
+    domain: 'creative-arts-therapy',
+    eventType: 'creative_arts_therapy.completed',
+    version: 1,
+    description: 'إكمال جلسة العلاج بالفنون الإبداعية — Creative arts therapy session completed',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      modality: 'string',
+      engagementLevel: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1357,6 +1377,7 @@ const DDD_CONTRACTS = {
   'instrumental-swallow-study': SWALLOW_STUDY_EVENTS,
   'crisis-incident': CRISIS_INCIDENT_EVENTS,
   'iq-assessment': IQ_ASSESSMENT_EVENTS,
+  'creative-arts-therapy': CREATIVE_ARTS_THERAPY_EVENTS,
 };
 
 /**
@@ -1416,6 +1437,7 @@ module.exports = {
   SWALLOW_STUDY_EVENTS,
   CRISIS_INCIDENT_EVENTS,
   IQ_ASSESSMENT_EVENTS,
+  CREATIVE_ARTS_THERAPY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

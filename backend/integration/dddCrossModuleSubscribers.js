@@ -1855,6 +1855,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1057: creative arts therapy session completed → core timeline ──
+  // When a music/art/drama/dance/play therapy session is completed, record it
+  // as a clinical milestone on the beneficiary's timeline.
+  subscribers.push({
+    name: 'creative-arts-therapy:completed → timeline:record',
+    pattern: 'creative-arts-therapy.creative_arts_therapy.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const m = event.payload.modality ? ` (${event.payload.modality})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'creative_arts_therapy_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Creative arts therapy session completed${m}`,
+            title_ar: 'اكتملت جلسة العلاج بالفنون الإبداعية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CreativeArtsTherapy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

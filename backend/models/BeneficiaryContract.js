@@ -90,6 +90,35 @@ const beneficiaryContractSchema = new mongoose.Schema(
 // sorted by expiry ascending (most urgent first).
 beneficiaryContractSchema.index({ beneficiaryId: 1, status: 1, endDate: 1 });
 
+// ── W1073: unified-core producer ───────────────────────────────────
+// Emit beneficiary-contract.activated when a service agreement moves to
+// 'active' so the per-beneficiary CareTimeline records the enrollment /
+// renewal anchor. Non-callback hook style (W483 gate): the global async
+// save plugin puts the whole hook chain in promise-adapter mode.
+beneficiaryContractSchema.pre('save', function flagContractActivated() {
+  this.$__contractActivatedNow =
+    this.status === 'active' && (this.isNew || this.isModified('status'));
+});
+
+beneficiaryContractSchema.post('save', function emitBeneficiaryContractActivated(doc) {
+  if (!doc.$__contractActivatedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('beneficiary-contract', 'beneficiary_contract.activated', {
+      contractId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      contractNumber: doc.contractNumber,
+      startDate: doc.startDate,
+      endDate: doc.endDate,
+      totalAmount: doc.totalAmount,
+      currency: doc.currency,
+      activatedAt: doc.signedAt || doc.updatedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 const BeneficiaryContract =
   mongoose.models.BeneficiaryContract ||
   mongoose.model('BeneficiaryContract', beneficiaryContractSchema);

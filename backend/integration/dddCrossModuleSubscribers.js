@@ -2346,6 +2346,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1073: service contract activated → core timeline ──────────────
+  // When a beneficiary's service agreement with the center moves to
+  // 'active', log it on the timeline as an administrative milestone
+  // (enrollment / renewal anchor).
+  subscribers.push({
+    name: 'beneficiary-contract:activated → timeline:record',
+    pattern: 'beneficiary-contract.beneficiary_contract.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const number = event.payload.contractNumber || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'service_contract_activated',
+            category: 'administrative',
+            severity: 'success',
+            title: `Service contract activated: ${number}`,
+            title_ar: 'تم تفعيل عقد الخدمة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] BeneficiaryContract timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

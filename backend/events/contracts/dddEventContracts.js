@@ -1643,6 +1643,28 @@ const PHYSIOTHERAPY_ASSESSMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const BENEFICIARY_CONTRACT_EVENTS = {
+  SERVICE_CONTRACT_ACTIVATED: {
+    domain: 'beneficiary-contract',
+    eventType: 'beneficiary_contract.activated',
+    version: 1,
+    description: 'تفعيل عقد خدمة المستفيد مع المركز — Beneficiary service contract activated',
+    payload: {
+      contractId: 'string',
+      beneficiaryId: 'string',
+      contractNumber: 'string',
+      startDate: 'date',
+      endDate: 'date',
+      totalAmount: 'number',
+      currency: 'string',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1702,6 +1724,7 @@ const DDD_CONTRACTS = {
   'disability-card': DISABILITY_CARD_EVENTS,
   portfolio: PORTFOLIO_EVENTS,
   'physiotherapy-assessment': PHYSIOTHERAPY_ASSESSMENT_EVENTS,
+  'beneficiary-contract': BENEFICIARY_CONTRACT_EVENTS,
 };
 
 /**
@@ -1777,6 +1800,7 @@ module.exports = {
   DISABILITY_CARD_EVENTS,
   PORTFOLIO_EVENTS,
   PHYSIOTHERAPY_ASSESSMENT_EVENTS,
+  BENEFICIARY_CONTRACT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

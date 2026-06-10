@@ -56,17 +56,18 @@ surfaces. Locked by drift guard
 
 ## Secondary findings (separate from mass-assignment — for follow-up)
 
-1. **Branch scope (W269 IDOR)** — Tier-1 update paths used
+1. **Branch scope (W269 IDOR)** — clinical paths used
    `findByIdAndUpdate(req.params.id, …)` with **no scope**, so an authed user in
-   branch A could edit a clinical record in branch B. **PARTIALLY FIXED:** the two
-   `therapist-extended` treatment-plan writes (CarePlan `PUT` + goals `PATCH`) are
-   now gated via route-level `requireBranchAccess` + pre-load +
-   `assertBeneficiaryInScope` (the proven `care-plans-admin` pattern; drift guard
-   `branch-isolation-treatment-plans-wave1119`). **Still open:** the
-   `therapist-extended` `GET /treatment-plans/:id` read-leak + `prescriptions` +
-   `tasks` + `hr-modules` update paths — each needs its model's scope shape
-   verified first (`Task` may carry no `branchId`; `ProfessionalDev` is
-   therapist-scoped, not beneficiary-scoped).
+   branch A could read/edit a clinical record in branch B. **FIXED — the entire
+   `therapist-extended` beneficiary-scoped surface (W1119):** treatment-plan `PUT`
+   - goals `PATCH` writes, the `GET /treatment-plans/:id` read-leak (gated _before_
+     loading PHI via `fetchScopedByBeneficiary`), and `prescriptions` `PUT` + `DELETE`
+     — all gated via route-level `requireBranchAccess` + `assertBeneficiaryInScope`
+     (the proven `care-plans-admin` pattern; drift guard
+     `branch-isolation-treatment-plans-wave1119`, 7 assertions). **Still open (a
+     different scope model — each needs its own analysis):** `professional-dev`
+     (therapist-scoped, not beneficiary), `tasks` (has `beneficiaryId` but is a
+     separate surface), `hr-modules` (employee/branch-scoped, not beneficiary).
 2. **Possible auth-bypass mount** — `therapist-extended` is mounted **both** via
    `dualMountAuth` (`_registry.js:661`) **and** plain `dualMount`
    (`clinical-therapy.registry.js:44`). Per the codebase's "never plain

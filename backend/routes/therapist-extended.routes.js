@@ -21,7 +21,10 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
+const {
+  assertBeneficiaryInScope,
+  fetchScopedByBeneficiary,
+} = require('../utils/beneficiaryBranchGate');
 
 // ── Model helpers (lazy) ─────────────────────────────────────────────────────
 function model(name, fallbackPath) {
@@ -154,11 +157,18 @@ router.post(
 
 router.get(
   '/treatment-plans/:planId',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = CarePlan();
     if (!M) return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
-    const plan = await M.findById(req.params.planId).lean();
-    if (!plan) return res.status(404).json({ success: false, message: 'Treatment plan not found' });
+    // W269 — gate on the plan's beneficiary BEFORE loading its PHI into memory.
+    // fetchScopedByBeneficiary reads only the beneficiary ref first, asserts
+    // branch scope, then loads the full doc only when in scope (uniform 404 so
+    // a foreign plan's existence isn't probable). No-op for cross-branch/tests.
+    const { doc: plan, denied } = await fetchScopedByBeneficiary(M, req.params.planId, req, res, {
+      lean: true,
+    });
+    if (denied) return;
     res.json({ success: true, data: plan });
   })
 );
@@ -301,8 +311,15 @@ router.post(
 
 router.put(
   '/prescriptions/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Prescription();
+    // W269 — gate via the prescription's beneficiary before mutating.
+    const existing = await M.findById(req.params.id).select('beneficiaryId').lean();
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'Prescription not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: stripUpdateMeta(req.body) },
@@ -315,8 +332,15 @@ router.put(
 
 router.delete(
   '/prescriptions/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Prescription();
+    // W269 — gate via the prescription's beneficiary before soft-deleting.
+    const existing = await M.findById(req.params.id).select('beneficiaryId').lean();
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'Prescription not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })

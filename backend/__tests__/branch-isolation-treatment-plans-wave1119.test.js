@@ -59,6 +59,16 @@ describe('W269 — therapist-extended treatment-plan writes are branch-gated', (
       SRC.match(
         /const denied = await assertBeneficiaryInScope[\s\S]{0,40}?if \(denied\) return;/g
       ) || [];
-    expect(denials.length).toBeGreaterThanOrEqual(2);
+    expect(denials.length).toBeGreaterThanOrEqual(4); // 2 treatment-plan writes + prescriptions PUT/DELETE
+  });
+
+  test('GET /treatment-plans/:id gates before loading PHI via fetchScopedByBeneficiary', () => {
+    expect(SRC).toMatch(/fetchScopedByBeneficiary/);
+    expect(SRC).toMatch(/fetchScopedByBeneficiary\(M, req\.params\.planId, req, res/);
+  });
+
+  test('prescriptions PUT + DELETE gate via the prescription beneficiaryId', () => {
+    const gates = SRC.match(/assertBeneficiaryInScope\(req, existing\.beneficiaryId, res\)/g) || [];
+    expect(gates.length).toBeGreaterThanOrEqual(2);
   });
 });

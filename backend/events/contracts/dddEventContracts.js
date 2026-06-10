@@ -1072,6 +1072,28 @@ const ADAPTIVE_SPORTS_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1045 — Individual Education Plan activation → unified core.
+const IEP_EVENTS = {
+  IEP_ACTIVATED: {
+    domain: 'iep',
+    eventType: 'iep.activated',
+    version: 1,
+    description:
+      'تفعيل الخطة التربوية الفردية — Individual Education Plan activated (signed & in effect)',
+    payload: {
+      iepId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      planType: 'string',
+      planYear: 'number',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1103,6 +1125,7 @@ const DDD_CONTRACTS = {
   'communication-aid': COMMUNICATION_AID_EVENTS,
   'ai-report': AI_REPORT_EVENTS,
   'adaptive-sports': ADAPTIVE_SPORTS_EVENTS,
+  iep: IEP_EVENTS,
 };
 
 /**
@@ -1150,6 +1173,7 @@ module.exports = {
   COMMUNICATION_AID_EVENTS,
   AI_REPORT_EVENTS,
   ADAPTIVE_SPORTS_EVENTS,
+  IEP_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

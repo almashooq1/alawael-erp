@@ -198,6 +198,33 @@ IEPSchema.path('__invariants').validate(function () {
 IEPSchema.set('toJSON', { virtuals: true });
 IEPSchema.set('toObject', { virtuals: true });
 
+// ── W1045: unified-core producer — IEP activated ──
+// When an IEP/IFSP reaches status 'active' (signed and in effect), publish a
+// domain event so the cross-module subscriber records a milestone on the
+// beneficiary's longitudinal CareTimeline. Non-callback hook style (W483-safe).
+IEPSchema.pre('save', function () {
+  this.$__iepActivatedNow = this.status === 'active' && (this.isNew || this.isModified('status'));
+});
+
+IEPSchema.post('save', function emitIepActivated(doc) {
+  if (!doc || !doc.$__iepActivatedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('iep', 'iep.activated', {
+        iepId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        planType: doc.planType || 'IEP',
+        planYear: typeof doc.planYear === 'number' ? doc.planYear : null,
+        activatedAt: doc.effectiveStartDate || doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.IndividualEducationPlan || mongoose.model('IndividualEducationPlan', IEPSchema);
 

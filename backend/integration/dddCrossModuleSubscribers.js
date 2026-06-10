@@ -1498,6 +1498,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Individual Education Plan activated → unified-core timeline (W1045) ──
+  // When an IEP/IFSP is signed and moves to status 'active', record the
+  // activation as a clinical milestone on the longitudinal record so the care
+  // team sees the education plan that is now in effect for the beneficiary.
+  subscribers.push({
+    name: 'iep:activated → timeline:record',
+    pattern: 'iep.iep.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const pt = event.payload.planType || 'IEP';
+          const yr = event.payload.planYear ? ` ${event.payload.planYear}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'iep_activated',
+            category: 'clinical',
+            severity: 'success',
+            title: `Education plan activated (${pt}${yr})`,
+            title_ar: 'تم تفعيل الخطة التربوية الفردية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] IEP timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -117,6 +117,8 @@ const careTimelineSchema = new mongoose.Schema(
         'ai_report_sent',
         // Adaptive sports program completed (W1044 — unified-core linkage)
         'adaptive_sports_completed',
+        // Individual Education Plan activated (W1045 — unified-core linkage)
+        'iep_activated',
         // Family
         'family_contact',
         'family_meeting',

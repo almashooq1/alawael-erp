@@ -751,3 +751,4 @@ __tests__/behavior-plan-completion-core-linkage-wave1032.test.js
 __tests__/communication-aid-activation-core-linkage-wave1042.test.js
 __tests__/ai-report-sent-core-linkage-wave1043.test.js
 __tests__/adaptive-sports-completion-core-linkage-wave1044.test.js
+__tests__/iep-activation-core-linkage-wave1045.test.js

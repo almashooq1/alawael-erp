@@ -55,7 +55,8 @@ describe('domains/group-therapy/routes/group-therapy.routes.js', () => {
 
   test('has local dependencies (3)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(3);
+    // W1157: + TherapyGroup + GroupSession loadModel fallbacks
+    expect(locals.length).toBe(5);
   });
 
   test('has module.exports', () => {

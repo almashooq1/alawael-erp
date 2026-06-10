@@ -4,6 +4,30 @@
 
 const express = require('express');
 const router = express.Router();
+// W1157 — cross-branch isolation (W269 doctrine). This file previously had NO
+// guards at all: no beneficiaryId hook, no body guard, and 6 session-keyed :id
+// routes (get/start/complete/cancel/quality/satisfaction) loaded TeleSession
+// with NO branch ownership check; the list was unscoped and the dashboard
+// trusted raw ?branchId= spoofing. Now:
+//   - beneficiaryId param hook + body guard (W1140 pattern)
+//   - /:id → /:teleSessionId so the ownership hook fires before handlers
+//   - list + dashboard pinned via effectiveBranchScope(req)
+const {
+  branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'teleSessionId',
+  branchScopedResourceParam({
+    modelName: 'TeleSession',
+    label: 'tele-rehab session',
+    loadModel: () => require('../models/TeleSession'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { teleRehabService } = require('../services/TeleRehabService');
 const {
   validateScheduleSession,
@@ -46,6 +70,8 @@ router.get(
       to: req.query.to,
       page: req.query.page,
       limit: req.query.limit,
+      // W1157 — restricted callers are pinned to their own branch
+      branchId: effectiveBranchScope(req),
     });
     res.json({ success: true, ...result });
   })
@@ -55,64 +81,67 @@ router.get(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.getDashboard(req.query.branchId || req.user?.branchId);
+    // W1157 — effectiveBranchScope ignores ?branchId= spoofing for restricted callers
+    const data = await teleRehabService.getDashboard(
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );
 
 // Get single
 router.get(
-  '/:id',
+  '/:teleSessionId',
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.getSession(req.params.id);
+    const data = await teleRehabService.getSession(req.params.teleSessionId);
     res.json({ success: true, data });
   })
 );
 
 // Start
 router.put(
-  '/:id/start',
+  '/:teleSessionId/start',
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.startSession(req.params.id);
+    const data = await teleRehabService.startSession(req.params.teleSessionId);
     res.json({ success: true, data });
   })
 );
 
 // Complete
 router.put(
-  '/:id/complete',
+  '/:teleSessionId/complete',
   validate(validateCompleteSession),
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.completeSession(req.params.id, req.body);
+    const data = await teleRehabService.completeSession(req.params.teleSessionId, req.body);
     res.json({ success: true, data });
   })
 );
 
 // Cancel
 router.put(
-  '/:id/cancel',
+  '/:teleSessionId/cancel',
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.cancelSession(req.params.id, req.body.reason);
+    const data = await teleRehabService.cancelSession(req.params.teleSessionId, req.body.reason);
     res.json({ success: true, data });
   })
 );
 
 // Connection quality
 router.put(
-  '/:id/quality',
+  '/:teleSessionId/quality',
   validate(validateRecordQuality),
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.recordQuality(req.params.id, req.body);
+    const data = await teleRehabService.recordQuality(req.params.teleSessionId, req.body);
     res.json({ success: true, data });
   })
 );
 
 // Satisfaction
 router.put(
-  '/:id/satisfaction',
+  '/:teleSessionId/satisfaction',
   validate(validateSubmitSatisfaction),
   asyncHandler(async (req, res) => {
-    const data = await teleRehabService.submitSatisfaction(req.params.id, req.body);
+    const data = await teleRehabService.submitSatisfaction(req.params.teleSessionId, req.body);
     res.json({ success: true, data });
   })
 );

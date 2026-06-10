@@ -872,3 +872,5 @@ __tests__/legacy-routes-branch-isolation-wave1148.test.js
 __tests__/episodes-domain-branch-isolation-wave1150.test.js
 __tests__/care-plans-sessions-branch-isolation-wave1152.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
+__tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js
+__tests__/plan-goal-linkage-behavioral-wave1154.test.js

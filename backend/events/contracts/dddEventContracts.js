@@ -1963,6 +1963,29 @@ const CONSENT_RECORD_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const RISK_SNAPSHOT_EVENTS = {
+  RISK_SNAPSHOT_ESCALATED: {
+    domain: 'risk-snapshot',
+    eventType: 'risk_snapshot.escalated',
+    version: 1,
+    description:
+      'ارتفاع مستوى المخاطر الإكلينيكية للمستفيد في لقطة المخاطر — The beneficiary risk tier escalated in a snapshot',
+    payload: {
+      snapshotId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      overallTier: 'string',
+      previousTier: 'string',
+      tierDelta: 'string',
+      overallScore: 'number',
+      computedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2037,6 +2060,7 @@ const DDD_CONTRACTS = {
   'nps-response': NPS_RESPONSE_EVENTS,
   'daily-comm-log': DAILY_COMM_LOG_EVENTS,
   'consent-record': CONSENT_RECORD_EVENTS,
+  'risk-snapshot': RISK_SNAPSHOT_EVENTS,
 };
 
 /**
@@ -2127,6 +2151,7 @@ module.exports = {
   NPS_RESPONSE_EVENTS,
   DAILY_COMM_LOG_EVENTS,
   CONSENT_RECORD_EVENTS,
+  RISK_SNAPSHOT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

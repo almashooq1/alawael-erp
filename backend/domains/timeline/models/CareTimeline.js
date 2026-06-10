@@ -164,6 +164,7 @@ const careTimelineSchema = new mongoose.Schema(
         'nps_response_recorded',
         'daily_comm_log_published',
         'consent_record_granted',
+        'risk_snapshot_escalated',
         // Family
         'family_contact',
         'family_meeting',

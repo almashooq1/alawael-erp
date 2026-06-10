@@ -2817,6 +2817,43 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1088: clinical risk escalation → core timeline ────────────────
+  // The daily risk sweeper persists a snapshot per beneficiary; only an
+  // ESCALATION (or a first high/critical reading) reaches the timeline so
+  // the clinical risk trail stays signal-rich. critical→critical, high→error.
+  subscribers.push({
+    name: 'risk-snapshot:escalated → timeline:record',
+    pattern: 'risk-snapshot.risk_snapshot.escalated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev =
+            event.payload.overallTier === 'critical'
+              ? 'critical'
+              : event.payload.overallTier === 'high'
+                ? 'error'
+                : 'warning';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'risk_snapshot_escalated',
+            category: 'clinical',
+            severity: sev,
+            title: `Risk escalated: ${event.payload.previousTier || 'none'} → ${
+              event.payload.overallTier || 'unknown'
+            }`,
+            title_ar: 'ارتفع مستوى المخاطر الإكلينيكية للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] RiskSnapshot timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

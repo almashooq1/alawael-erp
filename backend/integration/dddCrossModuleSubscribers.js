@@ -2942,6 +2942,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1092 — pickup authorization created for the beneficiary → unified core timeline
+  subscribers.push({
+    name: 'pickup-authorization:requested → timeline:record',
+    pattern: 'pickup-authorization.pickup_authorization.requested',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'pickup_authorization_requested',
+            category: 'administrative',
+            severity: 'info',
+            title: `Pickup authorization: ${event.payload.pickupPersonName || 'person'} (${
+              event.payload.pickupPersonRelationship || 'relationship'
+            })`,
+            title_ar: 'تم إنشاء تصريح استلام للمستفيد من قبل شخص مفوّض',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PickupAuthorization timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

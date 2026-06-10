@@ -2051,6 +2051,28 @@ const WAITING_LIST_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PICKUP_AUTHORIZATION_EVENTS = {
+  PICKUP_AUTHORIZATION_REQUESTED: {
+    domain: 'pickup-authorization',
+    eventType: 'pickup_authorization.requested',
+    version: 1,
+    description:
+      'إنشاء تصريح استلام للمستفيد من قبل شخص مفوّض — A pickup authorization was created for the beneficiary',
+    payload: {
+      authorizationId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      pickupPersonName: 'string',
+      pickupPersonRelationship: 'string',
+      validFrom: 'date',
+      validUntil: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2129,6 +2151,7 @@ const DDD_CONTRACTS = {
   'progress-report': PROGRESS_REPORT_EVENTS,
   'day-attendance': DAY_ATTENDANCE_EVENTS,
   'waiting-list': WAITING_LIST_EVENTS,
+  'pickup-authorization': PICKUP_AUTHORIZATION_EVENTS,
 };
 
 /**
@@ -2223,6 +2246,7 @@ module.exports = {
   PROGRESS_REPORT_EVENTS,
   DAY_ATTENDANCE_EVENTS,
   WAITING_LIST_EVENTS,
+  PICKUP_AUTHORIZATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

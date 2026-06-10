@@ -139,7 +139,12 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Maintenance — work order overdue | `MaintenanceWorkOrder` | rule `maintenance-work-order-overdue` → `Alert` | ✅ **W1007** — open WO past `scheduledDate`; critical-priority → critical |
 | Fleet — vehicle document expiry | `Vehicle` | rule `vehicle-document-expiry` → `Alert` (platform-scoped) | ✅ **W1008** — active vehicle, expired registration/insurance/inspection; registration\|insurance → critical |
 | Contracts — service/vendor expired | `Contract` | rule `contract-expired` → `Alert` | ✅ **W1009** — ACTIVE contract past `endDate` (lapsed without renewal/close) |
-| Inventory low-stock | — | (add a `category:'operational'` rule) | Open — needs an `InventoryItem`+`InventoryStock` join (current qty is a separate model), so **not** a clean single-model rule like the four above |
+| Inventory — low stock | `InventoryStock` × `InventoryItem` | rule `inventory-low-stock` → `Alert` | ✅ **W1070** — first TWO-model join (stock qty vs item reorder point); out-of-stock → critical; both models are object-exports, resolved defensively |
+
+**Operational sweep: 5 rules (W1006–W1009 + W1070) covering facilities · maintenance ·
+fleet · contracts · inventory — the main org-operational signals are now on the
+`/api/v1/dashboards/alerts` dashboard.** Further rules (e.g. license expiry) follow
+the same recipe.
 
 > **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
 > per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →

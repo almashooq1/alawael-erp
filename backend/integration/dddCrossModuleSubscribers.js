@@ -3859,6 +3859,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1135: beneficiary branch transfer completed → core timeline ───
+  // Transfers complete via TWO writer paths (BeneficiaryService doc.save()
+  // and branch-enhanced findByIdAndUpdate) — both producer hooks emit the
+  // same event. The 'transfer' enum value existed since day one with NO
+  // producer; this closes that founding gap. Row lands in the DESTINATION
+  // branch scope (toBranchId).
+  subscribers.push({
+    name: 'beneficiary-transfer:completed → timeline:record',
+    pattern: 'beneficiary-transfer.transfer.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'transfer',
+            category: 'administrative',
+            severity: 'info',
+            title: 'Beneficiary transferred to a new branch',
+            title_ar: 'اكتمل نقل المستفيد إلى الفرع الجديد',
+            ...(event.payload.toBranchId ? { branchId: event.payload.toBranchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] BeneficiaryTransfer timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

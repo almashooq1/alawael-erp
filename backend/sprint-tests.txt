@@ -841,3 +841,4 @@ __tests__/gas-scale-activated-core-linkage-wave1121.test.js
 __tests__/quality-audit-record-completed-core-linkage-wave1122.test.js
 __tests__/clinical-risk-score-escalated-core-linkage-wave1131.test.js
 __tests__/corrective-action-opened-core-linkage-wave1134.test.js
+__tests__/beneficiary-transfer-completed-core-linkage-wave1135.test.js

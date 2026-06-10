@@ -769,4 +769,7 @@ __tests__/medication-reconciliation-behavioral-wave1041.test.js
 __tests__/infection-surveillance-wave1042.test.js
 __tests__/infection-surveillance-behavioral-wave1042.test.js
 __tests__/facility-asset-overdue-rule-wave1006.test.js
-__tests__/maintenance-wo-overdue-rule-wave1007.test.js
+__tests__/clinical-core-linkage-wave1046.test.js
+__tests__/clinical-core-linkage-guard-wave1046.test.js
+__tests__/clinical-core-linkage-wave1046.test.js
+__tests__/clinical-core-linkage-guard-wave1046.test.js

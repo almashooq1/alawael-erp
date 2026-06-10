@@ -278,6 +278,35 @@ PressureInjuryRecordSchema.virtual('isReassessmentOverdue').get(function () {
 PressureInjuryRecordSchema.set('toJSON', { virtuals: true });
 PressureInjuryRecordSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// A newly-identified OPEN injury → pressure_injury (severity by stage/HAPI);
+// a transition to healed/closed → pressure_injury_resolved (success).
+const PI_OPEN = ['active', 'monitoring', 'healing'];
+PressureInjuryRecordSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+PressureInjuryRecordSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    const prev = this.$__prevStatus;
+    const base = {
+      pressureInjuryRecordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      stage: doc.stage,
+      bodySite: doc.bodySite,
+      origin: doc.origin,
+    };
+    if (prev === undefined && PI_OPEN.includes(doc.status)) {
+      Promise.resolve(integrationBus.publish('clinical-safety', 'pressure_injury.identified', base)).catch(() => {});
+    } else if (prev && PI_OPEN.includes(prev) && (doc.status === 'healed' || doc.status === 'closed')) {
+      Promise.resolve(integrationBus.publish('clinical-safety', 'pressure_injury.resolved', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.PressureInjuryRecord ||
   mongoose.model('PressureInjuryRecord', PressureInjuryRecordSchema);

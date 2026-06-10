@@ -281,6 +281,32 @@ FallsRiskAssessmentSchema.virtual('isReassessmentOverdue').get(function () {
 FallsRiskAssessmentSchema.set('toJSON', { virtuals: true });
 FallsRiskAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) ──────────────────────────────────────
+// Native pre-compile hooks (defined BEFORE mongoose.model) so they ACTUALLY
+// fire at runtime. Signature `function(doc)` — NOT a 1-param `next` (W954
+// legacy-shim hang trap). On the draft→finalized flip, publish to the
+// integration bus → dddCrossModuleSubscribers → CareTimeline (falls_risk_assessed).
+FallsRiskAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+FallsRiskAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-safety', 'falls.assessment_finalized', {
+        fallsRiskAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        riskLevel: doc.riskLevel,
+        riskScore: doc.riskScore,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.FallsRiskAssessment ||
   mongoose.model('FallsRiskAssessment', FallsRiskAssessmentSchema);

@@ -91,6 +91,16 @@ const careTimelineSchema = new mongoose.Schema(
         'restraint_applied',
         'crisis_reported', // W1004 — acute crisis reported
         'crisis_resolved', // W1004 — acute crisis resolved / closed
+        // Clinical Safety (W1046 — unified-core linkage of the W1010-W1042 modules)
+        'falls_risk_assessed', // W1010 — falls-risk assessment finalized
+        'pressure_injury', // W1011 — pressure injury identified
+        'pressure_injury_resolved', // W1011 — pressure injury healed/closed
+        'sleep_assessment', // W1020 — sleep assessment finalized
+        'mobility_assessment', // W1021 — orientation & mobility assessment finalized
+        'driving_assessment', // W1022 — driving-rehab assessment finalized
+        'medication_reconciliation', // W1041 — medication reconciliation reconciled
+        'infection_case', // W1042 — infection case opened / status change
+        'infection_resolved', // W1042 — infection case resolved
         // Family
         'family_contact',
         'family_meeting',

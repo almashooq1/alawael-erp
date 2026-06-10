@@ -250,6 +250,29 @@ DrivingRehabAssessmentSchema.virtual('isReassessmentOverdue').get(function () {
 DrivingRehabAssessmentSchema.set('toJSON', { virtuals: true });
 DrivingRehabAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → driving_assessment timeline row.
+DrivingRehabAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+DrivingRehabAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-safety', 'driving.assessment_finalized', {
+        drivingRehabAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        recommendation: doc.recommendation,
+        readinessLevel: doc.readinessLevel,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.DrivingRehabAssessment ||
   mongoose.model('DrivingRehabAssessment', DrivingRehabAssessmentSchema);

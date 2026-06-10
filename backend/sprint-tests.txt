@@ -103,6 +103,7 @@ __tests__/hr-modules-branch-isolation-wave1133.test.js
 __tests__/hr-branch-scope-plugin-behavioral-wave1133.test.js
 __tests__/branch-isolation-hr-attendance-wave1137.test.js
 __tests__/hr-attendance-branch-isolation-behavioral-wave1137.test.js
+__tests__/backfill-hr-branchid-wave1139.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js

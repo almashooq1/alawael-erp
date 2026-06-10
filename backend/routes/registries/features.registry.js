@@ -66,6 +66,7 @@ module.exports = function registerFeatureRoutes(
   const drivingRehabRoutes = safeRequire('../routes/driving-rehab.routes');
   const clinicalSafetySummaryRoutes = safeRequire('../routes/clinical-safety-summary.routes');
   const medicationReconciliationRoutes = safeRequire('../routes/medication-reconciliation.routes');
+  const infectionSurveillanceRoutes = safeRequire('../routes/infection-surveillance.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const prostheticOrthoticRoutes = safeRequire('../routes/prosthetic-orthotic.routes');
@@ -207,6 +208,9 @@ module.exports = function registerFeatureRoutes(
   // Wave 1041: Medication reconciliation (مطابقة الأدوية) — admission/discharge/transfer med-list
   // comparison + discrepancy detection + reconcile sign-off; CBAHI patient-safety standard (≠ eMAR)
   dualMountAuth(app, 'medication-reconciliation', medicationReconciliationRoutes, authenticate);
+  // Wave 1042: Infection-prevention surveillance (ترصّد العدوى) — communicable-disease case tracking +
+  // isolation precautions + center-exclusion + notifiable-disease authority reporting; CBAHI IPC standard
+  dualMountAuth(app, 'infection-surveillance', infectionSurveillanceRoutes, authenticate);
   // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence

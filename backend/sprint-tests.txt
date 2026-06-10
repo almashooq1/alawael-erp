@@ -766,3 +766,5 @@ __tests__/reports-analytics-executive-isolation-behavioral-wave962.test.js
 __tests__/clinical-safety-summary-wave1040.test.js
 __tests__/medication-reconciliation-wave1041.test.js
 __tests__/medication-reconciliation-behavioral-wave1041.test.js
+__tests__/infection-surveillance-wave1042.test.js
+__tests__/infection-surveillance-behavioral-wave1042.test.js

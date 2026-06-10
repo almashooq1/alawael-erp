@@ -3,7 +3,7 @@
 **Type**: Security finding (read-only audit) + partial fix
 **Class**: Mass-assignment / over-posting on DB writes (W506/W507 doctrine)
 **Trigger**: W1091 found a live mass-assignment hole in `care-plans-admin` goal-create; this sweep hunts the same class.
-**Status**: 🟢 2 verified-live clinical surfaces FIXED (W1112) · 🟡 remainder DOCUMENTED, pending per-route mount verification before fix.
+**Status**: 🟢 Mass-assignment Tier 1 (W1091/W1112) + Tier 2 (W1130) FIXED · 🟢 W269 cross-branch IDOR fixed across every beneficiary-scoped surface (W1119/W1125) + professional-dev therapist-ownership · 🟡 Tier 3 assessed low-risk (no fix — see below) · 🟡 remaining = owner product/schema decisions (hr-modules `branchId`, tasks list scope + ownership).
 
 ## Doctrine (what "correct" looks like here)
 
@@ -44,7 +44,9 @@ value. The genuine deviation is the **UPDATE** paths that write raw
 
 ### 🟡 Tier 3 — raw `req.body` nested under a single key (lower — cannot set sibling top-level fields)
 
-`referrals.routes.js:515` (assessment) · `student-events.routes.js:189` (data) · `student-elearning.routes.js:136` (data) · `student-rewards-store.routes.js:195` (data) · `therapy-sessions.routes.js:289` (soapNotes). The nested object is still fully attacker-controlled — sanitize if the subdoc carries any privileged field.
+`referrals.routes.js:515` (assessment) · `student-events.routes.js:189` (data) · `student-elearning.routes.js:136` (data) · `student-rewards-store.routes.js:195` (data) · `therapy-sessions.routes.js:289` (soapNotes).
+
+**Assessed — no fix warranted.** The body is namespaced under a single key, so there is **no sibling-top-level-field escalation** and **no prototype pollution** (a `$set` of a field _value_ does not merge into the doc / `Object.prototype`). The `data` / `assessment` / `soapNotes` containers are deliberately **freeform**, so a blanket `stripUpdateMeta` could strip legitimate content. Revisit only if a specific container later gains a privileged field that must be server-controlled.
 
 ## Fix applied (W1112)
 

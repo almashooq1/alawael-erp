@@ -180,6 +180,7 @@ const careTimelineSchema = new mongoose.Schema(
         'gas_scoring_recorded',
         'speech_session_analyzed',
         'portal_payment_paid',
+        'caregiver_support_completed',
         // Family
         'family_contact',
         'family_meeting',

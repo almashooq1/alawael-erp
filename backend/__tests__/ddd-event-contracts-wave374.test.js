@@ -141,6 +141,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'gas-scoring', // W1101 — GAS goal-attainment level scored → core timeline
   'speech-session', // W1102 — speech-session recording analysis completed → core timeline
   'portal-payment', // W1103 — guardian portal invoice paid → core timeline
+  'caregiver-support', // W1104 — caregiver support program completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -256,6 +257,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'gas_scoring', // W1101 — gas_scoring.recorded (GasScoring)
     'speech_session', // W1102 — speech_session.analyzed (SpeechSessionRecording)
     'portal_payment', // W1103 — portal_payment.paid (PortalPayment)
+    'caregiver_support', // W1104 — caregiver_support.completed (CaregiverSupportProgram)
   ])
 );
 

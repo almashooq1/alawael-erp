@@ -3282,6 +3282,33 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'caregiver-support:completed → timeline:record',
+    pattern: 'caregiver-support.caregiver_support.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.programType;
+          const sat = Number(event.payload.satisfactionScore);
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'caregiver_support_completed',
+            category: 'family',
+            severity: 'success',
+            title: `Caregiver support program completed${type ? ` (${type})` : ''}${Number.isFinite(sat) ? ` — satisfaction ${sat}/10` : ''}`,
+            title_ar: 'أتمّ مقدّم الرعاية برنامج الدعم الأسري للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CaregiverSupport timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

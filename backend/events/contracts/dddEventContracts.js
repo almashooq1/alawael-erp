@@ -2309,6 +2309,28 @@ const PORTAL_PAYMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CAREGIVER_SUPPORT_EVENTS = {
+  CAREGIVER_SUPPORT_COMPLETED: {
+    domain: 'caregiver-support',
+    eventType: 'caregiver_support.completed',
+    version: 1,
+    description:
+      'إتمام مقدّم الرعاية لبرنامج دعم أسري (إرشاد/تدريب/مجموعة دعم) — A caregiver completed a family-support program (counseling, training, or support group)',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      programType: 'string',
+      sessionsCount: 'number',
+      satisfactionScore: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2399,6 +2421,7 @@ const DDD_CONTRACTS = {
   'gas-scoring': GAS_SCORING_EVENTS,
   'speech-session': SPEECH_SESSION_EVENTS,
   'portal-payment': PORTAL_PAYMENT_EVENTS,
+  'caregiver-support': CAREGIVER_SUPPORT_EVENTS,
 };
 
 /**
@@ -2501,6 +2524,7 @@ module.exports = {
   GAS_SCORING_EVENTS,
   SPEECH_SESSION_EVENTS,
   PORTAL_PAYMENT_EVENTS,
+  CAREGIVER_SUPPORT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

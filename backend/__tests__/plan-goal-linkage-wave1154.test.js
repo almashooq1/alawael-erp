@@ -51,8 +51,14 @@ describe('gap #4 (W1154) — IEP goal → canonical goal bridge (W1133)', () => 
     expect(GOAL).toMatch(/therapeuticGoalId:\s*\{[\s\S]*?ref:\s*'TherapeuticGoal'/);
   });
 
-  test('Goal.therapeuticGoalId is indexed for "IEP goals bridging to this canonical goal"', () => {
-    expect(GOAL).toMatch(/index\(\{\s*therapeuticGoalId:\s*1\s*\}\)/);
+  test('Goal.therapeuticGoalId is indexed (field-level index:true from the W1133 bridge — no duplicate schema.index)', () => {
+    // The query "which IEP goals bridge to this canonical goal?" is served by the
+    // field-level index; a separate goalSchema.index({therapeuticGoalId:1}) would
+    // be a duplicate (caught by check:duplicate-schema-index / Mongoose warning).
+    expect(GOAL).toMatch(
+      /therapeuticGoalId:\s*\{[\s\S]*?ref:\s*'TherapeuticGoal'[\s\S]*?index:\s*true/
+    );
+    expect(GOAL).not.toMatch(/goalSchema\.index\(\{\s*therapeuticGoalId:\s*1\s*\}\)/);
   });
 });
 

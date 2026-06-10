@@ -255,10 +255,9 @@ goalSchema.index({ createdBy: 1, createdAt: -1 });
 goalSchema.index({ 'icfMapping.icfCode': 1 });
 // R1 (W1090) — fast lookup of goals by linked measure (outcome dashboards)
 goalSchema.index({ 'linkedMeasures.measureId': 1 });
-// gap #4 (plan↔goal) — fast lookup of IEP goals bridging to a canonical
-// TherapeuticGoal (W1133 ADR-040 Option-C bridge). Enables "which IEP goals
-// reference this canonical goal?" — needed when converging plan goals to refs.
-goalSchema.index({ therapeuticGoalId: 1 });
+// gap #4 (plan↔goal) — the "which IEP goals bridge to this canonical goal?"
+// query is already served by the field-level `index: true` on therapeuticGoalId
+// (W1133 bridge); no separate schema.index() (would be a duplicate — W1154).
 
 // W452 + R1 (W1090) — pre-save invariants. ASYNC style (no `next` callback):
 // this codebase runs Mongoose 9, which silently breaks pure callback-style

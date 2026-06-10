@@ -77,11 +77,22 @@ branch-isolated?" hard to answer at a glance.
 
 ## Open questions (blockers)
 
-- **Q1** — _Verified dormant 2026-06-10:_ `hr/saudi-hr-routes.js` + `hr/index.js`
-  have **no mount and no importer** (the only `require('./hr')` is `domains/index.js`
-  → `domains/hr`, a different path). Routing-safe to delete; the only fallout is the
-  source-only unit test `tests/unit/saudi-hr-routes.module.test.js`. **Left in place
-  pending owner go** (deleting a 22-endpoint file is owner's call, not auto-executed).
+- **Q1** — _Verified dormant 2026-06-10, but ENTANGLED — not the clean dead-code
+  delete first assumed._ `backend/hr/` holds 3 files: `index.js` + `saudi-hr-routes.js`
+  (22 endpoints) + **`saudi-hr-service.js` (28 KB)**. There is **no HTTP mount and no
+  external importer** (the only `require('./hr')` is `domains/index.js` → `domains/hr`,
+  a different path; `saudi-hr-service.js` is imported only by `saudi-hr-routes.js`).
+  BUT `saudi-hr-service.js` participates in **model registration**: it registers
+  `SaudiHrPayroll` and re-exports `Employee`/`LeaveRequest`/`Attendance` (per the
+  W342/W844 consolidation comments in `no-duplicate-model-registration-wave340.test.js`),
+  and it was modified recently (2026-06-04). So a clean retire is a **6-file change**,
+  not 1: delete the 3 sources + the 2 auto-gen unit tests
+  (`tests/unit/saudi-hr-{routes,service}.module.test.js`) + re-run the W340 guard
+  (confirm `SaudiHrPayroll` isn't in an active baseline Set — it appears only in
+  comments, so likely clean, but VERIFY) + `no-broken-requires` + `check:routes-load`.
+  **Left in place — NOT auto-executed**: destructive, touches a drift-guard's domain +
+  a recently-touched file on a shared branch, and the value (removing invisible dead
+  code) doesn't justify the risk mid-race. Owner's call; recipe above is ready.
 - **Q2** — ✅ RESOLVED: `hr-copilot` (`ADMIN_ROLES` includes `manager`) and
   `hr-compliance` (`READ/WRITE_ROLES` include `manager`/`hr`/`hr_manager`) ARE
   reachable by branch-restricted roles → were live cross-branch reads → **gated in

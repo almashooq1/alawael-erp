@@ -847,3 +847,4 @@ __tests__/corrective-action-opened-core-linkage-wave1134.test.js
 __tests__/beneficiary-transfer-completed-core-linkage-wave1135.test.js
 __tests__/complaint-resolved-core-linkage-wave1136.test.js
 __tests__/timeline-routes-branch-isolation-wave1138.test.js
+__tests__/golden-thread-integrity-script.test.js

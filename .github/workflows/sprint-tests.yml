@@ -1308,6 +1308,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-core-linkage-wave1046.test.js'
       - 'backend/__tests__/clinical-core-linkage-guard-wave1046.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenance-wo-overdue-rule-wave1007.test.js'
+      - 'backend/__tests__/vehicle-document-expiry-rule-wave1008.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2599,6 +2602,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-core-linkage-wave1046.test.js'
       - 'backend/__tests__/clinical-core-linkage-guard-wave1046.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/maintenance-wo-overdue-rule-wave1007.test.js'
+      - 'backend/__tests__/vehicle-document-expiry-rule-wave1008.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

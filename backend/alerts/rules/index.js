@@ -64,4 +64,9 @@ module.exports = [
   // Work order past its scheduled date and still open. Needs
   // `MaintenanceWorkOrder` in the app.js model loader to fire.
   require('./maintenance-work-order-overdue'),
+
+  // ── W1008 — operational / fleet (1) ─────────────────────────
+  // Active vehicle with expired registration / insurance / inspection.
+  // Needs `Vehicle` in the app.js model loader to fire.
+  require('./vehicle-document-expiry'),
 ];

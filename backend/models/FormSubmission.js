@@ -157,6 +157,10 @@ const FormSubmissionSchema = new mongoose.Schema(
     // always reported zero.
     reviewedAt: Date,
     reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // W1189 — same class, caught by check-phantom-schema-writes on its first
+    // run: three submit routes write submittedAt but it was never declared
+    // (public track endpoint already falls back to createdAt for this reason).
+    submittedAt: Date,
     dueDate: Date,
 
     // Multi-tenancy

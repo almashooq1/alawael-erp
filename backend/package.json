@@ -241,7 +241,8 @@
     "cleanup": "node scripts/cleanup.js",
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js",
-    "backfill:hr-branchid": "node scripts/backfill-hr-branchid.js"
+    "backfill:hr-branchid": "node scripts/backfill-hr-branchid.js",
+    "check:phantom-writes": "node scripts/check-phantom-schema-writes.js"
   },
   "_moduleAliases": {
     "@": ".",

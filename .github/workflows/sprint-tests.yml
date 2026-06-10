@@ -1514,6 +1514,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/nitaqat-contract-branch-isolation-wave1159.test.js'
       - 'backend/__tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3011,6 +3014,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/nitaqat-contract-branch-isolation-wave1159.test.js'
       - 'backend/__tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

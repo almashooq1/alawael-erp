@@ -53,9 +53,11 @@ describe('domains/field-training/routes/field-training.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (2)', () => {
+  // W1160: +3 local deps (assertBranchMatch middleware + TrainingProgram +
+  // TraineeRecord loadModels for the branch-ownership hooks)
+  test('has local dependencies (5)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(2);
+    expect(locals.length).toBe(5);
   });
 
   test('has module.exports', () => {

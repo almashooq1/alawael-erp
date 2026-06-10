@@ -4,6 +4,34 @@
 
 const express = require('express');
 const router = express.Router();
+// W1160 — cross-branch isolation (W269 doctrine): file had NO guards.
+//   - /programs/:id → /programs/:programId (TrainingProgram),
+//     /trainees/:id* → /trainees/:traineeRecordId* (TraineeRecord) so
+//     ownership hooks fire before every handler
+//   - dashboard uses effectiveBranchScope (no ?branchId= spoofing)
+//   - body guard covers caseload assignment (body-carried beneficiary ids)
+const {
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param(
+  'programId',
+  branchScopedResourceParam({
+    modelName: 'TrainingProgram',
+    label: 'training program',
+    loadModel: () => require('../models/TrainingProgram'),
+  })
+);
+router.param(
+  'traineeRecordId',
+  branchScopedResourceParam({
+    modelName: 'TraineeRecord',
+    label: 'trainee record',
+    loadModel: () => require('../models/TraineeRecord'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { fieldTrainingService } = require('../services/FieldTrainingService');
 const {
   validateCreateProgram,
@@ -46,16 +74,16 @@ router.get(
   })
 );
 router.get(
-  '/programs/:id',
+  '/programs/:programId',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.getProgram(req.params.id);
+    const data = await fieldTrainingService.getProgram(req.params.programId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/programs/:id',
+  '/programs/:programId',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.updateProgram(req.params.id, req.body);
+    const data = await fieldTrainingService.updateProgram(req.params.programId, req.body);
     res.json({ success: true, data });
   })
 );
@@ -82,27 +110,27 @@ router.get(
   })
 );
 router.get(
-  '/trainees/:id',
+  '/trainees/:traineeRecordId',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.getTraineeRecord(req.params.id);
+    const data = await fieldTrainingService.getTraineeRecord(req.params.traineeRecordId);
     res.json({ success: true, data });
   })
 );
 
 /* ── Hours ── */
 router.post(
-  '/trainees/:id/hours',
+  '/trainees/:traineeRecordId/hours',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.logHours(req.params.id, req.body);
+    const data = await fieldTrainingService.logHours(req.params.traineeRecordId, req.body);
     res.json({ success: true, data });
   })
 );
 
 /* ── Evaluations ── */
 router.post(
-  '/trainees/:id/evaluations',
+  '/trainees/:traineeRecordId/evaluations',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.addEvaluation(req.params.id, {
+    const data = await fieldTrainingService.addEvaluation(req.params.traineeRecordId, {
       ...req.body,
       evaluatedBy: getUserId(req),
     });
@@ -112,9 +140,9 @@ router.post(
 
 /* ── Supervision ── */
 router.post(
-  '/trainees/:id/supervision',
+  '/trainees/:traineeRecordId/supervision',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.addSupervisionSession(req.params.id, {
+    const data = await fieldTrainingService.addSupervisionSession(req.params.traineeRecordId, {
       ...req.body,
       supervisorId: getUserId(req),
     });
@@ -124,9 +152,9 @@ router.post(
 
 /* ── Observations ── */
 router.post(
-  '/trainees/:id/observations',
+  '/trainees/:traineeRecordId/observations',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.addObservation(req.params.id, {
+    const data = await fieldTrainingService.addObservation(req.params.traineeRecordId, {
       ...req.body,
       observedBy: getUserId(req),
     });
@@ -136,30 +164,34 @@ router.post(
 
 /* ── Competency ── */
 router.put(
-  '/trainees/:id/competencies/:name',
+  '/trainees/:traineeRecordId/competencies/:name',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.updateCompetency(req.params.id, req.params.name, {
-      ...req.body,
-      assessedBy: getUserId(req),
-    });
+    const data = await fieldTrainingService.updateCompetency(
+      req.params.traineeRecordId,
+      req.params.name,
+      {
+        ...req.body,
+        assessedBy: getUserId(req),
+      }
+    );
     res.json({ success: true, data });
   })
 );
 
 /* ── Caseload ── */
 router.post(
-  '/trainees/:id/caseload',
+  '/trainees/:traineeRecordId/caseload',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.assignBeneficiary(req.params.id, req.body);
+    const data = await fieldTrainingService.assignBeneficiary(req.params.traineeRecordId, req.body);
     res.json({ success: true, data });
   })
 );
 
 /* ── Complete ── */
 router.put(
-  '/trainees/:id/complete',
+  '/trainees/:traineeRecordId/complete',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.completeTraining(req.params.id, req.body);
+    const data = await fieldTrainingService.completeTraining(req.params.traineeRecordId, req.body);
     res.json({ success: true, data });
   })
 );
@@ -168,7 +200,9 @@ router.put(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.getDashboard(req.query.branchId || req.user?.branchId);
+    const data = await fieldTrainingService.getDashboard(
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );

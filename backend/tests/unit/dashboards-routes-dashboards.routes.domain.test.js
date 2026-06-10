@@ -58,9 +58,11 @@ describe('domains/dashboards/routes/dashboards.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (2)', () => {
+  // W1160: +4 local deps (assertBranchMatch middleware + DashboardConfig +
+  // KPIDefinition + DecisionAlert loadModels for the branch-ownership hooks)
+  test('has local dependencies (6)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(2);
+    expect(locals.length).toBe(6);
   });
 
   test('has module.exports', () => {

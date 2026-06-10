@@ -12,6 +12,13 @@ const { BeneficiaryRepository } = require('./repositories/beneficiary.repository
 const { BeneficiaryService } = require('./services/beneficiary.service');
 const { createBeneficiaryRoutes } = require('./routes/beneficiary.routes');
 const beneficiary360Routes = require('./routes/beneficiary360.routes');
+// W1160 (W269-class): the /api/v2/core mount built its own router WITHOUT the
+// beneficiaryId ownership hook — only the legacy /api/core mount (core.routes.js)
+// had it (W1146). Register the same hook here so both mounts are guarded.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../../middleware/assertBranchMatch');
 
 class CoreDomain extends BaseDomainModule {
   constructor() {
@@ -43,6 +50,10 @@ class CoreDomain extends BaseDomainModule {
 
   registerRoutes(router) {
     super.registerRoutes(router);
+    // W1160: ownership guard MUST be wired before the routes register —
+    // nested routers do NOT inherit param hooks (see beneficiary360.routes).
+    router.param('beneficiaryId', branchScopedBeneficiaryParam);
+    router.use(bodyScopedBeneficiaryGuard);
     createBeneficiaryRoutes(router, this.beneficiaryService);
 
     // 360° Dashboard routes

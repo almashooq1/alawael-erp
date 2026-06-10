@@ -25,6 +25,7 @@ const {
   summarizeOverdueReports,
 } = require('../../../services/supervisorOps.service');
 const reassessmentLifecycleService = require('../../../services/reassessmentLifecycle.service');
+const { gatherBranchHealth } = require('../../../services/operationsHealth.service');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -114,6 +115,37 @@ router.get(
     const tasks = await reassessmentLifecycleService.listByPhase({ branchId });
     const data = summarizeOverdueReports(tasks);
     return res.json({ success: true, data: { branchId: String(branchId), ...data } });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /supervisor-ops/operations-health[?branchId=&days=]
+//   The unified executive snapshot (W1195/W1196): fuses the FOUR signals —
+//   golden-thread completeness + documentation compliance + per-therapist
+//   productivity + overdue reassessment reports — into ONE overall grade
+//   (HEALTHY/WATCH/AT_RISK/NO_DATA) + composite + priority-ordered action list.
+//   Computed by the canonical operationsHealth.service (same code path as the
+//   audit:operations-health CLI). Same W269 branch scoping; window default 7d
+//   (capped 90). READ-ONLY.
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/supervisor-ops/operations-health',
+  asyncHandler(async (req, res) => {
+    const scoped = effectiveBranchScope(req);
+    let branchId = scoped || null;
+    if (!branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+      branchId = req.query.branchId;
+    }
+    if (!branchId) {
+      return res.status(400).json({
+        success: false,
+        error: 'branchId required — a cross-branch role must specify ?branchId.',
+      });
+    }
+
+    const sinceDays = Math.min(parseInt(req.query.days, 10) || 7, 90);
+    const data = await gatherBranchHealth(mongoose, { branchId, sinceDays });
+    return res.json({ success: true, data });
   })
 );
 

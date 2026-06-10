@@ -20,6 +20,7 @@
 const express = require('express');
 const { authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
+const { stripUpdateMeta } = require('../../utils/sanitize');
 
 const ADMIN = ['admin', 'super_admin', 'hr_manager'];
 const MANAGER = [...ADMIN, 'manager'];
@@ -103,7 +104,7 @@ function createHrModulesRouter({ logger } = {}) {
         if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
         const doc = await M.findByIdAndUpdate(
           req.params.id,
-          { $set: req.body },
+          { $set: stripUpdateMeta(req.body) },
           { returnDocument: 'after' }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'not found' });

@@ -30,6 +30,7 @@ const path = require('path');
 const read = p => fs.readFileSync(path.join(__dirname, '..', 'routes', p), 'utf-8');
 const TASKS = read('tasks.routes.js');
 const THERAPIST = read('therapist-extended.routes.js');
+const HR_MODULES = read('hr/hr-modules.routes.js');
 
 describe('W1112 — UPDATE routes sanitize req.body (no mass assignment)', () => {
   test('tasks.routes imports stripUpdateMeta from utils/sanitize', () => {
@@ -40,6 +41,16 @@ describe('W1112 — UPDATE routes sanitize req.body (no mass assignment)', () =>
   test('therapist-extended.routes imports stripUpdateMeta from utils/sanitize', () => {
     expect(THERAPIST).toMatch(/require\(['"]\.\.\/utils\/sanitize['"]\)/);
     expect(THERAPIST).toMatch(/stripUpdateMeta/);
+  });
+
+  test('hr-modules.routes imports stripUpdateMeta (one level deeper path)', () => {
+    expect(HR_MODULES).toMatch(/require\(['"]\.\.\/\.\.\/utils\/sanitize['"]\)/);
+    expect(HR_MODULES).toMatch(/stripUpdateMeta/);
+  });
+
+  test('ANTI-REGRESSION: no raw `$set: req.body` in hr-modules (generic attachCrud → 11 modules)', () => {
+    expect(HR_MODULES).not.toMatch(/\$set:\s*req\.body\b/);
+    expect(HR_MODULES).toMatch(/\$set:\s*stripUpdateMeta\(req\.body\)/);
   });
 
   test('ANTI-REGRESSION: no raw `$set: req.body` in tasks.routes', () => {

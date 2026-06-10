@@ -194,6 +194,31 @@ transitionLogSchema.pre('updateMany', function () {
   throw new Error('سجلات التدقيق غير قابلة للتعديل');
 });
 
+// ── W1118 — publish workflow_transition.recorded when a transition log is created ─
+transitionLogSchema.pre('save', function flagWorkflowTransitionRecorded() {
+  this.$__workflowTransitionRecorded = this.isNew;
+});
+
+transitionLogSchema.post('save', function emitWorkflowTransitionRecorded(doc) {
+  if (!doc.$__workflowTransitionRecorded) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('workflow-transition', 'workflow_transition.recorded', {
+      logId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.fromPhase ? { fromPhase: doc.fromPhase } : {}),
+      ...(doc.toPhase ? { toPhase: doc.toPhase } : {}),
+      ...(doc.status ? { status: doc.status } : {}),
+      ...(doc.executedBy ? { executedBy: String(doc.executedBy) } : {}),
+      transitionedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const WorkflowTransitionLog =
   mongoose.models.WorkflowTransitionLog ||
   mongoose.model('WorkflowTransitionLog', transitionLogSchema);

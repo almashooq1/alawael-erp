@@ -3651,6 +3651,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'workflow-transition:recorded → timeline:record',
+    pattern: 'workflow-transition.workflow_transition.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const from = event.payload.fromPhase;
+          const to = event.payload.toPhase;
+          const failed = event.payload.status && event.payload.status !== 'success';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'workflow_transition_recorded',
+            category: 'administrative',
+            severity: failed ? 'warning' : 'info',
+            title: `Care-workflow transition${from && to ? ` (${from} → ${to})` : ''}`,
+            title_ar: 'تم تسجيل انتقال طور في سير عمل رعاية المستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] WorkflowTransitionLog timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

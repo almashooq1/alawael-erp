@@ -155,6 +155,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'measure-reassessment', // W1115 — beneficiary measure-reassessment task completed → core timeline
   'measure-alert', // W1116 — beneficiary measure-driven alert raised → core timeline
   'measure-baseline', // W1117 — beneficiary measure baseline slot completed → core timeline
+  'workflow-transition', // W1118 — beneficiary care-workflow phase transition recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -284,6 +285,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'measure_reassessment', // W1115 — measure_reassessment.completed (MeasureReassessmentTask)
     'measure_alert', // W1116 — measure_alert.raised (MeasureAlert)
     'measure_baseline', // W1117 — measure_baseline.completed (MeasureBaselineSlot)
+    'workflow_transition', // W1118 — workflow_transition.recorded (WorkflowTransitionLog)
   ])
 );
 

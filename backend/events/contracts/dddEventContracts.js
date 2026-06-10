@@ -2627,6 +2627,30 @@ const MEASURE_BASELINE_EVENTS = Object.freeze({
   },
 }); // ═══ W1117 — measure-baseline completed → unified core timeline ═══
 
+const WORKFLOW_TRANSITION_EVENTS = Object.freeze({
+  WORKFLOW_TRANSITION_RECORDED: {
+    domain: 'workflow-transition',
+    eventType: 'workflow_transition.recorded',
+    version: 1,
+    description:
+      'A care-workflow phase transition was recorded for a beneficiary (audit-grade move between care phases).',
+    payload: {
+      logId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      fromPhase: 'string',
+      toPhase: 'string',
+      status: 'string',
+      executedBy: 'string',
+      transitionedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1118 — workflow phase transition recorded → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2731,6 +2755,7 @@ const DDD_CONTRACTS = {
   'measure-reassessment': MEASURE_REASSESSMENT_EVENTS,
   'measure-alert': MEASURE_ALERT_EVENTS,
   'measure-baseline': MEASURE_BASELINE_EVENTS,
+  'workflow-transition': WORKFLOW_TRANSITION_EVENTS,
 };
 
 /**
@@ -2847,6 +2872,7 @@ module.exports = {
   MEASURE_REASSESSMENT_EVENTS,
   MEASURE_ALERT_EVENTS,
   MEASURE_BASELINE_EVENTS,
+  WORKFLOW_TRANSITION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

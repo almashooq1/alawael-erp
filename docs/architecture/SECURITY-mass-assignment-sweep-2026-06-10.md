@@ -35,8 +35,8 @@ value. The genuine deviation is the **UPDATE** paths that write raw
 | `therapist-extended.routes.js:185` | `PATCH …/goals/:goalId`           | CarePlan goal       | ✅                                      | ❌                   | ✅ **FIXED (W1112)**                                                                                                 |
 | `therapist-extended.routes.js:288` | `PUT /prescriptions/:id`          | Prescription        | ✅                                      | ❌                   | ✅ **FIXED (W1112)**                                                                                                 |
 | `therapist-extended.routes.js:338` | `PUT /professional-dev/:id`       | ProfessionalDev     | ✅                                      | (therapistId-scoped) | ✅ **FIXED (W1112)**                                                                                                 |
-| `hr/hr-modules.routes.js:106`      | generic `attachCrud` `PATCH /:id` | **11 HR models**    | ✅ authorize(writeRoles)                | ❌                   | 🟡 pending mount-verify (high value — covers 11 modules)                                                             |
-| `workflow.routes.js:207`           | `PUT /definitions/:id`            | WorkflowDefinition  | ✅ authMiddleware + requireBranchAccess | ✅                   | 🟡 pending — `backend/routes/` copy vs the `domains/workflow/` one the registry mounts (resolve which is live first) |
+| `hr/hr-modules.routes.js:106`      | generic `attachCrud` `PATCH /:id` | **11 HR models**    | ✅ authorize(writeRoles)                | ❌                   | ✅ **FIXED** (extends W1112) — secures all 11 HR modules via the shared attachCrud helper                                                             |
+| `workflow.routes.js:207`           | `PUT /definitions/:id`            | WorkflowDefinition  | ✅ authMiddleware + requireBranchAccess | ✅                   | ⚪ N/A — `backend/routes/workflow.routes.js` is DORMANT (unmounted); the LIVE `domains/workflow` route has no raw-body pattern (verified) |
 
 ### 🟠 Tier 2 — raw `req.body` pushed into an array subdoc
 
@@ -70,8 +70,9 @@ surfaces. Locked by drift guard
 
 ## Recommended next steps
 
-1. Verify mount + auth for `hr/hr-modules.routes.js` and the live `workflow`
-   route, then apply the same `stripUpdateMeta` fix (Tier 1 remainder).
+1. ✅ **Tier 1 DONE** — `hr/hr-modules.routes.js` fixed (live, 11 modules); the
+   `workflow.routes.js:207` finding was the DORMANT `backend/routes/` copy (the
+   live `domains/workflow` route is clean), so no live Tier-1 holes remain.
 2. Sweep + fix Tier 2 (`stripUpdateMeta` the pushed element).
 3. Open a **branch-scope (W269) remediation** for the Tier-1 update paths — this
    is the larger risk for the clinical surfaces.

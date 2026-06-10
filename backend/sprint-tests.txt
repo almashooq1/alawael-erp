@@ -780,3 +780,5 @@ __tests__/unified-core-linkage-coverage-wave1047.test.js
 __tests__/deferred-islands-core-linkage-wave1075.test.js
 __tests__/residual-islands-core-linkage-wave1120.test.js
 __tests__/operational-alerts-capa-calibration-wave1121.test.js
+__tests__/biomedical-waste-wave1123.test.js
+__tests__/biomedical-waste-behavioral-wave1123.test.js

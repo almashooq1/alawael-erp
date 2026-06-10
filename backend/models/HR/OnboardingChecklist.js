@@ -137,7 +137,7 @@ OnboardingChecklistSchema.statics.DEFAULT_OFFBOARDING_ITEMS = [
 ];
 
 // W1133 — denormalize branchId from the employee for cross-branch isolation.
-OnboardingChecklistSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+OnboardingChecklistSchema.plugin(require('./hrBranchScope.plugin'));
 
 module.exports =
   mongoose.models.HrOnboardingChecklist ||

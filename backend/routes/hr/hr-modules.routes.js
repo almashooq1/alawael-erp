@@ -29,7 +29,7 @@ const MANAGER = [...ADMIN, 'manager'];
 
 // ─── W1133 cross-branch isolation helpers (W269 doctrine) ──────────────────────
 // These modules carry a denormalized `branchId` (derived from the employee by
-// models/HR/plugins/hrBranchScope.plugin.js), so the standard branch filter +
+// models/HR/hrBranchScope.plugin.js), so the standard branch filter +
 // per-doc assertion apply. `scope` is `null` for org-wide modules (comp-bands,
 // policies, surveys, kudos, positions) which are intentionally NOT branch-gated.
 

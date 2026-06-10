@@ -56,7 +56,7 @@ const VisaRequestSchema = new mongoose.Schema(
 );
 
 // W1133 — denormalize branchId from the employee (nullable for candidate visas).
-VisaRequestSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+VisaRequestSchema.plugin(require('./hrBranchScope.plugin'));
 
 module.exports =
   mongoose.models.HrVisaRequest || mongoose.model('HrVisaRequest', VisaRequestSchema);

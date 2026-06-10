@@ -11,7 +11,7 @@
  * visas, health-insurance, assets, …
  *
  * Fix: denormalize `branchId` onto the 7 employee-private models (derived from the
- * employee by models/HR/plugins/hrBranchScope.plugin.js) + enforce the standard
+ * employee by models/HR/hrBranchScope.plugin.js) + enforce the standard
  * W269 isolation on the router (requireBranchAccess + branchFilter on lists +
  * assertBranchMatch on id / action paths). Org-wide modules (comp-bands, positions,
  * surveys, kudos, policies) are intentionally NOT branch-gated.
@@ -30,7 +30,7 @@ const ROUTER = fs.readFileSync(
   path.join(__dirname, '..', 'routes', 'hr', 'hr-modules.routes.js'),
   'utf-8'
 );
-const PLUGIN = fs.readFileSync(path.join(HR_DIR, 'plugins', 'hrBranchScope.plugin.js'), 'utf-8');
+const PLUGIN = fs.readFileSync(path.join(HR_DIR, 'hrBranchScope.plugin.js'), 'utf-8');
 
 // The 7 employee-private models that MUST carry the derive-from-employee plugin.
 const SCOPED_MODELS = [
@@ -110,7 +110,7 @@ describe('W1133 — hrBranchScope.plugin derives branchId from the employee', ()
 describe('W1133 — the 7 employee-private models apply hrBranchScope.plugin', () => {
   test.each(SCOPED_MODELS)('%s applies hrBranchScope.plugin', file => {
     const src = fs.readFileSync(path.join(HR_DIR, file), 'utf-8');
-    expect(src).toMatch(/\.plugin\(require\(['"]\.\/plugins\/hrBranchScope\.plugin['"]\)/);
+    expect(src).toMatch(/\.plugin\(require\(['"]\.\/hrBranchScope\.plugin['"]\)/);
   });
 
   test('ShiftSwap derives from the requester (requesterId), not employeeId', () => {

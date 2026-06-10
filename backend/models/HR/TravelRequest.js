@@ -64,7 +64,7 @@ const TravelRequestSchema = new mongoose.Schema(
 );
 
 // W1133 — denormalize branchId from the employee for cross-branch isolation.
-TravelRequestSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+TravelRequestSchema.plugin(require('./hrBranchScope.plugin'));
 
 module.exports =
   mongoose.models.TravelRequest || mongoose.model('TravelRequest', TravelRequestSchema);

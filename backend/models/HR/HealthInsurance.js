@@ -47,7 +47,7 @@ const HealthInsuranceSchema = new mongoose.Schema(
 );
 
 // W1133 — denormalize branchId from the employee for cross-branch isolation.
-HealthInsuranceSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+HealthInsuranceSchema.plugin(require('./hrBranchScope.plugin'));
 
 module.exports =
   mongoose.models.HealthInsurance || mongoose.model('HealthInsurance', HealthInsuranceSchema);

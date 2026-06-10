@@ -236,22 +236,29 @@ goalSchema.index({ 'icfMapping.icfCode': 1 });
 // R1 (W1090) — fast lookup of goals by linked measure (outcome dashboards)
 goalSchema.index({ 'linkedMeasures.measureId': 1 });
 
-// W452 — ICF mapping invariants enforced before save.
-goalSchema.pre('save', function (next) {
+// W452 + R1 (W1090) — pre-save invariants. ASYNC style (no `next` callback):
+// this codebase runs Mongoose 9, which silently breaks pure callback-style
+// pre('save', function(next)) hooks — `next` is not passed, so every .save()
+// threw "next is not a function" (caught by the W1090 behavioral test; the
+// pre-existing icfMapping block had the same latent bug, never exercised by a
+// real .save()). Throwing aborts the save with the thrown error, exactly as
+// the old `return next(err)` did. See feedback_mongoose_9_pre_save_callback_
+// silent_break + the W483/W954 hook-style lessons.
+goalSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   if (Array.isArray(this.icfMapping) && this.icfMapping.length > 0) {
     // Invariant 1: at most one primary
     const primaries = this.icfMapping.filter(m => m.isPrimary === true);
     if (primaries.length > 1) {
-      return next(new Error('Goal.icfMapping: at most one entry may have isPrimary: true'));
+      throw new Error('Goal.icfMapping: at most one entry may have isPrimary: true');
     }
 
     // Invariant 2: targetQualifier requires baselineQualifier
     for (const m of this.icfMapping) {
       if (typeof m.targetQualifier === 'number' && typeof m.baselineQualifier !== 'number') {
-        return next(
-          new Error(`Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`)
+        throw new Error(
+          `Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`
         );
       }
     }
@@ -260,7 +267,7 @@ goalSchema.pre('save', function (next) {
     const seen = new Set();
     for (const m of this.icfMapping) {
       if (seen.has(m.icfCode)) {
-        return next(new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`));
+        throw new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`);
       }
       seen.add(m.icfCode);
     }
@@ -271,7 +278,7 @@ goalSchema.pre('save', function (next) {
     // Invariant 1: at most one primary measure per goal
     const primaryMeasures = this.linkedMeasures.filter(m => m.role === 'primary');
     if (primaryMeasures.length > 1) {
-      return next(new Error('Goal.linkedMeasures: at most one entry may have role: primary'));
+      throw new Error('Goal.linkedMeasures: at most one entry may have role: primary');
     }
 
     // Invariant 2: no duplicate measureId within the array
@@ -279,7 +286,7 @@ goalSchema.pre('save', function (next) {
     for (const m of this.linkedMeasures) {
       const key = String(m.measureId);
       if (seenMeasures.has(key)) {
-        return next(new Error(`Goal.linkedMeasures: duplicate measureId '${key}'`));
+        throw new Error(`Goal.linkedMeasures: duplicate measureId '${key}'`);
       }
       seenMeasures.add(key);
     }
@@ -287,12 +294,10 @@ goalSchema.pre('save', function (next) {
     // Invariant 3: a targetScore requires a targetDirection (else it is ambiguous)
     for (const m of this.linkedMeasures) {
       if (typeof m.targetScore === 'number' && !m.targetDirection) {
-        return next(new Error('Goal.linkedMeasures: targetScore set without targetDirection'));
+        throw new Error('Goal.linkedMeasures: targetScore set without targetDirection');
       }
     }
   }
-
-  next();
 });
 
 module.exports = mongoose.models.Goal || mongoose.model('Goal', goalSchema);

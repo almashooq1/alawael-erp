@@ -171,5 +171,32 @@ bipFidelityCheckSchema.pre('save', function preSaveInvariants() {
 
 bipFidelityCheckSchema.statics.FIDELITY_THRESHOLDS = FIDELITY_THRESHOLDS;
 
+// ── W1080: unified-core producer ───────────────────────────────────
+// Emit bip_fidelity.checked when a new fidelity check is recorded (the
+// invariants pre-save above has already computed status +
+// overallFidelityPercent by the time post-save runs). Only on new rows;
+// edits don't re-fire. Non-callback hook style (W483 gate).
+bipFidelityCheckSchema.pre('save', function flagBipFidelityChecked() {
+  this.$__bipFidelityChecked = this.isNew;
+});
+
+bipFidelityCheckSchema.post('save', function emitBipFidelityChecked(doc) {
+  if (!doc.$__bipFidelityChecked) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('bip-fidelity', 'bip_fidelity.checked', {
+      checkId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      fidelityPercent:
+        typeof doc.overallFidelityPercent === 'number' ? doc.overallFidelityPercent : null,
+      status: doc.status || null,
+      checkedAt: doc.checkedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.BipFidelityCheck || mongoose.model('BipFidelityCheck', bipFidelityCheckSchema);

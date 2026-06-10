@@ -2548,6 +2548,43 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1080: BIP fidelity check recorded → core timeline ─────────────
+  // A behaviour-plan fidelity check is the #1 predictor of BIP outcomes —
+  // record each check on the timeline; severity reflects the banding
+  // (failing → error, concerning → warning, passing → success).
+  subscribers.push({
+    name: 'bip-fidelity:checked → timeline:record',
+    pattern: 'bip-fidelity.bip_fidelity.checked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev =
+            event.payload.status === 'failing'
+              ? 'error'
+              : event.payload.status === 'concerning'
+                ? 'warning'
+                : 'success';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'bip_fidelity_checked',
+            category: 'clinical',
+            severity: sev,
+            title: `BIP fidelity check: ${event.payload.status || 'recorded'} (${
+              event.payload.fidelityPercent != null ? event.payload.fidelityPercent + '%' : 'n/a'
+            })`,
+            title_ar: 'تم تسجيل فحص دقّة تطبيق الخطة السلوكية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] BipFidelity timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

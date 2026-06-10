@@ -71,10 +71,11 @@ describe('R1 (W1090) — linkedMeasures invariants present in pre(save)', () => 
     expect(SRC).toMatch(/targetScore set without targetDirection/);
   });
 
-  test('invariants live in a callback-style pre(save) (matches W452 hook style)', () => {
+  test('invariants live in an async-style pre(save) (Mongoose-9 safe — no next callback)', () => {
     // Gate-4 (check:hook-style): all hooks on the same event must share a style.
-    // The new invariants extend the existing callback-style pre('save').
-    expect(SRC).toMatch(/goalSchema\.pre\(\s*'save',\s*function\s*\(\s*next\s*\)/);
+    // The single pre('save') is async (throws on violation) — pure callback
+    // style silently breaks under Mongoose 9 ("next is not a function").
+    expect(SRC).toMatch(/goalSchema\.pre\(\s*'save',\s*async\s+function\s*\(\s*\)/);
   });
 });
 

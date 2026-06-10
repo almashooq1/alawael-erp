@@ -156,6 +156,7 @@ const careTimelineSchema = new mongoose.Schema(
         'home_practice_completed',
         'medication_order_started',
         'family_visit_approved',
+        'bip_fidelity_checked',
         // Family
         'family_contact',
         'family_meeting',

@@ -1792,6 +1792,27 @@ const FAMILY_VISIT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const BIP_FIDELITY_EVENTS = {
+  BIP_FIDELITY_CHECKED: {
+    domain: 'bip-fidelity',
+    eventType: 'bip_fidelity.checked',
+    version: 1,
+    description:
+      'تسجيل فحص دقّة تطبيق خطة التدخل السلوكي — A BIP fidelity check was recorded for the beneficiary',
+    payload: {
+      checkId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      fidelityPercent: 'number',
+      status: 'string',
+      checkedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1858,6 +1879,7 @@ const DDD_CONTRACTS = {
   'home-carryover': HOME_CARRYOVER_EVENTS,
   'medication-order': MEDICATION_ORDER_EVENTS,
   'family-visit': FAMILY_VISIT_EVENTS,
+  'bip-fidelity': BIP_FIDELITY_EVENTS,
 };
 
 /**
@@ -1940,6 +1962,7 @@ module.exports = {
   HOME_CARRYOVER_EVENTS,
   MEDICATION_ORDER_EVENTS,
   FAMILY_VISIT_EVENTS,
+  BIP_FIDELITY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

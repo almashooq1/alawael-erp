@@ -83,7 +83,7 @@ const HOOK_RE =
 // phantom-ref baseline 58 → 0 across ~12 waves.
 const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'domains/care-plans/models/UnifiedCarePlan.js',
-  'domains/sessions/models/ClinicalSession.js',
+  // (ClinicalSession removed — W1149 converted callback pre('save') → sync no-next)
   'models/AccountingExpense.js',
   'models/AiRecommendationBundle.js',
   'models/Assessment.js',

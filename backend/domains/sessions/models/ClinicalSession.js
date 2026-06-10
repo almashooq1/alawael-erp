@@ -285,6 +285,10 @@ clinicalSessionSchema.index({ therapistId: 1, scheduledDate: 1 });
 clinicalSessionSchema.index({ episodeId: 1, scheduledDate: -1 });
 clinicalSessionSchema.index({ status: 1, scheduledDate: 1 });
 clinicalSessionSchema.index({ scheduledDate: 1, status: 1, branchId: 1 });
+// R2 (gap #2) — golden-thread backward traversal: "which sessions targeted this
+// goal?" The forward link already exists as goalProgress[].goalId (ref
+// TherapeuticGoal); this index makes the reverse query efficient at scale.
+clinicalSessionSchema.index({ 'goalProgress.goalId': 1 });
 
 // ─── Virtuals ───────────────────────────────────────────────────────────────
 
@@ -303,7 +307,12 @@ clinicalSessionSchema.virtual('averageGoalProgress').get(function () {
 
 // ─── Pre-save ───────────────────────────────────────────────────────────────
 
-clinicalSessionSchema.pre('save', function (next) {
+// Mongoose-9 sync throw-style pre-save (no `next`): callback-style `function(next)`
+// throws "next is not a function" under modern Kareem and the global hook shim
+// (W954 "data won't save" class). Converted to no-`next` to match W1090/W946/W948;
+// body is synchronous so behaviour is identical. Ratchets the callback-hook
+// baseline in check-mongoose-hook-style.js down by one (this file removed there).
+clinicalSessionSchema.pre('save', function () {
   if (!this.sessionNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -316,8 +325,6 @@ clinicalSessionSchema.pre('save', function (next) {
       (this.actualEndTime - this.actualStartTime) / (1000 * 60)
     );
   }
-
-  next();
 });
 
 // ─── Static Methods ─────────────────────────────────────────────────────────

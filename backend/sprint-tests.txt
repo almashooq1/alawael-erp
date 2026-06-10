@@ -594,6 +594,8 @@ __tests__/sensory-diet-behavioral-wave691.test.js
 __tests__/sensory-diet-wave691.test.js
 __tests__/services-use-defensive-guard-wave412.test.js
 __tests__/session-branch-tenancy-wave647.test.js
+__tests__/session-goal-linkage-behavioral-wave1149.test.js
+__tests__/session-goal-linkage-wave1149.test.js
 __tests__/sibling-adjustment-behavioral-wave468.test.js
 __tests__/sibling-adjustment-wave468.test.js
 __tests__/sidebar-paths-routed.test.js

@@ -778,3 +778,4 @@ __tests__/clinical-core-linkage-guard-wave1046.test.js
 __tests__/clinical-assessment-core-linkage-wave1047.test.js
 __tests__/unified-core-linkage-coverage-wave1047.test.js
 __tests__/deferred-islands-core-linkage-wave1075.test.js
+__tests__/residual-islands-core-linkage-wave1120.test.js

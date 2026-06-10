@@ -91,8 +91,51 @@ const LINKED_W1075 = [
   },
 ];
 
+// W1120 (2026-06-10) — the six residual islands found unlinked on BOTH main and
+// the parallel feat/w928 branch (assessment-family + CRPD + caregiver lifecycles).
+// Same regression-lock contract as LINKED_W1075.
+const LINKED_W1120 = [
+  {
+    file: 'ADLAssessment.js',
+    schema: 'adlAssessmentSchema',
+    timelineEventType: 'adl_assessment',
+    pattern: 'clinical-assessment.adl.assessment_completed',
+  },
+  {
+    file: 'IntegrationAssessment.js',
+    schema: 'integrationAssessmentSchema',
+    timelineEventType: 'integration_assessment',
+    pattern: 'clinical-assessment.integration.assessment_completed',
+  },
+  {
+    file: 'SelfAdvocacyTrainingPlan.js',
+    schema: 'SelfAdvocacyTrainingPlanSchema',
+    timelineEventType: 'self_advocacy_completed',
+    pattern: 'self-advocacy.plan.completed',
+  },
+  {
+    file: 'DecisionRightsAssessment.js',
+    schema: 'DecisionRightsAssessmentSchema',
+    timelineEventType: 'decision_rights_assessment',
+    pattern: 'decision-rights.assessment.finalized',
+  },
+  {
+    file: 'IndependentLivingPlan.js',
+    schema: 'independentLivingPlanSchema',
+    timelineEventType: 'independent_living_completed',
+    pattern: 'independent-living.plan.completed',
+  },
+  {
+    file: 'CaregiverSupportProgram.js',
+    schema: 'CaregiverSupportProgramSchema',
+    timelineEventType: 'caregiver_support_completed',
+    pattern: 'caregiver-support.program.completed',
+  },
+];
+
 // Audit 2026-06-10 — genuine islands still unlinked. Ratcheted: promote to a
-// LINKED guard (and delete from here) when wired. W1075 cleared the other eight.
+// LINKED guard (and delete from here) when wired. W1075 cleared eight, W1120 the
+// final six residuals — only the MDTCoordination duplicate remains deferred.
 const DEFERRED_ISLANDS = {
   'MDTCoordination.js':
     'parallel/duplicate of care/MdtMeeting.model.js (both register MDT meetings) — linking it would double-emit; consolidate the two models first',
@@ -163,6 +206,44 @@ describe('W1075 — the eight deferred islands are now LINKED (regression lock)'
         const idx = src.indexOf(`${schema}.post('save'`);
         // Match the COMPILE site (schema as 2nd arg) — not a 1-arg runtime
         // mongoose.model('X') lookup inside a method (e.g. MdtMeeting line ~144).
+        const compileIdx = src.search(new RegExp(`mongoose\\.model\\(\\s*['"][^'"]+['"]\\s*,\\s*${schema}\\b`));
+        expect(idx).toBeGreaterThan(0);
+        expect(compileIdx).toBeGreaterThan(0);
+        expect(idx).toBeLessThan(compileIdx);
+      });
+
+      it('uses the W954-safe signature function(doc) — not a lone next', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*doc\\s*\\)`));
+        expect(src).not.toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*next\\s*\\)`));
+      });
+
+      it('captures prevStatus via post(init) for transition detection', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]init['"]`));
+      });
+
+      it(`CareTimeline enum includes '${timelineEventType}'`, () => {
+        expect(TIMELINE_SRC).toMatch(new RegExp(`['"]${timelineEventType}['"]`));
+      });
+
+      it(`a subscriber listens on '${pattern}'`, () => {
+        expect(SUBSCRIBERS_SRC).toMatch(new RegExp(`pattern:\\s*['"]${pattern.replace(/\./g, '\\.')}['"]`));
+      });
+    });
+  }
+});
+
+describe('W1120 — the six residual islands are now LINKED (regression lock)', () => {
+  for (const { file, schema, timelineEventType, pattern } of LINKED_W1120) {
+    describe(file, () => {
+      const src = read(file);
+
+      it('has a LIVE producer hook publishing to the bus', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]`));
+        expect(src).toMatch(/integrationBus\.publish\(/);
+      });
+
+      it('the producer is defined BEFORE mongoose.model() compile (not runtime-dead)', () => {
+        const idx = src.indexOf(`${schema}.post('save'`);
         const compileIdx = src.search(new RegExp(`mongoose\\.model\\(\\s*['"][^'"]+['"]\\s*,\\s*${schema}\\b`));
         expect(idx).toBeGreaterThan(0);
         expect(compileIdx).toBeGreaterThan(0);

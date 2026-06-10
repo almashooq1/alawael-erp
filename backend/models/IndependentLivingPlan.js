@@ -334,6 +334,26 @@ independentLivingPlanSchema.virtual('durationWeeks').get(function () {
   return 0;
 });
 
+// ── Unified-core linkage (W1120 — independent-living plan island → CareTimeline) ──
+independentLivingPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+independentLivingPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('independent-living', 'plan.completed', {
+        independentLivingPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.IndependentLivingPlan ||
   mongoose.model('IndependentLivingPlan', independentLivingPlanSchema);

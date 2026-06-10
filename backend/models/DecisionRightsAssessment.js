@@ -146,6 +146,27 @@ DecisionRightsAssessmentSchema.pre('save', async function () {
   
 });
 
+// ── Unified-core linkage (W1120 — decision-rights assessment island → CareTimeline) ──
+DecisionRightsAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+DecisionRightsAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('decision-rights', 'assessment.finalized', {
+        decisionRightsAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        decisionType: doc.decisionType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.DecisionRightsAssessment ||
   mongoose.model('DecisionRightsAssessment', DecisionRightsAssessmentSchema);

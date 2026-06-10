@@ -124,6 +124,26 @@ SelfAdvocacyTrainingPlanSchema.pre('save', async function () {
   }
 });
 
+// ── Unified-core linkage (W1120 — self-advocacy plan island → CareTimeline) ──
+SelfAdvocacyTrainingPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+SelfAdvocacyTrainingPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('self-advocacy', 'plan.completed', {
+        selfAdvocacyPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.SelfAdvocacyTrainingPlan ||
   mongoose.model('SelfAdvocacyTrainingPlan', SelfAdvocacyTrainingPlanSchema);

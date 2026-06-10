@@ -355,6 +355,27 @@ CaregiverSupportProgramSchema.virtual('isOverdue').get(function () {
 CaregiverSupportProgramSchema.set('toJSON', { virtuals: true });
 CaregiverSupportProgramSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1120 — caregiver-support program island → CareTimeline) ──
+CaregiverSupportProgramSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+CaregiverSupportProgramSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('caregiver-support', 'program.completed', {
+        caregiverSupportProgramId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        programType: doc.programType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.CaregiverSupportProgram ||
   mongoose.model('CaregiverSupportProgram', CaregiverSupportProgramSchema);

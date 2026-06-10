@@ -114,6 +114,13 @@ const careTimelineSchema = new mongoose.Schema(
         'emergency_plan_activated', // W1075 — per-beneficiary emergency plan activated
         'consultation', // W1075 — cross-discipline therapist consultation answered/closed
         'cdss_alert_resolved', // W1075 — CDSS alert resolved
+        // Residual islands now linked (W1120 — 6 assessment/plan/CRPD lifecycle models)
+        'adl_assessment', // W1120 — activities-of-daily-living assessment completed
+        'integration_assessment', // W1120 — sensory-integration assessment completed
+        'self_advocacy_completed', // W1120 — self-advocacy training plan completed (CRPD)
+        'decision_rights_assessment', // W1120 — decision-rights capacity assessment finalized (CRPD)
+        'independent_living_completed', // W1120 — independent-living plan completed
+        'caregiver_support_completed', // W1120 — caregiver support program completed
         // Family
         'family_contact',
         'family_meeting',

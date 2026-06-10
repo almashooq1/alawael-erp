@@ -247,6 +247,27 @@ integrationAssessmentSchema.pre('save', async function () {
 
 });
 
+// ── Unified-core linkage (W1120 — integration assessment island → CareTimeline) ──
+integrationAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+integrationAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'integration.assessment_completed', {
+        integrationAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        assessmentType: doc.assessmentType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.IntegrationAssessment ||
   mongoose.model('IntegrationAssessment', integrationAssessmentSchema);

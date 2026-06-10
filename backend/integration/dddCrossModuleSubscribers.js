@@ -2078,6 +2078,139 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ═══ Residual islands → Timeline (W1120 — 6 assessment/plan/CRPD lifecycle models) ═══
+  subscribers.push({
+    name: 'adl:completed → timeline:record',
+    pattern: 'clinical-assessment.adl.assessment_completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'adl_assessment',
+          category: 'clinical',
+          severity: 'info',
+          title: `ADL assessment completed (${event.payload.assessmentType || ''})`.trim(),
+          title_ar: `إتمام تقييم الأنشطة اليومية (${event.payload.assessmentType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] adl timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'integration-assessment:completed → timeline:record',
+    pattern: 'clinical-assessment.integration.assessment_completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'integration_assessment',
+          category: 'clinical',
+          severity: 'info',
+          title: `Sensory-integration assessment completed (${event.payload.assessmentType || ''})`.trim(),
+          title_ar: `إتمام تقييم التكامل الحسّي (${event.payload.assessmentType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] integration-assessment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'self-advocacy:completed → timeline:record',
+    pattern: 'self-advocacy.plan.completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'self_advocacy_completed',
+          category: 'clinical',
+          severity: 'success',
+          title: 'Self-advocacy training plan completed',
+          title_ar: 'إتمام خطة تدريب المناصرة الذاتية',
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] self-advocacy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'decision-rights:finalized → timeline:record',
+    pattern: 'decision-rights.assessment.finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'decision_rights_assessment',
+          category: 'clinical',
+          severity: 'info',
+          title: `Decision-rights capacity assessment finalized (${event.payload.decisionType || ''})`.trim(),
+          title_ar: `اعتماد تقييم القدرة على اتخاذ القرار (${event.payload.decisionType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] decision-rights timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'independent-living:completed → timeline:record',
+    pattern: 'independent-living.plan.completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'independent_living_completed',
+          category: 'clinical',
+          severity: 'success',
+          title: 'Independent-living plan completed',
+          title_ar: 'إتمام خطة الحياة المستقلة',
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] independent-living timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'caregiver-support:completed → timeline:record',
+    pattern: 'caregiver-support.program.completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'caregiver_support_completed',
+          category: 'family',
+          severity: 'success',
+          title: `Caregiver support program completed (${event.payload.programType || ''})`.trim(),
+          title_ar: `إتمام برنامج دعم مقدّم الرعاية (${event.payload.programType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] caregiver-support timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

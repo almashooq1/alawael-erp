@@ -466,5 +466,26 @@ adlAssessmentSchema.statics.getBeneficiaryADLProgress = async function (benefici
   };
 };
 
+// ── Unified-core linkage (W1120 — ADL assessment island → CareTimeline) ──
+adlAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+adlAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'adl.assessment_completed', {
+        adlAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        assessmentType: doc.assessmentType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.ADLAssessment || mongoose.model('ADLAssessment', adlAssessmentSchema);

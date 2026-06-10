@@ -1736,6 +1736,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1053: care plan review recorded → core timeline ───────────────
+  // When a care-plan review is recorded, place it as a clinical milestone
+  // on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'plan-review:recorded → timeline:record',
+    pattern: 'plan-review.plan_review.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const rt = event.payload.reviewType ? ` (${event.payload.reviewType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'plan_review_recorded',
+            category: 'clinical',
+            severity: 'info',
+            title: `Care plan review recorded${rt}`,
+            title_ar: 'تم تسجيل مراجعة خطة الرعاية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PlanReview timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

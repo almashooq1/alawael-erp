@@ -1233,6 +1233,26 @@ const PRIOR_AUTHORIZATION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PLAN_REVIEW_EVENTS = {
+  PLAN_REVIEW_RECORDED: {
+    domain: 'plan-review',
+    eventType: 'plan_review.recorded',
+    version: 1,
+    description: 'تسجيل مراجعة خطة الرعاية — Care plan review recorded',
+    payload: {
+      reviewId: 'string',
+      beneficiaryId: 'string',
+      reviewType: 'string',
+      progressRating: 'string',
+      reviewDate: 'date',
+      recordedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1272,6 +1292,7 @@ const DDD_CONTRACTS = {
   'seating-postural-assessment': SEATING_POSTURAL_EVENTS,
   'sensory-diet-program': SENSORY_DIET_EVENTS,
   'prior-authorization': PRIOR_AUTHORIZATION_EVENTS,
+  'plan-review': PLAN_REVIEW_EVENTS,
 };
 
 /**
@@ -1327,6 +1348,7 @@ module.exports = {
   SEATING_POSTURAL_EVENTS,
   SENSORY_DIET_EVENTS,
   PRIOR_AUTHORIZATION_EVENTS,
+  PLAN_REVIEW_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

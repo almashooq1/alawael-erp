@@ -145,6 +145,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'coupon-usage', // W1105 — beneficiary coupon redeemed → core timeline
   'insurance-policy', // W1106 — beneficiary insurance policy activated → core timeline
   'red-flag-override', // W1107 — clinical red-flag override recorded → core timeline
+  'smart-scheduler', // W1108 — beneficiary smart schedule activated → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -264,6 +265,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'coupon_usage', // W1105 — coupon_usage.redeemed (CouponUsage)
     'insurance_policy', // W1106 — insurance_policy.activated (InsurancePolicy)
     'red_flag_override', // W1107 — red_flag_override.recorded (RedFlagOverride)
+    'smart_scheduler', // W1108 — smart_scheduler.activated (SmartScheduler)
   ])
 );
 

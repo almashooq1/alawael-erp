@@ -3391,6 +3391,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'smart-scheduler:activated → timeline:record',
+    pattern: 'smart-scheduler.smart_scheduler.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const freq = event.payload.frequency;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'smart_scheduler_activated',
+            category: 'administrative',
+            severity: 'success',
+            title: `Smart schedule activated${freq ? ` (${freq})` : ''}`,
+            title_ar: 'تم تفعيل جدول ذكي للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SmartScheduler timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

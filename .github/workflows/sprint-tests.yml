@@ -1410,6 +1410,8 @@ on:
       - 'backend/__tests__/insurance-policy-activated-core-linkage-wave1106.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/red-flag-override-recorded-core-linkage-wave1107.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-scheduler-activated-core-linkage-wave1108.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2803,6 +2805,8 @@ on:
       - 'backend/__tests__/insurance-policy-activated-core-linkage-wave1106.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/red-flag-override-recorded-core-linkage-wave1107.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-scheduler-activated-core-linkage-wave1108.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

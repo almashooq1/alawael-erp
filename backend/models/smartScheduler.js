@@ -359,6 +359,32 @@ smartSchedulerSchema.index({ beneficiaryId: 1, programId: 1 });
 smartSchedulerSchema.index({ status: 1 });
 smartSchedulerSchema.index({ planStartDate: 1, planEndDate: 1 });
 
+// ── W1108 — publish smart_scheduler.activated when a schedule goes active ──────
+smartSchedulerSchema.pre('save', function flagSmartSchedulerActivated() {
+  const becameActive = (this.isNew || this.isModified('status')) && this.status === 'active';
+  this.$__smartSchedulerActivated = becameActive;
+});
+
+smartSchedulerSchema.post('save', function emitSmartSchedulerActivated(doc) {
+  if (!doc.$__smartSchedulerActivated) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const plan = doc.schedulingPlan || {};
+    integrationBus.publish('smart-scheduler', 'smart_scheduler.activated', {
+      schedulerId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.programId ? { programId: String(doc.programId) } : {}),
+      ...(plan.frequency ? { frequency: plan.frequency } : {}),
+      ...(plan.planStartDate ? { planStartDate: plan.planStartDate } : {}),
+      ...(plan.planEndDate ? { planEndDate: plan.planEndDate } : {}),
+      activatedAt: new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports = {
   model: mongoose.models.SmartScheduler || mongoose.model('SmartScheduler', smartSchedulerSchema),
   schema: smartSchedulerSchema,

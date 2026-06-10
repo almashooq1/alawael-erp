@@ -184,6 +184,7 @@ const careTimelineSchema = new mongoose.Schema(
         'coupon_usage_redeemed',
         'insurance_policy_activated',
         'red_flag_override_recorded',
+        'smart_scheduler_activated',
         // Family
         'family_contact',
         'family_meeting',

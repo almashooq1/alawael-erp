@@ -2400,6 +2400,29 @@ const RED_FLAG_OVERRIDE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SMART_SCHEDULER_EVENTS = {
+  SMART_SCHEDULER_ACTIVATED: {
+    domain: 'smart-scheduler',
+    eventType: 'smart_scheduler.activated',
+    version: 1,
+    description:
+      'تفعيل جدول ذكي للمستفيد بعد اعتماده — A smart schedule for a beneficiary was approved and activated',
+    payload: {
+      schedulerId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      programId: 'string',
+      frequency: 'string',
+      planStartDate: 'date',
+      planEndDate: 'date',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2494,6 +2517,7 @@ const DDD_CONTRACTS = {
   'coupon-usage': COUPON_USAGE_EVENTS,
   'insurance-policy': INSURANCE_POLICY_EVENTS,
   'red-flag-override': RED_FLAG_OVERRIDE_EVENTS,
+  'smart-scheduler': SMART_SCHEDULER_EVENTS,
 };
 
 /**
@@ -2600,6 +2624,7 @@ module.exports = {
   COUPON_USAGE_EVENTS,
   INSURANCE_POLICY_EVENTS,
   RED_FLAG_OVERRIDE_EVENTS,
+  SMART_SCHEDULER_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

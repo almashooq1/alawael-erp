@@ -134,8 +134,20 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 ### Tier 3 — operational / governance
 | Domain | Model | Event | Status |
 | --- | --- | --- | --- |
-| Insurance / NPHIES claims | `NphiesInsuranceClaim` | `insurance.claim.approved` / `.rejected` → `insurance_claim` | ✅ **W994** |
-| Inventory low-stock · maintenance overdue · contract/document expiry · transport incidents | — | — | Open — mostly **not** beneficiary-keyed, so they belong on dashboards/KPIs, not the per-beneficiary `CareTimeline` |
+| Insurance / NPHIES claims | `NphiesInsuranceClaim` | `insurance.claim.approved` / `.rejected` → `insurance_claim` | ✅ **W994** (per-beneficiary timeline) |
+| Facilities — PPM / inspection overdue | `FacilityAsset` | smart-alert **rule** `facility-asset-ppm-overdue` (category `operational`) → `Alert` | ✅ **W1006** — first operational rule; org-scoped, NOT the beneficiary timeline |
+| Inventory low-stock · contract/document expiry · transport incidents | — | (add a `category:'operational'` rule in `alerts/rules/`) | Open — **not** beneficiary-keyed → use the alerts rule-engine path below, not `CareTimeline` |
+
+> **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
+> per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →
+> `dddCrossModuleSubscribers`). **Org/operational** events (facilities, inventory,
+> finance thresholds, expiry) feed the org-scoped **`Alert`** model via the
+> **smart-alerts rule engine** (`alerts/rules/*` → `AlertDispatcher` tick →
+> `/api/v1/dashboards/alerts`). To add an operational signal: drop a
+> `{ id, severity, category:'operational', description, evaluate(ctx) }` rule in
+> `alerts/rules/`, `require` it in `alerts/rules/index.js`, and add its model to
+> the `modelNames` loader in `app.js` — no `CareTimeline` enum or DDD contract
+> needed. A finding may override the rule's `severity` (e.g. life-safety → critical).
 
 **Mechanism guidance:** prefer **native pre-compile model hooks (C)** for models
 created via many routes (path-agnostic, reliable). Use a **bridge MAPPING (A)**

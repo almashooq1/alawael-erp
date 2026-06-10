@@ -53,4 +53,10 @@ module.exports = [
   // no-op when the store isn't wired, so it's safe to ship now
   // and turn on later by registering the store in app.js.
   require('./kpi-anomaly-detected'),
+
+  // ── W1006 — operational / facilities (1) ────────────────────
+  // First `category: 'operational'` rule — facility PPM/inspection
+  // overdue. Needs `FacilityAsset` in the app.js model loader to fire
+  // (defensive no-op otherwise).
+  require('./facility-asset-ppm-overdue'),
 ];

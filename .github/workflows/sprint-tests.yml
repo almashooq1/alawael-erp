@@ -1303,6 +1303,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/infection-surveillance-wave1042.test.js'
       - 'backend/__tests__/infection-surveillance-behavioral-wave1042.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-asset-overdue-rule-wave1006.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2589,6 +2591,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/infection-surveillance-wave1042.test.js'
       - 'backend/__tests__/infection-surveillance-behavioral-wave1042.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/facility-asset-overdue-rule-wave1006.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

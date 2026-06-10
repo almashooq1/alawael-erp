@@ -19,7 +19,10 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { effectiveBranchScope } = require('../../../middleware/assertBranchMatch');
-const { documentationBacklog } = require('../../../services/supervisorOps.service');
+const {
+  documentationBacklog,
+  branchProductivity,
+} = require('../../../services/supervisorOps.service');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -50,6 +53,34 @@ router.get(
 
     const sinceDays = Math.min(parseInt(req.query.days, 10) || 7, 90);
     const data = await documentationBacklog({ branchId, sinceDays });
+    return res.json({ success: true, data: { branchId: String(branchId), ...data } });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /supervisor-ops/productivity[?branchId=&days=]
+//   Per-therapist productivity across a branch: completed (window + today),
+//   therapy minutes delivered, documentation rate. Answers "how many sessions
+//   did therapist X complete today? how many minutes did Y deliver this week?"
+//   Same W269 branch scoping as the backlog route. (W1173)
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/supervisor-ops/productivity',
+  asyncHandler(async (req, res) => {
+    const scoped = effectiveBranchScope(req);
+    let branchId = scoped || null;
+    if (!branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+      branchId = req.query.branchId;
+    }
+    if (!branchId) {
+      return res.status(400).json({
+        success: false,
+        error: 'branchId required — a cross-branch role must specify ?branchId.',
+      });
+    }
+
+    const sinceDays = Math.min(parseInt(req.query.days, 10) || 7, 90);
+    const data = await branchProductivity({ branchId, sinceDays });
     return res.json({ success: true, data: { branchId: String(branchId), ...data } });
   })
 );

@@ -175,11 +175,90 @@ async function documentationBacklog(opts = {}) {
   };
 }
 
+/**
+ * PURE — per-therapist productivity over a set of sessions (the supervisor's
+ * "completed today / therapy minutes this week" questions). Computed on the
+ * CANONICAL ClinicalSession (NOT the legacy-TherapySession therapistUtilization
+ * service) so it stays consistent with the rest of the golden-thread/ops layer.
+ * @param {object[]} sessions
+ * @param {{ todayStart?: Date }} [opts]
+ * @returns {Record<string, object>} therapistId → productivity stats
+ */
+function summarizeProductivityByTherapist(sessions, opts = {}) {
+  const todayStart = opts.todayStart || null;
+  const byTherapist = {};
+  for (const s of Array.isArray(sessions) ? sessions : []) {
+    if (!s || !s.therapistId) continue;
+    const tid = String(s.therapistId);
+    if (!byTherapist[tid]) {
+      byTherapist[tid] = {
+        total: 0,
+        completed: 0,
+        documented: 0,
+        awaitingDocumentation: 0,
+        noShow: 0,
+        deliveredMinutes: 0,
+        completedToday: 0,
+      };
+    }
+    const t = byTherapist[tid];
+    const state = classifySessionWorkflowState(s);
+    t.total += 1;
+    if (state === 'documented') t.documented += 1;
+    else if (state === 'awaiting_documentation') t.awaitingDocumentation += 1;
+    else if (state === 'no_show') t.noShow += 1;
+
+    if (state === 'documented' || state === 'awaiting_documentation') {
+      t.completed += 1;
+      t.deliveredMinutes +=
+        typeof s.actualDurationMinutes === 'number' ? s.actualDurationMinutes : 0;
+      if (todayStart && s.scheduledDate && new Date(s.scheduledDate) >= todayStart) {
+        t.completedToday += 1;
+      }
+    }
+  }
+  for (const tid of Object.keys(byTherapist)) {
+    const t = byTherapist[tid];
+    t.documentedRate = t.completed > 0 ? Math.round((t.documented / t.completed) * 100) : 100;
+  }
+  return byTherapist;
+}
+
+/**
+ * READ-ONLY — per-therapist productivity across a branch over a recent window:
+ * completed sessions (this window + today) + therapy minutes delivered +
+ * documentation rate. Answers the supervisor's throughput questions. (W1173)
+ * @param {{ branchId?: string|ObjectId, sinceDays?: number }} [opts]
+ */
+async function branchProductivity(opts = {}) {
+  const ClinicalSession = mongoose.model('ClinicalSession');
+  const sinceDays = Number.isFinite(opts.sinceDays) && opts.sinceDays > 0 ? opts.sinceDays : 7;
+  const since = new Date();
+  since.setDate(since.getDate() - sinceDays);
+  since.setHours(0, 0, 0, 0);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const q = { isDeleted: { $ne: true }, scheduledDate: { $gte: since } };
+  if (opts.branchId) q.branchId = opts.branchId;
+
+  const sessions = await ClinicalSession.find(q).select(DOC_SELECT).lean();
+  const byTherapist = summarizeProductivityByTherapist(sessions, { todayStart });
+
+  return {
+    windowDays: sinceDays,
+    therapistCount: Object.keys(byTherapist).length,
+    byTherapist,
+  };
+}
+
 module.exports = {
   WORKFLOW_STATES,
   isDocumented,
   classifySessionWorkflowState,
   summarizeDailyOps,
+  summarizeProductivityByTherapist,
   dailyBoardForTherapist,
   documentationBacklog,
+  branchProductivity,
 };

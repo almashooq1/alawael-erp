@@ -115,7 +115,12 @@ router.post(
   requireService,
   validate(validateCreateEmployee),
   asyncHandler(async (req, res) => {
-    const employee = await hr.employee.create(req.body);
+    // W1178 — restricted callers cannot spoof branchId on create; pin to own branch
+    const createScope = effectiveBranchScope(req);
+    const employee = await hr.employee.create({
+      ...req.body,
+      ...(createScope ? { branchId: createScope } : {}),
+    });
     res.status(201).json({ success: true, data: employee });
   })
 );

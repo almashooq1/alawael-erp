@@ -275,6 +275,7 @@ __tests__/document-expiry-radar-service.test.js
 __tests__/documents-json-create-wave933.test.js
 __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
 __tests__/domain-mounts-central-branch-scope-wave1171.test.js
+__tests__/domain-raw-body-persistence-wave1178.test.js
 __tests__/domain-resource-param-guards-wave1175.test.js
 __tests__/domain-sod-policy.test.js
 __tests__/domain-spread-order-mass-assignment-wave1176.test.js

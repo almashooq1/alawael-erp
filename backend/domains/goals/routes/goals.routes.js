@@ -84,7 +84,12 @@ router.post(
   '/goals',
   validate(validateCreateGoal),
   asyncHandler(async (req, res) => {
-    const goal = new TherapeuticGoal(req.body);
+    // W1178 — restricted callers cannot spoof branchId on create; pin to own branch
+    const createScope = effectiveBranchScope(req);
+    const goal = new TherapeuticGoal({
+      ...req.body,
+      ...(createScope ? { branchId: createScope } : {}),
+    });
     await goal.save();
     return res.status(201).json({ success: true, data: goal });
   })
@@ -150,7 +155,9 @@ router.put(
     if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.goalId, req.body, {
+    // W1178 — ownership/identity fields are immutable via generic update
+    const { branchId: _branchId, beneficiaryId: _beneficiaryId, ...safeUpdate } = req.body;
+    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.goalId, safeUpdate, {
       returnDocument: 'after',
       runValidators: true,
     }).lean();

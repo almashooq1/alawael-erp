@@ -111,6 +111,8 @@ const careTimelineSchema = new mongoose.Schema(
         'diet_prescription_activated',
         // Behavior plan completed (W1032 — unified-core linkage)
         'behavior_plan_completed',
+        // AAC communication aid profile activated (W1042 — unified-core linkage)
+        'communication_aid_activated',
         // Family
         'family_contact',
         'family_meeting',

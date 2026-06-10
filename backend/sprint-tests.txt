@@ -748,3 +748,4 @@ __tests__/respite-completion-core-linkage-wave1029.test.js
 __tests__/transition-completion-core-linkage-wave1030.test.js
 __tests__/diet-prescription-activation-core-linkage-wave1031.test.js
 __tests__/behavior-plan-completion-core-linkage-wave1032.test.js
+__tests__/communication-aid-activation-core-linkage-wave1042.test.js

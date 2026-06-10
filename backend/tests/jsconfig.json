@@ -1,0 +1,16 @@
+{
+  // Bounds the auto-generated test tree as its own lightweight TS-server
+  // project so these ~1,350 files stop falling into VS Code's unbounded
+  // "inferred project" (which dragged the whole backend tree in on open).
+  // checkJs:false here keeps the editor fast; CI type-checking is governed
+  // by the parent backend/jsconfig.json, which is unchanged.
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "commonjs",
+    "checkJs": false,
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": ["**/*.js"],
+  "exclude": ["node_modules", "**/node_modules", "**/__snapshots__"]
+}

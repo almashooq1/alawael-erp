@@ -16,7 +16,25 @@
   "scm.decorations.enabled": false,
 
   // TypeScript: Reduce overhead - AGGRESSIVE SETTINGS
-  "typescript.tsserver.maxTsServerMemory": 4096,
+  // Headroom for the large backend project; the warning about "project-wide
+  // features" fires when a single TS-server project exceeds its budget.
+  "typescript.tsserver.maxTsServerMemory": 8192,
+  // Keep any source file that is NOT under a jsconfig/tsconfig (the "implicit
+  // project") cheap, so opening such a file never triggers strict, project-wide
+  // analysis of the whole tree.
+  "js/ts.implicitProjectConfig.checkJs": false,
+  "js/ts.implicitProjectConfig.strictNullChecks": false,
+  "js/ts.implicitProjectConfig.experimentalDecorators": false,
+  // ── FINAL KILL-SWITCH (opt-in) ──────────────────────────────────────────
+  // The live backend is ~30 MB of JS; TypeScript's project-wide-features cap is
+  // a hard-coded ~20 MB that NO setting can raise, so the "project-wide
+  // features" hint is an inherent limit, not a misconfig. We keep semantic
+  // features ON (go-to-definition / completions / hover for the open file and
+  // its imports) because that is far more valuable than silencing a cosmetic
+  // banner. If the banner ever bothers you, flip the next line to "always":
+  // it permanently silences the warning but DISABLES cross-file semantics
+  // (syntax-only mode: formatting/outline/folding/in-file rename still work).
+  "typescript.tsserver.useSyntaxServer": "auto",
   "typescript.tsserver.watchOptions": {
     "watchDirectory": "dynamicPriorityPolling",
     "watchFile": "dynamicPriorityPolling",
@@ -54,7 +72,8 @@
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
     "**/*.log": true,
-    "_archived": true,
+    "**/_archived": true, // dead code anywhere (incl. backend/_archived = 28.6 MB) — out of the language service
+    "**/.jest-cache": true,
     "backups": true,
     "**/package-lock.json": false // Keep visible for npm management
   },
@@ -70,7 +89,7 @@
     "**/out": true,
     "**/*.log": true,
     "**/package-lock.json": true,
-    "_archived/**": true,
+    "**/_archived/**": true,
     "docs/archive/**": true,
     "docs/wiki/**": true,
     "backups/**": true,
@@ -101,7 +120,7 @@
     "**/.nyc_output/**": true,
     "**/tmp/**": true,
     "**/temp/**": true,
-    "_archived/**": true,
+    "**/_archived/**": true,
     "backups/**": true,
     "docs/archive/**": true,
     "services/**": true

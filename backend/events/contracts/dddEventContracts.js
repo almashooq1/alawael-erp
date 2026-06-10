@@ -1008,6 +1008,27 @@ const DIET_PRESCRIPTION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1042 — AAC communication aid profile lifecycle → unified core.
+const COMMUNICATION_AID_EVENTS = {
+  COMMUNICATION_AID_ACTIVATED: {
+    domain: 'communication-aid',
+    eventType: 'communication_aid.activated',
+    version: 1,
+    description: 'تفعيل ملف وسيلة التواصل المعزز — AAC communication aid profile activated',
+    payload: {
+      profileId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      primaryModality: 'string',
+      vocabularyLevel: 'string',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1036,6 +1057,7 @@ const DDD_CONTRACTS = {
   respite: RESPITE_EVENTS,
   transition: TRANSITION_EVENTS,
   'diet-prescription': DIET_PRESCRIPTION_EVENTS,
+  'communication-aid': COMMUNICATION_AID_EVENTS,
 };
 
 /**
@@ -1080,6 +1102,7 @@ module.exports = {
   RESPITE_EVENTS,
   TRANSITION_EVENTS,
   DIET_PRESCRIPTION_EVENTS,
+  COMMUNICATION_AID_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

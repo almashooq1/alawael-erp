@@ -1,0 +1,15 @@
+{
+  // Bounds the __tests__ drift-guard tree as its own lightweight TS-server
+  // project so these ~1,300 files stop falling into VS Code's unbounded
+  // "inferred project". checkJs:false keeps editing fast; CI type-checking
+  // is governed by the parent backend/jsconfig.json, which is unchanged.
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "commonjs",
+    "checkJs": false,
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": ["**/*.js"],
+  "exclude": ["node_modules", "**/node_modules", "**/__snapshots__"]
+}

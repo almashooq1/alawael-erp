@@ -1406,6 +1406,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── AAC communication aid profile activated → unified-core timeline (W1042) ──
+  // A CommunicationAidProfile reaching lifecycleStatus 'active' (the beneficiary
+  // now has an active augmentative/alternative communication aid in place) is a
+  // clinical milestone on the longitudinal record.
+  subscribers.push({
+    name: 'communication-aid:activated → timeline:record',
+    pattern: 'communication-aid.communication_aid.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const modality = event.payload.primaryModality
+            ? ` (${event.payload.primaryModality})`
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'communication_aid_activated',
+            category: 'clinical',
+            severity: 'success',
+            title: `Communication aid profile activated${modality}`,
+            title_ar: 'تم تفعيل ملف وسيلة التواصل المعزز',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Communication aid timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

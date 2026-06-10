@@ -285,6 +285,34 @@ CommunicationAidProfileSchema.virtual('reassessmentOverdue').get(function () {
 CommunicationAidProfileSchema.set('toJSON', { virtuals: true });
 CommunicationAidProfileSchema.set('toObject', { virtuals: true });
 
+// ── W1042: unified-core producer — AAC profile activated ────────────
+// When a CommunicationAidProfile reaches lifecycleStatus 'active', publish a
+// domain event so the cross-module subscriber records a milestone on the
+// beneficiary's longitudinal CareTimeline. Non-callback hook style (W483-safe).
+CommunicationAidProfileSchema.pre('save', function () {
+  this.$__communicationAidActivatedNow =
+    this.lifecycleStatus === 'active' && (this.isNew || this.isModified('lifecycleStatus'));
+});
+
+CommunicationAidProfileSchema.post('save', function emitCommunicationAidActivated(doc) {
+  if (!doc || !doc.$__communicationAidActivatedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('communication-aid', 'communication_aid.activated', {
+        profileId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        primaryModality: doc.primaryModality || null,
+        vocabularyLevel: doc.vocabularyLevel || null,
+        activatedAt: doc.assessedAt || doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.CommunicationAidProfile ||
   mongoose.model('CommunicationAidProfile', CommunicationAidProfileSchema);

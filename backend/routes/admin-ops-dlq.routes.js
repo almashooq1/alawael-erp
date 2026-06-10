@@ -168,7 +168,7 @@ router.get('/integration-health/trends/:integration', async (req, res) => {
   try {
     const since = parseSince(req.query.since);
     const until = req.query.until ? new Date(req.query.until) : new Date();
-    const limit = req.query.limit ? Number(req.query.limit) : 288;
+    const limit = Math.min(req.query.limit ? Number(req.query.limit) : 288, 2000); // W1182 — DoS cap
     const recorder = getTrendRecorder();
     const result = await recorder.getSeries({
       integration: req.params.integration,

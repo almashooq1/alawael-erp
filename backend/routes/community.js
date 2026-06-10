@@ -180,7 +180,7 @@ router.get('/content/stats', (req, res) => {
 router.get('/content', (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 10, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
 
     const paginatedContent = communityData.content.slice(skip, skip + limit);

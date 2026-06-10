@@ -1822,7 +1822,7 @@ router.get(
   '/safety/leaderboard',
   asyncHandler(async (req, res) => {
     const { since, days } = periodFilter(req.query);
-    const limit = parseInt(req.query.limit || '50', 10);
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 1000); // W1182 — DoS cap
 
     // اجمع كل السائقين الذين قادوا في الفترة
     const trips = await Trip.find({

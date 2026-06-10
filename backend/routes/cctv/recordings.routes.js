@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
   if (req.query.kind) q.kind = req.query.kind;
   const rows = await CctvRecording.find(q)
     .sort({ startTime: -1 })
-    .limit(Number(req.query.limit) || 200)
+    .limit(Math.min(Number(req.query.limit) || 200, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });

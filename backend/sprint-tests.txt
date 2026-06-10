@@ -845,6 +845,7 @@ __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-routes-behavioral-wave862b.test.js
 __tests__/transition-plan-wave361.test.js
 __tests__/unauthenticated-routes-wave658.test.js
+__tests__/unbounded-query-limit-wave1182.test.js
 __tests__/unescaped-regexp-redos-wave1180.test.js
 __tests__/untenanted-aggregations-ratchet-wave944.test.js
 __tests__/user-branch-role-window.test.js

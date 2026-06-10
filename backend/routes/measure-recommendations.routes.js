@@ -74,7 +74,7 @@ router.get(
         administrableOnly:
           req.query.administrableOnly === '1' || req.query.administrableOnly === 'true',
         includeCurrent: req.query.includeCurrent === '1' || req.query.includeCurrent === 'true',
-        limit: Number.isInteger(limitRaw) && limitRaw > 0 ? limitRaw : undefined,
+        limit: Number.isInteger(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 1000) : undefined, // W1182 — DoS cap
       });
       res.json({ success: true, data: result });
     } catch (err) {

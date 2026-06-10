@@ -87,7 +87,7 @@ router.get('/templates', async (req, res) => {
     }
     const templates = await FormTemplate.find(filter)
       .sort({ name: 1 })
-      .limit(Number(req.query.limit) || 200)
+      .limit(Math.min(Number(req.query.limit) || 200, 2000)) // W1182 — DoS cap
       .lean();
     res.json({ ok: true, templates });
   } catch (err) {

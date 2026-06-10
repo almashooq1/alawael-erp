@@ -293,7 +293,7 @@ router.post(
  */
 router.get('/devices/:id/sync-history', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 1000); // W1182 — DoS cap
     const history = await ZKTecoService.getSyncHistory(req.params.id, limit);
     res.json({ success: true, data: history });
   } catch (error) {

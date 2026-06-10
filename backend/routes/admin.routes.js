@@ -170,7 +170,7 @@ router.post('/settings/import', async (req, res) => {
 // GET /settings/history — get change history
 router.get('/settings/history', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 50;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 1000); // W1182 — DoS cap
     const data = await systemSettingsService.getChangeHistory(limit);
     res.json({ success: true, data });
   } catch (err) {

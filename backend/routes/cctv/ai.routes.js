@@ -34,7 +34,7 @@ router.get('/faces', requireRole(['admin', 'security_officer']), async (req, res
     status: req.query.status || 'active',
     kind: req.query.kind || undefined,
   })
-    .limit(Number(req.query.limit) || 500)
+    .limit(Math.min(Number(req.query.limit) || 500, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });
@@ -73,7 +73,7 @@ router.delete('/faces/:id', requireRole(['admin']), async (req, res) => {
 // ─── ANPR ──────────────────────────────────────────────────────────────
 router.get('/anpr', requireRole(['admin', 'security_officer']), async (req, res) => {
   const rows = await CctvAnpr.find({ status: req.query.status || 'active' })
-    .limit(Number(req.query.limit) || 500)
+    .limit(Math.min(Number(req.query.limit) || 500, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });

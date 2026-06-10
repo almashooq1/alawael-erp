@@ -190,9 +190,16 @@ router.put(
 
 router.patch(
   '/treatment-plans/:planId/goals/:goalId',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = CarePlan();
     if (!M) return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
+    // W269 — gate cross-branch goal edit via the plan's beneficiary BEFORE mutating.
+    const existing = await M.findById(req.params.planId).select('beneficiary').lean();
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'Treatment plan not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
     const plan = await M.findOneAndUpdate(
       { _id: req.params.planId, 'goals._id': req.params.goalId },
       { $set: { 'goals.$': { ...stripUpdateMeta(req.body), _id: req.params.goalId } } },

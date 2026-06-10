@@ -181,6 +181,30 @@ gasScaleSchema.pre('save', function preSaveInvariants() {
   }
 });
 
+// ── W1121 — publish gas_scale.activated when a GAS scale goes/stays active ────
+gasScaleSchema.pre('save', function flagGasScaleActivated() {
+  this.$__gasScaleActivated = (this.isNew || this.isModified('status')) && this.status === 'active';
+});
+
+gasScaleSchema.post('save', function emitGasScaleActivated(doc) {
+  if (!doc.$__gasScaleActivated) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('gas-scale', 'gas_scale.activated', {
+      scaleId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.goalId ? { goalId: String(doc.goalId) } : {}),
+      ...(doc.domain ? { domain: doc.domain } : {}),
+      ...(doc.title_ar ? { titleAr: doc.title_ar } : {}),
+      ...(typeof doc.version === 'number' ? { version: doc.version } : {}),
+      activatedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 gasScaleSchema.statics.LEVELS = LEVELS;
 
 module.exports = mongoose.models.GasScale || mongoose.model('GasScale', gasScaleSchema);

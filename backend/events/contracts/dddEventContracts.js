@@ -2696,6 +2696,29 @@ const DECISION_ALERT_EVENTS = Object.freeze({
   },
 }); // ═══ W1120 — decision-support alert raised → unified core timeline ═══
 
+const GAS_SCALE_EVENTS = Object.freeze({
+  GAS_SCALE_ACTIVATED: {
+    domain: 'gas-scale',
+    eventType: 'gas_scale.activated',
+    version: 1,
+    description:
+      'A Goal-Attainment-Scaling scale was activated for a beneficiary therapeutic goal (definition/version live).',
+    payload: {
+      scaleId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      goalId: 'string',
+      domain: 'string',
+      titleAr: 'string',
+      version: 'number',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1121 — GAS scale activated → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2803,6 +2826,7 @@ const DDD_CONTRACTS = {
   'workflow-transition': WORKFLOW_TRANSITION_EVENTS,
   'generated-report': GENERATED_REPORT_EVENTS,
   'decision-alert': DECISION_ALERT_EVENTS,
+  'gas-scale': GAS_SCALE_EVENTS,
 };
 
 /**
@@ -2922,6 +2946,7 @@ module.exports = {
   WORKFLOW_TRANSITION_EVENTS,
   GENERATED_REPORT_EVENTS,
   DECISION_ALERT_EVENTS,
+  GAS_SCALE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

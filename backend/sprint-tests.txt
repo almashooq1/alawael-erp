@@ -97,6 +97,7 @@ __tests__/branch-isolation-hr-performance-wave269g.test.js
 __tests__/branch-isolation-measures-outcomes-wave269b.test.js
 __tests__/branch-isolation-measures-workflow-wave269e.test.js
 __tests__/branch-isolation-security-wave269.test.js
+__tests__/branch-isolation-treatment-plans-wave1119.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js
@@ -831,3 +832,4 @@ __tests__/measure-baseline-completed-core-linkage-wave1117.test.js
 __tests__/workflow-transition-recorded-core-linkage-wave1118.test.js
 __tests__/generated-report-completed-core-linkage-wave1119.test.js
 __tests__/decision-alert-raised-core-linkage-wave1120.test.js
+__tests__/gas-scale-activated-core-linkage-wave1121.test.js

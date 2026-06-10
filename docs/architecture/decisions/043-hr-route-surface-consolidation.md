@@ -1,4 +1,8 @@
-# ADR-043 — Consolidate + branch-isolate the HR route surface (🟡 Proposed)
+# ADR-043 — Consolidate + branch-isolate the HR route surface (🟢 Partially executed — W1143)
+
+> **Status**: isolation contract + owner-map + the 2 backlog-IDOR gates are DONE
+> (W1143); only the owner-gated cleanup remains (delete dormant `saudi-hr-routes`
+> Q1, decide `/api/hr` non-v1 mount Q3). Neither affects live behavior.
 
 **Date**: 2026-06-10
 **Type**: ADR (route-topology / canonical-mount + cross-branch-isolation contract — same shadow class as ADR-038 / ADR-042)
@@ -34,10 +38,11 @@ branch-isolated?" hard to answer at a glance.
 2. **No single isolation contract.** HR routes use ≥3 valid scoping patterns — the
    W269 helpers (`requireBranchAccess`+`enforceEmployeeBranch`+`assertBranchMatch`),
    the payroll employee-FK filter, and `employee-admin`'s custom `req.user.branchId`
-   filtering. Two employee-keyed files (`hr/hr-copilot.routes.js`,
-   `hr-compliance.routes.js`) currently carry **no** branch signal (role-gated, but
-   un-audited). `hr-route-branch-isolation-guard-wave1142` now baselines these and
-   fails CI on any **new** un-gated HR route.
+   filtering. `hr-route-branch-isolation-guard-wave1142` enforces "every employee-
+   keyed HR route carries a branch signal" and fails CI on any **new** un-gated HR
+   route. _(The two files originally baselined — `hr/hr-copilot.routes.js` +
+   `hr-compliance.routes.js` — were audited and confirmed reachable by branch-
+   restricted roles, so they were **gated in W1143**; the guard baseline is now empty.)_
 
 ## Decision drivers
 
@@ -53,37 +58,42 @@ branch-isolated?" hard to answer at a glance.
 1. **Retire `hr/saudi-hr-routes.js` + `hr/index.js`** (dormant; superseded by
    `domains/hr` + `hr-modules`). Confirm no importer outside `hr/index.js` (Q1),
    then delete + add a dead-route sentinel. _Claude-executable once Q1 confirmed._
-2. **Keep the `/api/v1/hr` split documented, not merged**: `domains/hr` = core
-   personnel (employees/leaves/attendance); `hr-modules` = Round-10 modules. Add a
-   one-line "owner map" comment at both mount sites so a new path's home is
+2. ✅ **DONE (W1143)** — **Keep the `/api/v1/hr` split documented, not merged**:
+   `domains/hr` = core personnel (employees/leaves/attendance); `hr-modules` =
+   Round-10 modules. An "owner map" comment was added at **both** mount sites
+   (`app.js` hr-modules + `_registry.js` domains/hr) so a new path's home is
    unambiguous. (Physically merging the two routers is **not** recommended — they
-   have different factory shapes; the risk is in the _implicit_ split, which the
-   comment fixes.)
+   have different factory shapes; the risk is in the _implicit_ split, now fixed.)
 3. **Branch-isolation is now a contract**: every HR route file taking an
    employee/record id MUST carry a branch signal (enforced by
    `hr-route-branch-isolation-guard-wave1142`; W269h-style). New HR routers inherit
    the requirement automatically.
-4. **Audit + gate the 2 backlog routes** (`hr-copilot` summarize-by-employeeId,
-   `hr-compliance` verify-by-employeeId): add `requireBranchAccess` +
-   `enforceEmployeeBranch` (the W1137 helper) **iff** any branch-restricted role can
-   reach them (Q2). Ratchet them out of the guard baseline in the same commit.
+4. ✅ **DONE (W1143)** — **Audited + gated the 2 backlog routes**: both
+   `hr-copilot` (summarize/draft-letter/suggest) and `hr-compliance` (5 per-employee
+   verify routes + `/overview` + `/verify-batch` aggregates) had role allow-lists
+   including branch-restricted manager/hr/hr_manager → genuine cross-branch reads.
+   Gated with `requireBranchAccess` + `enforceEmployeeBranch`/`assertBranchMatch` +
+   `branchFilter` on the aggregates; ratcheted out of the guard baseline (now empty).
 
 ## Open questions (blockers)
 
-- **Q1** — Does anything import `hr/index.js` / `hr/saudi-hr-routes.js` outside the
-  HR module itself? (grep is clean so far; needs owner confirmation before delete.)
-- **Q2** — Are `ADMIN_ROLES` on `hr-copilot` / the compliance roles on
-  `hr-compliance` ever **branch-restricted** (e.g. a branch `hr_manager`)? If yes →
-  they are live IDOR and must be gated; if strictly HQ/cross-branch → baseline note
-  is sufficient.
+- **Q1** — _Verified dormant 2026-06-10:_ `hr/saudi-hr-routes.js` + `hr/index.js`
+  have **no mount and no importer** (the only `require('./hr')` is `domains/index.js`
+  → `domains/hr`, a different path). Routing-safe to delete; the only fallout is the
+  source-only unit test `tests/unit/saudi-hr-routes.module.test.js`. **Left in place
+  pending owner go** (deleting a 22-endpoint file is owner's call, not auto-executed).
+- **Q2** — ✅ RESOLVED: `hr-copilot` (`ADMIN_ROLES` includes `manager`) and
+  `hr-compliance` (`READ/WRITE_ROLES` include `manager`/`hr`/`hr_manager`) ARE
+  reachable by branch-restricted roles → were live cross-branch reads → **gated in
+  W1143** (behavioral guard `hr-copilot-compliance-branch-isolation-behavioral-wave1143`).
 - **Q3** — Is the `/api/hr` (non-v1) mount of `domains/hr` still consumed by any
   client (mobile / legacy), or can the surface collapse to `/api/v1/hr` only?
 
 ## Consequences
 
-- ✅ One documented HR topology; dead-route audits stop tripping on `saudi-hr-routes`.
-- ✅ Branch isolation is guard-enforced for all future HR routes.
-- ⚠️ Until Q2 is answered, `hr-copilot` + `hr-compliance` remain baselined (tracked,
-  bounded by role-gating) rather than fixed.
-- ⚪ No behavior change ships from this ADR alone — it records the topology + the
-  contract; the deletes/gates are follow-up once Q1–Q3 are signed off.
+- ✅ One documented HR topology (owner-map comments at both mount sites); branch
+  isolation is guard-enforced for all future HR routes; the 2 backlog IDORs are
+  closed (W1143) and the guard baseline is empty.
+- ⚪ Remaining (owner-gated): delete the verified-dormant `saudi-hr-routes.js` +
+  `hr/index.js` (Q1) and decide the `/api/hr` non-v1 mount fate (Q3). No live
+  behavior depends on either — these are cleanup, not security.

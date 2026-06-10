@@ -30,19 +30,19 @@ const path = require('path');
 
 const BACKEND = path.join(__dirname, '..');
 
-// Employee-keyed but un-gated TODAY — tracked backlog, NOT a green light. Each is
-// role-gated (admin/compliance) so the exposure is bounded; remove from this set
-// the moment the file gains a branch signal (the stale-baseline test enforces it).
-const KNOWN_UNGATED = new Set([
-  'routes/hr/hr-copilot.routes.js', // POST /summarize/:employeeId — authorize(ADMIN_ROLES)
-  'routes/hr-compliance.routes.js', // /:employeeId verify-gosi/scfhs — compliance-role
-]);
+// Employee-keyed but legitimately un-gated TODAY — tracked backlog, NOT a green
+// light. EMPTY since W1143 gated hr-copilot + hr-compliance. Keep the mechanism so
+// a FUTURE legitimately-ungated file can be tracked here; the stale-baseline test
+// forces removal the moment an entry gains a branch signal.
+const KNOWN_UNGATED = new Set([]);
 
-// Surfaces hardened this session — locked against a protection-removing regression.
+// Surfaces hardened this arc — locked against a protection-removing regression.
 const MUST_HAVE_REQUIRE_BRANCH_ACCESS = [
   'routes/hr/hr-modules.routes.js',
   'routes/hr-attendance.routes.js',
   'domains/hr/routes/hr.routes.js',
+  'routes/hr/hr-copilot.routes.js', // W1143
+  'routes/hr-compliance.routes.js', // W1143
 ];
 
 const PARAM_RE = /:employeeId|:recordId|\/employees\/:id|\/employee\/:|:payrollId|:leaveId/;

@@ -107,6 +107,7 @@ __tests__/backfill-hr-branchid-wave1139.test.js
 __tests__/branch-isolation-hr-domain-wave1141.test.js
 __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
 __tests__/hr-route-branch-isolation-guard-wave1142.test.js
+__tests__/hr-copilot-compliance-branch-isolation-behavioral-wave1143.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js

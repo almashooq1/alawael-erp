@@ -86,4 +86,7 @@ const EmployeeGoalSchema = new mongoose.Schema(
 EmployeeGoalSchema.index({ employeeId: 1, 'period.startDate': -1 });
 EmployeeGoalSchema.index({ status: 1, 'period.endDate': 1 });
 
+// W1154 — denormalize branchId from the employee for cross-branch isolation.
+EmployeeGoalSchema.plugin(require('./hrBranchScope.plugin'));
+
 module.exports = mongoose.models.EmployeeGoal || mongoose.model('EmployeeGoal', EmployeeGoalSchema);

@@ -30,6 +30,9 @@ const MODELS = [
   { key: 'onboarding', modelPath: '../models/HR/OnboardingChecklist', fk: 'employeeId' },
   { key: 'visas', modelPath: '../models/HR/VisaRequest', fk: 'employeeId' },
   { key: 'shift-swaps', modelPath: '../models/HR/ShiftSwap', fk: 'requesterId' },
+  // W1154 — hr-extensions surfaces (documents + performance goals).
+  { key: 'documents', modelPath: '../models/HR/EmployeeDocument', fk: 'employeeId' },
+  { key: 'goals', modelPath: '../models/HR/EmployeeGoal', fk: 'employeeId' },
 ];
 
 /**

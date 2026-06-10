@@ -43,8 +43,15 @@ const MUST_HAVE_REQUIRE_BRANCH_ACCESS = [
   'domains/hr/routes/hr.routes.js',
   'routes/hr/hr-copilot.routes.js', // W1143
   'routes/hr-compliance.routes.js', // W1143
+  'routes/hr/hr-extensions.routes.js', // W1154
 ];
 
+// NOTE (W1154 blind-spot): PARAM_RE catches employee/record-keyed params by NAME
+// (:employeeId/:recordId/…). It does NOT catch a bare `:id` on an employee-keyed
+// MODEL (e.g. hr-extensions' /documents/:id, /goals/:id over EmployeeDocument /
+// EmployeeGoal) — those need branchId on the model + the regression lock above,
+// not param-name detection. Broadening PARAM_RE to all `:id` would false-positive
+// on org-level resources, so the lock list is the safer guard for that class.
 const PARAM_RE = /:employeeId|:recordId|\/employees\/:id|\/employee\/:|:payrollId|:leaveId/;
 const SIGNAL_RE =
   /branch_id|branchId|branchFilter|requireBranchAccess|effectiveBranchScope|enforceEmployeeBranch|assertBranchMatch|branchScope|assertPayrollEmployeeInScope|loadOwnedRequest/;

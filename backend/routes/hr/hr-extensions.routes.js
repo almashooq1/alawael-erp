@@ -24,12 +24,40 @@
 const express = require('express');
 const { authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../../middleware/assertBranchMatch');
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'hr_manager'];
 const MANAGER_ROLES = [...ADMIN_ROLES, 'manager'];
 
+// W269 — list-scope clause restricting to the caller's branch. No-op `{}` for
+// HQ/cross-branch. `allowNull` keeps unassigned (null-branch) rows visible
+// alongside the caller's branch (used for vacancies, which may be org-wide).
+function listScope(req, { allowNull = false } = {}) {
+  const bf = branchFilter(req);
+  if (!bf.branchId) return {}; // unrestricted / scope not populated
+  return allowNull ? { $or: [bf, { branchId: null }] } : bf;
+}
+
+// W269 — assert a loaded doc belongs to the caller's branch. Returns true (after
+// sending a 403) when denied, false when allowed. `allowNull` lets null-branch
+// (unassigned) docs through.
+function guardDocBranch(req, res, docBranchId, label, allowNull = false) {
+  if (allowNull && (docBranchId === null || docBranchId === undefined)) return false;
+  try {
+    assertBranchMatch(req, docBranchId, label);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
+
 function createHrExtensionsRouter({ logger } = {}) {
   const router = express.Router();
+
+  // W269 — populate req.branchScope so the per-doc / list scoping below enforces.
+  router.use(requireBranchAccess);
 
   function tryLoad(key, path) {
     try {
@@ -50,7 +78,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (!EmployeeDocument) return res.json({ success: true, data: { items: [], total: 0 } });
       const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
       const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-      const filter = {};
+      const filter = { ...listScope(req) }; // W269 branch isolation
       if (req.query.employeeId) filter.employeeId = req.query.employeeId;
       if (req.query.docType) filter.docType = req.query.docType;
       if (req.query.status) filter.status = req.query.status;
@@ -96,6 +124,10 @@ function createHrExtensionsRouter({ logger } = {}) {
       const EmployeeDocument = tryLoad('EmployeeDocument', '../../models/HR/EmployeeDocument');
       if (!EmployeeDocument)
         return res.status(503).json({ success: false, message: 'model unavailable' });
+      // W269 — verify branch ownership BEFORE archiving (cross-branch write block).
+      const existingDoc = await EmployeeDocument.findById(req.params.id).select('branchId').lean();
+      if (!existingDoc) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, existingDoc.branchId, 'employee document')) return;
       // Soft-delete: archive rather than remove for audit trail
       const doc = await EmployeeDocument.findByIdAndUpdate(
         req.params.id,
@@ -124,7 +156,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (!EmployeeGoal) return res.json({ success: true, data: { items: [], total: 0 } });
       const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
       const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-      const filter = {};
+      const filter = { ...listScope(req) }; // W269 branch isolation
       if (req.query.employeeId) filter.employeeId = req.query.employeeId;
       if (req.query.status) filter.status = req.query.status;
       if (req.query.category) filter.category = req.query.category;
@@ -171,6 +203,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       const { currentValue, percentComplete, note } = req.body || {};
       const goal = await EmployeeGoal.findById(req.params.id);
       if (!goal) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, goal.branchId, 'employee goal')) return; // W269
       const checkIn = {
         at: new Date(),
         byUserId: req.user?._id,
@@ -203,6 +236,10 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (typeof description === 'string') update.description = description;
       if (typeof status === 'string') update.status = status;
       if (typeof weight === 'number') update.weight = weight;
+      // W269 — verify branch ownership BEFORE mutating.
+      const existingGoal = await EmployeeGoal.findById(req.params.id).select('branchId').lean();
+      if (!existingGoal) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, existingGoal.branchId, 'employee goal')) return;
       const goal = await EmployeeGoal.findByIdAndUpdate(
         req.params.id,
         { $set: update },
@@ -225,7 +262,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (!Vacancy) return res.json({ success: true, data: { items: [], total: 0 } });
       const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
       const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-      const filter = {};
+      const filter = { ...listScope(req, { allowNull: true }) }; // W269 (vacancies may be org-wide)
       if (req.query.status) filter.status = req.query.status;
       if (req.query.department) filter.department = req.query.department;
       const [items, total] = await Promise.all([
@@ -265,6 +302,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (!Vacancy) return res.status(503).json({ success: false, message: 'model unavailable' });
       const v = await Vacancy.findById(req.params.id).lean({ virtuals: true });
       if (!v) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, v.branchId, 'vacancy', true)) return; // W269
       res.json({ success: true, data: v });
     } catch (err) {
       safeError(res, err, 'hr-extensions vacancy.get');
@@ -277,6 +315,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       if (!Vacancy) return res.status(503).json({ success: false, message: 'model unavailable' });
       const v = await Vacancy.findById(req.params.id);
       if (!v) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, v.branchId, 'vacancy', true)) return; // W269
       v.applicants.push(req.body);
       await v.save();
       res.status(201).json({ success: true, data: v.applicants[v.applicants.length - 1] });
@@ -295,6 +334,7 @@ function createHrExtensionsRouter({ logger } = {}) {
         const { stage, rejectedReason, rating, notes } = req.body || {};
         const v = await Vacancy.findById(req.params.id);
         if (!v) return res.status(404).json({ success: false, message: 'not found' });
+        if (guardDocBranch(req, res, v.branchId, 'vacancy', true)) return; // W269
         const applicant = v.applicants.id(req.params.applicantId);
         if (!applicant)
           return res.status(404).json({ success: false, message: 'applicant not found' });
@@ -314,11 +354,17 @@ function createHrExtensionsRouter({ logger } = {}) {
   // Saudi Compliance Center — read-only snapshot
   // ═══════════════════════════════════════════════════════════════════
 
-  router.get('/saudi-compliance/snapshot', authorize(MANAGER_ROLES), async (_req, res) => {
+  router.get('/saudi-compliance/snapshot', authorize(MANAGER_ROLES), async (req, res) => {
     try {
       const Employee = tryLoad('Employee', '../../models/HR/Employee');
       if (!Employee)
         return res.status(503).json({ success: false, message: 'Employee model unavailable' });
+
+      // W269 — scope the aggregates to the caller's branch (Employee keys on
+      // branch_id, EmployeeDocument on branchId). HQ/cross-branch → {} (all branches).
+      const scopeBranch = effectiveBranchScope(req);
+      const empBf = scopeBranch ? { branch_id: scopeBranch } : {};
+      const docBf = scopeBranch ? { branchId: scopeBranch } : {};
 
       const now = new Date();
       const day = 86400000;
@@ -333,26 +379,30 @@ function createHrExtensionsRouter({ logger } = {}) {
         iqamaExpired,
         licenseExpiring30,
       ] = await Promise.all([
-        Employee.countDocuments({ status: 'active' }),
-        Employee.countDocuments({ status: 'active', nationality: 'SA' }),
+        Employee.countDocuments({ status: 'active', ...empBf }),
+        Employee.countDocuments({ status: 'active', nationality: 'SA', ...empBf }),
         Employee.countDocuments({
           status: 'active',
           nationality: 'SA',
           $or: [{ gosiNumber: { $exists: false } }, { gosiNumber: null }, { gosiNumber: '' }],
+          ...empBf,
         }),
         Employee.countDocuments({
           status: 'active',
           nationality: { $ne: 'SA' },
           iqamaExpiry: { $gte: now, $lte: in30 },
+          ...empBf,
         }),
         Employee.countDocuments({
           status: 'active',
           nationality: { $ne: 'SA' },
           iqamaExpiry: { $lt: now },
+          ...empBf,
         }),
         Employee.countDocuments({
           status: 'active',
           licenseExpiry: { $gte: now, $lte: in30 },
+          ...empBf,
         }),
       ]);
 
@@ -374,10 +424,11 @@ function createHrExtensionsRouter({ logger } = {}) {
       let documentsExpiring30 = 0;
       if (EmployeeDocument) {
         [documentsVaulted, documentsExpiring30] = await Promise.all([
-          EmployeeDocument.countDocuments({ status: 'active' }),
+          EmployeeDocument.countDocuments({ status: 'active', ...docBf }),
           EmployeeDocument.countDocuments({
             status: 'active',
             expiryDate: { $gte: now, $lte: in30 },
+            ...docBf,
           }),
         ]);
       }

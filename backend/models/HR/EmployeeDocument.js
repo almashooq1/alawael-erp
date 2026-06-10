@@ -78,5 +78,8 @@ EmployeeDocumentSchema.index({ expiryDate: 1, status: 1 });
 
 EmployeeDocumentSchema.statics.DOC_TYPES = DOC_TYPES;
 
+// W1154 — denormalize branchId from the employee for cross-branch isolation.
+EmployeeDocumentSchema.plugin(require('./hrBranchScope.plugin'));
+
 module.exports =
   mongoose.models.EmployeeDocument || mongoose.model('EmployeeDocument', EmployeeDocumentSchema);

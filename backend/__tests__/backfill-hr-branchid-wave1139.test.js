@@ -44,10 +44,20 @@ afterAll(async () => {
 });
 
 describe('W1133 — backfill script contract', () => {
-  it('covers the 7 employee-private models with their employee FK', () => {
+  it('covers the employee-private models with their employee FK', () => {
     const keys = MODELS.map(m => m.key).sort();
     expect(keys).toEqual(
-      ['assets', 'health-insurance', 'loans', 'onboarding', 'shift-swaps', 'travel', 'visas'].sort()
+      [
+        'assets',
+        'documents', // W1154
+        'goals', // W1154
+        'health-insurance',
+        'loans',
+        'onboarding',
+        'shift-swaps',
+        'travel',
+        'visas',
+      ].sort()
     );
     // shift-swaps derives from the requester, the rest from employeeId
     expect(MODELS.find(m => m.key === 'shift-swaps').fk).toBe('requesterId');

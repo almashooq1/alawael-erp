@@ -1498,8 +1498,9 @@ on:
       - 'backend/__tests__/assessment-measure-bridge-wave1153.test.js'
       - 'backend/__tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/hr-extensions-branch-isolation-wave1152.test.js'
-      - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1152.test.js'
+      - 'backend/__tests__/hr-extensions-branch-isolation-wave1154.test.js'
+      - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2981,8 +2982,9 @@ on:
       - 'backend/__tests__/assessment-measure-bridge-wave1153.test.js'
       - 'backend/__tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/hr-extensions-branch-isolation-wave1152.test.js'
-      - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1152.test.js'
+      - 'backend/__tests__/hr-extensions-branch-isolation-wave1154.test.js'
+      - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

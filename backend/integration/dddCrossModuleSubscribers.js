@@ -2156,6 +2156,40 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1067: DTT (ABA) session completed → core timeline ─────────────
+  // When a discrete-trial-training session is completed, log it on the
+  // beneficiary's timeline (clinical; success when ≥1 target reached
+  // mastery, info otherwise) with the headline ABA progress metrics.
+  subscribers.push({
+    name: 'dtt-session:completed → timeline:record',
+    pattern: 'dtt-session.dtt_session.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const mastered = (event.payload.masteryCount || 0) > 0;
+          const area = event.payload.programArea || '';
+          const trials = event.payload.totalTrials || 0;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'dtt_session_completed',
+            category: 'clinical',
+            severity: mastered ? 'success' : 'info',
+            title: `DTT session completed (${area}) — ${trials} trials`,
+            title_ar: mastered
+              ? 'اكتملت جلسة المحاولات المنفصلة — تحقّق إتقان'
+              : 'اكتملت جلسة المحاولات المنفصلة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DttSession timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

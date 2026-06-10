@@ -182,6 +182,39 @@ DttSessionSchema.virtual('independentCorrectRate').get(function () {
 DttSessionSchema.set('toJSON', { virtuals: true });
 DttSessionSchema.set('toObject', { virtuals: true });
 
+// ─── W1067: unified-core linkage — DTT (ABA) session completed ──────────────
+// Milestone = the discrete-trial-training session transitions to 'completed'.
+// Emits a timeline event with the headline ABA metrics (trials, independent-
+// correct rate, mastery count) so progress is visible on the unified core.
+// Non-callback hook style.
+DttSessionSchema.pre('save', function flagDttCompleted() {
+  this.$__dttCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+DttSessionSchema.post('save', function emitDttSessionCompleted(doc) {
+  if (!doc.$__dttCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const masteryCount = Array.isArray(doc.targets)
+      ? doc.targets.filter(t => t && t.masteryAchieved).length
+      : 0;
+    integrationBus.publish('dtt-session', 'dtt_session.completed', {
+      sessionId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      programArea: doc.programArea,
+      totalTrials: doc.totalTrials,
+      independentCorrectRate: doc.independentCorrectRate,
+      masteryCount,
+      completedAt: doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports = mongoose.models.DttSession || mongoose.model('DttSession', DttSessionSchema);
 
 module.exports.PROGRAM_AREAS = PROGRAM_AREAS;

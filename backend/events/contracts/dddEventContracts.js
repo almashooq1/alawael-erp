@@ -1516,6 +1516,28 @@ const ALLERGY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DTT_SESSION_EVENTS = {
+  DTT_SESSION_COMPLETED: {
+    domain: 'dtt-session',
+    eventType: 'dtt_session.completed',
+    version: 1,
+    description: 'اكتمال جلسة المحاولات المنفصلة (ABA) — DTT session completed',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      programArea: 'string',
+      totalTrials: 'number',
+      independentCorrectRate: 'number',
+      masteryCount: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1569,6 +1591,7 @@ const DDD_CONTRACTS = {
   'pain-assessment': PAIN_ASSESSMENT_EVENTS,
   'dysphagia-assessment': DYSPHAGIA_ASSESSMENT_EVENTS,
   allergy: ALLERGY_EVENTS,
+  'dtt-session': DTT_SESSION_EVENTS,
 };
 
 /**
@@ -1638,6 +1661,7 @@ module.exports = {
   PAIN_ASSESSMENT_EVENTS,
   DYSPHAGIA_ASSESSMENT_EVENTS,
   ALLERGY_EVENTS,
+  DTT_SESSION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

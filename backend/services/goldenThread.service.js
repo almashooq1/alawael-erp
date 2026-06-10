@@ -221,4 +221,58 @@ async function traceByBeneficiary(beneficiaryId) {
   return result;
 }
 
-module.exports = { traceByBeneficiary, assembleThread, deriveNextActions, THREAD_STAGES };
+/**
+ * PURE — fold many beneficiary traces into a caseload/branch attention triage
+ * (blueprint §4.3): one row per beneficiary that NEEDS attention, ranked
+ * most-urgent first (lowest top-action priority, then most outstanding actions).
+ * No DB / no I/O. (W1165)
+ * @param {Array<{ beneficiaryId:any, nextActions?:any[] }>} traces
+ * @returns {{ rows: any[], summary: object }}
+ */
+function summarizeCaseloadAttention(traces) {
+  const rows = (Array.isArray(traces) ? traces : [])
+    .map(tr => {
+      const actions = tr && Array.isArray(tr.nextActions) ? tr.nextActions : [];
+      const top = actions[0] || null; // deriveNextActions already sorts most-urgent first
+      return {
+        beneficiaryId: tr && tr.beneficiaryId,
+        attentionCount: actions.length,
+        topPriority: top ? top.priority : null,
+        topAction: top ? { code: top.code, action: top.action, goalId: top.goalId } : null,
+      };
+    })
+    .filter(r => r.attentionCount > 0);
+
+  rows.sort((a, b) => a.topPriority - b.topPriority || b.attentionCount - a.attentionCount);
+
+  const summary = {
+    beneficiariesNeedingAttention: rows.length,
+    totalActions: rows.reduce((s, r) => s + r.attentionCount, 0),
+    urgentCount: rows.filter(r => r.topPriority === 1).length, // P1 = LINK_MEASURE
+  };
+  return { rows, summary };
+}
+
+/**
+ * Trace a set of beneficiaries and fold into a caseload attention triage
+ * (READ-ONLY). The live entry point a caseload route or CLI report calls. (W1165)
+ * @param {Array<string|ObjectId>} beneficiaryIds
+ * @returns {Promise<{ rows: any[], summary: object }>}
+ */
+async function attentionForBeneficiaries(beneficiaryIds) {
+  const ids = Array.isArray(beneficiaryIds) ? beneficiaryIds : [];
+  const traces = [];
+  for (const id of ids) {
+    traces.push(await traceByBeneficiary(id));
+  }
+  return summarizeCaseloadAttention(traces);
+}
+
+module.exports = {
+  traceByBeneficiary,
+  assembleThread,
+  deriveNextActions,
+  summarizeCaseloadAttention,
+  attentionForBeneficiaries,
+  THREAD_STAGES,
+};

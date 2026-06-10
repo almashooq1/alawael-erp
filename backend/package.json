@@ -57,6 +57,7 @@
     "audit:unauthenticated-routes": "node scripts/audit-unauthenticated-routes.js",
     "audit:stub-routes": "node scripts/audit-stub-routes.js",
     "audit:golden-thread": "node scripts/golden-thread-integrity.js",
+    "audit:golden-thread-attention": "node scripts/golden-thread-attention.js",
     "audit:goal-consolidation": "node scripts/goal-model-consolidation-readiness.js",
     "audit:stub-routes:json": "node scripts/audit-stub-routes.js --json",
     "verify:supply-chain-staging": "node scripts/verify-supply-chain-staging.js",

@@ -879,3 +879,5 @@ __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js
 __tests__/plan-goal-linkage-behavioral-wave1154.test.js
 __tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js
+__tests__/golden-thread-attention-behavioral-wave1165.test.js
+__tests__/golden-thread-attention-wave1165.test.js

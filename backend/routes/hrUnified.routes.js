@@ -9,6 +9,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const escapeRegex = require('../utils/escapeRegex'); // W1180 — ReDoS guard
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -46,9 +47,9 @@ router.get('/employees/search', async (req, res) => {
     const filter = { status };
     if (q)
       filter.$or = [
-        { firstName: new RegExp(q, 'i') },
-        { lastName: new RegExp(q, 'i') },
-        { employeeCode: new RegExp(q, 'i') },
+        { firstName: new RegExp(escapeRegex(q), 'i') },
+        { lastName: new RegExp(escapeRegex(q), 'i') },
+        { employeeCode: new RegExp(escapeRegex(q), 'i') },
       ];
     if (department) filter.department = department;
     const skip = (Math.max(1, +page) - 1) * +limit;

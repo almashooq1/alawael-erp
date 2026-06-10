@@ -341,6 +341,7 @@ __tests__/financial-navigation-wave469.test.js
 __tests__/fmea-mfa-tier-wave277c.test.js
 __tests__/forecast-digest-script.test.js
 __tests__/form-save-bridge-complaints-groups-wave930.test.js
+__tests__/form-templates-contract-wave1179.test.js
 __tests__/fraud-detection-mfa-service-layer-wave275b.test.js
 __tests__/fraud-detection-scan-mfa-service-layer-wave275v.test.js
 __tests__/fraud-score-mfa-service-layer-wave275q.test.js
@@ -843,6 +844,7 @@ __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-routes-behavioral-wave862b.test.js
 __tests__/transition-plan-wave361.test.js
 __tests__/unauthenticated-routes-wave658.test.js
+__tests__/unescaped-regexp-redos-wave1180.test.js
 __tests__/untenanted-aggregations-ratchet-wave944.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/utilization-digest-script.test.js
@@ -901,4 +903,3 @@ __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 # One test path per line, blank lines + # comments ignored.
 # Sprint suite test enumeration — referenced by scripts/run-sprint.js.
 tests/unit/ops-alerter.test.js
-__tests__/form-templates-contract-wave1179.test.js

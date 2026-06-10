@@ -713,6 +713,7 @@ __tests__/risk-appointment-branch-scope-wave663.test.js
 __tests__/risk-snapshot-escalated-core-linkage-wave1088.test.js
 __tests__/role-levels-coverage-wave932.test.js
 __tests__/root-proxy-scripts.test.js
+__tests__/routes-spread-order-mass-assignment-wave1177.test.js
 __tests__/runbooks-referenced.test.js
 __tests__/safe-error.test.js
 __tests__/safeguarding-behavioral-wave357.test.js

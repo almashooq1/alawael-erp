@@ -106,9 +106,11 @@ router.get('/employees/:employeeId/skills', async (req, res) => {
 router.post('/employees/:employeeId/skills', async (req, res) => {
   try {
     const EmployeeSkill = require('../models/HR/EmployeeSkill');
+    // W1177 — pin AFTER the spread: a body-carried employeeId must never
+    // override the URL-addressed employee.
     const skill = await EmployeeSkill.create({
-      employeeId: req.params.employeeId,
       ...req.body,
+      employeeId: req.params.employeeId,
       updatedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: skill });

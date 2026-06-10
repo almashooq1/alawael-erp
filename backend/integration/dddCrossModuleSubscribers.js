@@ -2585,6 +2585,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1081: goal progress entry recorded → core timeline ────────────
+  // Each progress update toward a CarePlan goal is a clinical milestone —
+  // record it on the timeline so a goal's trajectory is visible alongside
+  // every other event in the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'goal-entry:recorded → timeline:record',
+    pattern: 'goal-entry.goal_entry.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'goal_progress_recorded',
+            category: 'clinical',
+            severity: 'info',
+            title: `Goal progress recorded (${
+              event.payload.progressPercent != null
+                ? event.payload.progressPercent + '%'
+                : 'updated'
+            })`,
+            title_ar: 'تم تسجيل تقدّم على أحد أهداف الخطة العلاجية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] GoalEntry timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

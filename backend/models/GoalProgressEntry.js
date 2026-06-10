@@ -56,5 +56,30 @@ GoalProgressEntrySchema.index({ goalId: 1, recordedAt: 1 });
 // Beneficiary-wide rollup ordered by recency.
 GoalProgressEntrySchema.index({ beneficiaryId: 1, recordedAt: -1 });
 
+// ── W1081: unified-core producer ───────────────────────────────────
+// Emit goal_entry.recorded when a new progress entry is created so the
+// goal's trajectory shows up on the beneficiary's core timeline. Only
+// new rows fire; edits don't re-emit. Non-callback hook style (W483).
+GoalProgressEntrySchema.pre('save', function flagGoalEntryRecorded() {
+  this.$__goalEntryRecorded = this.isNew;
+});
+
+GoalProgressEntrySchema.post('save', function emitGoalEntryRecorded(doc) {
+  if (!doc.$__goalEntryRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('goal-entry', 'goal_entry.recorded', {
+      entryId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      carePlanId: doc.carePlanId ? String(doc.carePlanId) : null,
+      goalId: doc.goalId ? String(doc.goalId) : null,
+      progressPercent: typeof doc.progressPercent === 'number' ? doc.progressPercent : null,
+      recordedAt: doc.recordedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.GoalProgressEntry || mongoose.model('GoalProgressEntry', GoalProgressEntrySchema);

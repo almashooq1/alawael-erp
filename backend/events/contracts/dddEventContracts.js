@@ -1813,6 +1813,27 @@ const BIP_FIDELITY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const GOAL_ENTRY_EVENTS = {
+  GOAL_PROGRESS_RECORDED: {
+    domain: 'goal-entry',
+    eventType: 'goal_entry.recorded',
+    version: 1,
+    description:
+      'تسجيل تقدّم على هدف ضمن الخطة العلاجية — A goal progress entry was recorded for the beneficiary',
+    payload: {
+      entryId: 'string',
+      beneficiaryId: 'string',
+      carePlanId: 'string',
+      goalId: 'string',
+      progressPercent: 'number',
+      recordedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1880,6 +1901,7 @@ const DDD_CONTRACTS = {
   'medication-order': MEDICATION_ORDER_EVENTS,
   'family-visit': FAMILY_VISIT_EVENTS,
   'bip-fidelity': BIP_FIDELITY_EVENTS,
+  'goal-entry': GOAL_ENTRY_EVENTS,
 };
 
 /**
@@ -1963,6 +1985,7 @@ module.exports = {
   MEDICATION_ORDER_EVENTS,
   FAMILY_VISIT_EVENTS,
   BIP_FIDELITY_EVENTS,
+  GOAL_ENTRY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

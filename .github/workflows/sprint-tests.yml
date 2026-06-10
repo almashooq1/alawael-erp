@@ -1355,6 +1355,8 @@ on:
       - 'backend/__tests__/family-visit-approved-core-linkage-wave1079.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/bip-fidelity-checked-core-linkage-wave1080.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-progress-recorded-core-linkage-wave1081.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2693,6 +2695,8 @@ on:
       - 'backend/__tests__/family-visit-approved-core-linkage-wave1079.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/bip-fidelity-checked-core-linkage-wave1080.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-progress-recorded-core-linkage-wave1081.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

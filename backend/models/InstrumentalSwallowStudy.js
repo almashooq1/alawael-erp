@@ -206,6 +206,35 @@ InstrumentalSwallowStudySchema.virtual('isComplete').get(function () {
 InstrumentalSwallowStudySchema.set('toJSON', { virtuals: true });
 InstrumentalSwallowStudySchema.set('toObject', { virtuals: true });
 
+// ── W1054: unified-core linkage ───────────────────────────────────────
+// On completion (status → 'completed'), publish swallow_study.completed so the
+// cross-module subscriber records a clinical milestone on the beneficiary's
+// CareTimeline. NON-callback hooks only (global async save plugin puts Kareem
+// in promise-adapter mode — callback hooks would break at runtime).
+InstrumentalSwallowStudySchema.pre('save', function () {
+  this.$__swallowStudyCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+function emitSwallowStudyCompleted(doc) {
+  if (!doc || !doc.$__swallowStudyCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('instrumental-swallow-study', 'swallow_study.completed', {
+      studyId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      studyType: doc.studyType,
+      aspirationDetected: !!doc.aspirationDetected,
+      completedAt: doc.performedDate || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+InstrumentalSwallowStudySchema.post('save', emitSwallowStudyCompleted);
+
 module.exports =
   mongoose.models.InstrumentalSwallowStudy ||
   mongoose.model('InstrumentalSwallowStudy', InstrumentalSwallowStudySchema);

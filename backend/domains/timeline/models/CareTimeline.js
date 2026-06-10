@@ -130,6 +130,7 @@ const careTimelineSchema = new mongoose.Schema(
         'sensory_diet_completed',
         'prior_authorization_approved',
         'plan_review_recorded',
+        'swallow_study_completed',
         // Family
         'family_contact',
         'family_meeting',

@@ -760,3 +760,4 @@ __tests__/seating-postural-finalized-core-linkage-wave1050.test.js
 __tests__/sensory-diet-completion-core-linkage-wave1051.test.js
 __tests__/prior-authorization-approved-core-linkage-wave1052.test.js
 __tests__/plan-review-recorded-core-linkage-wave1053.test.js
+__tests__/swallow-study-completed-core-linkage-wave1054.test.js

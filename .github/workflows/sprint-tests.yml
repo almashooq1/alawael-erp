@@ -1299,6 +1299,8 @@ on:
       - 'backend/__tests__/prior-authorization-approved-core-linkage-wave1052.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-review-recorded-core-linkage-wave1053.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/swallow-study-completed-core-linkage-wave1054.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2581,6 +2583,8 @@ on:
       - 'backend/__tests__/prior-authorization-approved-core-linkage-wave1052.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-review-recorded-core-linkage-wave1053.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/swallow-study-completed-core-linkage-wave1054.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

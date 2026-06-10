@@ -1253,6 +1253,26 @@ const PLAN_REVIEW_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SWALLOW_STUDY_EVENTS = {
+  SWALLOW_STUDY_COMPLETED: {
+    domain: 'instrumental-swallow-study',
+    eventType: 'swallow_study.completed',
+    version: 1,
+    description: 'إكمال دراسة البلع الأداتية — Instrumental swallow study completed',
+    payload: {
+      studyId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      studyType: 'string',
+      aspirationDetected: 'boolean',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1293,6 +1313,7 @@ const DDD_CONTRACTS = {
   'sensory-diet-program': SENSORY_DIET_EVENTS,
   'prior-authorization': PRIOR_AUTHORIZATION_EVENTS,
   'plan-review': PLAN_REVIEW_EVENTS,
+  'instrumental-swallow-study': SWALLOW_STUDY_EVENTS,
 };
 
 /**
@@ -1349,6 +1370,7 @@ module.exports = {
   SENSORY_DIET_EVENTS,
   PRIOR_AUTHORIZATION_EVENTS,
   PLAN_REVIEW_EVENTS,
+  SWALLOW_STUDY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

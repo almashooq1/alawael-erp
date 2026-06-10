@@ -1765,6 +1765,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1054: instrumental swallow study completed → core timeline ────
+  // When an instrumental swallow study (VFSS/FEES) is completed, record it
+  // as a clinical milestone; aspiration findings raise the severity.
+  subscribers.push({
+    name: 'instrumental-swallow-study:completed → timeline:record',
+    pattern: 'instrumental-swallow-study.swallow_study.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const aspirated = !!event.payload.aspirationDetected;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'swallow_study_completed',
+            category: 'clinical',
+            severity: aspirated ? 'warning' : 'success',
+            title: `Instrumental swallow study completed${aspirated ? ' — aspiration detected' : ''}`,
+            title_ar: 'اكتملت دراسة البلع الأداتية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SwallowStudy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

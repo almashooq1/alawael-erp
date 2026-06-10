@@ -1620,6 +1620,219 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ═══ Clinical-safety modules → Timeline (W1046 unified-core linkage) ═══
+  // Producers: native post-save hooks on the W1010-W1042 models. Severity is
+  // computed intelligently (serious pressure stages / outbreaks escalate to
+  // error) so the unified timeline reflects real clinical risk.
+
+  subscribers.push({
+    name: 'falls-risk:finalized → timeline:record',
+    pattern: 'clinical-safety.falls.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        const high = event.payload.riskLevel === 'high';
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'falls_risk_assessed',
+          category: 'clinical',
+          severity: high ? 'warning' : 'info',
+          title: `Falls-risk assessment finalized (${event.payload.riskLevel || ''})`.trim(),
+          title_ar: `اعتماد تقييم خطر السقوط (${event.payload.riskLevel || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] falls-risk timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'pressure-injury:identified → timeline:record',
+    pattern: 'clinical-safety.pressure_injury.identified',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        const serious =
+          ['stage_3', 'stage_4', 'unstageable', 'deep_tissue_injury'].includes(event.payload.stage) ||
+          event.payload.origin === 'facility_acquired';
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'pressure_injury',
+          category: 'clinical',
+          severity: serious ? 'error' : 'warning',
+          title: `Pressure injury identified (${event.payload.stage || ''} @ ${event.payload.bodySite || ''})`.trim(),
+          title_ar: `رصد إصابة ضغط (${event.payload.stage || ''} @ ${event.payload.bodySite || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] pressure-injury timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'pressure-injury:resolved → timeline:record',
+    pattern: 'clinical-safety.pressure_injury.resolved',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'pressure_injury_resolved',
+          category: 'clinical',
+          severity: 'success',
+          title: `Pressure injury resolved (${event.payload.bodySite || ''})`.trim(),
+          title_ar: `التئام إصابة الضغط (${event.payload.bodySite || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] pressure-injury-resolved timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'sleep:finalized → timeline:record',
+    pattern: 'clinical-safety.sleep.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'sleep_assessment',
+          category: 'clinical',
+          severity: event.payload.problemSeverity === 'severe' ? 'warning' : 'info',
+          title: `Sleep assessment finalized (${event.payload.problemSeverity || ''})`.trim(),
+          title_ar: `اعتماد تقييم النوم (${event.payload.problemSeverity || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] sleep timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'om:finalized → timeline:record',
+    pattern: 'clinical-safety.om.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'mobility_assessment',
+          category: 'clinical',
+          severity: event.payload.independenceLevel === 'dependent' ? 'warning' : 'info',
+          title: `O&M assessment finalized (${event.payload.independenceLevel || ''})`.trim(),
+          title_ar: `اعتماد تقييم التوجّه والحركة (${event.payload.independenceLevel || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] om timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'driving:finalized → timeline:record',
+    pattern: 'clinical-safety.driving.assessment_finalized',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'driving_assessment',
+          category: 'clinical',
+          severity: event.payload.recommendation === 'not_fit_currently' ? 'warning' : 'info',
+          title: `Driving-rehab assessment finalized (${event.payload.recommendation || ''})`.trim(),
+          title_ar: `اعتماد تقييم تأهيل القيادة (${event.payload.recommendation || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] driving timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'medication-reconciliation:reconciled → timeline:record',
+    pattern: 'clinical-safety.medication.reconciled',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        const unresolved = Number(event.payload.unresolvedDiscrepancyCount) || 0;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'medication_reconciliation',
+          category: 'clinical',
+          severity: unresolved > 0 ? 'warning' : 'success',
+          title: `Medication reconciliation completed (${event.payload.reconciliationType || ''})`.trim(),
+          title_ar: `إتمام مطابقة الأدوية (${event.payload.reconciliationType || ''})`.trim(),
+          description: unresolved > 0 ? `${unresolved} unresolved discrepancy(ies)` : 'no unresolved discrepancies',
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] med-rec timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'infection:case_opened → timeline:record',
+    pattern: 'clinical-safety.infection.case_opened',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        const p = event.payload;
+        let severity = 'info';
+        if (p.caseStatus === 'confirmed') severity = 'warning';
+        if (p.isolationRequired || p.excludedFromCenter || p.outbreakId) severity = 'error';
+        await CareTimeline.create({
+          beneficiaryId: p.beneficiaryId,
+          eventType: 'infection_case',
+          category: 'clinical',
+          severity,
+          title: `Infection case opened (${p.category || ''}${p.pathogen ? ': ' + p.pathogen : ''})`.trim(),
+          title_ar: `فتح حالة عدوى (${p.category || ''}${p.pathogen ? ': ' + p.pathogen : ''})`.trim(),
+          metadata: p,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] infection-open timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'infection:case_resolved → timeline:record',
+    pattern: 'clinical-safety.infection.case_resolved',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'infection_resolved',
+          category: 'clinical',
+          severity: 'success',
+          title: `Infection case resolved (${event.payload.pathogen || event.payload.category || ''})`.trim(),
+          title_ar: `حلّ حالة العدوى (${event.payload.pathogen || event.payload.category || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] infection-resolved timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

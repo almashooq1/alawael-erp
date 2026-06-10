@@ -182,6 +182,32 @@ MedicationReconciliationSchema.virtual('hasUnresolvedDiscrepancies').get(functio
 MedicationReconciliationSchema.set('toJSON', { virtuals: true });
 MedicationReconciliationSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// On the draft→reconciled flip → medication_reconciliation timeline row
+// (warning when unresolved discrepancies remain, else success).
+MedicationReconciliationSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+MedicationReconciliationSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'reconciled' || this.$__prevStatus === 'reconciled') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    const stats = computeReconciliationStats(doc.medications);
+    Promise.resolve(
+      integrationBus.publish('clinical-safety', 'medication.reconciled', {
+        medicationReconciliationId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        reconciliationType: doc.reconciliationType,
+        medicationCount: stats.medicationCount,
+        unresolvedDiscrepancyCount: stats.unresolvedDiscrepancyCount,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.MedicationReconciliation ||
   mongoose.model('MedicationReconciliation', MedicationReconciliationSchema);

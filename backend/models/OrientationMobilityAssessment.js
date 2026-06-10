@@ -257,6 +257,29 @@ OrientationMobilityAssessmentSchema.virtual('isReassessmentOverdue').get(functio
 OrientationMobilityAssessmentSchema.set('toJSON', { virtuals: true });
 OrientationMobilityAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → mobility_assessment timeline row.
+OrientationMobilityAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+OrientationMobilityAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-safety', 'om.assessment_finalized', {
+        orientationMobilityAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        independenceLevel: doc.independenceLevel,
+        independenceScore: doc.independenceScore,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.OrientationMobilityAssessment ||
   mongoose.model('OrientationMobilityAssessment', OrientationMobilityAssessmentSchema);

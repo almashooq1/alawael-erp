@@ -174,6 +174,37 @@ InfectionSurveillanceCaseSchema.virtual('durationDays').get(function () {
 InfectionSurveillanceCaseSchema.set('toJSON', { virtuals: true });
 InfectionSurveillanceCaseSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// A newly-opened case (not ruled_out) → infection_case (severity by
+// confirmation/isolation/outbreak); a transition to resolved → infection_resolved.
+InfectionSurveillanceCaseSchema.post('init', function () {
+  this.$__prevCaseStatus = this.caseStatus;
+});
+InfectionSurveillanceCaseSchema.post('save', function (doc) {
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    const prev = this.$__prevCaseStatus;
+    const base = {
+      infectionCaseId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      category: doc.category,
+      pathogen: doc.pathogen || '',
+      caseStatus: doc.caseStatus,
+      isolationRequired: !!doc.isolationRequired,
+      excludedFromCenter: !!doc.excludedFromCenter,
+      outbreakId: doc.outbreakId || '',
+    };
+    if (prev === undefined && doc.caseStatus !== 'ruled_out' && doc.caseStatus !== 'resolved') {
+      Promise.resolve(integrationBus.publish('clinical-safety', 'infection.case_opened', base)).catch(() => {});
+    } else if (doc.caseStatus === 'resolved' && prev && prev !== 'resolved') {
+      Promise.resolve(integrationBus.publish('clinical-safety', 'infection.case_resolved', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.InfectionSurveillanceCase ||
   mongoose.model('InfectionSurveillanceCase', InfectionSurveillanceCaseSchema);

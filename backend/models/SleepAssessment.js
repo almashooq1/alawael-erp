@@ -265,6 +265,29 @@ SleepAssessmentSchema.virtual('isReassessmentOverdue').get(function () {
 SleepAssessmentSchema.set('toJSON', { virtuals: true });
 SleepAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1046) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → sleep_assessment timeline row.
+SleepAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+SleepAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-safety', 'sleep.assessment_finalized', {
+        sleepAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        problemSeverity: doc.problemSeverity,
+        suspectedOSA: !!doc.suspectedOSA,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.SleepAssessment || mongoose.model('SleepAssessment', SleepAssessmentSchema);
 

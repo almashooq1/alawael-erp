@@ -2651,6 +2651,28 @@ const WORKFLOW_TRANSITION_EVENTS = Object.freeze({
   },
 }); // ═══ W1118 — workflow phase transition recorded → unified core timeline ═══
 
+const GENERATED_REPORT_EVENTS = Object.freeze({
+  GENERATED_REPORT_COMPLETED: {
+    domain: 'generated-report',
+    eventType: 'generated_report.completed',
+    version: 1,
+    description:
+      'A scoped analytics report finished generating (status completed) for a beneficiary.',
+    payload: {
+      reportId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      templateCode: 'string',
+      scope: 'string',
+      title: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1119 — generated beneficiary report completed → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2756,6 +2778,7 @@ const DDD_CONTRACTS = {
   'measure-alert': MEASURE_ALERT_EVENTS,
   'measure-baseline': MEASURE_BASELINE_EVENTS,
   'workflow-transition': WORKFLOW_TRANSITION_EVENTS,
+  'generated-report': GENERATED_REPORT_EVENTS,
 };
 
 /**
@@ -2873,6 +2896,7 @@ module.exports = {
   MEASURE_ALERT_EVENTS,
   MEASURE_BASELINE_EVENTS,
   WORKFLOW_TRANSITION_EVENTS,
+  GENERATED_REPORT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

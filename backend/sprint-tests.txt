@@ -829,3 +829,4 @@ __tests__/measure-reassessment-completed-core-linkage-wave1115.test.js
 __tests__/measure-alert-raised-core-linkage-wave1116.test.js
 __tests__/measure-baseline-completed-core-linkage-wave1117.test.js
 __tests__/workflow-transition-recorded-core-linkage-wave1118.test.js
+__tests__/generated-report-completed-core-linkage-wave1119.test.js

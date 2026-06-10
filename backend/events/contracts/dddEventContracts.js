@@ -2766,6 +2766,31 @@ const CLINICAL_RISK_SCORE_EVENTS = Object.freeze({
   },
 }); // ═══ W1131 — clinical risk score escalated → unified core timeline ═══
 
+const CORRECTIVE_ACTION_EVENTS = Object.freeze({
+  CORRECTIVE_ACTION_OPENED: {
+    domain: 'corrective-action',
+    eventType: 'corrective_action.opened',
+    version: 1,
+    description:
+      'A beneficiary-scoped corrective action was opened (auto-created from a quality audit finding or manually by a quality supervisor).',
+    payload: {
+      correctiveActionId: 'string',
+      auditId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      actionType: 'string',
+      severity: 'string',
+      title: 'string',
+      dueDate: 'date',
+      openedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1134 — beneficiary corrective action opened → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2876,6 +2901,7 @@ const DDD_CONTRACTS = {
   'gas-scale': GAS_SCALE_EVENTS,
   'quality-audit-record': QUALITY_AUDIT_RECORD_EVENTS,
   'clinical-risk-score': CLINICAL_RISK_SCORE_EVENTS,
+  'corrective-action': CORRECTIVE_ACTION_EVENTS,
 };
 
 /**
@@ -2998,6 +3024,7 @@ module.exports = {
   GAS_SCALE_EVENTS,
   QUALITY_AUDIT_RECORD_EVENTS,
   CLINICAL_RISK_SCORE_EVENTS,
+  CORRECTIVE_ACTION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

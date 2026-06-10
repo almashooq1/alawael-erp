@@ -136,6 +136,9 @@ OnboardingChecklistSchema.statics.DEFAULT_OFFBOARDING_ITEMS = [
   { key: 'experience_certificate', label: 'إصدار شهادة الخبرة', ownerRole: 'hr', required: false },
 ];
 
+// W1133 — denormalize branchId from the employee for cross-branch isolation.
+OnboardingChecklistSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+
 module.exports =
   mongoose.models.HrOnboardingChecklist ||
   mongoose.model('HrOnboardingChecklist', OnboardingChecklistSchema);

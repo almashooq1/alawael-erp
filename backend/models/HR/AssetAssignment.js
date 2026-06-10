@@ -51,5 +51,8 @@ const AssetAssignmentSchema = new mongoose.Schema(
   { timestamps: true, collection: 'hr_asset_assignments' }
 );
 
+// W1133 — denormalize branchId from the employee for cross-branch isolation.
+AssetAssignmentSchema.plugin(require('./plugins/hrBranchScope.plugin'));
+
 module.exports =
   mongoose.models.AssetAssignment || mongoose.model('AssetAssignment', AssetAssignmentSchema);

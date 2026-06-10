@@ -108,5 +108,37 @@ correctiveActionSchema.index({ status: 1, dueDate: 1 });
 correctiveActionSchema.index({ assignedTo: 1, status: 1 });
 correctiveActionSchema.index({ branchId: 1, status: 1, severity: 1 });
 
+// ── W1134: unified-core linkage — corrective_action.opened ─────────────────
+// A NEW beneficiary-scoped corrective action is a quality milestone on the
+// beneficiary's unified CareTimeline. Facility-level actions (no beneficiaryId)
+// are deliberately skipped. Async hook style per W483 doctrine.
+correctiveActionSchema.pre('save', async function flagCorrectiveActionOpened() {
+  this.$__correctiveActionOpened = this.isNew && Boolean(this.beneficiaryId);
+});
+
+correctiveActionSchema.post('save', function emitCorrectiveActionOpened(doc) {
+  if (!doc.$__correctiveActionOpened) return;
+  doc.$__correctiveActionOpened = false;
+  try {
+    // Lazy require — keeps the model loadable in isolation (tests/scripts).
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('corrective-action', 'corrective_action.opened', {
+      correctiveActionId: String(doc._id),
+      ...(doc.auditId ? { auditId: String(doc.auditId) } : {}),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      actionType: doc.type,
+      severity: doc.severity,
+      title: doc.title,
+      ...(doc.dueDate ? { dueDate: doc.dueDate } : {}),
+      openedAt: doc.createdAt || new Date(),
+    });
+  } catch (err) {
+    // Never block the save on bus failure.
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.CorrectiveAction || mongoose.model('CorrectiveAction', correctiveActionSchema);

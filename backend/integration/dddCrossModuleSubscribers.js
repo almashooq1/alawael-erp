@@ -3827,6 +3827,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1134: beneficiary corrective action opened → core timeline ────
+  // QualityEngine auto-creates CorrectiveAction rows from audit findings
+  // (and supervisors create them manually). Beneficiary-scoped ones become
+  // a quality-category timeline row. critical→critical, high→error,
+  // medium→warning, low→info.
+  subscribers.push({
+    name: 'corrective-action:opened → timeline:record',
+    pattern: 'corrective-action.corrective_action.opened',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sevMap = { critical: 'critical', high: 'error', medium: 'warning', low: 'info' };
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.episodeId ? { episodeId: event.payload.episodeId } : {}),
+            eventType: 'corrective_action_opened',
+            category: 'quality',
+            severity: sevMap[event.payload.severity] || 'warning',
+            title: `Corrective action opened${event.payload.actionType ? `: ${event.payload.actionType}` : ''}`,
+            title_ar: event.payload.title || 'فُتح إجراء تصحيحي للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CorrectiveAction timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

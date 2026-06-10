@@ -34,4 +34,7 @@ const ShiftSwapSchema = new mongoose.Schema(
   { timestamps: true, collection: 'hr_shift_swaps' }
 );
 
+// W1133 — denormalize branchId from the requester employee for cross-branch isolation.
+ShiftSwapSchema.plugin(require('./plugins/hrBranchScope.plugin'), { employeeField: 'requesterId' });
+
 module.exports = mongoose.models.ShiftSwap || mongoose.model('ShiftSwap', ShiftSwapSchema);

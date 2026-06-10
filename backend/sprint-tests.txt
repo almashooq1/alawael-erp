@@ -286,6 +286,7 @@ __tests__/goal-linkage-insights-wave237.test.js
 __tests__/goal-linked-measures-behavioral-wave1090.test.js
 __tests__/goal-linked-measures-wave1090.test.js
 __tests__/goal-measure-linkage-wave235.test.js
+__tests__/goal-therapeutic-bridge-wave1133.test.js
 __tests__/goal-progress-digest-script.test.js
 __tests__/goal-progress-service.test.js
 __tests__/gov-adapters.e2e.test.js
@@ -839,3 +840,4 @@ __tests__/decision-alert-raised-core-linkage-wave1120.test.js
 __tests__/gas-scale-activated-core-linkage-wave1121.test.js
 __tests__/quality-audit-record-completed-core-linkage-wave1122.test.js
 __tests__/clinical-risk-score-escalated-core-linkage-wave1131.test.js
+__tests__/corrective-action-opened-core-linkage-wave1134.test.js

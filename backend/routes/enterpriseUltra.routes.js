@@ -14,6 +14,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const {
   LegalCase,
   CourtHearing,
@@ -864,7 +865,7 @@ router.patch(
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
-      { $push: { escalationPath: { $each: [req.body], $slice: -100 } } },
+      { $push: { escalationPath: { $each: [stripUpdateMeta(req.body)], $slice: -100 } } },
       { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });

@@ -38,9 +38,9 @@ value. The genuine deviation is the **UPDATE** paths that write raw
 | `hr/hr-modules.routes.js:106`      | generic `attachCrud` `PATCH /:id` | **11 HR models**    | ✅ authorize(writeRoles)                | ❌                   | ✅ **FIXED** (extends W1112) — secures all 11 HR modules via the shared attachCrud helper                                                 |
 | `workflow.routes.js:207`           | `PUT /definitions/:id`            | WorkflowDefinition  | ✅ authMiddleware + requireBranchAccess | ✅                   | ⚪ N/A — `backend/routes/workflow.routes.js` is DORMANT (unmounted); the LIVE `domains/workflow` route has no raw-body pattern (verified) |
 
-### 🟠 Tier 2 — raw `req.body` pushed into an array subdoc
+### 🟠 Tier 2 — raw `req.body` pushed into an array subdoc — ✅ **FIXED (W1130)**
 
-`enterpriseUltra.routes.js:867` (escalationPath) · `fleetFuelCards.js:95` (transactions) · `fleetTires.js:105` (pressureLogs) · `groupPrograms.routes.js:173` (sessions) · `internalAudit.js:273` (observations). Same fix (`stripUpdateMeta` the pushed element); severity bounded by each subdoc's schema.
+`enterpriseUltra.routes.js` (escalationPath) · `fleetFuelCards.js` (transactions) · `fleetTires.js` (pressureLogs) · `groupPrograms.routes.js` (sessions) · `internalAudit.js` (observations) — all 5 now wrap the pushed element in `stripUpdateMeta(req.body)` (added the import to enterpriseUltra + internalAudit). Severity was bounded by each subdoc's schema; this is the consistent defense-in-depth. Guard `mass-assignment-array-push-tier2-wave1130` (15 assertions); `check:routes-load` passes.
 
 ### 🟡 Tier 3 — raw `req.body` nested under a single key (lower — cannot set sibling top-level fields)
 

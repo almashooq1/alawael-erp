@@ -112,6 +112,8 @@ __tests__/hr-extensions-branch-isolation-wave1154.test.js
 __tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js
 __tests__/nitaqat-contract-branch-isolation-wave1159.test.js
 __tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js
+__tests__/finance-invoice-branch-isolation-wave1161.test.js
+__tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js
 __tests__/branch-isolation-hr-domain-wave1141.test.js
 __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
 __tests__/hr-route-branch-isolation-guard-wave1142.test.js

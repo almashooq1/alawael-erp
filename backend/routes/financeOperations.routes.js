@@ -16,12 +16,24 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const financeOpsService = require('../services/financeOperations.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W269 — Invoice carries branchId (denormalized from the beneficiary, W651), so the
+// invoice :id routes MUST verify the caller's branch before returning/mutating
+// financial PII. requireBranchAccess populates req.branchScope but the handlers pass
+// only the id to the service, so the scope was unused. Loads the invoice + asserts;
+// returns it when allowed, throws a 403/404 (caught by `wrap`) when denied.
+async function loadInvoiceInBranch(req, id) {
+  const inv = await financeOpsService.getInvoice(id); // throws 404 when missing
+  assertBranchMatch(req, inv.branchId, 'invoice'); // throws 403 on cross-branch
+  return inv;
+}
 const wrap = fn => async (req, res) => {
   try {
     const result = await fn(req, res);
@@ -52,11 +64,14 @@ router.get(
 
 router.get(
   '/invoices',
-  wrap(async req => financeOpsService.listInvoices(req.query))
+  // W269 — pin the branch filter (restricted → own branch; HQ → all / honoured query)
+  wrap(async req =>
+    financeOpsService.listInvoices({ ...req.query, branchId: effectiveBranchScope(req) })
+  )
 );
 router.get(
   '/invoices/:id',
-  wrap(async req => financeOpsService.getInvoice(req.params.id))
+  wrap(async req => loadInvoiceInBranch(req, req.params.id)) // W269
 );
 router.post(
   '/invoices',
@@ -64,15 +79,24 @@ router.post(
 );
 router.put(
   '/invoices/:id',
-  wrap(async req => financeOpsService.updateInvoice(req.params.id, req.body, getUserId(req)))
+  wrap(async req => {
+    await loadInvoiceInBranch(req, req.params.id); // W269 — verify branch before mutating
+    return financeOpsService.updateInvoice(req.params.id, req.body, getUserId(req));
+  })
 );
 router.post(
   '/invoices/:id/cancel',
-  wrap(async req => financeOpsService.cancelInvoice(req.params.id, getUserId(req)))
+  wrap(async req => {
+    await loadInvoiceInBranch(req, req.params.id); // W269
+    return financeOpsService.cancelInvoice(req.params.id, getUserId(req));
+  })
 );
 router.post(
   '/invoices/:id/pay',
-  wrap(async req => financeOpsService.markInvoicePaid(req.params.id, req.body, getUserId(req)))
+  wrap(async req => {
+    await loadInvoiceInBranch(req, req.params.id); // W269
+    return financeOpsService.markInvoicePaid(req.params.id, req.body, getUserId(req));
+  })
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════

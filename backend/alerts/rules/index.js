@@ -69,4 +69,9 @@ module.exports = [
   // Active vehicle with expired registration / insurance / inspection.
   // Needs `Vehicle` in the app.js model loader to fire.
   require('./vehicle-document-expiry'),
+
+  // ── W1009 — operational / contracts (1) ─────────────────────
+  // Contract still ACTIVE but past endDate. Needs `Contract.model`
+  // in the app.js model loader to fire (file is Contract.model.js).
+  require('./contract-expired'),
 ];

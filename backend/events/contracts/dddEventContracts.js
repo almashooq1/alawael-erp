@@ -1393,6 +1393,25 @@ const DIFFERENTIAL_DIAGNOSIS_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const COMMUNITY_REFERRAL_EVENTS = {
+  COMMUNITY_REFERRAL_COMPLETED: {
+    domain: 'community-referral',
+    eventType: 'community_referral.completed',
+    version: 1,
+    description: 'إكمال إحالة مجتمعية — Community referral completed',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      referralType: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1440,6 +1459,7 @@ const DDD_CONTRACTS = {
   'insurance-eligibility': INSURANCE_ELIGIBILITY_EVENTS,
   'morning-health-check': MORNING_HEALTH_CHECK_EVENTS,
   'differential-diagnosis': DIFFERENTIAL_DIAGNOSIS_EVENTS,
+  'community-referral': COMMUNITY_REFERRAL_EVENTS,
 };
 
 /**
@@ -1503,6 +1523,7 @@ module.exports = {
   INSURANCE_ELIGIBILITY_EVENTS,
   MORNING_HEALTH_CHECK_EVENTS,
   DIFFERENTIAL_DIAGNOSIS_EVENTS,
+  COMMUNITY_REFERRAL_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

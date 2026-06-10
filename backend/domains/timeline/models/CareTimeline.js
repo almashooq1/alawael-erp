@@ -137,6 +137,7 @@ const careTimelineSchema = new mongoose.Schema(
         'insurance_eligibility_checked',
         'morning_health_check_flagged',
         'differential_diagnosis_confirmed',
+        'community_referral_completed',
         // Family
         'family_contact',
         'family_meeting',

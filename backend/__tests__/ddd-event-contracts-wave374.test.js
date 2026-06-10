@@ -98,6 +98,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'insurance-eligibility', // W1058 — insurance eligibility check recorded → core timeline
   'morning-health-check', // W1059 — morning health check flagged → core timeline
   'differential-diagnosis', // W1060 — differential diagnosis confirmed → core timeline
+  'community-referral', // W1061 — community referral completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -170,6 +171,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'insurance_eligibility', // W1058 — insurance_eligibility.checked (InsuranceEligibilityCheck)
     'morning_health_check', // W1059 — morning_health_check.flagged (MorningHealthCheck)
     'differential_diagnosis', // W1060 — differential_diagnosis.confirmed (DifferentialDiagnosis)
+    'community_referral', // W1061 — community_referral.completed (CommunityReferral)
   ])
 );
 

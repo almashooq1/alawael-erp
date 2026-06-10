@@ -767,3 +767,4 @@ __tests__/creative-arts-therapy-completed-core-linkage-wave1057.test.js
 __tests__/insurance-eligibility-checked-core-linkage-wave1058.test.js
 __tests__/morning-health-check-flagged-core-linkage-wave1059.test.js
 __tests__/differential-diagnosis-confirmed-core-linkage-wave1060.test.js
+__tests__/community-referral-completed-core-linkage-wave1061.test.js

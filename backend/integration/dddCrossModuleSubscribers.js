@@ -1974,6 +1974,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1061: completed community referral → core timeline ────────────
+  // When a community referral linked to a beneficiary completes, log it on
+  // the beneficiary's timeline (administrative, success).
+  subscribers.push({
+    name: 'community-referral:completed → timeline:record',
+    pattern: 'community-referral.community_referral.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const t = event.payload.referralType ? ` (${event.payload.referralType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'community_referral_completed',
+            category: 'administrative',
+            severity: 'success',
+            title: `Community referral completed${t}`,
+            title_ar: 'اكتملت الإحالة المجتمعية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CommunityReferral timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

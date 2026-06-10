@@ -57,5 +57,31 @@ communityReferralSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
+// ── W1061: unified-core linkage ───────────────────────────────────────
+// Completing a referral is the milestone. Publish
+// community_referral.completed → CareTimeline. NON-callback hooks only.
+communityReferralSchema.pre('save', function () {
+  this.$__communityReferralCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+function emitCommunityReferralCompleted(doc) {
+  if (!doc || !doc.$__communityReferralCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('community-referral', 'community_referral.completed', {
+      referralId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      referralType: doc.referralType,
+      completedAt: doc.completedAt || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+communityReferralSchema.post('save', emitCommunityReferralCompleted);
+
 module.exports =
   mongoose.models.CommunityReferral || mongoose.model('CommunityReferral', communityReferralSchema);

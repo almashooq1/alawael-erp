@@ -1,22 +1,42 @@
 'use strict';
 /**
- * Form Template Routes — استمارات التقييم والموافقة والمتابعة
+ * Form Template Routes — النماذج الجاهزة (dynamic form builder + submissions)
  * ══════════════════════════════════════════════════════════════════════════
- * Dynamic form builder: create reusable form templates, collect submissions,
- * review responses, and generate submission reports.
+ * Serves the ready-made forms system: browse FormTemplate docs (32 catalog
+ * forms seeded via scripts/seed-forms-catalog.js + custom ones), fill and
+ * submit responses (FormSubmission), and review/approve submissions.
  *
- *   GET    /                    list form templates
- *   POST   /                    create form template
- *   GET    /:id                 get template details (with schema)
- *   PUT    /:id                 update template (draft only)
- *   DELETE /:id                 delete template
- *   PATCH  /:id/publish         publish / unpublish template
- *   POST   /:id/duplicate       duplicate template
- *   GET    /:id/submissions     list submissions for template
- *   POST   /:id/submit          submit form response
- *   GET    /submissions/:subId  get single submission
- *   PATCH  /submissions/:subId/status  update submission status (review, approve, reject)
- *   GET    /stats               form usage statistics
+ *   GET    /                          list form templates
+ *   GET    /categories                category counts (for UI tabs)
+ *   GET    /stats                     usage statistics
+ *   GET    /submissions/my            caller's own submissions
+ *   GET    /submissions/pending       review queue (reviewer roles)
+ *   GET    /submissions/:subId        single submission (owner or reviewer)
+ *   PATCH  /submissions/:subId/status review a submission (approve/reject/…)
+ *   POST   /                          create form template (draft)
+ *   GET    /:id                       template detail (_id or templateId slug)
+ *   PUT    /:id                       update template (draft only)
+ *   DELETE /:id                       soft-delete (isActive=false)
+ *   PATCH  /:id/publish               publish / unpublish toggle
+ *   POST   /:id/duplicate             duplicate as new draft
+ *   GET    /:id/submissions           submissions for one template
+ *   POST   /:id/submit                submit a filled form
+ *
+ * W1179 contract realignment: the previous revision of this router queried
+ * fields that do NOT exist on the real models (`title` / `status` /
+ * `branchId` / `isDeleted` on FormTemplate; `formTemplateId` / `responses` /
+ * `formTitle` / plain-ObjectId `submittedBy` on FormSubmission). Because
+ * FormTemplate has no `branchId`, every list/detail lookup for a
+ * branch-scoped user matched ZERO documents — the seeded "ready forms" were
+ * invisible — and every submit threw ValidationError (`data` required).
+ * This revision is aligned 1:1 with models/FormTemplate.js
+ * (name / isPublished / isActive / templateId / fields[].name) and
+ * models/FormSubmission.js (templateId slug / data / submittedBy.{userId}).
+ *
+ * Tenancy note: form templates are shared DEFINITIONS (no PHI, no branchId
+ * on the model) — they are intentionally visible across branches, like the
+ * catalog they are seeded from. Submissions are guarded by ownership
+ * (submittedBy.userId) + reviewer roles instead.
  */
 
 const express = require('express');
@@ -38,20 +58,177 @@ const safeModel = name => {
   }
 };
 
+// Roles that manage templates / review submissions (super_admin bypasses
+// requireRole internally, but list it for the canManage() data filter too).
+const MANAGE_ROLES = ['admin', 'super_admin', 'manager', 'supervisor'];
+const REVIEW_ROLES = [...MANAGE_ROLES, 'clinician'];
+const canManage = req => MANAGE_ROLES.includes(req.user?.role);
+const canReview = req => REVIEW_ROLES.includes(req.user?.role);
+
+const LAYOUT_FIELD_TYPES = ['header', 'divider', 'paragraph', 'spacer'];
+const isLayoutField = f => LAYOUT_FIELD_TYPES.includes(f?.type);
+
+// UI metadata for /categories (ids mirror the FormTemplate.category enum)
+const CATEGORY_META = {
+  beneficiary: {
+    label: 'شؤون المستفيدين',
+    labelEn: 'Beneficiary Affairs',
+    icon: '🧑‍🦽',
+    color: '#1565C0',
+  },
+  hr: { label: 'شؤون الموظفين', labelEn: 'Human Resources', icon: '👥', color: '#D32F2F' },
+  administration: {
+    label: 'الشؤون الإدارية',
+    labelEn: 'Administration',
+    icon: '🏛️',
+    color: '#6D4C41',
+  },
+  finance: { label: 'الشؤون المالية', labelEn: 'Finance', icon: '💰', color: '#2E7D32' },
+  general: { label: 'عامة', labelEn: 'General', icon: '📁', color: '#757575' },
+  medical: { label: 'طبية', labelEn: 'Medical', icon: '🩺', color: '#00838F' },
+  therapy: { label: 'علاجية', labelEn: 'Therapy', icon: '🧩', color: '#7B1FA2' },
+  legal: { label: 'قانونية', labelEn: 'Legal', icon: '⚖️', color: '#37474F' },
+  reports: { label: 'تقارير', labelEn: 'Reports', icon: '📊', color: '#EF6C00' },
+  custom: { label: 'مخصصة', labelEn: 'Custom', icon: '🛠️', color: '#5D4037' },
+};
+
+const escapeRegExp = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Resolve a template by Mongo _id OR templateId slug (catalog ids). */
+async function findTemplate(FormTemplate, idOrSlug, extraFilter = {}) {
+  const base = { isActive: { $ne: false }, ...extraFilter };
+  if (mongoose.isValidObjectId(idOrSlug)) {
+    const byId = await FormTemplate.findOne({ ...base, _id: idOrSlug }).lean();
+    if (byId) return byId;
+  }
+  return FormTemplate.findOne({ ...base, templateId: idOrSlug }).lean();
+}
+
 // ── GET / ──────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate) return res.json({ success: true, data: [], pagination: { total: 0 } });
-    const { page = 1, limit = 20, category, status } = req.query;
-    const filter = { branchId: req.user.branchId, isDeleted: { $ne: true } };
-    if (category) filter.category = category;
+    const { page = 1, limit = 100, category, status, search } = req.query;
+    const filter = { isActive: { $ne: false } };
+    if (category && category !== 'all') filter.category = category;
+    if (status === 'published') filter.isPublished = true;
+    else if (status === 'draft') filter.isPublished = { $ne: true };
+    else if (!canManage(req)) filter.isPublished = true; // staff see fillable forms only
+    if (search) {
+      const re = new RegExp(escapeRegExp(search), 'i');
+      filter.$or = [{ name: re }, { nameEn: re }, { description: re }, { templateId: re }];
+    }
+    const lim = Math.min(Number(limit) || 100, 200);
+    const skip = (Number(page) - 1) * lim;
+    const [data, total] = await Promise.all([
+      FormTemplate.find(filter)
+        .select('-versions -design.customCss')
+        .sort({ category: 1, name: 1 })
+        .skip(skip)
+        .limit(lim)
+        .lean(),
+      FormTemplate.countDocuments(filter),
+    ]);
+    res.json({ success: true, data, pagination: { total, page: Number(page), limit: lim } });
+  } catch (err) {
+    safeError(res, err, 'list form templates');
+  }
+});
+
+// ── GET /categories ────────────────────────────────────────────────────────
+// NOTE: must precede /:id or Express treats "categories" as a template id.
+router.get('/categories', async (req, res) => {
+  try {
+    const FormTemplate = safeModel('FormTemplate');
+    if (!FormTemplate) return res.json({ success: true, data: [] });
+    const match = { isActive: { $ne: false } };
+    if (!canManage(req)) match.isPublished = true;
+    const rows = await FormTemplate.aggregate([
+      { $match: match },
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+    const total = rows.reduce((s, r) => s + r.count, 0);
+    const data = [
+      {
+        id: 'all',
+        label: 'جميع النماذج',
+        labelEn: 'All Forms',
+        icon: '📋',
+        color: '#455A64',
+        count: total,
+      },
+      ...rows.map(r => ({
+        id: r._id,
+        count: r.count,
+        ...(CATEGORY_META[r._id] || CATEGORY_META.custom),
+      })),
+    ];
+    res.json({ success: true, data });
+  } catch (err) {
+    safeError(res, err, 'form template categories');
+  }
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+// NOTE: must precede /:id or Express casts "stats" as a FormTemplate ObjectId.
+router.get('/stats', async (req, res) => {
+  try {
+    const FormTemplate = safeModel('FormTemplate');
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormTemplate) return res.json({ success: true, data: { totalTemplates: 0 } });
+    // Managers/reviewers see global submission counts; others see their own.
+    const subFilter = canReview(req) ? {} : { 'submittedBy.userId': req.user._id };
+    const [
+      totalTemplates,
+      publishedTemplates,
+      totalSubmissions,
+      pendingSubmissions,
+      approvedSubmissions,
+      rejectedSubmissions,
+    ] = await Promise.all([
+      FormTemplate.countDocuments({ isActive: { $ne: false } }),
+      FormTemplate.countDocuments({ isActive: { $ne: false }, isPublished: true }),
+      FormSubmission ? FormSubmission.countDocuments(subFilter) : 0,
+      FormSubmission
+        ? FormSubmission.countDocuments({
+            ...subFilter,
+            status: { $in: ['submitted', 'under_review'] },
+          })
+        : 0,
+      FormSubmission ? FormSubmission.countDocuments({ ...subFilter, status: 'approved' }) : 0,
+      FormSubmission ? FormSubmission.countDocuments({ ...subFilter, status: 'rejected' }) : 0,
+    ]);
+    res.json({
+      success: true,
+      data: {
+        totalTemplates,
+        publishedTemplates,
+        totalSubmissions,
+        pendingSubmissions,
+        approvedSubmissions,
+        rejectedSubmissions,
+      },
+    });
+  } catch (err) {
+    safeError(res, err, 'form template stats');
+  }
+});
+
+// ── GET /submissions/my ────────────────────────────────────────────────────
+// NOTE: must precede /submissions/:subId.
+router.get('/submissions/my', async (req, res) => {
+  try {
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
+    const { page = 1, limit = 20, status } = req.query;
+    const filter = { 'submittedBy.userId': req.user._id };
     if (status) filter.status = status;
-    else filter.status = { $ne: 'deleted' };
     const skip = (Number(page) - 1) * Number(limit);
     const [data, total] = await Promise.all([
-      FormTemplate.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(Number(limit)).lean(),
-      FormTemplate.countDocuments(filter),
+      FormSubmission.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
+      FormSubmission.countDocuments(filter),
     ]);
     res.json({
       success: true,
@@ -59,63 +236,158 @@ router.get('/', async (req, res) => {
       pagination: { total, page: Number(page), limit: Number(limit) },
     });
   } catch (err) {
-    safeError(res, err, 'list form templates');
+    safeError(res, err, 'list my submissions');
   }
 });
+
+// ── GET /submissions/pending ───────────────────────────────────────────────
+router.get(
+  '/submissions/pending',
+  requireRole('admin', 'manager', 'supervisor', 'clinician'),
+  async (req, res) => {
+    try {
+      const FormSubmission = safeModel('FormSubmission');
+      if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
+      const { page = 1, limit = 50 } = req.query;
+      const filter = { status: { $in: ['submitted', 'under_review'] } };
+      const skip = (Number(page) - 1) * Number(limit);
+      const [data, total] = await Promise.all([
+        FormSubmission.find(filter)
+          .sort({ priority: -1, createdAt: 1 })
+          .skip(skip)
+          .limit(Number(limit))
+          .lean(),
+        FormSubmission.countDocuments(filter),
+      ]);
+      res.json({
+        success: true,
+        data,
+        pagination: { total, page: Number(page), limit: Number(limit) },
+      });
+    } catch (err) {
+      safeError(res, err, 'list pending submissions');
+    }
+  }
+);
+
+// ── GET /submissions/:subId ────────────────────────────────────────────────
+router.get('/submissions/:subId', async (req, res) => {
+  try {
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormSubmission)
+      return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    if (!mongoose.isValidObjectId(req.params.subId))
+      return res.status(400).json({ success: false, message: 'Invalid submission id' });
+    const doc = await FormSubmission.findById(req.params.subId).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
+    const isOwner = String(doc.submittedBy?.userId || '') === String(req.user._id);
+    if (!isOwner && !canReview(req))
+      return res
+        .status(403)
+        .json({ success: false, message: 'Not allowed to view this submission' });
+    res.json({ success: true, data: doc });
+  } catch (err) {
+    safeError(res, err, 'get submission');
+  }
+});
+
+// ── PATCH /submissions/:subId/status ──────────────────────────────────────
+router.patch(
+  '/submissions/:subId/status',
+  requireRole('admin', 'manager', 'supervisor', 'clinician'),
+  async (req, res) => {
+    try {
+      const { status, reviewNote } = req.body;
+      // Mirrors the FormSubmission.status enum (review-reachable states only)
+      const validStatuses = [
+        'under_review',
+        'approved',
+        'rejected',
+        'returned',
+        'cancelled',
+        'archived',
+      ];
+      if (!status || !validStatuses.includes(status))
+        return res
+          .status(400)
+          .json({ success: false, message: `status must be one of: ${validStatuses.join(', ')}` });
+      if (status === 'rejected' && !reviewNote)
+        return res
+          .status(400)
+          .json({ success: false, message: 'reviewNote is required when rejecting' });
+      const FormSubmission = safeModel('FormSubmission');
+      if (!FormSubmission)
+        return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+      if (!mongoose.isValidObjectId(req.params.subId))
+        return res.status(400).json({ success: false, message: 'Invalid submission id' });
+      const set = { status };
+      if (status === 'approved') set.approvedAt = new Date();
+      if (status === 'rejected') {
+        set.rejectedAt = new Date();
+        set.rejectionReason = reviewNote;
+      }
+      if (status === 'returned') set.returnReason = reviewNote || '';
+      const update = { $set: set };
+      if (reviewNote) {
+        update.$push = {
+          comments: {
+            userId: req.user._id,
+            userName: req.user.name || req.user.fullName || req.user.email,
+            userRole: req.user.role,
+            text: reviewNote,
+            type: status === 'returned' ? 'request_change' : 'comment',
+            isInternal: false,
+          },
+        };
+      }
+      const doc = await FormSubmission.findByIdAndUpdate(req.params.subId, update, {
+        returnDocument: 'after',
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'update submission status');
+    }
+  }
+);
 
 // ── POST / ─────────────────────────────────────────────────────────────────
 router.post('/', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      category,
-      fields = [],
-      requiresSignature = false,
-      targetAudience = 'all',
-    } = req.body;
-    if (!title) return res.status(400).json({ success: false, message: 'title is required' });
+    const body = req.body || {};
+    const name = body.name || body.title; // legacy callers sent `title`
+    if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+    const fields = body.fields || [];
     if (!Array.isArray(fields))
       return res.status(400).json({ success: false, message: 'fields must be an array' });
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await FormTemplate.create({
-      title,
-      description,
-      category,
+      templateId:
+        body.templateId ||
+        `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      name,
+      nameEn: body.nameEn,
+      description: body.description,
+      category: body.category || 'general',
+      tags: Array.isArray(body.tags) ? body.tags : [],
+      icon: body.icon,
+      color: body.color,
       fields,
-      requiresSignature,
-      targetAudience,
-      status: 'draft',
-      version: 1,
-      branchId: req.user.branchId,
+      sections: Array.isArray(body.sections) ? body.sections : [],
+      requiresApproval: body.requiresApproval !== false,
+      isActive: true,
+      isBuiltIn: false,
+      isPublished: false,
       createdBy: req.user._id,
-      submissionCount: 0,
+      createdByName: req.user.name || req.user.fullName || req.user.email,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
+    if (err && err.name === 'ValidationError')
+      return res.status(400).json({ success: false, message: err.message });
     safeError(res, err, 'create form template');
-  }
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-// NOTE: must precede /:id or Express casts "stats" as a FormTemplate ObjectId.
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const FormTemplate = safeModel('FormTemplate');
-    const FormSubmission = safeModel('FormSubmission');
-    if (!FormTemplate) return res.json({ success: true, data: { templates: 0, submissions: 0 } });
-    const base = { branchId: req.user.branchId };
-    const [templates, published, submissions, pendingReview] = await Promise.all([
-      FormTemplate.countDocuments({ ...base, isDeleted: { $ne: true } }),
-      FormTemplate.countDocuments({ ...base, status: 'published', isDeleted: { $ne: true } }),
-      FormSubmission ? FormSubmission.countDocuments(base) : 0,
-      FormSubmission ? FormSubmission.countDocuments({ ...base, status: 'submitted' }) : 0,
-    ]);
-    res.json({ success: true, data: { templates, published, submissions, pendingReview } });
-  } catch (err) {
-    safeError(res, err, 'form template stats');
   }
 });
 
@@ -125,12 +397,10 @@ router.get('/:id', async (req, res) => {
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const doc = await FormTemplate.findOne({
-      _id: req.params.id,
-      branchId: req.user.branchId,
-      isDeleted: { $ne: true },
-    }).lean();
+    const doc = await findTemplate(FormTemplate, req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Form template not found' });
+    if (!doc.isPublished && !canManage(req))
+      return res.status(404).json({ success: false, message: 'Form template not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
     safeError(res, err, 'get form template');
@@ -143,38 +413,44 @@ router.put('/:id', requireRole('admin', 'manager', 'supervisor'), async (req, re
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    // Only allow editing drafts (not published)
-    const existing = await FormTemplate.findOne({
-      _id: req.params.id,
-      branchId: req.user.branchId,
-      isDeleted: { $ne: true },
-    }).lean();
+    const existing = await findTemplate(FormTemplate, req.params.id);
     if (!existing)
       return res.status(404).json({ success: false, message: 'Form template not found' });
-    if (existing.status === 'published')
+    if (existing.isPublished)
       return res.status(400).json({
         success: false,
-        message: 'Cannot edit a published form. Unpublish it first or create a new version.',
+        message: 'Cannot edit a published form. Unpublish it first or duplicate it.',
       });
     const allowedFields = [
-      'title',
+      'name',
+      'nameEn',
       'description',
+      'descriptionEn',
       'category',
+      'tags',
+      'icon',
+      'color',
       'fields',
-      'requiresSignature',
-      'targetAudience',
+      'sections',
+      'design',
+      'requiresApproval',
+      'outputFormat',
+      'allowDraft',
+      'notifyOnSubmission',
     ];
     const updates = {};
     allowedFields.forEach(k => {
       if (req.body[k] !== undefined) updates[k] = req.body[k];
     });
     const doc = await FormTemplate.findByIdAndUpdate(
-      req.params.id,
-      { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user._id } },
-      { returnDocument: 'after' }
+      existing._id,
+      { $set: { ...updates, updatedBy: req.user._id } },
+      { returnDocument: 'after', runValidators: true }
     );
     res.json({ success: true, data: doc });
   } catch (err) {
+    if (err && err.name === 'ValidationError')
+      return res.status(400).json({ success: false, message: err.message });
     safeError(res, err, 'update form template');
   }
 });
@@ -185,11 +461,13 @@ router.delete('/:id', requireRole('admin', 'manager'), async (req, res) => {
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const doc = await FormTemplate.findOneAndUpdate(
-      { _id: req.params.id, branchId: req.user.branchId, isDeleted: { $ne: true } },
-      { isDeleted: true, deletedAt: new Date(), deletedBy: req.user._id, status: 'deleted' }
+    const existing = await findTemplate(FormTemplate, req.params.id);
+    if (!existing)
+      return res.status(404).json({ success: false, message: 'Form template not found' });
+    await FormTemplate.updateOne(
+      { _id: existing._id },
+      { $set: { isActive: false, isPublished: false, updatedBy: req.user._id } }
     );
-    if (!doc) return res.status(404).json({ success: false, message: 'Form template not found' });
     res.json({ success: true, message: 'Form template deleted' });
   } catch (err) {
     safeError(res, err, 'delete form template');
@@ -202,21 +480,12 @@ router.patch('/:id/publish', requireRole('admin', 'manager', 'supervisor'), asyn
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const existing = await FormTemplate.findOne({
-      _id: req.params.id,
-      branchId: req.user.branchId,
-      isDeleted: { $ne: true },
-    }).lean();
+    const existing = await findTemplate(FormTemplate, req.params.id);
     if (!existing)
       return res.status(404).json({ success: false, message: 'Form template not found' });
-    const newStatus = existing.status === 'published' ? 'draft' : 'published';
-    const extraFields =
-      newStatus === 'published'
-        ? { publishedAt: new Date(), publishedBy: req.user._id }
-        : { unpublishedAt: new Date() };
     const doc = await FormTemplate.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: newStatus, ...extraFields } },
+      existing._id,
+      { $set: { isPublished: !existing.isPublished, updatedBy: req.user._id } },
       { returnDocument: 'after' }
     );
     res.json({ success: true, data: doc });
@@ -231,29 +500,30 @@ router.post('/:id/duplicate', requireRole('admin', 'manager', 'supervisor'), asy
     const FormTemplate = safeModel('FormTemplate');
     if (!FormTemplate)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const original = await FormTemplate.findOne({
-      _id: req.params.id,
-      branchId: req.user.branchId,
-      isDeleted: { $ne: true },
-    }).lean();
+    const original = await findTemplate(FormTemplate, req.params.id);
     if (!original)
       return res.status(404).json({ success: false, message: 'Form template not found' });
     const {
       _id: _origId,
+      __v: _v,
       createdAt: _createdAt,
       updatedAt: _updatedAt,
-      submissionCount: _sc,
-      publishedAt: _pa,
+      usageCount: _uc,
+      lastUsedAt: _lua,
+      versions: _versions,
       ...rest
     } = original;
     const copy = await FormTemplate.create({
       ...rest,
-      title: `${original.title} (نسخة)`,
-      status: 'draft',
+      templateId: `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      name: `${original.name} (نسخة)`,
+      isBuiltIn: false,
+      isPublished: false,
       version: 1,
-      submissionCount: 0,
+      versions: [],
+      usageCount: 0,
       createdBy: req.user._id,
-      branchId: req.user.branchId,
+      createdByName: req.user.name || req.user.fullName || req.user.email,
     });
     res.status(201).json({ success: true, data: copy });
   } catch (err) {
@@ -267,19 +537,22 @@ router.get(
   requireRole('admin', 'manager', 'supervisor', 'clinician'),
   async (req, res) => {
     try {
+      const FormTemplate = safeModel('FormTemplate');
       const FormSubmission = safeModel('FormSubmission');
-      if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
-      const { page = 1, limit = 20, status, beneficiaryId } = req.query;
-      const filter = { formTemplateId: req.params.id, branchId: req.user.branchId };
+      if (!FormTemplate || !FormSubmission)
+        return res.json({ success: true, data: [], pagination: { total: 0 } });
+      const template = await findTemplate(FormTemplate, req.params.id);
+      if (!template)
+        return res.status(404).json({ success: false, message: 'Form template not found' });
+      const { page = 1, limit = 20, status } = req.query;
+      // FormSubmission.templateId stores the slug (falls back to _id string)
+      const filter = {
+        templateId: { $in: [template.templateId, String(template._id)].filter(Boolean) },
+      };
       if (status) filter.status = status;
-      if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
       const skip = (Number(page) - 1) * Number(limit);
       const [data, total] = await Promise.all([
-        FormSubmission.find(filter)
-          .sort({ submittedAt: -1 })
-          .skip(skip)
-          .limit(Number(limit))
-          .lean(),
+        FormSubmission.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
         FormSubmission.countDocuments(filter),
       ]);
       res.json({
@@ -296,94 +569,52 @@ router.get(
 // ── POST /:id/submit ───────────────────────────────────────────────────────
 router.post('/:id/submit', async (req, res) => {
   try {
-    const { beneficiaryId, responses = {}, submittedOnBehalf = false } = req.body;
+    const body = req.body || {};
+    // The legacy frontend sends { data, notes }; older callers sent { responses }.
+    const data = body.data || body.responses || {};
     const FormTemplate = safeModel('FormTemplate');
     const FormSubmission = safeModel('FormSubmission');
     if (!FormTemplate || !FormSubmission)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const template = await FormTemplate.findOne({
-      _id: req.params.id,
-      branchId: req.user.branchId,
-      status: 'published',
-      isDeleted: { $ne: true },
-    }).lean();
+    const template = await findTemplate(FormTemplate, req.params.id, { isPublished: true });
     if (!template)
       return res.status(404).json({ success: false, message: 'Published form template not found' });
-    // Validate required fields
-    const requiredFields = (template.fields || []).filter(f => f.required);
-    for (const field of requiredFields) {
-      if (
-        responses[field.key] === undefined ||
-        responses[field.key] === null ||
-        responses[field.key] === ''
-      ) {
+    for (const field of template.fields || []) {
+      if (isLayoutField(field) || field.readOnly || field.hidden || !field.required) continue;
+      const v = data[field.name];
+      if (v === undefined || v === null || v === '')
         return res
           .status(400)
-          .json({ success: false, message: `Required field missing: ${field.label || field.key}` });
-      }
+          .json({
+            success: false,
+            message: `Required field missing: ${field.label || field.name}`,
+          });
     }
     const submission = await FormSubmission.create({
-      formTemplateId: req.params.id,
-      formTitle: template.title,
-      beneficiaryId,
-      responses,
-      submittedBy: req.user._id,
-      submittedOnBehalf,
+      templateId: template.templateId || String(template._id),
+      templateName: template.name,
+      templateVersion: template.version || 1,
+      data,
+      notes: body.notes,
       status: 'submitted',
-      branchId: req.user.branchId,
-      submittedAt: new Date(),
+      submittedBy: {
+        userId: req.user._id,
+        name: req.user.name || req.user.fullName || req.user.email,
+        email: req.user.email,
+        role: req.user.role,
+      },
+      tenantId: template.tenantId || undefined,
     });
-    // Increment submission counter
-    await FormTemplate.updateOne({ _id: req.params.id }, { $inc: { submissionCount: 1 } });
+    await FormTemplate.updateOne(
+      { _id: template._id },
+      { $inc: { usageCount: 1 }, $set: { lastUsedAt: new Date() } }
+    );
     res.status(201).json({ success: true, data: submission });
   } catch (err) {
+    if (err && err.name === 'ValidationError')
+      return res.status(400).json({ success: false, message: err.message });
     safeError(res, err, 'submit form');
   }
 });
-
-// ── GET /submissions/:subId ────────────────────────────────────────────────
-router.get('/submissions/:subId', async (req, res) => {
-  try {
-    const FormSubmission = safeModel('FormSubmission');
-    if (!FormSubmission)
-      return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const doc = await FormSubmission.findOne({
-      _id: req.params.subId,
-      branchId: req.user.branchId,
-    }).lean();
-    if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'get submission');
-  }
-});
-
-// ── PATCH /submissions/:subId/status ──────────────────────────────────────
-router.patch(
-  '/submissions/:subId/status',
-  requireRole('admin', 'manager', 'supervisor', 'clinician'),
-  async (req, res) => {
-    try {
-      const { status, reviewNote } = req.body;
-      const validStatuses = ['submitted', 'under_review', 'approved', 'rejected', 'pending_info'];
-      if (!status || !validStatuses.includes(status))
-        return res
-          .status(400)
-          .json({ success: false, message: `status must be one of: ${validStatuses.join(', ')}` });
-      const FormSubmission = safeModel('FormSubmission');
-      if (!FormSubmission)
-        return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-      const doc = await FormSubmission.findOneAndUpdate(
-        { _id: req.params.subId, branchId: req.user.branchId },
-        { $set: { status, reviewNote, reviewedBy: req.user._id, reviewedAt: new Date() } },
-        { returnDocument: 'after' }
-      );
-      if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
-      res.json({ success: true, data: doc });
-    } catch (err) {
-      safeError(res, err, 'update submission status');
-    }
-  }
-);
 
 module.exports = router;

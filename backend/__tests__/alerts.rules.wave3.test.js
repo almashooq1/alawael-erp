@@ -317,38 +317,42 @@ describe('vaccination-overdue', () => {
 
 // ─── HR escalations ──────────────────────────────────────────────
 describe('credential-expired', () => {
-  test('fires only on past-expiry verified credentials', async () => {
+  test('fires on past-expiry credentials, severity per-kind, skips suspended', async () => {
     const now = new Date('2026-05-16');
-    const Credential = finder([
+    const EmployeeCredential = finder([
       {
         _id: 'c1',
-        verificationStatus: 'verified',
-        expiryDate: new Date('2026-04-30'),
-        licenseNumber: 'L-1',
-        branchId: 'br-1',
+        kind: 'scfhs-license', // critical kind
+        labelAr: 'رخصة هيئة التخصصات',
+        status: 'valid',
+        expiresAt: new Date('2026-04-30'), // past → fires
+        issueNumber: 'L-1',
         employeeId: 'e1',
       },
       {
         _id: 'c2',
-        verificationStatus: 'verified',
-        expiryDate: new Date('2026-06-30'),
-        licenseNumber: 'L-2',
-        branchId: 'br-1',
+        kind: 'scfhs-license',
+        labelAr: 'رخصة هيئة التخصصات',
+        status: 'valid',
+        expiresAt: new Date('2026-06-30'), // future → skip
+        issueNumber: 'L-2',
         employeeId: 'e2',
       },
       {
         _id: 'c3',
-        verificationStatus: 'pending',
-        expiryDate: new Date('2026-04-30'),
-        licenseNumber: 'L-3',
-        branchId: 'br-1',
+        kind: 'driver-license',
+        labelAr: 'رخصة قيادة',
+        status: 'suspended', // already handled → skip
+        expiresAt: new Date('2026-04-30'),
+        issueNumber: 'L-3',
         employeeId: 'e3',
       },
     ]);
-    const raised = await runOne('credential-expired', { Credential }, now);
+    const raised = await runOne('credential-expired', { EmployeeCredential }, now);
     expect(raised).toHaveLength(1);
-    expect(raised[0].severity).toBe('critical');
+    expect(raised[0].severity).toBe('critical'); // scfhs-license
     expect(raised[0].subject.id).toBe('c1');
+    expect(raised[0].subject.kind).toBe('scfhs-license');
   });
 });
 

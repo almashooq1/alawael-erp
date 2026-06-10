@@ -120,31 +120,32 @@ describe('buildEngine() with bundled rules', () => {
   test('credential-expiry-30d fires on near-expiry records', async () => {
     const now = new Date('2026-04-17');
     const eng = buildEngine({ now: () => now });
-    const Credential = finder([
+    const EmployeeCredential = finder([
       {
         _id: 'c1',
-        verificationStatus: 'verified',
-        expiryDate: new Date('2026-04-30'),
-        licenseNumber: 'L-1',
-        branchId: 'br-1',
+        kind: 'scfhs-license',
+        labelAr: 'رخصة هيئة التخصصات',
+        status: 'valid',
+        expiresAt: new Date('2026-04-30'), // within 30d → fires
+        issueNumber: 'L-1',
         employeeId: 'e-1',
       },
       {
         _id: 'c2',
-        verificationStatus: 'verified',
-        expiryDate: new Date('2026-10-10'),
-        licenseNumber: 'L-2',
-        branchId: 'br-1',
-      }, // > 30d
+        kind: 'scfhs-license',
+        status: 'valid',
+        expiresAt: new Date('2026-10-10'), // > 30d → skip
+        issueNumber: 'L-2',
+      },
       {
         _id: 'c3',
-        verificationStatus: 'pending',
-        expiryDate: new Date('2026-04-25'),
-        licenseNumber: 'L-3',
-        branchId: 'br-1',
-      }, // not verified
+        kind: 'scfhs-license',
+        status: 'expired', // already expired → skip (handled by credential-expired)
+        expiresAt: new Date('2026-04-25'),
+        issueNumber: 'L-3',
+      },
     ]);
-    const result = await eng.runAll({ models: { Credential } });
+    const result = await eng.runAll({ models: { EmployeeCredential } });
     const cred = result.raised.filter(a => a.ruleId === 'credential-expiry-30d');
     expect(cred.length).toBe(1);
     expect(cred[0].message).toContain('L-1');

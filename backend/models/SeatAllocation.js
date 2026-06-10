@@ -145,6 +145,30 @@ SeatAllocationSchema.virtual('attendsEveryDay').get(function () {
 SeatAllocationSchema.set('toJSON', { virtuals: true });
 SeatAllocationSchema.set('toObject', { virtuals: true });
 
+// W1098 — unified-core linkage: assigning an active day-center seat surfaces
+// an administrative row on the per-beneficiary timeline (on_hold/released
+// transitions stay out of the longitudinal record).
+SeatAllocationSchema.pre('save', function flagSeatAllocationAssigned() {
+  this.$__seatAllocationAssigned = this.isNew && this.status === 'active';
+});
+
+SeatAllocationSchema.post('save', function emitSeatAllocationAssigned(doc) {
+  if (!doc.$__seatAllocationAssigned) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('seat-allocation', 'seat_allocation.assigned', {
+      allocationId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      seatLabel: doc.seatLabel,
+      period: doc.period,
+      effectiveFrom: doc.effectiveFrom,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.SeatAllocation || mongoose.model('SeatAllocation', SeatAllocationSchema);
 

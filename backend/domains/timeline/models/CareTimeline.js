@@ -174,6 +174,7 @@ const careTimelineSchema = new mongoose.Schema(
         'gas_score_snapshotted',
         'pdpl_request_received',
         'bip_effectiveness_recorded',
+        'seat_allocation_assigned',
         // Family
         'family_contact',
         'family_meeting',

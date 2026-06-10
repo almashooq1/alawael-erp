@@ -2177,6 +2177,27 @@ const BIP_EFFECTIVENESS_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SEAT_ALLOCATION_EVENTS = {
+  SEAT_ALLOCATION_ASSIGNED: {
+    domain: 'seat-allocation',
+    eventType: 'seat_allocation.assigned',
+    version: 1,
+    description:
+      'تخصيص مقعد يومي للمستفيد في مركز التأهيل النهاري — A day-center seat was allocated to a beneficiary',
+    payload: {
+      allocationId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      seatLabel: 'string',
+      period: 'string',
+      effectiveFrom: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2261,6 +2282,7 @@ const DDD_CONTRACTS = {
   'gas-snapshot': GAS_SNAPSHOT_EVENTS,
   'pdpl-request': PDPL_REQUEST_EVENTS,
   'bip-effectiveness': BIP_EFFECTIVENESS_EVENTS,
+  'seat-allocation': SEAT_ALLOCATION_EVENTS,
 };
 
 /**
@@ -2361,6 +2383,7 @@ module.exports = {
   GAS_SNAPSHOT_EVENTS,
   PDPL_REQUEST_EVENTS,
   BIP_EFFECTIVENESS_EVENTS,
+  SEAT_ALLOCATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

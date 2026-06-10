@@ -7,7 +7,10 @@ const mongoose = require('mongoose');
 const insuranceEligibilityCheckSchema = new mongoose.Schema(
   {
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
-    uuid: { type: String, unique: true, required: true },
+    // W1193 — required with NO default while no caller ever set it → every
+    // checkEligibility() threw ValidationError at its first step. Schema-side
+    // default fixes all callers.
+    uuid: { type: String, unique: true, required: true, default: () => require('crypto').randomUUID() },
 
     policyId: { type: mongoose.Schema.Types.ObjectId, ref: 'InsurancePolicy', required: true },
     beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
@@ -19,6 +22,9 @@ const insuranceEligibilityCheckSchema = new mongoose.Schema(
       enum: ['general', 'service_specific', 'preauth'],
       default: 'general',
     },
+    // W1193 — written by smartInsurance.service (options.serviceCode) but
+    // never declared; caught by check:phantom-writes.
+    requestedService: { type: String, default: null },
 
     // النتيجة
     isEligible: { type: Boolean, default: false },

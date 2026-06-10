@@ -1473,6 +1473,8 @@ on:
       - 'backend/__tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/golden-thread-integrity-behavioral.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-routes-branch-isolation-wave1146.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2929,6 +2931,8 @@ on:
       - 'backend/__tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/golden-thread-integrity-behavioral.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/core-routes-branch-isolation-wave1146.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

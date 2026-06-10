@@ -5,13 +5,25 @@
  * ويصدّر راوتر Express جاهز للتسجيل في _registry.js
  *
  * Mount: dualMount(app, 'core', require('./core.routes'))
- * → /api/core/beneficiaries, /api/core/beneficiaries/:id/360, …
+ * → /api/core/beneficiaries, /api/core/beneficiaries/:beneficiaryId/360, …
  *
  * @module domains/core/routes/core.routes
  */
 
 const express = require('express');
 const router = express.Router();
+
+// ── W1146 (W269-class): branch isolation for the core beneficiary surface ──
+// Every :beneficiaryId URL param is ownership-checked BEFORE handlers run
+// (403 cross-branch / 404 missing / 503 fail-closed), and body-carried
+// beneficiary ids are checked on write paths. Both no-op for unrestricted
+// callers (no req.branchScope). See middleware/assertBranchMatch.js.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 
 // ── Beneficiary CRUD (factory pattern) ───────────────────────────────────────
 try {

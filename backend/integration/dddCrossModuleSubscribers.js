@@ -3309,6 +3309,33 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'coupon-usage:redeemed → timeline:record',
+    pattern: 'coupon-usage.coupon_usage.redeemed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const disc = Number(event.payload.discountAmount);
+          const discLabel = Number.isFinite(disc) ? ` (−${disc})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'coupon_usage_redeemed',
+            category: 'administrative',
+            severity: 'success',
+            title: `Discount coupon redeemed${discLabel}`,
+            title_ar: 'تم استخدام كوبون خصم للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CouponUsage timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

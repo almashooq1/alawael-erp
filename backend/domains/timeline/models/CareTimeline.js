@@ -181,6 +181,7 @@ const careTimelineSchema = new mongoose.Schema(
         'speech_session_analyzed',
         'portal_payment_paid',
         'caregiver_support_completed',
+        'coupon_usage_redeemed',
         // Family
         'family_contact',
         'family_meeting',

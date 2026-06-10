@@ -2331,6 +2331,28 @@ const CAREGIVER_SUPPORT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const COUPON_USAGE_EVENTS = {
+  COUPON_USAGE_REDEEMED: {
+    domain: 'coupon-usage',
+    eventType: 'coupon_usage.redeemed',
+    version: 1,
+    description:
+      'استخدام المستفيد لكوبون خصم على طلب/فاتورة — A beneficiary redeemed a discount coupon against an order or invoice',
+    payload: {
+      usageId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      couponId: 'string',
+      discountAmount: 'number',
+      orderAmount: 'number',
+      usedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2422,6 +2444,7 @@ const DDD_CONTRACTS = {
   'speech-session': SPEECH_SESSION_EVENTS,
   'portal-payment': PORTAL_PAYMENT_EVENTS,
   'caregiver-support': CAREGIVER_SUPPORT_EVENTS,
+  'coupon-usage': COUPON_USAGE_EVENTS,
 };
 
 /**
@@ -2525,6 +2548,7 @@ module.exports = {
   SPEECH_SESSION_EVENTS,
   PORTAL_PAYMENT_EVENTS,
   CAREGIVER_SUPPORT_EVENTS,
+  COUPON_USAGE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

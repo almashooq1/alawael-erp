@@ -71,6 +71,8 @@ class CarePlansService extends BaseService {
     if (filter.beneficiaryId) q.beneficiaryId = filter.beneficiaryId;
     if (filter.episodeId) q.episodeId = filter.episodeId;
     if (filter.status) q.status = filter.status;
+    // W1152 — branch isolation: routes pass effectiveBranchScope(req) here
+    if (filter.branchId) q.branchId = filter.branchId;
 
     const [data, total] = await Promise.all([
       UnifiedCarePlan.find(q)
@@ -238,15 +240,22 @@ class CarePlansService extends BaseService {
 
   /**
    * إحصاءات لوحة التحكم لخطط الرعاية
+   * @param {Object} [options] - { branchId } لتقييد الإحصاءات بفرع محدد
    * @returns {Promise<Object>} مجموعة الإحصاءات
    */
-  async getDashboard() {
+  async getDashboard({ branchId } = {}) {
     const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
 
+    // W1152 — branch isolation: routes pass effectiveBranchScope(req) here
+    const base = branchId ? { branchId } : {};
+
     const [total, byStatus, active] = await Promise.all([
-      UnifiedCarePlan.countDocuments({}),
-      UnifiedCarePlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      UnifiedCarePlan.countDocuments({ status: 'active' }),
+      UnifiedCarePlan.countDocuments(base),
+      UnifiedCarePlan.aggregate([
+        ...(branchId ? [{ $match: base }] : []),
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      UnifiedCarePlan.countDocuments({ ...base, status: 'active' }),
     ]);
 
     return {

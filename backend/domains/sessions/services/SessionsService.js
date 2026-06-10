@@ -74,6 +74,8 @@ class SessionsService extends BaseService {
     if (filter.episodeId) q.episodeId = filter.episodeId;
     if (filter.therapistId) q.therapistId = filter.therapistId;
     if (filter.status) q.status = filter.status;
+    // W1152 — branch isolation: routes pass effectiveBranchScope(req) here
+    if (filter.branchId) q.branchId = filter.branchId;
     if (filter.from || filter.to) {
       q.scheduledDate = {};
       if (filter.from) q.scheduledDate.$gte = new Date(filter.from);
@@ -135,9 +137,15 @@ class SessionsService extends BaseService {
    * @param {Object} pagination - { limit, skip }
    * @returns {Promise<{data: Object[], total: number}>}
    */
-  async getTherapistSessions(therapistId, { from, to } = {}, { limit = 50, skip = 0 } = {}) {
+  async getTherapistSessions(
+    therapistId,
+    { from, to, branchId } = {},
+    { limit = 50, skip = 0 } = {}
+  ) {
     const ClinicalSession = mongoose.model('ClinicalSession');
     const q = { therapistId, isDeleted: { $ne: true } };
+    // W1152 — branch isolation: routes pass effectiveBranchScope(req) here
+    if (branchId) q.branchId = branchId;
     if (from || to) {
       q.scheduledDate = {};
       if (from) q.scheduledDate.$gte = new Date(from);
@@ -267,9 +275,11 @@ class SessionsService extends BaseService {
    * @param {Object} dateRange - { from, to }
    * @returns {Promise<Object>} مجموعة الإحصاءات
    */
-  async getDashboard({ from, to } = {}) {
+  async getDashboard({ from, to, branchId } = {}) {
     const ClinicalSession = mongoose.model('ClinicalSession');
     const dateFilter = { isDeleted: { $ne: true } };
+    // W1152 — branch isolation: routes pass effectiveBranchScope(req) here
+    if (branchId) dateFilter.branchId = branchId;
     if (from || to) {
       dateFilter.scheduledDate = {};
       if (from) dateFilter.scheduledDate.$gte = new Date(from);
@@ -294,6 +304,7 @@ class SessionsService extends BaseService {
       ClinicalSession.countDocuments({
         scheduledDate: { $gte: todayStart, $lte: todayEnd },
         isDeleted: { $ne: true },
+        ...(branchId && { branchId }),
       }),
     ]);
 

@@ -11,11 +11,24 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1152 — session-keyed ownership: every :sessionId param loads the session's
+// own branchId and asserts it for restricted callers; list endpoints scope
+// through effectiveBranchScope() so ?branchId= spoofing/omission is closed.
 const {
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'sessionId',
+  branchScopedResourceParam({
+    modelName: 'ClinicalSession',
+    label: 'session',
+    loadModel: () => require('../models/ClinicalSession'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const {
   validateCreateSession,
@@ -73,7 +86,16 @@ router.get(
       skip = 0,
     } = req.query;
     const { data, total } = await sessionsService.listSessions(
-      { beneficiaryId, episodeId, therapistId, status, from, to },
+      // W1152 — restricted callers are pinned to their own branch
+      {
+        beneficiaryId,
+        episodeId,
+        therapistId,
+        status,
+        from,
+        to,
+        branchId: effectiveBranchScope(req),
+      },
       { limit, skip }
     );
     res.json({ success: true, data, total, skip: Number(skip), limit: Number(limit) });
@@ -86,7 +108,12 @@ router.get(
   requireService,
   asyncHandler(async (req, res) => {
     const { from, to } = req.query;
-    const data = await sessionsService.getDashboard({ from, to });
+    // W1152 — dashboard counts scoped to the caller's branch when restricted
+    const data = await sessionsService.getDashboard({
+      from,
+      to,
+      branchId: effectiveBranchScope(req),
+    });
     res.json({ success: true, data });
   })
 );
@@ -105,58 +132,59 @@ router.get(
   })
 );
 
-/* ─── GET /sessions/therapist/:id ───────────────────────────────────────── */
+/* ─── GET /sessions/therapist/:therapistId ───────────────────────── */
 router.get(
-  '/therapist/:id',
+  '/therapist/:therapistId',
   requireService,
   asyncHandler(async (req, res) => {
     const { from, to, limit = 50, skip = 0 } = req.query;
     const { data, total } = await sessionsService.getTherapistSessions(
-      req.params.id,
-      { from, to },
+      req.params.therapistId,
+      // W1152 — restricted callers only see their own branch's sessions
+      { from, to, branchId: effectiveBranchScope(req) },
       { limit, skip }
     );
     res.json({ success: true, data, total });
   })
 );
 
-/* ─── GET /sessions/:id ─────────────────────────────────────────────────── */
+/* ─── GET /sessions/:sessionId ──────────────────────────────────────────── */
 router.get(
-  '/:id',
+  '/:sessionId',
   requireService,
   asyncHandler(async (req, res) => {
-    const session = await sessionsService.getSessionById(req.params.id);
+    const session = await sessionsService.getSessionById(req.params.sessionId);
     res.json({ success: true, data: session });
   })
 );
 
-/* ─── PUT /sessions/:id — Update session ────────────────────────────────── */
+/* ─── PUT /sessions/:sessionId — Update session ─────────────────────────── */
 router.put(
-  '/:id',
+  '/:sessionId',
   requireService,
   validate(validateUpdateSession),
   asyncHandler(async (req, res) => {
-    const session = await sessionsService.updateSession(req.params.id, req.body);
+    const session = await sessionsService.updateSession(req.params.sessionId, req.body);
     res.json({ success: true, data: session });
   })
 );
 
-/* ─── PUT /sessions/:id/complete — Complete session with documentation ───── */
+/* ─── PUT /sessions/:sessionId/complete — Complete session with docs ─────── */
 router.put(
-  '/:id/complete',
+  '/:sessionId/complete',
   requireService,
   asyncHandler(async (req, res) => {
-    const session = await sessionsService.completeSession(req.params.id, req.body);
+    const session = await sessionsService.completeSession(req.params.sessionId, req.body);
     res.json({ success: true, data: session });
   })
 );
 
-/* ─── PUT /sessions/:id/cancel — Cancel session ─────────────────────────── */
+/* ─── PUT /sessions/:sessionId/cancel — Cancel session ─────────────────── */
 router.put(
-  '/:id/cancel',
+  '/:sessionId/cancel',
   requireService,
   asyncHandler(async (req, res) => {
-    const session = await sessionsService.cancelSession(req.params.id, req.body.reason);
+    const session = await sessionsService.cancelSession(req.params.sessionId, req.body.reason);
     res.json({ success: true, data: session });
   })
 );

@@ -50,20 +50,20 @@ describe('domains/sessions/routes/sessions.routes.js', () => {
     expect(source).toMatch(/\/therapist\//);
   });
 
-  test('defines GET /:id route', () => {
-    expect(source).toMatch(/router\.get\s*\(\s*['"`]\/:id['"`]/);
+  test('defines GET /:sessionId route', () => {
+    expect(source).toMatch(/router\.get\s*\(\s*['"`]\/:sessionId['"`]/);
   });
 
-  test('defines PUT /:id route', () => {
-    expect(source).toMatch(/router\.put\s*\(\s*['"`]\/:id['"`]/);
+  test('defines PUT /:sessionId route', () => {
+    expect(source).toMatch(/router\.put\s*\(\s*['"`]\/:sessionId['"`]/);
   });
 
-  test('defines PUT /:id/complete route', () => {
-    expect(source).toMatch(/\/:id\/complete/);
+  test('defines PUT /:sessionId/complete route', () => {
+    expect(source).toMatch(/\/:sessionId\/complete/);
   });
 
-  test('defines PUT /:id/cancel route', () => {
-    expect(source).toMatch(/\/:id\/cancel/);
+  test('defines PUT /:sessionId/cancel route', () => {
+    expect(source).toMatch(/\/:sessionId\/cancel/);
   });
 
   test('uses beneficiaryId (aligns with ClinicalSession model)', () => {

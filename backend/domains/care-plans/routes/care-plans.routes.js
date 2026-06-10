@@ -11,11 +11,24 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1152 — plan-keyed ownership: every :planId param loads the plan's own
+// branchId and asserts it for restricted callers; list/dashboard endpoints
+// scope through effectiveBranchScope() so ?branchId= spoofing is closed.
 const {
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'planId',
+  branchScopedResourceParam({
+    modelName: 'UnifiedCarePlan',
+    label: 'care plan',
+    loadModel: () => require('../models/UnifiedCarePlan'),
+  })
+);
 router.use(bodyScopedBeneficiaryGuard);
 const {
   validateCreateCarePlan,
@@ -56,6 +69,9 @@ router.get(
   requireService,
   asyncHandler(async (req, res) => {
     const { limit = 20, skip = 0, ...filter } = req.query;
+    // W1152 — restricted callers are pinned to their own branch (overrides
+    // any ?branchId= the caller may have supplied in the query string)
+    filter.branchId = effectiveBranchScope(req);
     const result = await carePlansService.listPlans(filter, { limit, skip });
     res.json({ success: true, ...result, skip: Number(skip), limit: Number(limit) });
   })
@@ -66,7 +82,10 @@ router.get(
   '/dashboard',
   requireService,
   asyncHandler(async (req, res) => {
-    const data = await carePlansService.getDashboard();
+    // W1152 — dashboard counts scoped to the caller's branch when restricted
+    const data = await carePlansService.getDashboard({
+      branchId: effectiveBranchScope(req),
+    });
     res.json({ success: true, data });
   })
 );
@@ -81,53 +100,53 @@ router.get(
   })
 );
 
-/* ─── GET /care-plans/:id ────────────────────────────────────────────────── */
+/* ─── GET /care-plans/:planId ─────────────────────────────────── */
 router.get(
-  '/:id',
+  '/:planId',
   requireService,
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.getPlanById(req.params.id);
+    const plan = await carePlansService.getPlanById(req.params.planId);
     res.json({ success: true, data: plan });
   })
 );
 
-/* ─── PUT /care-plans/:id — Update ──────────────────────────────────────── */
+/* ─── PUT /care-plans/:planId — Update ───────────────────────────── */
 router.put(
-  '/:id',
+  '/:planId',
   requireService,
   validate(validateUpdateCarePlan),
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.updatePlan(req.params.id, req.body);
+    const plan = await carePlansService.updatePlan(req.params.planId, req.body);
     res.json({ success: true, data: plan });
   })
 );
 
-/* ─── PUT /care-plans/:id/activate — Activate care plan ─────────────────── */
+/* ─── PUT /care-plans/:planId/activate — Activate care plan ───────────── */
 router.put(
-  '/:id/activate',
+  '/:planId/activate',
   requireService,
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.activatePlan(req.params.id);
+    const plan = await carePlansService.activatePlan(req.params.planId);
     res.json({ success: true, data: plan });
   })
 );
 
-/* ─── PUT /care-plans/:id/complete — Complete care plan ─────────────────── */
+/* ─── PUT /care-plans/:planId/complete — Complete care plan ───────────── */
 router.put(
-  '/:id/complete',
+  '/:planId/complete',
   requireService,
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.completePlan(req.params.id, req.body);
+    const plan = await carePlansService.completePlan(req.params.planId, req.body);
     res.json({ success: true, data: plan });
   })
 );
 
-/* ─── POST /care-plans/:id/goals — Add goal to plan ─────────────────────── */
+/* ─── POST /care-plans/:planId/goals — Add goal to plan ──────────────── */
 router.post(
-  '/:id/goals',
+  '/:planId/goals',
   requireService,
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.addGoal(req.params.id, req.body);
+    const plan = await carePlansService.addGoal(req.params.planId, req.body);
     res.json({ success: true, data: plan });
   })
 );

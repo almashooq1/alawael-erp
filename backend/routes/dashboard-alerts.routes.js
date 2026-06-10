@@ -26,6 +26,12 @@
 const express = require('express');
 
 const { POLICIES, ESCALATION_LADDERS } = require('../config/alert.registry');
+// W1191 — self-authenticate. Header says endpoints "expect req.user to be
+// populated by the upstream authenticate middleware", but phases.registry mounts
+// this via `safeMount` (bare app.use, NO injected auth) → the
+// `/api/(v1/)?dashboard-alerts` alias accepted anonymous ack/snooze/mute writes.
+// The app.js mount already injects authenticate; this gates EVERY mount.
+const { authenticate } = require('../middleware/auth');
 
 function asyncWrap(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -44,6 +50,7 @@ function getCoordinator(req) {
 
 function buildRouter() {
   const router = express.Router();
+  router.use(authenticate); // W1191 — gate EVERY mount (incl. the auth-less safeMount alias)
 
   router.get(
     '/',

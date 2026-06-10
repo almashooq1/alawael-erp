@@ -1376,6 +1376,12 @@ on:
       - 'backend/__tests__/forms-approval-chain-wave1186.test.js'
       - 'backend/__tests__/forms-approval-chain-behavioral-wave1186.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dashboard-saved-views-auth-wave1190.test.js'
+      - 'backend/__tests__/dashboard-saved-views-auth-behavioral-wave1190.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dashboard-rehab-safemount-auth-wave1191.test.js'
+      - 'backend/__tests__/dashboard-rehab-safemount-auth-behavioral-wave1191.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-phantom-schema-writes-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -2735,6 +2741,12 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/forms-approval-chain-wave1186.test.js'
       - 'backend/__tests__/forms-approval-chain-behavioral-wave1186.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dashboard-saved-views-auth-wave1190.test.js'
+      - 'backend/__tests__/dashboard-saved-views-auth-behavioral-wave1190.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dashboard-rehab-safemount-auth-wave1191.test.js'
+      - 'backend/__tests__/dashboard-rehab-safemount-auth-behavioral-wave1191.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-phantom-schema-writes-script.test.js'
       - 'backend/package.json'

@@ -11,10 +11,16 @@ const express = require('express');
 const router = express.Router();
 // W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
 // ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1168 — requireBranchAccess populates req.branchScope BEFORE the guards
+// below (without it every assertBranchMatch helper silently no-ops) +
+// effectiveBranchScope pins branchId reads against query/body spoofing.
 const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
 } = require('../../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
+router.use(requireBranchAccess); // W1168 — must run before the param/body guards
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 router.use(bodyScopedBeneficiaryGuard);
 const { arvrService } = require('../services/ARVRService');
@@ -42,7 +48,7 @@ router.post(
     const data = await arvrService.createSession({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -72,7 +78,9 @@ router.get(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await arvrService.getDashboard(req.query.branchId || req.user?.branchId);
+    const data = await arvrService.getDashboard(
+      effectiveBranchScope(req) || req.query.branchId || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );
@@ -83,7 +91,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const data = await arvrService.getAnalytics({
       days: req.query.days ? Number(req.query.days) : 30,
-      branchId: req.query.branchId || req.user?.branchId,
+      branchId: effectiveBranchScope(req) || req.query.branchId || req.user?.branchId,
     });
     res.json({ success: true, data });
   })

@@ -84,11 +84,22 @@ class BaseDomainModule {
       throw new Error(`[Domain:${this.name}] Must be initialized before mounting`);
     }
 
+    // W1168 — SECURITY: domain mounts were the ONLY API surface with NO
+    // `authenticate` (legacy registry mounts use dualMountAuth, app.js uses
+    // per-mount authenticate). Legacy routers shadow /api/<name> and
+    // /api/v1/<name> via first-match, but /api/v2/<name> was served SOLELY by
+    // this bare mount — every domain route (incl. beneficiary/family/quality
+    // data) was anonymous-reachable, and all branch-isolation guards
+    // (assertBranchMatch family) silently no-op'd without req.user/branchScope.
+    // Same `authenticate` (= authenticateToken) used by dualMountAuth for
+    // behavioural consistency. Lazy require — circular-import safety at boot.
+    const { authenticate } = require('../../middleware/auth');
+
     // Mount on /api/<name> and /api/v1/<name> and /api/v2/<name>
     const basePath = this.name;
-    app.use(`/api/${basePath}`, this.router);
-    app.use(`/api/v1/${basePath}`, this.router);
-    app.use(`/api/v2/${basePath}`, this.router);
+    app.use(`/api/${basePath}`, authenticate, this.router);
+    app.use(`/api/v1/${basePath}`, authenticate, this.router);
+    app.use(`/api/v2/${basePath}`, authenticate, this.router);
 
     logger.info(
       `[Domain:${this.name}] Mounted on /api/${basePath}, /api/v1/${basePath}, /api/v2/${basePath}`

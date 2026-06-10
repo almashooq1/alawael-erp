@@ -109,4 +109,8 @@ module.exports = [
   // ── W1138 — quality / supplier (1) ──────────────────────────
   // Supplier corrective action (SCAR) response overdue. Self-loading.
   require('./supplier-scar-response-overdue'),
+
+  // ── W1141 — financial / budget (1) ──────────────────────────
+  // Active budget consumed ≥90% of allocation (≥100% = critical). Self-loading.
+  require('./budget-overrun'),
 ];

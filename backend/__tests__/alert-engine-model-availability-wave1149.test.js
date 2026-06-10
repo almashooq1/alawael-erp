@@ -28,20 +28,28 @@ const path = require('path');
 
 const BACKEND = path.join(__dirname, '..');
 
-// Loader modelNames whose ./models/<name> file does NOT exist. Baseline:
-//  - Credential: superseded — the credential-* rules now self-load
-//    EmployeeCredential (W1147); the bare 'Credential' loader entry is a
-//    harmless vestige (a future app.js cleanup may drop it).
-//  - IRP: orphaned — the model was removed and SmartIRP is a different concept
-//    (no pending_approval); irp-overdue-approval is a guarded no-op pending a
-//    product decision. See project_alerts_bridge_flipped_prod_2026-06-10.
-const KNOWN_MISSING_LOADER_MODELS = new Set(['Credential', 'IRP']);
+// Loader modelNames whose ./models/<name> file does NOT exist. EMPTY as of W1150:
+// the two former vestiges were retired — 'Credential' was replaced by
+// 'EmployeeCredential' in the loader (the credential-* rules' real model, W1147),
+// and 'IRP' was dropped together with the deleted orphan rule
+// irp-overdue-approval. Any NEW missing loader model MUST fail here — do not add
+// to this set without a documented reason (cf. W1148 for the bridge analog).
+const KNOWN_MISSING_LOADER_MODELS = new Set([]);
 
 function extractLoaderModelNames() {
   const src = fs.readFileSync(path.join(BACKEND, 'app.js'), 'utf8');
   const block = src.match(/const modelNames = \[([\s\S]*?)\];/);
   if (!block) return null;
-  return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]);
+  // One entry per line. Strip the trailing line-comment FIRST so quoted model
+  // names mentioned inside a comment (e.g. "replaced removed 'Credential'") are
+  // not mistaken for array entries; then take the first quoted string per line.
+  const names = [];
+  for (const line of block[1].split('\n')) {
+    const code = line.replace(/\/\/.*$/, '');
+    const m = code.match(/['"]([^'"]+)['"]/);
+    if (m) names.push(m[1]);
+  }
+  return names;
 }
 
 function fileResolves(absNoExt) {

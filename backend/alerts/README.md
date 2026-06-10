@@ -47,7 +47,6 @@ backend/alerts/
 ├── rules/                   # rule definitions
 │   ├── index.js
 │   ├── credential-expiry-30d.js
-│   ├── irp-overdue-approval.js
 │   ├── invoice-overdue-60d.js
 │   ├── incident-major.js
 │   └── zatca-submission-rejected.js

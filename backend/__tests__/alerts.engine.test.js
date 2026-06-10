@@ -111,10 +111,10 @@ describe('buildEngine() with bundled rules', () => {
   // baseline of 5. Wave 5 (2026-05-16) added the EWMA anomaly
   // bridge. Pin the exact total so accidental rule removal shows
   // up as a test regression rather than a silent gap.
-  test('registers all 32 bundled rules (incl. procurement W1132 + training W1135 + SCAR W1138 + budget W1141)', () => {
-    expect(rules.length).toBe(32);
+  test('registers all 31 bundled rules (W1150 removed orphan irp-overdue-approval)', () => {
+    expect(rules.length).toBe(31);
     const eng = buildEngine();
-    expect(eng.rules.size).toBe(32);
+    expect(eng.rules.size).toBe(31);
   });
 
   test('credential-expiry-30d fires on near-expiry records', async () => {

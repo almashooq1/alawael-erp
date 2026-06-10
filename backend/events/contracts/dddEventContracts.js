@@ -1579,6 +1579,28 @@ const ADJUNCT_THERAPY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DISABILITY_CARD_EVENTS = {
+  DISABILITY_CARD_REGISTERED: {
+    domain: 'disability-card',
+    eventType: 'disability_card.registered',
+    version: 1,
+    description: 'تسجيل بطاقة إعاقة للمستفيد — Beneficiary disability card registered',
+    payload: {
+      cardId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      disabilityLevel: 'string',
+      cardNumber: 'string',
+      expiryDate: 'date',
+      monthlySubsidySAR: 'number',
+      registeredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1635,6 +1657,7 @@ const DDD_CONTRACTS = {
   'dtt-session': DTT_SESSION_EVENTS,
   'goal-progress': GOAL_PROGRESS_EVENTS,
   'adjunct-therapy': ADJUNCT_THERAPY_EVENTS,
+  'disability-card': DISABILITY_CARD_EVENTS,
 };
 
 /**
@@ -1707,6 +1730,7 @@ module.exports = {
   DTT_SESSION_EVENTS,
   GOAL_PROGRESS_EVENTS,
   ADJUNCT_THERAPY_EVENTS,
+  DISABILITY_CARD_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

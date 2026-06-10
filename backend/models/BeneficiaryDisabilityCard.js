@@ -77,6 +77,34 @@ DisabilityCardSchema.virtual('daysUntilExpiry').get(function () {
 DisabilityCardSchema.set('toJSON', { virtuals: true });
 DisabilityCardSchema.set('toObject', { virtuals: true });
 
+// ─── W1070: unified-core linkage — disability card registered ───────────────
+// Milestone = a new disability card is recorded as active. Emits a timeline
+// event (the card gates government entitlements/subsidies). Non-callback hook.
+DisabilityCardSchema.pre('save', function flagDisabilityCardRegistered() {
+  this.$__disabilityCardRegisteredNow = this.isNew && this.status === 'active';
+});
+
+DisabilityCardSchema.post('save', function emitDisabilityCardRegistered(doc) {
+  if (!doc.$__disabilityCardRegisteredNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('disability-card', 'disability_card.registered', {
+      cardId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      disabilityLevel: doc.disabilityLevel,
+      cardNumber: doc.cardNumber || '',
+      expiryDate: doc.expiryDate || undefined,
+      monthlySubsidySAR:
+        typeof doc.monthlySubsidySAR === 'number' ? doc.monthlySubsidySAR : undefined,
+      registeredAt: doc.issuedDate || doc.createdAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryDisabilityCard ||
   mongoose.model('BeneficiaryDisabilityCard', DisabilityCardSchema);

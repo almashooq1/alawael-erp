@@ -2255,6 +2255,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1070: disability card registered → core timeline ──────────────
+  // When a beneficiary's disability card ("بطاقة الإعاقة") is registered
+  // (status active), log it on the timeline — it gates government
+  // entitlements/subsidies, an administrative milestone.
+  subscribers.push({
+    name: 'disability-card:registered → timeline:record',
+    pattern: 'disability-card.disability_card.registered',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const level = event.payload.disabilityLevel || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'disability_card_registered',
+            category: 'administrative',
+            severity: 'success',
+            title: `Disability card registered (${level})`,
+            title_ar: 'تم تسجيل بطاقة الإعاقة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DisabilityCard timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

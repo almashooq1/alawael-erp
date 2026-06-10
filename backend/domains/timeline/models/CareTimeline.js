@@ -146,6 +146,7 @@ const careTimelineSchema = new mongoose.Schema(
         'dtt_session_completed',
         'goal_progress_achieved',
         'adjunct_therapy_completed',
+        'disability_card_registered',
         // Family
         'family_contact',
         'family_meeting',

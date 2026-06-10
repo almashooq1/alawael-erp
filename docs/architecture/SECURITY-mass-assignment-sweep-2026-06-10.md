@@ -3,7 +3,7 @@
 **Type**: Security finding (read-only audit) + partial fix
 **Class**: Mass-assignment / over-posting on DB writes (W506/W507 doctrine)
 **Trigger**: W1091 found a live mass-assignment hole in `care-plans-admin` goal-create; this sweep hunts the same class.
-**Status**: 🟢 Mass-assignment Tier 1 (W1091/W1112) + Tier 2 (W1130) FIXED · 🟢 W269 cross-branch IDOR fixed across every beneficiary-scoped surface (W1119/W1125) + professional-dev therapist-ownership · 🟡 Tier 3 assessed low-risk (no fix — see below) · 🟡 remaining = owner product/schema decisions (hr-modules `branchId`, tasks list scope + ownership).
+**Status**: 🟢 Mass-assignment Tier 1 (W1091/W1112) + Tier 2 (W1130) FIXED · 🟢 W269 cross-branch IDOR fixed across every beneficiary-scoped surface (W1119/W1125) + professional-dev therapist-ownership + task-ownership (W1131) · 🟡 Tier 3 assessed low-risk (no fix — see below) · 🟡 remaining = owner decisions only (hr-modules `branchId` schema · tasks list `GET /` scope · model consolidation ADR-040/041/042).
 
 ## Doctrine (what "correct" looks like here)
 

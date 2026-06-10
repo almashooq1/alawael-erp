@@ -2032,6 +2032,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1063: AAC PECS phase advanced → core timeline ────────────────
+  // When a beneficiary's AAC profile records a PECS protocol phase
+  // advancement, log the progression on their timeline (clinical, success).
+  subscribers.push({
+    name: 'aac-profile:pecs_phase_advanced → timeline:record',
+    pattern: 'aac-profile.aac_profile.pecs_phase_advanced',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const p = event.payload.pecsPhase;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'aac_pecs_phase_advanced',
+            category: 'clinical',
+            severity: 'success',
+            title: `AAC PECS phase advanced${p ? ` to phase ${p}` : ''}`,
+            title_ar: `تقدّم مرحلة PECS للتواصل البديل${p ? ` إلى المرحلة ${p}` : ''}`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] AacProfile PECS timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

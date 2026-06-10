@@ -139,6 +139,7 @@ const careTimelineSchema = new mongoose.Schema(
         'differential_diagnosis_confirmed',
         'community_referral_completed',
         'clinical_pathway_completed',
+        'aac_pecs_phase_advanced',
         // Family
         'family_contact',
         'family_meeting',

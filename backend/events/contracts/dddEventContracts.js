@@ -1431,6 +1431,26 @@ const CLINICAL_PATHWAY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const AAC_PROFILE_EVENTS = {
+  AAC_PECS_PHASE_ADVANCED: {
+    domain: 'aac-profile',
+    eventType: 'aac_profile.pecs_phase_advanced',
+    version: 1,
+    description: 'تقدّم مرحلة PECS للتواصل البديل — AAC PECS phase advanced',
+    payload: {
+      profileId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      pecsPhase: 'number',
+      primaryModality: 'string',
+      advancedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1480,6 +1500,7 @@ const DDD_CONTRACTS = {
   'differential-diagnosis': DIFFERENTIAL_DIAGNOSIS_EVENTS,
   'community-referral': COMMUNITY_REFERRAL_EVENTS,
   'clinical-pathway': CLINICAL_PATHWAY_EVENTS,
+  'aac-profile': AAC_PROFILE_EVENTS,
 };
 
 /**
@@ -1545,6 +1566,7 @@ module.exports = {
   DIFFERENTIAL_DIAGNOSIS_EVENTS,
   COMMUNITY_REFERRAL_EVENTS,
   CLINICAL_PATHWAY_EVENTS,
+  AAC_PROFILE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

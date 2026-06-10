@@ -106,6 +106,7 @@ __tests__/hr-attendance-branch-isolation-behavioral-wave1137.test.js
 __tests__/backfill-hr-branchid-wave1139.test.js
 __tests__/branch-isolation-hr-domain-wave1141.test.js
 __tests__/hr-domain-branch-isolation-behavioral-wave1141.test.js
+__tests__/hr-route-branch-isolation-guard-wave1142.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js
@@ -384,6 +385,8 @@ __tests__/measure-scoring-engine-wave212.test.js
 __tests__/measure-scoring-modules-extend-wave252.test.js
 __tests__/measure-selection-strategist-wave218.test.js
 __tests__/measure-trend-engine-wave219.test.js
+__tests__/measurement-result-baseline-linkage-behavioral-wave1142.test.js
+__tests__/measurement-result-baseline-linkage-wave1142.test.js
 __tests__/measures-catalog-seed-wave556.test.js
 __tests__/measures-outcomes-clinical-route-wave246.test.js
 __tests__/measures-outcomes-comparison-route-wave251.test.js

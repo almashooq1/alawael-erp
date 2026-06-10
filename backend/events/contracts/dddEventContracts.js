@@ -1770,6 +1770,28 @@ const MEDICATION_ORDER_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const FAMILY_VISIT_EVENTS = {
+  FAMILY_VISIT_APPROVED: {
+    domain: 'family-visit',
+    eventType: 'family_visit.approved',
+    version: 1,
+    description:
+      'تمت الموافقة على طلب زيارة الأهل لمشاهدة جلسة/فصل — A family visit request to observe a session was approved',
+    payload: {
+      requestId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      requestedDate: 'date',
+      slot: 'string',
+      sessionType: 'string',
+      approvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1835,6 +1857,7 @@ const DDD_CONTRACTS = {
   'toileting-event': TOILETING_EVENT_EVENTS,
   'home-carryover': HOME_CARRYOVER_EVENTS,
   'medication-order': MEDICATION_ORDER_EVENTS,
+  'family-visit': FAMILY_VISIT_EVENTS,
 };
 
 /**
@@ -1916,6 +1939,7 @@ module.exports = {
   TOILETING_EVENT_EVENTS,
   HOME_CARRYOVER_EVENTS,
   MEDICATION_ORDER_EVENTS,
+  FAMILY_VISIT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

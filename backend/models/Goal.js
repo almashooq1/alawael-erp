@@ -158,7 +158,7 @@ const goalSchema = new mongoose.Schema(
       default: () => [],
     },
 
-    // ─── R1 (W1068) — Goal ↔ Measure linkage (golden thread gap #1) ─────
+    // ─── R1 (W1090) — Goal ↔ Measure linkage (golden thread gap #1) ─────
     // Links a goal to the standardized measure(s) that prove its progress,
     // closing the "goal has no measure" gap so every SMART goal is backed
     // by a quantifiable instrument. This is the data foundation for honest
@@ -233,7 +233,7 @@ goalSchema.index({ participantId: 1, status: 1 });
 goalSchema.index({ createdBy: 1, createdAt: -1 });
 // W452 — fast lookup of goals by primary ICF code (used by aggregate reports)
 goalSchema.index({ 'icfMapping.icfCode': 1 });
-// R1 (W1068) — fast lookup of goals by linked measure (outcome dashboards)
+// R1 (W1090) — fast lookup of goals by linked measure (outcome dashboards)
 goalSchema.index({ 'linkedMeasures.measureId': 1 });
 
 // W452 — ICF mapping invariants enforced before save.
@@ -266,7 +266,7 @@ goalSchema.pre('save', function (next) {
     }
   }
 
-  // ─── R1 (W1068) — linkedMeasures invariants (golden-thread gap #1) ──
+  // ─── R1 (W1090) — linkedMeasures invariants (golden-thread gap #1) ──
   if (Array.isArray(this.linkedMeasures) && this.linkedMeasures.length > 0) {
     // Invariant 1: at most one primary measure per goal
     const primaryMeasures = this.linkedMeasures.filter(m => m.role === 'primary');

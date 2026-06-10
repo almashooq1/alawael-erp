@@ -92,6 +92,33 @@ FamilyVisitRequestSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// ── W1079: unified-core producer ───────────────────────────────────
+// Emit family_visit.approved when a parent-visit request is approved — a
+// family-engagement milestone. Fires on the transition into 'approved'.
+// Non-callback hook style (W483 gate).
+FamilyVisitRequestSchema.pre('save', function flagFamilyVisitApproved() {
+  this.$__familyVisitApproved =
+    this.status === 'approved' && (this.isNew || this.isModified('status'));
+});
+
+FamilyVisitRequestSchema.post('save', function emitFamilyVisitApproved(doc) {
+  if (!doc.$__familyVisitApproved) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('family-visit', 'family_visit.approved', {
+      requestId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      requestedDate: doc.requestedDate,
+      slot: doc.slot,
+      sessionType: doc.sessionType,
+      approvedAt: doc.approvedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.FamilyVisitRequest ||
   mongoose.model('FamilyVisitRequest', FamilyVisitRequestSchema);

@@ -2520,6 +2520,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1079: family visit approved → core timeline ───────────────────
+  // An approved parent-visit request (parent will observe a session) is a
+  // family-engagement milestone — surface it on the beneficiary timeline.
+  subscribers.push({
+    name: 'family-visit:approved → timeline:record',
+    pattern: 'family-visit.family_visit.approved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'family_visit_approved',
+            category: 'family',
+            severity: 'success',
+            title: `Family visit approved (${event.payload.slot || 'visit'})`,
+            title_ar: 'تمت الموافقة على زيارة الأهل',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] FamilyVisit timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

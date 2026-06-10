@@ -1349,6 +1349,10 @@ on:
       - 'backend/__tests__/home-practice-completed-core-linkage-wave1077.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/medication-order-activated-core-linkage-wave1078.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-linked-measures-behavioral-wave1090.test.js'
+      - 'backend/__tests__/goal-linked-measures-wave1090.test.js'
+      - 'backend/__tests__/family-visit-approved-core-linkage-wave1079.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2681,6 +2685,10 @@ on:
       - 'backend/__tests__/home-practice-completed-core-linkage-wave1077.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/medication-order-activated-core-linkage-wave1078.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-linked-measures-behavioral-wave1090.test.js'
+      - 'backend/__tests__/goal-linked-measures-wave1090.test.js'
+      - 'backend/__tests__/family-visit-approved-core-linkage-wave1079.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

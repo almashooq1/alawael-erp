@@ -278,6 +278,8 @@ __tests__/gender-routing-wave476.test.js
 __tests__/goal-forecaster-service-wave430.test.js
 __tests__/goal-forecaster-wave429.test.js
 __tests__/goal-linkage-insights-wave237.test.js
+__tests__/goal-linked-measures-behavioral-wave1090.test.js
+__tests__/goal-linked-measures-wave1090.test.js
 __tests__/goal-measure-linkage-wave235.test.js
 __tests__/goal-progress-digest-script.test.js
 __tests__/goal-progress-service.test.js
@@ -785,3 +787,4 @@ __tests__/sponsorship-activated-core-linkage-wave1075.test.js
 __tests__/potty-request-milestone-core-linkage-wave1076.test.js
 __tests__/home-practice-completed-core-linkage-wave1077.test.js
 __tests__/medication-order-activated-core-linkage-wave1078.test.js
+__tests__/family-visit-approved-core-linkage-wave1079.test.js

@@ -189,6 +189,7 @@ const careTimelineSchema = new mongoose.Schema(
         'arvr_session_completed',
         'program_enrollment_activated',
         'family_communication_logged',
+        'workflow_task_completed',
         // Family
         'family_contact',
         'family_meeting',

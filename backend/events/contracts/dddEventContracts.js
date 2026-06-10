@@ -2512,6 +2512,29 @@ const FAMILY_COMMUNICATION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const WORKFLOW_TASK_EVENTS = {
+  WORKFLOW_TASK_COMPLETED: {
+    domain: 'workflow-task',
+    eventType: 'workflow_task.completed',
+    version: 1,
+    description:
+      'اكتملت مهمة سير عمل ضمن حلقة رعاية المستفيد — A beneficiary care-workflow task was completed',
+    payload: {
+      taskId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      type: 'string',
+      phase: 'string',
+      completedBy: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2611,6 +2634,7 @@ const DDD_CONTRACTS = {
   'arvr-session': ARVR_SESSION_EVENTS,
   'program-enrollment': PROGRAM_ENROLLMENT_EVENTS,
   'family-communication': FAMILY_COMMUNICATION_EVENTS,
+  'workflow-task': WORKFLOW_TASK_EVENTS,
 };
 
 /**
@@ -2722,6 +2746,7 @@ module.exports = {
   ARVR_SESSION_EVENTS,
   PROGRAM_ENROLLMENT_EVENTS,
   FAMILY_COMMUNICATION_EVENTS,
+  WORKFLOW_TASK_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

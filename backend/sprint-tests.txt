@@ -822,3 +822,4 @@ __tests__/story-surface-published-core-linkage-wave1109.test.js
 __tests__/arvr-session-completed-core-linkage-wave1110.test.js
 __tests__/program-enrollment-activated-core-linkage-wave1111.test.js
 __tests__/family-communication-logged-core-linkage-wave1112.test.js
+__tests__/workflow-task-completed-core-linkage-wave1113.test.js

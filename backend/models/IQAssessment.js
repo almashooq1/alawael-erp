@@ -164,4 +164,32 @@ iqAssessmentSchema.path('fullScaleIQ').validate(function (_v) {
   return true;
 });
 
+// ── W1056: unified-core linkage ───────────────────────────────────────
+// An IQ assessment carries final scores at creation, so recording one is the
+// milestone. Publish iq_assessment.completed → CareTimeline. NON-callback
+// hooks only (global async save plugin → Kareem promise-adapter mode).
+iqAssessmentSchema.pre('save', function () {
+  this.$__iqAssessmentCompletedNow = this.isNew;
+});
+
+function emitIqAssessmentCompleted(doc) {
+  if (!doc || !doc.$__iqAssessmentCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('iq-assessment', 'iq_assessment.completed', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      instrumentType: doc.instrumentType,
+      fullScaleIQ: doc.fullScaleIQ,
+      classificationBand: doc.classificationBand,
+      completedAt: doc.assessmentDate || doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+iqAssessmentSchema.post('save', emitIqAssessmentCompleted);
+
 module.exports = mongoose.models.IQAssessment || mongoose.model('IQAssessment', iqAssessmentSchema);

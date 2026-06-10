@@ -762,3 +762,4 @@ __tests__/prior-authorization-approved-core-linkage-wave1052.test.js
 __tests__/plan-review-recorded-core-linkage-wave1053.test.js
 __tests__/swallow-study-completed-core-linkage-wave1054.test.js
 __tests__/crisis-incident-resolved-core-linkage-wave1055.test.js
+__tests__/iq-assessment-completed-core-linkage-wave1056.test.js

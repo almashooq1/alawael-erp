@@ -1293,6 +1293,27 @@ const CRISIS_INCIDENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const IQ_ASSESSMENT_EVENTS = {
+  IQ_ASSESSMENT_COMPLETED: {
+    domain: 'iq-assessment',
+    eventType: 'iq_assessment.completed',
+    version: 1,
+    description: 'إكمال تقييم الذكاء — IQ assessment completed',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      instrumentType: 'string',
+      fullScaleIQ: 'number',
+      classificationBand: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1335,6 +1356,7 @@ const DDD_CONTRACTS = {
   'plan-review': PLAN_REVIEW_EVENTS,
   'instrumental-swallow-study': SWALLOW_STUDY_EVENTS,
   'crisis-incident': CRISIS_INCIDENT_EVENTS,
+  'iq-assessment': IQ_ASSESSMENT_EVENTS,
 };
 
 /**
@@ -1393,6 +1415,7 @@ module.exports = {
   PLAN_REVIEW_EVENTS,
   SWALLOW_STUDY_EVENTS,
   CRISIS_INCIDENT_EVENTS,
+  IQ_ASSESSMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

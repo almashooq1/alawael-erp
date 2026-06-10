@@ -132,6 +132,7 @@ const careTimelineSchema = new mongoose.Schema(
         'plan_review_recorded',
         'swallow_study_completed',
         'crisis_incident_resolved',
+        'iq_assessment_completed',
         // Family
         'family_contact',
         'family_meeting',

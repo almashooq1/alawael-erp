@@ -1825,6 +1825,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1056: IQ assessment completed → core timeline ─────────────────
+  // When a psychometric IQ assessment is recorded, log it as a clinical
+  // milestone on the beneficiary's timeline.
+  subscribers.push({
+    name: 'iq-assessment:completed → timeline:record',
+    pattern: 'iq-assessment.iq_assessment.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const fsiq = event.payload.fullScaleIQ;
+          const tail = typeof fsiq === 'number' ? ` (FSIQ ${fsiq})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'iq_assessment_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `IQ assessment completed${tail}`,
+            title_ar: 'اكتمل تقييم الذكاء',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] IQAssessment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

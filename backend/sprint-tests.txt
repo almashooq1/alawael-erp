@@ -886,6 +886,7 @@ __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
 __tests__/golden-thread-caseload-route-wave1167.test.js
 __tests__/supervisor-ops-service-behavioral-wave1169.test.js
 __tests__/supervisor-ops-service-wave1169.test.js
+__tests__/supervisor-ops-route-wave1170.test.js
 __tests__/finance-invoice-branch-isolation-wave1161.test.js
 __tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js
 __tests__/finance-approvals-branch-isolation-wave1163.test.js

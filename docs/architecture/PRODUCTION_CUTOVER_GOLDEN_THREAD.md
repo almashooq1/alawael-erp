@@ -57,6 +57,10 @@ On first load of each model against prod, Mongoose builds these. All are additiv
   Access is enforced server-side by `branchScopedBeneficiaryParam` (W1160 branch-ownership on the `:beneficiaryId` param) — a restricted caller cannot read another branch's beneficiary.
 - Also reachable as a widget on the full dashboard: `GET …/360?widgets=goldenThread`.
 - This is the **domains/core** 360 (distinct from the `/api/v1/care/360` service — do not confuse them).
+- **`GET /api/(v1/)goals/golden-thread/caseload-attention[?branchId=&limit=]`** (W1167) —
+  caseload Smart Attention Queue: `{ branchId, scanned, capped, summary, rows }` ranked
+  most-urgent first. Branch-scoped (restricted callers pinned to their branch; cross-branch
+  roles must pass `?branchId`; scan capped). Mounted on the **goals** domain router.
 
 ## 4. Operational audit CLIs (read-only, admin-run; no flags needed beyond `MONGODB_URI`)
 

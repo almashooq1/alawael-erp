@@ -140,11 +140,15 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Fleet — vehicle document expiry | `Vehicle` | rule `vehicle-document-expiry` → `Alert` (platform-scoped) | ✅ **W1008** — active vehicle, expired registration/insurance/inspection; registration\|insurance → critical |
 | Contracts — service/vendor expired | `Contract` | rule `contract-expired` → `Alert` | ✅ **W1009** — ACTIVE contract past `endDate` (lapsed without renewal/close) |
 | Inventory — low stock | `InventoryStock` × `InventoryItem` | rule `inventory-low-stock` → `Alert` | ✅ **W1070** — first TWO-model join (stock qty vs item reorder point); out-of-stock → critical; both models are object-exports, resolved defensively |
+| Procurement — PO delivery overdue | `InventoryModulePurchaseOrder` | rule `purchase-order-delivery-overdue` → `Alert` | ✅ **W1132** — committed PO (approved/sent/partial) past `expected_delivery_date`, not received; catches late *incoming* supply before it becomes a low-stock shortfall; self-loading (no app.js edit) |
 
-**Operational sweep: 5 rules (W1006–W1009 + W1070) covering facilities · maintenance ·
-fleet · contracts · inventory — the main org-operational signals are now on the
-`/api/v1/dashboards/alerts` dashboard.** Further rules (e.g. license expiry) follow
-the same recipe.
+**Operational sweep (growing): facilities · maintenance · fleet · contracts ·
+inventory · procurement (W1006–W1009 / W1070 / W1132), plus quality (CAPA +
+calibration, W1121), waste (W1124) and occupational-health surveillance (W1126)
+rules added by the clinical-systems work — the main org-operational signals are
+now on the `/api/v1/dashboards/alerts` dashboard.** Newer rules use the
+**self-loading pattern** (`ctx.models.X || require('../../models/.../X')`) to avoid
+editing the app.js model loader (a parallel-work hot zone).
 
 > **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
 > per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →

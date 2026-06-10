@@ -159,6 +159,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'generated-report', // W1119 — beneficiary scoped report completed → core timeline
   'decision-alert', // W1120 — beneficiary decision-support alert raised → core timeline
   'gas-scale', // W1121 — GAS scale activated for a beneficiary goal → core timeline
+  'quality-audit-record', // W1122 — beneficiary quality audit completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -292,6 +293,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'generated_report', // W1119 — generated_report.completed (GeneratedReport)
     'decision_alert', // W1120 — decision_alert.raised (DecisionAlert)
     'gas_scale', // W1121 — gas_scale.activated (GasScale)
+    'quality_audit_record', // W1122 — quality_audit_record.completed (QualityAudit)
   ])
 );
 

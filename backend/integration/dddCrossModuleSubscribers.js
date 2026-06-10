@@ -3766,6 +3766,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'quality-audit-record:completed → timeline:record',
+    pattern: 'quality-audit-record.quality_audit_record.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const lvl = event.payload.complianceLevel;
+          const severity =
+            lvl === 'non_compliant' ? 'error' : lvl === 'needs_improvement' ? 'warning' : 'success';
+          const score = event.payload.overallScore;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'quality_audit_record_completed',
+            category: 'quality',
+            severity,
+            title: `Quality audit completed${typeof score === 'number' ? ` (${score}%)` : ''}`,
+            title_ar: 'اكتمل تدقيق جودة على ملف المستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] QualityAudit timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

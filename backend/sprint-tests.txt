@@ -833,3 +833,4 @@ __tests__/workflow-transition-recorded-core-linkage-wave1118.test.js
 __tests__/generated-report-completed-core-linkage-wave1119.test.js
 __tests__/decision-alert-raised-core-linkage-wave1120.test.js
 __tests__/gas-scale-activated-core-linkage-wave1121.test.js
+__tests__/quality-audit-record-completed-core-linkage-wave1122.test.js

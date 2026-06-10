@@ -2719,6 +2719,29 @@ const GAS_SCALE_EVENTS = Object.freeze({
   },
 }); // ═══ W1121 — GAS scale activated → unified core timeline ═══
 
+const QUALITY_AUDIT_RECORD_EVENTS = Object.freeze({
+  QUALITY_AUDIT_RECORD_COMPLETED: {
+    domain: 'quality-audit-record',
+    eventType: 'quality_audit_record.completed',
+    version: 1,
+    description:
+      'A beneficiary-scoped quality/compliance audit finished with an overall score and compliance level.',
+    payload: {
+      auditId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      overallScore: 'number',
+      complianceLevel: 'string',
+      auditType: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1122 — beneficiary quality audit completed → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2827,6 +2850,7 @@ const DDD_CONTRACTS = {
   'generated-report': GENERATED_REPORT_EVENTS,
   'decision-alert': DECISION_ALERT_EVENTS,
   'gas-scale': GAS_SCALE_EVENTS,
+  'quality-audit-record': QUALITY_AUDIT_RECORD_EVENTS,
 };
 
 /**
@@ -2947,6 +2971,7 @@ module.exports = {
   GENERATED_REPORT_EVENTS,
   DECISION_ALERT_EVENTS,
   GAS_SCALE_EVENTS,
+  QUALITY_AUDIT_RECORD_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -79,4 +79,12 @@ module.exports = [
   // Item at/below its reorder point (a TWO-model join across
   // InventoryStock + InventoryItem). Needs both in the app.js loader.
   require('./inventory-low-stock'),
+
+  // ── W1121 — operational / quality (2) ───────────────────────
+  // Self-loading (require the model directly when absent from ctx.models),
+  // so they fire without an app.js model-loader edit.
+  // CAPA past its due date and not yet completed (CBAHI quality management).
+  require('./capa-overdue'),
+  // Calibrated equipment overdue, or a failed calibration (→ critical).
+  require('./calibration-overdue'),
 ];

@@ -1451,6 +1451,28 @@ const AAC_PROFILE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PAIN_ASSESSMENT_EVENTS = {
+  PAIN_ASSESSMENT_FINALIZED: {
+    domain: 'pain-assessment',
+    eventType: 'pain_assessment.finalized',
+    version: 1,
+    description: 'اعتماد تقييم الألم — Pain assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      scale: 'string',
+      score: 'number',
+      painPresent: 'boolean',
+      significant: 'boolean',
+      finalizedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1501,6 +1523,7 @@ const DDD_CONTRACTS = {
   'community-referral': COMMUNITY_REFERRAL_EVENTS,
   'clinical-pathway': CLINICAL_PATHWAY_EVENTS,
   'aac-profile': AAC_PROFILE_EVENTS,
+  'pain-assessment': PAIN_ASSESSMENT_EVENTS,
 };
 
 /**
@@ -1567,6 +1590,7 @@ module.exports = {
   COMMUNITY_REFERRAL_EVENTS,
   CLINICAL_PATHWAY_EVENTS,
   AAC_PROFILE_EVENTS,
+  PAIN_ASSESSMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

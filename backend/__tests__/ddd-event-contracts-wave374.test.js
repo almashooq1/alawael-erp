@@ -101,6 +101,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'community-referral', // W1061 — community referral completed → core timeline
   'clinical-pathway', // W1062 — clinical pathway plan completed → core timeline
   'aac-profile', // W1063 — AAC PECS phase advanced → core timeline
+  'pain-assessment', // W1064 — pain assessment finalized → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -176,6 +177,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'community_referral', // W1061 — community_referral.completed (CommunityReferral)
     'clinical_pathway', // W1062 — clinical_pathway.completed (ClinicalPathwayPlan)
     'aac_profile', // W1063 — aac_profile.pecs_phase_advanced (AacProfile)
+    'pain_assessment', // W1064 — pain_assessment.finalized (PainAssessment)
   ])
 );
 

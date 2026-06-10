@@ -2061,6 +2061,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1064: pain assessment finalized → core timeline ──────────────
+  // When a beneficiary's pain assessment is finalized, log it on their
+  // timeline (clinical; warning when the pain is clinically significant,
+  // info otherwise) so the longitudinal pain record is visible on the core.
+  subscribers.push({
+    name: 'pain-assessment:finalized → timeline:record',
+    pattern: 'pain-assessment.pain_assessment.finalized',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sig = !!event.payload.significant;
+          const s = typeof event.payload.score === 'number' ? ` (${event.payload.score})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'pain_assessment_finalized',
+            category: 'clinical',
+            severity: sig ? 'warning' : 'info',
+            title: `Pain assessment finalized${s}`,
+            title_ar: sig ? 'تم اعتماد تقييم الألم — ألم ملحوظ' : 'تم اعتماد تقييم الألم',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PainAssessment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

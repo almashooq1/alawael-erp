@@ -237,6 +237,35 @@ PainAssessmentSchema.virtual('painReduction').get(function () {
 PainAssessmentSchema.set('toJSON', { virtuals: true });
 PainAssessmentSchema.set('toObject', { virtuals: true });
 
+// ─── W1064: unified-core linkage — pain assessment finalized ────────────────
+// Milestone = the assessment transitions to 'finalized' (draft → finalized,
+// or created already finalized). Emits a timeline event so the beneficiary's
+// pain record is visible on the unified core. Non-callback hook style.
+PainAssessmentSchema.pre('save', function flagPainFinalized() {
+  this.$__painFinalizedNow =
+    this.status === 'finalized' && (this.isNew || this.isModified('status'));
+});
+
+PainAssessmentSchema.post('save', function emitPainAssessmentFinalized(doc) {
+  if (!doc.$__painFinalizedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('pain-assessment', 'pain_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      scale: doc.scale,
+      score: doc.score,
+      painPresent: !!doc.painPresent,
+      significant: !!doc.isSignificantPain,
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.PainAssessment || mongoose.model('PainAssessment', PainAssessmentSchema);
 

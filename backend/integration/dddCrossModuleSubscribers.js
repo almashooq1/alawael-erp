@@ -1946,6 +1946,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1060: confirmed differential diagnosis → core timeline ────────
+  // When a CDSS differential diagnosis is confirmed by a clinician, log it
+  // on the beneficiary's timeline (clinical, success).
+  subscribers.push({
+    name: 'differential-diagnosis:confirmed → timeline:record',
+    pattern: 'differential-diagnosis.differential_diagnosis.confirmed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'differential_diagnosis_confirmed',
+            category: 'clinical',
+            severity: 'success',
+            title: 'Differential diagnosis confirmed',
+            title_ar: 'تم تأكيد التشخيص التفريقي',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DifferentialDiagnosis timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

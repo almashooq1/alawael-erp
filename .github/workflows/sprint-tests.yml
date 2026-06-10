@@ -1311,6 +1311,8 @@ on:
       - 'backend/__tests__/insurance-eligibility-checked-core-linkage-wave1058.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/morning-health-check-flagged-core-linkage-wave1059.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/differential-diagnosis-confirmed-core-linkage-wave1060.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2605,6 +2607,8 @@ on:
       - 'backend/__tests__/insurance-eligibility-checked-core-linkage-wave1058.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/morning-health-check-flagged-core-linkage-wave1059.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/differential-diagnosis-confirmed-core-linkage-wave1060.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

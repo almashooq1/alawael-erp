@@ -136,6 +136,7 @@ const careTimelineSchema = new mongoose.Schema(
         'creative_arts_therapy_completed',
         'insurance_eligibility_checked',
         'morning_health_check_flagged',
+        'differential_diagnosis_confirmed',
         // Family
         'family_contact',
         'family_meeting',

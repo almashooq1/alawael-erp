@@ -1374,6 +1374,25 @@ const MORNING_HEALTH_CHECK_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DIFFERENTIAL_DIAGNOSIS_EVENTS = {
+  DIFFERENTIAL_DIAGNOSIS_CONFIRMED: {
+    domain: 'differential-diagnosis',
+    eventType: 'differential_diagnosis.confirmed',
+    version: 1,
+    description: 'تأكيد التشخيص التفريقي (CDSS) — Differential diagnosis confirmed',
+    payload: {
+      diagnosisId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      confirmedDiagnosisId: 'string',
+      confirmedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1420,6 +1439,7 @@ const DDD_CONTRACTS = {
   'creative-arts-therapy': CREATIVE_ARTS_THERAPY_EVENTS,
   'insurance-eligibility': INSURANCE_ELIGIBILITY_EVENTS,
   'morning-health-check': MORNING_HEALTH_CHECK_EVENTS,
+  'differential-diagnosis': DIFFERENTIAL_DIAGNOSIS_EVENTS,
 };
 
 /**
@@ -1482,6 +1502,7 @@ module.exports = {
   CREATIVE_ARTS_THERAPY_EVENTS,
   INSURANCE_ELIGIBILITY_EVENTS,
   MORNING_HEALTH_CHECK_EVENTS,
+  DIFFERENTIAL_DIAGNOSIS_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

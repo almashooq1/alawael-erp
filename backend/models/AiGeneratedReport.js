@@ -117,5 +117,32 @@ aiGeneratedReportSchema.index({ status: 1, report_type: 1 });
 aiGeneratedReportSchema.index({ period_start: 1, period_end: 1 });
 aiGeneratedReportSchema.index({ deleted_at: 1 });
 
+// ── W1043: unified-core producer — AI-generated report sent ─────────
+// When an AiGeneratedReport reaches status 'sent', publish a domain event so the
+// cross-module subscriber records a communication milestone on the beneficiary's
+// longitudinal CareTimeline. Non-callback hook style (W483-safe).
+aiGeneratedReportSchema.pre('save', function () {
+  this.$__aiReportSentNow = this.status === 'sent' && (this.isNew || this.isModified('status'));
+});
+
+aiGeneratedReportSchema.post('save', function emitAiReportSent(doc) {
+  if (!doc || !doc.$__aiReportSentNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('ai-report', 'ai_report.sent', {
+        reportId: String(doc._id),
+        beneficiaryId: doc.beneficiary_id ? String(doc.beneficiary_id) : null,
+        ...(doc.branch_id ? { branchId: String(doc.branch_id) } : {}),
+        reportType: doc.report_type || null,
+        sentVia: doc.sent_via || null,
+        sentAt: doc.sent_at || doc.updated_at || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.AiGeneratedReport || mongoose.model('AiGeneratedReport', aiGeneratedReportSchema);

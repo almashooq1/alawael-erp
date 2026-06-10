@@ -1438,6 +1438,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── AI-generated report sent → unified-core timeline (W1043) ──────────
+  // When an AiGeneratedReport reaches status 'sent' (the family receives the
+  // AI-generated progress / discharge / regulatory report), record it as a
+  // communication milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'ai-report:sent → timeline:record',
+    pattern: 'ai-report.ai_report.sent',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const via = event.payload.sentVia ? ` via ${event.payload.sentVia}` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'ai_report_sent',
+            category: 'communication',
+            severity: 'success',
+            title: `AI-generated report sent${via}`,
+            title_ar: 'تم إرسال تقرير مولّد بالذكاء الاصطناعي للأسرة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] AI report timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

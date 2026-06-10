@@ -1029,6 +1029,28 @@ const COMMUNICATION_AID_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1043 — AI-generated report delivery → unified core.
+const AI_REPORT_EVENTS = {
+  AI_REPORT_SENT: {
+    domain: 'ai-report',
+    eventType: 'ai_report.sent',
+    version: 1,
+    description:
+      'إرسال تقرير مولّد بالذكاء الاصطناعي — AI-generated report delivered to the family',
+    payload: {
+      reportId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      reportType: 'string',
+      sentVia: 'string',
+      sentAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1058,6 +1080,7 @@ const DDD_CONTRACTS = {
   transition: TRANSITION_EVENTS,
   'diet-prescription': DIET_PRESCRIPTION_EVENTS,
   'communication-aid': COMMUNICATION_AID_EVENTS,
+  'ai-report': AI_REPORT_EVENTS,
 };
 
 /**
@@ -1103,6 +1126,7 @@ module.exports = {
   TRANSITION_EVENTS,
   DIET_PRESCRIPTION_EVENTS,
   COMMUNICATION_AID_EVENTS,
+  AI_REPORT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

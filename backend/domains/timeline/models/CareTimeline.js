@@ -113,6 +113,8 @@ const careTimelineSchema = new mongoose.Schema(
         'behavior_plan_completed',
         // AAC communication aid profile activated (W1042 — unified-core linkage)
         'communication_aid_activated',
+        // AI-generated report sent to family (W1043 — unified-core linkage)
+        'ai_report_sent',
         // Family
         'family_contact',
         'family_meeting',

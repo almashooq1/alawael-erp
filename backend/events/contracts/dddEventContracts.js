@@ -2604,6 +2604,29 @@ const MEASURE_ALERT_EVENTS = Object.freeze({
   },
 }); // ═══ W1116 — measure-alert raised → unified core timeline ═══
 
+const MEASURE_BASELINE_EVENTS = Object.freeze({
+  MEASURE_BASELINE_COMPLETED: {
+    domain: 'measure-baseline',
+    eventType: 'measure_baseline.completed',
+    version: 1,
+    description:
+      'A baseline measurement slot was completed for a beneficiary (first application of a tracked measure).',
+    payload: {
+      slotId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      measureCode: 'string',
+      measureId: 'string',
+      baselineApplicationId: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1117 — measure-baseline completed → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2707,6 +2730,7 @@ const DDD_CONTRACTS = {
   'behavior-record': BEHAVIOR_RECORD_EVENTS,
   'measure-reassessment': MEASURE_REASSESSMENT_EVENTS,
   'measure-alert': MEASURE_ALERT_EVENTS,
+  'measure-baseline': MEASURE_BASELINE_EVENTS,
 };
 
 /**
@@ -2822,6 +2846,7 @@ module.exports = {
   BEHAVIOR_RECORD_EVENTS,
   MEASURE_REASSESSMENT_EVENTS,
   MEASURE_ALERT_EVENTS,
+  MEASURE_BASELINE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

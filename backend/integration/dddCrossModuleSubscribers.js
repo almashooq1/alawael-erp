@@ -3625,6 +3625,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'measure-baseline:completed → timeline:record',
+    pattern: 'measure-baseline.measure_baseline.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const code = event.payload.measureCode;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'measure_baseline_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Measure baseline completed${code ? ` (${code})` : ''}`,
+            title_ar: 'اكتمل التطبيق الأساسي (Baseline) لمقياس للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] MeasureBaselineSlot timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -1428,6 +1428,9 @@ on:
       - 'backend/__tests__/measure-reassessment-completed-core-linkage-wave1115.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/measure-alert-raised-core-linkage-wave1116.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mass-assignment-update-routes-wave1112.test.js'
+      - 'backend/__tests__/measure-baseline-completed-core-linkage-wave1117.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2839,6 +2842,9 @@ on:
       - 'backend/__tests__/measure-reassessment-completed-core-linkage-wave1115.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/measure-alert-raised-core-linkage-wave1116.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mass-assignment-update-routes-wave1112.test.js'
+      - 'backend/__tests__/measure-baseline-completed-core-linkage-wave1117.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

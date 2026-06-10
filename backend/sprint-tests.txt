@@ -827,3 +827,4 @@ __tests__/workflow-task-completed-core-linkage-wave1113.test.js
 __tests__/behavior-record-logged-core-linkage-wave1114.test.js
 __tests__/measure-reassessment-completed-core-linkage-wave1115.test.js
 __tests__/measure-alert-raised-core-linkage-wave1116.test.js
+__tests__/measure-baseline-completed-core-linkage-wave1117.test.js

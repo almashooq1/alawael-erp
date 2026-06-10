@@ -385,8 +385,8 @@ __tests__/measure-scoring-engine-wave212.test.js
 __tests__/measure-scoring-modules-extend-wave252.test.js
 __tests__/measure-selection-strategist-wave218.test.js
 __tests__/measure-trend-engine-wave219.test.js
-__tests__/measurement-result-baseline-linkage-behavioral-wave1142.test.js
-__tests__/measurement-result-baseline-linkage-wave1142.test.js
+__tests__/measurement-result-baseline-linkage-behavioral-wave1145.test.js
+__tests__/measurement-result-baseline-linkage-wave1145.test.js
 __tests__/measures-catalog-seed-wave556.test.js
 __tests__/measures-outcomes-clinical-route-wave246.test.js
 __tests__/measures-outcomes-comparison-route-wave251.test.js

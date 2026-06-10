@@ -1476,8 +1476,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/core-routes-branch-isolation-wave1146.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measurement-result-baseline-linkage-behavioral-wave1142.test.js'
-      - 'backend/__tests__/measurement-result-baseline-linkage-wave1142.test.js'
+      - 'backend/__tests__/measurement-result-baseline-linkage-behavioral-wave1145.test.js'
+      - 'backend/__tests__/measurement-result-baseline-linkage-wave1145.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hr-route-branch-isolation-guard-wave1142.test.js'
       - 'backend/package.json'
@@ -2939,8 +2939,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/core-routes-branch-isolation-wave1146.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measurement-result-baseline-linkage-behavioral-wave1142.test.js'
-      - 'backend/__tests__/measurement-result-baseline-linkage-wave1142.test.js'
+      - 'backend/__tests__/measurement-result-baseline-linkage-behavioral-wave1145.test.js'
+      - 'backend/__tests__/measurement-result-baseline-linkage-wave1145.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hr-route-branch-isolation-guard-wave1142.test.js'
       - 'backend/package.json'

@@ -23,9 +23,18 @@ logical surface (`/treatment-plans`, `/assessments`, `/prescriptions`,
 - **`/api/therapist-extended/*`** → the **kebab** file wins (mounted at `_registry:661`, _before_ `phases.registry` at `_registry:803`). So this session's W269 + mass-assignment hardening is **LIVE** on this path. The camelCase file is **shadowed / dead** here.
 - **`/api/therapist/*`** → only the **camelCase** file is mounted (the kebab file is not co-mounted at `/api/therapist`). So the _same_ treatment-plan / prescription functionality is **also reachable, unhardened-by-this-session**, via `/api/therapist/treatment-plans` etc. — relying entirely on `therapistPortal.service` for its scoping.
 
-**Net effect:** one logical API, two implementations, two exposure paths, and a
-**split security posture** — the kebab path got W269 + anti-mass-assignment
-gating; the camelCase/service path did not (it relies on the service layer).
+**Net effect:** the same therapist-extended _surface_ exposed at two paths by two
+implementations over **two different plan models** — the kebab uses `CarePlan`; the
+camelCase/service uses **`TherapeuticPlan`** (`therapistPortal.service`). So this is
+model-level fragmentation (ADR-026 / ADR-040 family), not a pure route duplicate.
+
+**Q1 AUDITED (2026-06-10) — the service path is NOT an unhardened IDOR.** Every
+`therapistPortal.service` read + write scopes by therapist caseload:
+`getPlanById` / `getTherapeuticPlans` / `updateTreatmentPlan` / `updateGoalProgress`
+all filter `{ _id?, assignedTherapists: therapistId }` — _stronger_ than the kebab's
+branch-scope (caseload ⊃ branch, per the W269 doctrine). So the `/api/therapist`
+path is safe; the earlier "split security posture" worry is **downgraded** — both
+paths are scoped, just differently (caseload vs branch) and over different models.
 
 ## Decision drivers
 
@@ -67,9 +76,10 @@ currently-hardened, winning implementation) — do not retire it prematurely.
 
 ## Open questions (stakeholder)
 
-- **Q1.** Does `therapistPortal.service` already enforce branch/ownership scope on
-  the treatment-plan / prescription / professional-dev mutations (parity with the
-  W1119 kebab gates)? (Determines whether Option B is safe.)
+- **Q1. ANSWERED (2026-06-10): yes — caseload-scoped.** `therapistPortal.service`
+  filters every treatment-plan read + write by `{ assignedTherapists: therapistId }`
+  (stronger than branch). Option B is safe on the scoping axis; the open part is the
+  model question (Q3).
 - **Q2.** Do any clients call `/api/therapist/treatment-plans` (camelCase path) vs
   `/api/therapist-extended/treatment-plans` (kebab)? (Determines what can be retired.)
 - **Q3.** Is the service-backed (B) or direct-model (C) implementation the intended
@@ -79,9 +89,9 @@ currently-hardened, winning implementation) — do not retire it prematurely.
 
 - **Positive:** one therapist-extended implementation, one scoping path, no split
   security posture, no stranded duplicate.
-- **Negative / interim:** until resolved, the `/api/therapist` path remains
-  unhardened-by-W1119 (relies on the service layer) — Q1's audit is the priority
-  even if consolidation is deferred.
+- **Negative / interim:** two plan models (`CarePlan` vs `TherapeuticPlan`) back the
+  same surface, so consolidation is a model decision (ADR-026/040 family) larger
+  than a route-retire. No live IDOR — both paths are scoped (Q1 audited).
 - **Follow-on:** mirrors ADR-038; consider a drift guard forbidding a third
   therapist-extended route file.
 

@@ -138,7 +138,8 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Facilities — PPM / inspection overdue | `FacilityAsset` | smart-alert **rule** `facility-asset-ppm-overdue` (category `operational`) → `Alert` | ✅ **W1006** — first operational rule; org-scoped, NOT the beneficiary timeline |
 | Maintenance — work order overdue | `MaintenanceWorkOrder` | rule `maintenance-work-order-overdue` → `Alert` | ✅ **W1007** — open WO past `scheduledDate`; critical-priority → critical |
 | Fleet — vehicle document expiry | `Vehicle` | rule `vehicle-document-expiry` → `Alert` (platform-scoped) | ✅ **W1008** — active vehicle, expired registration/insurance/inspection; registration\|insurance → critical |
-| Inventory low-stock · vendor/license expiry | — | (add a `category:'operational'` rule in `alerts/rules/`) | Open — _inventory low-stock needs an `InventoryItem`+`InventoryStock` join (not single-model); `EmploymentContract` already has rules — add vendor/service `Contract` + license expiry next._ |
+| Contracts — service/vendor expired | `Contract` | rule `contract-expired` → `Alert` | ✅ **W1009** — ACTIVE contract past `endDate` (lapsed without renewal/close) |
+| Inventory low-stock | — | (add a `category:'operational'` rule) | Open — needs an `InventoryItem`+`InventoryStock` join (current qty is a separate model), so **not** a clean single-model rule like the four above |
 
 > **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
 > per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →

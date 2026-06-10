@@ -1472,6 +1472,7 @@ try {
       'FacilityAsset', // W1006 — operational PPM/inspection-overdue rule
       'MaintenanceWorkOrder', // W1007 — operational work-order-overdue rule
       'Vehicle', // W1008 — operational vehicle-document-expiry rule
+      'Contract.model', // W1009 — operational contract-expired rule (file: Contract.model.js)
     ];
     const liveModels = {};
     for (const name of modelNames) {

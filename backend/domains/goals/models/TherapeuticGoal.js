@@ -166,6 +166,19 @@ const therapeuticGoalSchema = new mongoose.Schema(
       ref: 'TherapeuticGoal',
     },
 
+    // ── Provenance (gap #3 — assessment → goal) ─────────────────────────
+    // The MeasureApplication (assessment administration) this goal was derived
+    // from, set by W568 assessmentInsight.createGoalFromSuggestion(). Optional +
+    // sparse: only assessment-derived goals carry it. Indexed so the backward
+    // query "which goals did this assessment generate?" is fast — NO redundant
+    // forward goalIds[] on MeasureApplication (R2 anti-fragmentation lesson).
+    measureApplicationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'MeasureApplication',
+      index: true,
+      sparse: true,
+    },
+
     // ── Identity ───────────────────────────────────────────────────────
     goalNumber: { type: String, unique: true, sparse: true },
     title: { type: String, required: true },

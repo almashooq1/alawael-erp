@@ -35,6 +35,8 @@ __tests__/arts-therapy-behavioral-wave685.test.js
 __tests__/arts-therapy-wave685.test.js
 __tests__/arvr-rehab-wave213.test.js
 __tests__/assessment-goal-from-suggestion-wave568.test.js
+__tests__/assessment-goal-provenance-behavioral-wave1151.test.js
+__tests__/assessment-goal-provenance-wave1151.test.js
 __tests__/assessment-insight-behavioral-wave564.test.js
 __tests__/assessment-insight-wave563.test.js
 __tests__/assistive-device-behavioral-wave359.test.js

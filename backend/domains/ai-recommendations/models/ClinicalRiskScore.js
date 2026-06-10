@@ -152,7 +152,9 @@ clinicalRiskScoreSchema.virtual('topFactors').get(function () {
 });
 
 // ── Pre-save: compute weighted scores & category scores ─────────────────────
-clinicalRiskScoreSchema.pre('save', function (next) {
+// W1131: converted to async hook style (W483 canonical) so the escalation
+// flag hook below can coexist without mixing dispatch styles on 'save'.
+clinicalRiskScoreSchema.pre('save', async function () {
   if (this.factors && this.factors.length) {
     this.factors.forEach(f => {
       f.weightedScore = (f.weight || 1) * (f.score || 0);
@@ -171,7 +173,35 @@ clinicalRiskScoreSchema.pre('save', function (next) {
       }
     }
   }
-  next();
+});
+
+// ── W1131 — publish clinical_risk_score.escalated for high/critical readings ─
+clinicalRiskScoreSchema.pre('save', async function flagClinicalRiskEscalated() {
+  this.$__clinicalRiskEscalated =
+    this.isNew &&
+    Boolean(this.beneficiaryId) &&
+    (this.riskLevel === 'high' || this.riskLevel === 'critical') &&
+    (this.trend === 'worsening' || this.trend === 'new');
+});
+
+clinicalRiskScoreSchema.post('save', function emitClinicalRiskEscalated(doc) {
+  if (!doc.$__clinicalRiskEscalated) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('clinical-risk-score', 'clinical_risk_score.escalated', {
+      riskScoreId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      totalScore: doc.totalScore,
+      ...(typeof doc.previousScore === 'number' ? { previousScore: doc.previousScore } : {}),
+      riskLevel: doc.riskLevel,
+      trend: doc.trend,
+      escalatedAt: doc.calculatedAt || doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
 });
 
 module.exports =

@@ -3795,6 +3795,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1131: clinical risk score escalation → core timeline ──────────
+  // RiskScoringService persists a ClinicalRiskScore per rule-engine run; only
+  // a high/critical reading (new or worsening) reaches the timeline so the
+  // clinical risk trail stays signal-rich. critical→critical, high→error.
+  subscribers.push({
+    name: 'clinical-risk-score:escalated → timeline:record',
+    pattern: 'clinical-risk-score.clinical_risk_score.escalated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const severity = event.payload.riskLevel === 'critical' ? 'critical' : 'error';
+          const score = event.payload.totalScore;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.episodeId ? { episodeId: event.payload.episodeId } : {}),
+            eventType: 'clinical_risk_score_escalated',
+            category: 'clinical',
+            severity,
+            title: `Clinical risk ${event.payload.riskLevel}${typeof score === 'number' ? ` (${score}/100)` : ''}`,
+            title_ar: 'ارتفع تقييم المخاطر السريرية للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] ClinicalRiskScore timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

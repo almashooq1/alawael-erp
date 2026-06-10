@@ -199,6 +199,7 @@ const careTimelineSchema = new mongoose.Schema(
         'decision_alert_raised',
         'gas_scale_activated',
         'quality_audit_record_completed',
+        'clinical_risk_score_escalated',
         // Family
         'family_contact',
         'family_meeting',

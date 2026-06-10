@@ -2742,6 +2742,30 @@ const QUALITY_AUDIT_RECORD_EVENTS = Object.freeze({
   },
 }); // ═══ W1122 — beneficiary quality audit completed → unified core timeline ═══
 
+const CLINICAL_RISK_SCORE_EVENTS = Object.freeze({
+  CLINICAL_RISK_SCORE_ESCALATED: {
+    domain: 'clinical-risk-score',
+    eventType: 'clinical_risk_score.escalated',
+    version: 1,
+    description:
+      'A rule-engine clinical risk score reached high/critical for a beneficiary (new reading or worsening trend).',
+    payload: {
+      riskScoreId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      episodeId: 'string',
+      totalScore: 'number',
+      previousScore: 'number',
+      riskLevel: 'string',
+      trend: 'string',
+      escalatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1131 — clinical risk score escalated → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2851,6 +2875,7 @@ const DDD_CONTRACTS = {
   'decision-alert': DECISION_ALERT_EVENTS,
   'gas-scale': GAS_SCALE_EVENTS,
   'quality-audit-record': QUALITY_AUDIT_RECORD_EVENTS,
+  'clinical-risk-score': CLINICAL_RISK_SCORE_EVENTS,
 };
 
 /**
@@ -2972,6 +2997,7 @@ module.exports = {
   DECISION_ALERT_EVENTS,
   GAS_SCALE_EVENTS,
   QUALITY_AUDIT_RECORD_EVENTS,
+  CLINICAL_RISK_SCORE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

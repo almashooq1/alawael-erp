@@ -99,6 +99,8 @@ __tests__/branch-isolation-measures-workflow-wave269e.test.js
 __tests__/branch-isolation-security-wave269.test.js
 __tests__/branch-isolation-treatment-plans-wave1119.test.js
 __tests__/branch-isolation-tasks-wave1125.test.js
+__tests__/hr-modules-branch-isolation-wave1133.test.js
+__tests__/hr-branch-scope-plugin-behavioral-wave1133.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js
@@ -836,3 +838,4 @@ __tests__/generated-report-completed-core-linkage-wave1119.test.js
 __tests__/decision-alert-raised-core-linkage-wave1120.test.js
 __tests__/gas-scale-activated-core-linkage-wave1121.test.js
 __tests__/quality-audit-record-completed-core-linkage-wave1122.test.js
+__tests__/clinical-risk-score-escalated-core-linkage-wave1131.test.js

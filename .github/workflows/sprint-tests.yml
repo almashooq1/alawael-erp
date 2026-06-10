@@ -1442,6 +1442,13 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-isolation-treatment-plans-wave1119.test.js'
       - 'backend/__tests__/quality-audit-record-completed-core-linkage-wave1122.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-isolation-tasks-wave1125.test.js'
+      - 'backend/__tests__/hr-modules-branch-isolation-wave1133.test.js'
+      - 'backend/__tests__/hr-branch-scope-plugin-behavioral-wave1133.test.js'
+      - 'backend/__tests__/mass-assignment-array-push-tier2-wave1130.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-risk-score-escalated-core-linkage-wave1131.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2867,6 +2874,13 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-isolation-treatment-plans-wave1119.test.js'
       - 'backend/__tests__/quality-audit-record-completed-core-linkage-wave1122.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-isolation-tasks-wave1125.test.js'
+      - 'backend/__tests__/hr-modules-branch-isolation-wave1133.test.js'
+      - 'backend/__tests__/hr-branch-scope-plugin-behavioral-wave1133.test.js'
+      - 'backend/__tests__/mass-assignment-array-push-tier2-wave1130.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-risk-score-escalated-core-linkage-wave1131.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -1986,6 +1986,28 @@ const RISK_SNAPSHOT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PROGRESS_REPORT_EVENTS = {
+  PROGRESS_REPORT_RECORDED: {
+    domain: 'progress-report',
+    eventType: 'progress_report.recorded',
+    version: 1,
+    description:
+      'تسجيل تقرير التقدّم الشهري للمستفيد — A monthly beneficiary progress report was recorded',
+    payload: {
+      reportId: 'string',
+      beneficiaryId: 'string',
+      month: 'string',
+      academicScore: 'number',
+      attendanceRate: 'number',
+      overallPerformance: 'string',
+      recordedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2061,6 +2083,7 @@ const DDD_CONTRACTS = {
   'daily-comm-log': DAILY_COMM_LOG_EVENTS,
   'consent-record': CONSENT_RECORD_EVENTS,
   'risk-snapshot': RISK_SNAPSHOT_EVENTS,
+  'progress-report': PROGRESS_REPORT_EVENTS,
 };
 
 /**
@@ -2152,6 +2175,7 @@ module.exports = {
   DAILY_COMM_LOG_EVENTS,
   CONSENT_RECORD_EVENTS,
   RISK_SNAPSHOT_EVENTS,
+  PROGRESS_REPORT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

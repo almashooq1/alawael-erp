@@ -797,3 +797,4 @@ __tests__/nps-response-recorded-core-linkage-wave1085.test.js
 __tests__/daily-comm-log-published-core-linkage-wave1086.test.js
 __tests__/consent-granted-core-linkage-wave1087.test.js
 __tests__/risk-snapshot-escalated-core-linkage-wave1088.test.js
+__tests__/progress-report-recorded-core-linkage-wave1089.test.js

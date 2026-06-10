@@ -2854,6 +2854,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1089 — monthly beneficiary progress report → unified core timeline
+  subscribers.push({
+    name: 'progress-report:recorded → timeline:record',
+    pattern: 'progress-report.progress_report.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const perf = event.payload.overallPerformance;
+          const sev =
+            perf === 'excellent' ? 'success' : perf === 'needs_improvement' ? 'warning' : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'progress_report_recorded',
+            category: 'clinical',
+            severity: sev,
+            title: `Monthly progress report: ${event.payload.month} (${perf || 'n/a'})`,
+            title_ar: 'تم تسجيل تقرير التقدّم الشهري للمستفيد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] BeneficiaryProgress timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

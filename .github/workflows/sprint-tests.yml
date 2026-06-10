@@ -1371,6 +1371,8 @@ on:
       - 'backend/__tests__/consent-granted-core-linkage-wave1087.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/risk-snapshot-escalated-core-linkage-wave1088.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/progress-report-recorded-core-linkage-wave1089.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2725,6 +2727,8 @@ on:
       - 'backend/__tests__/consent-granted-core-linkage-wave1087.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/risk-snapshot-escalated-core-linkage-wave1088.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/progress-report-recorded-core-linkage-wave1089.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

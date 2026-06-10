@@ -165,6 +165,7 @@ const careTimelineSchema = new mongoose.Schema(
         'daily_comm_log_published',
         'consent_record_granted',
         'risk_snapshot_escalated',
+        'progress_report_recorded',
         // Family
         'family_contact',
         'family_meeting',

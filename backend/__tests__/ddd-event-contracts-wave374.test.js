@@ -147,6 +147,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'red-flag-override', // W1107 — clinical red-flag override recorded → core timeline
   'smart-scheduler', // W1108 — beneficiary smart schedule activated → core timeline
   'story-surface', // W1109 — beneficiary story surface variant published → core timeline
+  'arvr-session', // W1110 — beneficiary AR/VR rehab session completed → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -268,6 +269,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'red_flag_override', // W1107 — red_flag_override.recorded (RedFlagOverride)
     'smart_scheduler', // W1108 — smart_scheduler.activated (SmartScheduler)
     'story_surface', // W1109 — story_surface.published (StorySurfaceVariant)
+    'arvr_session', // W1110 — arvr_session.completed (ARVRSession)
   ])
 );
 

@@ -2445,6 +2445,28 @@ const STORY_SURFACE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const ARVR_SESSION_EVENTS = {
+  ARVR_SESSION_COMPLETED: {
+    domain: 'arvr-session',
+    eventType: 'arvr_session.completed',
+    version: 1,
+    description:
+      'اكتملت جلسة تأهيل بالواقع الافتراضي/المعزّز للمستفيد — An AR/VR rehabilitation session for a beneficiary was completed',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      therapistId: 'string',
+      technologyType: 'string',
+      plannedDurationMinutes: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2541,6 +2563,7 @@ const DDD_CONTRACTS = {
   'red-flag-override': RED_FLAG_OVERRIDE_EVENTS,
   'smart-scheduler': SMART_SCHEDULER_EVENTS,
   'story-surface': STORY_SURFACE_EVENTS,
+  'arvr-session': ARVR_SESSION_EVENTS,
 };
 
 /**
@@ -2649,6 +2672,7 @@ module.exports = {
   RED_FLAG_OVERRIDE_EVENTS,
   SMART_SCHEDULER_EVENTS,
   STORY_SURFACE_EVENTS,
+  ARVR_SESSION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

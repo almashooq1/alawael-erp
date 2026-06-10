@@ -3443,6 +3443,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'arvr-session:completed → timeline:record',
+    pattern: 'arvr-session.arvr_session.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const modality = event.payload.technologyType;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'arvr_session_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `AR/VR rehabilitation session completed${modality ? ` (${modality})` : ''}`,
+            title_ar: 'اكتملت جلسة تأهيل بالواقع الافتراضي/المعزّز للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] ARVRSession timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

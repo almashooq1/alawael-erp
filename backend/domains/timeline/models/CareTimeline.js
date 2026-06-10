@@ -186,6 +186,7 @@ const careTimelineSchema = new mongoose.Schema(
         'red_flag_override_recorded',
         'smart_scheduler_activated',
         'story_surface_published',
+        'arvr_session_completed',
         // Family
         'family_contact',
         'family_meeting',

@@ -819,3 +819,4 @@ __tests__/insurance-policy-activated-core-linkage-wave1106.test.js
 __tests__/red-flag-override-recorded-core-linkage-wave1107.test.js
 __tests__/smart-scheduler-activated-core-linkage-wave1108.test.js
 __tests__/story-surface-published-core-linkage-wave1109.test.js
+__tests__/arvr-session-completed-core-linkage-wave1110.test.js

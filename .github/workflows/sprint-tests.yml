@@ -1480,6 +1480,8 @@ on:
       - 'backend/__tests__/measurement-result-baseline-linkage-wave1145.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hr-route-branch-isolation-guard-wave1142.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/legacy-routes-branch-isolation-wave1148.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2943,6 +2945,8 @@ on:
       - 'backend/__tests__/measurement-result-baseline-linkage-wave1145.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/hr-route-branch-isolation-guard-wave1142.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/legacy-routes-branch-isolation-wave1148.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

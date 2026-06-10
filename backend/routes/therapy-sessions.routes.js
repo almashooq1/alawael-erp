@@ -22,6 +22,13 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+// W1148 (W269-class): ownership check for :beneficiaryId params + body refs.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 
 // ── Service (lazy, so missing model doesn't crash app boot) ─────────────────
 let _service;

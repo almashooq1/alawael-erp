@@ -857,3 +857,4 @@ __tests__/golden-thread-integrity-behavioral.test.js
 __tests__/golden-thread-integrity-script.test.js
 __tests__/domains-routes-branch-isolation-wave1140.test.js
 __tests__/core-routes-branch-isolation-wave1146.test.js
+__tests__/legacy-routes-branch-isolation-wave1148.test.js

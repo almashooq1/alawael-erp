@@ -8,6 +8,13 @@ const express = require('express');
 const router = express.Router();
 const IndependentLivingController = require('../controllers/independentLiving.controller');
 const { protect, authorize } = require('../middleware/auth');
+// W1148 (W269-class): branch isolation for :beneficiaryId-keyed PHI reads.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 
 // ═══════════════════════════════════════════════════════
 //  لوحة المعلومات والتقارير

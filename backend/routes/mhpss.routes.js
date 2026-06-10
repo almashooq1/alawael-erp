@@ -61,6 +61,13 @@ const controller = require('../controllers/mhpss.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W1148 (W269-class): ownership check for :beneficiaryId params + body refs.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 // All routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);

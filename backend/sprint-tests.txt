@@ -818,3 +818,5 @@ __tests__/forms-approval-chain-wave1186.test.js
 __tests__/forms-approval-chain-behavioral-wave1186.test.js
 __tests__/dashboard-saved-views-auth-wave1190.test.js
 __tests__/dashboard-saved-views-auth-behavioral-wave1190.test.js
+__tests__/dashboard-rehab-safemount-auth-wave1191.test.js
+__tests__/dashboard-rehab-safemount-auth-behavioral-wave1191.test.js

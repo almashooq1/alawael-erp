@@ -11,6 +11,13 @@
 
 const express = require('express');
 const suggestionService = require('../services/goalSuggestionService');
+// W1191 — self-authenticate. The header says "behind authenticate; authorisation
+// is the mount-site's job", but phases.registry mounts this via `safeMount`
+// (bare app.use, NO injected auth), so the `/api/(v1/)?rehab-goal-suggestions`
+// alias was reachable anonymously. The app.js mount already injects authenticate;
+// this router-level gate protects EVERY mount (the app.js one re-validates the
+// JWT idempotently). See dashboard-saved-views W1190 for the same class.
+const { authenticate } = require('../middleware/auth');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -28,6 +35,7 @@ function parseCsv(value) {
 function createRehabGoalSuggestionsRouter() {
   const router = express.Router();
   router.use(express.json());
+  router.use(authenticate); // W1191 — gate EVERY mount (incl. the auth-less safeMount alias)
 
   // GET /goals?discipline_ids=a,b&age_months=24&exclude=CODE1,CODE2&limit=10
   router.get(

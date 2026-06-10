@@ -2914,6 +2914,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1091 — known beneficiary joined a service waiting list → unified core timeline
+  subscribers.push({
+    name: 'waiting-list:joined → timeline:record',
+    pattern: 'waiting-list.waiting_list.joined',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'waiting_list_joined',
+            category: 'administrative',
+            severity: event.payload.priority === 1 ? 'warning' : 'info',
+            title: `Joined waiting list: ${event.payload.serviceType || 'service'} (priority ${
+              event.payload.priority ?? 'n/a'
+            })`,
+            title_ar: 'تم إدراج المستفيد في قائمة انتظار خدمة جديدة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] WaitingList timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

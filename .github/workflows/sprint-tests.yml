@@ -1375,6 +1375,8 @@ on:
       - 'backend/__tests__/progress-report-recorded-core-linkage-wave1089.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/day-attendance-present-core-linkage-wave1090.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waiting-list-joined-core-linkage-wave1091.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2733,6 +2735,8 @@ on:
       - 'backend/__tests__/progress-report-recorded-core-linkage-wave1089.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/day-attendance-present-core-linkage-wave1090.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/waiting-list-joined-core-linkage-wave1091.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

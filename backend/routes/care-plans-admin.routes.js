@@ -311,10 +311,16 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
 
     const path = `${plan}.domains.${domain}.goals`;
     const scope = branchFilter(req);
+    // W1091 — sanitize the pushed goal the same way the PATCH route does
+    // (line below). Pushing raw req.body let a client mass-assign meta/auth
+    // fields (_id, createdBy/At, role, isAdmin) or pollute the prototype on
+    // goal CREATE — the W506/W507 doctrine the PATCH path already follows but
+    // this POST silently skipped. Legitimate goal fields (title, linkedMeasures,
+    // targetValue, …) still flow through; only meta/pollution keys are dropped.
     const doc = await CarePlan.findOneAndUpdate(
       Object.keys(scope).length ? { _id: req.params.id, ...scope } : { _id: req.params.id },
       {
-        $push: { [path]: req.body },
+        $push: { [path]: stripUpdateMeta(req.body) },
         [`${plan}.enabled`]: true,
       },
       { returnDocument: 'after', runValidators: true }

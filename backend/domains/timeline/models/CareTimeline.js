@@ -167,6 +167,7 @@ const careTimelineSchema = new mongoose.Schema(
         'risk_snapshot_escalated',
         'progress_report_recorded',
         'day_attendance_present',
+        'waiting_list_joined',
         // Family
         'family_contact',
         'family_meeting',

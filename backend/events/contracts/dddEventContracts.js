@@ -2030,6 +2030,27 @@ const DAY_ATTENDANCE_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const WAITING_LIST_EVENTS = {
+  WAITING_LIST_JOINED: {
+    domain: 'waiting-list',
+    eventType: 'waiting_list.joined',
+    version: 1,
+    description:
+      'إدراج المستفيد في قائمة انتظار خدمة جديدة — A known beneficiary joined the waiting list for a new service line',
+    payload: {
+      entryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      serviceType: 'string',
+      priority: 'number',
+      requestedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2107,6 +2128,7 @@ const DDD_CONTRACTS = {
   'risk-snapshot': RISK_SNAPSHOT_EVENTS,
   'progress-report': PROGRESS_REPORT_EVENTS,
   'day-attendance': DAY_ATTENDANCE_EVENTS,
+  'waiting-list': WAITING_LIST_EVENTS,
 };
 
 /**
@@ -2200,6 +2222,7 @@ module.exports = {
   RISK_SNAPSHOT_EVENTS,
   PROGRESS_REPORT_EVENTS,
   DAY_ATTENDANCE_EVENTS,
+  WAITING_LIST_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

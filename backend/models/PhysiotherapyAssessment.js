@@ -252,6 +252,28 @@ PhysiotherapyAssessmentSchema.virtual('jointsMeasured').get(function () {
 PhysiotherapyAssessmentSchema.set('toJSON', { virtuals: true });
 PhysiotherapyAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
+// On the draft→finalized flip → physiotherapy_assessment timeline row.
+PhysiotherapyAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+PhysiotherapyAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'physiotherapy.assessment_finalized', {
+        physiotherapyAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        assessmentType: doc.assessmentType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.PhysiotherapyAssessment ||
   mongoose.model('PhysiotherapyAssessment', PhysiotherapyAssessmentSchema);

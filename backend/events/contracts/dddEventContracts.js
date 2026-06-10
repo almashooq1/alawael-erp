@@ -2094,6 +2094,27 @@ const MEAL_EVENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CDSS_ALERT_EVENTS = {
+  CDSS_ALERT_RAISED: {
+    domain: 'cdss-alert',
+    eventType: 'cdss_alert.raised',
+    version: 1,
+    description:
+      'إطلاق تنبيه دعم قرار سريري حرج/طارئ للمستفيد — A critical/emergency CDSS alert was raised for a beneficiary',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      alertType: 'string',
+      severity: 'string',
+      message: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.CRITICAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2174,6 +2195,7 @@ const DDD_CONTRACTS = {
   'waiting-list': WAITING_LIST_EVENTS,
   'pickup-authorization': PICKUP_AUTHORIZATION_EVENTS,
   'meal-event': MEAL_EVENT_EVENTS,
+  'cdss-alert': CDSS_ALERT_EVENTS,
 };
 
 /**
@@ -2270,6 +2292,7 @@ module.exports = {
   WAITING_LIST_EVENTS,
   PICKUP_AUTHORIZATION_EVENTS,
   MEAL_EVENT_EVENTS,
+  CDSS_ALERT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

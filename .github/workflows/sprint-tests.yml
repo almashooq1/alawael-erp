@@ -1382,6 +1382,8 @@ on:
       - 'backend/__tests__/pickup-authorization-requested-core-linkage-wave1092.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/meal-allergy-incident-core-linkage-wave1093.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-alert-raised-core-linkage-wave1094.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2747,6 +2749,8 @@ on:
       - 'backend/__tests__/pickup-authorization-requested-core-linkage-wave1092.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/meal-allergy-incident-core-linkage-wave1093.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-alert-raised-core-linkage-wave1094.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

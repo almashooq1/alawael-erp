@@ -2996,6 +2996,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1094 — critical CDSS alert → unified core timeline
+  subscribers.push({
+    name: 'cdss-alert:raised → timeline:record',
+    pattern: 'cdss-alert.cdss_alert.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev = event.payload.severity;
+          const severity =
+            sev === 'emergency' ? 'critical' : sev === 'critical' ? 'error' : 'warning';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'cdss_alert_raised',
+            category: 'clinical',
+            severity,
+            title: `CDSS alert: ${event.payload.alertType || 'clinical'} (${sev || 'n/a'})`,
+            title_ar: 'تم إطلاق تنبيه دعم قرار سريري حرج للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CdssAlert timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

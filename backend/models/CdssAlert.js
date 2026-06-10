@@ -65,4 +65,28 @@ cdssAlertSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
 });
 
+// W1094 — unified-core linkage: surface only critical/emergency alerts on
+// the per-beneficiary clinical timeline (info/warning stay in CDSS only).
+cdssAlertSchema.pre('save', function flagCdssAlertRaised() {
+  this.$__cdssAlertRaised =
+    this.isNew && (this.severity === 'critical' || this.severity === 'emergency');
+});
+
+cdssAlertSchema.post('save', function emitCdssAlertRaised(doc) {
+  if (!doc.$__cdssAlertRaised) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('cdss-alert', 'cdss_alert.raised', {
+      alertId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      alertType: doc.alertType,
+      severity: doc.severity,
+      message: doc.message,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports = mongoose.models.CdssAlert || mongoose.model('CdssAlert', cdssAlertSchema);

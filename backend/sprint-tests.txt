@@ -803,3 +803,4 @@ __tests__/day-attendance-present-core-linkage-wave1090.test.js
 __tests__/waiting-list-joined-core-linkage-wave1091.test.js
 __tests__/pickup-authorization-requested-core-linkage-wave1092.test.js
 __tests__/meal-allergy-incident-core-linkage-wave1093.test.js
+__tests__/cdss-alert-raised-core-linkage-wave1094.test.js

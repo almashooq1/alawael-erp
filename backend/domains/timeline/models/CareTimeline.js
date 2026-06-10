@@ -170,6 +170,7 @@ const careTimelineSchema = new mongoose.Schema(
         'waiting_list_joined',
         'pickup_authorization_requested',
         'meal_allergy_incident',
+        'cdss_alert_raised',
         // Family
         'family_contact',
         'family_meeting',

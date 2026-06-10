@@ -2239,6 +2239,29 @@ const STORY_BOOK_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const GAS_SCORING_EVENTS = {
+  GAS_SCORING_RECORDED: {
+    domain: 'gas-scoring',
+    eventType: 'gas_scoring.recorded',
+    version: 1,
+    description:
+      'تسجيل مستوى تحقيق هدف على مقياس GAS للمستفيد — A beneficiary goal-attainment level was scored on a GAS scale',
+    payload: {
+      scoringId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      goalId: 'string',
+      achievedLevel: 'number',
+      purpose: 'string',
+      metExpected: 'boolean',
+      scoredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2326,6 +2349,7 @@ const DDD_CONTRACTS = {
   'bip-effectiveness': BIP_EFFECTIVENESS_EVENTS,
   'seat-allocation': SEAT_ALLOCATION_EVENTS,
   'story-book': STORY_BOOK_EVENTS,
+  'gas-scoring': GAS_SCORING_EVENTS,
 };
 
 /**
@@ -2429,6 +2453,7 @@ module.exports = {
   BIP_EFFECTIVENESS_EVENTS,
   SEAT_ALLOCATION_EVENTS,
   STORY_BOOK_EVENTS,
+  GAS_SCORING_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

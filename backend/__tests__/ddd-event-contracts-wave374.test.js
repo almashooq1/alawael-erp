@@ -138,6 +138,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'seat-allocation', // W1098 — day-center seat allocation → core timeline
   'student-activity', // W1099 — gamified student activity completion → core timeline
   'story-book', // W1100 — quarterly story book published → core timeline — BIP fidelity check recorded → core timeline
+  'gas-scoring', // W1101 — GAS goal-attainment level scored → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -250,6 +251,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'seat_allocation', // W1098 — seat_allocation.assigned (SeatAllocation)
     'student_activity', // W1099 — student_activity.completed (StudentActivity)
     'story_book', // W1100 — story_book.published (StoryBook) — bip_fidelity.checked (BipFidelityCheck)
+    'gas_scoring', // W1101 — gas_scoring.recorded (GasScoring)
   ])
 );
 

@@ -1396,6 +1396,8 @@ on:
       - 'backend/__tests__/student-activity-completed-core-linkage-wave1099.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/story-book-published-core-linkage-wave1100.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/gas-scoring-recorded-core-linkage-wave1101.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2775,6 +2777,8 @@ on:
       - 'backend/__tests__/student-activity-completed-core-linkage-wave1099.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/story-book-published-core-linkage-wave1100.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/gas-scoring-recorded-core-linkage-wave1101.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

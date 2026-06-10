@@ -3196,6 +3196,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'gas-scoring:recorded → timeline:record',
+    pattern: 'gas-scoring.gas_scoring.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const level = Number(event.payload.achievedLevel);
+          const sign = level > 0 ? `+${level}` : `${level}`;
+          const severity = event.payload.metExpected ? 'success' : level < 0 ? 'warning' : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'gas_scoring_recorded',
+            category: 'clinical',
+            severity,
+            title: `GAS goal scored: ${sign}${event.payload.purpose ? ` (${event.payload.purpose})` : ''}`,
+            title_ar: 'تم تسجيل مستوى تحقيق هدف على مقياس GAS للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] GasScoring timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

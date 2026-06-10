@@ -2467,6 +2467,28 @@ const ARVR_SESSION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PROGRAM_ENROLLMENT_EVENTS = {
+  PROGRAM_ENROLLMENT_ACTIVATED: {
+    domain: 'program-enrollment',
+    eventType: 'program_enrollment.activated',
+    version: 1,
+    description:
+      'أصبح التحاق المستفيد ببرنامج تأهيلي نشطاً — A beneficiary program enrollment became active',
+    payload: {
+      enrollmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      programId: 'string',
+      groupId: 'string',
+      leadTherapistId: 'string',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2564,6 +2586,7 @@ const DDD_CONTRACTS = {
   'smart-scheduler': SMART_SCHEDULER_EVENTS,
   'story-surface': STORY_SURFACE_EVENTS,
   'arvr-session': ARVR_SESSION_EVENTS,
+  'program-enrollment': PROGRAM_ENROLLMENT_EVENTS,
 };
 
 /**
@@ -2673,6 +2696,7 @@ module.exports = {
   SMART_SCHEDULER_EVENTS,
   STORY_SURFACE_EVENTS,
   ARVR_SESSION_EVENTS,
+  PROGRAM_ENROLLMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

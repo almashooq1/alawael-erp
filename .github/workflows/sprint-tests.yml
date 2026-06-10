@@ -1416,6 +1416,8 @@ on:
       - 'backend/__tests__/story-surface-published-core-linkage-wave1109.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arvr-session-completed-core-linkage-wave1110.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/program-enrollment-activated-core-linkage-wave1111.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2815,6 +2817,8 @@ on:
       - 'backend/__tests__/story-surface-published-core-linkage-wave1109.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arvr-session-completed-core-linkage-wave1110.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/program-enrollment-activated-core-linkage-wave1111.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

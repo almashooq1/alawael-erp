@@ -187,6 +187,7 @@ const careTimelineSchema = new mongoose.Schema(
         'smart_scheduler_activated',
         'story_surface_published',
         'arvr_session_completed',
+        'program_enrollment_activated',
         // Family
         'family_contact',
         'family_meeting',

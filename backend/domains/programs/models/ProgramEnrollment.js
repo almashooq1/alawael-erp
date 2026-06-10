@@ -340,6 +340,30 @@ enrollmentSchema.statics.getOverdueEnrollments = function (branchId) {
     .sort({ expectedEndDate: 1 });
 };
 
+// ── W1111 — publish program_enrollment.activated when an enrollment goes active ─
+enrollmentSchema.pre('save', function flagProgramEnrollmentActivated() {
+  const becameActive = (this.isNew || this.isModified('status')) && this.status === 'active';
+  this.$__programEnrollmentActivated = becameActive;
+});
+
+enrollmentSchema.post('save', function emitProgramEnrollmentActivated(doc) {
+  if (!doc.$__programEnrollmentActivated) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('program-enrollment', 'program_enrollment.activated', {
+      enrollmentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.programId ? { programId: String(doc.programId) } : {}),
+      ...(doc.groupId ? { groupId: String(doc.groupId) } : {}),
+      ...(doc.leadTherapistId ? { leadTherapistId: String(doc.leadTherapistId) } : {}),
+      activatedAt: doc.actualStartDate || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const ProgramEnrollment =
   mongoose.models.ProgramEnrollment || mongoose.model('ProgramEnrollment', enrollmentSchema);
 

@@ -69,10 +69,13 @@ router.get('/dashboard', async (req, res) => {
             .lean()
         : [],
       Appointment
-        ? Appointment.find({
-            beneficiaryId: { $in: childrenIds },
+        ? // W1197 — canonical field is `beneficiary` (phantom beneficiaryId
+          // matched nothing → dashboard always showed zero appointments) and
+          // the status enum is UPPERCASE.
+          Appointment.find({
+            beneficiary: { $in: childrenIds },
             date: { $gte: new Date() },
-            status: { $nin: ['cancelled'] },
+            status: { $nin: ['CANCELLED'] },
           })
             .sort({ date: 1 })
             .limit(5)

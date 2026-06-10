@@ -135,6 +135,7 @@ const careTimelineSchema = new mongoose.Schema(
         'iq_assessment_completed',
         'creative_arts_therapy_completed',
         'insurance_eligibility_checked',
+        'morning_health_check_flagged',
         // Family
         'family_contact',
         'family_meeting',

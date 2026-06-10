@@ -1913,6 +1913,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1059: flagged morning health check → core timeline ────────────
+  // A morning health check with decision observe/send_home is a safety
+  // event; log it on the beneficiary's timeline (send_home = error).
+  subscribers.push({
+    name: 'morning-health-check:flagged → timeline:record',
+    pattern: 'morning-health-check.morning_health_check.flagged',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sentHome = event.payload.decision === 'send_home';
+          const temp =
+            typeof event.payload.temperatureC === 'number'
+              ? ` (${event.payload.temperatureC}°C)`
+              : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'morning_health_check_flagged',
+            category: 'clinical',
+            severity: sentHome ? 'error' : 'warning',
+            title: `Morning health check flagged: ${event.payload.decision}${temp}`,
+            title_ar: sentHome ? 'فحص صحي صباحي: إرجاع للمنزل' : 'فحص صحي صباحي: تحت المراقبة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] MorningHealthCheck timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

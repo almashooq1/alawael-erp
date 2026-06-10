@@ -1354,6 +1354,26 @@ const INSURANCE_ELIGIBILITY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const MORNING_HEALTH_CHECK_EVENTS = {
+  MORNING_HEALTH_CHECK_FLAGGED: {
+    domain: 'morning-health-check',
+    eventType: 'morning_health_check.flagged',
+    version: 1,
+    description: 'فحص صحي صباحي مُعلَّم (مراقبة/إرجاع للمنزل) — Morning health check flagged',
+    payload: {
+      checkId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      decision: 'string',
+      temperatureC: 'number',
+      flaggedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1399,6 +1419,7 @@ const DDD_CONTRACTS = {
   'iq-assessment': IQ_ASSESSMENT_EVENTS,
   'creative-arts-therapy': CREATIVE_ARTS_THERAPY_EVENTS,
   'insurance-eligibility': INSURANCE_ELIGIBILITY_EVENTS,
+  'morning-health-check': MORNING_HEALTH_CHECK_EVENTS,
 };
 
 /**
@@ -1460,6 +1481,7 @@ module.exports = {
   IQ_ASSESSMENT_EVENTS,
   CREATIVE_ARTS_THERAPY_EVENTS,
   INSURANCE_ELIGIBILITY_EVENTS,
+  MORNING_HEALTH_CHECK_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

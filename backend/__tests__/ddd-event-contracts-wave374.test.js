@@ -96,6 +96,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'iq-assessment', // W1056 — IQ assessment completed → core timeline
   'creative-arts-therapy', // W1057 — creative arts therapy session completed → core timeline
   'insurance-eligibility', // W1058 — insurance eligibility check recorded → core timeline
+  'morning-health-check', // W1059 — morning health check flagged → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -166,6 +167,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'iq_assessment', // W1056 — iq_assessment.completed (IQAssessment)
     'creative_arts_therapy', // W1057 — creative_arts_therapy.completed (CreativeArtsTherapySession)
     'insurance_eligibility', // W1058 — insurance_eligibility.checked (InsuranceEligibilityCheck)
+    'morning_health_check', // W1059 — morning_health_check.flagged (MorningHealthCheck)
   ])
 );
 

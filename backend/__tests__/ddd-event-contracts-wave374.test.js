@@ -115,6 +115,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'sponsorship', // W1075 — sponsorship activated → core timeline
   'toileting-event', // W1076 — potty request (toilet-training milestone) → core timeline
   'home-carryover', // W1077 — home-practice completed (family engagement) → core timeline
+  'medication-order', // W1078 — medication order activated → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -204,6 +205,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'sponsorship', // W1075 — sponsorship.activated (Sponsorship)
     'toileting_event', // W1076 — toileting_event.potty_requested (ToiletingEvent)
     'home_carryover', // W1077 — home_carryover.completed (HomeCarryoverEntry)
+    'medication_order', // W1078 — medication_order.activated (MedicationOrder)
   ])
 );
 

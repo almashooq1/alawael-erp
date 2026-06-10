@@ -1750,6 +1750,26 @@ const HOME_CARRYOVER_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const MEDICATION_ORDER_EVENTS = {
+  MEDICATION_ORDER_STARTED: {
+    domain: 'medication-order',
+    eventType: 'medication_order.activated',
+    version: 1,
+    description:
+      'بدء وصفة دواء فعّالة جديدة للمستفيد — A new active medication order was started for the beneficiary',
+    payload: {
+      orderId: 'string',
+      beneficiaryId: 'string',
+      name: 'string',
+      rxNormId: 'string',
+      startedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1814,6 +1834,7 @@ const DDD_CONTRACTS = {
   sponsorship: SPONSORSHIP_EVENTS,
   'toileting-event': TOILETING_EVENT_EVENTS,
   'home-carryover': HOME_CARRYOVER_EVENTS,
+  'medication-order': MEDICATION_ORDER_EVENTS,
 };
 
 /**
@@ -1894,6 +1915,7 @@ module.exports = {
   SPONSORSHIP_EVENTS,
   TOILETING_EVENT_EVENTS,
   HOME_CARRYOVER_EVENTS,
+  MEDICATION_ORDER_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

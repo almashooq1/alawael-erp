@@ -2492,6 +2492,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1078: medication order activated → core timeline ──────────────
+  // A new active medication order is a clinically significant event —
+  // record it on the beneficiary timeline for the care team's review.
+  subscribers.push({
+    name: 'medication-order:activated → timeline:record',
+    pattern: 'medication-order.medication_order.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'medication_order_started',
+            category: 'clinical',
+            severity: 'info',
+            title: `Medication started: ${event.payload.name || 'medication'}`,
+            title_ar: 'بدء وصفة دواء جديدة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] MedicationOrder timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

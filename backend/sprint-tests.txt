@@ -784,3 +784,4 @@ __tests__/subsidy-payment-received-core-linkage-wave1074.test.js
 __tests__/sponsorship-activated-core-linkage-wave1075.test.js
 __tests__/potty-request-milestone-core-linkage-wave1076.test.js
 __tests__/home-practice-completed-core-linkage-wave1077.test.js
+__tests__/medication-order-activated-core-linkage-wave1078.test.js

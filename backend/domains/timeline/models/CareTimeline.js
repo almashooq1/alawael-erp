@@ -154,6 +154,7 @@ const careTimelineSchema = new mongoose.Schema(
         'sponsorship_activated',
         'potty_request_milestone',
         'home_practice_completed',
+        'medication_order_started',
         // Family
         'family_contact',
         'family_meeting',

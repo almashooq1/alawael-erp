@@ -63,4 +63,11 @@ describe('W269 — tasks ID routes gate beneficiary-linked (clinical) tasks', ()
   test('the ownership gate no-ops without an auth context (test/internal ergonomics)', () => {
     expect(SRC).toMatch(/if \(!req \|\| !req\.user\) return false/);
   });
+
+  test('W1132 — list GET / is scoped (non-privileged callers see only their own tasks)', () => {
+    expect(SRC).toMatch(/function applyTaskListScope/);
+    expect(SRC).toMatch(/applyTaskListScope\(req, q\)/);
+    // scopes by assignedTo OR assignedBy for the caller
+    expect(SRC).toMatch(/q\.\$or = \[\{ assignedTo: uid \}, \{ assignedBy: uid \}\]/);
+  });
 });

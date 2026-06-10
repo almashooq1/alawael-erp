@@ -3,7 +3,7 @@
 **Type**: Security finding (read-only audit) + partial fix
 **Class**: Mass-assignment / over-posting on DB writes (W506/W507 doctrine)
 **Trigger**: W1091 found a live mass-assignment hole in `care-plans-admin` goal-create; this sweep hunts the same class.
-**Status**: 🟢 Mass-assignment Tier 1 (W1091/W1112) + Tier 2 (W1130) FIXED · 🟢 W269 cross-branch IDOR fixed across every beneficiary-scoped surface (W1119/W1125) + professional-dev therapist-ownership + task-ownership (W1131) · 🟡 Tier 3 assessed low-risk (no fix — see below) · 🟡 remaining = owner decisions only (hr-modules `branchId` schema · tasks list `GET /` scope · model consolidation ADR-040/041/042).
+**Status**: 🟢 Mass-assignment Tier 1 (W1091/W1112) + Tier 2 (W1130) FIXED · 🟢 W269 cross-branch IDOR fixed across every beneficiary-scoped surface (W1119/W1125) + professional-dev therapist-ownership + tasks fully gated (W1131 ownership + W1132 list scope) · 🟡 Tier 3 assessed low-risk (no fix — see below) · 🟡 remaining: hr-modules `branchId` (a **parallel wave1131 effort is already on it** — not duplicated here) · model-consolidation ADRs 040/041/042 (owner sign-off).
 
 ## Doctrine (what "correct" looks like here)
 
@@ -83,9 +83,13 @@ admin/super_admin/manager`); no-op without an auth context. This default role
      so a route-level branch gate would either fail-closed (break the 10) or no-op.
      Branch-scoping HR needs denormalizing `branchId` onto the models OR gating via
      each record's employee FK (field name varies per model) — a data-model effort
-     for the owner. **Other open (product decision):** the `tasks` list `GET /`
-     (returns all tasks, no scope) — a list-scoping decision; the ID-route
-     ownership gate (W1131) does not change list behaviour.
+     for the owner — and **a parallel effort (`hr-modules-branch-isolation-wave1131` + `hr-branch-scope-plugin-behavioral-wave1131`) is already addressing it**, so
+     this session deliberately did NOT duplicate it. **`tasks` list `GET /` FIXED
+     (W1132):** non-privileged callers are now scoped to their own tasks
+     (`assignedTo`/`assignedBy`, matching the dashboard); managers/admins see all;
+     no-op without an auth context. Delegated default — widen if the list should
+     show team-wide tasks to all staff. The **`tasks` surface is now fully gated**
+     (W1125 branch + W1131 ownership + W1132 list).
 2. **Duplicate `therapist-extended` route file — INVESTIGATED, not an
    auth-bypass; resolved.** Two _different_ files serve `/api/therapist-extended/*`:
    the kebab `therapist-extended.routes.js` (mounted **first** via `dualMountAuth`,

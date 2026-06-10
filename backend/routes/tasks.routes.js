@@ -83,6 +83,19 @@ function denyIfNotTaskOwnerOrManager(req, res, task) {
   return true;
 }
 
+// W1132 (W269) — list scope: a non-privileged caller sees only their own tasks
+// (assignedTo / assignedBy), matching the dashboard's assignedTo scoping;
+// managers/admins (TASK_PRIVILEGED_ROLES) see all. No-op without an auth context.
+// Closes the list-wide leak (any authed user could list every task org-wide).
+function applyTaskListScope(req, q) {
+  if (!req || !req.user) return;
+  const role = (req.user.role || '').toLowerCase();
+  if (TASK_PRIVILEGED_ROLES.includes(role)) return;
+  const uid = req.user.id || req.user._id;
+  if (!uid) return;
+  q.$or = [{ assignedTo: uid }, { assignedBy: uid }];
+}
+
 /* ══════════════════════ DASHBOARD ══════════════════════════════════════════ */
 
 router.get(
@@ -130,6 +143,7 @@ router.get(
     if (priority) q.priority = priority;
     if (assignedTo) q.assignedTo = assignedTo;
     if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
+    applyTaskListScope(req, q); // W1132 — non-privileged callers: own tasks only
     const [data, total] = await Promise.all([
       M.find(q).sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit)).lean(),
       M.countDocuments(q),

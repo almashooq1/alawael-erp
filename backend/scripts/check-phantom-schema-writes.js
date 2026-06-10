@@ -158,7 +158,6 @@ const KNOWN_PHANTOM_WRITES = new Set([
   "services/BeneficiaryService.js::beneficiarytransfer::beneficiary",
   "services/BeneficiaryService.js::beneficiarytransfer::fromBranch",
   "services/BeneficiaryService.js::beneficiarytransfer::toBranch",
-  "services/smartInsurance.service.js::insuranceeligibilitycheck::requestedService",
   "services/smartInsurance.service.js::insuranceclaim::claimUuid",
   "services/smartInsurance.service.js::insuranceclaim::policyId",
   "services/smartInsurance.service.js::insuranceclaim::insuranceCompanyId",
@@ -169,9 +168,6 @@ const KNOWN_PHANTOM_WRITES = new Set([
   "services/smartInsurance.service.js::insuranceclaim::lineItems",
   "services/smartInsurance.service.js::insuranceclaim::priorAuthId",
   "services/smartInsurance.service.js::insuranceclaim::createdBy",
-  "services/smartInsurance.service.js::priorauthorization::insuranceCompanyId",
-  "services/smartInsurance.service.js::priorauthorization::estimatedStartDate",
-  "services/smartInsurance.service.js::priorauthorization::estimatedEndDate",
 ]);
 
 const ALWAYS_ALLOWED = new Set([

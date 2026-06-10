@@ -901,3 +901,4 @@ __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 # One test path per line, blank lines + # comments ignored.
 # Sprint suite test enumeration — referenced by scripts/run-sprint.js.
 tests/unit/ops-alerter.test.js
+__tests__/form-templates-contract-wave1179.test.js

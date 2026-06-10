@@ -2198,6 +2198,26 @@ const SEAT_ALLOCATION_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const STUDENT_ACTIVITY_EVENTS = {
+  STUDENT_ACTIVITY_COMPLETED: {
+    domain: 'student-activity',
+    eventType: 'student_activity.completed',
+    version: 1,
+    description:
+      'إكمال المستفيد لنشاط علاجي محفّز في بوابة الطالب — A gamified student activity was completed by a beneficiary',
+    payload: {
+      activityId: 'string',
+      beneficiaryId: 'string',
+      kind: 'string',
+      xpReward: 'number',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2263,6 +2283,7 @@ const DDD_CONTRACTS = {
   'toileting-event': TOILETING_EVENT_EVENTS,
   'home-carryover': HOME_CARRYOVER_EVENTS,
   'medication-order': MEDICATION_ORDER_EVENTS,
+  'student-activity': STUDENT_ACTIVITY_EVENTS,
   'family-visit': FAMILY_VISIT_EVENTS,
   'bip-fidelity': BIP_FIDELITY_EVENTS,
   'goal-entry': GOAL_ENTRY_EVENTS,
@@ -2364,6 +2385,7 @@ module.exports = {
   TOILETING_EVENT_EVENTS,
   HOME_CARRYOVER_EVENTS,
   MEDICATION_ORDER_EVENTS,
+  STUDENT_ACTIVITY_EVENTS,
   FAMILY_VISIT_EVENTS,
   BIP_FIDELITY_EVENTS,
   GOAL_ENTRY_EVENTS,

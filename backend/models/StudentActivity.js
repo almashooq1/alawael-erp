@@ -70,5 +70,28 @@ const StudentActivitySchema = new mongoose.Schema(
 
 StudentActivitySchema.index({ beneficiaryId: 1, status: 1, dueAt: 1 });
 
+// W1099 — unified-core linkage: when a gamified activity is COMPLETED it
+// surfaces a clinical "therapeutic task completed" row on the
+// per-beneficiary timeline. Pending/skipped states stay off the record.
+StudentActivitySchema.pre('save', function flagStudentActivityCompleted() {
+  this.$__studentActivityCompleted = this.isModified('status') && this.status === 'completed';
+});
+
+StudentActivitySchema.post('save', function emitStudentActivityCompleted(doc) {
+  if (!doc.$__studentActivityCompleted) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('student-activity', 'student_activity.completed', {
+      activityId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      kind: doc.kind,
+      xpReward: doc.xpReward,
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.StudentActivity || mongoose.model('StudentActivity', StudentActivitySchema);

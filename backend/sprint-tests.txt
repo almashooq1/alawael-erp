@@ -808,3 +808,4 @@ __tests__/gas-score-snapshotted-core-linkage-wave1095.test.js
 __tests__/pdpl-request-received-core-linkage-wave1096.test.js
 __tests__/bip-effectiveness-recorded-core-linkage-wave1097.test.js
 __tests__/seat-allocation-assigned-core-linkage-wave1098.test.js
+__tests__/student-activity-completed-core-linkage-wave1099.test.js

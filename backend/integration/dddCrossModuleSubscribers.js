@@ -3144,6 +3144,32 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // W1099 — gamified student activity completion → unified core timeline
+  subscribers.push({
+    name: 'student-activity:completed → timeline:record',
+    pattern: 'student-activity.student_activity.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const xp = Number(event.payload.xpReward) || 0;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'student_activity_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Activity completed: ${event.payload.kind || 'PRACTICE'}${xp ? ` (+${xp} XP)` : ''}`,
+            title_ar: 'أكمل المستفيد نشاطًا علاجيًا محفّزًا في بوابة الطالب',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] StudentActivity timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

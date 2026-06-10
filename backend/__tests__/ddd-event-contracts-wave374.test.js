@@ -135,7 +135,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'gas-snapshot', // W1095 — GAS T-score snapshot → core timeline
   'pdpl-request', // W1096 — PDPL data-subject request → core timeline
   'bip-effectiveness', // W1097 — BIP effectiveness reading → core timeline
-  'seat-allocation', // W1098 — day-center seat allocation → core timeline — BIP fidelity check recorded → core timeline
+  'seat-allocation', // W1098 — day-center seat allocation → core timeline
+  'student-activity', // W1099 — gamified student activity completion → core timeline — BIP fidelity check recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -245,7 +246,8 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'gas_snapshot', // W1095 — gas_snapshot.recorded (GasScoreSnapshot)
     'pdpl_request', // W1096 — pdpl_request.received (PdplRequest)
     'bip_effectiveness', // W1097 — bip_effectiveness.recorded (BipEffectiveness)
-    'seat_allocation', // W1098 — seat_allocation.assigned (SeatAllocation) — bip_fidelity.checked (BipFidelityCheck)
+    'seat_allocation', // W1098 — seat_allocation.assigned (SeatAllocation)
+    'student_activity', // W1099 — student_activity.completed (StudentActivity) — bip_fidelity.checked (BipFidelityCheck)
   ])
 );
 

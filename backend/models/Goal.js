@@ -159,6 +159,11 @@ const goalSchema = new mongoose.Schema(
     },
 
     // ─── R1 (W1090) — Goal ↔ Measure linkage (golden thread gap #1) ─────
+    // @deprecated (ADR-040, W1133): tactical stopgap. The canonical
+    // goal↔measure↔outcome linkage lives on `TherapeuticGoal` (the hub of the
+    // outcomes/GAS/forecast services). New care-plan goals should reference a
+    // canonical TherapeuticGoal via `therapeuticGoalId` (below) rather than
+    // re-implement linkage here. Frozen pending the ADR-040 migration.
     // Links a goal to the standardized measure(s) that prove its progress,
     // closing the "goal has no measure" gap so every SMART goal is backed
     // by a quantifiable instrument. This is the data foundation for honest
@@ -208,6 +213,21 @@ const goalSchema = new mongoose.Schema(
         ),
       ],
       default: () => [],
+    },
+
+    // ─── ADR-040 (W1133) — bridge to the canonical goal model ──────────
+    // Optional reference to the canonical `TherapeuticGoal` (the model that
+    // anchors the goal↔measure↔outcome golden thread across ~20 services). The
+    // additive Option-C bridge: a CarePlan-embedded Goal keeps its IEP structure
+    // but points at the canonical goal so outcome/GAS/forecast logic resolves
+    // through ONE model. Optional + defaulted (legacy goals stay valid); the
+    // destructive consolidation (migrate callers + retire SmartGoal) stays gated
+    // on owner sign-off per ADR-040.
+    therapeuticGoalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TherapeuticGoal',
+      default: null,
+      index: true,
     },
 
     // Metadata

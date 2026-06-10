@@ -1,5 +1,13 @@
 # ADR-040 — Consolidate the three goal models on `TherapeuticGoal` as canonical for the golden thread (🟡 Proposed)
 
+> **Progress — additive phase SHIPPED under owner delegation (W1133, 2026-06-10):**
+> the non-destructive Option-C scaffolding is in: `Goal` gained an optional
+> `therapeuticGoalId` bridge → `TherapeuticGoal`; `Goal.linkedMeasures` (W1090) and
+> `SmartGoal` carry `@deprecated` markers (stop new code piling on). Guard
+> `goal-therapeutic-bridge-wave1133`. The **destructive phase** (populate the
+> bridge in the care-plan builder · re-point callers · migrate + retire `SmartGoal`
+> rows) **remains gated on Q1–Q4** — no data was touched.
+
 **Date**: 2026-06-10
 **Type**: ADR (model consolidation / canonical-entity — de-fragments the "goal" concept that the assessment→goal→measure→outcome golden thread depends on)
 **Mode**: 🤝 Claude can execute the deprecation shim + the `Goal`(IEP)→`TherapeuticGoal` reference wiring once dispositions are signed off; 👤 stakeholder owns the keep-vs-migrate call for any live `SmartGoal` / embedded-IEP-goal data

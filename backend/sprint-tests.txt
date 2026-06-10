@@ -791,3 +791,4 @@ __tests__/family-visit-approved-core-linkage-wave1079.test.js
 __tests__/bip-fidelity-checked-core-linkage-wave1080.test.js
 __tests__/goal-progress-recorded-core-linkage-wave1081.test.js
 __tests__/cdss-risk-assessed-core-linkage-wave1082.test.js
+__tests__/red-flag-raised-core-linkage-wave1083.test.js

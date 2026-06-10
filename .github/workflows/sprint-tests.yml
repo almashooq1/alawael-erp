@@ -1359,6 +1359,8 @@ on:
       - 'backend/__tests__/goal-progress-recorded-core-linkage-wave1081.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-risk-assessed-core-linkage-wave1082.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/red-flag-raised-core-linkage-wave1083.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2701,6 +2703,8 @@ on:
       - 'backend/__tests__/goal-progress-recorded-core-linkage-wave1081.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-risk-assessed-core-linkage-wave1082.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/red-flag-raised-core-linkage-wave1083.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

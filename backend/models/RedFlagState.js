@@ -80,5 +80,30 @@ RedFlagStateSchema.index({ beneficiaryId: 1, flagId: 1, status: 1 }, { unique: t
 // Common query: "all active flags for this beneficiary"
 RedFlagStateSchema.index({ beneficiaryId: 1, status: 1 });
 
+// ── W1083: unified-core producer ───────────────────────────────────
+// Emit red_flag.raised when a NEW active flag record is inserted (cooldown
+// rows and edits don't fire) so the safety signal lands on the
+// beneficiary's core timeline. Non-callback hook style (W483).
+RedFlagStateSchema.pre('save', function flagRedFlagRaised() {
+  this.$__redFlagRaised = this.isNew && this.status === 'active';
+});
+
+RedFlagStateSchema.post('save', function emitRedFlagRaised(doc) {
+  if (!doc.$__redFlagRaised) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('red-flag', 'red_flag.raised', {
+      beneficiaryId: String(doc.beneficiaryId),
+      flagId: doc.flagId || null,
+      severity: doc.severity || null,
+      domain: doc.domain || null,
+      blocking: doc.blocking === true,
+      raisedAt: doc.raisedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 // Avoid "OverwriteModelError" in watch mode / repeat requires.
 module.exports = mongoose.models.RedFlagState || mongoose.model('RedFlagState', RedFlagStateSchema);

@@ -2657,6 +2657,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1083: clinical red flag raised → core timeline ────────────────
+  // A raised red flag (the highest-priority clinical safety signal) must
+  // be visible on the beneficiary's longitudinal record. Severity passes
+  // through from the flag (critical / warning / info).
+  subscribers.push({
+    name: 'red-flag:raised → timeline:record',
+    pattern: 'red-flag.red_flag.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev = ['critical', 'warning', 'info'].includes(event.payload.severity)
+            ? event.payload.severity
+            : 'warning';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'red_flag_raised',
+            category: 'clinical',
+            severity: sev,
+            title: `Red flag raised: ${event.payload.flagId || 'clinical signal'}${
+              event.payload.blocking ? ' (blocking)' : ''
+            }`,
+            title_ar: 'تم رفع علامة خطر سريرية على المستفيد',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] RedFlag timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -119,7 +119,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'family-visit', // W1079 — family visit approved (family engagement) → core timeline
   'bip-fidelity', // W1080
   'goal-entry', // W1081
-  'cdss-risk', // W1082 — CDSS risk assessment recorded → core timeline — BIP fidelity check recorded → core timeline
+  'cdss-risk', // W1082
+  'red-flag', // W1083 — clinical red flag raised → core timeline — BIP fidelity check recorded → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -213,7 +214,8 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'family_visit', // W1079 — family_visit.approved (FamilyVisitRequest)
     'bip_fidelity', // W1080
     'goal_entry', // W1081
-    'cdss_risk', // W1082 — cdss_risk.assessed (CdssRiskAssessment) — bip_fidelity.checked (BipFidelityCheck)
+    'cdss_risk', // W1082
+    'red_flag', // W1083 — red_flag.raised (RedFlagState) — bip_fidelity.checked (BipFidelityCheck)
   ])
 );
 

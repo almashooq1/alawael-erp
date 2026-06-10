@@ -159,6 +159,7 @@ const careTimelineSchema = new mongoose.Schema(
         'bip_fidelity_checked',
         'goal_progress_recorded',
         'cdss_risk_assessed',
+        'red_flag_raised',
         // Family
         'family_contact',
         'family_meeting',

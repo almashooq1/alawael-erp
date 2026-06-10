@@ -1856,6 +1856,27 @@ const CDSS_RISK_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const RED_FLAG_EVENTS = {
+  RED_FLAG_RAISED: {
+    domain: 'red-flag',
+    eventType: 'red_flag.raised',
+    version: 1,
+    description:
+      'رفع علامة خطر سريرية على المستفيد — A clinical red flag was raised for the beneficiary',
+    payload: {
+      beneficiaryId: 'string',
+      flagId: 'string',
+      severity: 'string',
+      domain: 'string',
+      blocking: 'boolean',
+      raisedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1925,6 +1946,7 @@ const DDD_CONTRACTS = {
   'bip-fidelity': BIP_FIDELITY_EVENTS,
   'goal-entry': GOAL_ENTRY_EVENTS,
   'cdss-risk': CDSS_RISK_EVENTS,
+  'red-flag': RED_FLAG_EVENTS,
 };
 
 /**
@@ -2010,6 +2032,7 @@ module.exports = {
   BIP_FIDELITY_EVENTS,
   GOAL_ENTRY_EVENTS,
   CDSS_RISK_EVENTS,
+  RED_FLAG_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

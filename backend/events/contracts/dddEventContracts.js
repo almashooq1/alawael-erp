@@ -1877,6 +1877,28 @@ const RED_FLAG_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SESSION_ATTENDANCE_EVENTS = {
+  SESSION_ATTENDANCE_MISSED: {
+    domain: 'session-attendance',
+    eventType: 'session_attendance.missed',
+    version: 1,
+    description:
+      'تغيّب المستفيد عن جلسة علاجية (no_show / absent) — The beneficiary missed a therapy session',
+    payload: {
+      attendanceId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      sessionId: 'string',
+      status: 'string',
+      billable: 'boolean',
+      scheduledDate: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1947,6 +1969,7 @@ const DDD_CONTRACTS = {
   'goal-entry': GOAL_ENTRY_EVENTS,
   'cdss-risk': CDSS_RISK_EVENTS,
   'red-flag': RED_FLAG_EVENTS,
+  'session-attendance': SESSION_ATTENDANCE_EVENTS,
 };
 
 /**
@@ -2033,6 +2056,7 @@ module.exports = {
   GOAL_ENTRY_EVENTS,
   CDSS_RISK_EVENTS,
   RED_FLAG_EVENTS,
+  SESSION_ATTENDANCE_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

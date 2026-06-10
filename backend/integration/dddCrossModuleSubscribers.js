@@ -2690,6 +2690,38 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1084: missed therapy session → core timeline ──────────────────
+  // A no_show / absent breaks the care plan's dosage — surface it on the
+  // timeline so the gap is visible (and follow-up can be triggered).
+  // no_show (nobody came, often billable) → warning; absent → info.
+  subscribers.push({
+    name: 'session-attendance:missed → timeline:record',
+    pattern: 'session-attendance.session_attendance.missed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev = event.payload.status === 'no_show' ? 'warning' : 'info';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'session_attendance_missed',
+            category: 'clinical',
+            severity: sev,
+            title: `Session missed: ${event.payload.status || 'absent'}${
+              event.payload.billable ? ' (billable)' : ''
+            }`,
+            title_ar: 'تغيّب المستفيد عن جلسة علاجية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SessionAttendance timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

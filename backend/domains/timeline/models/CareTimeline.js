@@ -160,6 +160,7 @@ const careTimelineSchema = new mongoose.Schema(
         'goal_progress_recorded',
         'cdss_risk_assessed',
         'red_flag_raised',
+        'session_attendance_missed',
         // Family
         'family_contact',
         'family_meeting',

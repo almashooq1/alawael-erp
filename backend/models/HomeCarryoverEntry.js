@@ -60,6 +60,30 @@ const homeCarryoverSchema = new mongoose.Schema(
 
 homeCarryoverSchema.index({ beneficiaryId: 1, loggedAt: -1 });
 
+// ── W1077: unified-core producer ───────────────────────────────────
+// Emit home_carryover.completed when a guardian logs a completed
+// home-practice activity — a positive family-engagement signal. Only on
+// new completed rows (partial/skipped are not milestones; edits don't
+// re-fire). Non-callback hook style (W483 gate).
+homeCarryoverSchema.pre('save', function flagHomeCarryoverDone() {
+  this.$__homeCarryoverDone = this.isNew && this.outcome === 'completed';
+});
+
+homeCarryoverSchema.post('save', function emitHomeCarryoverDone(doc) {
+  if (!doc.$__homeCarryoverDone) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('home-carryover', 'home_carryover.completed', {
+      entryId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      outcome: doc.outcome,
+      loggedAt: doc.loggedAt,
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 const HomeCarryoverEntry =
   mongoose.models.HomeCarryoverEntry || mongoose.model('HomeCarryoverEntry', homeCarryoverSchema);
 

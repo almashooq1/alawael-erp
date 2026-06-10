@@ -153,6 +153,7 @@ const careTimelineSchema = new mongoose.Schema(
         'subsidy_payment_received',
         'sponsorship_activated',
         'potty_request_milestone',
+        'home_practice_completed',
         // Family
         'family_contact',
         'family_meeting',

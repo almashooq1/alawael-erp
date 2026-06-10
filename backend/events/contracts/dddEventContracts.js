@@ -1731,6 +1731,25 @@ const TOILETING_EVENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const HOME_CARRYOVER_EVENTS = {
+  HOME_PRACTICE_COMPLETED: {
+    domain: 'home-carryover',
+    eventType: 'home_carryover.completed',
+    version: 1,
+    description:
+      'سجّل ولي الأمر تنفيذ تمرين منزلي — إشارة مشاركة أسرية إيجابية — Guardian logged a completed home-practice activity',
+    payload: {
+      entryId: 'string',
+      beneficiaryId: 'string',
+      outcome: 'string',
+      loggedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1794,6 +1813,7 @@ const DDD_CONTRACTS = {
   'subsidy-entry': SUBSIDY_ENTRY_EVENTS,
   sponsorship: SPONSORSHIP_EVENTS,
   'toileting-event': TOILETING_EVENT_EVENTS,
+  'home-carryover': HOME_CARRYOVER_EVENTS,
 };
 
 /**
@@ -1873,6 +1893,7 @@ module.exports = {
   SUBSIDY_ENTRY_EVENTS,
   SPONSORSHIP_EVENTS,
   TOILETING_EVENT_EVENTS,
+  HOME_CARRYOVER_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

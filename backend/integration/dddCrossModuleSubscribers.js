@@ -2464,6 +2464,34 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1077: home-practice completed → core timeline ─────────────────
+  // A guardian logging a completed home-carryover activity is a positive
+  // family-engagement signal — surface it on the beneficiary timeline.
+  subscribers.push({
+    name: 'home-carryover:completed → timeline:record',
+    pattern: 'home-carryover.home_carryover.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'home_practice_completed',
+            category: 'family',
+            severity: 'success',
+            title: 'Home-practice activity completed by guardian',
+            title_ar: 'أنجز ولي الأمر تمريناً منزلياً',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] HomeCarryover timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

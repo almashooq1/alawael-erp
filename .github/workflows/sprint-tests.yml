@@ -1345,6 +1345,8 @@ on:
       - 'backend/__tests__/sponsorship-activated-core-linkage-wave1075.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/potty-request-milestone-core-linkage-wave1076.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-practice-completed-core-linkage-wave1077.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2673,6 +2675,8 @@ on:
       - 'backend/__tests__/sponsorship-activated-core-linkage-wave1075.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/potty-request-milestone-core-linkage-wave1076.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/home-practice-completed-core-linkage-wave1077.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -158,6 +158,58 @@ const goalSchema = new mongoose.Schema(
       default: () => [],
     },
 
+    // ─── R1 (W1068) — Goal ↔ Measure linkage (golden thread gap #1) ─────
+    // Links a goal to the standardized measure(s) that prove its progress,
+    // closing the "goal has no measure" gap so every SMART goal is backed
+    // by a quantifiable instrument. This is the data foundation for honest
+    // outcome dashboards (MCID/GAS) and the CDSS Next-Best-Action engine.
+    // Per docs/blueprint/43-beneficiary-journey-operating-system.md
+    // §III gap #1 + §XVI.1 data contract. Mirrors the W452 icfMapping
+    // pattern (sub-schema + refs + invariants in pre('save')).
+    //
+    // All fields optional/defaulted so legacy Goal records stay valid;
+    // the care-plan builder populates them when a goal is drafted.
+    //
+    // Invariants (enforced in pre('save') hook below):
+    //   - At most ONE entry may have role: 'primary'.
+    //   - No duplicate measureId within the array.
+    //   - If targetScore is set, targetDirection must also be set.
+    linkedMeasures: {
+      type: [
+        new mongoose.Schema(
+          {
+            measureId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'MeasurementMaster',
+              required: true,
+            },
+            role: {
+              type: String,
+              enum: ['primary', 'secondary'],
+              default: 'primary',
+            },
+            // Optional back-reference to the baseline MeasurementResult so
+            // progress applications can be compared to their origin point
+            // (partially serves golden-thread gap #5).
+            baselineResultId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'MeasurementResult',
+              default: null,
+            },
+            targetScore: { type: Number, default: null },
+            targetDirection: {
+              type: String,
+              enum: ['increase', 'decrease', 'maintain'],
+            },
+            addedAt: { type: Date, default: Date.now },
+            addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+          },
+          { _id: false }
+        ),
+      ],
+      default: () => [],
+    },
+
     // Metadata
     createdAt: {
       type: Date,
@@ -181,6 +233,8 @@ goalSchema.index({ participantId: 1, status: 1 });
 goalSchema.index({ createdBy: 1, createdAt: -1 });
 // W452 — fast lookup of goals by primary ICF code (used by aggregate reports)
 goalSchema.index({ 'icfMapping.icfCode': 1 });
+// R1 (W1068) — fast lookup of goals by linked measure (outcome dashboards)
+goalSchema.index({ 'linkedMeasures.measureId': 1 });
 
 // W452 — ICF mapping invariants enforced before save.
 goalSchema.pre('save', function (next) {
@@ -209,6 +263,32 @@ goalSchema.pre('save', function (next) {
         return next(new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`));
       }
       seen.add(m.icfCode);
+    }
+  }
+
+  // ─── R1 (W1068) — linkedMeasures invariants (golden-thread gap #1) ──
+  if (Array.isArray(this.linkedMeasures) && this.linkedMeasures.length > 0) {
+    // Invariant 1: at most one primary measure per goal
+    const primaryMeasures = this.linkedMeasures.filter(m => m.role === 'primary');
+    if (primaryMeasures.length > 1) {
+      return next(new Error('Goal.linkedMeasures: at most one entry may have role: primary'));
+    }
+
+    // Invariant 2: no duplicate measureId within the array
+    const seenMeasures = new Set();
+    for (const m of this.linkedMeasures) {
+      const key = String(m.measureId);
+      if (seenMeasures.has(key)) {
+        return next(new Error(`Goal.linkedMeasures: duplicate measureId '${key}'`));
+      }
+      seenMeasures.add(key);
+    }
+
+    // Invariant 3: a targetScore requires a targetDirection (else it is ambiguous)
+    for (const m of this.linkedMeasures) {
+      if (typeof m.targetScore === 'number' && !m.targetDirection) {
+        return next(new Error('Goal.linkedMeasures: targetScore set without targetDirection'));
+      }
     }
   }
 

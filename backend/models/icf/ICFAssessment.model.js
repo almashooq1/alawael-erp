@@ -634,6 +634,28 @@ icfAssessmentSchema.methods.calculateScores = function () {
   return this.domainScores;
 };
 
+/* ─── Unified-core linkage (W1075 — ICF island → CareTimeline) ────────────── */
+icfAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+icfAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'approved' || this.$__prevStatus === 'approved') return;
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'icf.assessment_approved', {
+        icfAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        icfVersion: doc.icfVersion,
+        assessmentDate: doc.assessmentDate,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 /* ─── Registration Guard & Export ─────────────────────────────────────────── */
 
 const ICFAssessment =

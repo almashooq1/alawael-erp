@@ -1900,6 +1900,184 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ═══ Deferred islands → Timeline (W1075 — 8 per-beneficiary lifecycle models) ═══
+  subscribers.push({
+    name: 'icf:approved → timeline:record',
+    pattern: 'clinical-assessment.icf.assessment_approved',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'icf_assessment',
+          category: 'clinical',
+          severity: 'info',
+          title: `ICF functioning profile approved (${event.payload.icfVersion || ''})`.trim(),
+          title_ar: `اعتماد ملف التصنيف الدولي للأداء الوظيفي (${event.payload.icfVersion || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] icf timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'treatment-authorization:decided → timeline:record',
+    pattern: 'authorization.treatment.authorization_decided',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'treatment_authorization',
+          category: 'administrative',
+          severity: event.payload.decision === 'denied' ? 'warning' : 'success',
+          title: `Treatment authorization ${event.payload.decision || ''}`.trim(),
+          title_ar: `قرار اعتماد العلاج: ${event.payload.decision || ''}`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] treatment-authorization timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'clinical-pathway:completed → timeline:record',
+    pattern: 'care-pathway.clinical-pathway.completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'clinical_pathway_completed',
+          category: 'clinical',
+          severity: 'success',
+          title: `Clinical pathway completed (${event.payload.pathwayType || ''})`.trim(),
+          title_ar: `إتمام المسار العلاجي (${event.payload.pathwayType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] clinical-pathway timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'mdt:completed → timeline:record',
+    pattern: 'care-coordination.mdt.meeting_completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'mdt_meeting',
+          category: 'clinical',
+          severity: 'info',
+          title: `MDT meeting completed (${event.payload.purpose || ''})`.trim(),
+          title_ar: `إتمام اجتماع الفريق متعدد التخصصات (${event.payload.purpose || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] mdt timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'swallow-study:completed → timeline:record',
+    pattern: 'clinical-assessment.swallow-study.completed',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'swallow_study',
+          category: 'clinical',
+          severity: event.payload.aspirationDetected ? 'warning' : 'info',
+          title: `Instrumental swallow study completed (${event.payload.studyType || ''})`.trim(),
+          title_ar: `إتمام دراسة البلع الآلية (${event.payload.studyType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] swallow-study timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'emergency-plan:activated → timeline:record',
+    pattern: 'safety.emergency-plan.activated',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        const conds = Array.isArray(event.payload.conditionTypes) ? event.payload.conditionTypes.join(', ') : '';
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'emergency_plan_activated',
+          category: 'clinical',
+          severity: 'warning',
+          title: `Emergency plan activated${conds ? ` (${conds})` : ''}`,
+          title_ar: `تفعيل خطة الطوارئ${conds ? ` (${conds})` : ''}`,
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] emergency-plan timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'consultation:answered → timeline:record',
+    pattern: 'care-coordination.consultation.answered',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'consultation',
+          category: 'clinical',
+          severity: 'info',
+          title: `Therapist consultation ${event.payload.status || 'answered'} (${event.payload.topic || ''})`.trim(),
+          title_ar: `استشارة بين المعالجين (${event.payload.topic || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] consultation timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'cdss-alert:resolved → timeline:record',
+    pattern: 'cdss.alert.resolved',
+    handler: async event => {
+      try {
+        const CareTimeline = require('mongoose').models.CareTimeline;
+        if (!CareTimeline || !event.payload.beneficiaryId) return;
+        await CareTimeline.create({
+          beneficiaryId: event.payload.beneficiaryId,
+          eventType: 'cdss_alert_resolved',
+          category: 'clinical',
+          severity: 'info',
+          title: `CDSS alert resolved (${event.payload.alertType || ''})`.trim(),
+          title_ar: `حل تنبيه دعم القرار السريري (${event.payload.alertType || ''})`.trim(),
+          metadata: event.payload,
+        });
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] cdss-alert timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

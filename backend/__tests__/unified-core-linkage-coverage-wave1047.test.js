@@ -36,18 +36,66 @@ const LINKED_TRIO = [
   { file: 'PhysiotherapyAssessment.js', schema: 'PhysiotherapyAssessmentSchema' },
 ];
 
+// W1075 (2026-06-10) — the eight deferred islands from the 2026-06-10 audit, now
+// LINKED. Each MUST keep a LIVE producer hook (publish + pre-compile post('save'),
+// W954-safe signature) + a CareTimeline eventType + a subscriber. Regression-locked
+// exactly like LINKED_TRIO, but each publishes to its own bus domain.
+const LINKED_W1075 = [
+  {
+    file: 'icf/ICFAssessment.model.js',
+    schema: 'icfAssessmentSchema',
+    timelineEventType: 'icf_assessment',
+    pattern: 'clinical-assessment.icf.assessment_approved',
+  },
+  {
+    file: 'treatmentAuthorization.model.js',
+    schema: 'TreatmentAuthorizationSchema',
+    timelineEventType: 'treatment_authorization',
+    pattern: 'authorization.treatment.authorization_decided',
+  },
+  {
+    file: 'ClinicalPathwayPlan.js',
+    schema: 'clinicalPathwayPlanSchema',
+    timelineEventType: 'clinical_pathway_completed',
+    pattern: 'care-pathway.clinical-pathway.completed',
+  },
+  {
+    file: 'care/MdtMeeting.model.js',
+    schema: 'mdtMeetingSchema',
+    timelineEventType: 'mdt_meeting',
+    pattern: 'care-coordination.mdt.meeting_completed',
+  },
+  {
+    file: 'InstrumentalSwallowStudy.js',
+    schema: 'InstrumentalSwallowStudySchema',
+    timelineEventType: 'swallow_study',
+    pattern: 'clinical-assessment.swallow-study.completed',
+  },
+  {
+    file: 'EmergencyPlan.js',
+    schema: 'EmergencyPlanSchema',
+    timelineEventType: 'emergency_plan_activated',
+    pattern: 'safety.emergency-plan.activated',
+  },
+  {
+    file: 'TherapistConsultation.js',
+    schema: 'therapistConsultationSchema',
+    timelineEventType: 'consultation',
+    pattern: 'care-coordination.consultation.answered',
+  },
+  {
+    file: 'CdssAlert.js',
+    schema: 'cdssAlertSchema',
+    timelineEventType: 'cdss_alert_resolved',
+    pattern: 'cdss.alert.resolved',
+  },
+];
+
 // Audit 2026-06-10 — genuine islands still unlinked. Ratcheted: promote to a
-// LINKED guard (and delete from here) when wired.
+// LINKED guard (and delete from here) when wired. W1075 cleared the other eight.
 const DEFERRED_ISLANDS = {
-  'icf/ICFAssessment.model.js': 'ICF functioning-profile completion (draft→…→approved→archived) — next pass',
-  'treatmentAuthorization.model.js': 'authorization approved/denied — highest-value operational island',
-  'ClinicalPathwayPlan.js': 'pathway-stage completion milestone',
-  'care/MdtMeeting.model.js': 'MDT meeting completed (pick canonical vs MDTCoordination first)',
-  'MDTCoordination.js': 'parallel MDT model — consolidate with MdtMeeting first',
-  'InstrumentalSwallowStudy.js': 'VFSS/FEES study finalized — completes the dysphagia loop',
-  'EmergencyPlan.js': 'per-beneficiary emergency/seizure/allergy plan activation',
-  'TherapistConsultation.js': 'cross-discipline consult answered/closed',
-  'CdssAlert.js': 'CDSS alert acknowledged/overridden/resolved',
+  'MDTCoordination.js':
+    'parallel/duplicate of care/MdtMeeting.model.js (both register MDT meetings) — linking it would double-emit; consolidate the two models first',
 };
 
 const TIMELINE_SRC = fs.readFileSync(
@@ -101,6 +149,46 @@ describe('W1047 — CareTimeline + subscribers know the trio', () => {
   }
 });
 
+describe('W1075 — the eight deferred islands are now LINKED (regression lock)', () => {
+  for (const { file, schema, timelineEventType, pattern } of LINKED_W1075) {
+    describe(file, () => {
+      const src = read(file);
+
+      it('has a LIVE producer hook publishing to the bus', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]`));
+        expect(src).toMatch(/integrationBus\.publish\(/);
+      });
+
+      it('the producer is defined BEFORE mongoose.model() compile (not runtime-dead)', () => {
+        const idx = src.indexOf(`${schema}.post('save'`);
+        // Match the COMPILE site (schema as 2nd arg) — not a 1-arg runtime
+        // mongoose.model('X') lookup inside a method (e.g. MdtMeeting line ~144).
+        const compileIdx = src.search(new RegExp(`mongoose\\.model\\(\\s*['"][^'"]+['"]\\s*,\\s*${schema}\\b`));
+        expect(idx).toBeGreaterThan(0);
+        expect(compileIdx).toBeGreaterThan(0);
+        expect(idx).toBeLessThan(compileIdx);
+      });
+
+      it('uses the W954-safe signature function(doc) — not a lone next', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*doc\\s*\\)`));
+        expect(src).not.toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*next\\s*\\)`));
+      });
+
+      it('captures prevStatus via post(init) for transition detection', () => {
+        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]init['"]`));
+      });
+
+      it(`CareTimeline enum includes '${timelineEventType}'`, () => {
+        expect(TIMELINE_SRC).toMatch(new RegExp(`['"]${timelineEventType}['"]`));
+      });
+
+      it(`a subscriber listens on '${pattern}'`, () => {
+        expect(SUBSCRIBERS_SRC).toMatch(new RegExp(`pattern:\\s*['"]${pattern.replace(/\./g, '\\.')}['"]`));
+      });
+    });
+  }
+});
+
 describe('W1047 — deferred-island manifest is honest (ratchet)', () => {
   for (const [rel, reason] of Object.entries(DEFERRED_ISLANDS)) {
     describe(rel, () => {
@@ -116,7 +204,12 @@ describe('W1047 — deferred-island manifest is honest (ratchet)', () => {
     });
   }
 
-  it('documents a non-trivial deferred backlog (coverage stays explicit)', () => {
-    expect(Object.keys(DEFERRED_ISLANDS).length).toBeGreaterThanOrEqual(5);
+  it('every remaining deferred island carries an explicit reason (coverage stays honest)', () => {
+    const entries = Object.entries(DEFERRED_ISLANDS);
+    expect(entries.length).toBeGreaterThanOrEqual(1);
+    for (const [, reason] of entries) {
+      expect(typeof reason).toBe('string');
+      expect(reason.length).toBeGreaterThan(10);
+    }
   });
 });

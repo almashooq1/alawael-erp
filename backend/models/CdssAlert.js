@@ -65,4 +65,27 @@ cdssAlertSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
 });
 
+// ── Unified-core linkage (W1075 — CDSS alert island → CareTimeline) ──
+cdssAlertSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+cdssAlertSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'resolved' || this.$__prevStatus === 'resolved') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('cdss', 'alert.resolved', {
+        cdssAlertId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        alertType: doc.alertType,
+        severity: doc.severity,
+        wasActedUpon: !!doc.wasActedUpon,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports = mongoose.models.CdssAlert || mongoose.model('CdssAlert', cdssAlertSchema);

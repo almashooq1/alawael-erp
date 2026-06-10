@@ -206,6 +206,28 @@ InstrumentalSwallowStudySchema.virtual('isComplete').get(function () {
 InstrumentalSwallowStudySchema.set('toJSON', { virtuals: true });
 InstrumentalSwallowStudySchema.set('toObject', { virtuals: true });
 
+// ── Unified-core linkage (W1075 — swallow-study island → CareTimeline) ──
+InstrumentalSwallowStudySchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+InstrumentalSwallowStudySchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'swallow-study.completed', {
+        instrumentalSwallowStudyId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        studyType: doc.studyType,
+        aspirationDetected: !!doc.aspirationDetected,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.InstrumentalSwallowStudy ||
   mongoose.model('InstrumentalSwallowStudy', InstrumentalSwallowStudySchema);

@@ -81,6 +81,27 @@ clinicalPathwayPlanSchema.pre('validate', async function validateInvariants() {
   }
 });
 
+// ── Unified-core linkage (W1075 — clinical-pathway island → CareTimeline) ──
+clinicalPathwayPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+clinicalPathwayPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'COMPLETED' || this.$__prevStatus === 'COMPLETED') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('care-pathway', 'clinical-pathway.completed', {
+        clinicalPathwayPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        pathwayType: doc.pathwayType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.ClinicalPathwayPlan ||
   mongoose.model('ClinicalPathwayPlan', clinicalPathwayPlanSchema);

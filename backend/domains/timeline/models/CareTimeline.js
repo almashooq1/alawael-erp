@@ -105,6 +105,15 @@ const careTimelineSchema = new mongoose.Schema(
         'dysphagia_assessment', // W670 — swallow-safety assessment finalized
         'pain_assessment', // W671 — pain assessment finalized
         'physiotherapy_assessment', // W672 — physiotherapy assessment finalized
+        // Deferred islands now linked (W1075 — 8 per-beneficiary lifecycle models)
+        'icf_assessment', // W1075 — ICF functioning profile approved
+        'treatment_authorization', // W1075 — insurance treatment authorization decided
+        'clinical_pathway_completed', // W1075 — clinical pathway plan completed
+        'mdt_meeting', // W1075 — multidisciplinary team meeting completed
+        'swallow_study', // W1075 — instrumental swallow study (VFSS/FEES) completed
+        'emergency_plan_activated', // W1075 — per-beneficiary emergency plan activated
+        'consultation', // W1075 — cross-discipline therapist consultation answered/closed
+        'cdss_alert_resolved', // W1075 — CDSS alert resolved
         // Family
         'family_contact',
         'family_meeting',

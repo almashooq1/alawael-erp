@@ -135,5 +135,28 @@ EmergencyPlanSchema.pre('save', async function () {
   
 });
 
+// ── Unified-core linkage (W1075 — emergency-plan island → CareTimeline) ──
+EmergencyPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+EmergencyPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'active' || this.$__prevStatus === 'active') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('safety', 'emergency-plan.activated', {
+        emergencyPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        conditionTypes: Array.isArray(doc.knownConditions)
+          ? doc.knownConditions.map(c => c && c.type).filter(Boolean)
+          : [],
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.EmergencyPlan || mongoose.model('EmergencyPlan', EmergencyPlanSchema);

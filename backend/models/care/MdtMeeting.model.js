@@ -166,6 +166,27 @@ mdtMeetingSchema.set('toObject', { virtuals: true });
 // admin actions.
 mdtMeetingSchema.set('optimisticConcurrency', true);
 
+// ── Unified-core linkage (W1075 — MDT meeting island → CareTimeline) ──
+mdtMeetingSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+mdtMeetingSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    Promise.resolve(
+      integrationBus.publish('care-coordination', 'mdt.meeting_completed', {
+        mdtMeetingId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        purpose: doc.purpose,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 // Pattern D (W850): psych-care MDT meetings (canonical coordination: models/MDTCoordination.js → MDTMeeting)
 const CarePsychMdtMeeting =
   mongoose.models.CarePsychMdtMeeting || mongoose.model('CarePsychMdtMeeting', mdtMeetingSchema);

@@ -328,6 +328,8 @@ __tests__/family-wbci-behavioral-wave467.test.js
 __tests__/family-wbci-wave467.test.js
 __tests__/finance-approvals-branch-isolation-behavioral-wave1163.test.js
 __tests__/finance-approvals-branch-isolation-wave1163.test.js
+__tests__/finance-cheques-branch-isolation-wave1172.test.js
+__tests__/finance-cheques-branch-isolation-behavioral-wave1172.test.js
 __tests__/finance-invoice-branch-isolation-behavioral-wave1161.test.js
 __tests__/finance-invoice-branch-isolation-wave1161.test.js
 __tests__/finance-models-halalas-expand-wave579.test.js

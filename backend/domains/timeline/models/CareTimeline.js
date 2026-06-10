@@ -148,6 +148,7 @@ const careTimelineSchema = new mongoose.Schema(
         'adjunct_therapy_completed',
         'disability_card_registered',
         'portfolio_milestone_added',
+        'physiotherapy_assessment_finalized',
         // Family
         'family_contact',
         'family_meeting',

@@ -252,6 +252,32 @@ PhysiotherapyAssessmentSchema.virtual('jointsMeasured').get(function () {
 PhysiotherapyAssessmentSchema.set('toJSON', { virtuals: true });
 PhysiotherapyAssessmentSchema.set('toObject', { virtuals: true });
 
+// ─── W1072: unified-core linkage — physiotherapy assessment finalized ───────
+// Milestone = the PT assessment transitions to 'finalized'. Emits a timeline
+// event (mobility baseline / re-assessment / discharge). Non-callback hook.
+PhysiotherapyAssessmentSchema.pre('save', function flagPtFinalized() {
+  this.$__ptFinalizedNow = this.status === 'finalized' && (this.isNew || this.isModified('status'));
+});
+
+PhysiotherapyAssessmentSchema.post('save', function emitPhysiotherapyAssessmentFinalized(doc) {
+  if (!doc.$__ptFinalizedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('physiotherapy-assessment', 'physiotherapy_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      assessmentType: doc.assessmentType,
+      mobilityStatus: doc.mobilityStatus,
+      homeProgramGiven: !!doc.homeProgramGiven,
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.PhysiotherapyAssessment ||
   mongoose.model('PhysiotherapyAssessment', PhysiotherapyAssessmentSchema);

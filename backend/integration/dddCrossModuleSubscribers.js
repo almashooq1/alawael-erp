@@ -2316,6 +2316,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1072: physiotherapy assessment finalized → core timeline ──────
+  // When a physiotherapy assessment is finalized, log it on the
+  // beneficiary's timeline as a clinical milestone (mobility baseline /
+  // re-assessment / discharge outcome).
+  subscribers.push({
+    name: 'physiotherapy-assessment:finalized → timeline:record',
+    pattern: 'physiotherapy-assessment.physiotherapy_assessment.finalized',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.assessmentType || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'physiotherapy_assessment_finalized',
+            category: 'clinical',
+            severity: 'success',
+            title: `Physiotherapy assessment finalized (${type})`,
+            title_ar: 'تم اعتماد تقييم العلاج الطبيعي',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PhysiotherapyAssessment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

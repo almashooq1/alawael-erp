@@ -1622,6 +1622,27 @@ const PORTFOLIO_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PHYSIOTHERAPY_ASSESSMENT_EVENTS = {
+  PHYSIOTHERAPY_ASSESSMENT_FINALIZED: {
+    domain: 'physiotherapy-assessment',
+    eventType: 'physiotherapy_assessment.finalized',
+    version: 1,
+    description: 'اعتماد تقييم علاج طبيعي — Physiotherapy assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      assessmentType: 'string',
+      mobilityStatus: 'string',
+      homeProgramGiven: 'boolean',
+      finalizedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1680,6 +1701,7 @@ const DDD_CONTRACTS = {
   'adjunct-therapy': ADJUNCT_THERAPY_EVENTS,
   'disability-card': DISABILITY_CARD_EVENTS,
   portfolio: PORTFOLIO_EVENTS,
+  'physiotherapy-assessment': PHYSIOTHERAPY_ASSESSMENT_EVENTS,
 };
 
 /**
@@ -1754,6 +1776,7 @@ module.exports = {
   ADJUNCT_THERAPY_EVENTS,
   DISABILITY_CARD_EVENTS,
   PORTFOLIO_EVENTS,
+  PHYSIOTHERAPY_ASSESSMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -131,6 +131,7 @@ const careTimelineSchema = new mongoose.Schema(
         'prior_authorization_approved',
         'plan_review_recorded',
         'swallow_study_completed',
+        'crisis_incident_resolved',
         // Family
         'family_contact',
         'family_meeting',

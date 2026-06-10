@@ -1794,6 +1794,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1055: crisis incident resolved → core timeline ────────────────
+  // When a crisis incident reaches 'resolved'/'closed', record it on the
+  // beneficiary's timeline; critical/urgent crises keep a warning severity.
+  subscribers.push({
+    name: 'crisis-incident:resolved → timeline:record',
+    pattern: 'crisis-incident.crisis_incident.resolved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sev = event.payload.severity;
+          const high = sev === 'critical' || sev === 'urgent';
+          const ct = event.payload.crisisType ? ` (${event.payload.crisisType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'crisis_incident_resolved',
+            category: 'clinical',
+            severity: high ? 'warning' : 'success',
+            title: `Crisis incident resolved${ct}`,
+            title_ar: 'تم حل حادثة الأزمة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] CrisisIncident timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

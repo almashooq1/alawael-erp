@@ -92,6 +92,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'prior-authorization', // W1052 — prior authorization approved → core timeline
   'plan-review', // W1053 — care plan review recorded → core timeline
   'instrumental-swallow-study', // W1054 — swallow study completed → core timeline
+  'crisis-incident', // W1055 — crisis incident resolved → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -158,6 +159,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'prior_authorization', // W1052 — prior_authorization.approved (PriorAuthorization)
     'plan_review', // W1053 — plan_review.recorded (PlanReview)
     'swallow_study', // W1054 — swallow_study.completed (InstrumentalSwallowStudy)
+    'crisis_incident', // W1055 — crisis_incident.resolved (CrisisIncident)
   ])
 );
 

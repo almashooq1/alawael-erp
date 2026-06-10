@@ -1273,6 +1273,26 @@ const SWALLOW_STUDY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const CRISIS_INCIDENT_EVENTS = {
+  CRISIS_INCIDENT_RESOLVED: {
+    domain: 'crisis-incident',
+    eventType: 'crisis_incident.resolved',
+    version: 1,
+    description: 'حل حادثة أزمة — Crisis incident resolved',
+    payload: {
+      incidentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      crisisType: 'string',
+      severity: 'string',
+      resolvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1314,6 +1334,7 @@ const DDD_CONTRACTS = {
   'prior-authorization': PRIOR_AUTHORIZATION_EVENTS,
   'plan-review': PLAN_REVIEW_EVENTS,
   'instrumental-swallow-study': SWALLOW_STUDY_EVENTS,
+  'crisis-incident': CRISIS_INCIDENT_EVENTS,
 };
 
 /**
@@ -1371,6 +1392,7 @@ module.exports = {
   PRIOR_AUTHORIZATION_EVENTS,
   PLAN_REVIEW_EVENTS,
   SWALLOW_STUDY_EVENTS,
+  CRISIS_INCIDENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

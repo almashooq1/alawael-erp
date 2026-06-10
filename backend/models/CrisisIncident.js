@@ -151,5 +151,33 @@ CrisisIncidentSchema.pre('save', async function () {
   }
 });
 
+// ── W1055: unified-core linkage ───────────────────────────────────────
+// On resolution (status → 'resolved'/'closed'), publish crisis_incident.resolved
+// so the cross-module subscriber records a milestone on the beneficiary's
+// CareTimeline. NON-callback hooks only (matches the async pre('save') above).
+CrisisIncidentSchema.pre('save', function () {
+  const resolving = this.status === 'resolved' || this.status === 'closed';
+  this.$__crisisResolvedNow = resolving && (this.isNew || this.isModified('status'));
+});
+
+function emitCrisisIncidentResolved(doc) {
+  if (!doc || !doc.$__crisisResolvedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('crisis-incident', 'crisis_incident.resolved', {
+      incidentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      crisisType: doc.crisisType,
+      severity: doc.severity,
+      resolvedAt: doc.resolvedAt || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+CrisisIncidentSchema.post('save', emitCrisisIncidentResolved);
+
 module.exports =
   mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', CrisisIncidentSchema);

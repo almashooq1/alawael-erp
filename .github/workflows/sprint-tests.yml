@@ -1550,6 +1550,8 @@ on:
       - 'backend/__tests__/supervisor-overdue-reports-wave1174.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/domain-resource-param-guards-wave1175.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/domain-spread-order-mass-assignment-wave1176.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3083,6 +3085,8 @@ on:
       - 'backend/__tests__/supervisor-overdue-reports-wave1174.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/domain-resource-param-guards-wave1175.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/domain-spread-order-mass-assignment-wave1176.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

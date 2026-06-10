@@ -277,6 +277,7 @@ __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
 __tests__/domain-mounts-central-branch-scope-wave1171.test.js
 __tests__/domain-resource-param-guards-wave1175.test.js
 __tests__/domain-sod-policy.test.js
+__tests__/domain-spread-order-mass-assignment-wave1176.test.js
 __tests__/domains-routes-branch-isolation-wave1140.test.js
 __tests__/dpia-lifecycle-wave285.test.js
 __tests__/dsar-hash-script.test.js

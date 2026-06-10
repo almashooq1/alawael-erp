@@ -245,7 +245,9 @@ router.post(
   requireService,
   validate(validateCheckIn),
   asyncHandler(async (req, res) => {
-    const record = await hr.attendance.checkIn({ employeeId: req.user?._id, ...req.body });
+    // W1176 — pin employeeId AFTER the spread: a body-carried employeeId must
+    // never let a caller check in on behalf of another employee.
+    const record = await hr.attendance.checkIn({ ...req.body, employeeId: req.user?._id });
     res.status(201).json({ success: true, data: record });
   })
 );
@@ -255,7 +257,8 @@ router.post(
   '/attendance/check-out',
   requireService,
   asyncHandler(async (req, res) => {
-    const record = await hr.attendance.checkOut({ employeeId: req.user?._id, ...req.body });
+    // W1176 — same identity pin as check-in.
+    const record = await hr.attendance.checkOut({ ...req.body, employeeId: req.user?._id });
     res.json({ success: true, data: record });
   })
 );

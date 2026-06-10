@@ -20,7 +20,40 @@ const AttendanceEngine = require('../services/hr/attendanceEngine');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { enforceEmployeeBranch } = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
+
+// W269 — cross-branch isolation for the employee/record-keyed manager routes.
+// AttendanceEngine is branch-unaware (queries by employeeId only), and requireBranchAccess
+// only gates explicit ?branchId spoofing — so without these guards any manager could read
+// or mutate ANY employee's attendance across branches. Each guard returns `true` (after
+// sending a 403/404/503) when access is denied, `false` when allowed.
+async function guardEmployeeBranch(req, res, employeeId) {
+  try {
+    await enforceEmployeeBranch(req, employeeId);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
+
+// Resolve an attendance record's owning employee, then enforce the employee branch gate.
+async function guardRecordBranch(req, res, recordId) {
+  try {
+    const SmartAttendance = require('../models/advanced_attendance.model');
+    const rec = await SmartAttendance.findById(recordId).select('employeeId').lean();
+    if (!rec) {
+      res.status(404).json({ success: false, message: 'سجل الحضور غير موجود' });
+      return true;
+    }
+    await enforceEmployeeBranch(req, rec.employeeId);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
 // Maximum records per page — prevents DoS via unbounded queries
 const MAX_PAGE_LIMIT = 100;
 const clampLimit = (raw, fallback) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);
@@ -192,6 +225,7 @@ router.get(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
       const result = await AttendanceEngine.getEmployeeRecords(req.params.employeeId, {
         startDate: req.query.startDate,
         endDate: req.query.endDate,
@@ -218,6 +252,7 @@ router.get(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
       const month = parseInt(req.query.month) || new Date().getMonth() + 1;
       const year = parseInt(req.query.year) || new Date().getFullYear();
 
@@ -239,6 +274,7 @@ router.get(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
       const shift = await AttendanceEngine.getEmployeeShift(req.params.employeeId);
       res.json({ success: true, data: shift });
     } catch (error) {
@@ -256,6 +292,7 @@ router.post(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
       const result = await AttendanceEngine.checkIn(req.params.employeeId, {
         method: 'manual',
         notes: req.body.notes || `تسجيل يدوي بواسطة ${req.user.name || req.user.id}`,
@@ -308,6 +345,7 @@ router.put(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardRecordBranch(req, res, req.params.recordId)) return; // W269
       const result = await AttendanceEngine.updateRecord(
         req.params.recordId,
         req.body,
@@ -330,6 +368,7 @@ router.post(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardRecordBranch(req, res, req.params.recordId)) return; // W269
       const result = await AttendanceEngine.approveRecord(
         req.params.recordId,
         req.user.id,
@@ -352,6 +391,7 @@ router.post(
   authorizeRole(['manager', 'hr', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
+      if (await guardRecordBranch(req, res, req.params.recordId)) return; // W269
       const result = await AttendanceEngine.rejectRecord(
         req.params.recordId,
         req.user.id,

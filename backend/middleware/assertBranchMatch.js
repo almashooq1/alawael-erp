@@ -173,6 +173,58 @@ async function enforceBeneficiaryBranch(req, beneficiaryId) {
   assertBranchMatch(req, ben.branchId, 'beneficiary');
 }
 
+/**
+ * Enforce cross-branch isolation on an EMPLOYEE-keyed route (the HR analogue of
+ * `enforceBeneficiaryBranch`). HR transactional records (attendance, payroll,
+ * loans, …) are keyed by `employeeId`, and `Employee` carries `branch_id`, so a
+ * route that takes an employeeId via params/body must verify the employee belongs
+ * to the caller's branch before reading or mutating their data.
+ *
+ * For restricted callers ONLY: loads the Employee by id, asserts the caller's
+ * branch matches `employee.branch_id` (falls back to `branchId`), throws 403 on
+ * mismatch (404 not-found / 503 model-unavailable). No-op (no DB lookup) for
+ * cross-branch / unrestricted callers and tests without `req.branchScope` — same
+ * ergonomics as `enforceBeneficiaryBranch`.
+ *
+ * Throws — does not return a value. Errors carry `err.status`. Catch via the
+ * route's try/catch (map `err.status` to the HTTP response).
+ *
+ * @param {object} req
+ * @param {string|ObjectId} employeeId
+ * @returns {Promise<void>}
+ */
+async function enforceEmployeeBranch(req, employeeId) {
+  if (!req || !req.branchScope || !req.branchScope.restricted) {
+    return; // cross-branch / unscoped / test path — no-op
+  }
+  if (!employeeId) {
+    const err = new Error('employeeId is required');
+    err.status = 400;
+    throw err;
+  }
+  const mongoose = require('mongoose');
+  let Employee;
+  try {
+    Employee = mongoose.model('Employee');
+  } catch (_e) {
+    try {
+      require('../models/HR/Employee');
+      Employee = mongoose.model('Employee');
+    } catch (_e2) {
+      const err = new Error('Employee model unavailable — refusing for safety (fail-closed)');
+      err.status = 503;
+      throw err;
+    }
+  }
+  const emp = await Employee.findById(employeeId).select('branch_id branchId').lean();
+  if (!emp) {
+    const err = new Error('employee not found');
+    err.status = 404;
+    throw err;
+  }
+  assertBranchMatch(req, emp.branch_id || emp.branchId, 'employee');
+}
+
 // Back-compat alias kept until W269b consumers migrate. Returns the
 // loaded beneficiary OR null on not-found OR sentinel for unrestricted
 // callers, mirroring the original signature.
@@ -371,6 +423,7 @@ module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
   enforceBeneficiaryBranch,
+  enforceEmployeeBranch,
   loadBeneficiaryAndAssertBranch,
   assertBranchIdsAllowed,
   branchScopedBeneficiaryParam,

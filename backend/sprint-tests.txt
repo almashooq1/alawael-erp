@@ -788,3 +788,4 @@ __tests__/staff-health-behavioral-wave1125.test.js
 __tests__/staff-health-surveillance-overdue-rule-wave1126.test.js
 __tests__/po-delivery-overdue-rule-wave1132.test.js
 __tests__/training-compliance-overdue-rule-wave1135.test.js
+__tests__/supplier-scar-overdue-rule-wave1138.test.js

@@ -142,6 +142,7 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | Inventory — low stock | `InventoryStock` × `InventoryItem` | rule `inventory-low-stock` → `Alert` | ✅ **W1070** — first TWO-model join (stock qty vs item reorder point); out-of-stock → critical; both models are object-exports, resolved defensively |
 | Procurement — PO delivery overdue | `InventoryModulePurchaseOrder` | rule `purchase-order-delivery-overdue` → `Alert` | ✅ **W1132** — committed PO (approved/sent/partial) past `expected_delivery_date`, not received; catches late *incoming* supply before it becomes a low-stock shortfall; self-loading (no app.js edit) |
 | Compliance — mandatory training overdue | `TrainingCompliance` | rule `training-compliance-overdue` (category `compliance`) → `Alert` | ✅ **W1135** — pending/overdue staff training past `dueDate` (fire-safety/infection-control/CPR); distinct from `credential-*` (professional licences); self-loading |
+| Quality — supplier SCAR response overdue | `SupplierScar` | rule `supplier-scar-response-overdue` (category `quality`) → `Alert` | ✅ **W1138** — SCAR awaiting supplier response (open/acknowledged/in_progress/rejected) past `responseDueBy` (ISO 9001 §8.4); critical → critical; self-loading |
 
 **Operational sweep (growing): facilities · maintenance · fleet · contracts ·
 inventory · procurement (W1006–W1009 / W1070 / W1132), plus quality (CAPA +

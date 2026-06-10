@@ -758,3 +758,4 @@ __tests__/spasticity-injection-completion-core-linkage-wave1048.test.js
 __tests__/prosthetic-orthotic-delivery-core-linkage-wave1049.test.js
 __tests__/seating-postural-finalized-core-linkage-wave1050.test.js
 __tests__/sensory-diet-completion-core-linkage-wave1051.test.js
+__tests__/prior-authorization-approved-core-linkage-wave1052.test.js

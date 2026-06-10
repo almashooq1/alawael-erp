@@ -1214,6 +1214,25 @@ const SENSORY_DIET_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PRIOR_AUTHORIZATION_EVENTS = {
+  PRIOR_AUTHORIZATION_APPROVED: {
+    domain: 'prior-authorization',
+    eventType: 'prior_authorization.approved',
+    version: 1,
+    description: 'اعتماد الموافقة المسبقة — Prior authorization approved',
+    payload: {
+      authorizationId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      serviceType: 'string',
+      approvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1252,6 +1271,7 @@ const DDD_CONTRACTS = {
   'prosthetic-orthotic-order': PROSTHETIC_ORTHOTIC_EVENTS,
   'seating-postural-assessment': SEATING_POSTURAL_EVENTS,
   'sensory-diet-program': SENSORY_DIET_EVENTS,
+  'prior-authorization': PRIOR_AUTHORIZATION_EVENTS,
 };
 
 /**
@@ -1306,6 +1326,7 @@ module.exports = {
   PROSTHETIC_ORTHOTIC_EVENTS,
   SEATING_POSTURAL_EVENTS,
   SENSORY_DIET_EVENTS,
+  PRIOR_AUTHORIZATION_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

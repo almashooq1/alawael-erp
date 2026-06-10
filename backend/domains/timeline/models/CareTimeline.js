@@ -128,6 +128,7 @@ const careTimelineSchema = new mongoose.Schema(
         'prosthetic_orthotic_delivered',
         'seating_postural_finalized',
         'sensory_diet_completed',
+        'prior_authorization_approved',
         // Family
         'family_contact',
         'family_meeting',

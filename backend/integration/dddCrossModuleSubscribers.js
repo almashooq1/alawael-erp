@@ -1707,6 +1707,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1052: prior authorization approved → core timeline ────────────
+  // When an insurance prior authorization is approved, record it as an
+  // administrative milestone on the beneficiary's longitudinal record.
+  subscribers.push({
+    name: 'prior-authorization:approved → timeline:record',
+    pattern: 'prior-authorization.prior_authorization.approved',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const svc = event.payload.serviceType ? ` (${event.payload.serviceType})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'prior_authorization_approved',
+            category: 'administrative',
+            severity: 'success',
+            title: `Prior authorization approved${svc}`,
+            title_ar: 'تم اعتماد الموافقة المسبقة',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] PriorAuthorization timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

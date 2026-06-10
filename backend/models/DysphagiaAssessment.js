@@ -238,6 +238,36 @@ DysphagiaAssessmentSchema.virtual('isUnsafeSwallow').get(function () {
 DysphagiaAssessmentSchema.set('toJSON', { virtuals: true });
 DysphagiaAssessmentSchema.set('toObject', { virtuals: true });
 
+// ─── W1065: unified-core linkage — dysphagia assessment finalized ───────────
+// Milestone = the swallow assessment transitions to 'finalized'. Emits a
+// timeline event so the beneficiary's swallow-safety record (and any unsafe
+// verdict) is visible on the unified core. Non-callback hook style.
+DysphagiaAssessmentSchema.pre('save', function flagDysphagiaFinalized() {
+  this.$__dysphagiaFinalizedNow =
+    this.status === 'finalized' && (this.isNew || this.isModified('status'));
+});
+
+DysphagiaAssessmentSchema.post('save', function emitDysphagiaAssessmentFinalized(doc) {
+  if (!doc.$__dysphagiaFinalizedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('dysphagia-assessment', 'dysphagia_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      screeningTool: doc.screeningTool,
+      aspirationRisk: doc.aspirationRisk,
+      npoRecommended: !!doc.npoRecommended,
+      unsafe: !!doc.isUnsafeSwallow,
+      recommendedIddsiFood: doc.recommendedIddsiFood || '',
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.DysphagiaAssessment ||
   mongoose.model('DysphagiaAssessment', DysphagiaAssessmentSchema);

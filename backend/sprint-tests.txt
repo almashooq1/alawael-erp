@@ -771,3 +771,4 @@ __tests__/community-referral-completed-core-linkage-wave1061.test.js
 __tests__/clinical-pathway-completed-core-linkage-wave1062.test.js
 __tests__/aac-pecs-phase-advanced-core-linkage-wave1063.test.js
 __tests__/pain-assessment-finalized-core-linkage-wave1064.test.js
+__tests__/dysphagia-assessment-finalized-core-linkage-wave1065.test.js

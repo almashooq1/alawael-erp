@@ -2092,6 +2092,39 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1065: dysphagia (swallow) assessment finalized → core timeline ─
+  // When a beneficiary's swallow-safety assessment is finalized, log it on
+  // their timeline (clinical; error when the swallow is unsafe — high
+  // aspiration risk / silent aspiration / active NPO — else info).
+  subscribers.push({
+    name: 'dysphagia-assessment:finalized → timeline:record',
+    pattern: 'dysphagia-assessment.dysphagia_assessment.finalized',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const unsafe = !!event.payload.unsafe;
+          const risk = event.payload.aspirationRisk
+            ? ` — ${event.payload.aspirationRisk} aspiration risk`
+            : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'dysphagia_assessment_finalized',
+            category: 'clinical',
+            severity: unsafe ? 'error' : 'info',
+            title: `Dysphagia assessment finalized${risk}`,
+            title_ar: unsafe ? 'تم اعتماد تقييم البلع — بلع غير آمن' : 'تم اعتماد تقييم البلع',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] DysphagiaAssessment timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

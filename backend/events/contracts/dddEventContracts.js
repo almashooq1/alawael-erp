@@ -1473,6 +1473,29 @@ const PAIN_ASSESSMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const DYSPHAGIA_ASSESSMENT_EVENTS = {
+  DYSPHAGIA_ASSESSMENT_FINALIZED: {
+    domain: 'dysphagia-assessment',
+    eventType: 'dysphagia_assessment.finalized',
+    version: 1,
+    description: 'اعتماد تقييم البلع — Dysphagia (swallow) assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      screeningTool: 'string',
+      aspirationRisk: 'string',
+      npoRecommended: 'boolean',
+      unsafe: 'boolean',
+      recommendedIddsiFood: 'string',
+      finalizedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1524,6 +1547,7 @@ const DDD_CONTRACTS = {
   'clinical-pathway': CLINICAL_PATHWAY_EVENTS,
   'aac-profile': AAC_PROFILE_EVENTS,
   'pain-assessment': PAIN_ASSESSMENT_EVENTS,
+  'dysphagia-assessment': DYSPHAGIA_ASSESSMENT_EVENTS,
 };
 
 /**
@@ -1591,6 +1615,7 @@ module.exports = {
   CLINICAL_PATHWAY_EVENTS,
   AAC_PROFILE_EVENTS,
   PAIN_ASSESSMENT_EVENTS,
+  DYSPHAGIA_ASSESSMENT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

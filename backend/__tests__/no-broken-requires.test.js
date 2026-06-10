@@ -78,6 +78,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // fixture strings, not real imports — the scanner is fooled by the quotes.
   path.join('__tests__', 'check-authz-consolidation-script.test.js'),
   path.join('__tests__', 'check-can-scope-contract-script.test.js'),
+  // W1189/W1194 check-phantom-schema-writes self-test writes
+  // `require('../models/Widget')` / `require('./shape')` etc. as fixture
+  // CONTENT (string arrays written to mkdtempSync repos) — same W522 class:
+  // literal fixture strings, not real imports.
+  path.join('__tests__', 'check-phantom-schema-writes-script.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

@@ -112,6 +112,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'physiotherapy-assessment', // W1072 — physiotherapy assessment finalized → core timeline
   'beneficiary-contract', // W1073 — service contract activated → core timeline
   'subsidy-entry', // W1074 — subsidy payment received → core timeline
+  'sponsorship', // W1075 — sponsorship activated → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -198,6 +199,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'physiotherapy_assessment', // W1072 — physiotherapy_assessment.finalized (PhysiotherapyAssessment)
     'beneficiary_contract', // W1073 — beneficiary_contract.activated (BeneficiaryContract)
     'subsidy_entry', // W1074 — subsidy_entry.received (BeneficiarySubsidyEntry)
+    'sponsorship', // W1075 — sponsorship.activated (Sponsorship)
   ])
 );
 

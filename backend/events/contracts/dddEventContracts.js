@@ -1687,6 +1687,29 @@ const SUBSIDY_ENTRY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SPONSORSHIP_EVENTS = {
+  SPONSORSHIP_ACTIVATED: {
+    domain: 'sponsorship',
+    eventType: 'sponsorship.activated',
+    version: 1,
+    description: 'تفعيل كفالة المستفيد من متبرع — Beneficiary sponsorship (kafala) activated',
+    payload: {
+      sponsorshipId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      sponsorshipType: 'string',
+      monthlyAmount: 'number',
+      currency: 'string',
+      isZakat: 'boolean',
+      startDate: 'date',
+      activatedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1748,6 +1771,7 @@ const DDD_CONTRACTS = {
   'physiotherapy-assessment': PHYSIOTHERAPY_ASSESSMENT_EVENTS,
   'beneficiary-contract': BENEFICIARY_CONTRACT_EVENTS,
   'subsidy-entry': SUBSIDY_ENTRY_EVENTS,
+  sponsorship: SPONSORSHIP_EVENTS,
 };
 
 /**
@@ -1825,6 +1849,7 @@ module.exports = {
   PHYSIOTHERAPY_ASSESSMENT_EVENTS,
   BENEFICIARY_CONTRACT_EVENTS,
   SUBSIDY_ENTRY_EVENTS,
+  SPONSORSHIP_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

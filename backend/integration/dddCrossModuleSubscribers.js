@@ -2406,6 +2406,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1075: sponsorship activated → core timeline ───────────────────
+  // When a beneficiary's kafala (sponsorship) becomes active, log it on
+  // the timeline as an administrative milestone (a donor now covers them).
+  subscribers.push({
+    name: 'sponsorship:activated → timeline:record',
+    pattern: 'sponsorship.sponsorship.activated',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.sponsorshipType || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'sponsorship_activated',
+            category: 'administrative',
+            severity: 'success',
+            title: `Sponsorship activated (${type})`,
+            title_ar: 'تمت كفالة المستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Sponsorship timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

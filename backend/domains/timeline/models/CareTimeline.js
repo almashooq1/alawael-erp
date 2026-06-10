@@ -151,6 +151,7 @@ const careTimelineSchema = new mongoose.Schema(
         'physiotherapy_assessment_finalized',
         'service_contract_activated',
         'subsidy_payment_received',
+        'sponsorship_activated',
         // Family
         'family_contact',
         'family_meeting',

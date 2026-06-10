@@ -176,6 +176,36 @@ SponsorshipSchema.virtual('isExpired').get(function () {
 SponsorshipSchema.set('toJSON', { virtuals: true });
 SponsorshipSchema.set('toObject', { virtuals: true });
 
+// ── W1075: unified-core producer ───────────────────────────────────
+// Emit sponsorship.activated when a kafala becomes active so the
+// per-beneficiary CareTimeline records the milestone (a donor now
+// covers them). Non-callback hook style (W483 gate): the global async
+// save plugin puts the whole hook chain in promise-adapter mode.
+SponsorshipSchema.pre('save', function flagSponsorshipActivated() {
+  this.$__sponsorshipActivatedNow =
+    this.status === 'active' && (this.isNew || this.isModified('status'));
+});
+
+SponsorshipSchema.post('save', function emitSponsorshipActivated(doc) {
+  if (!doc.$__sponsorshipActivatedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('sponsorship', 'sponsorship.activated', {
+      sponsorshipId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      sponsorshipType: doc.sponsorshipType,
+      monthlyAmount: doc.monthlyAmount,
+      currency: doc.currency,
+      isZakat: !!doc.isZakat,
+      startDate: doc.startDate,
+      activatedAt: doc.updatedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports = mongoose.models.Sponsorship || mongoose.model('Sponsorship', SponsorshipSchema);
 
 module.exports.TYPES = TYPES;

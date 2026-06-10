@@ -2376,6 +2376,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1074: subsidy payment received → core timeline ────────────────
+  // When a beneficiary subsidy/pension is marked received, log it on the
+  // timeline as an administrative milestone (financial support landed).
+  subscribers.push({
+    name: 'subsidy-entry:received → timeline:record',
+    pattern: 'subsidy-entry.subsidy_entry.received',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const type = event.payload.subsidyType || '';
+          const amount = event.payload.amountSAR != null ? event.payload.amountSAR : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'subsidy_payment_received',
+            category: 'administrative',
+            severity: 'success',
+            title: `Subsidy received: ${type} — ${amount} SAR`,
+            title_ar: 'تم استلام إعانة مالية',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] SubsidyEntry timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

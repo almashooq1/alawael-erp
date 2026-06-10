@@ -150,6 +150,7 @@ const careTimelineSchema = new mongoose.Schema(
         'portfolio_milestone_added',
         'physiotherapy_assessment_finalized',
         'service_contract_activated',
+        'subsidy_payment_received',
         // Family
         'family_contact',
         'family_meeting',

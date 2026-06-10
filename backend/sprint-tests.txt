@@ -780,3 +780,4 @@ __tests__/disability-card-registered-core-linkage-wave1070.test.js
 __tests__/portfolio-milestone-added-core-linkage-wave1071.test.js
 __tests__/physiotherapy-assessment-finalized-core-linkage-wave1072.test.js
 __tests__/service-contract-activated-core-linkage-wave1073.test.js
+__tests__/subsidy-payment-received-core-linkage-wave1074.test.js

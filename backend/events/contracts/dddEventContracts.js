@@ -1665,6 +1665,28 @@ const BENEFICIARY_CONTRACT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const SUBSIDY_ENTRY_EVENTS = {
+  SUBSIDY_PAYMENT_RECEIVED: {
+    domain: 'subsidy-entry',
+    eventType: 'subsidy_entry.received',
+    version: 1,
+    description: 'استلام إعانة/معاش مالي للمستفيد — Beneficiary subsidy payment received',
+    payload: {
+      entryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      subsidyType: 'string',
+      amountSAR: 'number',
+      year: 'number',
+      month: 'number',
+      receivedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1725,6 +1747,7 @@ const DDD_CONTRACTS = {
   portfolio: PORTFOLIO_EVENTS,
   'physiotherapy-assessment': PHYSIOTHERAPY_ASSESSMENT_EVENTS,
   'beneficiary-contract': BENEFICIARY_CONTRACT_EVENTS,
+  'subsidy-entry': SUBSIDY_ENTRY_EVENTS,
 };
 
 /**
@@ -1801,6 +1824,7 @@ module.exports = {
   PORTFOLIO_EVENTS,
   PHYSIOTHERAPY_ASSESSMENT_EVENTS,
   BENEFICIARY_CONTRACT_EVENTS,
+  SUBSIDY_ENTRY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

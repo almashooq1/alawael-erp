@@ -2581,6 +2581,29 @@ const MEASURE_REASSESSMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const MEASURE_ALERT_EVENTS = Object.freeze({
+  MEASURE_ALERT_RAISED: {
+    domain: 'measure-alert',
+    eventType: 'measure_alert.raised',
+    version: 1,
+    description:
+      'A measure-driven alert (regression / plateau / MCID / forecast) was raised for a beneficiary.',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      measureCode: 'string',
+      measureId: 'string',
+      alertType: 'string',
+      severity: 'string',
+      raisedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}); // ═══ W1116 — measure-alert raised → unified core timeline ═══
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2683,6 +2706,7 @@ const DDD_CONTRACTS = {
   'workflow-task': WORKFLOW_TASK_EVENTS,
   'behavior-record': BEHAVIOR_RECORD_EVENTS,
   'measure-reassessment': MEASURE_REASSESSMENT_EVENTS,
+  'measure-alert': MEASURE_ALERT_EVENTS,
 };
 
 /**
@@ -2797,6 +2821,7 @@ module.exports = {
   WORKFLOW_TASK_EVENTS,
   BEHAVIOR_RECORD_EVENTS,
   MEASURE_REASSESSMENT_EVENTS,
+  MEASURE_ALERT_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -335,6 +335,7 @@ __tests__/llm-anomaly-models-behavioral-wave144-147.test.js
 __tests__/maintenancerequest-branch-tenancy-wave665.test.js
 __tests__/makefile-npm-script-refs.test.js
 __tests__/mass-assignment-create-strip-update-meta-wave507.test.js
+__tests__/mass-assignment-update-routes-wave1112.test.js
 __tests__/mdt-coordination-branch-scope-wave639.test.js
 __tests__/measure-administer-scoring-wave215.test.js
 __tests__/measure-administration-wave211.test.js
@@ -825,3 +826,4 @@ __tests__/family-communication-logged-core-linkage-wave1112.test.js
 __tests__/workflow-task-completed-core-linkage-wave1113.test.js
 __tests__/behavior-record-logged-core-linkage-wave1114.test.js
 __tests__/measure-reassessment-completed-core-linkage-wave1115.test.js
+__tests__/measure-alert-raised-core-linkage-wave1116.test.js

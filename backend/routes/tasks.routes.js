@@ -12,6 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 function Task() {
   try {
@@ -138,7 +139,7 @@ router.put(
     const M = Task();
     const task = await M.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });

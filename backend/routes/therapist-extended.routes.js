@@ -19,6 +19,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Model helpers (lazy) ─────────────────────────────────────────────────────
 function model(name, fallbackPath) {
@@ -167,7 +168,7 @@ router.put(
     if (!M) return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
     const plan = await M.findByIdAndUpdate(
       req.params.planId,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'Treatment plan not found' });
@@ -182,7 +183,7 @@ router.patch(
     if (!M) return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
     const plan = await M.findOneAndUpdate(
       { _id: req.params.planId, 'goals._id': req.params.goalId },
-      { $set: { 'goals.$': { ...req.body, _id: req.params.goalId } } },
+      { $set: { 'goals.$': { ...stripUpdateMeta(req.body), _id: req.params.goalId } } },
       { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: plan });
@@ -285,7 +286,7 @@ router.put(
     const M = Prescription();
     const record = await M.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Prescription not found' });
@@ -335,7 +336,7 @@ router.put(
     const M = ProfessionalDev();
     const record = await M.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });

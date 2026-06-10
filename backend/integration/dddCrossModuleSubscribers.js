@@ -3598,6 +3598,33 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  subscribers.push({
+    name: 'measure-alert:raised → timeline:record',
+    pattern: 'measure-alert.measure_alert.raised',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const code = event.payload.measureCode;
+          const sev = event.payload.severity;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'measure_alert_raised',
+            category: 'clinical',
+            severity: sev === 'critical' ? 'critical' : sev === 'high' ? 'error' : 'warning',
+            title: `Measure alert raised${code ? ` (${code})` : ''}`,
+            title_ar: 'تم رفع تنبيه مرتبط بمقياس للمستفيد',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] MeasureAlert timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

@@ -93,6 +93,33 @@ surface on `Goal`(IEP); point it at the canonical model instead.
   — the caller/outcomes evidence says yes.
 - **Q4.** Are `Measure` and `MeasurementMaster` the same concept (→ ADR-041)?
 
+## Data readiness evidence (`audit:goal-consolidation`, DEV, 2026-06-10)
+
+Ran the read-only readiness audit (W1138 sibling, `scripts/goal-model-consolidation-readiness.js`)
+against the dev DB (`alawael-erp`):
+
+| Model               | dev count |
+| ------------------- | --------- |
+| `SmartGoal`         | **0**     |
+| `TherapeuticGoal`   | 0         |
+| `Goal` (IEP)        | 0         |
+| `CarePlan`          | 4         |
+| `TherapeuticPlan`   | 1         |
+| `Measure`           | 8         |
+| `MeasurementMaster` | 0         |
+
+**Verdict (dev):** `SmartGoal` is **EMPTY** → the Option-C retire is **trivial** there —
+deprecate + remove the 2 write surfaces; **no data migration, no clinical-field
+fabrication** (which is what made a non-empty SmartGoal→TherapeuticGoal migration
+hard, since `TherapeuticGoal` requires `episodeId`/`target.value`/`type` that
+`SmartGoal` lacks). The all-zero goal counts mean this is a **near-seed dev DB**, so
+the numbers are **indicative, not authoritative**.
+
+**To unblock Q1 for real:** run `MONGODB_URI=<prod> npm run audit:goal-consolidation`.
+If prod `SmartGoal` is also empty (or small), Q1 = "read-only-deprecate" and the
+retire ships as a guarded `--execute` script (dry-run default). The audit tooling is
+now verified end-to-end against a live DB.
+
 ## Consequences
 
 - **Positive:** one canonical goal for the golden thread; outcome/GAS/forecast

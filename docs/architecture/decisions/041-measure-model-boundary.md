@@ -84,6 +84,18 @@ freezes that field for deprecation.
 - **Q3.** Confirm `Measure` is canonical for goal↔measure↔outcome (the service +
   ref evidence says yes).
 
+## Data readiness evidence (`audit:goal-consolidation`, DEV, 2026-06-10)
+
+Read-only audit against the dev DB (`alawael-erp`): **`Measure` = 8**,
+**`MeasurementMaster` = 0**, **`MeasurementResult` = 0**. This **confirms the ADR's
+direction**: `Measure` is the populated/canonical model and the parallel
+measurement-system is **empty** in dev → fencing/retiring it is **trivial** (no data
+to migrate). Indicative only (near-seed dev DB) — confirm with
+`MONGODB_URI=<prod> npm run audit:goal-consolidation` before fencing. If prod
+`MeasurementMaster` is also empty, Q1 ("is the measurement-system a real psychometric
+context with data?") resolves to "no — fence it", and the W1090 `Goal.linkedMeasures`
+ref correction (`MeasurementMaster` → `Measure`) ships in the same window.
+
 ## Consequences
 
 - **Positive:** one canonical measure for the golden thread; the W1090 mis-wiring

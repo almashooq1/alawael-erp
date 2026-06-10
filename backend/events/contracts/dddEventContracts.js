@@ -1334,6 +1334,26 @@ const CREATIVE_ARTS_THERAPY_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const INSURANCE_ELIGIBILITY_EVENTS = {
+  INSURANCE_ELIGIBILITY_CHECKED: {
+    domain: 'insurance-eligibility',
+    eventType: 'insurance_eligibility.checked',
+    version: 1,
+    description: 'إجراء فحص أهلية التأمين — Insurance eligibility check recorded',
+    payload: {
+      checkId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      checkType: 'string',
+      isEligible: 'boolean',
+      checkedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1378,6 +1398,7 @@ const DDD_CONTRACTS = {
   'crisis-incident': CRISIS_INCIDENT_EVENTS,
   'iq-assessment': IQ_ASSESSMENT_EVENTS,
   'creative-arts-therapy': CREATIVE_ARTS_THERAPY_EVENTS,
+  'insurance-eligibility': INSURANCE_ELIGIBILITY_EVENTS,
 };
 
 /**
@@ -1438,6 +1459,7 @@ module.exports = {
   CRISIS_INCIDENT_EVENTS,
   IQ_ASSESSMENT_EVENTS,
   CREATIVE_ARTS_THERAPY_EVENTS,
+  INSURANCE_ELIGIBILITY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

@@ -1884,6 +1884,35 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1058: insurance eligibility check → core timeline ─────────────
+  // When an NPHIES insurance-eligibility check is recorded, log it on the
+  // beneficiary's timeline (administrative); ineligible results raise a warning.
+  subscribers.push({
+    name: 'insurance-eligibility:checked → timeline:record',
+    pattern: 'insurance-eligibility.insurance_eligibility.checked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const eligible = !!event.payload.isEligible;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'insurance_eligibility_checked',
+            category: 'administrative',
+            severity: eligible ? 'success' : 'warning',
+            title: `Insurance eligibility check: ${eligible ? 'eligible' : 'not eligible'}`,
+            title_ar: eligible ? 'فحص أهلية التأمين: مؤهل' : 'فحص أهلية التأمين: غير مؤهل',
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] InsuranceEligibility timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

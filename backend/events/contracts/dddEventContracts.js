@@ -1496,6 +1496,26 @@ const DYSPHAGIA_ASSESSMENT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const ALLERGY_EVENTS = {
+  ALLERGY_RECORDED: {
+    domain: 'allergy',
+    eventType: 'allergy.recorded',
+    version: 1,
+    description: 'تسجيل حساسية للمستفيد — Beneficiary allergy recorded (safety)',
+    payload: {
+      allergyId: 'string',
+      beneficiaryId: 'string',
+      substance: 'string',
+      severity: 'string',
+      severe: 'boolean',
+      recordedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1548,6 +1568,7 @@ const DDD_CONTRACTS = {
   'aac-profile': AAC_PROFILE_EVENTS,
   'pain-assessment': PAIN_ASSESSMENT_EVENTS,
   'dysphagia-assessment': DYSPHAGIA_ASSESSMENT_EVENTS,
+  allergy: ALLERGY_EVENTS,
 };
 
 /**
@@ -1616,6 +1637,7 @@ module.exports = {
   AAC_PROFILE_EVENTS,
   PAIN_ASSESSMENT_EVENTS,
   DYSPHAGIA_ASSESSMENT_EVENTS,
+  ALLERGY_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

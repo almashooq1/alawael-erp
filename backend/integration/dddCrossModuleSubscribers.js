@@ -2125,6 +2125,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1066: allergy recorded → core timeline ────────────────────────
+  // A new active allergy is a safety milestone. Log it on the
+  // beneficiary's timeline (clinical; error for severe / life-threatening
+  // allergies, warning otherwise — an allergy always warrants attention).
+  subscribers.push({
+    name: 'allergy:recorded → timeline:record',
+    pattern: 'allergy.allergy.recorded',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const severe = !!event.payload.severe;
+          const sub = event.payload.substance || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'allergy_recorded',
+            category: 'clinical',
+            severity: severe ? 'error' : 'warning',
+            title: `Allergy recorded: ${sub} (${event.payload.severity})`,
+            title_ar: severe ? `تم تسجيل حساسية خطيرة: ${sub}` : `تم تسجيل حساسية: ${sub}`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Allergy timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

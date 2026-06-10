@@ -142,6 +142,7 @@ const careTimelineSchema = new mongoose.Schema(
         'aac_pecs_phase_advanced',
         'pain_assessment_finalized',
         'dysphagia_assessment_finalized',
+        'allergy_recorded',
         // Family
         'family_contact',
         'family_meeting',

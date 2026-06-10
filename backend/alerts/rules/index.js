@@ -40,6 +40,9 @@ module.exports = [
 
   // ── Wave 3 — HR escalations (3) ─────────────────────────────
   require('./credential-expired'),
+  // ── W1151 — staff certification expiry (the UI-backed credential model) ──
+  require('./staff-certification-expired'),
+  require('./staff-certification-expiry-30d'),
   require('./employment-contract-expiring-60d'),
   require('./employment-contract-expired'),
 

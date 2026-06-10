@@ -252,12 +252,45 @@ async function branchProductivity(opts = {}) {
   };
 }
 
+// The reassessment-lifecycle phases that mean "the periodic report is overdue"
+// (W222 MeasureReassessmentTask.phase). The supervisor's "overdue reports" view.
+const OVERDUE_REPORT_PHASES = Object.freeze(['OVERDUE', 'ESCALATED', 'BREACHED']);
+
+/**
+ * PURE — shape a set of MeasureReassessmentTask rows (from
+ * reassessmentLifecycle.listByPhase) into the supervisor "overdue reports" view:
+ * only the overdue-spectrum phases, counted + sorted most-overdue-first. No DB.
+ * @param {object[]} tasks
+ * @returns {{ total:number, counts:object, tasks:any[] }}
+ */
+function summarizeOverdueReports(tasks) {
+  const list = Array.isArray(tasks) ? tasks : [];
+  const counts = { OVERDUE: 0, ESCALATED: 0, BREACHED: 0 };
+  const out = [];
+  for (const t of list) {
+    if (!t || counts[t.phase] === undefined) continue; // keep only overdue phases
+    counts[t.phase] += 1;
+    out.push({
+      taskId: t._id,
+      beneficiaryId: t.beneficiaryId,
+      measureId: t.measureId,
+      measureCode: t.measureCode,
+      dueAt: t.dueAt,
+      phase: t.phase,
+    });
+  }
+  out.sort((a, b) => new Date(a.dueAt || 0).getTime() - new Date(b.dueAt || 0).getTime());
+  return { total: out.length, counts, tasks: out };
+}
+
 module.exports = {
   WORKFLOW_STATES,
+  OVERDUE_REPORT_PHASES,
   isDocumented,
   classifySessionWorkflowState,
   summarizeDailyOps,
   summarizeProductivityByTherapist,
+  summarizeOverdueReports,
   dailyBoardForTherapist,
   documentationBacklog,
   branchProductivity,

@@ -809,6 +809,7 @@ __tests__/supervisor-ops-service-behavioral-wave1169.test.js
 __tests__/supervisor-ops-service-wave1169.test.js
 __tests__/supervisor-productivity-behavioral-wave1173.test.js
 __tests__/supervisor-productivity-wave1173.test.js
+__tests__/supervisor-overdue-reports-wave1174.test.js
 __tests__/supply-chain-doc-sync-wave823.test.js
 __tests__/supply-chain-engineering-freeze-wave822.test.js
 __tests__/supply-chain-ops-closure-wave817.test.js

@@ -22,7 +22,9 @@ const { effectiveBranchScope } = require('../../../middleware/assertBranchMatch'
 const {
   documentationBacklog,
   branchProductivity,
+  summarizeOverdueReports,
 } = require('../../../services/supervisorOps.service');
+const reassessmentLifecycleService = require('../../../services/reassessmentLifecycle.service');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -81,6 +83,36 @@ router.get(
 
     const sinceDays = Math.min(parseInt(req.query.days, 10) || 7, 90);
     const data = await branchProductivity({ branchId, sinceDays });
+    return res.json({ success: true, data: { branchId: String(branchId), ...data } });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /supervisor-ops/overdue-reports[?branchId=]
+//   Which beneficiaries have an overdue periodic (reassessment) report —
+//   phase OVERDUE / ESCALATED / BREACHED. Reuses the W222 reassessment
+//   lifecycle (listByPhase) + the pure summarizeOverdueReports shaper. Same
+//   W269 branch scoping. (W1174)
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/supervisor-ops/overdue-reports',
+  asyncHandler(async (req, res) => {
+    const scoped = effectiveBranchScope(req);
+    let branchId = scoped || null;
+    if (!branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+      branchId = req.query.branchId;
+    }
+    if (!branchId) {
+      return res.status(400).json({
+        success: false,
+        error: 'branchId required — a cross-branch role must specify ?branchId.',
+      });
+    }
+
+    // listByPhase with no `phase` returns all pending/acknowledged tasks for the
+    // branch; the pure shaper keeps only the overdue-spectrum phases.
+    const tasks = await reassessmentLifecycleService.listByPhase({ branchId });
+    const data = summarizeOverdueReports(tasks);
     return res.json({ success: true, data: { branchId: String(branchId), ...data } });
   })
 );

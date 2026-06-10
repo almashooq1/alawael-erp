@@ -264,14 +264,23 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
     const submitterPhone = data.phone || data.submitter_phone || data.contact_phone || null;
     const submitterEmail = data.email || data.submitter_email || null;
 
+    // W1186 — the model's declared field is approvalSteps; the old
+    // approvalWorkflow read was a phantom (strict mode never persisted it),
+    // so public submissions never initialized their approval chains.
     const approvals = [];
-    if (tpl.approvalWorkflow && tpl.approvalWorkflow.enabled) {
-      const steps = (tpl.approvalWorkflow.steps || [])
+    {
+      const wfSteps =
+        tpl.approvalSteps && tpl.approvalSteps.length > 0
+          ? tpl.approvalSteps
+          : (tpl.approvalWorkflow && tpl.approvalWorkflow.enabled
+              ? tpl.approvalWorkflow.steps
+              : []) || [];
+      wfSteps
         .slice()
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-      steps.forEach((s, i) => {
-        approvals.push({ step: i, role: s.role, label: s.label || s.role, status: 'pending' });
-      });
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .forEach((s, i) => {
+          approvals.push({ step: i, role: s.role, label: s.label || s.role, status: 'pending' });
+        });
     }
 
     const submissionNumber = `PUB-${Date.now().toString(36)}-${Math.random()

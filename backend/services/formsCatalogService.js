@@ -43,6 +43,25 @@ const AUDIENCE_TO_CATEGORY = {
   management: 'administration',
 };
 
+// W1186 — map the registry's `approvalWorkflow` {enabled, steps[{role,label,order}]}
+// onto the model's DECLARED `approvalSteps` field. Pre-W1186 buildTemplateDoc wrote
+// `approvalWorkflow` (not in the schema), strict mode dropped it silently, and all
+// catalog instantiations shipped WITHOUT their designed approval chains (27 of 32
+// registry entries define one) — so the step-wise review engine never engaged.
+function approvalStepsFromWorkflow(workflow) {
+  if (!workflow || !workflow.enabled || !Array.isArray(workflow.steps)) return [];
+  return workflow.steps
+    .slice()
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((s, i) => ({
+      role: s.role,
+      label: s.label || s.role,
+      labelEn: s.labelEn,
+      order: s.order ?? i,
+      required: s.required !== false,
+    }));
+}
+
 function buildTemplateDoc(entry, ctx = {}) {
   // Tag the template with catalog provenance using only fields the model
   // declares (no `metadata` field on FormTemplate — strict mode drops it).
@@ -70,8 +89,11 @@ function buildTemplateDoc(entry, ctx = {}) {
     // Structure
     sections: entry.sections || [],
     fields: entry.fields || [],
-    approvalWorkflow: entry.approvalWorkflow || { enabled: false, steps: [] },
     design: entry.design || {},
+
+    // Approval chain (model-declared fields — see approvalStepsFromWorkflow)
+    requiresApproval: Boolean(entry.approvalWorkflow && entry.approvalWorkflow.enabled),
+    approvalSteps: approvalStepsFromWorkflow(entry.approvalWorkflow),
 
     // Tenancy + status
     tenantId: ctx.tenantId || undefined,
@@ -193,5 +215,6 @@ function toDetail(entry) {
 module.exports = {
   createFormsCatalogService,
   buildTemplateDoc,
+  approvalStepsFromWorkflow,
   CATALOG_VERSION,
 };

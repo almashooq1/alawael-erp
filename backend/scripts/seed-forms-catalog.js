@@ -41,6 +41,7 @@ const HELP = flag('--help') || flag('-h');
 const DRY = flag('--dry-run');
 const JSON_MODE = flag('--json');
 const RESET = flag('--reset');
+const SYNC_APPROVALS = flag('--sync-approvals');
 const AUDIENCE = arg('--audience');
 const TENANT_ID = arg('--tenant') || process.env.FORMS_SEED_TENANT_ID || null;
 const BRANCH_ID = arg('--branch') || process.env.FORMS_SEED_BRANCH_ID || null;
@@ -56,6 +57,8 @@ if (HELP) {
       '  --branch <id>                          branchId scope (or FORMS_SEED_BRANCH_ID)',
       '  --dry-run                              plan only, no DB writes',
       '  --reset                                delete existing from-catalog docs first',
+      '  --sync-approvals                       backfill approvalSteps onto already-seeded',
+      '                                         catalog docs missing a chain (W1186)',
       '  --json                                 machine-readable output',
       '  -h, --help                             this message',
       '',
@@ -128,6 +131,63 @@ async function main() {
 
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000 });
+
+  // ── W1186: backfill approval chains onto already-seeded catalog docs ──────
+  // Pre-W1186 instantiation wrote the registry's chain into the phantom
+  // `approvalWorkflow` field, which strict mode dropped — so every seeded doc
+  // has an empty approvalSteps[]. This mode is idempotent: it only touches
+  // from-catalog docs (templateId matches a registry id, optionally
+  // tenant-suffixed) whose approvalSteps is empty while the registry defines
+  // a chain.
+  if (SYNC_APPROVALS) {
+    const { approvalStepsFromWorkflow } = require('../services/formsCatalogService');
+    const entries = AUDIENCE ? catalog.listByAudience(AUDIENCE) : catalog.listAll();
+    const results = { updated: [], skippedNoChain: 0, skippedHasChain: 0, notSeeded: 0 };
+    for (const item of entries) {
+      const entry = catalog.getById(item.id);
+      const steps = approvalStepsFromWorkflow(entry.approvalWorkflow);
+      if (steps.length === 0) {
+        results.skippedNoChain += 1;
+        continue;
+      }
+      const templateId = TENANT_ID ? `${entry.id}:${TENANT_ID}` : entry.id;
+      const doc = await FormTemplate.findOne({ templateId }).select('approvalSteps').lean();
+      if (!doc) {
+        results.notSeeded += 1;
+        continue;
+      }
+      if ((doc.approvalSteps || []).length > 0) {
+        results.skippedHasChain += 1;
+        continue;
+      }
+      await FormTemplate.updateOne(
+        { _id: doc._id },
+        { $set: { approvalSteps: steps, requiresApproval: true } }
+      );
+      results.updated.push(templateId);
+    }
+    await mongoose.disconnect();
+    if (JSON_MODE) {
+      process.stdout.write(
+        JSON.stringify({ mode: 'sync-approvals', updated: results.updated.length, ...results }, null, 2) + '\n'
+      );
+    } else {
+      process.stdout.write(
+        [
+          `${c.bold}Forms Catalog — SYNC APPROVALS (W1186)${c.reset}`,
+          '',
+          `${c.green}updated:${c.reset}        ${results.updated.length}`,
+          `${c.dim}already had:${c.reset}    ${results.skippedHasChain}`,
+          `${c.dim}no chain:${c.reset}       ${results.skippedNoChain}`,
+          `${c.yellow}not seeded:${c.reset}     ${results.notSeeded}`,
+          '',
+          ...results.updated.map(id => `  ${c.green}✓${c.reset} ${id}`),
+          '',
+        ].join('\n')
+      );
+    }
+    return 0;
+  }
 
   if (RESET) {
     const filter = { 'metadata.catalogId': { $exists: true }, isFromCatalog: true };

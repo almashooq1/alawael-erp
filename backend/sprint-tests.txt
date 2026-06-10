@@ -814,3 +814,5 @@ __tests__/finance-approvals-branch-isolation-wave1163.test.js
 __tests__/finance-approvals-branch-isolation-behavioral-wave1163.test.js
 __tests__/finance-cheques-branch-isolation-wave1172.test.js
 __tests__/finance-cheques-branch-isolation-behavioral-wave1172.test.js
+__tests__/forms-approval-chain-wave1186.test.js
+__tests__/forms-approval-chain-behavioral-wave1186.test.js

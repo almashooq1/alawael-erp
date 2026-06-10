@@ -1388,6 +1388,8 @@ on:
       - 'backend/__tests__/gas-score-snapshotted-core-linkage-wave1095.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pdpl-request-received-core-linkage-wave1096.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bip-effectiveness-recorded-core-linkage-wave1097.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2759,6 +2761,8 @@ on:
       - 'backend/__tests__/gas-score-snapshotted-core-linkage-wave1095.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pdpl-request-received-core-linkage-wave1096.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/bip-effectiveness-recorded-core-linkage-wave1097.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

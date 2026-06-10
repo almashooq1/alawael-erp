@@ -173,6 +173,7 @@ const careTimelineSchema = new mongoose.Schema(
         'cdss_alert_raised',
         'gas_score_snapshotted',
         'pdpl_request_received',
+        'bip_effectiveness_recorded',
         // Family
         'family_contact',
         'family_meeting',

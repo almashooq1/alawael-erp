@@ -2156,6 +2156,27 @@ const PDPL_REQUEST_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const BIP_EFFECTIVENESS_EVENTS = {
+  BIP_EFFECTIVENESS_RECORDED: {
+    domain: 'bip-effectiveness',
+    eventType: 'bip_effectiveness.recorded',
+    version: 1,
+    description:
+      'تسجيل قراءة فعّالية خطة التدخل السلوكي للمستفيد — A BIP effectiveness reading was recorded for a beneficiary',
+    payload: {
+      readingId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      fbaAssessmentId: 'string',
+      percentChangeFromBaseline: 'number',
+      measuredAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2239,6 +2260,7 @@ const DDD_CONTRACTS = {
   'cdss-alert': CDSS_ALERT_EVENTS,
   'gas-snapshot': GAS_SNAPSHOT_EVENTS,
   'pdpl-request': PDPL_REQUEST_EVENTS,
+  'bip-effectiveness': BIP_EFFECTIVENESS_EVENTS,
 };
 
 /**
@@ -2338,6 +2360,7 @@ module.exports = {
   CDSS_ALERT_EVENTS,
   GAS_SNAPSHOT_EVENTS,
   PDPL_REQUEST_EVENTS,
+  BIP_EFFECTIVENESS_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

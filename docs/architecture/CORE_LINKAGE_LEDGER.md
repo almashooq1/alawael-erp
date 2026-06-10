@@ -136,7 +136,8 @@ enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 | --- | --- | --- | --- |
 | Insurance / NPHIES claims | `NphiesInsuranceClaim` | `insurance.claim.approved` / `.rejected` → `insurance_claim` | ✅ **W994** (per-beneficiary timeline) |
 | Facilities — PPM / inspection overdue | `FacilityAsset` | smart-alert **rule** `facility-asset-ppm-overdue` (category `operational`) → `Alert` | ✅ **W1006** — first operational rule; org-scoped, NOT the beneficiary timeline |
-| Inventory low-stock · contract/document expiry · transport incidents | — | (add a `category:'operational'` rule in `alerts/rules/`) | Open — **not** beneficiary-keyed → use the alerts rule-engine path below, not `CareTimeline` |
+| Maintenance — work order overdue | `MaintenanceWorkOrder` | rule `maintenance-work-order-overdue` → `Alert` | ✅ **W1007** — open WO past `scheduledDate`; critical-priority → critical |
+| Inventory low-stock · contract/document expiry · transport (vehicle) expiry | — | (add a `category:'operational'` rule in `alerts/rules/`) | Open — **not** beneficiary-keyed → alerts rule-engine path. _Inventory low-stock needs an `InventoryItem`+`InventoryStock` join (not single-model); `Vehicle` has no branch field (org-wide alert)._ |
 
 > **Two sinks, by scope (the W1006 lesson):** beneficiary-keyed events feed the
 > per-beneficiary **`CareTimeline`** (native model hook → `integrationBus` →

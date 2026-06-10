@@ -1470,6 +1470,7 @@ try {
       'Vaccination',
       'EmploymentContract',
       'FacilityAsset', // W1006 — operational PPM/inspection-overdue rule
+      'MaintenanceWorkOrder', // W1007 — operational work-order-overdue rule
     ];
     const liveModels = {};
     for (const name of modelNames) {

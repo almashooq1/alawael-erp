@@ -232,3 +232,47 @@ describe('W1186 — step-wise review engine', () => {
     expect(ok.body.data.status).toBe('archived');
   });
 });
+
+describe('W1186b — queue + detail visibility for step-role reviewers', () => {
+  let subId;
+
+  beforeEach(async () => {
+    const res = await submitChainForm();
+    subId = res.body.data._id;
+  });
+
+  function asUser(user) {
+    mockAuthState.user = user;
+  }
+
+  it('step-role reviewer sees the pending queue scoped to their role', async () => {
+    asUser(HR_OFFICER);
+    const res = await request(app).get('/api/v1/form-templates/submissions/pending');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(String(res.body.data[0]._id)).toBe(String(subId));
+  });
+
+  it('a role with no step anywhere gets an empty queue (not the whole queue)', async () => {
+    asUser(STAFF); // therapist — owner, but no step role
+    const res = await request(app).get('/api/v1/form-templates/submissions/pending');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(0);
+  });
+
+  it('manage role still sees the full queue', async () => {
+    asUser(ADMIN);
+    const res = await request(app).get('/api/v1/form-templates/submissions/pending');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+  });
+
+  it('step-role reviewer can open the submission detail; unrelated role cannot', async () => {
+    asUser(DIRECT_MANAGER);
+    const ok = await request(app).get(`/api/v1/form-templates/submissions/${subId}`);
+    expect(ok.status).toBe(200);
+    asUser({ _id: uid(), role: 'driver', name: 'سائق', email: 'driver@test' });
+    const no = await request(app).get(`/api/v1/form-templates/submissions/${subId}`);
+    expect(no.status).toBe(403);
+  });
+});

@@ -272,34 +272,41 @@ router.get('/submissions/my', async (req, res) => {
 });
 
 // ── GET /submissions/pending ───────────────────────────────────────────────
-router.get(
-  '/submissions/pending',
-  requireRole('admin', 'manager', 'supervisor', 'clinician'),
-  async (req, res) => {
-    try {
-      const FormSubmission = safeModel('FormSubmission');
-      if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
-      const { page = 1, limit = 50 } = req.query;
-      const filter = { status: { $in: ['submitted', 'under_review'] } };
-      const skip = (Number(page) - 1) * Number(limit);
-      const [data, total] = await Promise.all([
-        FormSubmission.find(filter)
-          .sort({ priority: -1, createdAt: 1 })
-          .skip(skip)
-          .limit(Number(limit))
-          .lean(),
-        FormSubmission.countDocuments(filter),
-      ]);
-      res.json({
-        success: true,
-        data,
-        pagination: { total, page: Number(page), limit: Number(limit) },
-      });
-    } catch (err) {
-      safeError(res, err, 'list pending submissions');
+// W1186b — reviewer-role users see the full pending queue; STEP-role users
+// (e.g. hr_officer / direct_manager, named by a template's approvalSteps but
+// outside REVIEW_ROLES) see only submissions where their role holds a
+// pending step — otherwise they could approve (PATCH allows it) but never
+// FIND their queue. Everyone else: 403.
+router.get('/submissions/pending', async (req, res) => {
+  try {
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
+    const { page = 1, limit = 50 } = req.query;
+    const filter = { status: { $in: ['submitted', 'under_review'] } };
+    if (!canReview(req)) {
+      const role = req.user?.role;
+      if (!role)
+        return res.status(403).json({ success: false, message: 'Not allowed to view the queue' });
+      filter.approvals = { $elemMatch: { status: 'pending', role } };
     }
+    const skip = (Number(page) - 1) * Number(limit);
+    const [data, total] = await Promise.all([
+      FormSubmission.find(filter)
+        .sort({ priority: -1, createdAt: 1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .lean(),
+      FormSubmission.countDocuments(filter),
+    ]);
+    res.json({
+      success: true,
+      data,
+      pagination: { total, page: Number(page), limit: Number(limit) },
+    });
+  } catch (err) {
+    safeError(res, err, 'list pending submissions');
   }
-);
+});
 
 // ── GET /submissions/:subId ────────────────────────────────────────────────
 router.get('/submissions/:subId', async (req, res) => {
@@ -312,7 +319,9 @@ router.get('/submissions/:subId', async (req, res) => {
     const doc = await FormSubmission.findById(req.params.subId).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
     const isOwner = String(doc.submittedBy?.userId || '') === String(req.user._id);
-    if (!isOwner && !canReview(req))
+    // W1186b — step-role reviewers may open submissions whose chain names them
+    const isStepReviewer = (doc.approvals || []).some(a => a.role === req.user?.role);
+    if (!isOwner && !canReview(req) && !isStepReviewer)
       return res
         .status(403)
         .json({ success: false, message: 'Not allowed to view this submission' });

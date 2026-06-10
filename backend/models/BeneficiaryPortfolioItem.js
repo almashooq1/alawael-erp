@@ -70,6 +70,32 @@ PortfolioItemSchema.index({ beneficiaryId: 1, achievementDate: -1 });
 PortfolioItemSchema.index({ beneficiaryId: 1, type: 1, achievementDate: -1 });
 PortfolioItemSchema.index({ tags: 1, achievementDate: -1 });
 
+// ─── W1071: unified-core linkage — portfolio milestone added ────────────────
+// Milestone = a NEW portfolio item flagged isMilestone is added. Emits a
+// timeline event (family-facing progress highlight). Non-callback hook style.
+PortfolioItemSchema.pre('save', function flagPortfolioMilestone() {
+  this.$__portfolioMilestoneNow = this.isNew && this.isMilestone === true;
+});
+
+PortfolioItemSchema.post('save', function emitPortfolioMilestoneAdded(doc) {
+  if (!doc.$__portfolioMilestoneNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('portfolio', 'portfolio.milestone_added', {
+      itemId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      type: doc.type,
+      title: doc.title || '',
+      achievementDate: doc.achievementDate || undefined,
+      addedAt: doc.createdAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryPortfolioItem ||
   mongoose.model('BeneficiaryPortfolioItem', PortfolioItemSchema);

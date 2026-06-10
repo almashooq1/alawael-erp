@@ -1601,6 +1601,27 @@ const DISABILITY_CARD_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+const PORTFOLIO_EVENTS = {
+  PORTFOLIO_MILESTONE_ADDED: {
+    domain: 'portfolio',
+    eventType: 'portfolio.milestone_added',
+    version: 1,
+    description: 'إضافة إنجاز/معلَم إلى بورتفوليو الطفل — Beneficiary portfolio milestone added',
+    payload: {
+      itemId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      type: 'string',
+      title: 'string',
+      achievementDate: 'date',
+      addedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1658,6 +1679,7 @@ const DDD_CONTRACTS = {
   'goal-progress': GOAL_PROGRESS_EVENTS,
   'adjunct-therapy': ADJUNCT_THERAPY_EVENTS,
   'disability-card': DISABILITY_CARD_EVENTS,
+  portfolio: PORTFOLIO_EVENTS,
 };
 
 /**
@@ -1731,6 +1753,7 @@ module.exports = {
   GOAL_PROGRESS_EVENTS,
   ADJUNCT_THERAPY_EVENTS,
   DISABILITY_CARD_EVENTS,
+  PORTFOLIO_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

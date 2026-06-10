@@ -777,3 +777,4 @@ __tests__/dtt-session-completed-core-linkage-wave1067.test.js
 __tests__/goal-progress-achieved-core-linkage-wave1068.test.js
 __tests__/adjunct-therapy-completed-core-linkage-wave1069.test.js
 __tests__/disability-card-registered-core-linkage-wave1070.test.js
+__tests__/portfolio-milestone-added-core-linkage-wave1071.test.js

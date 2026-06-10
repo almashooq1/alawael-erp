@@ -2285,6 +2285,37 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── W1071: portfolio milestone added → core timeline ───────────────
+  // When a milestone-flagged portfolio item (achievement/artwork/report)
+  // is added to a beneficiary's portfolio, surface it on the timeline as a
+  // family-facing progress highlight.
+  subscribers.push({
+    name: 'portfolio:milestone-added → timeline:record',
+    pattern: 'portfolio.portfolio.milestone_added',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const title = event.payload.title || '';
+          const type = event.payload.type || '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'portfolio_milestone_added',
+            category: 'family',
+            severity: 'success',
+            title: `Portfolio milestone added: ${title} (${type})`,
+            title_ar: `تمت إضافة إنجاز إلى ملف الطفل: ${title}`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Portfolio timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

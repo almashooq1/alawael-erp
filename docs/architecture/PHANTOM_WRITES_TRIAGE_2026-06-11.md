@@ -56,10 +56,11 @@ ValidationError at runtime** because the real model has different *required* fie
    `rehab-center/family-communication.model`. **Fix = rebind each writer**, not extend
    the correspondence model.
 
-3. **guardianPortal appointment booking** (4 keys). `Appointment` requires
-   `beneficiary` (ref) but the writer sends `beneficiaryId` (+ `serviceType,
-   requestedBy, requestedByUserId`) → required-field throw → **guardian booking is
-   broken**. Class B: fix the writer to canonical names.
+3. ~~**guardianPortal appointment booking** (4 keys)~~ — **FIXED W1197**: writer
+   realigned to canonical vocabulary (`beneficiary` ref, Arabic `type` enum with
+   slug map, UPPERCASE `status`, required `startTime` derived from requestedDate,
+   `bookedBy`/`bookedByName`); the READ filter also queried phantom `beneficiaryId`
+   → guardians always saw an empty list — fixed to `beneficiary`.
 
 4. **BeneficiaryService** (5 keys — `branch, fileNumber, disabilityType,
    disabilitySeverity, referralSource`). Core entity; W926 already showed the

@@ -98,6 +98,7 @@ __tests__/branch-isolation-measures-outcomes-wave269b.test.js
 __tests__/branch-isolation-measures-workflow-wave269e.test.js
 __tests__/branch-isolation-security-wave269.test.js
 __tests__/branch-isolation-treatment-plans-wave1119.test.js
+__tests__/branch-isolation-tasks-wave1125.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/branch-scope-adoption-wave35.test.js
 __tests__/branch-scope-region.test.js

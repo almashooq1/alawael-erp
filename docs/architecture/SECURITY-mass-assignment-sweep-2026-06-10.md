@@ -67,9 +67,14 @@ surfaces. Locked by drift guard
      `branch-isolation-treatment-plans-wave1119`, 8 assertions). **Also FIXED:**
      `professional-dev` `PUT` + `DELETE` now enforce therapist-ownership via
      `denyIfNotOwnTherapistRecord` (a therapist may only mutate their own CPD
-     records; admins/cross-role pass through). **Still open (a different scope
-     model — each needs its own analysis):** `tasks` (has `beneficiaryId` but is
-     a separate surface), `hr-modules` (employee/branch-scoped, not beneficiary).
+     records; admins/cross-role pass through). **`tasks` ID routes PARTIALLY FIXED
+     (W1125):** `GET`/`PUT`/`DELETE` `/tasks/:id` now gate the _clinical-task
+     subset_ (beneficiaryId-linked) by the beneficiary's branch; general tasks
+     (no beneficiary) are intentionally untouched — their ownership model
+     (assignedTo/assignedBy vs manager override) is a separate product decision.
+     Guard `branch-isolation-tasks-wave1125`. **Still open:** `hr-modules` update
+     path (employee/branch-scoped, not beneficiary) + the `tasks` list `GET /`
+     (returns all tasks, no scope) + the general-task ownership decision.
 2. **Possible auth-bypass mount** — `therapist-extended` is mounted **both** via
    `dualMountAuth` (`_registry.js:661`) **and** plain `dualMount`
    (`clinical-therapy.registry.js:44`). Per the codebase's "never plain

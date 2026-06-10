@@ -13,6 +13,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const {
+  assertBeneficiaryInScope,
+  fetchScopedByBeneficiary,
+} = require('../utils/beneficiaryBranchGate');
 
 function Task() {
   try {
@@ -125,18 +130,31 @@ router.post(
 
 router.get(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
-    const task = await M.findById(req.params.id).lean();
-    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    // W269 — if the task is linked to a beneficiary, gate the read by that
+    // beneficiary's branch BEFORE returning PHI (uniform 404). No-op for tasks
+    // with no beneficiary + cross-branch/HQ roles + unscoped test calls.
+    const { doc: task, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     res.json({ success: true, data: task });
   })
 );
 
 router.put(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
+    // W269 — gate cross-branch edit of a beneficiary-linked (clinical) task.
+    const existing = await M.findById(req.params.id).select('beneficiaryId').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     const task = await M.findByIdAndUpdate(
       req.params.id,
       { $set: stripUpdateMeta(req.body) },
@@ -149,8 +167,14 @@ router.put(
 
 router.delete(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
+    // W269 — gate cross-branch soft-delete of a beneficiary-linked (clinical) task.
+    const existing = await M.findById(req.params.id).select('beneficiaryId').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })

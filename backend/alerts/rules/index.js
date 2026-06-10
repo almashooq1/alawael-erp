@@ -96,4 +96,9 @@ module.exports = [
   // ── W1126 — operational / occupational health (1) ───────────
   // Staff occ-health surveillance overdue (links the W1125 system). Self-loading.
   require('./staff-health-surveillance-overdue'),
+
+  // ── W1132 — operational / procurement (1) ───────────────────
+  // Purchase order past its expected delivery date and not received.
+  // Self-loading (no app.js edit).
+  require('./purchase-order-delivery-overdue'),
 ];

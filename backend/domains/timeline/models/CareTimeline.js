@@ -115,6 +115,8 @@ const careTimelineSchema = new mongoose.Schema(
         'communication_aid_activated',
         // AI-generated report sent to family (W1043 — unified-core linkage)
         'ai_report_sent',
+        // Adaptive sports program completed (W1044 — unified-core linkage)
+        'adaptive_sports_completed',
         // Family
         'family_contact',
         'family_meeting',

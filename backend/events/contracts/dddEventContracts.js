@@ -1051,6 +1051,27 @@ const AI_REPORT_EVENTS = {
   },
 }; // ═══════════════════════════════════════════════════════════════════════════════
 
+// W1044 — Adaptive sports program completion → unified core.
+const ADAPTIVE_SPORTS_EVENTS = {
+  ADAPTIVE_SPORTS_COMPLETED: {
+    domain: 'adaptive-sports',
+    eventType: 'adaptive_sports.completed',
+    version: 1,
+    description: 'إتمام برنامج رياضة تكيفية — Adaptive sports program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      sport: 'string',
+      endDate: 'date',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'notification'],
+  },
+}; // ═══════════════════════════════════════════════════════════════════════════════
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -1081,6 +1102,7 @@ const DDD_CONTRACTS = {
   'diet-prescription': DIET_PRESCRIPTION_EVENTS,
   'communication-aid': COMMUNICATION_AID_EVENTS,
   'ai-report': AI_REPORT_EVENTS,
+  'adaptive-sports': ADAPTIVE_SPORTS_EVENTS,
 };
 
 /**
@@ -1127,6 +1149,7 @@ module.exports = {
   DIET_PRESCRIPTION_EVENTS,
   COMMUNICATION_AID_EVENTS,
   AI_REPORT_EVENTS,
+  ADAPTIVE_SPORTS_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

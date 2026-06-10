@@ -1468,6 +1468,36 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
+  // ── Adaptive sports program completed → unified-core timeline (W1044) ──
+  // When an AdaptiveSportsProgram reaches status 'completed' (the beneficiary
+  // finished a structured adaptive / para-sport program), record it as a
+  // clinical milestone on the longitudinal record.
+  subscribers.push({
+    name: 'adaptive-sports:completed → timeline:record',
+    pattern: 'adaptive-sports.adaptive_sports.completed',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const sport = event.payload.sport ? ` (${event.payload.sport})` : '';
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            eventType: 'adaptive_sports_completed',
+            category: 'clinical',
+            severity: 'success',
+            title: `Adaptive sports program completed${sport}`,
+            title_ar: 'اكتمل برنامج الرياضة التكيفية',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Adaptive sports timeline failed: ${err.message}`);
+      }
+    },
+  });
+
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;
   for (const sub of subscribers) {

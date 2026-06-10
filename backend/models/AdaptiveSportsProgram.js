@@ -240,6 +240,34 @@ AdaptiveSportsProgramSchema.virtual('totalMinutesLogged').get(function () {
 AdaptiveSportsProgramSchema.set('toJSON', { virtuals: true });
 AdaptiveSportsProgramSchema.set('toObject', { virtuals: true });
 
+// ── W1044: unified-core producer — adaptive sports program completed ──
+// When an AdaptiveSportsProgram reaches status 'completed', publish a domain
+// event so the cross-module subscriber records a milestone on the beneficiary's
+// longitudinal CareTimeline. Non-callback hook style (W483-safe).
+AdaptiveSportsProgramSchema.pre('save', function () {
+  this.$__adaptiveSportsCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+AdaptiveSportsProgramSchema.post('save', function emitAdaptiveSportsCompleted(doc) {
+  if (!doc || !doc.$__adaptiveSportsCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('adaptive-sports', 'adaptive_sports.completed', {
+        programId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        sport: doc.sport || null,
+        endDate: doc.endDate || null,
+        completedAt: doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.AdaptiveSportsProgram ||
   mongoose.model('AdaptiveSportsProgram', AdaptiveSportsProgramSchema);

@@ -240,7 +240,8 @@
     "stats": "node scripts/project-stats.js",
     "cleanup": "node scripts/cleanup.js",
     "cleanup:run": "node scripts/cleanup.js --run --all",
-    "predev": "node scripts/check-services.js"
+    "predev": "node scripts/check-services.js",
+    "backfill:hr-branchid": "node scripts/backfill-hr-branchid.js"
   },
   "_moduleAliases": {
     "@": ".",

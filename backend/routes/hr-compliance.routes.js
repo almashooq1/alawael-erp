@@ -17,6 +17,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { enforceEmployeeBranch } = require('../middleware/assertBranchMatch');
 
 const Employee = require('../models/HR/Employee');
 const gosi = require('../services/gosiAdapter');
@@ -28,6 +30,30 @@ const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
 router.use(authenticateToken);
+// W269 — READ/WRITE roles include branch-restricted manager/hr/hr_manager, so the
+// per-employee verification routes must verify branch ownership and the aggregate
+// reports must scope to the caller's branch. `branchFilter(req)` returns a
+// `{ branchId }` clause for restricted callers, `{}` for HQ/cross-branch.
+router.use(requireBranchAccess);
+
+// employeeBranchFilter — the Employee model's tenant key is `branch_id` (snake),
+// so translate the canonical branchFilter's `branchId` to `branch_id`.
+function employeeBranchFilter(req) {
+  const bf = branchFilter(req);
+  return bf.branchId ? { branch_id: bf.branchId } : {};
+}
+
+// Gate a single employee-keyed verification route. Returns true (after sending a
+// 403/404) when access is denied, false when allowed.
+async function guardEmployeeBranch(req, res, employeeId) {
+  try {
+    await enforceEmployeeBranch(req, employeeId);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
 
 const READ_ROLES = [
   'admin',
@@ -43,19 +69,23 @@ const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_
 // ── GET /overview ────────────────────────────────────────────────────────
 router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const total = await Employee.countDocuments({ status: { $ne: 'terminated' } });
+    const bf = employeeBranchFilter(req); // W269 — {} for HQ, { branch_id } for restricted
+    const total = await Employee.countDocuments({ status: { $ne: 'terminated' }, ...bf });
     const [gosiActive, gosiInactive, gosiUnverified, scfhsActive, scfhsExpired, scfhsUnverified] =
       await Promise.all([
-        Employee.countDocuments({ 'gosi_verification.status': 'active' }),
+        Employee.countDocuments({ 'gosi_verification.status': 'active', ...bf }),
         Employee.countDocuments({
           'gosi_verification.status': { $in: ['inactive', 'not_found'] },
+          ...bf,
         }),
         Employee.countDocuments({
           $or: [{ gosi_verification: { $exists: false } }, { 'gosi_verification.verified': false }],
+          ...bf,
         }),
-        Employee.countDocuments({ 'scfhs_verification.status': 'active' }),
+        Employee.countDocuments({ 'scfhs_verification.status': 'active', ...bf }),
         Employee.countDocuments({
           'scfhs_verification.status': { $in: ['expired', 'suspended', 'not_found'] },
+          ...bf,
         }),
         Employee.countDocuments({
           scfhs_number: { $exists: true, $ne: '' },
@@ -63,6 +93,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
             { scfhs_verification: { $exists: false } },
             { 'scfhs_verification.verified': false },
           ],
+          ...bf,
         }),
       ]);
 
@@ -71,6 +102,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
     soon.setDate(soon.getDate() + 90);
     const expiringSoon = await Employee.find({
       'scfhs_verification.expiryDate': { $gte: new Date(), $lte: soon },
+      ...bf,
     })
       .select(
         'firstName_ar lastName_ar national_id scfhs_verification.expiryDate scfhs_verification.classification'
@@ -103,6 +135,7 @@ router.get('/:employeeId/status', requireRole(READ_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.employeeId))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
     const e = await Employee.findById(req.params.employeeId)
       .select(
         'firstName firstName_ar lastName lastName_ar national_id scfhs_number scfhs_classification scfhs_expiry gosi_number gosi_registered gosi_verification scfhs_verification'
@@ -133,6 +166,7 @@ router.post('/:employeeId/verify-gosi', requireRole(WRITE_ROLES), async (req, re
   try {
     if (!mongoose.isValidObjectId(req.params.employeeId))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
 
@@ -182,6 +216,7 @@ router.post('/:employeeId/verify-scfhs', requireRole(WRITE_ROLES), async (req, r
   try {
     if (!mongoose.isValidObjectId(req.params.employeeId))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
     if (!e.scfhs_number)
@@ -234,6 +269,7 @@ router.post('/:employeeId/verify-qiwa', requireRole(WRITE_ROLES), async (req, re
   try {
     if (!mongoose.isValidObjectId(req.params.employeeId))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
 
@@ -278,6 +314,7 @@ router.post('/:employeeId/verify-muqeem', requireRole(WRITE_ROLES), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.employeeId))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    if (await guardEmployeeBranch(req, res, req.params.employeeId)) return; // W269
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
     if (!e.iqama_number)
@@ -331,7 +368,8 @@ router.post(
   async (req, res) => {
     try {
       const scope = (req.body?.scope || 'both').toLowerCase(); // 'gosi' | 'scfhs' | 'both'
-      const filter = { status: { $ne: 'terminated' } };
+      // W269 — restrict the batch to the caller's branch (HQ/cross-branch → all).
+      const filter = { status: { $ne: 'terminated' }, ...employeeBranchFilter(req) };
       const employees = await Employee.find(filter).select('_id national_id scfhs_number').lean();
 
       let gosiDone = 0;

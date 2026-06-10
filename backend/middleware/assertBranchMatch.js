@@ -173,6 +173,58 @@ async function enforceBeneficiaryBranch(req, beneficiaryId) {
   assertBranchMatch(req, ben.branchId, 'beneficiary');
 }
 
+/**
+ * Enforce cross-branch isolation on an EMPLOYEE-keyed route (the HR analogue of
+ * `enforceBeneficiaryBranch`). HR transactional records (attendance, payroll,
+ * loans, …) are keyed by `employeeId`, and `Employee` carries `branch_id`, so a
+ * route that takes an employeeId via params/body must verify the employee belongs
+ * to the caller's branch before reading or mutating their data.
+ *
+ * For restricted callers ONLY: loads the Employee by id, asserts the caller's
+ * branch matches `employee.branch_id` (falls back to `branchId`), throws 403 on
+ * mismatch (404 not-found / 503 model-unavailable). No-op (no DB lookup) for
+ * cross-branch / unrestricted callers and tests without `req.branchScope` — same
+ * ergonomics as `enforceBeneficiaryBranch`.
+ *
+ * Throws — does not return a value. Errors carry `err.status`. Catch via the
+ * route's try/catch (map `err.status` to the HTTP response).
+ *
+ * @param {object} req
+ * @param {string|ObjectId} employeeId
+ * @returns {Promise<void>}
+ */
+async function enforceEmployeeBranch(req, employeeId) {
+  if (!req || !req.branchScope || !req.branchScope.restricted) {
+    return; // cross-branch / unscoped / test path — no-op
+  }
+  if (!employeeId) {
+    const err = new Error('employeeId is required');
+    err.status = 400;
+    throw err;
+  }
+  const mongoose = require('mongoose');
+  let Employee;
+  try {
+    Employee = mongoose.model('Employee');
+  } catch (_e) {
+    try {
+      require('../models/HR/Employee');
+      Employee = mongoose.model('Employee');
+    } catch (_e2) {
+      const err = new Error('Employee model unavailable — refusing for safety (fail-closed)');
+      err.status = 503;
+      throw err;
+    }
+  }
+  const emp = await Employee.findById(employeeId).select('branch_id branchId').lean();
+  if (!emp) {
+    const err = new Error('employee not found');
+    err.status = 404;
+    throw err;
+  }
+  assertBranchMatch(req, emp.branch_id || emp.branchId, 'employee');
+}
+
 // Back-compat alias kept until W269b consumers migrate. Returns the
 // loaded beneficiary OR null on not-found OR sentinel for unrestricted
 // callers, mirroring the original signature.
@@ -367,12 +419,89 @@ async function bodyScopedBeneficiaryGuard(req, res, next) {
   }
 }
 
+/**
+ * W1150 — Factory: Express param-middleware enforcing branch ownership on a
+ * RESOURCE-keyed URL param (the generic analogue of branchScopedBeneficiaryParam
+ * for models that carry their own `branchId`, e.g. EpisodeOfCare, CarePlan…).
+ *
+ * Closes the `:id`-keyed gap class: W269/W1140 hooks only fire for
+ * `:beneficiaryId` params — routes loading a resource by its own `:id`
+ * (GET /:id, PUT /:id, POST /:id/transition…) never verified the loaded
+ * document's branchId for restricted callers.
+ *
+ * Usage (rename the route param so the hook fires — Express matches param
+ * names literally):
+ *   router.param('episodeId', branchScopedResourceParam({
+ *     modelName: 'EpisodeOfCare',
+ *     label: 'episode',
+ *     loadModel: () => require('../domains/episodes/models/EpisodeOfCare'),
+ *   }));
+ *
+ * Behaviour (mirrors branchScopedBeneficiaryParam exactly):
+ *   - No req.branchScope / unrestricted → next() with NO DB lookup
+ *   - Non-24-hex param value → next() (route handler owns invalid-id shape)
+ *   - Restricted + cross-branch → 403 (response sent, chain short-circuited)
+ *   - Restricted + not-found → 404
+ *   - Restricted + model unavailable → 503 (fail-closed)
+ *
+ * @param {object} options
+ * @param {string} options.modelName - mongoose registered model name
+ * @param {string} [options.label] - human label for the 403/404 messages
+ * @param {string} [options.branchField] - branch FK field (default 'branchId')
+ * @param {Function} [options.loadModel] - fallback require() when the model
+ *   is not yet registered (called once, result ignored — registration side
+ *   effect is what matters)
+ * @returns {Function} Express router.param callback (req, res, next, value)
+ */
+function branchScopedResourceParam({ modelName, label, branchField = 'branchId', loadModel }) {
+  if (!modelName) throw new Error('branchScopedResourceParam: modelName is required');
+  const resourceLabel = label || modelName;
+  return async function scopedResourceParam(req, res, next, value) {
+    try {
+      if (!req || !req.branchScope || !req.branchScope.restricted) {
+        return next(); // cross-branch / unscoped / test path — no-op
+      }
+      const idStr = String(value || '');
+      if (!/^[a-f0-9]{24}$/i.test(idStr)) return next(); // route handler owns invalid ids
+      const mongoose = require('mongoose');
+      let Model;
+      try {
+        Model = mongoose.model(modelName);
+      } catch (_e) {
+        try {
+          if (typeof loadModel === 'function') loadModel();
+          Model = mongoose.model(modelName);
+        } catch (_e2) {
+          return res.status(503).json({
+            success: false,
+            error: 'models_unavailable',
+            message: `${modelName} model unavailable — refusing for safety (fail-closed)`,
+          });
+        }
+      }
+      const doc = await Model.findById(idStr).select(branchField).lean();
+      if (!doc) {
+        return res.status(404).json({ success: false, error: `${resourceLabel} not found` });
+      }
+      assertBranchMatch(req, doc[branchField], resourceLabel);
+      next();
+    } catch (err) {
+      if (err && err.status === 403) {
+        return res.status(403).json({ success: false, error: err.message });
+      }
+      next(err);
+    }
+  };
+}
+
 module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
   enforceBeneficiaryBranch,
+  enforceEmployeeBranch,
   loadBeneficiaryAndAssertBranch,
   assertBranchIdsAllowed,
   branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
   bodyScopedBeneficiaryGuard,
 };

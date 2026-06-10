@@ -20,12 +20,58 @@
 const express = require('express');
 const { authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
+const { stripUpdateMeta } = require('../../utils/sanitize');
+const { requireBranchAccess, branchFilter } = require('../../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../../middleware/assertBranchMatch');
 
 const ADMIN = ['admin', 'super_admin', 'hr_manager'];
 const MANAGER = [...ADMIN, 'manager'];
 
+// ─── W1133 cross-branch isolation helpers (W269 doctrine) ──────────────────────
+// These modules carry a denormalized `branchId` (derived from the employee by
+// models/HR/hrBranchScope.plugin.js), so the standard branch filter +
+// per-doc assertion apply. `scope` is `null` for org-wide modules (comp-bands,
+// policies, surveys, kudos, positions) which are intentionally NOT branch-gated.
+
+/**
+ * MongoDB filter clause that restricts a list query to the caller's branch.
+ * No-op (`{}`) for cross-branch/HQ roles. When `allowNullBranch` is set
+ * (candidate-keyed modules like visas), unassigned (null-branch) rows stay
+ * visible alongside the caller's own branch.
+ */
+function listScopeFilter(req, scope) {
+  if (!scope) return {};
+  const bf = branchFilter(req); // {} | {branchId: X} | {branchId: {$in:[...]}}
+  if (bf.branchId === undefined) return {}; // unrestricted / no scope populated
+  if (scope.allowNullBranch) {
+    return { $or: [{ branchId: bf.branchId }, { branchId: null }] };
+  }
+  return bf;
+}
+
+/**
+ * Enforce W269 ownership on a single loaded doc. Returns `true` when it has
+ * already sent a 403 (caller must `return`), `false` when access is allowed.
+ * `allowNullBranch` lets unassigned (null-branch) docs through.
+ */
+function guardDocBranch(req, res, docBranchId, label, allowNullBranch) {
+  if (allowNullBranch && (docBranchId === null || docBranchId === undefined)) return false;
+  try {
+    assertBranchMatch(req, docBranchId, label);
+    return false;
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return true;
+  }
+}
+
 function createHrModulesRouter({ logger } = {}) {
   const router = express.Router();
+
+  // W1133 — populate req.branchScope for every HR-module route so branchFilter /
+  // assertBranchMatch enforce cross-branch isolation. Mounted after `authenticate`
+  // (app.js), so req.user is present; cross-branch/HQ roles get allBranches.
+  router.use(requireBranchAccess);
 
   function tryLoad(key, path) {
     try {
@@ -41,6 +87,9 @@ function createHrModulesRouter({ logger } = {}) {
     const {
       readRoles = MANAGER,
       writeRoles = ADMIN,
+      // W1133 — when set (`{ allowNullBranch? }`), this module is branch-isolated:
+      // lists are branch-filtered and id/PATCH paths assert per-doc ownership.
+      scope = null,
       indexQuery = req => {
         const f = {};
         for (const k of ['status', 'employeeId']) {
@@ -56,7 +105,7 @@ function createHrModulesRouter({ logger } = {}) {
         if (!M) return res.json({ success: true, data: { items: [], total: 0, available: false } });
         const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
         const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-        const filter = indexQuery(req);
+        const filter = { ...indexQuery(req), ...listScopeFilter(req, scope) };
         const [items, total] = await Promise.all([
           M.find(filter)
             .sort({ createdAt: -1 })
@@ -91,6 +140,12 @@ function createHrModulesRouter({ logger } = {}) {
         if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
         const doc = await M.findById(req.params.id).lean({ virtuals: true });
         if (!doc) return res.status(404).json({ success: false, message: 'not found' });
+        if (
+          scope &&
+          guardDocBranch(req, res, doc.branchId, `hr ${prefix}`, scope.allowNullBranch)
+        ) {
+          return;
+        }
         res.json({ success: true, data: doc });
       } catch (err) {
         safeError(res, err, `hr-modules ${prefix}.get`);
@@ -101,9 +156,17 @@ function createHrModulesRouter({ logger } = {}) {
       try {
         const M = tryLoad(prefix, modelPath);
         if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
+        // W1133 — verify branch ownership BEFORE mutating (cross-branch write block).
+        if (scope) {
+          const existing = await M.findById(req.params.id).select('branchId').lean();
+          if (!existing) return res.status(404).json({ success: false, message: 'not found' });
+          if (guardDocBranch(req, res, existing.branchId, `hr ${prefix}`, scope.allowNullBranch)) {
+            return;
+          }
+        }
         const doc = await M.findByIdAndUpdate(
           req.params.id,
-          { $set: req.body },
+          { $set: stripUpdateMeta(req.body) },
           { returnDocument: 'after' }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'not found' });
@@ -115,14 +178,18 @@ function createHrModulesRouter({ logger } = {}) {
   }
 
   // ─── Attach the 11 CRUD modules ────────────────────────────────────────────
-  attachCrud('/onboarding', '../../models/HR/OnboardingChecklist');
-  attachCrud('/loans', '../../models/HR/Loan');
-  attachCrud('/travel', '../../models/HR/TravelRequest');
-  attachCrud('/health-insurance', '../../models/HR/HealthInsurance');
+  // W1133 — `scope` marks the employee-private modules (financial / PII) that are
+  // branch-isolated (branchId denormalized from the employee). The org-wide
+  // modules below (comp-bands, positions, surveys, kudos, policies) are
+  // intentionally NOT branch-gated: they are shared configuration / recognition.
+  attachCrud('/onboarding', '../../models/HR/OnboardingChecklist', { scope: {} });
+  attachCrud('/loans', '../../models/HR/Loan', { scope: {} });
+  attachCrud('/travel', '../../models/HR/TravelRequest', { scope: {} });
+  attachCrud('/health-insurance', '../../models/HR/HealthInsurance', { scope: {} });
   attachCrud('/comp-bands', '../../models/HR/CompensationBand', { readRoles: ADMIN });
   attachCrud('/positions', '../../models/HR/WorkforcePosition', { readRoles: ADMIN });
   attachCrud('/surveys', '../../models/HR/Survey');
-  attachCrud('/assets', '../../models/HR/AssetAssignment');
+  attachCrud('/assets', '../../models/HR/AssetAssignment', { scope: {} });
   attachCrud('/kudos', '../../models/HR/Kudos', {
     readRoles: ['admin', 'super_admin', 'hr_manager', 'manager', 'employee'],
     writeRoles: ['admin', 'super_admin', 'hr_manager', 'manager', 'employee'],
@@ -134,8 +201,9 @@ function createHrModulesRouter({ logger } = {}) {
     },
   });
   attachCrud('/policies', '../../models/HR/Policy', { readRoles: MANAGER });
-  attachCrud('/shift-swaps', '../../models/HR/ShiftSwap');
-  attachCrud('/visas', '../../models/HR/VisaRequest');
+  attachCrud('/shift-swaps', '../../models/HR/ShiftSwap', { scope: {} });
+  // Visas allow null-branch rows (candidate visas have no employee yet).
+  attachCrud('/visas', '../../models/HR/VisaRequest', { scope: { allowNullBranch: true } });
 
   // ─── Special actions ────────────────────────────────────────────────────────
 
@@ -146,6 +214,7 @@ function createHrModulesRouter({ logger } = {}) {
       if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
       const doc = await M.findById(req.params.id);
       if (!doc) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, doc.branchId, 'hr /onboarding')) return; // W1133
       const item = doc.items.find(i => i.key === req.params.itemKey);
       if (!item) return res.status(404).json({ success: false, message: 'item not found' });
       item.completedAt = new Date();
@@ -243,6 +312,7 @@ function createHrModulesRouter({ logger } = {}) {
       if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
       const a = await M.findById(req.params.id);
       if (!a) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, a.branchId, 'hr /assets')) return; // W1133
       a.status = 'returned';
       a.returnedAt = new Date();
       if (req.body?.conditionOnReturn) a.conditionOnReturn = req.body.conditionOnReturn;
@@ -261,6 +331,7 @@ function createHrModulesRouter({ logger } = {}) {
       if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
       const loan = await M.findById(req.params.id);
       if (!loan) return res.status(404).json({ success: false, message: 'not found' });
+      if (guardDocBranch(req, res, loan.branchId, 'hr /loans')) return; // W1133
       loan.status = 'approved';
       loan.approvedByUserId = req.user?._id;
       loan.approvedAt = new Date();

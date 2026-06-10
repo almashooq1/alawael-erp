@@ -35,11 +35,37 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../middleware/assertBranchMatch');
 const nitaqatService = require('../services/nitaqat.service');
 const wpsService = require('../services/wps-enhanced.service');
 const contractService = require('../services/contract.service');
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// W269 — employment contracts carry a denormalized branchId (derived from the
+// employee). The /contracts/:id routes take a bare contract id, so they MUST verify
+// the contract's branch before returning/mutating salary PII. Returns the loaded
+// contract when allowed, or null after sending a 403/404.
+async function loadContractInBranch(req, res, contractId) {
+  let contract;
+  try {
+    contract = await contractService.getContract(contractId);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+    return null;
+  }
+  if (!contract) {
+    res.status(404).json({ success: false, message: 'العقد غير موجود' });
+    return null;
+  }
+  try {
+    assertBranchMatch(req, contract.branchId, 'employment contract');
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, message: err.message });
+    return null;
+  }
+  return contract;
+}
 
 // جميع المسارات تتطلب مصادقة
 router.use(authenticateToken);
@@ -340,8 +366,8 @@ router.post(
 router.get(
   '/contracts/:id',
   asyncHandler(async (req, res) => {
-    const result = await contractService.getContract(req.params.id);
-    if (!result) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
+    const result = await loadContractInBranch(req, res, req.params.id); // W269
+    if (!result) return; // 403/404 already sent
     res.json({ success: true, data: result });
   })
 );
@@ -360,6 +386,7 @@ router.post(
         .status(400)
         .json({ success: false, message: 'employeeData وorganizationData مطلوبان' });
     }
+    if (!(await loadContractInBranch(req, res, req.params.id))) return; // W269
     const result = await contractService.submitToQiwa(
       req.params.id,
       { ...employeeData, updatedBy: req.user._id || req.user.id },
@@ -379,6 +406,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { status } = req.body;
     if (!status) return res.status(400).json({ success: false, message: 'status مطلوب' });
+    if (!(await loadContractInBranch(req, res, req.params.id))) return; // W269
     const result = await contractService.updateStatus(
       req.params.id,
       status,

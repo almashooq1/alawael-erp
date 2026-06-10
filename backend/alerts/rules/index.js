@@ -20,9 +20,8 @@
  */
 
 module.exports = [
-  // ── Phase 11 baseline (5) ───────────────────────────────────
+  // ── Phase 11 baseline (4 — W1150 removed orphan irp-overdue-approval) ──
   require('./credential-expiry-30d'),
-  require('./irp-overdue-approval'),
   require('./invoice-overdue-60d'),
   require('./incident-major'),
   require('./zatca-submission-rejected'),

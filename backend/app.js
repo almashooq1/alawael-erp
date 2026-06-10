@@ -1459,8 +1459,7 @@ try {
     // so a missing model just means that rule yields []. We only
     // surface models that Wave 3 rules actually reference.
     const modelNames = [
-      'Credential',
-      'IRP',
+      'EmployeeCredential', // W1147 real model for credential rules (replaced removed Credential); W1150 also dropped dead IRP
       'Invoice',
       'Incident',
       'Document',

@@ -111,10 +111,10 @@ describe('buildEngine() with bundled rules', () => {
   // baseline of 5. Wave 5 (2026-05-16) added the EWMA anomaly
   // bridge. Pin the exact total so accidental rule removal shows
   // up as a test regression rather than a silent gap.
-  test('registers all 24 bundled rules (5 baseline + 13 wave-3 + 1 wave-5 + 5 operational W1006-W1009/W1070)', () => {
-    expect(rules.length).toBe(24);
+  test('registers all 26 bundled rules (5 baseline + 13 wave-3 + 1 wave-5 + 5 operational W1006-W1009/W1070 + 2 quality W1121)', () => {
+    expect(rules.length).toBe(26);
     const eng = buildEngine();
-    expect(eng.rules.size).toBe(24);
+    expect(eng.rules.size).toBe(26);
   });
 
   test('credential-expiry-30d fires on near-expiry records', async () => {
@@ -164,8 +164,13 @@ describe('buildEngine() with bundled rules', () => {
   });
 
   test('invoice-overdue-60d fires on old unpaid invoices', async () => {
-    const eng = buildEngine();
+    // The clock MUST be injected via the constructor — runAll() overrides any
+    // ctx.now with `this.now()` (engine.js:85 `{ ...ctx, now }`), so a
+    // `runAll({ now })` is silently ignored and the rule sees real wall-clock
+    // time. With the default real-time clock, inv-2 (16d old at the intended
+    // 2026-04-17) eventually crosses 60d and the test flakes to 2 findings.
     const now = new Date('2026-04-17');
+    const eng = buildEngine({ now: () => now });
     const Invoice = finder([
       {
         _id: 'inv-1',
@@ -189,7 +194,7 @@ describe('buildEngine() with bundled rules', () => {
         branchId: 'br-1',
       },
     ]);
-    const result = await eng.runAll({ now: () => now, models: { Invoice } });
+    const result = await eng.runAll({ models: { Invoice } });
     const ov = result.raised.filter(a => a.ruleId === 'invoice-overdue-60d');
     expect(ov.length).toBe(1);
     expect(ov[0].message).toContain('INV-1');

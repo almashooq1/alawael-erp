@@ -101,4 +101,8 @@ module.exports = [
   // Purchase order past its expected delivery date and not received.
   // Self-loading (no app.js edit).
   require('./purchase-order-delivery-overdue'),
+
+  // ── W1135 — compliance / training (1) ───────────────────────
+  // Staff mandatory training overdue (TrainingCompliance). Self-loading.
+  require('./training-compliance-overdue'),
 ];

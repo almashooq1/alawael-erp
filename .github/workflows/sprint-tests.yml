@@ -1336,6 +1336,8 @@ on:
       - 'backend/__tests__/staff-health-surveillance-overdue-rule-wave1126.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/po-delivery-overdue-rule-wave1132.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/training-compliance-overdue-rule-wave1135.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2655,6 +2657,8 @@ on:
       - 'backend/__tests__/staff-health-surveillance-overdue-rule-wave1126.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/po-delivery-overdue-rule-wave1132.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/training-compliance-overdue-rule-wave1135.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

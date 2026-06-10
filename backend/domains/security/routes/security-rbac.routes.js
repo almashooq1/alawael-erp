@@ -11,6 +11,11 @@
 
 const express = require('express');
 const router = express.Router();
+// W1166 — privilege-escalation hardening. dualMountAuth applies only
+// `authenticate`, so before this wave ANY authed user could create/delete
+// roles, grant themselves permissions, and read the full audit log. The
+// entire RBAC management surface is admin-only by nature.
+const { requireAdmin } = require('../../../middleware/auth');
 const {
   validateCreateRole,
   validateCreatePermission,
@@ -34,6 +39,8 @@ const requireService = (req, res, next) => {
   }
   return next();
 };
+
+router.use(requireAdmin); // W1166 — admin-only RBAC management (anti privilege escalation)
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Roles

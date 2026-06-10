@@ -2,21 +2,28 @@
 
 ## TL;DR
 
-The smart-alerts engine (`backend/alerts/rules/*`, gated by `ALERTS_ENGINE_ENABLED`)
-has a **systemic latent coverage gap**: several clinical/HR rules query the
-**base/legacy** model name, while the live web-admin UIs write the **same concept**
-to a **richer sibling** model. On fragmented domains the alert therefore watches a
-model the UI never populates, so it would **never fire on real onboarded data**.
+**Original concern:** the smart-alerts engine (`backend/alerts/rules/*`) appeared to
+have a *systemic* coverage gap — several clinical/HR rules query a **base** model
+while the live web-admin UIs write the **same concept** to a **sibling** model, so an
+alert would never fire on real data.
 
-This is a consequence of the project's known domain-model fragmentation (multiple
-models per concept) plus in-flight consolidation ADRs. **One instance was fixed**
-(credentials → W1151); the rest are tied to their domains' canonical-model
-decisions and are **deferred** (re-pointing standalone would conflict with active
-consolidation or target a soon-to-be-deprecated model).
+**Verified outcome (correction, same day): this was largely over-flagged.** On
+rigorous per-model verification, a "sibling model" usually means a **different
+concern** — a version-history layer, a lighter workflow variant, or a different
+*type* — **not** a competing store. In those cases the alert reading the base model
+is **correct**. After verification, **only _credentials_ was a genuine wrong-model
+mismatch** (`EmployeeCredential` vs the UI-backed `StaffCertification` — both
+staff-credential stores with the same expiry concept). **That one is FIXED (W1151).**
+Care-plans and goals are **confirmed false alarms**; incidents/documents/contracts
+are different-purpose siblings, not bugs.
 
-> **Impact today: none.** Production is a fresh, un-onboarded instance — every
-> sibling model is empty, so no rule fires regardless. This is a **readiness** gap:
-> it bites the moment each domain is populated with real data.
+**Lesson:** before flagging an alert↔UI "model mismatch", confirm the sibling is a
+**competing store for the same concept** (same key fields + lifecycle) — not a
+version-history layer, a lighter-workflow variant, or a different type.
+
+> **Impact today: none either way** — production is a fresh, un-onboarded instance
+> (every model empty). The credential fix (W1151) is readiness for when staff
+> certifications are entered.
 
 ## The pattern
 
@@ -31,11 +38,11 @@ backend alerts/rules/<rule>.js     ctx.models.Model_A.find(...)                M
 | Concept | Alert reads | UI actually writes | Endpoint | Status |
 |---|---|---|---|---|
 | **Staff credentials** | `EmployeeCredential` | `StaffCertification` | `/api/v1/rehabilitation-advanced/staff-certifications` | ✅ **FIXED — W1151** (additive: both models now covered) |
-| **Goals** | `Goal` | `SmartGoal` | `/api/v1/therapist-pro/smart-goals` | ⏸ Deferred → golden-thread **ADR-040** (TherapeuticGoal canonical). Canonical is in flux toward `TherapeuticGoal`, so additive-cover-`SmartGoal` may cover a soon-deprecated model. |
-| **Care plans** | `CarePlan` | `CarePlanVersion` (W41 care-planning registry) | care-planning surfaces | ⏸ Deferred → **W41 / ADR-026** (care-plan / IEP-IFSP fragmentation). |
-| **Incidents** | `Incident` | `Incident` vs `IncidentReport` vs `BehaviorIncident` / `CrisisIncident` … | quality/incidents | ⏸ Needs a confirmed UI trace; quality domain. |
-| **Documents** | `Document` | `Document` vs `ControlledDocument` / `EmployeeDocument` … | documents | ⏸ Needs a confirmed UI trace. |
-| **Employment contracts** | `EmploymentContract` | `EmploymentContract` vs `HREmploymentContract` / `Nitaqat…` | HR | ⏸ Needs a confirmed UI trace; HR domain. |
+| **Goals** | `Goal` (IEP) | `SmartGoal` (lighter therapist workflow) | `/api/v1/therapist-pro/smart-goals` | ✅ **NOT a mismatch** — `Goal` is the full IEP model with `lastProgressAt` (built for stall-detection); `SmartGoal` is explicitly "lighter… without the full IEP machinery" with %-progress (no `lastProgressAt`). Different workflows → alert correctly scoped to `Goal`. |
+| **Care plans** | `CarePlan` | — | — | ✅ **NOT a mismatch** — `CarePlan` has the alert's exact fields (`status` ACTIVE/DRAFT/ARCHIVED + `reviewDate`). `CarePlanVersion` is the W41 append-only **version-history** layer, not a competing store. |
+| **Incidents** | `Incident` (comprehensive mgmt) | `IncidentReport` (safety/clinical reports) | quality/incidents | 🔶 **Ambiguous, not a bug** — `Incident` = comprehensive incident-management; `IncidentReport` = safety reports. Different purposes → which to cover is a scoping question, not a wrong model. |
+| **Documents** | `Document` | `ControlledDocument` / `EmployeeDocument` (different doc *types*) | documents | ✅ Likely fine — siblings are specialized document types, not competing stores (not deep-verified). |
+| **Employment contracts** | `EmploymentContract` | `HREmploymentContract` / `Nitaqat…` (specialized) | HR | ✅ Likely fine — siblings are specialized variants (not deep-verified). |
 | **Vaccinations** | `Vaccination` | `Vaccination` (single model) | — | ✅ Safe — not fragmented. |
 | **PDPL DSAR** | `PdplRequest` | `PdplRequest` (single model) | — | ✅ Safe — not fragmented. |
 | **Invoices / finance** | `Invoice` | `Invoice` | — | ✅ Safe. |

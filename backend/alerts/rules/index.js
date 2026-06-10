@@ -59,4 +59,9 @@ module.exports = [
   // overdue. Needs `FacilityAsset` in the app.js model loader to fire
   // (defensive no-op otherwise).
   require('./facility-asset-ppm-overdue'),
+
+  // ── W1007 — operational / maintenance (1) ───────────────────
+  // Work order past its scheduled date and still open. Needs
+  // `MaintenanceWorkOrder` in the app.js model loader to fire.
+  require('./maintenance-work-order-overdue'),
 ];

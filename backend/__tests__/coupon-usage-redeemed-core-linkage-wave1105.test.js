@@ -40,6 +40,23 @@ function usage(beneficiaryId, branchId, overrides = {}) {
   };
 }
 
+/**
+ * Wait until the async post-save → bus → subscriber chain materialises the
+ * expected number of CareTimeline rows (W1227 deflake: the previous fixed
+ * 30 ms sleep lost the race under CI load — deploy-gate red on shard 4 of
+ * run 27364124300). Polls every 25 ms up to `timeoutMs`, then returns
+ * whatever is there so the assertion still reports a clear diff.
+ */
+async function waitForRows(filter, expected, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  let rows = [];
+  for (;;) {
+    rows = await CareTimeline.find(filter).sort({ createdAt: 1 });
+    if (rows.length >= expected || Date.now() > deadline) return rows;
+    await new Promise(r => setTimeout(r, 25));
+  }
+}
+
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create();
   await mongoose.connect(mongo.getUri());
@@ -63,9 +80,8 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
     const branchId = new mongoose.Types.ObjectId();
 
     const doc = await CouponUsage.create(usage(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
 
-    const rows = await CareTimeline.find({ beneficiaryId });
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('coupon_usage_redeemed');
@@ -83,7 +99,7 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
     const branchId = new mongoose.Types.ObjectId();
 
     await CouponUsage.create(usage(beneficiaryId, branchId, { deletedAt: new Date() }));
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 150));
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(0);
@@ -94,12 +110,12 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
     const branchId = new mongoose.Types.ObjectId();
 
     const doc = await CouponUsage.create(usage(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
+    await waitForRows({ beneficiaryId }, 1);
 
     // Unrelated mutation — not a new document.
     doc.orderAmount = 350;
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 150));
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(1);
@@ -111,9 +127,8 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
 
     await CouponUsage.create(usage(beneficiaryId, branchId, { discountAmount: 20 }));
     await CouponUsage.create(usage(beneficiaryId, branchId, { discountAmount: 30 }));
-    await new Promise(r => setTimeout(r, 40));
 
-    const rows = await CareTimeline.find({ beneficiaryId }).sort({ createdAt: 1 });
+    const rows = await waitForRows({ beneficiaryId }, 2);
     expect(rows).toHaveLength(2);
     expect(rows.every(r => r.eventType === 'coupon_usage_redeemed')).toBe(true);
   });

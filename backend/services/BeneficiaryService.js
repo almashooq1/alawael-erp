@@ -240,15 +240,21 @@ class BeneficiaryService {
     }
 
     // إلغاء أي طلبات نقل معلّقة سابقة
+    // W1209 — canonical key is beneficiaryId (the phantom `beneficiary`
+    // filter never matched, so stale pending transfers were never cancelled).
     await BeneficiaryTransfer.updateMany(
-      { beneficiary: beneficiary._id, status: 'pending' },
+      { beneficiaryId: beneficiary._id, status: 'pending' },
       { status: 'cancelled', notes: 'إلغاء تلقائي بسبب طلب نقل جديد' }
     );
 
+    // W1209 — BeneficiaryTransfer's REQUIRED fields are beneficiaryId/
+    // fromBranchId/toBranchId (the phantom beneficiary/fromBranch/toBranch
+    // payload threw ValidationError on every transfer initiation), and the
+    // canonical Beneficiary branch field is branchId.
     const transfer = await BeneficiaryTransfer.create({
-      beneficiary: beneficiary._id,
-      fromBranch: beneficiary.branch,
-      toBranch: toBranchId,
+      beneficiaryId: beneficiary._id,
+      fromBranchId: beneficiary.branchId || beneficiary.branch_id,
+      toBranchId,
       transferDate,
       reason,
       requestedBy,

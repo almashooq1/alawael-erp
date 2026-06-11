@@ -46,6 +46,13 @@ beforeAll(async () => {
   CarePlanVersion = cpvMod.CarePlanVersion || cpvMod;
   TherapeuticGoal = require('../domains/goals/models/TherapeuticGoal').TherapeuticGoal;
   svc = require('../services/rehabPlanHealth.service');
+  // Build indexes NOW instead of racing autoIndex: on CI the unique
+  // {planId, versionNumber} index finished building before seedPlan's raw
+  // inserts and two index-key-less docs collided on {null, null} (E11000);
+  // locally the inserts won the race and the suite stayed green. Forcing
+  // init() makes every environment behave like CI.
+  await CarePlanVersion.init();
+  await TherapeuticGoal.init();
 }, 60000);
 
 afterAll(async () => {
@@ -66,10 +73,9 @@ async function seedPlan({
   planType = 'individual_therapy',
 }) {
   await CarePlanVersion.collection.insertOne({
-    // Raw insert bypasses mongoose defaults, so the UNIQUE
-    // {planId, versionNumber} index (CarePlanVersion.js:432) rejects a second
-    // {null,null} pair — the suite broke deterministically once autoIndex
-    // built the index (failed CI on main AND on the merged branch).
+    // unique per doc — the collection has a unique {planId, versionNumber}
+    // index (CarePlanVersion.js:432), and omitting both makes every seeded
+    // doc key {null, null}, breaking deterministically once autoIndex builds.
     planId: new mongoose.Types.ObjectId(),
     versionNumber: 1,
     beneficiaryId,

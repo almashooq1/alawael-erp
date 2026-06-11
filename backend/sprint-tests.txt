@@ -853,3 +853,4 @@ __tests__/diversity-behavioral-wave1199.test.js
 __tests__/workforce-intelligence-service-wave1200.test.js
 __tests__/workforce-intelligence-routes-wave1200.test.js
 __tests__/my-day-board-wave1204.test.js
+__tests__/rehab-plan-health-behavioral-wave1205.test.js

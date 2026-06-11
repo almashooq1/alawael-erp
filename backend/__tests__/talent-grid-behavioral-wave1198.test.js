@@ -31,6 +31,9 @@ beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1198-talent' } });
   await mongoose.connect(mongod.getUri());
   TR = require('../models/HR/TalentReview');
+  // build the unique (employeeId, reviewCycle) index before the duplicate-key
+  // assertion — mongoose builds indexes async, flaky in fast CI shards otherwise.
+  await TR.init();
 });
 afterAll(async () => {
   await mongoose.disconnect();

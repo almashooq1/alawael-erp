@@ -1011,4 +1011,7 @@ __tests__/headcount-plan-behavioral-wave1203.test.js
 __tests__/official-letters-routes-wave1224.test.js
 __tests__/official-letters-behavioral-wave1224.test.js
 __tests__/productivity-anomalies-wave1215.test.js
+__tests__/succession-readiness-lib-wave1207.test.js
+__tests__/succession-readiness-routes-wave1207.test.js
+__tests__/succession-readiness-service-wave1207.test.js
 __tests__/expense-anomaly-wave1218.test.js

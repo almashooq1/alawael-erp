@@ -854,3 +854,6 @@ __tests__/workforce-intelligence-service-wave1200.test.js
 __tests__/workforce-intelligence-routes-wave1200.test.js
 __tests__/my-day-board-wave1204.test.js
 __tests__/rehab-plan-health-behavioral-wave1205.test.js
+__tests__/skills-gap-lib-wave1201.test.js
+__tests__/skills-gap-routes-wave1201.test.js
+__tests__/skills-gap-behavioral-wave1201.test.js

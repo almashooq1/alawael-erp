@@ -106,8 +106,19 @@ const initializeRedis = () => {
  * @param {number} ttl - Time to live in seconds
  * @param {string} prefix - Cache key prefix
  */
+// W1229: verification / anti-fraud endpoints must NEVER serve stale state.
+// Caught live on prod: a freshly REVOKED official letter kept verifying as
+// VALID for up to the 300s TTL, because the write-side invalidation strips
+// only a trailing /:objectId (the revoke URL ends in /revoke, and the verify
+// URL is keyed by token — they never match). Status-flipping verify reads
+// bypass the cache entirely.
+const NO_CACHE_RE = /\/letter-verify\/|\/official-letters\/verify\//;
+
 const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
   return async (req, res, next) => {
+    if (req.method === 'GET' && NO_CACHE_RE.test((req.originalUrl || req.url || '').split('?')[0])) {
+      return next();
+    }
     if (!redis || req.method !== 'GET') {
       // For write operations (POST/PUT/PATCH/DELETE), invalidate related cache
       if (redis && req.method !== 'GET' && req.method !== 'OPTIONS' && req.method !== 'HEAD') {

@@ -72,4 +72,24 @@ describe('W1207 succession-readiness.lib — ranking', () => {
     ]);
     expect(ranked.map(r => r.employeeId)).toEqual(['b', 'c', 'a']);
   });
+
+  // W1227 — successionReadinessService emits FLAT candidates (`...r` spreads
+  // `score` to the top level), not `{readiness:{score}}`. The original reader
+  // only handled the nested shape, so the live /candidates ranking sorted by
+  // `undefined` → DB order. rankCandidates must rank the flat shape too.
+  test('rankCandidates sorts FLAT candidates (the live service shape) by score', () => {
+    const ranked = L.rankCandidates([
+      { employeeId: 'a', score: 40 },
+      { employeeId: 'b', score: 85 },
+      { employeeId: 'c', score: 60 },
+    ]);
+    expect(ranked.map(r => r.employeeId)).toEqual(['b', 'c', 'a']);
+  });
+
+  test('candidateScore reads flat, nested, and defaults missing to 0', () => {
+    expect(L.candidateScore({ score: 72 })).toBe(72);
+    expect(L.candidateScore({ readiness: { score: 55 } })).toBe(55);
+    expect(L.candidateScore({})).toBe(0);
+    expect(L.candidateScore(null)).toBe(0);
+  });
 });

@@ -178,5 +178,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Pay-equity routes not mounted (module missing)');
   }
 
+  // ── 9-box talent matrix (W1198 — performance × potential placement) ───────
+  // Self-authenticating; salary-free but identity-bearing reads are role-gated.
+  const talentGridRouter = safeRequire('../routes/hr/talent-grid.routes');
+  if (talentGridRouter) {
+    app.use('/api/hr/talent-grid', talentGridRouter);
+    app.use('/api/v1/hr/talent-grid', talentGridRouter);
+    logger.info('[HR] Talent grid (9-box) mounted (/api/(v1/)?hr/talent-grid)');
+  } else {
+    logger.warn('[HR] Talent grid routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

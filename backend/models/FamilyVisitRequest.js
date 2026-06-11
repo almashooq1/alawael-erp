@@ -92,34 +92,30 @@ FamilyVisitRequestSchema.path('__invariants').validate(function () {
   return ok;
 });
 
-// W985 — surface family engagement on the unified-core timeline: a completed
-// family visit (positive engagement) and a no-show (disengagement signal).
-// Fires on the status flip to completed / no_show (once). Native pre-compile
-// hooks per the proven W970 pattern; guarded, fire-and-forget. Consumed by
-// dddCrossModuleSubscribers → CareTimeline (reuses the existing family_meeting
-// eventType, severity by outcome).
-FamilyVisitRequestSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1079: unified-core producer ───────────────────────────────────
+// Emit family_visit.approved when a parent-visit request is approved — a
+// family-engagement milestone. Fires on the transition into 'approved'.
+// Non-callback hook style (W483 gate).
+FamilyVisitRequestSchema.pre('save', function flagFamilyVisitApproved() {
+  this.$__familyVisitApproved =
+    this.status === 'approved' && (this.isNew || this.isModified('status'));
 });
-FamilyVisitRequestSchema.post('save', function (doc) {
+
+FamilyVisitRequestSchema.post('save', function emitFamilyVisitApproved(doc) {
+  if (!doc.$__familyVisitApproved) return;
   try {
-    if (doc.status === this.$__prevStatus) return; // no status change
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
-    if (!doc.beneficiaryId) return;
-    const base = {
-      visitId: String(doc._id),
+    integrationBus.publish('family-visit', 'family_visit.approved', {
+      requestId: String(doc._id),
       beneficiaryId: String(doc.beneficiaryId),
-      relationship: doc.relationship || '',
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
       requestedDate: doc.requestedDate,
-    };
-    if (doc.status === 'completed') {
-      Promise.resolve(integrationBus.publish('family', 'visit.completed', base)).catch(() => {});
-    } else if (doc.status === 'no_show') {
-      Promise.resolve(integrationBus.publish('family', 'visit.no_show', base)).catch(() => {});
-    }
-  } catch (_) {
-    /* bus not wired — never block persistence */
+      slot: doc.slot,
+      sessionType: doc.sessionType,
+      approvedAt: doc.approvedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
   }
 });
 

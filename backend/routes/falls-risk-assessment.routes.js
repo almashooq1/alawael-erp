@@ -340,9 +340,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const nextReviewDue = body.nextReviewDue ? new Date(body.nextReviewDue) : null;
 
     const interventions = Array.isArray(body.preventionInterventions)
-      ? body.preventionInterventions
-          .map(s => String(s))
-          .filter(s => INTERVENTIONS.includes(s))
+      ? body.preventionInterventions.map(s => String(s)).filter(s => INTERVENTIONS.includes(s))
       : [];
 
     const doc = await FallsRiskAssessment.create({
@@ -414,7 +412,10 @@ router.post('/:id/add-intervention', requireRole(WRITE_ROLES), async (req, res) 
     if (!INTERVENTIONS.includes(intervention)) {
       return res
         .status(400)
-        .json({ success: false, message: `intervention يجب أن يكون: ${INTERVENTIONS.join(' | ')}` });
+        .json({
+          success: false,
+          message: `intervention يجب أن يكون: ${INTERVENTIONS.join(' | ')}`,
+        });
     }
     const row = await FallsRiskAssessment.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -486,7 +487,10 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       } else {
         row.riskLevel = String(req.body.riskLevel);
       }
-    } else if (row.tool === 'clinical_judgment' && RISK_LEVELS.includes(String(req.body.riskLevel))) {
+    } else if (
+      row.tool === 'clinical_judgment' &&
+      RISK_LEVELS.includes(String(req.body.riskLevel))
+    ) {
       row.riskLevel = String(req.body.riskLevel);
     }
     await row.save();

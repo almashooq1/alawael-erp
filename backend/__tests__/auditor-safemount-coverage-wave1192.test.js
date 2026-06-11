@@ -37,7 +37,11 @@ describe('W1192 auditor models ../routes safeMount + stays clean', () => {
   });
 
   test('KNOWN_PUBLIC allowlists the 3 intentionally-public routes W1192 surfaced', () => {
-    for (const slug of ['build-info.routes.js', 'integrations-metrics.routes.js', 'otp-auth.routes.js']) {
+    for (const slug of [
+      'build-info.routes.js',
+      'integrations-metrics.routes.js',
+      'otp-auth.routes.js',
+    ]) {
       expect(src).toContain(`'${slug}'`);
     }
   });

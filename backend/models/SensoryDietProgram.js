@@ -161,6 +161,33 @@ SensoryDietProgramSchema.virtual('isReviewOverdue').get(function () {
 SensoryDietProgramSchema.set('toJSON', { virtuals: true });
 SensoryDietProgramSchema.set('toObject', { virtuals: true });
 
+// ── W1051: unified-core linkage ───────────────────────────────────────
+// On completion (status → 'completed'), publish sensory_diet.completed so
+// the cross-module subscriber records a clinical milestone on the
+// beneficiary's CareTimeline. NON-callback hooks only (global async save
+// plugin puts Kareem in promise-adapter mode — callback hooks would break).
+SensoryDietProgramSchema.pre('save', function () {
+  this.$__sensoryDietCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+function emitSensoryDietCompleted(doc) {
+  if (!doc || !doc.$__sensoryDietCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('sensory-diet-program', 'sensory_diet.completed', {
+      programId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      completedAt: doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+SensoryDietProgramSchema.post('save', emitSensoryDietCompleted);
+
 module.exports =
   mongoose.models.SensoryDietProgram ||
   mongoose.model('SensoryDietProgram', SensoryDietProgramSchema);

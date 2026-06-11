@@ -6,20 +6,25 @@
 
 'use strict';
 
-const VALID_TYPES = [
-  'long-term',
-  'short-term',
-  'maintenance',
-  'functional',
-  'academic',
-  'social',
-  'behavioral',
-  'communication',
-  'motor',
-  'cognitive',
-];
+// W1219 — these lists had drifted COMPLETELY from the TherapeuticGoal model
+// enums (hyphenated 'short-term' vs the model's 'short_term'; statuses like
+// 'on-hold'/'cancelled' that the model never accepted). Net effect: valid
+// model values were rejected with 400 at the validator, while validator-legal
+// values blew up as a mongoose ValidationError at save. Surfaced by the
+// route-layer behavioral suite. Single source of truth = the model enums
+// (domains/goals/models/TherapeuticGoal.js).
+const VALID_TYPES = ['long_term', 'short_term', 'session', 'maintenance', 'discharge'];
 
-const VALID_STATUSES = ['active', 'achieved', 'on-hold', 'cancelled', 'transferred', 'draft'];
+const VALID_STATUSES = [
+  'draft',
+  'active',
+  'achieved',
+  'partially_achieved',
+  'not_achieved',
+  'discontinued',
+  'deferred',
+  'modified',
+];
 
 // ─── Validators ──────────────────────────────────────────────────────────────
 

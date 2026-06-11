@@ -79,7 +79,8 @@ const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
 router.use(requireBranchAccess);
 
-const num = (v, d) => (v === undefined || v === null || v === '' || isNaN(Number(v)) ? d : Number(v));
+const num = (v, d) =>
+  v === undefined || v === null || v === '' || isNaN(Number(v)) ? d : Number(v);
 const bad = (res, msg) => res.status(400).json({ success: false, message: msg });
 
 // ── List ────────────────────────────────────────────────────────────
@@ -90,7 +91,8 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.wasteCategory && CATEGORIES.includes(req.query.wasteCategory)) {
       filter.wasteCategory = req.query.wasteCategory;
     }
-    if (req.query.generationDepartment) filter.generationDepartment = req.query.generationDepartment;
+    if (req.query.generationDepartment)
+      filter.generationDepartment = req.query.generationDepartment;
     const limit = Math.min(num(req.query.limit, 100), 500);
     const rows = await Waste.find(filter).sort({ generationDate: -1 }).limit(limit);
     res.json({ success: true, data: rows, count: rows.length });
@@ -143,7 +145,10 @@ router.get('/awaiting-disposal', requireRole(READ_ROLES), async (req, res) => {
 router.get('/by-category', requireRole(READ_ROLES), async (req, res) => {
   try {
     const branchId = effectiveBranchScope(req);
-    const match = { deletedAt: null, ...(branchId ? { branchId: new mongoose.Types.ObjectId(branchId) } : {}) };
+    const match = {
+      deletedAt: null,
+      ...(branchId ? { branchId: new mongoose.Types.ObjectId(branchId) } : {}),
+    };
     const agg = await Waste.aggregate([
       { $match: match },
       {
@@ -273,7 +278,8 @@ router.post('/:id/store', requireRole(WRITE_ROLES), async (req, res) => {
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (!String(req.body?.storageLocation || '').trim()) return bad(res, 'موقع التخزين مطلوب');
     row.storageLocation = String(req.body.storageLocation).slice(0, 200);
-    if (req.body.maxStorageHours !== undefined) row.maxStorageHours = num(req.body.maxStorageHours, 48);
+    if (req.body.maxStorageHours !== undefined)
+      row.maxStorageHours = num(req.body.maxStorageHours, 48);
     row.storedAt = new Date();
     row.status = 'stored';
     await row.save();
@@ -289,7 +295,8 @@ router.post('/:id/collect', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return bad(res, 'معرّف غير صالح');
     const row = await Waste.findOne({ _id: req.params.id, ...branchFilter(req), deletedAt: null });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
-    if (!String(req.body?.collectionVendor || '').trim()) return bad(res, 'جهة النقل المرخّصة مطلوبة');
+    if (!String(req.body?.collectionVendor || '').trim())
+      return bad(res, 'جهة النقل المرخّصة مطلوبة');
     row.collectionVendor = String(req.body.collectionVendor).slice(0, 200);
     row.collectedByName = String(req.body.collectedByName || '').slice(0, 120);
     row.manifestNumber = String(req.body.manifestNumber || '').slice(0, 100);
@@ -308,7 +315,8 @@ router.post('/:id/dispose', requireRole(DISPOSE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return bad(res, 'معرّف غير صالح');
     const row = await Waste.findOne({ _id: req.params.id, ...branchFilter(req), deletedAt: null });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
-    if (!DISPOSAL_METHODS.includes(req.body?.disposalMethod)) return bad(res, 'طريقة التخلّص غير صالحة');
+    if (!DISPOSAL_METHODS.includes(req.body?.disposalMethod))
+      return bad(res, 'طريقة التخلّص غير صالحة');
     if (!String(req.body?.disposalFacility || '').trim()) return bad(res, 'منشأة المعالجة مطلوبة');
     row.disposalMethod = req.body.disposalMethod;
     row.disposalFacility = String(req.body.disposalFacility).slice(0, 200);

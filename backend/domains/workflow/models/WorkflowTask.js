@@ -215,6 +215,31 @@ workflowTaskSchema.statics.getOverdueTasks = function (branchId) {
     .sort({ dueDate: 1 });
 };
 
+// ── W1113 — publish workflow_task.completed when a care-workflow task finishes ─
+workflowTaskSchema.pre('save', function flagWorkflowTaskCompleted() {
+  const becameCompleted = (this.isNew || this.isModified('status')) && this.status === 'completed';
+  this.$__workflowTaskCompleted = becameCompleted;
+});
+
+workflowTaskSchema.post('save', function emitWorkflowTaskCompleted(doc) {
+  if (!doc.$__workflowTaskCompleted) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('workflow-task', 'workflow_task.completed', {
+      taskId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.type ? { type: doc.type } : {}),
+      ...(doc.phase ? { phase: doc.phase } : {}),
+      ...(doc.completedBy ? { completedBy: String(doc.completedBy) } : {}),
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const WorkflowTask =
   mongoose.models.WorkflowTask || mongoose.model('WorkflowTask', workflowTaskSchema);
 

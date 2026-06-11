@@ -282,6 +282,12 @@ measureApplicationSchema.index({ beneficiaryId: 1, measureId: 1, applicationDate
 measureApplicationSchema.index({ beneficiaryId: 1, purpose: 1 });
 measureApplicationSchema.index({ episodeId: 1, measureId: 1 });
 measureApplicationSchema.index({ nextApplicationDate: 1, reapplicationStatus: 1 });
+// gap #6 (assessment↔measure) — the canonical assessment→measurement bridge is
+// `assessmentId` (ref ClinicalAssessment). Index it so the backward query "which
+// measure administrations came from this assessment?" is fast. Sparse: most
+// administrations are standalone. (Legacy MeasurementResult deliberately NOT
+// extended — ADR-041 fences that parallel system; convergence is that ADR's call.)
+measureApplicationSchema.index({ assessmentId: 1 }, { sparse: true });
 
 // ─── Virtuals ─────────────────────────────────────────────────────────────
 

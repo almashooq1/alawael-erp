@@ -69,6 +69,30 @@ const medicationOrderSchema = new mongoose.Schema(
 
 medicationOrderSchema.index({ beneficiaryId: 1, status: 1 });
 
+// ── W1078: unified-core producer ───────────────────────────────────
+// Emit medication_order.activated when a new active medication order is
+// created. Only on new active rows (held/stopped are not new-start
+// milestones; edits don't re-fire). Non-callback hook style (W483 gate).
+medicationOrderSchema.pre('save', function flagMedOrderActivated() {
+  this.$__medOrderActivated = this.isNew && this.status === 'active';
+});
+
+medicationOrderSchema.post('save', function emitMedOrderActivated(doc) {
+  if (!doc.$__medOrderActivated) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('medication-order', 'medication_order.activated', {
+      orderId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      name: doc.name,
+      rxNormId: doc.rxNormId || null,
+      startedAt: doc.startedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 const MedicationOrder =
   mongoose.models.MedicationOrder || mongoose.model('MedicationOrder', medicationOrderSchema);
 

@@ -50,6 +50,32 @@ cdssRiskAssessmentSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
 });
 
+// ── W1082: unified-core producer ───────────────────────────────────
+// Emit cdss_risk.assessed when a new CDSS risk assessment is recorded so
+// the score lands on the beneficiary's core timeline. Only new rows fire;
+// edits don't re-emit. Non-callback hook style (W483).
+cdssRiskAssessmentSchema.pre('save', function flagCdssRiskAssessed() {
+  this.$__cdssRiskAssessed = this.isNew;
+});
+
+cdssRiskAssessmentSchema.post('save', function emitCdssRiskAssessed(doc) {
+  if (!doc.$__cdssRiskAssessed) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('cdss-risk', 'cdss_risk.assessed', {
+      assessmentId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      assessmentType: doc.assessmentType || null,
+      riskLevel: doc.riskLevel || null,
+      totalScore: typeof doc.totalScore === 'number' ? doc.totalScore : null,
+      assessmentDate: doc.assessmentDate || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.CdssRiskAssessment ||
   mongoose.model('CdssRiskAssessment', cdssRiskAssessmentSchema);

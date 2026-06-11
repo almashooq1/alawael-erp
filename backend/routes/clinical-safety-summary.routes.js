@@ -73,14 +73,18 @@ function buildSummary(beneficiaryId, sources) {
   const { falls, injuries, sleep, om, driving, seizure30dCount } = sources;
   const flags = [];
   const now = Date.now();
-  const overdue = d =>
-    d && d.nextReviewDue && new Date(d.nextReviewDue).getTime() < now;
+  const overdue = d => d && d.nextReviewDue && new Date(d.nextReviewDue).getTime() < now;
 
   // Falls
   let fallsOut = null;
   if (falls) {
     const od = falls.status === 'finalized' && overdue(falls);
-    fallsOut = { riskLevel: falls.riskLevel, riskScore: falls.riskScore, date: falls.date, overdue: !!od };
+    fallsOut = {
+      riskLevel: falls.riskLevel,
+      riskScore: falls.riskScore,
+      date: falls.date,
+      overdue: !!od,
+    };
     if (falls.riskLevel === 'high') flags.push('falls_high_risk');
     if (od) flags.push('falls_reassessment_overdue');
   }
@@ -108,7 +112,11 @@ function buildSummary(beneficiaryId, sources) {
   let sleepOut = null;
   if (sleep) {
     const od = sleep.status === 'finalized' && overdue(sleep);
-    sleepOut = { problemSeverity: sleep.problemSeverity, suspectedOSA: !!sleep.suspectedOSA, overdue: !!od };
+    sleepOut = {
+      problemSeverity: sleep.problemSeverity,
+      suspectedOSA: !!sleep.suspectedOSA,
+      overdue: !!od,
+    };
     if (sleep.problemSeverity === 'severe') flags.push('severe_sleep_disturbance');
     if (sleep.suspectedOSA) flags.push('suspected_sleep_apnea');
     if (od) flags.push('sleep_reassessment_overdue');
@@ -118,7 +126,11 @@ function buildSummary(beneficiaryId, sources) {
   let omOut = null;
   if (om) {
     const od = om.status === 'finalized' && overdue(om);
-    omOut = { independenceLevel: om.independenceLevel, independenceScore: om.independenceScore, overdue: !!od };
+    omOut = {
+      independenceLevel: om.independenceLevel,
+      independenceScore: om.independenceScore,
+      overdue: !!od,
+    };
     if (om.independenceLevel === 'dependent') flags.push('mobility_dependent');
     if (od) flags.push('om_reassessment_overdue');
   }
@@ -177,7 +189,11 @@ async function gatherSources(beneficiaryId, req) {
     latestFinalized('OrientationMobilityAssessment', beneficiaryId, req),
     latestFinalized('DrivingRehabAssessment', beneficiaryId, req),
     Seizure
-      ? Seizure.countDocuments({ ...branchFilter(req), beneficiaryId, startTime: { $gte: cutoff30d } })
+      ? Seizure.countDocuments({
+          ...branchFilter(req),
+          beneficiaryId,
+          startTime: { $gte: cutoff30d },
+        })
       : 0,
   ]);
   return { falls, injuries, sleep, om, driving, seizure30dCount };
@@ -214,30 +230,54 @@ router.get('/alerts', requireRole(READ_ROLES), async (req, res) => {
     const tasks = [];
     if (Falls)
       tasks.push(
-        Falls.find({ ...bf, status: 'finalized', riskLevel: 'high' }).select('beneficiaryId').limit(2000).lean().then(add)
+        Falls.find({ ...bf, status: 'finalized', riskLevel: 'high' })
+          .select('beneficiaryId')
+          .limit(2000)
+          .lean()
+          .then(add)
       );
     if (Injury)
       tasks.push(
-        Injury.find({ ...bf, status: { $in: OPEN_INJURY_STATUSES } }).select('beneficiaryId').limit(2000).lean().then(add)
+        Injury.find({ ...bf, status: { $in: OPEN_INJURY_STATUSES } })
+          .select('beneficiaryId')
+          .limit(2000)
+          .lean()
+          .then(add)
       );
     if (Sleep)
       tasks.push(
-        Sleep.find({ ...bf, status: 'finalized', problemSeverity: 'severe' }).select('beneficiaryId').limit(2000).lean().then(add)
+        Sleep.find({ ...bf, status: 'finalized', problemSeverity: 'severe' })
+          .select('beneficiaryId')
+          .limit(2000)
+          .lean()
+          .then(add)
       );
     if (OM)
       tasks.push(
-        OM.find({ ...bf, status: 'finalized', independenceLevel: 'dependent' }).select('beneficiaryId').limit(2000).lean().then(add)
+        OM.find({ ...bf, status: 'finalized', independenceLevel: 'dependent' })
+          .select('beneficiaryId')
+          .limit(2000)
+          .lean()
+          .then(add)
       );
     if (Driving)
       tasks.push(
-        Driving.find({ ...bf, status: 'finalized', recommendation: 'not_fit_currently' }).select('beneficiaryId').limit(2000).lean().then(add)
+        Driving.find({ ...bf, status: 'finalized', recommendation: 'not_fit_currently' })
+          .select('beneficiaryId')
+          .limit(2000)
+          .lean()
+          .then(add)
       );
     // Overdue reassessments (any module) are also alert-worthy.
     const now = new Date();
     for (const M of [Falls, Sleep, OM, Driving, Injury]) {
       if (M)
         tasks.push(
-          M.find({ ...bf, status: M === Injury ? { $in: OPEN_INJURY_STATUSES } : 'finalized', nextReviewDue: { $ne: null, $lt: now } })
+          M.find({
+            ...bf,
+            status: M === Injury ? { $in: OPEN_INJURY_STATUSES } : 'finalized',
+            nextReviewDue: { $ne: null, $lt: now },
+          })
             .select('beneficiaryId')
             .limit(2000)
             .lean()
@@ -251,7 +291,9 @@ router.get('/alerts', requireRole(READ_ROLES), async (req, res) => {
     const summaries = await Promise.all(
       idList.map(async id => buildSummary(id, await gatherSources(id, req)))
     );
-    const flagged = summaries.filter(s => s.hasActiveFlag).sort((a, b) => b.flagCount - a.flagCount);
+    const flagged = summaries
+      .filter(s => s.hasActiveFlag)
+      .sort((a, b) => b.flagCount - a.flagCount);
 
     // Hydrate beneficiary names.
     const Beneficiary = lazyBeneficiary();
@@ -284,21 +326,41 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       await Promise.all([
         Falls ? Falls.countDocuments({ ...bf, status: 'finalized', riskLevel: 'high' }) : 0,
         Injury ? Injury.countDocuments({ ...bf, status: { $in: OPEN_INJURY_STATUSES } }) : 0,
-        Injury ? Injury.countDocuments({ ...bf, status: { $in: OPEN_INJURY_STATUSES }, origin: 'facility_acquired' }) : 0,
+        Injury
+          ? Injury.countDocuments({
+              ...bf,
+              status: { $in: OPEN_INJURY_STATUSES },
+              origin: 'facility_acquired',
+            })
+          : 0,
         Sleep ? Sleep.countDocuments({ ...bf, status: 'finalized', problemSeverity: 'severe' }) : 0,
         Sleep ? Sleep.countDocuments({ ...bf, status: 'finalized', suspectedOSA: true }) : 0,
         OM ? OM.countDocuments({ ...bf, status: 'finalized', independenceLevel: 'dependent' }) : 0,
-        Driving ? Driving.countDocuments({ ...bf, status: 'finalized', recommendation: 'not_fit_currently' }) : 0,
+        Driving
+          ? Driving.countDocuments({
+              ...bf,
+              status: 'finalized',
+              recommendation: 'not_fit_currently',
+            })
+          : 0,
       ]);
 
     const overdueTasks = [];
     for (const M of [Falls, Sleep, OM, Driving]) {
       overdueTasks.push(
-        M ? M.countDocuments({ ...bf, status: 'finalized', nextReviewDue: { $ne: null, $lt: now } }) : 0
+        M
+          ? M.countDocuments({ ...bf, status: 'finalized', nextReviewDue: { $ne: null, $lt: now } })
+          : 0
       );
     }
     overdueTasks.push(
-      Injury ? Injury.countDocuments({ ...bf, status: { $in: OPEN_INJURY_STATUSES }, nextReviewDue: { $ne: null, $lt: now } }) : 0
+      Injury
+        ? Injury.countDocuments({
+            ...bf,
+            status: { $in: OPEN_INJURY_STATUSES },
+            nextReviewDue: { $ne: null, $lt: now },
+          })
+        : 0
     );
     const overdueCounts = await Promise.all(overdueTasks);
     const reassessmentOverdue = overdueCounts.reduce((a, b) => a + b, 0);

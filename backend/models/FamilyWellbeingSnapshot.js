@@ -115,7 +115,6 @@ FamilyWellbeingSnapshotSchema.pre('save', async function () {
   this.presentComponents = result.presentComponents ?? 0;
   this.missingComponents = result.missingComponents ?? 5;
   this.triggeredActions = result.triggers || [];
-
 });
 
 module.exports =

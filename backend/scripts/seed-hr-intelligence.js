@@ -62,12 +62,42 @@ function currentLevelFor(id, competencyKey, requiredLevel) {
 
 // competency baseline applied to every job title (rehab-center generic set)
 const COMPETENCY_CATALOG = [
-  { competencyKey: 'assessment', competencyNameAr: 'التقييم السريري', requiredLevel: 4, criticality: 'core' },
-  { competencyKey: 'documentation', competencyNameAr: 'التوثيق', requiredLevel: 3, criticality: 'important' },
-  { competencyKey: 'patient_safety', competencyNameAr: 'سلامة المستفيد', requiredLevel: 4, criticality: 'core' },
-  { competencyKey: 'communication', competencyNameAr: 'التواصل', requiredLevel: 3, criticality: 'important' },
-  { competencyKey: 'evidence_based', competencyNameAr: 'الممارسة المبنية على الأدلة', requiredLevel: 3, criticality: 'important' },
-  { competencyKey: 'aac', competencyNameAr: 'التواصل المعزّز والبديل', requiredLevel: 2, criticality: 'nice' },
+  {
+    competencyKey: 'assessment',
+    competencyNameAr: 'التقييم السريري',
+    requiredLevel: 4,
+    criticality: 'core',
+  },
+  {
+    competencyKey: 'documentation',
+    competencyNameAr: 'التوثيق',
+    requiredLevel: 3,
+    criticality: 'important',
+  },
+  {
+    competencyKey: 'patient_safety',
+    competencyNameAr: 'سلامة المستفيد',
+    requiredLevel: 4,
+    criticality: 'core',
+  },
+  {
+    competencyKey: 'communication',
+    competencyNameAr: 'التواصل',
+    requiredLevel: 3,
+    criticality: 'important',
+  },
+  {
+    competencyKey: 'evidence_based',
+    competencyNameAr: 'الممارسة المبنية على الأدلة',
+    requiredLevel: 3,
+    criticality: 'important',
+  },
+  {
+    competencyKey: 'aac',
+    competencyNameAr: 'التواصل المعزّز والبديل',
+    requiredLevel: 2,
+    criticality: 'nice',
+  },
 ];
 
 function out(summary) {
@@ -76,7 +106,9 @@ function out(summary) {
     console.log('');
     console.log('HR intelligence seed —', DRY_RUN ? 'DRY RUN (no writes)' : 'applied');
     console.log(`  job titles: ${summary.jobTitles}   requirements: ${summary.requirements}`);
-    console.log(`  employees: ${summary.employees}   competencies: ${summary.competencies}   talentReviews: ${summary.talentReviews}`);
+    console.log(
+      `  employees: ${summary.employees}   competencies: ${summary.competencies}   talentReviews: ${summary.talentReviews}`
+    );
     if (summary.reset) console.log(`  reset deleted: ${JSON.stringify(summary.reset)}`);
     console.log('');
   }
@@ -84,7 +116,13 @@ function out(summary) {
 
 async function main() {
   if (DRY_RUN) {
-    out({ jobTitles: '(dry)', requirements: COMPETENCY_CATALOG.length + ' per title', employees: '(dry)', competencies: '(dry)', talentReviews: '(dry)' });
+    out({
+      jobTitles: '(dry)',
+      requirements: COMPETENCY_CATALOG.length + ' per title',
+      employees: '(dry)',
+      competencies: '(dry)',
+      talentReviews: '(dry)',
+    });
     process.exit(0);
   }
   if (!process.env.MONGODB_URI) {
@@ -100,18 +138,31 @@ async function main() {
 
   const empFilter = { status: 'active', deleted_at: null };
   if (BRANCH) empFilter.branch_id = BRANCH;
-  const employees = await Employee.find(empFilter).select('_id job_title_en job_title_ar branch_id').limit(LIMIT).lean();
+  const employees = await Employee.find(empFilter)
+    .select('_id job_title_en job_title_ar branch_id')
+    .limit(LIMIT)
+    .lean();
   const jobTitle = e => e.job_title_en || e.job_title_ar || 'general';
   const titles = [...new Set(employees.map(jobTitle))];
 
-  const summary = { jobTitles: titles.length, requirements: 0, employees: employees.length, competencies: 0, talentReviews: 0 };
+  const summary = {
+    jobTitles: titles.length,
+    requirements: 0,
+    employees: employees.length,
+    competencies: 0,
+    talentReviews: 0,
+  };
 
   if (RESET) {
     const empIds = employees.map(e => e._id);
     const r1 = await EmployeeCompetency.deleteMany({ employeeId: { $in: empIds } });
     const r2 = await TalentReview.deleteMany({ employeeId: { $in: empIds } });
     const r3 = await RoleCompetencyRequirement.deleteMany({ jobTitle: { $in: titles } });
-    summary.reset = { competencies: r1.deletedCount, talentReviews: r2.deletedCount, requirements: r3.deletedCount };
+    summary.reset = {
+      competencies: r1.deletedCount,
+      talentReviews: r2.deletedCount,
+      requirements: r3.deletedCount,
+    };
   }
 
   // 1) role baselines
@@ -119,7 +170,14 @@ async function main() {
     for (const c of COMPETENCY_CATALOG) {
       await RoleCompetencyRequirement.updateOne(
         { jobTitle: t, competencyKey: c.competencyKey },
-        { $set: { competencyNameAr: c.competencyNameAr, requiredLevel: c.requiredLevel, criticality: c.criticality, active: true } },
+        {
+          $set: {
+            competencyNameAr: c.competencyNameAr,
+            requiredLevel: c.requiredLevel,
+            criticality: c.criticality,
+            active: true,
+          },
+        },
         { upsert: true }
       );
       summary.requirements++;
@@ -132,8 +190,12 @@ async function main() {
     const id = String(e._id);
     for (const c of COMPETENCY_CATALOG) {
       const currentLevel = currentLevelFor(id, c.competencyKey, c.requiredLevel);
-      const existing = await EmployeeCompetency.findOne({ employeeId: e._id, competencyKey: c.competencyKey });
-      const doc = existing || new EmployeeCompetency({ employeeId: e._id, competencyKey: c.competencyKey });
+      const existing = await EmployeeCompetency.findOne({
+        employeeId: e._id,
+        competencyKey: c.competencyKey,
+      });
+      const doc =
+        existing || new EmployeeCompetency({ employeeId: e._id, competencyKey: c.competencyKey });
       doc.competencyNameAr = c.competencyNameAr;
       doc.currentLevel = currentLevel;
       doc.assessedAt = new Date();

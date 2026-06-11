@@ -272,11 +272,17 @@ referralSchema.post('save', function (doc) {
       status: doc.status,
     };
     if (doc.status === 'accepted') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.accepted', base)).catch(() => {});
+      Promise.resolve(integrationBus.publish('referral', 'referral.accepted', base)).catch(
+        () => {}
+      );
     } else if (doc.status === 'completed') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.completed', base)).catch(() => {});
+      Promise.resolve(integrationBus.publish('referral', 'referral.completed', base)).catch(
+        () => {}
+      );
     } else if (doc.status === 'rejected' || doc.status === 'declined') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.rejected', base)).catch(() => {});
+      Promise.resolve(integrationBus.publish('referral', 'referral.rejected', base)).catch(
+        () => {}
+      );
     }
   } catch (_) {
     /* bus not wired — never block persistence */

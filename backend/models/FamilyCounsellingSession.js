@@ -157,21 +157,29 @@ FamilyCounsellingSessionSchema.index({ beneficiaryId: 1, sessionDate: -1 });
 FamilyCounsellingSessionSchema.index({ branchId: 1, sessionDate: -1, sessionType: 1 });
 FamilyCounsellingSessionSchema.index({ counsellorUserId: 1, sessionDate: -1 });
 
-// W470 Wave-18 invariants
+// W470 Wave-18 invariants (W1026: converted to async/throw style so the hook
+// family stays consistent with the global async plugins → avoids the W483
+// "next is not a function" Kareem promise-adapter mismatch).
 FamilyCounsellingSessionSchema.pre('save', async function () {
+  // W1026: flag completion transition for the post('save') emitter.
+  this.$__familyCounsellingDoneNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+
   // Cancelled/no_show require cancellationReason
   if (
     (this.status === 'cancelled' || this.status === 'no_show') &&
     (!this.cancellationReason || this.cancellationReason.trim().length < 5)
   ) {
     throw new Error(
-        `FamilyCounsellingSession: status="${this.status}" requires cancellationReason (≥5 chars)`
-      );
+      `FamilyCounsellingSession: status="${this.status}" requires cancellationReason (≥5 chars)`
+    );
   }
 
   // completed status: sessionDate should be in the past or now
   if (this.status === 'completed' && this.sessionDate && this.sessionDate > new Date()) {
-    throw new Error('FamilyCounsellingSession: completed session cannot have sessionDate in future');
+    throw new Error(
+      'FamilyCounsellingSession: completed session cannot have sessionDate in future'
+    );
   }
 
   // followUpActions[].completed requires completedAt
@@ -180,8 +188,28 @@ FamilyCounsellingSessionSchema.pre('save', async function () {
       fa.completedAt = new Date();
     }
   }
+});
 
-  
+// ── W1026: producer hook — family counselling completed → unified core ──
+// Emit after the write commits; the flag is set in the pre('save') above.
+FamilyCounsellingSessionSchema.post('save', function emitFamilyCounsellingDone(doc) {
+  if (!this.$__familyCounsellingDoneNow) return;
+  if (!doc.beneficiaryId) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('family-counselling', 'family_counselling.completed', {
+      familyCounsellingSessionId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      branchId: doc.branchId ? String(doc.branchId) : undefined,
+      sessionType: doc.sessionType,
+      triggerSource: doc.triggerSource,
+      durationMinutes: doc.durationMinutes,
+      completedAt: doc.sessionDate || new Date(),
+    });
+  } catch {
+    /* never block the save */
+  }
 });
 
 module.exports =

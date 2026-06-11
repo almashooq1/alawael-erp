@@ -44,9 +44,8 @@ describe('W954 — firstParamName extracts the sole declared parameter', () => {
   });
 
   it('reads arrow-function params (parenthesised + bare)', () => {
-    // eslint-disable-next-line arrow-body-style
-    expect(firstParamName((doc) => {})).toBe('doc');
-    // eslint-disable-next-line arrow-body-style
+    expect(firstParamName(doc => {})).toBe('doc');
+
     expect(firstParamName(next => {})).toBe('next');
   });
 });

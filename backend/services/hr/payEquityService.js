@@ -107,7 +107,14 @@ async function analyze({ branchId, department = null, thresholdPct, byTitle = fa
 }
 
 /** Run analyze + persist an aggregate-only snapshot (no individuals stored). */
-async function snapshot({ branchId, department = null, thresholdPct, byTitle = false, computedBy = null, computedAt } = {}) {
+async function snapshot({
+  branchId,
+  department = null,
+  thresholdPct,
+  byTitle = false,
+  computedBy = null,
+  computedAt,
+} = {}) {
   const PayEquitySnapshot = getModel('PayEquitySnapshot');
   if (!PayEquitySnapshot) {
     const err = new Error('PayEquitySnapshot model unavailable');
@@ -158,7 +165,12 @@ async function trends({ branchId, department = null, limit = 24 } = {}) {
 }
 
 /** The flagged (below-cohort) employees — sensitive identity-bearing list. */
-async function flaggedEmployees({ branchId, department = null, thresholdPct, byTitle = false } = {}) {
+async function flaggedEmployees({
+  branchId,
+  department = null,
+  thresholdPct,
+  byTitle = false,
+} = {}) {
   const a = await analyze({ branchId, department, thresholdPct, byTitle });
   return a.flagged;
 }

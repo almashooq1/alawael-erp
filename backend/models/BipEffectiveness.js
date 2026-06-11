@@ -144,5 +144,29 @@ bipEffectivenessSchema.virtual('percentChangeFromBaseline').get(function pct() {
   return Number((((current - baseline) / baseline) * 100).toFixed(1));
 });
 
+// W1097 — unified-core linkage: every BIP effectiveness reading surfaces a
+// behaviour-plan progress row on the per-beneficiary clinical timeline.
+bipEffectivenessSchema.pre('save', function flagBipEffectivenessRecorded() {
+  this.$__bipEffectivenessRecorded = this.isNew;
+});
+
+bipEffectivenessSchema.post('save', function emitBipEffectivenessRecorded(doc) {
+  if (!doc.$__bipEffectivenessRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const pct = doc.percentChangeFromBaseline;
+    integrationBus.publish('bip-effectiveness', 'bip_effectiveness.recorded', {
+      readingId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      fbaAssessmentId: doc.fbaAssessmentId,
+      ...(typeof pct === 'number' ? { percentChangeFromBaseline: pct } : {}),
+      measuredAt: doc.measuredAt,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.BipEffectiveness || mongoose.model('BipEffectiveness', bipEffectivenessSchema);

@@ -216,7 +216,6 @@ riskAssessmentSchema.pre('save', async function () {
   } else {
     this.assessment.severity = 'low';
   }
-
 });
 
 // ===== METHODS =====

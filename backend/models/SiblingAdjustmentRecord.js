@@ -159,8 +159,6 @@ SiblingAdjustmentRecordSchema.pre('save', async function () {
       this.referralReason = `SDQ Total Difficulties ${result.total} → very_high band — clinical referral indicated`;
     }
   }
-
-  
 });
 
 module.exports =

@@ -136,7 +136,7 @@ router.get(
       if (req.query.facilityAssetId) filter.facilityAssetId = req.query.facilityAssetId;
       if (req.query.facilityId) filter.facilityId = req.query.facilityId;
 
-      const limit = req.query.limit ? Number(req.query.limit) : 100;
+      const limit = Math.min(req.query.limit ? Number(req.query.limit) : 100, 1000); // W1182 — DoS cap
       const skip = req.query.skip ? Number(req.query.skip) : 0;
 
       const rows = await WorkOrderModel.find(filter)

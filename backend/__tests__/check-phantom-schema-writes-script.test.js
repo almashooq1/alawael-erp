@@ -16,12 +16,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'check-phantom-schema-writes.js');
-const {
-  scanObjectLiteral,
-  extractSchemaKeySets,
-  buildBindings,
-  scanRepo,
-} = require(SCRIPT);
+const { scanObjectLiteral, extractSchemaKeySets, buildBindings, scanRepo } = require(SCRIPT);
 
 // ─── fixtures ────────────────────────────────────────────────────────────────
 
@@ -37,9 +32,9 @@ function makeFixtureRepo({ phantom }) {
       "const mongoose = require('mongoose');",
       'const WidgetSchema = new mongoose.Schema(',
       '  {',
-      "    name: { type: String, required: true },",
+      '    name: { type: String, required: true },',
       '    size: Number,',
-      "    tags: [{ type: String }],",
+      '    tags: [{ type: String }],',
       '  },',
       '  { timestamps: true }',
       ');',
@@ -54,7 +49,7 @@ function makeFixtureRepo({ phantom }) {
       "const Widget = require('../models/Widget');",
       'async function create(req) {',
       '  return Widget.create({',
-      "    name: req.body.name,",
+      '    name: req.body.name,',
       `    ${extraKey}`,
       '  });',
       '}',
@@ -114,7 +109,7 @@ describe('scanObjectLiteral', () => {
 
 describe('extractSchemaKeySets', () => {
   it('reads inline new Schema({...}) literals', () => {
-    const sets = extractSchemaKeySets("const S = new mongoose.Schema({ a: 1, b: { c: 2 } });");
+    const sets = extractSchemaKeySets('const S = new mongoose.Schema({ a: 1, b: { c: 2 } });');
     expect(sets).toEqual([['a', 'b']]);
   });
 
@@ -127,10 +122,7 @@ describe('extractSchemaKeySets', () => {
   });
 
   it('includes schema.add({...}) keys', () => {
-    const src = [
-      'const S = new Schema({ a: 1 });',
-      'S.add({ extra: String });',
-    ].join('\n');
+    const src = ['const S = new Schema({ a: 1 });', 'S.add({ extra: String });'].join('\n');
     expect(extractSchemaKeySets(src)).toEqual([['a'], ['extra']]);
   });
 
@@ -251,7 +243,14 @@ describe('check-phantom-schema-writes — CLI exit-code contract', () => {
     const r = runCli(['--json']);
     expect(r.code).toBe(0);
     const j = JSON.parse(r.stdout);
-    for (const f of ['modelsIndexed', 'scannedSites', 'skippedSites', 'newFindings', 'staleBaseline', 'baselineSize']) {
+    for (const f of [
+      'modelsIndexed',
+      'scannedSites',
+      'skippedSites',
+      'newFindings',
+      'staleBaseline',
+      'baselineSize',
+    ]) {
       expect(j).toHaveProperty(f);
     }
     expect(j.modelsIndexed).toBeGreaterThan(300);

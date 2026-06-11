@@ -106,7 +106,10 @@ describe('W1151 — staff-certification-expiry-30d', () => {
     const StaffCertification = finder([
       cert('sc1', { certification_info: { expiry_date: new Date('2026-06-20') } }), // ~10d → fires
       cert('sc2', { certification_info: { expiry_date: new Date('2026-09-01') } }), // >30d → skip
-      cert('sc3', { status: 'expired', certification_info: { expiry_date: new Date('2026-06-20') } }), // already expired → skip
+      cert('sc3', {
+        status: 'expired',
+        certification_info: { expiry_date: new Date('2026-06-20') },
+      }), // already expired → skip
     ]);
     const out = await expiry30dRule.evaluate({ models: { StaffCertification }, now });
     expect(out).toHaveLength(1);

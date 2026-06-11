@@ -104,7 +104,9 @@ describe('W1021 behavioral — low independence requires a training plan', () =>
   });
 
   it('SAVES developing with no goal (above the gate)', async () => {
-    const doc = await OM.create(baseDoc({ independenceLevel: 'developing', independenceScore: 60 }));
+    const doc = await OM.create(
+      baseDoc({ independenceLevel: 'developing', independenceScore: 60 })
+    );
     expect(doc.independenceLevel).toBe('developing');
   });
 });
@@ -146,7 +148,10 @@ describe('W1021 behavioral — computeIndependence banding', () => {
   });
 
   it('one independent + one dependent → 50/developing', () => {
-    const r = OM.computeIndependence({ sensoryAwareness: 'independent', spatialConcepts: 'dependent' });
+    const r = OM.computeIndependence({
+      sensoryAwareness: 'independent',
+      spatialConcepts: 'dependent',
+    });
     expect(r.score).toBe(50);
     expect(r.level).toBe('developing');
   });
@@ -158,7 +163,10 @@ describe('W1021 behavioral — computeIndependence banding', () => {
   });
 
   it("'not_assessed' domains are skipped from the average", () => {
-    const r = OM.computeIndependence({ sensoryAwareness: 'independent', spatialConcepts: 'not_assessed' });
+    const r = OM.computeIndependence({
+      sensoryAwareness: 'independent',
+      spatialConcepts: 'not_assessed',
+    });
     expect(r.score).toBe(100);
     expect(r.level).toBe('independent');
   });
@@ -199,7 +207,10 @@ describe('W1021 behavioral — virtuals + round-trip persistence', () => {
         ...domains,
         independenceScore: computed.score,
         independenceLevel: computed.level,
-        trainingGoals: computed.level === 'dependent' || computed.level === 'emerging' ? ['cane_skills_indoor'] : [],
+        trainingGoals:
+          computed.level === 'dependent' || computed.level === 'emerging'
+            ? ['cane_skills_indoor']
+            : [],
       })
     );
     const reloaded = await OM.findById(doc._id).lean();

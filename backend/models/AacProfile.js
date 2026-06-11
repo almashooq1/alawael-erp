@@ -198,4 +198,35 @@ aacProfileSchema.virtual('pecsCurrentPhase').get(function pecsCurrentPhase() {
   return (this.pecsPhase && this.pecsPhase.current) || null;
 });
 
+// ─── W1063: unified-core linkage — AAC PECS phase advancement ────────────────
+// Milestone = the PECS protocol current phase is set/advanced (new profile
+// already on a phase, or an existing profile's phase moves up). Emits a
+// timeline event so the beneficiary's communication progression is visible
+// on the unified core. Non-callback hook style (W483 safe family).
+aacProfileSchema.pre('save', function flagAacPecsAdvanced() {
+  this.$__aacPecsAdvancedNow = !!(
+    this.pecsPhase &&
+    this.pecsPhase.current &&
+    (this.isNew || this.isModified('pecsPhase.current'))
+  );
+});
+
+aacProfileSchema.post('save', function emitAacPecsPhaseAdvanced(doc) {
+  if (!doc.$__aacPecsAdvancedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('aac-profile', 'aac_profile.pecs_phase_advanced', {
+      profileId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      pecsPhase: doc.pecsPhase && doc.pecsPhase.current,
+      primaryModality: doc.primaryModality,
+      advancedAt: (doc.pecsPhase && doc.pecsPhase.lastTransitionAt) || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 module.exports = mongoose.models.AacProfile || mongoose.model('AacProfile', aacProfileSchema);

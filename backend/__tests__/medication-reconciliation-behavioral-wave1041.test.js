@@ -86,7 +86,11 @@ describe('W1041 behavioral — modify requires notes', () => {
 
   it('SAVES a modify decision with notes', async () => {
     const doc = await MedRec.create(
-      baseDoc({ medications: [{ name: 'Levetiracetam', decision: 'modify', notes: 'dose reduced to 250mg BID' }] })
+      baseDoc({
+        medications: [
+          { name: 'Levetiracetam', decision: 'modify', notes: 'dose reduced to 250mg BID' },
+        ],
+      })
     );
     expect(doc.medications[0].decision).toBe('modify');
   });
@@ -142,8 +146,20 @@ describe('W1041 behavioral — virtuals + round-trip persistence', () => {
     const doc = await MedRec.create(
       baseDoc({
         medications: [
-          { name: 'Carbamazepine', dose: '200mg', route: 'oral', frequency: 'BID', source: 'home', decision: 'continue' },
-          { name: 'Risperidone', decision: 'discontinue', discrepancyType: 'therapeutic_duplication', discrepancyResolved: false },
+          {
+            name: 'Carbamazepine',
+            dose: '200mg',
+            route: 'oral',
+            frequency: 'BID',
+            source: 'home',
+            decision: 'continue',
+          },
+          {
+            name: 'Risperidone',
+            decision: 'discontinue',
+            discrepancyType: 'therapeutic_duplication',
+            discrepancyResolved: false,
+          },
         ],
       })
     );
@@ -157,7 +173,16 @@ describe('W1041 behavioral — virtuals + round-trip persistence', () => {
     const doc = await MedRec.create(
       baseDoc({
         reconciliationType: 'discharge',
-        medications: [{ name: 'Baclofen', dose: '10mg', route: 'oral', frequency: 'TID', source: 'prescribed', decision: 'new' }],
+        medications: [
+          {
+            name: 'Baclofen',
+            dose: '10mg',
+            route: 'oral',
+            frequency: 'TID',
+            source: 'prescribed',
+            decision: 'new',
+          },
+        ],
       })
     );
     const reloaded = await MedRec.findById(doc._id).lean();
@@ -169,7 +194,11 @@ describe('W1041 behavioral — virtuals + round-trip persistence', () => {
 
   it('resolving a discrepancy clears the unresolved count', async () => {
     const doc = await MedRec.create(
-      baseDoc({ medications: [{ name: 'Phenytoin', discrepancyType: 'omission', discrepancyResolved: false }] })
+      baseDoc({
+        medications: [
+          { name: 'Phenytoin', discrepancyType: 'omission', discrepancyResolved: false },
+        ],
+      })
     );
     expect(doc.unresolvedDiscrepancyCount).toBe(1);
     doc.medications[0].discrepancyResolved = true;

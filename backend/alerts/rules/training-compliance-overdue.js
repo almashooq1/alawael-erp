@@ -46,7 +46,8 @@ module.exports = {
         key: `training-compliance-overdue:${tc._id}`,
         subject: { type: 'TrainingCompliance', id: tc._id },
         branchId: tc.branchId,
-        message: `Mandatory training overdue since ${due} (user ${tc.userId || ''}, course ${tc.courseId || ''})`.trim(),
+        message:
+          `Mandatory training overdue since ${due} (user ${tc.userId || ''}, course ${tc.courseId || ''})`.trim(),
       });
     }
     return findings;

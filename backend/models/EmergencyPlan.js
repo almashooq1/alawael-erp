@@ -120,7 +120,9 @@ EmergencyPlanSchema.pre('save', async function () {
   if (Array.isArray(this.emergencyContacts)) {
     const primaries = this.emergencyContacts.filter(c => c.isPrimary === true);
     if (primaries.length > 1) {
-      throw new Error('EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true');
+      throw new Error(
+        'EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true'
+      );
     }
   }
 
@@ -131,8 +133,6 @@ EmergencyPlanSchema.pre('save', async function () {
     next.setMonth(next.getMonth() + months);
     this.nextReviewDue = next;
   }
-
-  
 });
 
 // ── Unified-core linkage (W1075 — emergency-plan island → CareTimeline) ──
@@ -143,7 +143,8 @@ EmergencyPlanSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'active' || this.$__prevStatus === 'active') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('safety', 'emergency-plan.activated', {
         emergencyPlanId: String(doc._id),

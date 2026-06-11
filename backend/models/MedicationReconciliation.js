@@ -140,7 +140,10 @@ MedicationReconciliationSchema.path('__invariants').validate(function () {
       m => m && m.decision === 'modify' && !String(m.notes || '').trim()
     );
     if (modifyMissingNotes) {
-      this.invalidate('medications', 'a medication with decision=modify requires notes describing the change');
+      this.invalidate(
+        'medications',
+        'a medication with decision=modify requires notes describing the change'
+      );
       ok = false;
     }
   }
@@ -192,7 +195,8 @@ MedicationReconciliationSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'reconciled' || this.$__prevStatus === 'reconciled') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     const stats = computeReconciliationStats(doc.medications);
     Promise.resolve(
       integrationBus.publish('clinical-safety', 'medication.reconciled', {

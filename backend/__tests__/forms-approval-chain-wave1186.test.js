@@ -35,10 +35,7 @@ const legacyRouteSrc = read('routes/formTemplate.routes.js');
 const adminRouteSrc = read('routes/forms-submission.routes.js');
 const publicRouteSrc = read('routes/public-forms.routes.js');
 
-const {
-  approvalStepsFromWorkflow,
-  buildTemplateDoc,
-} = require('../services/formsCatalogService');
+const { approvalStepsFromWorkflow, buildTemplateDoc } = require('../services/formsCatalogService');
 const catalog = require('../config/forms-catalog.registry');
 
 describe('W1186 approval-chain persistence', () => {
@@ -89,7 +86,9 @@ describe('W1186 approval-chain persistence', () => {
   describe('FormSubmission declares review-tracking fields', () => {
     it('reviewedAt + reviewedBy are schema paths (strict mode persists them)', () => {
       expect(submissionModelSrc).toMatch(/reviewedAt:\s*Date/);
-      expect(submissionModelSrc).toMatch(/reviewedBy:\s*\{\s*type:\s*mongoose\.Schema\.Types\.ObjectId/);
+      expect(submissionModelSrc).toMatch(
+        /reviewedBy:\s*\{\s*type:\s*mongoose\.Schema\.Types\.ObjectId/
+      );
     });
   });
 

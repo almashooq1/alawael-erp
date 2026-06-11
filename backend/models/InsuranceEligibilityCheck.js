@@ -10,7 +10,12 @@ const insuranceEligibilityCheckSchema = new mongoose.Schema(
     // W1193 — required with NO default while no caller ever set it → every
     // checkEligibility() threw ValidationError at its first step. Schema-side
     // default fixes all callers.
-    uuid: { type: String, unique: true, required: true, default: () => require('crypto').randomUUID() },
+    uuid: {
+      type: String,
+      unique: true,
+      required: true,
+      default: () => require('crypto').randomUUID(),
+    },
 
     policyId: { type: mongoose.Schema.Types.ObjectId, ref: 'InsurancePolicy', required: true },
     beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
@@ -55,6 +60,32 @@ insuranceEligibilityCheckSchema.index({ policyId: 1, createdAt: -1 });
 insuranceEligibilityCheckSchema.index({ beneficiaryId: 1, isEligible: 1 });
 insuranceEligibilityCheckSchema.index({ nphiesCheckId: 1 });
 insuranceEligibilityCheckSchema.index({ deletedAt: 1 });
+
+// ── W1058: unified-core linkage ───────────────────────────────────────
+// Recording an eligibility check is the milestone. Publish
+// insurance_eligibility.checked → CareTimeline. NON-callback hooks only.
+insuranceEligibilityCheckSchema.pre('save', function () {
+  this.$__insuranceEligibilityCheckedNow = this.isNew;
+});
+
+function emitInsuranceEligibilityChecked(doc) {
+  if (!doc || !doc.$__insuranceEligibilityCheckedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('insurance-eligibility', 'insurance_eligibility.checked', {
+      checkId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      checkType: doc.checkType,
+      isEligible: !!doc.isEligible,
+      checkedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+insuranceEligibilityCheckSchema.post('save', emitInsuranceEligibilityChecked);
 
 module.exports =
   mongoose.models.InsuranceEligibilityCheck ||

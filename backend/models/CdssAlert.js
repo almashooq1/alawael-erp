@@ -65,7 +65,33 @@ cdssAlertSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
 });
 
-// ── Unified-core linkage (W1075 — CDSS alert island → CareTimeline) ──
+// W1094 — unified-core linkage: surface only critical/emergency alerts on
+// the per-beneficiary clinical timeline (info/warning stay in CDSS only).
+cdssAlertSchema.pre('save', function flagCdssAlertRaised() {
+  this.$__cdssAlertRaised =
+    this.isNew && (this.severity === 'critical' || this.severity === 'emergency');
+});
+
+cdssAlertSchema.post('save', function emitCdssAlertRaised(doc) {
+  if (!doc.$__cdssAlertRaised) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('cdss-alert', 'cdss_alert.raised', {
+      alertId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      alertType: doc.alertType,
+      severity: doc.severity,
+      message: doc.message,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
+// ── Unified-core linkage (W1075 — CDSS alert resolution → CareTimeline) ──
+// Ported from origin/main parallel wave: when an alert flips to 'resolved',
+// publish so the dddCrossModuleSubscribers persist a cdss_alert_resolved row.
 cdssAlertSchema.post('init', function () {
   this.$__prevStatus = this.status;
 });
@@ -73,7 +99,8 @@ cdssAlertSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'resolved' || this.$__prevStatus === 'resolved') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('cdss', 'alert.resolved', {
         cdssAlertId: String(doc._id),

@@ -434,7 +434,7 @@ router.get('/children/:id/sessions', async (req, res) => {
   try {
     const guardianId = req.user._id || req.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 15;
+    const limit = Math.min(parseInt(req.query.limit) || 15, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
 
     // التحقق من أن الابن تابع لولي الأمر
@@ -653,7 +653,7 @@ router.get('/invoices', async (req, res) => {
   try {
     const guardianId = req.user._id || req.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 10, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
     let invoices = [];
     let total = 0;
@@ -705,7 +705,7 @@ router.get('/messages', async (req, res) => {
   try {
     const guardianId = req.user._id || req.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
     const { ParentMessage } = require('../models/ParentPortal');
 
@@ -820,7 +820,7 @@ router.get('/notifications', async (req, res) => {
   try {
     const guardianId = req.user._id || req.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 1000); // W1182 — DoS cap
     let notifications = [];
     let unreadCount = 0;
     try {
@@ -882,7 +882,7 @@ router.get('/complaints', async (req, res) => {
   try {
     const guardianId = req.user._id || req.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 15;
+    const limit = Math.min(parseInt(req.query.limit) || 15, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
     const { ParentComplaint } = require('../models/ParentPortal');
 
@@ -1164,7 +1164,7 @@ router.get('/admin/complaints', async (req, res) => {
 
     const { ParentComplaint } = require('../models/ParentPortal');
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
 
     const query = {};

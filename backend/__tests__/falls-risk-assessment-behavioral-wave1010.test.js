@@ -96,7 +96,11 @@ describe('W1010 behavioral — high-risk requires a plan + review', () => {
   it('REJECTS high risk with no nextReviewDue', async () => {
     await expect(
       FallsRiskAssessment.create(
-        baseDoc({ riskLevel: 'high', riskScore: 60, preventionInterventions: ['supervision_increase'] })
+        baseDoc({
+          riskLevel: 'high',
+          riskScore: 60,
+          preventionInterventions: ['supervision_increase'],
+        })
       )
     ).rejects.toThrow(/nextReviewDue/);
   });
@@ -123,9 +127,9 @@ describe('W1010 behavioral — fall history + post-fall require lastFallDate', (
   });
 
   it('REJECTS historyOfFalling with no lastFallDate', async () => {
-    await expect(
-      FallsRiskAssessment.create(baseDoc({ historyOfFalling: true }))
-    ).rejects.toThrow(/lastFallDate/);
+    await expect(FallsRiskAssessment.create(baseDoc({ historyOfFalling: true }))).rejects.toThrow(
+      /lastFallDate/
+    );
   });
 
   it('REJECTS numberOfFallsLast6Months>0 with no lastFallDate', async () => {

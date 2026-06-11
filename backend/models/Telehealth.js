@@ -95,6 +95,37 @@ teleconsultationSchema.index({ branch: 1, status: 1, scheduledAt: -1 });
 teleconsultationSchema.index({ beneficiary: 1, scheduledAt: -1 });
 teleconsultationSchema.index({ provider: 1, scheduledAt: -1 });
 
+// ─── W1024: Teleconsultation completed → unified core ────────────────────────
+// When a tele-rehab consultation reaches 'completed', emit
+// `teleconsultations.teleconsultation.completed` so the per-beneficiary
+// CareTimeline (and dashboards/notifications) record the remote session as a
+// clinical milestone. Sync hooks (no `next`) — this schema has no other hooks.
+// Never blocks the save.
+teleconsultationSchema.pre('save', function flagTeleconsultationDone() {
+  this.$__teleconsultDoneNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+teleconsultationSchema.post('save', function emitTeleconsultationDone(doc) {
+  try {
+    if (!this.$__teleconsultDoneNow) return;
+    if (!doc || !doc.beneficiary) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('teleconsultations', 'teleconsultation.completed', {
+      teleconsultationId: String(doc._id),
+      consultationNumber: doc.consultationNumber,
+      beneficiaryId: String(doc.beneficiary),
+      branchId: doc.branch ? String(doc.branch) : undefined,
+      specialty: doc.specialty,
+      type: doc.type,
+      durationMinutes: doc.durationMinutes,
+      completedAt: doc.endedAt || new Date(),
+    });
+  } catch {
+    /* never block the save */
+  }
+});
+
 // ─── VirtualSession ──────────────────────────────────────────────────────────
 
 const virtualSessionSchema = new Schema(

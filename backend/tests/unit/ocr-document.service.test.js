@@ -1220,7 +1220,8 @@ describe('Export', () => {
     it('csv export returns CSV string', () => {
       const result = service.exportDocument('doc-301', 'csv');
       expect(typeof result.data).toBe('string');
-      expect(result.data).toContain('Field,Value');
+      // W423: cells are RFC-4180 quote-escaped (CSV formula-injection hardening)
+      expect(result.data).toContain('"Field","Value"');
     });
 
     it('export job has id, documentId, format, status, createdAt', () => {
@@ -1238,26 +1239,33 @@ describe('Export', () => {
   });
 
   describe('_toCSV()', () => {
+    // W423: every cell is RFC-4180 quote-escaped + formula-defanged, so
+    // expectations assert the quoted form.
     it('flattens simple object to Field,Value rows', () => {
       const csv = service._toCSV({ name: 'test', age: '30' });
-      expect(csv).toContain('Field,Value');
-      expect(csv).toContain('name,test');
-      expect(csv).toContain('age,30');
+      expect(csv).toContain('"Field","Value"');
+      expect(csv).toContain('"name","test"');
+      expect(csv).toContain('"age","30"');
     });
 
     it('flattens nested objects with dot notation', () => {
       const csv = service._toCSV({ a: { b: 'val' } });
-      expect(csv).toContain('a.b,val');
+      expect(csv).toContain('"a.b","val"');
     });
 
     it('serializes arrays as JSON', () => {
       const csv = service._toCSV({ items: [1, 2, 3] });
-      expect(csv).toContain('items,[1,2,3]');
+      expect(csv).toContain('"items","[1,2,3]"');
     });
 
     it('handles empty object', () => {
       const csv = service._toCSV({});
-      expect(csv).toBe('Field,Value');
+      expect(csv).toBe('"Field","Value"');
+    });
+
+    it('defangs formula-injection triggers in cell values (W423)', () => {
+      const csv = service._toCSV({ payload: '=cmd|/c calc' });
+      expect(csv).not.toContain('"=cmd');
     });
   });
 });

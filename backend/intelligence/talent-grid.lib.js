@@ -44,9 +44,15 @@ const SEGMENTS = Object.freeze({
 
 // high-level action group per box (the "so what")
 const ACTION_GROUP = Object.freeze({
-  9: 'develop_retain', 8: 'develop_retain', 6: 'develop_retain', // top-right cluster
-  7: 'leverage', 5: 'leverage', 3: 'develop', // diagonal / observe
-  4: 'observe', 2: 'improve', 1: 'manage_out', // bottom-left cluster
+  9: 'develop_retain',
+  8: 'develop_retain',
+  6: 'develop_retain', // top-right cluster
+  7: 'leverage',
+  5: 'leverage',
+  3: 'develop', // diagonal / observe
+  4: 'observe',
+  2: 'improve',
+  1: 'manage_out', // bottom-left cluster
 });
 
 function clampBand(n) {

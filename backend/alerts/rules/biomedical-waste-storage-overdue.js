@@ -19,7 +19,8 @@
 const HAZARDOUS = ['infectious', 'sharps', 'pathological', 'cytotoxic', 'radioactive'];
 
 function loadModel(ctx) {
-  if (ctx && ctx.models && ctx.models.BiomedicalWasteRecord) return ctx.models.BiomedicalWasteRecord;
+  if (ctx && ctx.models && ctx.models.BiomedicalWasteRecord)
+    return ctx.models.BiomedicalWasteRecord;
   try {
     return require('../../models/BiomedicalWasteRecord');
   } catch (_) {

@@ -94,9 +94,11 @@ router.get('/users/:userId/roles', authorize('admin', 'hr_manager'), async (req,
 router.post('/users/:userId/roles', authorize('admin'), async (req, res) => {
   try {
     const UserRole = require('../models/RBAC/UserRole');
+    // W1177 — pin AFTER the spread: a body-carried userId must never divert
+    // a role assignment to a different user than the URL-addressed one.
     const assignment = await UserRole.create({
-      userId: req.params.userId,
       ...req.body,
+      userId: req.params.userId,
       assignedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: assignment });

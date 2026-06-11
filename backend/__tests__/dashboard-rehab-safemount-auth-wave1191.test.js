@@ -31,7 +31,10 @@ const BK = path.join(__dirname, '..');
 const REGDIR = path.join(BK, 'routes', 'registries');
 const REG_FILES = [
   path.join(BK, 'routes', '_registry.js'),
-  ...fs.readdirSync(REGDIR).filter(f => f.endsWith('.js')).map(f => path.join(REGDIR, f)),
+  ...fs
+    .readdirSync(REGDIR)
+    .filter(f => f.endsWith('.js'))
+    .map(f => path.join(REGDIR, f)),
 ];
 
 const SAFEMOUNT_RE = /safeMount\s*\(\s*app\s*,\s*([\s\S]*?),\s*['"]([^'"]+)['"]\s*\)/g;
@@ -43,7 +46,9 @@ const AUTH_NAMES =
   'authenticate|authenticateToken|authMiddleware|authGuard|auth|protect|requireAuth|verifyToken|' +
   'parentAuth|studentAuth|guardianAuth|portalAuth|requireRole|requireMfa|loadMfaActor|' +
   'requireBranchAccess|bodyScopedBeneficiaryGuard|requireAuthOrApiKey|apiKeyAuth';
-const APPLIES_AUTH = new RegExp(`router\\.use\\(\\s*(?:${AUTH_NAMES})\\b|\\b(?:${AUTH_NAMES})\\s*,`);
+const APPLIES_AUTH = new RegExp(
+  `router\\.use\\(\\s*(?:${AUTH_NAMES})\\b|\\b(?:${AUTH_NAMES})\\s*,`
+);
 // `router.use('/', require('./x.routes'))` — an orchestrator delegating to
 // sub-routers that each self-authenticate (e.g. workflowEnhanced → 10 subs).
 const DELEGATES = /router\.use\(\s*['"]\/?['"]\s*,\s*require\(/;
@@ -71,12 +76,11 @@ const PUBLIC_ALLOWLIST = new Set([
 ]);
 
 function resolveModule(regFile, mod) {
-  return [
-    path.resolve(path.join(BK, 'routes'), mod),
-    path.resolve(path.dirname(regFile), mod),
-  ]
-    .map(p => (p.endsWith('.js') ? p : p + '.js'))
-    .find(p => fs.existsSync(p)) || null;
+  return (
+    [path.resolve(path.join(BK, 'routes'), mod), path.resolve(path.dirname(regFile), mod)]
+      .map(p => (p.endsWith('.js') ? p : p + '.js'))
+      .find(p => fs.existsSync(p)) || null
+  );
 }
 
 const slugOf = mod => mod.replace(/^.*\//, '');
@@ -89,7 +93,12 @@ for (const rf of REG_FILES) {
   while ((m = SAFEMOUNT_RE.exec(src))) {
     const mod = m[2];
     if (!mod.startsWith('../routes/') && !mod.startsWith('./')) continue;
-    targets.push({ registry: path.basename(rf), mod, slug: slugOf(mod), file: resolveModule(rf, mod) });
+    targets.push({
+      registry: path.basename(rf),
+      mod,
+      slug: slugOf(mod),
+      file: resolveModule(rf, mod),
+    });
   }
 }
 

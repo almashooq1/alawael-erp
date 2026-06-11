@@ -238,7 +238,6 @@ adlAssessmentSchema.pre('save', async function () {
   else if (this.overallScore >= 45) this.independenceLevel = 'partially_independent';
   else if (this.overallScore >= 25) this.independenceLevel = 'mostly_dependent';
   else this.independenceLevel = 'dependent';
-
 });
 
 // ─── Virtuals ───

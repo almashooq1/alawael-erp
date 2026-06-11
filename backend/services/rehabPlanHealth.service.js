@@ -292,7 +292,7 @@ async function assembleBeneficiaryPlanHealth(beneficiaryId, opts = {}) {
   //    PREFER the live CarePlanVersion (the care-planning W41-51 workflow + the
   //    W44/W50 intelligence run on it — review cadence = reviewSchedule.nextReviewAt),
   //    fall back to the DDD UnifiedCarePlan (reviewDate). Normalised to one shape.
-  let plan = await resolveActivePlan(beneficiaryId);
+  const plan = await resolveActivePlan(beneficiaryId);
 
   // 2. The beneficiary's goals (canonical TherapeuticGoal, golden-thread-linked,
   //    with progressHistory for the W44 signals).

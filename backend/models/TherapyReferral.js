@@ -76,6 +76,5 @@ if (mongoose.models.TherapyReferral) {
     }
   });
 
-  module.exports =
-    mongoose.models.TherapyReferral || mongoose.model('TherapyReferral', schema);
+  module.exports = mongoose.models.TherapyReferral || mongoose.model('TherapyReferral', schema);
 }

@@ -355,24 +355,30 @@ CaregiverSupportProgramSchema.virtual('isOverdue').get(function () {
 CaregiverSupportProgramSchema.set('toJSON', { virtuals: true });
 CaregiverSupportProgramSchema.set('toObject', { virtuals: true });
 
-// ── Unified-core linkage (W1120 — caregiver-support program island → CareTimeline) ──
-CaregiverSupportProgramSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1104 core-linkage: emit when a caregiver-support program completes ──
+CaregiverSupportProgramSchema.pre('save', function flagCaregiverSupportCompleted() {
+  this.$__caregiverSupportCompleted = this.isModified('status') && this.status === 'completed';
 });
-CaregiverSupportProgramSchema.post('save', function (doc) {
+
+CaregiverSupportProgramSchema.post('save', function emitCaregiverSupportCompleted(doc) {
+  if (!doc.$__caregiverSupportCompleted) return;
   try {
-    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('caregiver-support', 'program.completed', {
-        caregiverSupportProgramId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        programType: doc.programType,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    const sat =
+      doc.outcomes && typeof doc.outcomes.satisfactionScore === 'number'
+        ? doc.outcomes.satisfactionScore
+        : undefined;
+    integrationBus.publish('caregiver-support', 'caregiver_support.completed', {
+      programId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      programType: doc.programType,
+      sessionsCount: Array.isArray(doc.sessions) ? doc.sessions.length : 0,
+      satisfactionScore: sat,
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
   }
 });
 

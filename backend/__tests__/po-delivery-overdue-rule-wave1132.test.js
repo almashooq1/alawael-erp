@@ -58,11 +58,42 @@ describe('purchase-order-delivery-overdue', () => {
 
   test('fires on a committed PO past expected delivery; skips on-time, delivered, and uncommitted', async () => {
     const raised = await runOne([
-      { _id: 'p1', po_number: 'PO-1', status: 'sent', expected_delivery_date: PAST, branch_id: BRANCH },
-      { _id: 'p2', po_number: 'PO-2', status: 'approved', expected_delivery_date: FUTURE, branch_id: BRANCH },
-      { _id: 'p3', po_number: 'PO-3', status: 'partial', expected_delivery_date: PAST, actual_delivery_date: PAST, branch_id: BRANCH },
-      { _id: 'p4', po_number: 'PO-4', status: 'draft', expected_delivery_date: PAST, branch_id: BRANCH },
-      { _id: 'p5', po_number: 'PO-5', status: 'received', expected_delivery_date: PAST, branch_id: BRANCH },
+      {
+        _id: 'p1',
+        po_number: 'PO-1',
+        status: 'sent',
+        expected_delivery_date: PAST,
+        branch_id: BRANCH,
+      },
+      {
+        _id: 'p2',
+        po_number: 'PO-2',
+        status: 'approved',
+        expected_delivery_date: FUTURE,
+        branch_id: BRANCH,
+      },
+      {
+        _id: 'p3',
+        po_number: 'PO-3',
+        status: 'partial',
+        expected_delivery_date: PAST,
+        actual_delivery_date: PAST,
+        branch_id: BRANCH,
+      },
+      {
+        _id: 'p4',
+        po_number: 'PO-4',
+        status: 'draft',
+        expected_delivery_date: PAST,
+        branch_id: BRANCH,
+      },
+      {
+        _id: 'p5',
+        po_number: 'PO-5',
+        status: 'received',
+        expected_delivery_date: PAST,
+        branch_id: BRANCH,
+      },
     ]);
     expect(raised).toHaveLength(1);
     expect(raised[0].key).toBe('po-delivery-overdue:p1');
@@ -73,7 +104,13 @@ describe('purchase-order-delivery-overdue', () => {
 
   test('a partially-received PO past its date (not fully delivered) still fires', async () => {
     const raised = await runOne([
-      { _id: 'p6', po_number: 'PO-6', status: 'partial', expected_delivery_date: PAST, branch_id: BRANCH },
+      {
+        _id: 'p6',
+        po_number: 'PO-6',
+        status: 'partial',
+        expected_delivery_date: PAST,
+        branch_id: BRANCH,
+      },
     ]);
     expect(raised).toHaveLength(1);
   });

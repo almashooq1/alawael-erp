@@ -100,7 +100,8 @@ PayEquitySnapshotSchema.path('__invariants').validate(function validateInvariant
   for (const dim of ['genderGap', 'nationalityGap']) {
     const g = this[dim];
     if (g && g.reportable) {
-      if (g.medianGapPct == null) this.invalidate(`${dim}.medianGapPct`, 'reportable gap needs medianGapPct');
+      if (g.medianGapPct == null)
+        this.invalidate(`${dim}.medianGapPct`, 'reportable gap needs medianGapPct');
       if (!g.direction) this.invalidate(`${dim}.direction`, 'reportable gap needs direction');
     }
   }
@@ -108,5 +109,4 @@ PayEquitySnapshotSchema.path('__invariants').validate(function validateInvariant
 });
 
 module.exports =
-  mongoose.models.PayEquitySnapshot ||
-  mongoose.model('PayEquitySnapshot', PayEquitySnapshotSchema);
+  mongoose.models.PayEquitySnapshot || mongoose.model('PayEquitySnapshot', PayEquitySnapshotSchema);

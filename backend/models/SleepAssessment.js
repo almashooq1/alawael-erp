@@ -274,7 +274,8 @@ SleepAssessmentSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('clinical-safety', 'sleep.assessment_finalized', {
         sleepAssessmentId: String(doc._id),

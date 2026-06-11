@@ -61,7 +61,15 @@ describe('capa-overdue', () => {
   test('fires on an actionable CAPA past due; skips future-due + terminal', async () => {
     const raised = await runOne('capa-overdue', {
       CapaItem: finder([
-        { _id: 'c1', capaNumber: 'CAPA-2026-0001', title: 'Fix sterilizer log', status: 'IN_PROGRESS', dueDate: PAST, branchId: BRANCH, priority: 'medium' },
+        {
+          _id: 'c1',
+          capaNumber: 'CAPA-2026-0001',
+          title: 'Fix sterilizer log',
+          status: 'IN_PROGRESS',
+          dueDate: PAST,
+          branchId: BRANCH,
+          priority: 'medium',
+        },
         { _id: 'c2', status: 'OPEN', dueDate: FUTURE, priority: 'low' }, // not yet due
         { _id: 'c3', status: 'CLOSED', dueDate: PAST, priority: 'high' }, // terminal
         { _id: 'c4', status: 'VERIFIED', dueDate: PAST, priority: 'high' }, // action already verified

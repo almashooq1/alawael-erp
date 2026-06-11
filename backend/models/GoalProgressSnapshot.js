@@ -78,6 +78,34 @@ goalProgressSnapshotSchema.index({
   measuredAt: -1,
 });
 
+// ─── W1068: unified-core linkage — rehab goal achieved ──────────────────────
+// Milestone = a new snapshot records the goal reaching ≥ 100% (target met or
+// exceeded). Emits a timeline event so the achievement is visible on the
+// unified core. Append-only model, so the isNew gate prevents re-fire.
+// Non-callback hook style.
+goalProgressSnapshotSchema.pre('save', function flagGoalAchieved() {
+  this.$__goalAchievedNow =
+    this.isNew && typeof this.progressPct === 'number' && this.progressPct >= 100;
+});
+
+goalProgressSnapshotSchema.post('save', function emitGoalProgressAchieved(doc) {
+  if (!doc.$__goalAchievedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('goal-progress', 'goal_progress.goal_achieved', {
+      snapshotId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.goalId ? { goalId: String(doc.goalId) } : {}),
+      goalName: doc.goalName,
+      progressPct: doc.progressPct,
+      measuredAt: doc.measuredAt || doc.createdAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 const GoalProgressSnapshot =
   mongoose.models.GoalProgressSnapshot ||
   mongoose.model('GoalProgressSnapshot', goalProgressSnapshotSchema);

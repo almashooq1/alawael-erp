@@ -288,7 +288,8 @@ PressureInjuryRecordSchema.post('init', function () {
 PressureInjuryRecordSchema.post('save', function (doc) {
   try {
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     const prev = this.$__prevStatus;
     const base = {
       pressureInjuryRecordId: String(doc._id),
@@ -298,9 +299,17 @@ PressureInjuryRecordSchema.post('save', function (doc) {
       origin: doc.origin,
     };
     if (prev === undefined && PI_OPEN.includes(doc.status)) {
-      Promise.resolve(integrationBus.publish('clinical-safety', 'pressure_injury.identified', base)).catch(() => {});
-    } else if (prev && PI_OPEN.includes(prev) && (doc.status === 'healed' || doc.status === 'closed')) {
-      Promise.resolve(integrationBus.publish('clinical-safety', 'pressure_injury.resolved', base)).catch(() => {});
+      Promise.resolve(
+        integrationBus.publish('clinical-safety', 'pressure_injury.identified', base)
+      ).catch(() => {});
+    } else if (
+      prev &&
+      PI_OPEN.includes(prev) &&
+      (doc.status === 'healed' || doc.status === 'closed')
+    ) {
+      Promise.resolve(
+        integrationBus.publish('clinical-safety', 'pressure_injury.resolved', base)
+      ).catch(() => {});
     }
   } catch (_) {
     /* never block persistence */

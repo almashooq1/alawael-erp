@@ -261,6 +261,35 @@ ProstheticOrthoticOrderSchema.virtual('isActive').get(function () {
 ProstheticOrthoticOrderSchema.set('toJSON', { virtuals: true });
 ProstheticOrthoticOrderSchema.set('toObject', { virtuals: true });
 
+// ── W1049: unified-core linkage ───────────────────────────────────────
+// On delivery (stage → 'delivered'), publish prosthetic_orthotic.delivered
+// so the cross-module subscriber records a clinical milestone on the
+// beneficiary's CareTimeline. NON-callback hooks only (global async save
+// plugin puts Kareem in promise-adapter mode — callback hooks would break).
+ProstheticOrthoticOrderSchema.pre('save', function () {
+  this.$__prostheticOrthoticDeliveredNow =
+    this.stage === 'delivered' && (this.isNew || this.isModified('stage'));
+});
+
+function emitProstheticOrthoticDelivered(doc) {
+  if (!doc || !doc.$__prostheticOrthoticDeliveredNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('prosthetic-orthotic-order', 'prosthetic_orthotic.delivered', {
+      orderId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      deviceCategory: doc.deviceCategory,
+      deliveredDate: doc.deliveredDate || doc.updatedAt,
+      deliveredAt: doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+ProstheticOrthoticOrderSchema.post('save', emitProstheticOrthoticDelivered);
+
 module.exports =
   mongoose.models.ProstheticOrthoticOrder ||
   mongoose.model('ProstheticOrthoticOrder', ProstheticOrthoticOrderSchema);

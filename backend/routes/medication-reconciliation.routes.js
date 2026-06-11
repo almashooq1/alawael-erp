@@ -216,7 +216,8 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     let unresolvedDiscrepancies = 0;
     let recordsWithUnresolved = 0;
     for (const r of raw) {
-      if (r.reconciliationType) byType[r.reconciliationType] = (byType[r.reconciliationType] || 0) + 1;
+      if (r.reconciliationType)
+        byType[r.reconciliationType] = (byType[r.reconciliationType] || 0) + 1;
       if (r.status === 'reconciled') reconciled++;
       let recUnresolved = 0;
       for (const m of r.medications || []) {
@@ -304,7 +305,10 @@ router.post('/:id/reconcile', requireRole(RECONCILE_ROLES), async (req, res) => 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MedicationReconciliation.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await MedicationReconciliation.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reconciled') {
       return res.status(409).json({ success: false, message: 'تمت المطابقة سلفاً' });
@@ -330,7 +334,10 @@ router.post('/:id/resolve-discrepancy', requireRole(WRITE_ROLES), async (req, re
     if (!Number.isInteger(index) || index < 0) {
       return res.status(400).json({ success: false, message: 'index غير صالح' });
     }
-    const row = await MedicationReconciliation.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await MedicationReconciliation.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (!row.medications[index]) {
       return res.status(400).json({ success: false, message: 'لا يوجد دواء بهذا الفهرس' });
@@ -338,7 +345,8 @@ router.post('/:id/resolve-discrepancy', requireRole(WRITE_ROLES), async (req, re
     row.medications[index].discrepancyResolved = true;
     if (req.body?.note) {
       const prev = row.medications[index].notes || '';
-      row.medications[index].notes = `${prev ? prev + ' | ' : ''}${String(req.body.note).slice(0, 300)}`;
+      row.medications[index].notes =
+        `${prev ? prev + ' | ' : ''}${String(req.body.note).slice(0, 300)}`;
     }
     await row.save();
     res.json({ success: true, data: row });
@@ -353,7 +361,10 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MedicationReconciliation.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await MedicationReconciliation.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reconciled') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل سجل تمت مطابقته' });

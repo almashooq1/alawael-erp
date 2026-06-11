@@ -40,6 +40,32 @@ differentialDiagnosisSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
 });
 
+// ── W1060: unified-core linkage ───────────────────────────────────────
+// Confirming a differential diagnosis is the milestone. Publish
+// differential_diagnosis.confirmed → CareTimeline. NON-callback hooks only.
+differentialDiagnosisSchema.pre('save', function () {
+  this.$__diffDxConfirmedNow =
+    this.status === 'confirmed' && (this.isNew || this.isModified('status'));
+});
+
+function emitDifferentialDiagnosisConfirmed(doc) {
+  if (!doc || !doc.$__diffDxConfirmedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('differential-diagnosis', 'differential_diagnosis.confirmed', {
+      diagnosisId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      confirmedDiagnosisId: doc.confirmedDiagnosisId ? String(doc.confirmedDiagnosisId) : null,
+      confirmedAt: doc.confirmedAt || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+differentialDiagnosisSchema.post('save', emitDifferentialDiagnosisConfirmed);
+
 module.exports =
   mongoose.models.DifferentialDiagnosis ||
   mongoose.model('DifferentialDiagnosis', differentialDiagnosisSchema);

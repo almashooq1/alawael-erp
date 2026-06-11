@@ -232,7 +232,10 @@ class BeneficiaryService {
     await this.checkBranchCapacity(toBranchId);
 
     // التحقق أن الفرع المستقبِل مختلف عن الحالي
-    if (beneficiary.branch.toString() === toBranchId.toString()) {
+    // W1220 — Beneficiary's canonical branch field is branchId (W1209 read the
+    // phantom `beneficiary.branch`, which is undefined → TypeError on every call).
+    const currentBranchId = beneficiary.branchId || beneficiary.branch_id;
+    if (currentBranchId && currentBranchId.toString() === toBranchId.toString()) {
       const err = new Error('لا يمكن نقل المستفيد لنفس الفرع الحالي');
       err.code = 'SAME_BRANCH_TRANSFER';
       err.statusCode = 422;
@@ -240,21 +243,18 @@ class BeneficiaryService {
     }
 
     // إلغاء أي طلبات نقل معلّقة سابقة
-    // W1209 — canonical key is beneficiaryId (the phantom `beneficiary`
-    // filter never matched, so stale pending transfers were never cancelled).
+    // W1220 — BeneficiaryTransfer's canonical FK names are BARE
+    // (beneficiary/fromBranch/toBranch per the W990 Direction-A model that won
+    // the merge); main's W1209 Id-suffixed rewrite targeted main's model.
     await BeneficiaryTransfer.updateMany(
-      { beneficiaryId: beneficiary._id, status: 'pending' },
+      { beneficiary: beneficiary._id, status: 'pending' },
       { status: 'cancelled', notes: 'إلغاء تلقائي بسبب طلب نقل جديد' }
     );
 
-    // W1209 — BeneficiaryTransfer's REQUIRED fields are beneficiaryId/
-    // fromBranchId/toBranchId (the phantom beneficiary/fromBranch/toBranch
-    // payload threw ValidationError on every transfer initiation), and the
-    // canonical Beneficiary branch field is branchId.
     const transfer = await BeneficiaryTransfer.create({
-      beneficiaryId: beneficiary._id,
-      fromBranchId: beneficiary.branchId || beneficiary.branch_id,
-      toBranchId,
+      beneficiary: beneficiary._id,
+      fromBranch: currentBranchId,
+      toBranch: toBranchId,
       transferDate,
       reason,
       requestedBy,
@@ -288,7 +288,10 @@ class BeneficiaryService {
     const newFileNumber = await this.generateFileNumber(transfer.toBranch, branchCode);
 
     // تحديث الفرع ورقم الملف
-    beneficiary.branch = transfer.toBranch;
+    // W1220 — canonical Beneficiary branch field is branchId (writing the
+    // phantom `branch` key was silently dropped by strict mode, so the
+    // beneficiary never actually moved).
+    beneficiary.branchId = transfer.toBranch;
     beneficiary.fileNumber = newFileNumber;
     beneficiary.status = BENEFICIARY_STATUSES.ACTIVE;
     await beneficiary.save();

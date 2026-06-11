@@ -5,6 +5,7 @@
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const timingSafeCompare = require('../../utils/timingSafeCompare'); // W1181 — constant-time signature check
 
 /* ─── Schemas ────────────────────────────────────────────── */
 const digitalCertificateSchema = new mongoose.Schema(
@@ -309,7 +310,8 @@ class DigitalCertificateService {
       .createHash('sha512')
       .update(dataToSign + (cert?.publicKey || ''))
       .digest('hex');
-    const integrityOk = expectedSig === sig.signatureData.signature;
+    // W1181: constant-time compare (signature integrity check)
+    const integrityOk = timingSafeCompare(expectedSig, String(sig.signatureData.signature ?? ''));
 
     sig.verification = {
       verified: true,

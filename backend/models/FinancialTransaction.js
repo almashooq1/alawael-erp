@@ -246,7 +246,6 @@ FinancialTransactionSchema.pre('save', async function () {
     'debitAccount.amount',
     'creditAccount.amount',
   ]);
-  
 });
 
 // Method to post transaction

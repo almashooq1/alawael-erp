@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
+const escapeRegex = require('../utils/escapeRegex'); // W1180 — ReDoS guard
 
 router.use(authenticate);
 
@@ -43,9 +44,9 @@ router.get('/', async (req, res) => {
           const Employee = require('../models/HR/Employee');
           results[mod] = await Employee.find({
             $or: [
-              { firstName: new RegExp(q, 'i') },
-              { lastName: new RegExp(q, 'i') },
-              { employeeCode: new RegExp(q, 'i') },
+              { firstName: new RegExp(escapeRegex(q), 'i') },
+              { lastName: new RegExp(escapeRegex(q), 'i') },
+              { employeeCode: new RegExp(escapeRegex(q), 'i') },
             ],
           })
             .limit(lim)
@@ -86,7 +87,10 @@ router.get('/suggest', async (req, res) => {
     if (mod === 'beneficiaries') {
       const Beneficiary = require('../models/Beneficiary');
       suggestions = await Beneficiary.find({
-        $or: [{ firstName: new RegExp(q, 'i') }, { lastName: new RegExp(q, 'i') }],
+        $or: [
+          { firstName: new RegExp(escapeRegex(q), 'i') },
+          { lastName: new RegExp(escapeRegex(q), 'i') },
+        ],
       })
         .select('firstName lastName beneficiaryCode')
         .limit(10)
@@ -94,7 +98,10 @@ router.get('/suggest', async (req, res) => {
     } else if (mod === 'employees') {
       const Employee = require('../models/HR/Employee');
       suggestions = await Employee.find({
-        $or: [{ firstName: new RegExp(q, 'i') }, { lastName: new RegExp(q, 'i') }],
+        $or: [
+          { firstName: new RegExp(escapeRegex(q), 'i') },
+          { lastName: new RegExp(escapeRegex(q), 'i') },
+        ],
       })
         .select('firstName lastName employeeCode')
         .limit(10)

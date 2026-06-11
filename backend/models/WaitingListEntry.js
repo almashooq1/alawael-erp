@@ -78,5 +78,29 @@ WaitingListEntrySchema.index({ branchId: 1, status: 1, priority: 1, requestedAt:
 // Service-type breakdown.
 WaitingListEntrySchema.index({ serviceType: 1, status: 1 });
 
+// W1091 — unified-core linkage: emit when a KNOWN beneficiary joins the
+// waiting list for a new service line (prospective-only rows have no
+// beneficiaryId and are intentionally not surfaced on a timeline).
+WaitingListEntrySchema.pre('save', function flagWaitingListJoined() {
+  this.$__waitingListJoined = this.isNew && this.status === 'waiting' && !!this.beneficiaryId;
+});
+
+WaitingListEntrySchema.post('save', function emitWaitingListJoined(doc) {
+  if (!doc.$__waitingListJoined) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('waiting-list', 'waiting_list.joined', {
+      entryId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      serviceType: doc.serviceType,
+      priority: doc.priority,
+      requestedAt: doc.requestedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.WaitingListEntry || mongoose.model('WaitingListEntry', WaitingListEntrySchema);

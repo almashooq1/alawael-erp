@@ -65,7 +65,6 @@ WhatsAppTemplateSchema.index({ status: 1 });
 
 WhatsAppTemplateSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  
 });
 
 // Pattern D (W842): Meta provider template sync (distinct from comm/whatsapp-models Template)

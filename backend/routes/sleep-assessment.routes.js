@@ -242,7 +242,8 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     let suspectedOSA = 0;
     let totalScore = 0;
     for (const r of raw) {
-      if (r.problemSeverity) bySeverity[r.problemSeverity] = (bySeverity[r.problemSeverity] || 0) + 1;
+      if (r.problemSeverity)
+        bySeverity[r.problemSeverity] = (bySeverity[r.problemSeverity] || 0) + 1;
       if (r.tool) byTool[r.tool] = (byTool[r.tool] || 0) + 1;
       if (r.status === 'finalized') finalized++;
       if (r.suspectedOSA) suspectedOSA++;
@@ -399,7 +400,10 @@ router.post('/:id/add-intervention', requireRole(WRITE_ROLES), async (req, res) 
     if (!INTERVENTIONS.includes(intervention)) {
       return res
         .status(400)
-        .json({ success: false, message: `intervention يجب أن يكون: ${INTERVENTIONS.join(' | ')}` });
+        .json({
+          success: false,
+          message: `intervention يجب أن يكون: ${INTERVENTIONS.join(' | ')}`,
+        });
     }
     const row = await SleepAssessment.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -427,9 +431,11 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (row.status === 'finalized') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل تقييم تم اعتماده' });
     }
-    const factorKeys = ['sleepOnsetLatencyMinutes', 'nightWakingsPerNight', 'totalSleepHours'].concat(
-      PROBLEM_FLAGS
-    );
+    const factorKeys = [
+      'sleepOnsetLatencyMinutes',
+      'nightWakingsPerNight',
+      'totalSleepHours',
+    ].concat(PROBLEM_FLAGS);
     let factorsTouched = false;
     for (const k of factorKeys) {
       if (k in req.body) {

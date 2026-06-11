@@ -435,7 +435,6 @@ episodeOfCareSchema.pre('save', async function () {
       { name: 'discharge', status: 'pending' },
     ];
   }
-
 });
 
 // ─── Instance Methods ───────────────────────────────────────────────────────

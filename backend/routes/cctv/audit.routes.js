@@ -30,7 +30,7 @@ router.get('/', requireRole(auditRoles), async (req, res) => {
   if (req.query.to) q.createdAt = { ...(q.createdAt || {}), $lte: new Date(req.query.to) };
   const rows = await CctvViewAudit.find(q)
     .sort({ createdAt: -1 })
-    .limit(Number(req.query.limit) || 500)
+    .limit(Math.min(Number(req.query.limit) || 500, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });
@@ -38,7 +38,7 @@ router.get('/', requireRole(auditRoles), async (req, res) => {
 router.get('/by-user/:userId', requireRole(auditRoles), async (req, res) => {
   const rows = await CctvViewAudit.find({ userId: req.params.userId })
     .sort({ createdAt: -1 })
-    .limit(Number(req.query.limit) || 200)
+    .limit(Math.min(Number(req.query.limit) || 200, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });
@@ -46,7 +46,7 @@ router.get('/by-user/:userId', requireRole(auditRoles), async (req, res) => {
 router.get('/by-camera/:id', requireRole(auditRoles), async (req, res) => {
   const rows = await CctvViewAudit.find({ cameraId: req.params.id })
     .sort({ createdAt: -1 })
-    .limit(Number(req.query.limit) || 200)
+    .limit(Math.min(Number(req.query.limit) || 200, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });
@@ -58,7 +58,7 @@ router.get('/by-beneficiary/:id', requireRole([...auditRoles, 'parent']), async 
   }
   const rows = await CctvViewAudit.find({ beneficiaryId: req.params.id })
     .sort({ createdAt: -1 })
-    .limit(Number(req.query.limit) || 200)
+    .limit(Math.min(Number(req.query.limit) || 200, 2000)) // W1182 — DoS cap
     .lean();
   res.json({ success: true, data: rows });
 });

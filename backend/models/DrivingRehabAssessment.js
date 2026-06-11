@@ -137,14 +137,24 @@ const DrivingRehabAssessmentSchema = new mongoose.Schema(
     seatingTransfersLevel: { type: String, enum: SEATING_LEVELS.concat([null]), default: null },
 
     // ── Computed readiness ───────────────────────────────────────────
-    readinessLevel: { type: String, enum: READINESS_LEVELS, default: 'further_assessment', index: true },
+    readinessLevel: {
+      type: String,
+      enum: READINESS_LEVELS,
+      default: 'further_assessment',
+      index: true,
+    },
 
     // ── Adaptive equipment + on-road ─────────────────────────────────
     adaptiveEquipmentNeeded: { type: [String], default: () => [] },
     onRoadAssessment: { type: String, enum: ONROAD_OUTCOMES, default: 'not_done' },
 
     // ── Recommendation + restrictions ────────────────────────────────
-    recommendation: { type: String, enum: RECOMMENDATIONS, default: 'further_training', index: true },
+    recommendation: {
+      type: String,
+      enum: RECOMMENDATIONS,
+      default: 'further_training',
+      index: true,
+    },
     restrictions: { type: [String], default: () => [] },
     planNotes: { type: String, default: '', maxlength: 1000 },
     nextReviewDue: { type: Date, default: null, index: true },
@@ -259,7 +269,8 @@ DrivingRehabAssessmentSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('clinical-safety', 'driving.assessment_finalized', {
         drivingRehabAssessmentId: String(doc._id),

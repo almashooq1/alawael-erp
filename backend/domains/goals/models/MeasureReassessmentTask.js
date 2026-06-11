@@ -264,6 +264,30 @@ measureReassessmentTaskSchema.statics.listFor = function (filter = {}) {
   return this.find(q).sort({ dueAt: 1 }).lean();
 };
 
+// ── W1115 — publish measure_reassessment.completed when a reassessment task closes ─
+measureReassessmentTaskSchema.pre('save', function flagMeasureReassessmentCompleted() {
+  const becameCompleted = (this.isNew || this.isModified('status')) && this.status === 'completed';
+  this.$__measureReassessmentCompleted = becameCompleted;
+});
+
+measureReassessmentTaskSchema.post('save', function emitMeasureReassessmentCompleted(doc) {
+  if (!doc.$__measureReassessmentCompleted) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('measure-reassessment', 'measure_reassessment.completed', {
+      taskId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.measureCode ? { measureCode: doc.measureCode } : {}),
+      ...(doc.measureId ? { measureId: String(doc.measureId) } : {}),
+      ...(doc.phase ? { phase: doc.phase } : {}),
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const MeasureReassessmentTask =
   mongoose.models.MeasureReassessmentTask ||
   mongoose.model('MeasureReassessmentTask', measureReassessmentTaskSchema);

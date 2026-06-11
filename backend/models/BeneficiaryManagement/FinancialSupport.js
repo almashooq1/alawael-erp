@@ -246,7 +246,6 @@ financialSupportSchema.pre('save', async function () {
   if (this.disbursedAmount > this.approvedAmount) {
     throw new Error('Disbursed amount cannot exceed approved amount');
   }
-
 });
 
 // Methods

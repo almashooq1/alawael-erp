@@ -522,7 +522,7 @@ function createHikvisionRouter({
 
   router.get('/health/devices/:id', requirePerm('hikvision.health.read'), async (req, res) => {
     try {
-      const limit = req.query.limit ? Number(req.query.limit) : 10;
+      const limit = Math.min(req.query.limit ? Number(req.query.limit) : 10, 1000); // W1182 — DoS cap
       const result = await healthService.getLatest(req.params.id, limit);
       return respond(res, result);
     } catch (err) {
@@ -1562,7 +1562,7 @@ function createHikvisionRouter({
       requirePerm('hikvision.jobs.history.read'),
       async (req, res) => {
         try {
-          const limit = req.query?.limit ? Number(req.query.limit) : 20;
+          const limit = Math.min(req.query?.limit ? Number(req.query.limit) : 20, 1000); // W1182 — DoS cap
           const r = await scheduler.listRuns({ jobId: req.params.id, limit });
           if (!r.ok) return respond(res, r);
           return res.json({ success: true, data: r });

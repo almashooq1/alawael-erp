@@ -59,7 +59,12 @@ describe('W1021 OrientationMobilityAssessment — exports & enums', () => {
       'developing',
       'independent',
     ]);
-    expect(model.INDEPENDENCE_LEVELS).toEqual(['dependent', 'emerging', 'developing', 'independent']);
+    expect(model.INDEPENDENCE_LEVELS).toEqual([
+      'dependent',
+      'emerging',
+      'developing',
+      'independent',
+    ]);
   });
 
   it('exports the 9 scored DOMAINS', () => {
@@ -87,7 +92,7 @@ describe('W1021 OrientationMobilityAssessment — schema refs', () => {
     expect(MODEL_SRC).toMatch(/branchId[\s\S]{0,120}ref:\s*['"]Branch['"]/);
   });
 
-  it("cross-links VisionScreening (W720)", () => {
+  it('cross-links VisionScreening (W720)', () => {
     expect(MODEL_SRC).toMatch(/ref:\s*['"]VisionScreening['"]/);
   });
 

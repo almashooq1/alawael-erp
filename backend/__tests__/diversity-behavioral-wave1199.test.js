@@ -59,16 +59,24 @@ describe('W1199 DiversitySnapshot — happy path', () => {
 
 describe('W1199 DiversitySnapshot — Wave-18 invariants', () => {
   test('saudization out of [0,100] rejected', async () => {
-    await expect(Snap.create(base({ saudizationRatePct: 120 }))).rejects.toThrow(/saudizationRatePct/);
+    await expect(Snap.create(base({ saudizationRatePct: 120 }))).rejects.toThrow(
+      /saudizationRatePct/
+    );
   });
   test('a diversity index out of [0,1] rejected', async () => {
     await expect(
-      Snap.create(base({ diversityIndex: { genderBlau: 1.5, nationalityBlau: 0.4, departmentShannon: 1 } }))
+      Snap.create(
+        base({ diversityIndex: { genderBlau: 1.5, nationalityBlau: 0.4, departmentShannon: 1 } })
+      )
     ).rejects.toThrow(/genderBlau/);
   });
   test('department scope requires a department; branch scope forbids one', async () => {
-    await expect(Snap.create(base({ scope: { level: 'department', department: null } }))).rejects.toThrow(/department/);
-    await expect(Snap.create(base({ scope: { level: 'branch', department: 'PT' } }))).rejects.toThrow(/department/);
+    await expect(
+      Snap.create(base({ scope: { level: 'department', department: null } }))
+    ).rejects.toThrow(/department/);
+    await expect(
+      Snap.create(base({ scope: { level: 'branch', department: 'PT' } }))
+    ).rejects.toThrow(/department/);
   });
   test('invariants fire on UPDATE-save too (markModified)', async () => {
     const d = await Snap.create(base());

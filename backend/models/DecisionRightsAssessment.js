@@ -130,20 +130,18 @@ DecisionRightsAssessmentSchema.pre('save', async function () {
     (!this.supportArrangement || this.supportArrangement.trim().length < 20)
   ) {
     throw new Error(
-        `DecisionRightsAssessment: ${this.routedLayer} layer requires supportArrangement (≥20 chars) before finalization`
-      );
+      `DecisionRightsAssessment: ${this.routedLayer} layer requires supportArrangement (≥20 chars) before finalization`
+    );
   }
 
   // Decisions that always require advocate involvement regardless of layer
   if (lib.requiresAdvocate(this.decisionType, this.routedLayer)) {
     if (this.status === 'finalized' && !this.advocateInvolved) {
       throw new Error(
-          `DecisionRightsAssessment: decisionType="${this.decisionType}" or layer="${this.routedLayer}" requires advocateInvolved=true before finalization`
-        );
+        `DecisionRightsAssessment: decisionType="${this.decisionType}" or layer="${this.routedLayer}" requires advocateInvolved=true before finalization`
+      );
     }
   }
-
-  
 });
 
 // ── Unified-core linkage (W1120 — decision-rights assessment island → CareTimeline) ──
@@ -154,7 +152,8 @@ DecisionRightsAssessmentSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('decision-rights', 'assessment.finalized', {
         decisionRightsAssessmentId: String(doc._id),

@@ -24,7 +24,7 @@ let claimSeq = 0;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query);
     if (row) return row;
@@ -80,7 +80,10 @@ describe('W994 — insurance claim outcomes reach the unified-core timeline', ()
     loaded.approvedAmount = 1000;
     await loaded.save();
 
-    const tl = await waitForTimeline({ beneficiaryId: c.beneficiaryId, eventType: 'insurance_claim' });
+    const tl = await waitForTimeline({
+      beneficiaryId: c.beneficiaryId,
+      eventType: 'insurance_claim',
+    });
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -92,7 +95,10 @@ describe('W994 — insurance claim outcomes reach the unified-core timeline', ()
     loaded.status = 'partially_approved';
     loaded.approvedAmount = 600;
     await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: c.beneficiaryId, eventType: 'insurance_claim' });
+    const tl = await waitForTimeline({
+      beneficiaryId: c.beneficiaryId,
+      eventType: 'insurance_claim',
+    });
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('success');
   });
@@ -102,7 +108,10 @@ describe('W994 — insurance claim outcomes reach the unified-core timeline', ()
     const loaded = await InsuranceClaim.findById(c._id);
     loaded.status = 'rejected';
     await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: c.beneficiaryId, eventType: 'insurance_claim' });
+    const tl = await waitForTimeline({
+      beneficiaryId: c.beneficiaryId,
+      eventType: 'insurance_claim',
+    });
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
   });

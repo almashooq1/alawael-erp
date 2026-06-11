@@ -92,6 +92,32 @@ MorningHealthCheckSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// ── W1059: unified-core linkage ───────────────────────────────────────
+// A flagged morning check (observe/send_home) is the milestone. Publish
+// morning_health_check.flagged → CareTimeline. NON-callback hooks only.
+MorningHealthCheckSchema.pre('save', function () {
+  this.$__morningHealthFlaggedNow = this.isNew && this.decision !== 'allow';
+});
+
+function emitMorningHealthCheckFlagged(doc) {
+  if (!doc || !doc.$__morningHealthFlaggedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('morning-health-check', 'morning_health_check.flagged', {
+      checkId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      decision: doc.decision,
+      temperatureC: typeof doc.temperatureC === 'number' ? doc.temperatureC : null,
+      flaggedAt: doc.checkTime || doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+MorningHealthCheckSchema.post('save', emitMorningHealthCheckFlagged);
+
 module.exports =
   mongoose.models.MorningHealthCheck ||
   mongoose.model('MorningHealthCheck', MorningHealthCheckSchema);

@@ -48,32 +48,42 @@ describe('W1040 buildSummary — empty + base', () => {
 
 describe('W1040 buildSummary — falls', () => {
   it('high risk → falls_high_risk', () => {
-    const s = route.buildSummary(BID, { falls: { riskLevel: 'high', status: 'finalized', nextReviewDue: FUTURE } });
+    const s = route.buildSummary(BID, {
+      falls: { riskLevel: 'high', status: 'finalized', nextReviewDue: FUTURE },
+    });
     expect(s.flags).toContain('falls_high_risk');
     expect(s.falls.riskLevel).toBe('high');
   });
 
   it('finalized + past review → falls_reassessment_overdue', () => {
-    const s = route.buildSummary(BID, { falls: { riskLevel: 'low', status: 'finalized', nextReviewDue: PAST } });
+    const s = route.buildSummary(BID, {
+      falls: { riskLevel: 'low', status: 'finalized', nextReviewDue: PAST },
+    });
     expect(s.flags).toContain('falls_reassessment_overdue');
     expect(s.falls.overdue).toBe(true);
   });
 
   it('low risk + future review → no flags', () => {
-    const s = route.buildSummary(BID, { falls: { riskLevel: 'low', status: 'finalized', nextReviewDue: FUTURE } });
+    const s = route.buildSummary(BID, {
+      falls: { riskLevel: 'low', status: 'finalized', nextReviewDue: FUTURE },
+    });
     expect(s.flags).toEqual([]);
   });
 });
 
 describe('W1040 buildSummary — pressure injuries', () => {
   it('open injury → open_pressure_injury', () => {
-    const s = route.buildSummary(BID, { injuries: [{ status: 'active', stage: 'stage_2', origin: 'present_on_admission' }] });
+    const s = route.buildSummary(BID, {
+      injuries: [{ status: 'active', stage: 'stage_2', origin: 'present_on_admission' }],
+    });
     expect(s.flags).toContain('open_pressure_injury');
     expect(s.pressureInjury.openCount).toBe(1);
   });
 
   it('stage_3 → pressure_injury_stage3plus; facility_acquired → HAPI flag', () => {
-    const s = route.buildSummary(BID, { injuries: [{ status: 'active', stage: 'stage_3', origin: 'facility_acquired' }] });
+    const s = route.buildSummary(BID, {
+      injuries: [{ status: 'active', stage: 'stage_3', origin: 'facility_acquired' }],
+    });
     expect(s.flags).toContain('pressure_injury_stage3plus');
     expect(s.flags).toContain('hospital_acquired_pressure_injury');
     expect(s.pressureInjury.facilityAcquired).toBe(true);
@@ -81,25 +91,45 @@ describe('W1040 buildSummary — pressure injuries', () => {
   });
 
   it('open injury past review → pressure_injury_reassessment_overdue', () => {
-    const s = route.buildSummary(BID, { injuries: [{ status: 'monitoring', stage: 'stage_1', origin: 'community_acquired', nextReviewDue: PAST }] });
+    const s = route.buildSummary(BID, {
+      injuries: [
+        {
+          status: 'monitoring',
+          stage: 'stage_1',
+          origin: 'community_acquired',
+          nextReviewDue: PAST,
+        },
+      ],
+    });
     expect(s.flags).toContain('pressure_injury_reassessment_overdue');
   });
 });
 
 describe('W1040 buildSummary — sleep / mobility / driving / seizures', () => {
   it('severe sleep + OSA → two flags', () => {
-    const s = route.buildSummary(BID, { sleep: { problemSeverity: 'severe', suspectedOSA: true, status: 'finalized', nextReviewDue: FUTURE } });
+    const s = route.buildSummary(BID, {
+      sleep: {
+        problemSeverity: 'severe',
+        suspectedOSA: true,
+        status: 'finalized',
+        nextReviewDue: FUTURE,
+      },
+    });
     expect(s.flags).toContain('severe_sleep_disturbance');
     expect(s.flags).toContain('suspected_sleep_apnea');
   });
 
   it('dependent mobility → mobility_dependent', () => {
-    const s = route.buildSummary(BID, { om: { independenceLevel: 'dependent', status: 'finalized', nextReviewDue: FUTURE } });
+    const s = route.buildSummary(BID, {
+      om: { independenceLevel: 'dependent', status: 'finalized', nextReviewDue: FUTURE },
+    });
     expect(s.flags).toContain('mobility_dependent');
   });
 
   it('not_fit_currently driving → not_fit_to_drive', () => {
-    const s = route.buildSummary(BID, { driving: { recommendation: 'not_fit_currently', status: 'finalized', nextReviewDue: FUTURE } });
+    const s = route.buildSummary(BID, {
+      driving: { recommendation: 'not_fit_currently', status: 'finalized', nextReviewDue: FUTURE },
+    });
     expect(s.flags).toContain('not_fit_to_drive');
   });
 
@@ -120,7 +150,12 @@ describe('W1040 buildSummary — flagCount aggregates across modules', () => {
   it('multiple modules sum their flags', () => {
     const s = route.buildSummary(BID, {
       falls: { riskLevel: 'high', status: 'finalized', nextReviewDue: FUTURE },
-      sleep: { problemSeverity: 'severe', suspectedOSA: false, status: 'finalized', nextReviewDue: FUTURE },
+      sleep: {
+        problemSeverity: 'severe',
+        suspectedOSA: false,
+        status: 'finalized',
+        nextReviewDue: FUTURE,
+      },
       injuries: [{ status: 'active', stage: 'stage_4', origin: 'facility_acquired' }],
     });
     // falls_high_risk + severe_sleep + open_injury + stage3plus + hapi = 5
@@ -153,7 +188,9 @@ describe('W1040 route — endpoint surface', () => {
 
   it('is READ-ONLY — no write/mutation operations', () => {
     expect(ROUTES_SRC).not.toMatch(/router\.(post|put|patch|delete)\(/);
-    expect(ROUTES_SRC).not.toMatch(/\.(create|save|insertMany|updateOne|updateMany|deleteOne|deleteMany|findOneAndUpdate|findOneAndDelete|findByIdAndUpdate|findByIdAndDelete)\(/);
+    expect(ROUTES_SRC).not.toMatch(
+      /\.(create|save|insertMany|updateOne|updateMany|deleteOne|deleteMany|findOneAndUpdate|findOneAndDelete|findByIdAndUpdate|findByIdAndDelete)\(/
+    );
   });
 
   it('only GET handlers are declared', () => {

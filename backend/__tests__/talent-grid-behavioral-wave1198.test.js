@@ -18,7 +18,13 @@ let TR;
 const oid = () => new mongoose.Types.ObjectId();
 
 function base(over = {}) {
-  return { employeeId: oid(), reviewCycle: '2026-H1', performanceBand: 3, potentialBand: 3, ...over };
+  return {
+    employeeId: oid(),
+    reviewCycle: '2026-H1',
+    performanceBand: 3,
+    potentialBand: 3,
+    ...over,
+  };
 }
 
 beforeAll(async () => {

@@ -206,27 +206,34 @@ InstrumentalSwallowStudySchema.virtual('isComplete').get(function () {
 InstrumentalSwallowStudySchema.set('toJSON', { virtuals: true });
 InstrumentalSwallowStudySchema.set('toObject', { virtuals: true });
 
-// ── Unified-core linkage (W1075 — swallow-study island → CareTimeline) ──
-InstrumentalSwallowStudySchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1054: unified-core linkage ───────────────────────────────────────
+// On completion (status → 'completed'), publish swallow_study.completed so the
+// cross-module subscriber records a clinical milestone on the beneficiary's
+// CareTimeline. NON-callback hooks only (global async save plugin puts Kareem
+// in promise-adapter mode — callback hooks would break at runtime).
+InstrumentalSwallowStudySchema.pre('save', function () {
+  this.$__swallowStudyCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
 });
-InstrumentalSwallowStudySchema.post('save', function (doc) {
+
+function emitSwallowStudyCompleted(doc) {
+  if (!doc || !doc.$__swallowStudyCompletedNow) return;
   try {
-    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('clinical-assessment', 'swallow-study.completed', {
-        instrumentalSwallowStudyId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        studyType: doc.studyType,
-        aspirationDetected: !!doc.aspirationDetected,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    integrationBus.publish('instrumental-swallow-study', 'swallow_study.completed', {
+      studyId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      studyType: doc.studyType,
+      aspirationDetected: !!doc.aspirationDetected,
+      completedAt: doc.performedDate || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
   }
-});
+}
+
+InstrumentalSwallowStudySchema.post('save', emitSwallowStudyCompleted);
 
 module.exports =
   mongoose.models.InstrumentalSwallowStudy ||

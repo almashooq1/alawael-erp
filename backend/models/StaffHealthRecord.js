@@ -54,7 +54,14 @@ const STATUSES = [
   'closed',
 ];
 
-const EXPOSURE_TYPES = ['needlestick', 'sharps', 'splash_mucous', 'splash_skin', 'aerosol', 'other'];
+const EXPOSURE_TYPES = [
+  'needlestick',
+  'sharps',
+  'splash_mucous',
+  'splash_skin',
+  'aerosol',
+  'other',
+];
 const FITNESS_LEVELS = ['fit', 'fit_with_restrictions', 'temporarily_unfit', 'unfit'];
 const RESULTS = ['negative', 'positive', 'indeterminate', 'pass', 'fail', 'not_applicable'];
 

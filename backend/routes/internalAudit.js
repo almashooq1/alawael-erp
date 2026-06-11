@@ -4,6 +4,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 // استيراد النماذج
 const {
   AnnualAuditPlan,
@@ -270,7 +271,7 @@ router.post(
       const audit = await SurpriseAudit.findOneAndUpdate(
         { auditId: req.params.auditId },
         {
-          $push: { observations: { $each: [req.body], $slice: -200 } },
+          $push: { observations: { $each: [stripUpdateMeta(req.body)], $slice: -200 } },
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },

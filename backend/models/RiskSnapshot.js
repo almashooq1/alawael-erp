@@ -64,5 +64,36 @@ RiskSnapshotSchema.index({ beneficiaryId: 1, computedAt: -1 });
 // Per-sweep dashboards: all snapshots in a run, ordered by escalation.
 RiskSnapshotSchema.index({ sweepRunId: 1, tierDelta: 1 });
 
+// ── W1088: unified-core producer ───────────────────────────────────
+// Emit risk_snapshot.escalated for a NEW snapshot whose tier ESCALATED
+// (or a first reading already at high/critical) so the clinical-risk
+// escalation lands on the beneficiary's core timeline. deescalated /
+// unchanged / first-low snapshots stay out of the timeline to keep it
+// signal-rich. Non-callback (W483).
+RiskSnapshotSchema.pre('save', function flagRiskEscalated() {
+  const high = this.overallTier === 'high' || this.overallTier === 'critical';
+  this.$__riskEscalated =
+    this.isNew && (this.tierDelta === 'escalated' || (this.tierDelta === 'first' && high));
+});
+
+RiskSnapshotSchema.post('save', function emitRiskEscalated(doc) {
+  if (!doc.$__riskEscalated) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('risk-snapshot', 'risk_snapshot.escalated', {
+      snapshotId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      overallTier: doc.overallTier || null,
+      previousTier: doc.previousTier || null,
+      tierDelta: doc.tierDelta || null,
+      overallScore: typeof doc.overallScore === 'number' ? doc.overallScore : null,
+      computedAt: doc.computedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports = mongoose.models.RiskSnapshot || mongoose.model('RiskSnapshot', RiskSnapshotSchema);
 module.exports.TIERS = TIERS;

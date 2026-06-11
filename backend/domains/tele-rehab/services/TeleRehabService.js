@@ -25,12 +25,23 @@ class TeleRehabService extends BaseService {
   }
 
   /* ── List ── */
-  async listSessions({ beneficiaryId, therapistId, status, from, to, page = 1, limit = 20 } = {}) {
+  async listSessions({
+    beneficiaryId,
+    therapistId,
+    status,
+    from,
+    to,
+    page = 1,
+    limit = 20,
+    branchId,
+  } = {}) {
     const TeleSession = mongoose.model('TeleSession');
     const q = { isDeleted: { $ne: true } };
     if (beneficiaryId) q.beneficiaryId = beneficiaryId;
     if (therapistId) q.therapistId = therapistId;
     if (status) q.status = status;
+    // W1157 — branch isolation: routes pass effectiveBranchScope(req)
+    if (branchId) q.branchId = branchId;
     if (from || to) {
       q.scheduledAt = {};
       if (from) q.scheduledAt.$gte = new Date(from);

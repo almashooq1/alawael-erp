@@ -46,9 +46,9 @@ describe('services/documents/documentQRCode.service.js', () => {
     expect(npms.length).toBe(3);
   });
 
-  test('has local dependencies (1)', () => {
+  test('has local dependencies (2)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(1);
+    expect(locals.length).toBe(2);
   });
 
   test('has module.exports', () => {

@@ -102,6 +102,8 @@ describe('inventory-low-stock', () => {
 
   test('missing either model → defensive no-op', async () => {
     expect(await runOne({})).toHaveLength(0);
-    expect(await runOne({ InventoryItem: items([{ _id: 'i1', reorderPoint: 10 }]) })).toHaveLength(0);
+    expect(await runOne({ InventoryItem: items([{ _id: 'i1', reorderPoint: 10 }]) })).toHaveLength(
+      0
+    );
   });
 });

@@ -149,7 +149,6 @@ FinancialNavigationPlanSchema.pre('save', async function () {
       };
     });
   }
-
 });
 
 function _incomeBandMidpoint(band) {

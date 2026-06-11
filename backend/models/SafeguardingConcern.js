@@ -270,31 +270,64 @@ SafeguardingConcernSchema.virtual('isCriticalAwaitingSupervisor').get(function (
 SafeguardingConcernSchema.set('toJSON', { virtuals: true });
 SafeguardingConcernSchema.set('toObject', { virtuals: true });
 
-// W977 — surface a raised safeguarding concern on the beneficiary's unified-core
-// timeline at once (regulatory artifact). Only fires when the concern is ABOUT a
-// beneficiary (subjectKind='beneficiary' → subjectBeneficiaryId is the
-// beneficiary ref); a concern about staff/other has no beneficiary timeline.
-// Native pre-compile hooks, create-only, guarded, fire-and-forget. Consumed by
-// dddCrossModuleSubscribers.js.
+// W992 — surface a new safeguarding concern on the subject beneficiary's unified
+// timeline. Only concerns ABOUT a beneficiary (subjectKind='beneficiary') land
+// on a timeline; staff/other-subject concerns have no beneficiary timeline to
+// attach to. Pre-compile native hooks (the W970 mechanism) — fire-and-forget +
+// fully guarded. The literal `integrationBus.publish` keeps the W389/W392
+// producer-coverage guards satisfied.
 SafeguardingConcernSchema.pre('save', function () {
   this.$__wasNew = this.isNew;
+  // W1027: flag a transition INTO 'closed' for the closure emitter below.
+  this.$__safeguardingClosedNow =
+    this.status === 'closed' && (this.isNew || this.isModified('status'));
 });
+
 SafeguardingConcernSchema.post('save', function (doc) {
   try {
-    if (!this.$__wasNew) return;
+    if (!this.$__wasNew) return; // only emit when a new concern is raised
     if (doc.subjectKind !== 'beneficiary' || !doc.subjectBeneficiaryId) return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
     if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+
     Promise.resolve(
-      integrationBus.publish('safety', 'safeguarding.raised', {
+      integrationBus.publish('safety', 'safeguarding.concern_raised', {
         concernId: String(doc._id),
         beneficiaryId: String(doc.subjectBeneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
         category: doc.category || '',
         severity: doc.severity || '',
       })
     ).catch(() => {});
   } catch (_) {
-    /* bus not wired — never block persistence */
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
+
+// W1027 — emit a closure milestone when a beneficiary-subject concern reaches
+// the terminal 'closed' status. Separate non-callback post('save') hook (same
+// hook family as the W992 emitter above → no W483 mismatch). The literal
+// `integrationBus.publish` keeps the W389/W392 producer-coverage guards satisfied.
+SafeguardingConcernSchema.post('save', function emitSafeguardingClosed(doc) {
+  try {
+    if (!this.$__safeguardingClosedNow) return;
+    if (doc.subjectKind !== 'beneficiary' || !doc.subjectBeneficiaryId) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+
+    Promise.resolve(
+      integrationBus.publish('safety', 'safeguarding.concern_closed', {
+        concernId: String(doc._id),
+        beneficiaryId: String(doc.subjectBeneficiaryId),
+        branchId: doc.branchId ? String(doc.branchId) : '',
+        category: doc.category || '',
+        severity: doc.severity || '',
+        outcome: doc.outcome || '',
+        closedAt: doc.closedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
   }
 });
 

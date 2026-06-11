@@ -37,7 +37,8 @@ async function runOne(models, now = new Date('2026-06-10T12:00:00Z')) {
 }
 
 const BRANCH = '64b000000000000000000001';
-const hoursAgo = (h, from = new Date('2026-06-10T12:00:00Z')) => new Date(from.getTime() - h * 3600 * 1000);
+const hoursAgo = (h, from = new Date('2026-06-10T12:00:00Z')) =>
+  new Date(from.getTime() - h * 3600 * 1000);
 
 describe('biomedical-waste-storage-overdue', () => {
   test('registered as an operational rule', () => {
@@ -95,8 +96,22 @@ describe('biomedical-waste-storage-overdue', () => {
   test('non-stored / no storedAt are skipped', async () => {
     const raised = await runOne({
       BiomedicalWasteRecord: finder([
-        { _id: 'w4', status: 'collected', wasteCategory: 'sharps', storedAt: hoursAgo(200), maxStorageHours: 48, deletedAt: null },
-        { _id: 'w5', status: 'stored', wasteCategory: 'sharps', storedAt: null, maxStorageHours: 48, deletedAt: null },
+        {
+          _id: 'w4',
+          status: 'collected',
+          wasteCategory: 'sharps',
+          storedAt: hoursAgo(200),
+          maxStorageHours: 48,
+          deletedAt: null,
+        },
+        {
+          _id: 'w5',
+          status: 'stored',
+          wasteCategory: 'sharps',
+          storedAt: null,
+          maxStorageHours: 48,
+          deletedAt: null,
+        },
       ]),
     });
     expect(raised).toHaveLength(0);

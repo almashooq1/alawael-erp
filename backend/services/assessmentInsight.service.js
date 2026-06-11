@@ -385,6 +385,10 @@ class AssessmentInsightService {
     const goal = await TherapeuticGoal.create({
       beneficiaryId: app.beneficiaryId,
       episodeId: resolvedEpisode,
+      // gap #3 — record the assessment→goal provenance (was previously dropped;
+      // the source only survived as a free-text tag/note). Makes the golden
+      // thread traversable: MeasureApplication._id ↔ TherapeuticGoal.measureApplicationId.
+      measureApplicationId: applicationId,
       title: draft.title,
       title_ar: draft.title_ar,
       description: draft.specific || draft.title,

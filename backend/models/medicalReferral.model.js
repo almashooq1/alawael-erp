@@ -287,36 +287,33 @@ const ReferralFollowUpSchema = new Schema(
 
 ReferralFollowUpSchema.index({ referral: 1, date: -1 });
 
-// W997 — surface referral outcomes on the unified-core timeline (shared
-// `referral` domain). accepted / completed / declined-or-rejected. Native
-// pre-compile hooks per the W970 pattern (the modelEventBridge-is-dead
-// workaround); guarded + fire-and-forget. post('save') is a different event from
-// the existing async pre('save') branch-derive hook, so no hook-style conflict.
-MedicalReferralSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ─── Unified-core producer (W1001) ───────────────────────────────────────────
+// Emit medical_referral.completed exactly once when a beneficiary's medical
+// referral reaches 'completed' (the consultation/treatment loop concluded). The
+// flag is computed in an async pre('save') to match the existing async hook
+// style on this schema (W483 gate); the event publishes in post('save').
+MedicalReferralSchema.pre('save', async function markCompletedTransition() {
+  this.$__referralCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
 });
-MedicalReferralSchema.post('save', function (doc) {
+
+MedicalReferralSchema.post('save', async function publishReferralCompleted(doc) {
   try {
-    if (doc.status === this.$__prevStatus) return;
+    if (!this.$__referralCompletedNow) return;
+    if (!doc.beneficiary) return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
     if (!integrationBus || typeof integrationBus.publish !== 'function') return;
-    const beneficiaryId = doc.beneficiary || doc.beneficiaryId;
-    if (!beneficiaryId) return;
-    const base = {
+    integrationBus.publish('medical-referrals', 'medical_referral.completed', {
       referralId: String(doc._id),
-      beneficiaryId: String(beneficiaryId),
-      referralType: 'medical',
-      status: doc.status,
-    };
-    if (doc.status === 'accepted') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.accepted', base)).catch(() => {});
-    } else if (doc.status === 'completed') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.completed', base)).catch(() => {});
-    } else if (doc.status === 'rejected' || doc.status === 'declined') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.rejected', base)).catch(() => {});
-    }
-  } catch (_) {
-    /* bus not wired — never block persistence */
+      referralNumber: doc.referralNumber || null,
+      beneficiaryId: String(doc.beneficiary),
+      branchId: doc.branchId ? String(doc.branchId) : null,
+      referralType: doc.referralType || null,
+      specialty: (doc.referredTo && doc.referredTo.specialty) || null,
+      completedAt: doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    // Producer must never break the save path.
   }
 });
 

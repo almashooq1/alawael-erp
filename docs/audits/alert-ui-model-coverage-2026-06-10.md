@@ -3,14 +3,14 @@
 ## TL;DR
 
 **Original concern:** the smart-alerts engine (`backend/alerts/rules/*`) appeared to
-have a *systemic* coverage gap — several clinical/HR rules query a **base** model
+have a _systemic_ coverage gap — several clinical/HR rules query a **base** model
 while the live web-admin UIs write the **same concept** to a **sibling** model, so an
 alert would never fire on real data.
 
 **Verified outcome (correction, same day): this was largely over-flagged.** On
 rigorous per-model verification, a "sibling model" usually means a **different
 concern** — a version-history layer, a lighter workflow variant, or a different
-*type* — **not** a competing store. In those cases the alert reading the base model
+_type_ — **not** a competing store. In those cases the alert reading the base model
 is **correct**. After verification, **only _credentials_ was a genuine wrong-model
 mismatch** (`EmployeeCredential` vs the UI-backed `StaffCertification` — both
 staff-credential stores with the same expiry concept). **That one is FIXED (W1151).**
@@ -35,23 +35,23 @@ backend alerts/rules/<rule>.js     ctx.models.Model_A.find(...)                M
 
 ## Per-concept status
 
-| Concept | Alert reads | UI actually writes | Endpoint | Status |
-|---|---|---|---|---|
-| **Staff credentials** | `EmployeeCredential` | `StaffCertification` | `/api/v1/rehabilitation-advanced/staff-certifications` | ✅ **FIXED — W1151** (additive: both models now covered) |
-| **Goals** | `Goal` (IEP) | `SmartGoal` (lighter therapist workflow) | `/api/v1/therapist-pro/smart-goals` | ✅ **NOT a mismatch** — `Goal` is the full IEP model with `lastProgressAt` (built for stall-detection); `SmartGoal` is explicitly "lighter… without the full IEP machinery" with %-progress (no `lastProgressAt`). Different workflows → alert correctly scoped to `Goal`. |
-| **Care plans** | `CarePlan` | — | — | ✅ **NOT a mismatch** — `CarePlan` has the alert's exact fields (`status` ACTIVE/DRAFT/ARCHIVED + `reviewDate`). `CarePlanVersion` is the W41 append-only **version-history** layer, not a competing store. |
-| **Incidents** | `Incident` (comprehensive mgmt) | `IncidentReport` (safety/clinical reports) | quality/incidents | 🔶 **Ambiguous, not a bug** — `Incident` = comprehensive incident-management; `IncidentReport` = safety reports. Different purposes → which to cover is a scoping question, not a wrong model. |
-| **Documents** | `Document` | `ControlledDocument` / `EmployeeDocument` (different doc *types*) | documents | ✅ Likely fine — siblings are specialized document types, not competing stores (not deep-verified). |
-| **Employment contracts** | `EmploymentContract` | `HREmploymentContract` / `Nitaqat…` (specialized) | HR | ✅ Likely fine — siblings are specialized variants (not deep-verified). |
-| **Vaccinations** | `Vaccination` | `Vaccination` (single model) | — | ✅ Safe — not fragmented. |
-| **PDPL DSAR** | `PdplRequest` | `PdplRequest` (single model) | — | ✅ Safe — not fragmented. |
-| **Invoices / finance** | `Invoice` | `Invoice` | — | ✅ Safe. |
-| **Operational (W1006+)** | `FacilityAsset`, `MaintenanceWorkOrder`, `Vehicle`, `Contract.model`, `InventoryStock`, `CapaItem`, … | spot-checked: `facility-assets/new` → `/api/v1/facility-asset` → `FacilityAsset` ✅ matches | various | ✅ Lower risk (rules built against these models); facility-asset verified. Re-verify the rest opportunistically. |
+| Concept                  | Alert reads                                                                                           | UI actually writes                                                                          | Endpoint                                               | Status                                                                                                                                                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Staff credentials**    | `EmployeeCredential`                                                                                  | `StaffCertification`                                                                        | `/api/v1/rehabilitation-advanced/staff-certifications` | ✅ **FIXED — W1151** (additive: both models now covered)                                                                                                                                                                                                                   |
+| **Goals**                | `Goal` (IEP)                                                                                          | `SmartGoal` (lighter therapist workflow)                                                    | `/api/v1/therapist-pro/smart-goals`                    | ✅ **NOT a mismatch** — `Goal` is the full IEP model with `lastProgressAt` (built for stall-detection); `SmartGoal` is explicitly "lighter… without the full IEP machinery" with %-progress (no `lastProgressAt`). Different workflows → alert correctly scoped to `Goal`. |
+| **Care plans**           | `CarePlan`                                                                                            | —                                                                                           | —                                                      | ✅ **NOT a mismatch** — `CarePlan` has the alert's exact fields (`status` ACTIVE/DRAFT/ARCHIVED + `reviewDate`). `CarePlanVersion` is the W41 append-only **version-history** layer, not a competing store.                                                                |
+| **Incidents**            | `Incident` (comprehensive mgmt)                                                                       | `IncidentReport` (safety/clinical reports)                                                  | quality/incidents                                      | 🔶 **Ambiguous, not a bug** — `Incident` = comprehensive incident-management; `IncidentReport` = safety reports. Different purposes → which to cover is a scoping question, not a wrong model.                                                                             |
+| **Documents**            | `Document`                                                                                            | `ControlledDocument` / `EmployeeDocument` (different doc _types_)                           | documents                                              | ✅ Likely fine — siblings are specialized document types, not competing stores (not deep-verified).                                                                                                                                                                        |
+| **Employment contracts** | `EmploymentContract`                                                                                  | `HREmploymentContract` / `Nitaqat…` (specialized)                                           | HR                                                     | ✅ Likely fine — siblings are specialized variants (not deep-verified).                                                                                                                                                                                                    |
+| **Vaccinations**         | `Vaccination`                                                                                         | `Vaccination` (single model)                                                                | —                                                      | ✅ Safe — not fragmented.                                                                                                                                                                                                                                                  |
+| **PDPL DSAR**            | `PdplRequest`                                                                                         | `PdplRequest` (single model)                                                                | —                                                      | ✅ Safe — not fragmented.                                                                                                                                                                                                                                                  |
+| **Invoices / finance**   | `Invoice`                                                                                             | `Invoice`                                                                                   | —                                                      | ✅ Safe.                                                                                                                                                                                                                                                                   |
+| **Operational (W1006+)** | `FacilityAsset`, `MaintenanceWorkOrder`, `Vehicle`, `Contract.model`, `InventoryStock`, `CapaItem`, … | spot-checked: `facility-assets/new` → `/api/v1/facility-asset` → `FacilityAsset` ✅ matches | various                                                | ✅ Lower risk (rules built against these models); facility-asset verified. Re-verify the rest opportunistically.                                                                                                                                                           |
 
 ## Fix patterns
 
 1. **Additive-cover-both** (the W1151-safe pattern, use when the canonical is still
-   undecided): add a *new* rule reading the sibling model **alongside** the
+   undecided): add a _new_ rule reading the sibling model **alongside** the
    existing one — non-destructive, easy to retire later. See
    `backend/alerts/rules/staff-certification-expired.js` +
    `staff-certification-expiry-30d.js` (self-loading on `StaffCertification`,
@@ -80,7 +80,7 @@ backend alerts/rules/<rule>.js     ctx.models.Model_A.find(...)                M
 
 - `backend/__tests__/alert-engine-model-availability-wave1149.test.js` (W1149) —
   asserts every alert-loader model + every rule self-load `require()` resolves to a
-  real model file. Catches the *model-missing* class, **not** the *wrong-model*
+  real model file. Catches the _model-missing_ class, **not** the _wrong-model_
   (mismatch) class documented here — that one needs the UI-trace above.
 - `backend/__tests__/model-event-bridge-mapping-models-exist-wave1148.test.js`
   (W1148) — the bridge analog (phantom mapping models).

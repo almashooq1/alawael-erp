@@ -25,7 +25,8 @@ const BROKEN_SAVE_HOOK = /\.(pre|post)\(\s*['"]save['"]\s*,\s*async function \(\
 // W1213 — 3rd variant of the class: an async NO-PARAM hook whose body still
 // CALLS next(...) → ReferenceError on every save (Communication crashed this
 // way until W1193; AccountingPayment until W1213). Catch it on ANY hook event.
-const ASYNC_NOPARAM_HOOK = /\.(pre|post)\(\s*['"](\w+)['"]\s*,\s*async function \(\s*\)\s*\{([\s\S]*?)\n\}\s*\)/g;
+const ASYNC_NOPARAM_HOOK =
+  /\.(pre|post)\(\s*['"](\w+)['"]\s*,\s*async function \(\s*\)\s*\{([\s\S]*?)\n\}\s*\)/g;
 
 function walk(dir, acc) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

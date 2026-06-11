@@ -6,6 +6,31 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1168 — requireBranchAccess populates req.branchScope BEFORE the guards
+// below (without it every assertBranchMatch helper silently no-ops) +
+// effectiveBranchScope pins branchId reads against query/body spoofing.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+  branchScopedResourceParam,
+} = require('../../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
+router.use(requireBranchAccess); // W1168 — must run before the param/body guards
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — /recommendations/:id/* ownership: restricted callers cannot act on a
+// foreign-branch Recommendation (respond / view / rate).
+router.param(
+  'id',
+  branchScopedResourceParam({
+    modelName: 'Recommendation',
+    label: 'توصية',
+    loadModel: () => require('../models/Recommendation'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { riskScoringService } = require('../services/RiskScoringService');
 const {
   validateCalculateBatch,
@@ -43,7 +68,9 @@ router.post(
   '/risk/calculate-batch',
   validate(validateCalculateBatch),
   asyncHandler(async (req, res) => {
-    const result = await riskScoringService.calculateBatch(req.body.branchId || req.user?.branchId);
+    const result = await riskScoringService.calculateBatch(
+      effectiveBranchScope(req) || req.body.branchId || req.user?.branchId
+    );
     res.json({ success: true, data: result });
   })
 );
@@ -74,7 +101,7 @@ router.get(
   '/risk/high-risk',
   asyncHandler(async (req, res) => {
     const data = await riskScoringService.getHighRiskBeneficiaries(
-      req.query.branchId || req.user?.branchId,
+      effectiveBranchScope(req) || req.query.branchId || req.user?.branchId,
       parseInt(req.query.limit) || 50
     );
     res.json({ success: true, data, total: data.length });
@@ -149,7 +176,9 @@ router.post(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await riskScoringService.getDashboard(req.query.branchId || req.user?.branchId);
+    const data = await riskScoringService.getDashboard(
+      effectiveBranchScope(req) || req.query.branchId || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );

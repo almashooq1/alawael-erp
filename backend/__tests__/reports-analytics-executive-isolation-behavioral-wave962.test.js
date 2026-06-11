@@ -60,9 +60,27 @@ beforeAll(async () => {
     db.collection('invoices').deleteMany({}),
   ]);
   await db.collection('beneficiaries').insertMany([
-    { deleted_at: null, status: 'active', disability_type: 'physical', createdAt: new Date(), branch_id: oid(A) },
-    { deleted_at: null, status: 'active', disability_type: 'sensory', createdAt: new Date(), branch_id: oid(A) },
-    { deleted_at: null, status: 'active', disability_type: 'physical', createdAt: new Date(), branch_id: oid(B) }, // foreign
+    {
+      deleted_at: null,
+      status: 'active',
+      disability_type: 'physical',
+      createdAt: new Date(),
+      branch_id: oid(A),
+    },
+    {
+      deleted_at: null,
+      status: 'active',
+      disability_type: 'sensory',
+      createdAt: new Date(),
+      branch_id: oid(A),
+    },
+    {
+      deleted_at: null,
+      status: 'active',
+      disability_type: 'physical',
+      createdAt: new Date(),
+      branch_id: oid(B),
+    }, // foreign
   ]);
   await db.collection('invoices').insertMany([
     { deleted_at: null, status: 'paid', total_amount: 300, branch_id: oid(A) },

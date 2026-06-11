@@ -219,7 +219,6 @@ counselingSessionSchema.pre('save', async function () {
   if (this.actualStartTime && this.actualEndTime) {
     this.actualDuration = (this.actualEndTime - this.actualStartTime) / (1000 * 60); // in minutes
   }
-
 });
 
 // Methods

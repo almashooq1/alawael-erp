@@ -6,6 +6,41 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1168 — requireBranchAccess populates req.branchScope BEFORE the guards
+// below (without it every assertBranchMatch helper silently no-ops) +
+// effectiveBranchScope pins branchId reads against query/body spoofing.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+  branchScopedResourceParam,
+} = require('../../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
+router.use(requireBranchAccess); // W1168 — must run before the param/body guards
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1175 — resource ownership: restricted callers cannot touch a foreign-branch
+// FamilyMember (update / consents) or FamilyCommunication (follow-ups /
+// homework). :consentId and :homeworkId are sub-documents of the hooked
+// parents — covered transitively.
+router.param(
+  'memberId',
+  branchScopedResourceParam({
+    modelName: 'FamilyMember',
+    label: 'فرد أسرة',
+    loadModel: () => require('../models/FamilyMember'),
+  })
+);
+router.param(
+  'commId',
+  branchScopedResourceParam({
+    modelName: 'FamilyCommunication',
+    label: 'تواصل أسري',
+    loadModel: () => require('../models/FamilyCommunication'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { familyService } = require('../services/FamilyService');
 const {
   validateAddFamilyMember,
@@ -35,7 +70,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const data = await familyService.addFamilyMember({
       ...req.body,
-      branchId: req.user?.branchId || req.body.branchId,
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data });
@@ -51,12 +86,14 @@ router.get(
   })
 );
 
-/** PUT /members/:id — تحديث بيانات فرد أسرة */
+/** PUT /members/:memberId — تحديث بيانات فرد أسرة */
+// W1175 — renamed :id → :memberId (URL shape unchanged) so the FamilyMember
+// ownership hook fires.
 router.put(
-  '/members/:id',
+  '/members/:memberId',
   validate(validateUpdateFamilyMember),
   asyncHandler(async (req, res) => {
-    const data = await familyService.updateFamilyMember(req.params.id, req.body);
+    const data = await familyService.updateFamilyMember(req.params.memberId, req.body);
     res.json({ success: true, data });
   })
 );
@@ -113,7 +150,7 @@ router.post(
     const data = await familyService.logCommunication({
       ...req.body,
       staffId: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data });
@@ -138,18 +175,24 @@ router.get(
   asyncHandler(async (req, res) => {
     const data = await familyService.getPendingFollowUps({
       staffId: req.query.staffId || getUserId(req),
-      branchId: req.query.branchId || req.user?.branchId,
+      branchId: effectiveBranchScope(req) || req.query.branchId || req.user?.branchId,
       limit: parseInt(req.query.limit) || 50,
     });
     res.json({ success: true, data, total: data.length });
   })
 );
 
-/** POST /follow-ups/:id/complete — إتمام متابعة */
+/** POST /follow-ups/:commId/complete — إتمام متابعة */
+// W1175 — renamed :id → :commId (follow-ups live on FamilyCommunication; the
+// ownership hook fires; URL shape unchanged).
 router.post(
-  '/follow-ups/:id/complete',
+  '/follow-ups/:commId/complete',
   asyncHandler(async (req, res) => {
-    const data = await familyService.completeFollowUp(req.params.id, getUserId(req), req.body.note);
+    const data = await familyService.completeFollowUp(
+      req.params.commId,
+      getUserId(req),
+      req.body.note
+    );
     res.json({ success: true, data });
   })
 );
@@ -166,7 +209,7 @@ router.post(
     const data = await familyService.assignHomework({
       ...req.body,
       staffId: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -220,7 +263,9 @@ router.get(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await familyService.getDashboard(req.query.branchId || req.user?.branchId);
+    const data = await familyService.getDashboard(
+      effectiveBranchScope(req) || req.query.branchId || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );

@@ -31,24 +31,12 @@ const careTimelineSchema = new mongoose.Schema(
       enum: [
         // Lifecycle
         'registration',
-        'waitlisted', // W979
-        'waitlist_booked', // W979 — booked from the waitlist (admission)
         'admission',
         'discharge',
         'transfer',
         'readmission',
-        'status_changed', // W982 — beneficiary lifecycle status change
-        'care_transition', // W986 — life-stage transition plan completed / cancelled
-        'insurance_claim', // W994 — insurance claim approved / rejected (admin)
         // Clinical
         'assessment_completed',
-        'screening_completed', // W980 — vision/hearing screening finalized
-        'medication_administered', // W981
-        'medication_not_given', // W981
-        'followup_completed', // W987 — post-rehab follow-up case completed
-        'followup_lost', // W987 — beneficiary lost to post-rehab follow-up
-        'followup_visit', // W992 — post-rehab follow-up visit attended / missed
-        'referral', // W997 — referral accepted / completed / rejected (any of 4 referral subsystems)
         'assessment_scheduled',
         'reassessment_due',
         'care_plan_created',
@@ -83,51 +71,142 @@ const careTimelineSchema = new mongoose.Schema(
         'risk_flag_resolved',
         'quality_alert',
         'compliance_issue',
-        'complaint_filed', // W984
         'behavior_incident', // W970 — behavior subscriber (already on main) needs this enum value
-        // Safety (W977)
+        // Clinical safety (W992 — unified-core linkage)
         'seizure_event',
         'safeguarding_concern',
-        'restraint_applied',
-        'crisis_reported', // W1004 — acute crisis reported
-        'crisis_resolved', // W1004 — acute crisis resolved / closed
-        // Clinical Safety (W1046 — unified-core linkage of the W1010-W1042 modules)
-        'falls_risk_assessed', // W1010 — falls-risk assessment finalized
-        'pressure_injury', // W1011 — pressure injury identified
-        'pressure_injury_resolved', // W1011 — pressure injury healed/closed
-        'sleep_assessment', // W1020 — sleep assessment finalized
-        'mobility_assessment', // W1021 — orientation & mobility assessment finalized
-        'driving_assessment', // W1022 — driving-rehab assessment finalized
-        'medication_reconciliation', // W1041 — medication reconciliation reconciled
-        'infection_case', // W1042 — infection case opened / status change
-        'infection_resolved', // W1042 — infection case resolved
-        // Clinical Assessments trio (W1047 — W670-W673 islands linked)
-        'dysphagia_assessment', // W670 — swallow-safety assessment finalized
-        'pain_assessment', // W671 — pain assessment finalized
-        'physiotherapy_assessment', // W672 — physiotherapy assessment finalized
-        // Deferred islands now linked (W1075 — 8 per-beneficiary lifecycle models)
-        'icf_assessment', // W1075 — ICF functioning profile approved
-        'treatment_authorization', // W1075 — insurance treatment authorization decided
-        'clinical_pathway_completed', // W1075 — clinical pathway plan completed
-        'mdt_meeting', // W1075 — multidisciplinary team meeting completed
-        'swallow_study', // W1075 — instrumental swallow study (VFSS/FEES) completed
-        'emergency_plan_activated', // W1075 — per-beneficiary emergency plan activated
-        'consultation', // W1075 — cross-discipline therapist consultation answered/closed
-        'cdss_alert_resolved', // W1075 — CDSS alert resolved
-        // Residual islands now linked (W1120 — 6 assessment/plan/CRPD lifecycle models)
-        'adl_assessment', // W1120 — activities-of-daily-living assessment completed
-        'integration_assessment', // W1120 — sensory-integration assessment completed
-        'self_advocacy_completed', // W1120 — self-advocacy training plan completed (CRPD)
-        'decision_rights_assessment', // W1120 — decision-rights capacity assessment finalized (CRPD)
-        'independent_living_completed', // W1120 — independent-living plan completed
-        'caregiver_support_completed', // W1120 — caregiver support program completed
+        'safeguarding_concern_closed', // W1027 — safeguarding concern closed → unified core
+        'restraint_seclusion',
+        // Sensory screenings (W993 — unified-core linkage)
+        'screening_completed',
+        // Medication administration (W994 — unified-core linkage)
+        'medication_dose_recorded',
+        // Discharge / end of service (W995 — unified-core linkage)
+        'discharge_completed',
+        // Admission / enrollment from waitlist (W996 — unified-core linkage)
+        'admission_enrolled',
+        // Referral conversion / loop closed (W997 — unified-core linkage)
+        'referral_converted',
+        // Medical referral completion (W1001 — unified-core linkage)
+        'medical_referral_completed',
+        // Measurement/assessment result approved (W1022 — unified-core linkage)
+        'measurement_result_approved',
+        // Insurance claim paid (W1000 — unified-core linkage)
+        'insurance_claim_paid',
+        // Invoice fully paid (W1023 — unified-core linkage)
+        'invoice_paid',
+        // Tele-rehab consultation completed (W1024 — unified-core linkage)
+        'teleconsultation_completed',
+        // Home visit completed (W1025 — unified-core linkage)
+        'home_visit_completed',
+        // Family counselling session completed (W1026 — unified-core linkage)
+        'family_counselling_completed',
+        // Assistive device returned (W1028 — unified-core linkage)
+        'assistive_device_returned',
+        // Respite booking completed (W1029 — unified-core linkage)
+        'respite_completed',
+        // Transition plan completed (W1030 — unified-core linkage)
+        'transition_completed',
+        // Diet prescription activated (W1031 — unified-core linkage)
+        'diet_prescription_activated',
+        // Behavior plan completed (W1032 — unified-core linkage)
+        'behavior_plan_completed',
+        // AAC communication aid profile activated (W1042 — unified-core linkage)
+        'communication_aid_activated',
+        // AI-generated report sent to family (W1043 — unified-core linkage)
+        'ai_report_sent',
+        // Adaptive sports program completed (W1044 — unified-core linkage)
+        'adaptive_sports_completed',
+        // Individual Education Plan activated (W1045 — unified-core linkage)
+        'iep_activated',
+        // Vaccination administered (W1046 — unified-core linkage)
+        'vaccination_administered',
+        // Family home program completed (W1047 — unified-core linkage)
+        'family_home_program_completed',
+        // Spasticity injection completed (W1048 — unified-core linkage)
+        'spasticity_injection_completed',
+        'prosthetic_orthotic_delivered',
+        'seating_postural_finalized',
+        'sensory_diet_completed',
+        'prior_authorization_approved',
+        'plan_review_recorded',
+        'swallow_study_completed',
+        'crisis_incident_resolved',
+        'iq_assessment_completed',
+        'creative_arts_therapy_completed',
+        'insurance_eligibility_checked',
+        'morning_health_check_flagged',
+        'differential_diagnosis_confirmed',
+        'community_referral_completed',
+        'clinical_pathway_completed',
+        'aac_pecs_phase_advanced',
+        'pain_assessment_finalized',
+        'dysphagia_assessment_finalized',
+        'allergy_recorded',
+        'dtt_session_completed',
+        'goal_progress_achieved',
+        'adjunct_therapy_completed',
+        'disability_card_registered',
+        'portfolio_milestone_added',
+        'physiotherapy_assessment_finalized',
+        'service_contract_activated',
+        'subsidy_payment_received',
+        'sponsorship_activated',
+        'potty_request_milestone',
+        'home_practice_completed',
+        'medication_order_started',
+        'family_visit_approved',
+        'bip_fidelity_checked',
+        'goal_progress_recorded',
+        'cdss_risk_assessed',
+        'red_flag_raised',
+        'session_attendance_missed',
+        'nps_response_recorded',
+        'daily_comm_log_published',
+        'consent_record_granted',
+        'risk_snapshot_escalated',
+        'progress_report_recorded',
+        'day_attendance_present',
+        'waiting_list_joined',
+        'pickup_authorization_requested',
+        'meal_allergy_incident',
+        'cdss_alert_raised',
+        'gas_score_snapshotted',
+        'pdpl_request_received',
+        'bip_effectiveness_recorded',
+        'seat_allocation_assigned',
+        'student_activity_completed',
+        'story_book_published',
+        'gas_scoring_recorded',
+        'speech_session_analyzed',
+        'portal_payment_paid',
+        'caregiver_support_completed',
+        'coupon_usage_redeemed',
+        'insurance_policy_activated',
+        'red_flag_override_recorded',
+        'smart_scheduler_activated',
+        'story_surface_published',
+        'arvr_session_completed',
+        'program_enrollment_activated',
+        'family_communication_logged',
+        'workflow_task_completed',
+        'behavior_record_logged',
+        'measure_reassessment_completed',
+        'measure_alert_raised',
+        'measure_baseline_completed',
+        'workflow_transition_recorded',
+        'generated_report_completed',
+        'decision_alert_raised',
+        'gas_scale_activated',
+        'quality_audit_record_completed',
+        'clinical_risk_score_escalated',
+        'corrective_action_opened',
+        'complaint_resolved', // W1136 — beneficiary-linked complaint resolved → unified core
         // Family
         'family_contact',
         'family_meeting',
         'consent_obtained',
-        'consent_revoked', // W1002 — consent withdrawn (PDPL/CRPD)
         'home_program_assigned',
-        'home_program_completed', // W1003 — home program completed
         // Communication
         'note_added',
         'document_uploaded',
@@ -139,6 +218,48 @@ const careTimelineSchema = new mongoose.Schema(
         'prediction_made',
         // Custom
         'custom',
+        // ── merged from origin/main parallel waves (W97x–W12xx) ──
+        'waitlisted',
+        'waitlist_booked',
+        'status_changed',
+        'care_transition',
+        'insurance_claim',
+        'medication_administered',
+        'medication_not_given',
+        'followup_completed',
+        'followup_lost',
+        'followup_visit',
+        'referral',
+        'complaint_filed',
+        'restraint_applied',
+        'crisis_reported',
+        'crisis_resolved',
+        'falls_risk_assessed',
+        'pressure_injury',
+        'pressure_injury_resolved',
+        'sleep_assessment',
+        'mobility_assessment',
+        'driving_assessment',
+        'medication_reconciliation',
+        'infection_case',
+        'infection_resolved',
+        'dysphagia_assessment',
+        'pain_assessment',
+        'physiotherapy_assessment',
+        'icf_assessment',
+        'treatment_authorization',
+        'mdt_meeting',
+        'swallow_study',
+        'emergency_plan_activated',
+        'consultation',
+        'cdss_alert_resolved',
+        'adl_assessment',
+        'integration_assessment',
+        'self_advocacy_completed',
+        'decision_rights_assessment',
+        'independent_living_completed',
+        'consent_revoked',
+        'home_program_completed',
       ],
       required: true,
       index: true,

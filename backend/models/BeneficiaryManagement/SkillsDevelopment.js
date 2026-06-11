@@ -185,7 +185,6 @@ skillsDevelopmentSchema.pre('save', async function () {
   if (this.endorsements) {
     this.endorsementCount = this.endorsements.length;
   }
-
 });
 
 // Methods

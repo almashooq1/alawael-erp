@@ -238,27 +238,33 @@ DysphagiaAssessmentSchema.virtual('isUnsafeSwallow').get(function () {
 DysphagiaAssessmentSchema.set('toJSON', { virtuals: true });
 DysphagiaAssessmentSchema.set('toObject', { virtuals: true });
 
-// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
-// On the draft→finalized flip → dysphagia_assessment timeline row
-// (high aspiration risk escalates to warning).
-DysphagiaAssessmentSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ─── W1065: unified-core linkage — dysphagia assessment finalized ───────────
+// Milestone = the swallow assessment transitions to 'finalized'. Emits a
+// timeline event so the beneficiary's swallow-safety record (and any unsafe
+// verdict) is visible on the unified core. Non-callback hook style.
+DysphagiaAssessmentSchema.pre('save', function flagDysphagiaFinalized() {
+  this.$__dysphagiaFinalizedNow =
+    this.status === 'finalized' && (this.isNew || this.isModified('status'));
 });
-DysphagiaAssessmentSchema.post('save', function (doc) {
+
+DysphagiaAssessmentSchema.post('save', function emitDysphagiaAssessmentFinalized(doc) {
+  if (!doc.$__dysphagiaFinalizedNow) return;
   try {
-    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('clinical-assessment', 'dysphagia.assessment_finalized', {
-        dysphagiaAssessmentId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        aspirationRisk: doc.aspirationRisk,
-        npoRecommended: !!doc.npoRecommended,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    integrationBus.publish('dysphagia-assessment', 'dysphagia_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      screeningTool: doc.screeningTool,
+      aspirationRisk: doc.aspirationRisk,
+      npoRecommended: !!doc.npoRecommended,
+      unsafe: !!doc.isUnsafeSwallow,
+      recommendedIddsiFood: doc.recommendedIddsiFood || '',
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
   }
 });
 

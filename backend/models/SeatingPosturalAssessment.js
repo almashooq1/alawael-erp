@@ -282,6 +282,35 @@ SeatingPosturalAssessmentSchema.virtual('segmentsSupported').get(function () {
 SeatingPosturalAssessmentSchema.set('toJSON', { virtuals: true });
 SeatingPosturalAssessmentSchema.set('toObject', { virtuals: true });
 
+// ── W1050: unified-core linkage ───────────────────────────────────────
+// On finalization (status → 'finalized'), publish seating_postural.finalized
+// so the cross-module subscriber records a clinical milestone on the
+// beneficiary's CareTimeline. NON-callback hooks only (global async save
+// plugin puts Kareem in promise-adapter mode — callback hooks would break).
+SeatingPosturalAssessmentSchema.pre('save', function () {
+  this.$__seatingPosturalFinalizedNow =
+    this.status === 'finalized' && (this.isNew || this.isModified('status'));
+});
+
+function emitSeatingPosturalFinalized(doc) {
+  if (!doc || !doc.$__seatingPosturalFinalizedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('seating-postural-assessment', 'seating_postural.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      assessmentType: doc.assessmentType,
+      pressureInjuryRisk: doc.pressureInjuryRisk,
+      finalizedAt: doc.assessedAt || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+SeatingPosturalAssessmentSchema.post('save', emitSeatingPosturalFinalized);
+
 module.exports =
   mongoose.models.SeatingPosturalAssessment ||
   mongoose.model('SeatingPosturalAssessment', SeatingPosturalAssessmentSchema);

@@ -195,9 +195,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    const raw = await PressureInjuryRecord.find(filter)
-      .select('stage origin status')
-      .lean();
+    const raw = await PressureInjuryRecord.find(filter).select('stage origin status').lean();
     const byStage = STAGES.reduce((acc, s) => ((acc[s] = 0), acc), {});
     const byOrigin = ORIGINS.reduce((acc, o) => ((acc[o] = 0), acc), {});
     const byStatus = STATUSES.reduce((acc, s) => ((acc[s] = 0), acc), {});

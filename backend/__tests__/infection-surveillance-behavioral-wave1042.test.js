@@ -66,7 +66,9 @@ describe('W1042 behavioral — base save + enum gating', () => {
   });
 
   it('REJECTS an invalid precautionType', async () => {
-    await expect(IPC.create(baseDoc({ precautionType: 'forcefield' }))).rejects.toThrow(/precautionType/);
+    await expect(IPC.create(baseDoc({ precautionType: 'forcefield' }))).rejects.toThrow(
+      /precautionType/
+    );
   });
 });
 
@@ -86,20 +88,32 @@ describe('W1042 behavioral — clinical invariants', () => {
 
   it('REJECTS resolutionDate earlier than onsetDate', async () => {
     await expect(
-      IPC.create(baseDoc({ caseStatus: 'resolved', onsetDate: new Date('2026-06-05'), resolutionDate: new Date('2026-06-01') }))
+      IPC.create(
+        baseDoc({
+          caseStatus: 'resolved',
+          onsetDate: new Date('2026-06-05'),
+          resolutionDate: new Date('2026-06-01'),
+        })
+      )
     ).rejects.toThrow(/resolutionDate/);
   });
 
   it('REJECTS isolationRequired with precautionType=none', async () => {
-    await expect(IPC.create(baseDoc({ isolationRequired: true }))).rejects.toThrow(/precautionType/);
+    await expect(IPC.create(baseDoc({ isolationRequired: true }))).rejects.toThrow(
+      /precautionType/
+    );
   });
 
   it('REJECTS excludedFromCenter with no exclusionStart', async () => {
-    await expect(IPC.create(baseDoc({ excludedFromCenter: true }))).rejects.toThrow(/exclusionStart/);
+    await expect(IPC.create(baseDoc({ excludedFromCenter: true }))).rejects.toThrow(
+      /exclusionStart/
+    );
   });
 
   it('REJECTS reportedToAuthority with no authorityReportDate', async () => {
-    await expect(IPC.create(baseDoc({ reportedToAuthority: true }))).rejects.toThrow(/authorityReportDate/);
+    await expect(IPC.create(baseDoc({ reportedToAuthority: true }))).rejects.toThrow(
+      /authorityReportDate/
+    );
   });
 
   it('SAVES a fully-specified isolated + reported confirmed case', async () => {
@@ -127,7 +141,9 @@ describe('W1042 behavioral — virtuals', () => {
   it('isActive true for suspected/confirmed, false for resolved', async () => {
     const a = await IPC.create(baseDoc({ caseStatus: 'confirmed', pathogen: 'RSV' }));
     expect(a.isActive).toBe(true);
-    const b = await IPC.create(baseDoc({ caseStatus: 'resolved', resolutionDate: new Date('2026-06-10') }));
+    const b = await IPC.create(
+      baseDoc({ caseStatus: 'resolved', resolutionDate: new Date('2026-06-10') })
+    );
     expect(b.isActive).toBe(false);
   });
 
@@ -142,14 +158,22 @@ describe('W1042 behavioral — virtuals', () => {
   it('isCurrentlyExcluded false once the return date has passed', async () => {
     const past = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     const doc = await IPC.create(
-      baseDoc({ excludedFromCenter: true, exclusionStart: new Date('2020-01-01'), exclusionEnd: past })
+      baseDoc({
+        excludedFromCenter: true,
+        exclusionStart: new Date('2020-01-01'),
+        exclusionEnd: past,
+      })
     );
     expect(doc.isCurrentlyExcluded).toBe(false);
   });
 
   it('durationDays computes onset → resolution', async () => {
     const doc = await IPC.create(
-      baseDoc({ onsetDate: new Date('2026-06-01'), caseStatus: 'resolved', resolutionDate: new Date('2026-06-08') })
+      baseDoc({
+        onsetDate: new Date('2026-06-01'),
+        caseStatus: 'resolved',
+        resolutionDate: new Date('2026-06-08'),
+      })
     );
     expect(doc.durationDays).toBe(7);
   });

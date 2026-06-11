@@ -125,5 +125,30 @@ generatedReportSchema.index({ templateCode: 1, 'period.from': -1 });
 generatedReportSchema.index({ beneficiaryId: 1, templateCode: 1, createdAt: -1 });
 generatedReportSchema.index({ branchId: 1, status: 1, createdAt: -1 });
 
+// ── W1119 — publish generated_report.completed when a report reaches completed ──
+generatedReportSchema.pre('save', function flagGeneratedReportCompleted() {
+  const becameCompleted = (this.isNew || this.isModified('status')) && this.status === 'completed';
+  this.$__generatedReportCompleted = becameCompleted;
+});
+
+generatedReportSchema.post('save', function emitGeneratedReportCompleted(doc) {
+  if (!doc.$__generatedReportCompleted) return;
+  if (!doc.beneficiaryId) return; // only beneficiary-scoped reports hit the per-beneficiary timeline
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('generated-report', 'generated_report.completed', {
+      reportId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.templateCode ? { templateCode: doc.templateCode } : {}),
+      ...(doc.scope ? { scope: doc.scope } : {}),
+      ...(doc.title ? { title: doc.title } : {}),
+      completedAt: doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.GeneratedReport || mongoose.model('GeneratedReport', generatedReportSchema);

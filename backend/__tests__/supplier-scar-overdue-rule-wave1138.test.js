@@ -52,10 +52,38 @@ describe('supplier-scar-response-overdue', () => {
 
   test('fires on awaiting-response SCARs past due; skips future + responded + closed', async () => {
     const raised = await runOne([
-      { _id: 'q1', scarNumber: 'SCAR-1', status: 'open', responseDueBy: PAST, severity: 'major', branchId: BRANCH },
-      { _id: 'q2', scarNumber: 'SCAR-2', status: 'in_progress', responseDueBy: FUTURE, severity: 'minor', branchId: BRANCH },
-      { _id: 'q3', scarNumber: 'SCAR-3', status: 'response_received', responseDueBy: PAST, severity: 'major', branchId: BRANCH },
-      { _id: 'q4', scarNumber: 'SCAR-4', status: 'closed', responseDueBy: PAST, severity: 'major', branchId: BRANCH },
+      {
+        _id: 'q1',
+        scarNumber: 'SCAR-1',
+        status: 'open',
+        responseDueBy: PAST,
+        severity: 'major',
+        branchId: BRANCH,
+      },
+      {
+        _id: 'q2',
+        scarNumber: 'SCAR-2',
+        status: 'in_progress',
+        responseDueBy: FUTURE,
+        severity: 'minor',
+        branchId: BRANCH,
+      },
+      {
+        _id: 'q3',
+        scarNumber: 'SCAR-3',
+        status: 'response_received',
+        responseDueBy: PAST,
+        severity: 'major',
+        branchId: BRANCH,
+      },
+      {
+        _id: 'q4',
+        scarNumber: 'SCAR-4',
+        status: 'closed',
+        responseDueBy: PAST,
+        severity: 'major',
+        branchId: BRANCH,
+      },
     ]);
     expect(raised).toHaveLength(1);
     expect(raised[0].key).toBe('supplier-scar-response-overdue:q1');
@@ -67,14 +95,23 @@ describe('supplier-scar-response-overdue', () => {
 
   test('a critical SCAR overdue escalates to critical', async () => {
     const raised = await runOne([
-      { _id: 'q5', scarNumber: 'SCAR-5', status: 'acknowledged', responseDueBy: PAST, severity: 'critical', branchId: BRANCH },
+      {
+        _id: 'q5',
+        scarNumber: 'SCAR-5',
+        status: 'acknowledged',
+        responseDueBy: PAST,
+        severity: 'critical',
+        branchId: BRANCH,
+      },
     ]);
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe('critical');
   });
 
   test('a SCAR with no responseDueBy does not fire', async () => {
-    const raised = await runOne([{ _id: 'q6', status: 'open', severity: 'major', branchId: BRANCH }]);
+    const raised = await runOne([
+      { _id: 'q6', status: 'open', severity: 'major', branchId: BRANCH },
+    ]);
     expect(raised).toHaveLength(0);
   });
 });

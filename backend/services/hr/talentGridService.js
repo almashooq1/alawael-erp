@@ -74,7 +74,9 @@ async function upsertReview({
     perf = await derivePerformanceBand(employeeId);
     source = 'derived';
     if (perf == null) {
-      const err = new Error('performanceBand not supplied and not derivable (no approved evaluation)');
+      const err = new Error(
+        'performanceBand not supplied and not derivable (no approved evaluation)'
+      );
       err.code = 'NO_PERFORMANCE';
       throw err;
     }

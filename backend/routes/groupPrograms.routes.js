@@ -170,7 +170,7 @@ router.post('/:id/sessions', requireAuth, requireBranchAccess, async (req, res) 
   try {
     const program = await GroupProgram.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
-      { $push: { sessions: { $each: [req.body], $slice: -200 } } },
+      { $push: { sessions: { $each: [stripUpdateMeta(req.body)], $slice: -200 } } },
       { returnDocument: 'after' }
     );
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });

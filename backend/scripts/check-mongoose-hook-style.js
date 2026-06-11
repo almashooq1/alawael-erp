@@ -60,17 +60,8 @@ const SKIP_DIR_NAMES = new Set([
 // Match `<Schema>.pre('event', <opts?>, <fn>)` or .post(...). Capture
 // event name + signature start. We need to read forward to see whether
 // the function is `async function` / `function (next)` / arrow.
-//
-// W956 — closed two blind spots that hid the W946/W954 callback class:
-//   (a) `\w*(?:Schema|schema)` (was `\w+…`) now matches a BARE `schema` /
-//       `Schema` var (the universal plugin-function param name), not just
-//       `fooSchema`. A bare 6-char `schema` failed the old `\w+…` (needed ≥7).
-//   (b) `function\s*\w*\s*\(` (was `function\s*\(`) now matches a NAMED
-//       function expression — `function preSave(next)` — not just anonymous.
-// Residual (not yet covered): array-event hooks `pre(['a','b'], fn)` still need
-// a string event literal here, so they remain invisible — documented follow-up.
 const HOOK_RE =
-  /(\w*(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\w*\s*\(([^)]*)\)/g;
+  /(\w+(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\(([^)]*)\)/g;
 
 // W494 baseline (2026-05-27): files with at least one pure callback-
 // style pre/post hook. Under Mongoose 9, EVERY callback hook throws
@@ -91,20 +82,27 @@ const HOOK_RE =
 // entry from this Set, commit. Same wave pattern that drove W325c
 // phantom-ref baseline 58 → 0 across ~12 waves.
 const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
-  // W949 — only guarded false-positives remain (auditLog hooks guard
-  // `typeof next === 'function'`, so they are Mongoose-9-safe). All real
-  // callback hooks (async+next W946, sync W948, next(arg) W949) are converted.
-  "models/auditLog.model.js",
-  // W956 — surfaced ONLY after the regex was tightened to catch bare-`Schema`
-  // vars + named function expressions (these were invisible to the old regex,
-  // so they were never in the baseline). Both are in the parallel agent's
-  // active core-linkage hot-zone (modelEventBridge had commits this session;
-  // FamilyHomeProgram was edited ~26 min before W956), so converting them now
-  // would collide. They WORK today via the (now-correct, W954) shim; ratchet
-  // each to `async function () {}` + prune from this set once the hot-zone
-  // settles. The W955 global plugins + 4 W956 model files are already converted.
-  "integration/modelEventBridge.js",
-  "models/FamilyHomeProgram.js",
+  // (ClinicalSession removed — W1149 converted callback pre('save') → sync no-next)
+  // W494 ratchet wave 3: 3 Cdss* + ClinicalRule + CpdRecord (-5)
+  // W494 ratchet wave 4: CommunityActivity + ComplianceMetric +
+  //   CourseEnrollment + CourseModule + CrisisIncident (-5)
+  // W494 ratchet wave 1: Webhook + EmailPreference + CrmCampaign (-3)
+  // W494 ratchet wave 2: 5 Crm* models (CrmLead/Partner/Referral/Segment/Survey)
+  //   — all single uuid-fill hooks, trivial async conversion.
+  // W494 ratchet wave 4 (parallel agent): Delegation + DifferentialDiagnosis + DisabilityProgram
+  // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
+  // W494 ratchet (mine, +2): DiscussionForum + DrugLibrary converted to async.
+  // W494 ratchet wave 6: ESignature + EStamp + ElearningCourse +
+  //   ElearningQuiz (-4) — auto-expiry + uuid-fill hooks.
+  // (FamilyCounsellingSession removed — W1026 converted callback pre('save') → async)
+  // (ForumReply removed — W494 ratchet wave 6 bonus)
+  // (Goal removed — callback pre('save') already converted to non-callback)
+  // models/MDTCoordination.js — removed W629: unifiedRehabPlanSchema callback
+  // hook converted to async (ratchet-DOWN) so the sibling
+  // deriveBranchFromBeneficiary hook can be async on the same event.
+  'models/auditLog.model.js',
+  // models/gratuity.model.js — removed: hook converted to async (W494/audit #5)
+  // W503: CapaItem converted to async style — unblocks auto-CAPA on major equity disparity.
 ]);
 
 function listSchemaFiles(roots) {
@@ -139,16 +137,11 @@ function listSchemaFiles(roots) {
 function classifyHook(isAsync, params, bodyAhead) {
   const paramsTrim = params.trim();
   const hasNext = /\bnext\b/.test(paramsTrim);
-  const callsNext = /\bnext\s*\(/.test(bodyAhead);
-  // W946 — an `async function (next)` hook that calls next() is ALSO broken
-  // under Mongoose 9: async hooks don't receive `next` (it's undefined), so
-  // next() throws "next is not a function" on every save. Fold it into the
-  // dangerous 'callback' class so the W494 ratchet + mixed-detection catch it.
-  if (isAsync) return hasNext && callsNext ? 'callback' : 'async';
+  if (isAsync) return 'async';
   if (!hasNext) return 'sync';
   // sync with `next` param — check if body actually calls next(). If it
   // does, it's the dangerous callback style. If it doesn't, treat as sync.
-  if (callsNext) return 'callback';
+  if (/\bnext\s*\(/.test(bodyAhead)) return 'callback';
   return 'sync';
 }
 

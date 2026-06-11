@@ -48,6 +48,7 @@ class BehaviorService extends BaseService {
     to,
     page = 1,
     limit = 20,
+    branchId,
   } = {}) {
     const BehaviorRecord = mongoose.model('BehaviorRecord');
     const q = { isDeleted: { $ne: true } };
@@ -55,6 +56,8 @@ class BehaviorService extends BaseService {
     if (behaviorPlanId) q.behaviorPlanId = behaviorPlanId;
     if (topography) q['behavior.topography'] = topography;
     if (severity) q['behavior.severity'] = severity;
+    // W1155 — cross-branch isolation: pin restricted callers to their branch
+    if (branchId) q.branchId = branchId;
     if (from || to) {
       q.occurredAt = {};
       if (from) q.occurredAt.$gte = new Date(from);
@@ -111,11 +114,13 @@ class BehaviorService extends BaseService {
     return plan;
   }
 
-  async listPlans({ beneficiaryId, status, page = 1, limit = 20 } = {}) {
+  async listPlans({ beneficiaryId, status, page = 1, limit = 20, branchId } = {}) {
     const BehaviorPlan = mongoose.model('BehaviorPlan');
     const q = { isDeleted: { $ne: true } };
     if (beneficiaryId) q.beneficiaryId = beneficiaryId;
     if (status) q.status = status;
+    // W1155 — cross-branch isolation: pin restricted callers to their branch
+    if (branchId) q.branchId = branchId;
     const total = await BehaviorPlan.countDocuments(q);
     const data = await BehaviorPlan.find(q)
       .sort({ createdAt: -1 })

@@ -22,11 +22,22 @@ const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
-const { effectiveBranchScope, enforceEmployeeBranch } = require('../../middleware/assertBranchMatch');
+const {
+  effectiveBranchScope,
+  enforceEmployeeBranch,
+} = require('../../middleware/assertBranchMatch');
 const safeError = require('../../utils/safeError');
 const svc = require('../../services/hr/talentGridService');
 
-const READ_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director', 'hr', 'manager'];
+const READ_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'hr_manager',
+  'hr_director',
+  'hr',
+  'manager',
+];
 const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director', 'manager'];
 // negative-label identity lists → narrower
 const SENSITIVE_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_director', 'hr_manager'];
@@ -35,11 +46,13 @@ router.use(authenticateToken);
 router.use(requireBranchAccess);
 
 function mapErr(res, err, ctx) {
-  if (err && err.code === 'MODEL_UNAVAILABLE') return res.status(503).json({ success: false, error: err.message });
+  if (err && err.code === 'MODEL_UNAVAILABLE')
+    return res.status(503).json({ success: false, error: err.message });
   if (err && (err.code === 'VALIDATION' || err.code === 'NO_PERFORMANCE')) {
     return res.status(400).json({ success: false, error: err.message });
   }
-  if (err && err.name === 'ValidationError') return res.status(400).json({ success: false, error: err.message });
+  if (err && err.name === 'ValidationError')
+    return res.status(400).json({ success: false, error: err.message });
   if (err && err.status) return res.status(err.status).json({ success: false, error: err.message });
   return safeError(res, err, ctx);
 }
@@ -58,7 +71,8 @@ async function guardEmployee(req, res, employeeId) {
 router.post('/reviews', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const body = req.body || {};
-    if (!body.employeeId) return res.status(400).json({ success: false, error: 'employeeId required' });
+    if (!body.employeeId)
+      return res.status(400).json({ success: false, error: 'employeeId required' });
     if (await guardEmployee(req, res, body.employeeId)) return; // W269
     const actor = req.user || {};
     const doc = await svc.upsertReview({
@@ -91,7 +105,10 @@ router.get('/grid', requireRole(READ_ROLES), async (req, res) => {
 router.get('/high-potentials', requireRole(READ_ROLES), async (req, res) => {
   try {
     const branchId = effectiveBranchScope(req);
-    const items = await svc.highPotentials({ branchId, reviewCycle: req.query.reviewCycle || null });
+    const items = await svc.highPotentials({
+      branchId,
+      reviewCycle: req.query.reviewCycle || null,
+    });
     res.json({ success: true, data: { count: items.length, items } });
   } catch (err) {
     mapErr(res, err, 'talent-grid:hipo');

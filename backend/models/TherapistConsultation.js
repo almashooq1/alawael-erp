@@ -62,7 +62,8 @@ if (mongoose.models.TherapistConsultation) {
     try {
       if (!TC_DONE.includes(doc.status) || TC_DONE.includes(this.$__prevStatus)) return;
       const { integrationBus } = require('../integration/systemIntegrationBus');
-      if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+      if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary)
+        return;
       Promise.resolve(
         integrationBus.publish('care-coordination', 'consultation.answered', {
           therapistConsultationId: String(doc._id),
@@ -77,5 +78,6 @@ if (mongoose.models.TherapistConsultation) {
   });
 
   module.exports =
-    mongoose.models.TherapistConsultation || mongoose.model('TherapistConsultation', therapistConsultationSchema);
+    mongoose.models.TherapistConsultation ||
+    mongoose.model('TherapistConsultation', therapistConsultationSchema);
 }

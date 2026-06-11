@@ -64,6 +64,32 @@ const allergySchema = new mongoose.Schema(
 
 allergySchema.index({ beneficiaryId: 1, status: 1, severity: 1 });
 
+// ─── W1066: unified-core linkage — allergy recorded (safety milestone) ──────
+// A newly recorded active allergy is logged on the beneficiary's timeline so
+// the safety verdict (esp. severe / life-threatening) is visible on the
+// unified core. Non-callback hook style.
+allergySchema.pre('save', function flagAllergyRecorded() {
+  this.$__allergyRecordedNow = this.isNew && this.status === 'active';
+});
+
+allergySchema.post('save', function emitAllergyRecorded(doc) {
+  if (!doc.$__allergyRecordedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('allergy', 'allergy.recorded', {
+      allergyId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      substance: doc.substance,
+      severity: doc.severity,
+      severe: SEVERE_SEVERITIES.includes(doc.severity),
+      recordedAt: doc.diagnosedAt || doc.createdAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
+  }
+});
+
 const Allergy = mongoose.models.Allergy || mongoose.model('Allergy', allergySchema);
 
 module.exports = {

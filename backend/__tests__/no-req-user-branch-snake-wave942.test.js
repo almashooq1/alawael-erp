@@ -46,34 +46,33 @@ const SKIP_DIRS = new Set([
 // pattern matches `branch_id` explicitly).
 const PATTERNS = [/req\.user\??\.branch_id\b/, /req\.user\??\.branch\b/];
 
-// Baseline (2026-06-05): consumer files currently reading the never-populated
-// snake/bare branch field. Ratchet DOWN as each adopts effectiveBranchScope(req).
-const BASELINE = new Set([
-  // 'routes/ai-analytics.routes.js' — FIXED W973: 7 filter sites → aiBranchFilter(req)
-  //   (snake adapter, de-shadowed import); restricted scoped + ?branch_id spoof blocked;
-  //   isolation test (branchId-only user + spoof case, 3/3).
-  // 'routes/beneficiary-transfers.routes.js' — DEFERRED: deeper field-drift (service writes
-  //   fromBranch, schema declares fromBranchId strict:true → stripped; docs persist no branch).
-  'routes/beneficiary-transfers.routes.js',
-  // 'routes/communication-module.routes.js' — FIXED W946 (InternalMessage +
-  //   ContactDirectory CREATE stamps now use effectiveBranchScope(req)).
-  // 'routes/files-module.routes.js' — FIXED W946 (both CREATE stamps now use
-  //   effectiveBranchScope(req)); pruned from baseline (ratchet-down).
-  'routes/hr/employee-admin.routes.js',
-  'routes/hr/hr-change-requests.routes.js',
-  'routes/hr/hr-inbox.routes.js',
-  // 'routes/hr-module.routes.js' — FIXED W973: POST /leaves branch stamp now uses
-  //   effectiveBranchScope(req) (was req.user.branch_id → undefined on a required field).
-  // 'routes/referral.routes.js' — FIXED W973: 2 list filters → referralBranchFilter(req),
-  //   value/stamps → effectiveBranchScope(req); list-isolation test (branchId-only user, 2/2).
-  // 'routes/reports-analytics-module.routes.js' — FIXED W973: inert never-populated
-  //   fallback swapped to scopedBranch (C3a already forces the real branch at the caller).
-  // 'routes/smart-assessment-engine.routes.js' — FIXED W973: 13 assessment CREATE
-  //   stamps now use effectiveBranchScope(req); reads already scoped (W907).
-  // 'routes/telehealth.routes.js' — FIXED W946: all 11 req.user.branch sites now
-  //   use telehealthBranchFilter(req) (lists) / effectiveBranchScope(req) (values
-  //   + stamps); proven by the branchId-only-user cases in the W871 test (9/9).
-]);
+// W991 — the canonical-first idiom `req.user.branchId || req.user.branch_id`
+// (and `... || req.user.branch`) is SAFE: branchId (the W930-enriched field) is
+// read FIRST, so the snake/bare token is dead fallback weight — it can only be
+// reached when branchId is falsy, in which case the snake form (also never
+// populated) is falsy too, so the `|| null` default wins. Strip the idiom before
+// danger-matching so the guard flags only STANDALONE never-populated reads. A
+// standalone `req.user.branch_id` elsewhere in the same file is NOT stripped (the
+// idiom regex requires the `branchId ||` prefix) → still caught. Self-tested below.
+const SAFE_IDIOM = /req\.user\??\.branchId\s*(?:\|\||\?\?)\s*req\.user\??\.branch(?:_id)?\b/g;
+
+// Baseline (2026-06-05 → ratcheted to EMPTY 2026-06-08, W991). Every consumer file
+// that once read the never-populated snake/bare branch field is now either FIXED or
+// recognized as the canonical-first safe idiom (excluded by SAFE_IDIOM). Any NEW
+// standalone read fails CI — including one introduced into the 3 HR files below,
+// which baselining could no longer have caught. Fix history (ratchet-DOWN trail):
+//   W946: files-module + communication-module CREATE stamps; telehealth all-11
+//         read/stamp sites → telehealthBranchFilter / effectiveBranchScope (12→9).
+//   W973: smart-assessment (13 stamps) + hr-module (POST /leaves) + reports-analytics
+//         (inert fallback) + referral (5 sites + test) + ai-analytics (7 leak+spoof
+//         sites + test) (→ 12→4).
+//   W990: beneficiary-transfers — Direction A field-drift fix (schema *Id→bare so
+//         transfers persist; GET / scope → effectiveBranchScope) (→ 12→3).
+//   W991: the 3 HR files (employee-admin / hr-change-requests / hr-inbox) read
+//         `req.user.branchId || req.user.branch_id` — the canonical-first SAFE idiom
+//         (branchId primary; snake = dead fallback). The SAFE_IDIOM strip now
+//         excludes it, so they're no longer flagged and the baseline is EMPTY.
+const BASELINE = new Set([]);
 
 function walk(dir, out = []) {
   let entries;
@@ -93,7 +92,9 @@ function walk(dir, out = []) {
 }
 
 function fileReadsSnakeBranch(src) {
-  return PATTERNS.some(re => re.test(src));
+  // Remove the canonical-first safe idiom; danger-match only the residual.
+  const residual = src.replace(SAFE_IDIOM, '');
+  return PATTERNS.some(re => re.test(residual));
 }
 
 function scan() {
@@ -118,10 +119,27 @@ describe('M-naming — no consumer reads the never-populated req.user.branch_id 
   it('self-test: pattern DETECTS the snake/bare forms but NOT canonical branchId', () => {
     expect(fileReadsSnakeBranch('filter.branch_id = req.user.branch_id;')).toBe(true);
     expect(fileReadsSnakeBranch('const b = req.user.branch;')).toBe(true);
-    expect(fileReadsSnakeBranch('const b = req.user?.branch_id || null;')).toBe(true);
+    expect(fileReadsSnakeBranch('const b = req.user?.branch_id || null;')).toBe(true); // snake PRIMARY
     // canonical — must NOT match
     expect(fileReadsSnakeBranch('const b = req.user.branchId;')).toBe(false);
     expect(fileReadsSnakeBranch('const b = effectiveBranchScope(req);')).toBe(false);
+  });
+
+  it('self-test (W991): canonical-first idiom is SAFE, but a standalone snake read still flags', () => {
+    // SAFE — branchId primary, snake/bare = dead fallback
+    expect(fileReadsSnakeBranch('const b = req.user.branchId || req.user.branch_id || null;')).toBe(
+      false
+    );
+    expect(fileReadsSnakeBranch('const b = req.user?.branchId || req.user?.branch_id;')).toBe(
+      false
+    );
+    expect(fileReadsSnakeBranch('const b = req.user.branchId ?? req.user.branch;')).toBe(false);
+    // CRITICAL: an idiom present does NOT mask a separate standalone never-populated read
+    expect(
+      fileReadsSnakeBranch(
+        'const a = req.user.branchId || req.user.branch_id; filter.b = req.user.branch_id;'
+      )
+    ).toBe(true);
   });
 
   it('the set of consumer files reading snake/bare branch == baseline (no growth, ratchet-down)', () => {

@@ -152,7 +152,6 @@ achievementSchema.pre('save', async function () {
     };
     this.pointsAwarded = pointMap[this.type] || 50;
   }
-
 });
 
 // Methods

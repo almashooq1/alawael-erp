@@ -3,7 +3,7 @@
 **Date:** 2026-06-11 · **Tool:** `npm run check:phantom-writes` (W1189) · **Baseline:**
 **75** (was 131 — burned down across 10 waves W1189→W1210; every LIVE cluster fixed).
 **Everything remaining is DORMANT** (PHANTOM-de-mounted routes awaiting ADR-030
-wire-vs-delete: guardians, email-v2, electronic-directives, student-* ×5 — note the
+wire-vs-delete: guardians, email-v2, electronic-directives, student-\* ×5 — note the
 PHANTOM markers date from W775 when those FILES DID NOT EXIST yet; they were created
 later against imagined schemas and never wired). guardianPortal was repaired
 (W1197/W1199) and WIRED (W1211).
@@ -15,26 +15,26 @@ against the bound model's declared schema paths. A key the schema never declares
 **silently dropped** by Mongoose strict mode. First triage pass (this doc) shows the
 finding set is NOT mostly "benign missing fields" — several clusters are routes written
 against **imagined schemas** (the W1179 disease) whose `create()` calls **throw
-ValidationError at runtime** because the real model has different *required* fields.
+ValidationError at runtime** because the real model has different _required_ fields.
 
 ## Classification taxonomy
 
-| Class | Meaning | Fix path |
-|---|---|---|
-| **A — alien model** | Writer's vocabulary matches NO registered model; real model has different required fields → create() always throws | Per-domain design: map to canonical vocabulary, bind to the right model, or build the missing model |
-| **B — semantic mismatch** | Canonical field exists under another name (`beneficiaryId` vs `beneficiary`) — W324 class | Fix the WRITER, never add a parallel field |
-| **C — missing benign field** | Write is intended, field simply never declared | Additive schema declaration (the W1186/`submittedAt` recipe) |
-| **D — tooling gap** | Finding is an artifact of static-analysis limits (re-export shims, multi-registration) | Improve the script, re-baseline |
+| Class                        | Meaning                                                                                                            | Fix path                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| **A — alien model**          | Writer's vocabulary matches NO registered model; real model has different required fields → create() always throws | Per-domain design: map to canonical vocabulary, bind to the right model, or build the missing model |
+| **B — semantic mismatch**    | Canonical field exists under another name (`beneficiaryId` vs `beneficiary`) — W324 class                          | Fix the WRITER, never add a parallel field                                                          |
+| **C — missing benign field** | Write is intended, field simply never declared                                                                     | Additive schema declaration (the W1186/`submittedAt` recipe)                                        |
+| **D — tooling gap**          | Finding is an artifact of static-analysis limits (re-export shims, multi-registration)                             | Improve the script, re-baseline                                                                     |
 
 ## Fixed already
 
-| Wave | Fix |
-|---|---|
-| W1186 | FormTemplate `approvalSteps` persistence + FormSubmission `reviewedAt`/`reviewedBy` |
-| W1189 | FormSubmission `submittedAt` (class C) |
-| W1193 | `Communication` pre-save called **undeclared `next()`** → ReferenceError on every save (file had `eslint-disable no-undef` masking it) — a 3rd W978-variant no current guard catches |
+| Wave  | Fix                                                                                                                                                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1186 | FormTemplate `approvalSteps` persistence + FormSubmission `reviewedAt`/`reviewedBy`                                                                                                                                                                     |
+| W1189 | FormSubmission `submittedAt` (class C)                                                                                                                                                                                                                  |
+| W1193 | `Communication` pre-save called **undeclared `next()`** → ReferenceError on every save (file had `eslint-disable no-undef` masking it) — a 3rd W978-variant no current guard catches                                                                    |
 | W1193 | `PriorAuthorization.uuid` + `InsuranceEligibilityCheck.uuid`: **required with no default and no caller ever set them** → `checkEligibility()` and `requestPriorAuth()` threw on every call. Schema-side `crypto.randomUUID()` default fixes all callers |
-| W1193 | Class-C declares: `PriorAuthorization.{insuranceCompanyId, estimatedStartDate, estimatedEndDate}`, `InsuranceEligibilityCheck.requestedService` |
+| W1193 | Class-C declares: `PriorAuthorization.{insuranceCompanyId, estimatedStartDate, estimatedEndDate}`, `InsuranceEligibilityCheck.requestedService`                                                                                                         |
 
 ## ⚠ Liveness correction (W1200)
 
@@ -45,7 +45,7 @@ five `student-*` route files are **DORMANT** — their only registry references 
 de-mounting). The W1197/W1199 guardianPortal repairs are therefore correct code on an
 UNMOUNTED surface — harmless, and ready if ADR-030 wires it, but they were not live
 user fixes. **LIVE writers confirmed by real mount lines**: `documents.smart`
-(_registry:783), `employeePortal` (×3 incl. app.js direct), `riskAssessment`
+(\_registry:783), `employeePortal` (×3 incl. app.js direct), `riskAssessment`
 (phases.registry), `budgetManagement` (finance.registry), `smartInsurance.service`
 (consumed by mounted smart-insurance.routes — the W1193 repairs WERE live fixes),
 `notifications-module`, `smartNotificationCenter`, `admin.routes`, `user-management`,
@@ -69,10 +69,11 @@ lines and show the matched text.**
 
 2. **communication message-log writers** (13 keys; `email-v2`, `guardianPortal`,
    `student-complaints`). Writers want a **message log** (`channel, direction, body,
-   recipient, cc, bcc, sentAt, senderId…`); `models/Communication.js` is a
+recipient, cc, bcc, sentAt, senderId…`); `models/Communication.js` is a
    **correspondence-management** model (required `title, subject, sender.name,
-   receiver.name, sentDate, type enum incoming/outgoing/internal, createdBy.userId`)
+receiver.name, sentDate, type enum incoming/outgoing/internal, createdBy.userId`)
    → create throws. **Fix = rebind each writer**, not extend the correspondence model.
+
    - ✅ **guardianPortal — FIXED W1199**: whole messages section (inbox / send /
      detail / reply) rebound to the purpose-built `PortalMessage` model (participant-
      keyed tenancy, isRead/readAt on open, proper reply chain via
@@ -90,7 +91,7 @@ lines and show the matched text.**
    → guardians always saw an empty list — fixed to `beneficiary`.
 
 4. **BeneficiaryService** (5 keys — `branch, fileNumber, disabilityType,
-   disabilitySeverity, referralSource`). Core entity; W926 already showed the
+disabilitySeverity, referralSource`). Core entity; W926 already showed the
    canonical shape is `category`/`disability.type` (nested). Verify the service's
    liveness (check:dormant-modules) then realign writer or declare flat fields per
    the W926 normalizer-bridge precedent.
@@ -100,10 +101,11 @@ lines and show the matched text.**
 5. **studentactivity** (7 keys; `student-elearning`, `student-events`,
    `student-rewards-store`). Model is a gamified TASK (`titleAr`, `dueAt` REQUIRED);
    writers log point-events (`studentId, activityType, points, reason, recordedBy,
-   date`) → throws. Either bind to a new `StudentActivityLog` model or map onto the
+date`) → throws. Either bind to a new `StudentActivityLog` model or map onto the
    task vocabulary.
 
 6. **document cluster** (12 keys) — split by liveness:
+
    - ✅ **documents.smart — FIXED W1201** (LIVE, `_registry:783`): the whole file was
      written against an imagined schema (`branchId`/`isDeleted`/`beneficiaryId`/
      English `status:'active'`/`shares`/`currentVersion`/`accessedAt`/`fileUrl`+
@@ -167,5 +169,5 @@ class-B keys (creates W324-style duplicate semantics).
 
 - Follow pure re-export shims (`module.exports = require('./x').Y`) when indexing.
 - Flag **missing required keys** at create sites (catches the `uuid` class statically).
-- Extend W978-family guards to catch `next()` *called but never declared* in async
+- Extend W978-family guards to catch `next()` _called but never declared_ in async
   hooks (the W1193 Communication bug shape).

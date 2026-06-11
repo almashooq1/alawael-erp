@@ -311,7 +311,11 @@ router.post('/', async (req, res) => {
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const url = String(fileUrl).trim();
-    const baseName = url.split(/[\\/?#]/).filter(Boolean).pop() || 'document';
+    const baseName =
+      url
+        .split(/[\\/?#]/)
+        .filter(Boolean)
+        .pop() || 'document';
     const doc = await Document.create({
       fileName: baseName,
       originalFileName: baseName,
@@ -324,9 +328,7 @@ router.post('/', async (req, res) => {
       description: description || '',
       tags: Array.isArray(tags) ? tags : [],
       ...(expiryDate ? { expiryDate: new Date(expiryDate) } : {}),
-      ...(beneficiaryId
-        ? { entityType: 'Beneficiary', entityId: String(beneficiaryId) }
-        : {}),
+      ...(beneficiaryId ? { entityType: 'Beneficiary', entityId: String(beneficiaryId) } : {}),
       status: 'نشط',
       uploadedBy: actorId(req),
       uploadedByName: req.user.name || req.user.fullName || '',
@@ -420,7 +422,11 @@ router.post('/:id/versions', async (req, res) => {
     const { fileUrl, changeNote, mimeType, sizeBytes, fileHash } = req.body;
     if (!fileUrl) return res.status(400).json({ success: false, message: 'fileUrl is required' });
     const url = String(fileUrl).trim();
-    const baseName = url.split(/[\\/?#]/).filter(Boolean).pop() || 'document';
+    const baseName =
+      url
+        .split(/[\\/?#]/)
+        .filter(Boolean)
+        .pop() || 'document';
     // Get current version count
     const count = await DocumentVersion.countDocuments({ documentId: req.params.id });
     const newVersion = await DocumentVersion.create({

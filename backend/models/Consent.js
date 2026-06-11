@@ -86,42 +86,28 @@ const consentSchema = new mongoose.Schema(
 // Primary lookup: latest records of this type for this beneficiary.
 consentSchema.index({ beneficiaryId: 1, type: 1, grantedAt: -1 });
 
-// W1002 — surface consent lifecycle on the unified-core timeline (PDPL/CRPD):
-// a consent OBTAINED (granted — care/data processing now permitted) and a consent
-// REVOKED (withdrawn — care/data access at risk). Fills the CareTimeline's
-// long-declared but producerless `consent_obtained` enum value + a new
-// `consent_revoked`. Native pre-compile hooks per the W970 pattern (the
-// modelEventBridge-is-dead workaround); guarded + fire-and-forget.
-//
-// W954-SAFE hook signatures: the global legacy-hook shim only wraps a hook whose
-// sole param is literally named `next`. `post('save', function (doc) {…})`,
-// `pre('save', function () {…})` (0-param) and `post('init', …)` all pass through
-// untouched — no save-hang. The append-only model has no `status` enum, so the
-// pre-save captures `isNew` (reliable create-detection, no double-fire on
-// re-save) and post-init captures the prior `revokedAt` (revoke transition).
-consentSchema.post('init', function () {
-  this.$__prevRevokedAt = this.revokedAt;
+// ── W1087: unified-core producer ───────────────────────────────────
+// Emit consent_record.granted for a NEW, non-revoked consent so the
+// PDPL/CBAHI consent grant lands on the beneficiary's core timeline.
+// Revocations are SET (revokedAt) on existing rows — those edits don't
+// fire here, and a row imported already-revoked is skipped. Non-callback (W483).
+consentSchema.pre('save', function flagConsentGranted() {
+  this.$__consentGranted = this.isNew && !this.revokedAt;
 });
-consentSchema.pre('save', function () {
-  this.$__wasNew = this.isNew;
-});
-consentSchema.post('save', function (doc) {
+
+consentSchema.post('save', function emitConsentGranted(doc) {
+  if (!doc.$__consentGranted) return;
   try {
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
-    if (!doc.beneficiaryId) return;
-    const base = {
+    integrationBus.publish('consent-record', 'consent_record.granted', {
       consentId: String(doc._id),
       beneficiaryId: String(doc.beneficiaryId),
-      consentType: doc.type,
-    };
-    if (doc.$__wasNew) {
-      Promise.resolve(integrationBus.publish('consent', 'consent.obtained', base)).catch(() => {});
-    } else if (!doc.$__prevRevokedAt && doc.revokedAt) {
-      Promise.resolve(integrationBus.publish('consent', 'consent.revoked', base)).catch(() => {});
-    }
-  } catch (_) {
-    /* bus not wired — never block persistence */
+      type: doc.type || null,
+      grantedAt: doc.grantedAt || doc.createdAt || new Date(),
+      expiresAt: doc.expiresAt || null,
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
   }
 });
 

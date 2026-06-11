@@ -59,6 +59,12 @@
     "audit:untenanted-aggregations": "node scripts/audit-untenanted-aggregations.js",
     "audit:unauthenticated-routes": "node scripts/audit-unauthenticated-routes.js",
     "audit:stub-routes": "node scripts/audit-stub-routes.js",
+    "audit:golden-thread": "node scripts/golden-thread-integrity.js",
+    "audit:golden-thread-attention": "node scripts/golden-thread-attention.js",
+    "audit:session-documentation": "node scripts/session-documentation-audit.js",
+    "audit:goal-consolidation": "node scripts/goal-model-consolidation-readiness.js",
+    "audit:operations-health": "node scripts/operations-health.js",
+    "consolidate:smartgoal": "node scripts/consolidate-smartgoal.js",
     "audit:stub-routes:json": "node scripts/audit-stub-routes.js --json",
     "audit:golden-thread": "node scripts/golden-thread-integrity.js",
     "audit:golden-thread-attention": "node scripts/golden-thread-attention.js",
@@ -76,6 +82,7 @@
     "backfill:session-branchid": "node scripts/backfill-session-branchid.js",
     "backfill:invoice-branchid": "node scripts/backfill-invoice-branchid.js",
     "backfill:careplan-branchid": "node scripts/backfill-careplan-branchid.js",
+    "backfill:hr-branchid": "node scripts/backfill-hr-branchid.js",
     "backfill:safetyincident-branchid": "node scripts/backfill-safetyincident-branchid.js",
     "backfill:maintenancerequest-branchid": "node scripts/backfill-maintenancerequest-branchid.js",
     "preflight": "node scripts/preflight.js",
@@ -325,6 +332,7 @@
     "supertest": "^7.2.2"
   },
   "overrides": {
+    "@grpc/grpc-js": ">=1.14.4",
     "fast-xml-parser": ">=5.5.7",
     "lodash": ">=4.17.24",
     "uuid": "^14.0.0",

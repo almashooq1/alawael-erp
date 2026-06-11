@@ -107,7 +107,10 @@ router.post('/snapshot', requireRole(READ_ROLES), async (req, res) => {
       if (!bodyBranch) {
         return res
           .status(400)
-          .json({ success: false, error: 'branchId required (HQ must specify a branch to snapshot)' });
+          .json({
+            success: false,
+            error: 'branchId required (HQ must specify a branch to snapshot)',
+          });
       }
     }
     const actor = req.user || {};

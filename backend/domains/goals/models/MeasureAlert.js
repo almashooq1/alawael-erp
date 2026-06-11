@@ -187,6 +187,30 @@ measureAlertSchema.statics.listOpenFor = function (filter = {}) {
   return this.find(q).sort({ severity: -1, firstSeenAt: -1 }).lean();
 };
 
+// ── W1116 — publish measure_alert.raised when a measure-driven alert is created ─
+measureAlertSchema.pre('save', function flagMeasureAlertRaised() {
+  this.$__measureAlertRaised = this.isNew;
+});
+
+measureAlertSchema.post('save', function emitMeasureAlertRaised(doc) {
+  if (!doc.$__measureAlertRaised) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('measure-alert', 'measure_alert.raised', {
+      alertId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.measureCode ? { measureCode: doc.measureCode } : {}),
+      ...(doc.measureId ? { measureId: String(doc.measureId) } : {}),
+      ...(doc.alertType ? { alertType: doc.alertType } : {}),
+      ...(doc.severity ? { severity: doc.severity } : {}),
+      raisedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const MeasureAlert =
   mongoose.models.MeasureAlert || mongoose.model('MeasureAlert', measureAlertSchema);
 

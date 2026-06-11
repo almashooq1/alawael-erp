@@ -12,6 +12,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { stripUpdateMeta } = require('../utils/sanitize');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const {
+  assertBeneficiaryInScope,
+  fetchScopedByBeneficiary,
+} = require('../utils/beneficiaryBranchGate');
 
 function Task() {
   try {
@@ -56,6 +62,39 @@ function Task() {
 }
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// W1131 (W269 ownership) — a task may be mutated only by its owner
+// (assignedTo / assignedBy) or a manager/admin. NO-OP for unauthenticated /
+// internal / test contexts (auth is enforced at mount via dualMountAuth); the
+// gate engages only when req.user is present. Closes the general-task edit/delete
+// IDOR that W1125 left open (W1125 covered only the beneficiary-linked subset).
+// The privileged-role set is a deliberate default chosen on the owner's behalf —
+// widen it (e.g. + coordinator / clinical_supervisor) if those roles legitimately
+// manage other staff's tasks.
+const TASK_PRIVILEGED_ROLES = ['admin', 'super_admin', 'manager'];
+function denyIfNotTaskOwnerOrManager(req, res, task) {
+  if (!req || !req.user) return false; // no auth context (test/internal) → no-op
+  const role = (req.user.role || '').toLowerCase();
+  if (TASK_PRIVILEGED_ROLES.includes(role)) return false;
+  const uid = String(req.user.id || req.user._id || '');
+  const isOwner = uid && (String(task.assignedTo) === uid || String(task.assignedBy) === uid);
+  if (isOwner) return false;
+  res.status(403).json({ success: false, message: 'غير مصرّح: المهمة تخص مستخدماً آخر' });
+  return true;
+}
+
+// W1132 (W269) — list scope: a non-privileged caller sees only their own tasks
+// (assignedTo / assignedBy), matching the dashboard's assignedTo scoping;
+// managers/admins (TASK_PRIVILEGED_ROLES) see all. No-op without an auth context.
+// Closes the list-wide leak (any authed user could list every task org-wide).
+function applyTaskListScope(req, q) {
+  if (!req || !req.user) return;
+  const role = (req.user.role || '').toLowerCase();
+  if (TASK_PRIVILEGED_ROLES.includes(role)) return;
+  const uid = req.user.id || req.user._id;
+  if (!uid) return;
+  q.$or = [{ assignedTo: uid }, { assignedBy: uid }];
+}
 
 /* ══════════════════════ DASHBOARD ══════════════════════════════════════════ */
 
@@ -104,6 +143,7 @@ router.get(
     if (priority) q.priority = priority;
     if (assignedTo) q.assignedTo = assignedTo;
     if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
+    applyTaskListScope(req, q); // W1132 — non-privileged callers: own tasks only
     const [data, total] = await Promise.all([
       M.find(q).sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit)).lean(),
       M.countDocuments(q),
@@ -124,21 +164,38 @@ router.post(
 
 router.get(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
-    const task = await M.findById(req.params.id).lean();
-    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    // W269 — if the task is linked to a beneficiary, gate the read by that
+    // beneficiary's branch BEFORE returning PHI (uniform 404). No-op for tasks
+    // with no beneficiary + cross-branch/HQ roles + unscoped test calls.
+    const { doc: task, denied } = await fetchScopedByBeneficiary(M, req.params.id, req, res, {
+      beneficiaryField: 'beneficiaryId',
+      lean: true,
+    });
+    if (denied) return;
     res.json({ success: true, data: task });
   })
 );
 
 router.put(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
+    // W269 — gate cross-branch edit of a beneficiary-linked (clinical) task, then
+    // task-ownership (W1131): owner (assignedTo/assignedBy) or a manager/admin only.
+    const existing = await M.findById(req.params.id)
+      .select('beneficiaryId assignedTo assignedBy')
+      .lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
+    if (denyIfNotTaskOwnerOrManager(req, res, existing)) return;
     const task = await M.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: stripUpdateMeta(req.body) },
       { returnDocument: 'after' }
     ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
@@ -148,8 +205,18 @@ router.put(
 
 router.delete(
   '/:id',
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const M = Task();
+    // W269 — gate cross-branch soft-delete of a beneficiary-linked (clinical) task,
+    // then task-ownership (W1131): owner or manager/admin only.
+    const existing = await M.findById(req.params.id)
+      .select('beneficiaryId assignedTo assignedBy')
+      .lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'Task not found' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
+    if (denyIfNotTaskOwnerOrManager(req, res, existing)) return;
     await M.findByIdAndUpdate(req.params.id, { $set: { isDeleted: true } });
     res.json({ success: true });
   })

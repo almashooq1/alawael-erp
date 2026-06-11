@@ -60,7 +60,9 @@ describe('W1022 behavioral — base save + enum gating', () => {
   });
 
   it('REJECTS an invalid recommendation', async () => {
-    await expect(DR.create(baseDoc({ recommendation: 'race_car' }))).rejects.toThrow(/recommendation/);
+    await expect(DR.create(baseDoc({ recommendation: 'race_car' }))).rejects.toThrow(
+      /recommendation/
+    );
   });
 
   it('REJECTS an invalid readinessLevel', async () => {
@@ -68,15 +70,17 @@ describe('W1022 behavioral — base save + enum gating', () => {
   });
 
   it('REJECTS an invalid onRoadAssessment', async () => {
-    await expect(DR.create(baseDoc({ onRoadAssessment: 'crashed' }))).rejects.toThrow(/onRoadAssessment/);
+    await expect(DR.create(baseDoc({ onRoadAssessment: 'crashed' }))).rejects.toThrow(
+      /onRoadAssessment/
+    );
   });
 });
 
 describe('W1022 behavioral — recommendation gates plan + review', () => {
   it('REJECTS fit_with_adaptations with no equipment', async () => {
-    await expect(
-      DR.create(baseDoc({ recommendation: 'fit_with_adaptations' }))
-    ).rejects.toThrow(/adaptiveEquipmentNeeded/);
+    await expect(DR.create(baseDoc({ recommendation: 'fit_with_adaptations' }))).rejects.toThrow(
+      /adaptiveEquipmentNeeded/
+    );
   });
 
   it('SAVES fit_with_adaptations with equipment', async () => {
@@ -98,7 +102,9 @@ describe('W1022 behavioral — recommendation gates plan + review', () => {
 
   it('REJECTS further_training with no nextReviewDue', async () => {
     await expect(
-      DR.create(baseDoc({ recommendation: 'further_training', readinessLevel: 'further_assessment' }))
+      DR.create(
+        baseDoc({ recommendation: 'further_training', readinessLevel: 'further_assessment' })
+      )
     ).rejects.toThrow(/nextReviewDue/);
   });
 
@@ -142,13 +148,21 @@ describe('W1022 behavioral — finalize gating + date sanity', () => {
 describe('W1022 behavioral — computeReadiness logic', () => {
   it('blocks readiness when vision inadequate', () => {
     expect(DR.computeReadiness({})).toBe('not_ready');
-    expect(DR.computeReadiness({ visionAdequate: false, cognitiveScreenLevel: 'pass' })).toBe('not_ready');
+    expect(DR.computeReadiness({ visionAdequate: false, cognitiveScreenLevel: 'pass' })).toBe(
+      'not_ready'
+    );
   });
 
   it('blocks readiness on a cognitive or physical fail', () => {
-    expect(DR.computeReadiness({ visionAdequate: true, cognitiveScreenLevel: 'fail' })).toBe('not_ready');
+    expect(DR.computeReadiness({ visionAdequate: true, cognitiveScreenLevel: 'fail' })).toBe(
+      'not_ready'
+    );
     expect(
-      DR.computeReadiness({ visionAdequate: true, cognitiveScreenLevel: 'pass', physicalControlLevel: 'inadequate' })
+      DR.computeReadiness({
+        visionAdequate: true,
+        cognitiveScreenLevel: 'pass',
+        physicalControlLevel: 'inadequate',
+      })
     ).toBe('not_ready');
   });
 
@@ -158,10 +172,18 @@ describe('W1022 behavioral — computeReadiness logic', () => {
 
   it('ready_with_adaptation on borderline cognition or needed adaptation', () => {
     expect(
-      DR.computeReadiness({ visionAdequate: true, cognitiveScreenLevel: 'borderline', physicalControlLevel: 'adequate' })
+      DR.computeReadiness({
+        visionAdequate: true,
+        cognitiveScreenLevel: 'borderline',
+        physicalControlLevel: 'adequate',
+      })
     ).toBe('ready_with_adaptation');
     expect(
-      DR.computeReadiness({ visionAdequate: true, cognitiveScreenLevel: 'pass', physicalControlLevel: 'needs_adaptation' })
+      DR.computeReadiness({
+        visionAdequate: true,
+        cognitiveScreenLevel: 'pass',
+        physicalControlLevel: 'needs_adaptation',
+      })
     ).toBe('ready_with_adaptation');
   });
 

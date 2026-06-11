@@ -43,7 +43,9 @@ async function loadWorkforce({ branchId, department }) {
   if (branchId) filter.branch_id = branchId; // branch isolation (caller-resolved)
   if (department) filter.department = department;
   const rows = await Employee.find(filter)
-    .select('gender nationality basic_salary housing_allowance transport_allowance other_allowances department')
+    .select(
+      'gender nationality basic_salary housing_allowance transport_allowance other_allowances department'
+    )
     .lean();
   return rows.map(e => ({
     gender: e.gender,
@@ -63,7 +65,13 @@ async function analyze({ branchId, department = null, tiers } = {}) {
   };
 }
 
-async function snapshot({ branchId, department = null, tiers, computedBy = null, computedAt } = {}) {
+async function snapshot({
+  branchId,
+  department = null,
+  tiers,
+  computedBy = null,
+  computedAt,
+} = {}) {
   const Snap = getModel('DiversitySnapshot', '../../models/HR/DiversitySnapshot');
   if (!Snap) {
     const err = new Error('DiversitySnapshot model unavailable');

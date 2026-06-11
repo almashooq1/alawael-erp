@@ -6,6 +6,36 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1157 — close the program/enrollment-keyed :id gap + list scoping:
+//   - /:id → /:programId, /enrollments/:id → /enrollments/:enrollmentId so
+//     ownership hooks fire before any handler runs
+//   - list/statistics/overdue use effectiveBranchScope (no ?branchId= spoofing)
+const {
+  branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'programId',
+  branchScopedResourceParam({
+    modelName: 'Program',
+    label: 'program',
+    loadModel: () => require('../models/Program').Program,
+  })
+);
+router.param(
+  'enrollmentId',
+  branchScopedResourceParam({
+    modelName: 'ProgramEnrollment',
+    label: 'program enrollment',
+    loadModel: () => require('../models/ProgramEnrollment').ProgramEnrollment,
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { programsService } = require('../services/ProgramsService');
 const {
   validateCreateProgram,
@@ -34,7 +64,8 @@ router.post(
     const program = await programsService.createProgram({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data: program });
@@ -50,7 +81,8 @@ router.get(
       type: req.query.type,
       category: req.query.category,
       search: req.query.search,
-      branchId: req.query.branchId || req.user?.branchId,
+      // W1157 — restricted callers are pinned to their own branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId,
       page: req.query.page,
       limit: req.query.limit,
     });
@@ -63,7 +95,7 @@ router.get(
   '/statistics',
   asyncHandler(async (req, res) => {
     const data = await programsService.getProgramStatistics(
-      req.query.branchId || req.user?.branchId
+      effectiveBranchScope(req) || req.user?.branchId
     );
     res.json({ success: true, data });
   })
@@ -74,45 +106,45 @@ router.get(
   '/overdue',
   asyncHandler(async (req, res) => {
     const data = await programsService.getOverdueEnrollments(
-      req.query.branchId || req.user?.branchId
+      effectiveBranchScope(req) || req.user?.branchId
     );
     res.json({ success: true, data, total: data.length });
   })
 );
 
-/** GET /:id — تفاصيل برنامج */
+/** GET /:programId — تفاصيل برنامج */
 router.get(
-  '/:id',
+  '/:programId',
   asyncHandler(async (req, res) => {
-    const program = await programsService.getProgram(req.params.id);
+    const program = await programsService.getProgram(req.params.programId);
     res.json({ success: true, data: program });
   })
 );
 
-/** PUT /:id — تحديث برنامج */
+/** PUT /:programId — تحديث برنامج */
 router.put(
-  '/:id',
+  '/:programId',
   validate(validateUpdateProgram),
   asyncHandler(async (req, res) => {
-    const program = await programsService.updateProgram(req.params.id, req.body);
+    const program = await programsService.updateProgram(req.params.programId, req.body);
     res.json({ success: true, data: program });
   })
 );
 
-/** POST /:id/publish — نشر برنامج */
+/** POST /:programId/publish — نشر برنامج */
 router.post(
-  '/:id/publish',
+  '/:programId/publish',
   asyncHandler(async (req, res) => {
-    const program = await programsService.publishProgram(req.params.id, getUserId(req));
+    const program = await programsService.publishProgram(req.params.programId, getUserId(req));
     res.json({ success: true, data: program });
   })
 );
 
-/** GET /:id/dashboard — لوحة تحكم البرنامج */
+/** GET /:programId/dashboard — لوحة تحكم البرنامج */
 router.get(
-  '/:id/dashboard',
+  '/:programId/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await programsService.getProgramDashboard(req.params.id);
+    const data = await programsService.getProgramDashboard(req.params.programId);
     res.json({ success: true, data });
   })
 );
@@ -129,7 +161,8 @@ router.post(
     const enrollment = await programsService.enrollBeneficiary({
       ...req.body,
       userId: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
     res.status(201).json({ success: true, data: enrollment });
@@ -154,40 +187,40 @@ router.get(
   })
 );
 
-/** GET /enrollments/:id — تفاصيل تسجيل */
+/** GET /enrollments/:enrollmentId — تفاصيل تسجيل */
 router.get(
-  '/enrollments/:id',
+  '/enrollments/:enrollmentId',
   asyncHandler(async (req, res) => {
-    const data = await programsService.getEnrollmentDetails(req.params.id);
+    const data = await programsService.getEnrollmentDetails(req.params.enrollmentId);
     if (!data) return res.status(404).json({ success: false, message: 'التسجيل غير موجود' });
     res.json({ success: true, data });
   })
 );
 
-/** POST /enrollments/:id/approve — موافقة */
+/** POST /enrollments/:enrollmentId/approve — موافقة */
 router.post(
-  '/enrollments/:id/approve',
+  '/enrollments/:enrollmentId/approve',
   asyncHandler(async (req, res) => {
-    const data = await programsService.approveEnrollment(req.params.id, getUserId(req));
+    const data = await programsService.approveEnrollment(req.params.enrollmentId, getUserId(req));
     res.json({ success: true, data });
   })
 );
 
-/** POST /enrollments/:id/activate — تفعيل */
+/** POST /enrollments/:enrollmentId/activate — تفعيل */
 router.post(
-  '/enrollments/:id/activate',
+  '/enrollments/:enrollmentId/activate',
   asyncHandler(async (req, res) => {
-    const data = await programsService.activateEnrollment(req.params.id, getUserId(req));
+    const data = await programsService.activateEnrollment(req.params.enrollmentId, getUserId(req));
     res.json({ success: true, data });
   })
 );
 
-/** POST /enrollments/:id/withdraw — انسحاب */
+/** POST /enrollments/:enrollmentId/withdraw — انسحاب */
 router.post(
-  '/enrollments/:id/withdraw',
+  '/enrollments/:enrollmentId/withdraw',
   asyncHandler(async (req, res) => {
     const data = await programsService.withdrawEnrollment(
-      req.params.id,
+      req.params.enrollmentId,
       getUserId(req),
       req.body.reason
     );
@@ -195,20 +228,24 @@ router.post(
   })
 );
 
-/** POST /enrollments/:id/complete — إتمام */
+/** POST /enrollments/:enrollmentId/complete — إتمام */
 router.post(
-  '/enrollments/:id/complete',
+  '/enrollments/:enrollmentId/complete',
   asyncHandler(async (req, res) => {
-    const data = await programsService.completeEnrollment(req.params.id, getUserId(req), req.body);
+    const data = await programsService.completeEnrollment(
+      req.params.enrollmentId,
+      getUserId(req),
+      req.body
+    );
     res.json({ success: true, data });
   })
 );
 
-/** POST /enrollments/:id/log-session — تسجيل جلسة */
+/** POST /enrollments/:enrollmentId/log-session — تسجيل جلسة */
 router.post(
-  '/enrollments/:id/log-session',
+  '/enrollments/:enrollmentId/log-session',
   asyncHandler(async (req, res) => {
-    const data = await programsService.logSession(req.params.id, req.body);
+    const data = await programsService.logSession(req.params.enrollmentId, req.body);
     res.json({ success: true, data });
   })
 );

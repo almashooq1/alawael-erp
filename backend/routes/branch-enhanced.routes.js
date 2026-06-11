@@ -54,9 +54,9 @@ router.get('/transfers', authenticate, requireBranchAccess, async (req, res) => 
   try {
     const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
     const transfers = await BeneficiaryTransfer.find()
-      .populate('beneficiaryId', 'full_name_ar file_number')
-      .populate('fromBranchId', 'name nameAr')
-      .populate('toBranchId', 'name nameAr')
+      .populate('beneficiary', 'full_name_ar file_number')
+      .populate('fromBranch', 'name nameAr')
+      .populate('toBranch', 'name nameAr')
       .populate('requestedBy', 'name email')
       .populate('approvedBy', 'name email')
       .sort({ createdAt: -1 })

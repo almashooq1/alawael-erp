@@ -244,7 +244,6 @@ integrationAssessmentSchema.pre('save', async function () {
     else if (diff < -5) this.trend = 'declining';
     else this.trend = 'stable';
   }
-
 });
 
 // ── Unified-core linkage (W1120 — integration assessment island → CareTimeline) ──

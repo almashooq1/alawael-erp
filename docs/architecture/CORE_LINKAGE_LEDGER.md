@@ -18,11 +18,11 @@ the prioritized path to comprehensive coverage.
 
 ## 1. The three linkage mechanisms
 
-| Mechanism | What it is | Status | Consumed by |
-| --- | --- | --- | --- |
-| **A. modelEventBridge** (`integration/modelEventBridge.js`) | A global mongoose plugin attaches generic post-save hooks to every schema; at save-time it dispatches by `modelName` against **21 MAPPINGS** (hr/finance/medical/beneficiary/attendance/notification). | **Resurrected (W974), env-gated `ENABLE_MODEL_EVENT_BRIDGE` (default OFF)**. Was runtime-dead for ~its whole life. | `crossModuleSubscribers.js` (23 patterns) |
-| **B. DDD service emits → serviceEventBridge** (W387) | Domain services emit on a `BaseService` EventEmitter; `serviceEventBridge` forwards to the integration bus. | **Live.** Drives the `CareTimeline` "nervous system". | `dddCrossModuleSubscribers.js` (21 patterns) |
-| **C. Route / model-hook direct publish** | A route (or a native pre-compile model hook) calls `integrationBus.publish(...)` directly. | **Live.** Used where there is no clean service seam. | the same DDD subscribers |
+| Mechanism                                                   | What it is                                                                                                                                                                                             | Status                                                                                                             | Consumed by                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| **A. modelEventBridge** (`integration/modelEventBridge.js`) | A global mongoose plugin attaches generic post-save hooks to every schema; at save-time it dispatches by `modelName` against **21 MAPPINGS** (hr/finance/medical/beneficiary/attendance/notification). | **Resurrected (W974), env-gated `ENABLE_MODEL_EVENT_BRIDGE` (default OFF)**. Was runtime-dead for ~its whole life. | `crossModuleSubscribers.js` (23 patterns)    |
+| **B. DDD service emits → serviceEventBridge** (W387)        | Domain services emit on a `BaseService` EventEmitter; `serviceEventBridge` forwards to the integration bus.                                                                                            | **Live.** Drives the `CareTimeline` "nervous system".                                                              | `dddCrossModuleSubscribers.js` (21 patterns) |
+| **C. Route / model-hook direct publish**                    | A route (or a native pre-compile model hook) calls `integrationBus.publish(...)` directly.                                                                                                             | **Live.** Used where there is no clean service seam.                                                               | the same DDD subscribers                     |
 
 Examples of **C**: student registration → `core.beneficiary.registered` (W927);
 appointment lifecycle → `appointments.appointment.{booked,cancelled,no_show}` via
@@ -74,7 +74,7 @@ These are why static drift guards (W374/W382/W389/W392) were all green while the
 system persisted nothing. **Static guards read source text; only running a save
 catches these.**
 
-1. **Dead post-compile hooks.** `schema.post('save')` added *after*
+1. **Dead post-compile hooks.** `schema.post('save')` added _after_
    `mongoose.model()` never fires. The whole modelEventBridge was inert.
    _Fix pattern:_ register hooks via a **global `mongoose.plugin()` before any
    model compiles** (W974), or put native hooks **in the model file**
@@ -108,42 +108,45 @@ Out of **498 route files**, only ~a dozen feed the core. The bridge (once
 enabled) covers the 21 LIVE-registry mappings. The rest, by priority:
 
 ### Tier 1 — clinical, belongs on the timeline
-| Domain | Model (exists) | Event | Status |
-| --- | --- | --- | --- |
-| Waitlist → admission | `Waitlist` | `waitlist.*` → `waitlisted` / `waitlist_booked` | ✅ **W979** |
-| Safety events | `SeizureEvent` · `SafeguardingConcern` · `RestraintSeclusion` | `safety.*` → `seizure_event` / `safeguarding_concern` / `restraint_applied` | ✅ **W977** |
-| Acute crises | `CrisisIncident` | `crisis.reported` / `.resolved` → `crisis_reported` / `crisis_resolved` | ✅ **W1004** |
-| Screenings | `VisionScreening` · `HearingScreening` | `screening.completed` | ✅ **W980** |
-| Medication admin (MAR) | `MedicationAdministrationRecord` | `medication.administered` / `.not_given` | ✅ **W981** |
-| Discharge / transition | `TransitionPlan` | `lifecycle.transition.completed` / `.cancelled` → `care_transition` | ✅ **W986** |
-| Referrals | `TherapyReferral` · `CommunityReferral` · `MedicalReferral` · `Referral` (FHIR portal) | `referral.accepted` / `.completed` / `.rejected` → `referral` (shared domain, `referralType` discriminator) | ✅ **W997** — wired all 4 subsystems to ONE shared `referral` vocabulary instead of forcing a consolidation. `ReferralTracking` left out (orthogonal CRM analytics, not beneficiary-keyed). A future ADR may still consolidate the 4 models. |
-| Follow-up cases | `PostRehabCase` | `followup.case.completed` / `.lost` → `followup_completed` / `followup_lost` | ✅ **W987** |
-| Follow-up visits | `FollowUpVisit` | `followup.visit.attended` / `.missed` → `followup_visit` | ✅ **W992** |
-| Home programs | `FamilyHomeProgram` · `HomeAssignment` | `home_program.assigned` / `.completed` → `home_program_assigned` / `home_program_completed` (shared domain, `programType` discriminator) | ✅ **W1003** — filled the long-declared but producerless `home_program_assigned` enum |
-| Care team | `EpisodeOfCare.careTeam[]` (embedded) | `careteam.member_added` / `.member_removed` / `.lead_changed` → `team_member_added` / `team_member_removed` / `lead_changed` | ✅ **W1005** — embedded-array DIFF (post-init snapshot vs save); filled 3 producerless enum values |
+
+| Domain                 | Model (exists)                                                                         | Event                                                                                                                                    | Status                                                                                                                                                                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Waitlist → admission   | `Waitlist`                                                                             | `waitlist.*` → `waitlisted` / `waitlist_booked`                                                                                          | ✅ **W979**                                                                                                                                                                                                                                  |
+| Safety events          | `SeizureEvent` · `SafeguardingConcern` · `RestraintSeclusion`                          | `safety.*` → `seizure_event` / `safeguarding_concern` / `restraint_applied`                                                              | ✅ **W977**                                                                                                                                                                                                                                  |
+| Acute crises           | `CrisisIncident`                                                                       | `crisis.reported` / `.resolved` → `crisis_reported` / `crisis_resolved`                                                                  | ✅ **W1004**                                                                                                                                                                                                                                 |
+| Screenings             | `VisionScreening` · `HearingScreening`                                                 | `screening.completed`                                                                                                                    | ✅ **W980**                                                                                                                                                                                                                                  |
+| Medication admin (MAR) | `MedicationAdministrationRecord`                                                       | `medication.administered` / `.not_given`                                                                                                 | ✅ **W981**                                                                                                                                                                                                                                  |
+| Discharge / transition | `TransitionPlan`                                                                       | `lifecycle.transition.completed` / `.cancelled` → `care_transition`                                                                      | ✅ **W986**                                                                                                                                                                                                                                  |
+| Referrals              | `TherapyReferral` · `CommunityReferral` · `MedicalReferral` · `Referral` (FHIR portal) | `referral.accepted` / `.completed` / `.rejected` → `referral` (shared domain, `referralType` discriminator)                              | ✅ **W997** — wired all 4 subsystems to ONE shared `referral` vocabulary instead of forcing a consolidation. `ReferralTracking` left out (orthogonal CRM analytics, not beneficiary-keyed). A future ADR may still consolidate the 4 models. |
+| Follow-up cases        | `PostRehabCase`                                                                        | `followup.case.completed` / `.lost` → `followup_completed` / `followup_lost`                                                             | ✅ **W987**                                                                                                                                                                                                                                  |
+| Follow-up visits       | `FollowUpVisit`                                                                        | `followup.visit.attended` / `.missed` → `followup_visit`                                                                                 | ✅ **W992**                                                                                                                                                                                                                                  |
+| Home programs          | `FamilyHomeProgram` · `HomeAssignment`                                                 | `home_program.assigned` / `.completed` → `home_program_assigned` / `home_program_completed` (shared domain, `programType` discriminator) | ✅ **W1003** — filled the long-declared but producerless `home_program_assigned` enum                                                                                                                                                        |
+| Care team              | `EpisodeOfCare.careTeam[]` (embedded)                                                  | `careteam.member_added` / `.member_removed` / `.lead_changed` → `team_member_added` / `team_member_removed` / `lead_changed`             | ✅ **W1005** — embedded-array DIFF (post-init snapshot vs save); filled 3 producerless enum values                                                                                                                                           |
 
 ### Tier 2 — family / CRM visibility
-| Domain | Model | Event | Status |
-| --- | --- | --- | --- |
-| Beneficiary status lifecycle | `Beneficiary` | `beneficiary.status_changed` → `status_changed` | ✅ **W982** |
-| Complaints (CRM) | `Complaint` | `complaint.filed` → `complaint_filed` | ✅ **W984** |
-| Family visits | `FamilyVisitRequest` | `family.visit.completed` / `.no_show` → `family_meeting` | ✅ **W985** |
-| Consent (PDPL/CRPD) | `Consent` | `consent.obtained` / `.revoked` → `consent_obtained` / `consent_revoked` | ✅ **W1002** — filled the long-declared but producerless `consent_obtained` enum |
-| Guardian-portal engagement | — | — | Open |
+
+| Domain                       | Model                | Event                                                                    | Status                                                                           |
+| ---------------------------- | -------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Beneficiary status lifecycle | `Beneficiary`        | `beneficiary.status_changed` → `status_changed`                          | ✅ **W982**                                                                      |
+| Complaints (CRM)             | `Complaint`          | `complaint.filed` → `complaint_filed`                                    | ✅ **W984**                                                                      |
+| Family visits                | `FamilyVisitRequest` | `family.visit.completed` / `.no_show` → `family_meeting`                 | ✅ **W985**                                                                      |
+| Consent (PDPL/CRPD)          | `Consent`            | `consent.obtained` / `.revoked` → `consent_obtained` / `consent_revoked` | ✅ **W1002** — filled the long-declared but producerless `consent_obtained` enum |
+| Guardian-portal engagement   | —                    | —                                                                        | Open                                                                             |
 
 ### Tier 3 — operational / governance
-| Domain | Model | Event | Status |
-| --- | --- | --- | --- |
-| Insurance / NPHIES claims | `NphiesInsuranceClaim` | `insurance.claim.approved` / `.rejected` → `insurance_claim` | ✅ **W994** (per-beneficiary timeline) |
-| Facilities — PPM / inspection overdue | `FacilityAsset` | smart-alert **rule** `facility-asset-ppm-overdue` (category `operational`) → `Alert` | ✅ **W1006** — first operational rule; org-scoped, NOT the beneficiary timeline |
-| Maintenance — work order overdue | `MaintenanceWorkOrder` | rule `maintenance-work-order-overdue` → `Alert` | ✅ **W1007** — open WO past `scheduledDate`; critical-priority → critical |
-| Fleet — vehicle document expiry | `Vehicle` | rule `vehicle-document-expiry` → `Alert` (platform-scoped) | ✅ **W1008** — active vehicle, expired registration/insurance/inspection; registration\|insurance → critical |
-| Contracts — service/vendor expired | `Contract` | rule `contract-expired` → `Alert` | ✅ **W1009** — ACTIVE contract past `endDate` (lapsed without renewal/close) |
-| Inventory — low stock | `InventoryStock` × `InventoryItem` | rule `inventory-low-stock` → `Alert` | ✅ **W1070** — first TWO-model join (stock qty vs item reorder point); out-of-stock → critical; both models are object-exports, resolved defensively |
-| Procurement — PO delivery overdue | `InventoryModulePurchaseOrder` | rule `purchase-order-delivery-overdue` → `Alert` | ✅ **W1132** — committed PO (approved/sent/partial) past `expected_delivery_date`, not received; catches late *incoming* supply before it becomes a low-stock shortfall; self-loading (no app.js edit) |
-| Compliance — mandatory training overdue | `TrainingCompliance` | rule `training-compliance-overdue` (category `compliance`) → `Alert` | ✅ **W1135** — pending/overdue staff training past `dueDate` (fire-safety/infection-control/CPR); distinct from `credential-*` (professional licences); self-loading |
-| Quality — supplier SCAR response overdue | `SupplierScar` | rule `supplier-scar-response-overdue` (category `quality`) → `Alert` | ✅ **W1138** — SCAR awaiting supplier response (open/acknowledged/in_progress/rejected) past `responseDueBy` (ISO 9001 §8.4); critical → critical; self-loading |
-| Financial — budget overrun | `Budget` | rule `budget-overrun` (category `financial`) → `Alert` | ✅ **W1141** — active budget ≥90% consumed (≥100% → critical); a trackable dashboard Alert (distinct from the W401 budget sweeper's transient notification); platform-scoped; self-loading |
+
+| Domain                                   | Model                              | Event                                                                                | Status                                                                                                                                                                                                 |
+| ---------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Insurance / NPHIES claims                | `NphiesInsuranceClaim`             | `insurance.claim.approved` / `.rejected` → `insurance_claim`                         | ✅ **W994** (per-beneficiary timeline)                                                                                                                                                                 |
+| Facilities — PPM / inspection overdue    | `FacilityAsset`                    | smart-alert **rule** `facility-asset-ppm-overdue` (category `operational`) → `Alert` | ✅ **W1006** — first operational rule; org-scoped, NOT the beneficiary timeline                                                                                                                        |
+| Maintenance — work order overdue         | `MaintenanceWorkOrder`             | rule `maintenance-work-order-overdue` → `Alert`                                      | ✅ **W1007** — open WO past `scheduledDate`; critical-priority → critical                                                                                                                              |
+| Fleet — vehicle document expiry          | `Vehicle`                          | rule `vehicle-document-expiry` → `Alert` (platform-scoped)                           | ✅ **W1008** — active vehicle, expired registration/insurance/inspection; registration\|insurance → critical                                                                                           |
+| Contracts — service/vendor expired       | `Contract`                         | rule `contract-expired` → `Alert`                                                    | ✅ **W1009** — ACTIVE contract past `endDate` (lapsed without renewal/close)                                                                                                                           |
+| Inventory — low stock                    | `InventoryStock` × `InventoryItem` | rule `inventory-low-stock` → `Alert`                                                 | ✅ **W1070** — first TWO-model join (stock qty vs item reorder point); out-of-stock → critical; both models are object-exports, resolved defensively                                                   |
+| Procurement — PO delivery overdue        | `InventoryModulePurchaseOrder`     | rule `purchase-order-delivery-overdue` → `Alert`                                     | ✅ **W1132** — committed PO (approved/sent/partial) past `expected_delivery_date`, not received; catches late _incoming_ supply before it becomes a low-stock shortfall; self-loading (no app.js edit) |
+| Compliance — mandatory training overdue  | `TrainingCompliance`               | rule `training-compliance-overdue` (category `compliance`) → `Alert`                 | ✅ **W1135** — pending/overdue staff training past `dueDate` (fire-safety/infection-control/CPR); distinct from `credential-*` (professional licences); self-loading                                   |
+| Quality — supplier SCAR response overdue | `SupplierScar`                     | rule `supplier-scar-response-overdue` (category `quality`) → `Alert`                 | ✅ **W1138** — SCAR awaiting supplier response (open/acknowledged/in_progress/rejected) past `responseDueBy` (ISO 9001 §8.4); critical → critical; self-loading                                        |
+| Financial — budget overrun               | `Budget`                           | rule `budget-overrun` (category `financial`) → `Alert`                               | ✅ **W1141** — active budget ≥90% consumed (≥100% → critical); a trackable dashboard Alert (distinct from the W401 budget sweeper's transient notification); platform-scoped; self-loading             |
 
 **Operational sweep (growing): facilities · maintenance · fleet · contracts ·
 inventory · procurement (W1006–W1009 / W1070 / W1132), plus quality (CAPA +
@@ -155,7 +158,7 @@ editing the app.js model loader (a parallel-work hot zone).
 
 > ⚠️ **The whole engine is env-gated `ALERTS_ENGINE_ENABLED` (default OFF).** The
 > `AlertsScheduler` 5-min tick only runs the 32 rules when that flag is set; the
-> read-only triage routes work regardless, so the dashboard shows *existing* alerts
+> read-only triage routes work regardless, so the dashboard shows _existing_ alerts
 > but **no new ones are generated until an operator flips it.** Activation steps are
 > in `DORMANT_CAPABILITY_ACTIVATION_RUNBOOK_2026-06.md` (low blast radius — it only
 > creates `Alert` rows + category-routed notifications).
@@ -200,7 +203,7 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
   W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) ·
   W1002 consent (PDPL/CRPD) · W1003 home programs · W1004 acute crises ·
   W1005 care-team — all merged to main). All shape-guarded by W998.
-- + 21 LIVE-registry mappings, **wired but dormant behind the flag**.
+- - 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of
   scope here.

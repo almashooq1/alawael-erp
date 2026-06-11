@@ -57,13 +57,7 @@ const WRITE_ROLES = [
   'therapist',
   'teacher',
 ];
-const FINALIZE_ROLES = [
-  'admin',
-  'superadmin',
-  'super_admin',
-  'manager',
-  'clinical_supervisor',
-];
+const FINALIZE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'clinical_supervisor'];
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
 const {
@@ -227,7 +221,8 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     let finalized = 0;
     let totalScore = 0;
     for (const r of raw) {
-      if (r.independenceLevel) byLevel[r.independenceLevel] = (byLevel[r.independenceLevel] || 0) + 1;
+      if (r.independenceLevel)
+        byLevel[r.independenceLevel] = (byLevel[r.independenceLevel] || 0) + 1;
       if (r.visionStatus) byVision[r.visionStatus] = (byVision[r.visionStatus] || 0) + 1;
       if (r.status === 'finalized') finalized++;
       if (typeof r.independenceScore === 'number') totalScore += r.independenceScore;

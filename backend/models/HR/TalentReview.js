@@ -16,7 +16,12 @@ const grid = require('../../intelligence/talent-grid.lib');
 
 const TalentReviewSchema = new mongoose.Schema(
   {
-    employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true, index: true },
+    employeeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Employee',
+      required: true,
+      index: true,
+    },
     reviewCycle: { type: String, required: true, maxlength: 20 }, // e.g. '2026-H1'
 
     performanceBand: { type: Number, required: true, min: 1, max: 3 },
@@ -46,7 +51,12 @@ TalentReviewSchema.plugin(require('./hrBranchScope.plugin'));
 
 // async to MATCH the plugin's async pre('validate') (hook-style gate forbids mixing).
 TalentReviewSchema.pre('validate', async function computeBox() {
-  if (this.performanceBand >= 1 && this.performanceBand <= 3 && this.potentialBand >= 1 && this.potentialBand <= 3) {
+  if (
+    this.performanceBand >= 1 &&
+    this.performanceBand <= 3 &&
+    this.potentialBand >= 1 &&
+    this.potentialBand <= 3
+  ) {
     this.box = grid.boxOf(this.performanceBand, this.potentialBand);
     const seg = grid.segmentOf(this.box);
     this.segment = seg ? seg.key : null;

@@ -174,7 +174,8 @@ mdtMeetingSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
     const { integrationBus } = require('../../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('care-coordination', 'mdt.meeting_completed', {
         mdtMeetingId: String(doc._id),

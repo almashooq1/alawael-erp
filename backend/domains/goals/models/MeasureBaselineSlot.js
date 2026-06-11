@@ -258,6 +258,34 @@ measureBaselineSlotSchema.statics.listOpenForBeneficiary = function (beneficiary
     .lean();
 };
 
+// ── W1117 — publish measure_baseline.completed when a baseline slot is completed ─
+measureBaselineSlotSchema.pre('save', function flagMeasureBaselineCompleted() {
+  const becameCompleted =
+    (this.isNew || this.isModified('state')) && this.state === 'BASELINE_COMPLETED';
+  this.$__measureBaselineCompleted = becameCompleted;
+});
+
+measureBaselineSlotSchema.post('save', function emitMeasureBaselineCompleted(doc) {
+  if (!doc.$__measureBaselineCompleted) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('measure-baseline', 'measure_baseline.completed', {
+      slotId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.measureCode ? { measureCode: doc.measureCode } : {}),
+      ...(doc.measureId ? { measureId: String(doc.measureId) } : {}),
+      ...(doc.baselineApplicationId
+        ? { baselineApplicationId: String(doc.baselineApplicationId) }
+        : {}),
+      completedAt: doc.completedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 const MeasureBaselineSlot =
   mongoose.models.MeasureBaselineSlot ||
   mongoose.model('MeasureBaselineSlot', measureBaselineSlotSchema);

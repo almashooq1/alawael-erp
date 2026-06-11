@@ -28,7 +28,14 @@ const RecordStatus = z.enum([
   'closed',
 ]);
 
-const ExposureType = z.enum(['needlestick', 'sharps', 'splash_mucous', 'splash_skin', 'aerosol', 'other']);
+const ExposureType = z.enum([
+  'needlestick',
+  'sharps',
+  'splash_mucous',
+  'splash_skin',
+  'aerosol',
+  'other',
+]);
 const FitnessLevel = z.enum(['fit', 'fit_with_restrictions', 'temporarily_unfit', 'unfit']);
 const Result = z.enum(['negative', 'positive', 'indeterminate', 'pass', 'fail', 'not_applicable']);
 

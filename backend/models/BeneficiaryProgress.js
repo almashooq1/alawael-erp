@@ -242,6 +242,29 @@ BeneficiaryProgressSchema.pre('save', async function () {
   this.updatedAt = new Date();
 });
 
+// W1089 — unified-core linkage: emit when a monthly progress report is recorded.
+BeneficiaryProgressSchema.pre('save', function flagProgressReportRecorded() {
+  this.$__progressReportRecorded = this.isNew;
+});
+
+BeneficiaryProgressSchema.post('save', function emitProgressReportRecorded(doc) {
+  if (!doc.$__progressReportRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('progress-report', 'progress_report.recorded', {
+      reportId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      month: doc.month,
+      academicScore: doc.academicScore,
+      attendanceRate: doc.attendanceRate,
+      overallPerformance: doc.overallPerformance,
+      recordedAt: doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryProgress ||
   mongoose.model('BeneficiaryProgress', BeneficiaryProgressSchema);

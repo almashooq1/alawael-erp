@@ -12,8 +12,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const MODEL_SRC = fs.readFileSync(path.join(__dirname, '..', 'models', 'BiomedicalWasteRecord.js'), 'utf8');
-const ROUTE_SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'biomedical-waste.routes.js'), 'utf8');
+const MODEL_SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'models', 'BiomedicalWasteRecord.js'),
+  'utf8'
+);
+const ROUTE_SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'biomedical-waste.routes.js'),
+  'utf8'
+);
 const REG_SRC = fs.readFileSync(
   path.join(__dirname, '..', 'routes', 'registries', 'features.registry.js'),
   'utf8'
@@ -22,7 +28,16 @@ const Model = require('../models/BiomedicalWasteRecord');
 
 describe('W1123 — model shape', () => {
   it('exposes the 8 WHO waste categories', () => {
-    for (const c of ['infectious', 'sharps', 'pathological', 'pharmaceutical', 'cytotoxic', 'chemical', 'radioactive', 'general']) {
+    for (const c of [
+      'infectious',
+      'sharps',
+      'pathological',
+      'pharmaceutical',
+      'cytotoxic',
+      'chemical',
+      'radioactive',
+      'general',
+    ]) {
       expect(Model.CATEGORIES).toContain(c);
     }
   });

@@ -57,6 +57,7 @@
 
 const express = require('express');
 const { canStartSession } = require('../services/redFlagGuard');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -84,6 +85,12 @@ function createRedFlagRouter(deps = {}) {
 
   const router = express.Router({ mergeParams: true });
   router.use(express.json());
+
+  // W1148 (W269-class): the mount site (phases.registry safeMount) does NOT
+  // add branch scoping, so the factory wires it directly. The param hook
+  // no-ops when req.branchScope?.restricted is falsy, keeping injected-fake
+  // tests untouched (design decision #1 still holds for auth/rate-limit).
+  router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
   // ─── GET /:beneficiaryId/red-flags ─────────────────────────────
   router.get(

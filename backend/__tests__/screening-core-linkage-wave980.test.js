@@ -21,7 +21,7 @@ let VisionScreening, HearingScreening, CareTimeline;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query);
     if (row) return row;
@@ -57,7 +57,10 @@ afterEach(async () => {
   ]);
 });
 
-const finalizeFields = () => ({ screenedBy: new mongoose.Types.ObjectId(), screenedAt: new Date() });
+const finalizeFields = () => ({
+  screenedBy: new mongoose.Types.ObjectId(),
+  screenedAt: new Date(),
+});
 
 describe('W980 — screenings reach the unified-core timeline', () => {
   it('a draft vision screening produces no row; finalizing it lands screening_completed', async () => {

@@ -5,6 +5,12 @@
  * with explicit milestones. Used by `routes/therapistPro.routes.js`
  * `/smart-goals`. Lighter than the IEP `Goal` model — for therapists
  * who want a fast goal-setting workflow without the full IEP machinery.
+ *
+ * @deprecated (ADR-040, W1133): one of three coexisting goal models. The
+ * canonical goal model for the golden thread is `TherapeuticGoal` (it anchors
+ * the outcomes/GAS/forecast services). SmartGoal is slated for deprecation —
+ * do NOT add new write-callers; route new goal-setting to TherapeuticGoal.
+ * Existing rows stay read-only until the ADR-040 migration (owner-gated).
  */
 
 const mongoose = require('mongoose');
@@ -48,6 +54,5 @@ if (mongoose.models.SmartGoal) {
 
   smartGoalSchema.index({ therapist: 1, beneficiary: 1, status: 1 });
 
-  module.exports =
-    mongoose.models.SmartGoal || mongoose.model('SmartGoal', smartGoalSchema);
+  module.exports = mongoose.models.SmartGoal || mongoose.model('SmartGoal', smartGoalSchema);
 }

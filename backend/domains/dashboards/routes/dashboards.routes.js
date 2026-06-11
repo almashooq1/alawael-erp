@@ -4,6 +4,42 @@
 
 const express = require('express');
 const router = express.Router();
+// W1160 — cross-branch isolation (W269 doctrine): file had NO guards.
+//   - /configs/:id → /configs/:dashboardConfigId (DashboardConfig),
+//     /kpis/:id → /kpis/:kpiId (DashboardKPIDefinition),
+//     /alerts/:id → /alerts/:alertId (DecisionAlert) so ownership hooks fire
+//   - executive-summary / kpis/latest / alerts / analytics / decision runs
+//     use effectiveBranchScope (no ?branchId= spoofing)
+const {
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param(
+  'dashboardConfigId',
+  branchScopedResourceParam({
+    modelName: 'DashboardConfig',
+    label: 'dashboard config',
+    loadModel: () => require('../models/DashboardConfig'),
+  })
+);
+router.param(
+  'kpiId',
+  branchScopedResourceParam({
+    modelName: 'DashboardKPIDefinition',
+    label: 'KPI definition',
+    loadModel: () => require('../models/KPIDefinition'),
+  })
+);
+router.param(
+  'alertId',
+  branchScopedResourceParam({
+    modelName: 'DecisionAlert',
+    label: 'decision alert',
+    loadModel: () => require('../models/DecisionAlert'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { dashboardService } = require('../services/DashboardService');
 const { decisionSupportEngine } = require('../services/DecisionSupportEngine');
 
@@ -19,7 +55,7 @@ router.get(
   '/executive-summary',
   asyncHandler(async (req, res) => {
     const data = await dashboardService.getExecutiveSummary(
-      req.query.branchId || req.user?.branchId
+      effectiveBranchScope(req) || req.user?.branchId
     );
     res.json({ success: true, data });
   })
@@ -52,46 +88,52 @@ router.get(
   })
 );
 router.get(
-  '/configs/:id',
+  '/configs/:dashboardConfigId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.getDashboard(req.params.id);
+    const data = await dashboardService.getDashboard(req.params.dashboardConfigId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/configs/:id',
+  '/configs/:dashboardConfigId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.updateDashboard(req.params.id, req.body);
+    const data = await dashboardService.updateDashboard(req.params.dashboardConfigId, req.body);
     res.json({ success: true, data });
   })
 );
 router.delete(
-  '/configs/:id',
+  '/configs/:dashboardConfigId',
   asyncHandler(async (req, res) => {
-    await dashboardService.deleteDashboard(req.params.id);
+    await dashboardService.deleteDashboard(req.params.dashboardConfigId);
     res.json({ success: true, message: 'Dashboard deleted' });
   })
 );
 
 /* ── Widgets ── */
 router.post(
-  '/configs/:id/widgets',
+  '/configs/:dashboardConfigId/widgets',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.addWidget(req.params.id, req.body);
+    const data = await dashboardService.addWidget(req.params.dashboardConfigId, req.body);
     res.json({ success: true, data });
   })
 );
 router.delete(
-  '/configs/:id/widgets/:widgetId',
+  '/configs/:dashboardConfigId/widgets/:widgetId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.removeWidget(req.params.id, req.params.widgetId);
+    const data = await dashboardService.removeWidget(
+      req.params.dashboardConfigId,
+      req.params.widgetId
+    );
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/configs/:id/layout',
+  '/configs/:dashboardConfigId/layout',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.updateWidgetLayout(req.params.id, req.body.widgets);
+    const data = await dashboardService.updateWidgetLayout(
+      req.params.dashboardConfigId,
+      req.body.widgets
+    );
     res.json({ success: true, data });
   })
 );
@@ -121,39 +163,39 @@ router.get(
   '/kpis/latest',
   asyncHandler(async (req, res) => {
     const data = await dashboardService.getLatestSnapshots(
-      req.query.branchId || req.user?.branchId
+      effectiveBranchScope(req) || req.user?.branchId
     );
     res.json({ success: true, data, total: data.length });
   })
 );
 router.get(
-  '/kpis/:id',
+  '/kpis/:kpiId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.getKPI(req.params.id);
+    const data = await dashboardService.getKPI(req.params.kpiId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/kpis/:id',
+  '/kpis/:kpiId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.updateKPI(req.params.id, req.body);
+    const data = await dashboardService.updateKPI(req.params.kpiId, req.body);
     res.json({ success: true, data });
   })
 );
 
 /* ── KPI Snapshots ── */
 router.post(
-  '/kpis/:id/snapshots',
+  '/kpis/:kpiId/snapshots',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.recordSnapshot({ ...req.body, kpiId: req.params.id });
+    const data = await dashboardService.recordSnapshot({ ...req.body, kpiId: req.params.kpiId });
     res.status(201).json({ success: true, data });
   })
 );
 router.get(
-  '/kpis/:id/trend',
+  '/kpis/:kpiId/trend',
   asyncHandler(async (req, res) => {
     const data = await dashboardService.getKPITrend(
-      req.params.id,
+      req.params.kpiId,
       req.query.periodType,
       parseInt(req.query.limit) || 12
     );
@@ -171,7 +213,7 @@ router.get(
       category: req.query.category,
       assignedTo: req.query.assignedTo,
       beneficiaryId: req.query.beneficiaryId,
-      branchId: req.query.branchId || req.user?.branchId,
+      branchId: effectiveBranchScope(req) || req.user?.branchId,
       page: req.query.page,
       limit: req.query.limit,
     });
@@ -182,7 +224,7 @@ router.get(
   '/alerts/analytics',
   asyncHandler(async (req, res) => {
     const data = await dashboardService.getAlertAnalytics(
-      req.query.branchId || req.user?.branchId,
+      effectiveBranchScope(req) || req.user?.branchId,
       parseInt(req.query.days) || 30
     );
     res.json({ success: true, data });
@@ -196,31 +238,35 @@ router.post(
   })
 );
 router.get(
-  '/alerts/:id',
+  '/alerts/:alertId',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.getAlert(req.params.id);
+    const data = await dashboardService.getAlert(req.params.alertId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/alerts/:id/acknowledge',
+  '/alerts/:alertId/acknowledge',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.acknowledgeAlert(req.params.id, getUserId(req));
+    const data = await dashboardService.acknowledgeAlert(req.params.alertId, getUserId(req));
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/alerts/:id/resolve',
+  '/alerts/:alertId/resolve',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.resolveAlert(req.params.id, getUserId(req), req.body.notes);
+    const data = await dashboardService.resolveAlert(
+      req.params.alertId,
+      getUserId(req),
+      req.body.notes
+    );
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/alerts/:id/dismiss',
+  '/alerts/:alertId/dismiss',
   asyncHandler(async (req, res) => {
     const data = await dashboardService.dismissAlert(
-      req.params.id,
+      req.params.alertId,
       getUserId(req),
       req.body.reason
     );
@@ -228,16 +274,16 @@ router.put(
   })
 );
 router.put(
-  '/alerts/:id/escalate',
+  '/alerts/:alertId/escalate',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.escalateAlert(req.params.id, req.body.escalateTo);
+    const data = await dashboardService.escalateAlert(req.params.alertId, req.body.escalateTo);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/alerts/:id/assign',
+  '/alerts/:alertId/assign',
   asyncHandler(async (req, res) => {
-    const data = await dashboardService.assignAlert(req.params.id, req.body.assignedTo);
+    const data = await dashboardService.assignAlert(req.params.alertId, req.body.assignedTo);
     res.json({ success: true, data });
   })
 );
@@ -253,7 +299,9 @@ router.get(
 router.post(
   '/decision/run-all',
   asyncHandler(async (req, res) => {
-    const data = await decisionSupportEngine.runAllRules(req.query.branchId || req.user?.branchId);
+    const data = await decisionSupportEngine.runAllRules(
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );
@@ -262,7 +310,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const data = await decisionSupportEngine.runRule(
       req.params.ruleId,
-      req.query.branchId || req.user?.branchId
+      effectiveBranchScope(req) || req.user?.branchId
     );
     res.json({ success: true, data });
   })

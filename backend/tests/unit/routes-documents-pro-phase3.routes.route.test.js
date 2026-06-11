@@ -60,9 +60,9 @@ describe('api/routes/documents-pro-phase3.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (7)', () => {
+  test('has local dependencies (8)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(7);
+    expect(locals.length).toBe(8);
   });
 
   test('has module.exports', () => {

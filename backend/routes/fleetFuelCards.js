@@ -92,7 +92,13 @@ router.post('/:id/transactions', async (req, res) => {
     const card = await FleetFuelCard.findByIdAndUpdate(
       req.params.id,
       {
-        $push: { transactions: { ...req.body, recordedAt: new Date(), recordedBy: req.user._id } },
+        $push: {
+          transactions: {
+            ...stripUpdateMeta(req.body),
+            recordedAt: new Date(),
+            recordedBy: req.user._id,
+          },
+        },
       },
       { returnDocument: 'after' }
     );

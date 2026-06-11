@@ -85,7 +85,13 @@ describe('facility-asset-ppm-overdue', () => {
   test('flags inspection overdue too (message names it)', async () => {
     const raised = await runOne({
       FacilityAsset: finder([
-        { _id: 'a3', name: 'Lift', status: 'in_service', nextInspectionDue: PAST, criticality: 'high' },
+        {
+          _id: 'a3',
+          name: 'Lift',
+          status: 'in_service',
+          nextInspectionDue: PAST,
+          criticality: 'high',
+        },
       ]),
     });
     expect(raised).toHaveLength(1);

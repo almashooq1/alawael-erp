@@ -12,7 +12,12 @@ const priorAuthorizationSchema = new mongoose.Schema(
     // W1193 — required with NO default while no caller ever set it
     // (smartInsurance.service sets authUuid only) → every requestPriorAuth()
     // threw ValidationError. Schema-side default fixes all callers.
-    uuid: { type: String, unique: true, required: true, default: () => require('crypto').randomUUID() },
+    uuid: {
+      type: String,
+      unique: true,
+      required: true,
+      default: () => require('crypto').randomUUID(),
+    },
 
     policyId: { type: mongoose.Schema.Types.ObjectId, ref: 'InsurancePolicy', required: true },
     beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
@@ -85,6 +90,34 @@ priorAuthorizationSchema.index({ beneficiaryId: 1, createdAt: -1 });
 priorAuthorizationSchema.index({ nphiesAuthId: 1 });
 priorAuthorizationSchema.index({ validUntil: 1, status: 1 });
 priorAuthorizationSchema.index({ deletedAt: 1 });
+
+// ── W1052: unified-core linkage ───────────────────────────────────────
+// On approval (status → 'approved'), publish prior_authorization.approved so
+// the cross-module subscriber records an administrative milestone on the
+// beneficiary's CareTimeline. NON-callback hooks only (global async save
+// plugin puts Kareem in promise-adapter mode — callback hooks would break).
+priorAuthorizationSchema.pre('save', function () {
+  this.$__priorAuthApprovedNow =
+    this.status === 'approved' && (this.isNew || this.isModified('status'));
+});
+
+function emitPriorAuthorizationApproved(doc) {
+  if (!doc || !doc.$__priorAuthApprovedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('prior-authorization', 'prior_authorization.approved', {
+      authorizationId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      serviceType: doc.serviceType,
+      approvedAt: doc.respondedAt || doc.updatedAt,
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+priorAuthorizationSchema.post('save', emitPriorAuthorizationApproved);
 
 module.exports =
   mongoose.models.PriorAuthorization ||

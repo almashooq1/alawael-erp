@@ -41,7 +41,9 @@ describe('W976 incident→NCR producer — source shape', () => {
     expect(MODEL_SRC).toMatch(/\$locals\.wasNew\)\s*return/);
   });
   it('emits on the singleton bus (unified, W974) via getDefault', () => {
-    expect(MODEL_SRC).toMatch(/require\(\s*'\.\.\/\.\.\/services\/quality\/qualityEventBus\.service'\s*\)/);
+    expect(MODEL_SRC).toMatch(
+      /require\(\s*'\.\.\/\.\.\/services\/quality\/qualityEventBus\.service'\s*\)/
+    );
     expect(MODEL_SRC).toMatch(/getDefault\(\)/);
   });
 });

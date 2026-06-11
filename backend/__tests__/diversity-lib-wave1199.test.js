@@ -6,11 +6,19 @@
 
 const L = require('../intelligence/diversity.lib');
 
-const r = (gender, nationality, salary, department = 'PT') => ({ gender, nationality, salary, department });
+const r = (gender, nationality, salary, department = 'PT') => ({
+  gender,
+  nationality,
+  salary,
+  department,
+});
 
 describe('W1199 diversity.lib — representation + indices', () => {
   test('representation counts + percentages', () => {
-    const rep = L.representation([r('male', 'SA', 1), r('male', 'SA', 1), r('female', 'SA', 1)], x => x.gender);
+    const rep = L.representation(
+      [r('male', 'SA', 1), r('male', 'SA', 1), r('female', 'SA', 1)],
+      x => x.gender
+    );
     expect(rep.total).toBe(3);
     expect(rep.counts).toEqual({ male: 2, female: 1 });
     expect(rep.pct.male).toBeCloseTo(66.7, 1);
@@ -28,7 +36,14 @@ describe('W1199 diversity.lib — representation + indices', () => {
   });
 
   test('Saudization rate (case-insensitive SA/saudi/ksa)', () => {
-    expect(L.saudizationRate([r('male', 'SA', 1), r('male', 'saudi', 1), r('female', 'EG', 1), r('female', 'PH', 1)])).toBe(50);
+    expect(
+      L.saudizationRate([
+        r('male', 'SA', 1),
+        r('male', 'saudi', 1),
+        r('female', 'EG', 1),
+        r('female', 'PH', 1),
+      ])
+    ).toBe(50);
     expect(L.saudizationRate([])).toBeNull();
   });
 });

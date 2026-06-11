@@ -31,8 +31,7 @@ const MODEL_RISK_TYPES = [
 // The route's public API accepts strategic/compliance — map to the closest
 // model enum values.
 const RISK_TYPE_MAP = { strategic: 'operational', compliance: 'regulatory' };
-const toModelRiskType = t =>
-  MODEL_RISK_TYPES.includes(t) ? t : RISK_TYPE_MAP[t] || 'operational';
+const toModelRiskType = t => (MODEL_RISK_TYPES.includes(t) ? t : RISK_TYPE_MAP[t] || 'operational');
 // API scale is 1..5; the model stores 0..1.
 const toUnitScale = v => {
   const n = Number(v);

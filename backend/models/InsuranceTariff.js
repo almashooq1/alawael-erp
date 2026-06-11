@@ -50,7 +50,6 @@ InsuranceTariffSchema.pre('validate', async function () {
   if (this.effectiveTo && this.effectiveFrom && this.effectiveTo < this.effectiveFrom) {
     throw new Error('InsuranceTariff: effectiveTo must be on/after effectiveFrom');
   }
-  
 });
 
 module.exports =

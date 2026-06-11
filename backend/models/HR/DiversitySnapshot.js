@@ -55,7 +55,10 @@ DiversitySnapshotSchema.pre('validate', function markInvariants() {
 });
 
 DiversitySnapshotSchema.path('__invariants').validate(function validateInvariants() {
-  if (this.saudizationRatePct != null && (this.saudizationRatePct < 0 || this.saudizationRatePct > 100)) {
+  if (
+    this.saudizationRatePct != null &&
+    (this.saudizationRatePct < 0 || this.saudizationRatePct > 100)
+  ) {
     this.invalidate('saudizationRatePct', 'saudizationRatePct must be within [0,100]');
   }
   const di = this.diversityIndex || {};

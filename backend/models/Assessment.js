@@ -360,7 +360,6 @@ programAssessmentSchema.pre('save', async function () {
     this.scoreChange = this.score - this.previousScore;
     this.improvement = this.scoreChange > 0;
   }
-
 });
 
 module.exports =

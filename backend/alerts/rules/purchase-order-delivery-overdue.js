@@ -22,8 +22,7 @@
 const AWAITING = ['approved', 'sent', 'partial'];
 
 function resolvePOModel(ctx) {
-  const m =
-    ctx.models && (ctx.models.InventoryModulePurchaseOrder || ctx.models.PurchaseOrder);
+  const m = ctx.models && (ctx.models.InventoryModulePurchaseOrder || ctx.models.PurchaseOrder);
   if (m && typeof m.find === 'function') return m;
   try {
     return require('../../models/inventory/PurchaseOrder');

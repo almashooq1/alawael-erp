@@ -27,7 +27,7 @@ let ICF, TreatmentAuthorization, Pathway, Mdt, Swallow, Emergency, Consult, Cdss
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
     if (row) return row;
@@ -173,7 +173,7 @@ describe('W1075 — MDT meeting completion reaches the timeline', () => {
 });
 
 describe('W1075 — instrumental swallow study completion reaches the timeline', () => {
-  it('ordered → completed with aspiration → swallow_study (warning)', async () => {
+  it('ordered → completed with aspiration → swallow_study_completed (warning)', async () => {
     const beneficiaryId = oid();
     const doc = await Swallow.create({
       beneficiaryId,
@@ -184,7 +184,9 @@ describe('W1075 — instrumental swallow study completion reaches the timeline',
     const r = await Swallow.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'swallow_study' });
+    // This branch's W1054 wiring: instrumental-swallow-study.swallow_study.completed
+    // → eventType 'swallow_study_completed'.
+    const row = await waitForTimeline({ beneficiaryId, eventType: 'swallow_study_completed' });
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
     expect(row.metadata.studyType).toBe('vfss');

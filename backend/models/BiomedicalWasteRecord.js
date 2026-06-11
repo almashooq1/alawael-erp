@@ -92,7 +92,12 @@ const BiomedicalWasteRecordSchema = new Schema(
 
     // ── Generation (segregation at source) ───────────────────────────
     generationDate: { type: Date, required: true, index: true },
-    generationDepartment: { type: String, enum: GENERATION_DEPARTMENTS, default: 'clinic', index: true },
+    generationDepartment: {
+      type: String,
+      enum: GENERATION_DEPARTMENTS,
+      default: 'clinic',
+      index: true,
+    },
     generationLocationNote: { type: String, default: '', maxlength: 300 },
     segregatedByName: { type: String, default: '', maxlength: 120 },
     segregatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },

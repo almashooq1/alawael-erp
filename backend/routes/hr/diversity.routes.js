@@ -26,15 +26,23 @@ const safeError = require('../../utils/safeError');
 const svc = require('../../services/hr/diversityService');
 
 const READ_ROLES = [
-  'admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director', 'hr',
-  'manager', 'compliance', 'compliance_officer',
+  'admin',
+  'superadmin',
+  'super_admin',
+  'hr_manager',
+  'hr_director',
+  'hr',
+  'manager',
+  'compliance',
+  'compliance_officer',
 ];
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
 
 function mapErr(res, err, ctx) {
-  if (err && err.code === 'MODEL_UNAVAILABLE') return res.status(503).json({ success: false, error: err.message });
+  if (err && err.code === 'MODEL_UNAVAILABLE')
+    return res.status(503).json({ success: false, error: err.message });
   return safeError(res, err, ctx);
 }
 
@@ -59,7 +67,12 @@ router.post('/snapshot', requireRole(READ_ROLES), async (req, res) => {
     const department = req.body && req.body.department ? String(req.body.department) : null;
     const branchId = effectiveBranchScope(req);
     if (!branchId && !(req.body && req.body.branchId)) {
-      return res.status(400).json({ success: false, error: 'branchId required (HQ must specify a branch to snapshot)' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: 'branchId required (HQ must specify a branch to snapshot)',
+        });
     }
     const actor = req.user || {};
     const doc = await svc.snapshot({

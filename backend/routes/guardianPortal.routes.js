@@ -441,8 +441,7 @@ router.post('/messages/:id/reply', async (req, res) => {
       $or: [{ fromId: req.user._id }, { toId: req.user._id }],
     }).lean();
     if (!original) return res.status(404).json({ success: false, message: 'Message not found' });
-    const toId =
-      String(original.fromId) === String(req.user._id) ? original.toId : original.fromId;
+    const toId = String(original.fromId) === String(req.user._id) ? original.toId : original.fromId;
     const reply = await PortalMessage.create({
       fromId: req.user._id,
       fromModel: 'User',

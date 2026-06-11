@@ -81,7 +81,8 @@ afterAll(async () => {
 });
 
 const get = branch => request(app).get('/analytics/hr').set('x-test-branch', branch);
-const totalLeaves = body => (body.data.leaves_by_type || []).reduce((s, r) => s + (r.count || 0), 0);
+const totalLeaves = body =>
+  (body.data.leaves_by_type || []).reduce((s, r) => s + (r.count || 0), 0);
 
 describe('W961 — /analytics/hr cross-branch isolation (hrBranchOnly)', () => {
   it('a restricted caller sees ONLY their branch leaves (2 annual, never the foreign sick)', async () => {

@@ -262,8 +262,7 @@ router.post(
     // for them). A cross-branch creator may name an explicit branch in the body.
     const { branch_id: _b1, branchId: _b2, ...rest } = req.body || {};
     const branchId =
-      req.branchScope?.branchId ||
-      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+      req.branchScope?.branchId || (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
     const vehicle = new Vehicle({
       ...rest,
       ...(branchId ? { branch_id: branchId } : {}),
@@ -1822,7 +1821,7 @@ router.get(
   '/safety/leaderboard',
   asyncHandler(async (req, res) => {
     const { since, days } = periodFilter(req.query);
-    const limit = parseInt(req.query.limit || '50', 10);
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 1000); // W1182 — DoS cap
 
     // اجمع كل السائقين الذين قادوا في الفترة
     const trips = await Trip.find({

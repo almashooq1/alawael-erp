@@ -77,6 +77,35 @@ SubsidyEntrySchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// ── W1074: unified-core producer ───────────────────────────────────
+// Emit subsidy-entry.received when a subsidy/pension is marked received
+// so the per-beneficiary CareTimeline records the financial-support
+// milestone. Non-callback hook style (W483 gate): the global async save
+// plugin puts the whole hook chain in promise-adapter mode.
+SubsidyEntrySchema.pre('save', function flagSubsidyReceived() {
+  this.$__subsidyReceivedNow =
+    this.status === 'received' && (this.isNew || this.isModified('status'));
+});
+
+SubsidyEntrySchema.post('save', function emitSubsidyReceived(doc) {
+  if (!doc.$__subsidyReceivedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('subsidy-entry', 'subsidy_entry.received', {
+      entryId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      subsidyType: doc.subsidyType,
+      amountSAR: doc.amountSAR,
+      year: doc.year,
+      month: doc.month,
+      receivedAt: doc.receivedDate || doc.updatedAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiarySubsidyEntry ||
   mongoose.model('BeneficiarySubsidyEntry', SubsidyEntrySchema);

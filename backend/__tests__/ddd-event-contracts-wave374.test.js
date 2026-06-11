@@ -62,20 +62,108 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'behavior',
   'ai-recommendations',
   'appointments', // W970 — appointment booking/cancellation/no-show → core timeline
-  'safety', // W977 — seizure / safeguarding / restraint → core timeline
-  'waitlist', // W979 — waitlist added / booked (admission) → core timeline
-  'screenings', // W980 — vision / hearing screening finalized → core timeline
-  'medication', // W981 — medication administered / not-given → core timeline
-  'complaints', // W984 — complaint filed about a beneficiary → core timeline
-  'family', // W985 — family visit completed / no-show → core timeline
-  'lifecycle', // W986 — life-stage transition plan completed / cancelled → core timeline
-  'followup', // W987 — post-rehab follow-up case completed / lost-to-follow-up → core timeline
-  'insurance', // W994 — insurance claim approved / rejected → core timeline
-  'referral', // W997 — referral accepted / completed / rejected (shared across 4 models) → core timeline
-  'consent', // W1002 — consent obtained / revoked (PDPL/CRPD) → core timeline
-  'home_program', // W1003 — home program assigned / completed → core timeline
-  'crisis', // W1004 — acute crisis reported / resolved → core timeline
-  'careteam', // W1005 — care-team member added/removed + lead changed → core timeline
+  'safety', // W992 — seizure / safeguarding / restraint clinical safety events → core timeline
+  'screenings', // W993 — vision / hearing functional screenings → core timeline
+  'medications', // W994 — MAR dose outcomes (administered/refused/missed/held) → core timeline
+  'discharge', // W995 — discharge plan completion → core timeline
+  'admissions', // W996 — waitlist enrollment (admission) → core timeline
+  'referrals', // W997 — referral conversion (loop closed) → core timeline
+  'medical-referrals', // W998 — medical referral completion → core timeline
+  'measurements', // W999 — measurement result approved → core timeline
+  'insurance-claims', // W1000 — insurance claim paid → core timeline
+  'invoices', // W1023 — invoice fully paid → core timeline
+  'teleconsultations', // W1024 — tele-rehab consultation completed → core timeline
+  'home-visits', // W1025 — home visit completed → core timeline
+  'family-counselling', // W1026 — family counselling session completed → core timeline
+  'assistive-devices', // W1028 — assistive device returned → core timeline
+  'respite', // W1029 — respite booking completed → core timeline
+  'transition', // W1030 — transition plan completed → core timeline
+  'diet-prescription', // W1031 — diet prescription activated → core timeline
+  'communication-aid', // W1042 — AAC communication aid profile activated → core timeline
+  'ai-report', // W1043 — AI-generated report sent → core timeline
+  'adaptive-sports', // W1044 — adaptive sports program completed → core timeline
+  'iep', // W1045 — individual education plan activated → core timeline
+  'vaccination', // W1046 — vaccination administered → core timeline
+  'family-home-program', // W1047 — family home program completed → core timeline
+  'spasticity-injection', // W1048 — spasticity injection completed → core timeline
+  'prosthetic-orthotic-order', // W1049 — prosthetic/orthotic delivered → core timeline
+  'seating-postural-assessment', // W1050 — seating/postural finalized → core timeline
+  'sensory-diet-program', // W1051 — sensory diet completed → core timeline
+  'prior-authorization', // W1052 — prior authorization approved → core timeline
+  'plan-review', // W1053 — care plan review recorded → core timeline
+  'instrumental-swallow-study', // W1054 — swallow study completed → core timeline
+  'crisis-incident', // W1055 — crisis incident resolved → core timeline
+  'iq-assessment', // W1056 — IQ assessment completed → core timeline
+  'creative-arts-therapy', // W1057 — creative arts therapy session completed → core timeline
+  'insurance-eligibility', // W1058 — insurance eligibility check recorded → core timeline
+  'morning-health-check', // W1059 — morning health check flagged → core timeline
+  'differential-diagnosis', // W1060 — differential diagnosis confirmed → core timeline
+  'community-referral', // W1061 — community referral completed → core timeline
+  'clinical-pathway', // W1062 — clinical pathway plan completed → core timeline
+  'aac-profile', // W1063 — AAC PECS phase advanced → core timeline
+  'pain-assessment', // W1064 — pain assessment finalized → core timeline
+  'dysphagia-assessment', // W1065 — dysphagia assessment finalized → core timeline
+  'allergy', // W1066 — allergy recorded → core timeline
+  'dtt-session', // W1067 — DTT session completed → core timeline
+  'goal-progress', // W1068 — goal progress achieved → core timeline
+  'adjunct-therapy', // W1069 — adjunct therapy session completed → core timeline
+  'disability-card', // W1070 — disability card registered → core timeline
+  'portfolio', // W1071 — portfolio milestone added → core timeline
+  'physiotherapy-assessment', // W1072 — physiotherapy assessment finalized → core timeline
+  'beneficiary-contract', // W1073 — service contract activated → core timeline
+  'subsidy-entry', // W1074 — subsidy payment received → core timeline
+  'sponsorship', // W1075 — sponsorship activated → core timeline
+  'toileting-event', // W1076 — potty request (toilet-training milestone) → core timeline
+  'home-carryover', // W1077 — home-practice completed (family engagement) → core timeline
+  'medication-order', // W1078 — medication order activated → core timeline
+  'family-visit', // W1079 — family visit approved (family engagement) → core timeline
+  'bip-fidelity', // W1080
+  'goal-entry', // W1081
+  'cdss-risk', // W1082
+  'red-flag', // W1083
+  'session-attendance', // W1084 — session missed (no_show/absent) → core timeline
+  'nps-response', // W1085 — family NPS satisfaction recorded → core timeline
+  'daily-comm-log', // W1086 — daily parent communication log published → core timeline
+  'consent-record', // W1087 — consent granted (PDPL/CBAHI) → core timeline
+  'risk-snapshot', // W1088 — clinical risk tier escalated → core timeline
+  'progress-report', // W1089 — monthly progress report recorded → core timeline
+  'day-attendance', // W1090 — daily day-rehab rollcall present → core timeline
+  'waiting-list', // W1091 — known beneficiary joined the waiting list → core timeline
+  'pickup-authorization', // W1092 — pickup authorization created → core timeline
+  'meal-event', // W1093 — meal allergy incident → core timeline
+  'cdss-alert', // W1094 — critical CDSS alert → core timeline
+  'gas-snapshot', // W1095 — GAS T-score snapshot → core timeline
+  'pdpl-request', // W1096 — PDPL data-subject request → core timeline
+  'bip-effectiveness', // W1097 — BIP effectiveness reading → core timeline
+  'seat-allocation', // W1098 — day-center seat allocation → core timeline
+  'student-activity', // W1099 — gamified student activity completion → core timeline
+  'story-book', // W1100 — quarterly story book published → core timeline — BIP fidelity check recorded → core timeline
+  'gas-scoring', // W1101 — GAS goal-attainment level scored → core timeline
+  'speech-session', // W1102 — speech-session recording analysis completed → core timeline
+  'portal-payment', // W1103 — guardian portal invoice paid → core timeline
+  'caregiver-support', // W1104 — caregiver support program completed → core timeline
+  'coupon-usage', // W1105 — beneficiary coupon redeemed → core timeline
+  'insurance-policy', // W1106 — beneficiary insurance policy activated → core timeline
+  'red-flag-override', // W1107 — clinical red-flag override recorded → core timeline
+  'smart-scheduler', // W1108 — beneficiary smart schedule activated → core timeline
+  'story-surface', // W1109 — beneficiary story surface variant published → core timeline
+  'arvr-session', // W1110 — beneficiary AR/VR rehab session completed → core timeline
+  'program-enrollment', // W1111 — beneficiary program enrollment activated → core timeline
+  'family-communication', // W1112 — beneficiary family communication logged → core timeline
+  'workflow-task', // W1113 — beneficiary care-workflow task completed → core timeline
+  'behavior-record', // W1114 — beneficiary behavior (ABC) record logged → core timeline
+  'measure-reassessment', // W1115 — beneficiary measure-reassessment task completed → core timeline
+  'measure-alert', // W1116 — beneficiary measure-driven alert raised → core timeline
+  'measure-baseline', // W1117 — beneficiary measure baseline slot completed → core timeline
+  'workflow-transition', // W1118 — beneficiary care-workflow phase transition recorded → core timeline
+  'generated-report', // W1119 — beneficiary scoped report completed → core timeline
+  'decision-alert', // W1120 — beneficiary decision-support alert raised → core timeline
+  'gas-scale', // W1121 — GAS scale activated for a beneficiary goal → core timeline
+  'quality-audit-record', // W1122 — beneficiary quality audit completed → core timeline
+  'clinical-risk-score', // W1131 — clinical risk score escalated → core timeline
+  'corrective-action', // W1134 — beneficiary corrective action opened → core timeline
+  'beneficiary-transfer', // W1135 — beneficiary branch transfer completed → core timeline
+  'complaint', // W1136 — beneficiary-linked complaint resolved → core timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -110,22 +198,110 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'ai',
     'recommendation',
     'appointment', // W970 — appointment.booked / .cancelled / .no_show
-    'seizure', // W977
-    'safeguarding', // W977
-    'restraint', // W977
-    'waitlist', // W979
-    'screening', // W980
-    'medication', // W981
-    'complaint', // W984
-    'visit', // W985
-    'transition', // W986
-    'case', // W987
-    'claim', // W994
-    'referral', // W997
-    'consent', // W1002
-    'home_program', // W1003
-    'crisis', // W1004
-    'careteam', // W1005
+    'seizure', // W992 — seizure.recorded
+    'safeguarding', // W992 — safeguarding.concern_raised
+    'restraint', // W992 — restraint.applied
+    'screening', // W993 — screening.completed (vision + hearing)
+    'medication', // W994 — medication.dose_recorded (MAR)
+    'discharge', // W995 — discharge.completed
+    'admission', // W996 — admission.enrolled (waitlist)
+    'referral', // W997 — referral.converted (ReferralTracking)
+    'medical_referral', // W998 — medical_referral.completed (MedicalReferral)
+    'measurement', // W999 — measurement.result_approved (MeasurementResult)
+    'insurance_claim', // W1000 — insurance_claim.paid (InsuranceClaim)
+    'invoice', // W1023 — invoice.paid (Invoice)
+    'teleconsultation', // W1024 — teleconsultation.completed (Teleconsultation)
+    'home_visit', // W1025 — home_visit.completed (HomeVisit)
+    'family_counselling', // W1026 — family_counselling.completed (FamilyCounsellingSession)
+    'assistive_device', // W1028 — assistive_device.returned (AssistiveDevice)
+    'respite', // W1029 — respite.completed (RespiteBooking)
+    'transition', // W1030 — transition.completed (TransitionPlan)
+    'diet_prescription', // W1031 — diet_prescription.activated (BeneficiaryDietPrescription)
+    'communication_aid', // W1042 — communication_aid.activated (CommunicationAidProfile)
+    'ai_report', // W1043 — ai_report.sent (AiGeneratedReport)
+    'adaptive_sports', // W1044 — adaptive_sports.completed (AdaptiveSportsProgram)
+    'iep', // W1045 — iep.activated (IndividualEducationPlan)
+    'vaccination', // W1046 — vaccination.administered (Vaccination)
+    'family_home_program', // W1047 — family_home_program.completed (FamilyHomeProgram)
+    'spasticity_injection', // W1048 — spasticity_injection.completed (SpasticityInjection)
+    'prosthetic_orthotic', // W1049 — prosthetic_orthotic.delivered (ProstheticOrthoticOrder)
+    'seating_postural', // W1050 — seating_postural.finalized (SeatingPosturalAssessment)
+    'sensory_diet', // W1051 — sensory_diet.completed (SensoryDietProgram)
+    'prior_authorization', // W1052 — prior_authorization.approved (PriorAuthorization)
+    'plan_review', // W1053 — plan_review.recorded (PlanReview)
+    'swallow_study', // W1054 — swallow_study.completed (InstrumentalSwallowStudy)
+    'crisis_incident', // W1055 — crisis_incident.resolved (CrisisIncident)
+    'iq_assessment', // W1056 — iq_assessment.completed (IQAssessment)
+    'creative_arts_therapy', // W1057 — creative_arts_therapy.completed (CreativeArtsTherapySession)
+    'insurance_eligibility', // W1058 — insurance_eligibility.checked (InsuranceEligibilityCheck)
+    'morning_health_check', // W1059 — morning_health_check.flagged (MorningHealthCheck)
+    'differential_diagnosis', // W1060 — differential_diagnosis.confirmed (DifferentialDiagnosis)
+    'community_referral', // W1061 — community_referral.completed (CommunityReferral)
+    'clinical_pathway', // W1062 — clinical_pathway.completed (ClinicalPathwayPlan)
+    'aac_profile', // W1063 — aac_profile.pecs_phase_advanced (AacProfile)
+    'pain_assessment', // W1064 — pain_assessment.finalized (PainAssessment)
+    'dysphagia_assessment', // W1065 — dysphagia_assessment.finalized (DysphagiaAssessment)
+    'allergy', // W1066 — allergy.recorded (Allergy)
+    'dtt_session', // W1067 — dtt_session.completed (DttSession)
+    'goal_progress', // W1068 — goal_progress.goal_achieved (GoalProgressSnapshot)
+    'adjunct_therapy', // W1069 — adjunct_therapy.session_completed (AdjunctTherapySession)
+    'disability_card', // W1070 — disability_card.registered (BeneficiaryDisabilityCard)
+    'portfolio', // W1071 — portfolio.milestone_added (BeneficiaryPortfolioItem)
+    'physiotherapy_assessment', // W1072 — physiotherapy_assessment.finalized (PhysiotherapyAssessment)
+    'beneficiary_contract', // W1073 — beneficiary_contract.activated (BeneficiaryContract)
+    'subsidy_entry', // W1074 — subsidy_entry.received (BeneficiarySubsidyEntry)
+    'sponsorship', // W1075 — sponsorship.activated (Sponsorship)
+    'toileting_event', // W1076 — toileting_event.potty_requested (ToiletingEvent)
+    'home_carryover', // W1077 — home_carryover.completed (HomeCarryoverEntry)
+    'medication_order', // W1078 — medication_order.activated (MedicationOrder)
+    'family_visit', // W1079 — family_visit.approved (FamilyVisitRequest)
+    'bip_fidelity', // W1080
+    'goal_entry', // W1081
+    'cdss_risk', // W1082
+    'red_flag', // W1083
+    'session_attendance', // W1084 — session_attendance.missed (SessionAttendance)
+    'nps_response', // W1085 — nps_response.recorded (NpsResponse)
+    'daily_comm_log', // W1086 — daily_comm_log.published (DailyCommunicationLog)
+    'consent_record', // W1087 — consent_record.granted (Consent)
+    'risk_snapshot', // W1088 — risk_snapshot.escalated (RiskSnapshot)
+    'progress_report', // W1089 — progress_report.recorded (BeneficiaryProgress)
+    'day_attendance', // W1090 — day_attendance.present (BeneficiaryDayAttendance)
+    'waiting_list', // W1091 — waiting_list.joined (WaitingListEntry)
+    'pickup_authorization', // W1092 — pickup_authorization.requested (PickupAuthorization)
+    'meal_event', // W1093 — meal_event.allergy_incident (BeneficiaryMealEvent)
+    'cdss_alert', // W1094 — cdss_alert.raised (CdssAlert)
+    'gas_snapshot', // W1095 — gas_snapshot.recorded (GasScoreSnapshot)
+    'pdpl_request', // W1096 — pdpl_request.received (PdplRequest)
+    'bip_effectiveness', // W1097 — bip_effectiveness.recorded (BipEffectiveness)
+    'seat_allocation', // W1098 — seat_allocation.assigned (SeatAllocation)
+    'student_activity', // W1099 — student_activity.completed (StudentActivity)
+    'story_book', // W1100 — story_book.published (StoryBook) — bip_fidelity.checked (BipFidelityCheck)
+    'gas_scoring', // W1101 — gas_scoring.recorded (GasScoring)
+    'speech_session', // W1102 — speech_session.analyzed (SpeechSessionRecording)
+    'portal_payment', // W1103 — portal_payment.paid (PortalPayment)
+    'caregiver_support', // W1104 — caregiver_support.completed (CaregiverSupportProgram)
+    'coupon_usage', // W1105 — coupon_usage.redeemed (CouponUsage)
+    'insurance_policy', // W1106 — insurance_policy.activated (InsurancePolicy)
+    'red_flag_override', // W1107 — red_flag_override.recorded (RedFlagOverride)
+    'smart_scheduler', // W1108 — smart_scheduler.activated (SmartScheduler)
+    'story_surface', // W1109 — story_surface.published (StorySurfaceVariant)
+    'arvr_session', // W1110 — arvr_session.completed (ARVRSession)
+    'program_enrollment', // W1111 — program_enrollment.activated (ProgramEnrollment)
+    'family_communication', // W1112 — family_communication.logged (FamilyCommunication)
+    'workflow_task', // W1113 — workflow_task.completed (WorkflowTask)
+    'behavior_record', // W1114 — behavior_record.logged (BehaviorRecord)
+    'measure_reassessment', // W1115 — measure_reassessment.completed (MeasureReassessmentTask)
+    'measure_alert', // W1116 — measure_alert.raised (MeasureAlert)
+    'measure_baseline', // W1117 — measure_baseline.completed (MeasureBaselineSlot)
+    'workflow_transition', // W1118 — workflow_transition.recorded (WorkflowTransitionLog)
+    'generated_report', // W1119 — generated_report.completed (GeneratedReport)
+    'decision_alert', // W1120 — decision_alert.raised (DecisionAlert)
+    'gas_scale', // W1121 — gas_scale.activated (GasScale)
+    'quality_audit_record', // W1122 — quality_audit_record.completed (QualityAudit)
+    'clinical_risk_score', // W1131 — clinical_risk_score.escalated (ClinicalRiskScore)
+    'corrective_action', // W1134 — corrective_action.opened (CorrectiveAction)
+    'transfer', // W1135 — transfer.completed (BeneficiaryTransfer)
+    'complaint', // W1136 — complaint.resolved (Complaint)
   ])
 );
 
@@ -170,20 +346,6 @@ describe('W374 DDD event-contracts drift guard', () => {
         behavior: 'BEHAVIOR_EVENTS',
         'ai-recommendations': 'AI_RECOMMENDATION_EVENTS',
         appointments: 'APPOINTMENT_EVENTS', // W970
-        safety: 'SAFETY_EVENTS', // W977
-        waitlist: 'WAITLIST_EVENTS', // W979
-        screenings: 'SCREENING_EVENTS', // W980
-        medication: 'MEDICATION_EVENTS', // W981
-        complaints: 'COMPLAINT_EVENTS', // W984
-        family: 'FAMILY_EVENTS', // W985
-        lifecycle: 'LIFECYCLE_EVENTS', // W986
-        followup: 'FOLLOWUP_EVENTS', // W987
-        insurance: 'INSURANCE_EVENTS', // W994
-        referral: 'REFERRAL_EVENTS', // W997
-        consent: 'CONSENT_EVENTS', // W1002
-        home_program: 'HOME_PROGRAM_EVENTS', // W1003
-        crisis: 'CRISIS_EVENTS', // W1004
-        careteam: 'CARETEAM_EVENTS', // W1005
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {
         expect(contracts[exportName]).toBe(contracts.DDD_CONTRACTS[group]);

@@ -102,7 +102,13 @@ router.post('/:id/pressure-log', async (req, res) => {
     const tire = await FleetTire.findByIdAndUpdate(
       req.params.id,
       {
-        $push: { pressureLogs: { ...req.body, recordedAt: new Date(), recordedBy: req.user._id } },
+        $push: {
+          pressureLogs: {
+            ...stripUpdateMeta(req.body),
+            recordedAt: new Date(),
+            recordedBy: req.user._id,
+          },
+        },
       },
       { returnDocument: 'after' }
     );

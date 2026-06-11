@@ -288,7 +288,6 @@ cashFlowSchema.pre('save', async function () {
   if (this.calculations.totalOutflows > 0) {
     this.reserves.adequacyRatio = (this.reserves.total / this.calculations.totalOutflows) * 100;
   }
-
 });
 
 // ===== METHODS =====

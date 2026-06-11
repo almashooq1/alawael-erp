@@ -4,6 +4,35 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1155 — close the record/plan-keyed :id gap + list/dashboard branch scoping:
+//   - /records/:id → :recordId, /plans/:id → :planId so ownership hooks fire
+//   - lists + dashboard pass effectiveBranchScope(req) (ignores ?branchId= spoofing)
+const {
+  branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'recordId',
+  branchScopedResourceParam({
+    modelName: 'BehaviorRecord',
+    label: 'behavior record',
+    loadModel: () => require('../models/BehaviorRecord'),
+  })
+);
+router.param(
+  'planId',
+  branchScopedResourceParam({
+    modelName: 'BehaviorPlan',
+    label: 'behavior plan',
+    loadModel: () => require('../models/BehaviorPlan'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { behaviorService } = require('../services/BehaviorService');
 const {
   validateCreateRecord,
@@ -28,7 +57,8 @@ router.post(
     const data = await behaviorService.createRecord({
       ...req.body,
       reportedBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -45,21 +75,22 @@ router.get(
       to: req.query.to,
       page: req.query.page,
       limit: req.query.limit,
+      branchId: effectiveBranchScope(req),
     });
     res.json({ success: true, ...result });
   })
 );
 router.get(
-  '/records/:id',
+  '/records/:recordId',
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.getRecord(req.params.id);
+    const data = await behaviorService.getRecord(req.params.recordId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/records/:id/review',
+  '/records/:recordId/review',
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.reviewRecord(req.params.id, {
+    const data = await behaviorService.reviewRecord(req.params.recordId, {
       reviewerId: getUserId(req),
       notes: req.body.notes,
     });
@@ -75,7 +106,8 @@ router.post(
     const data = await behaviorService.createPlan({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -88,37 +120,38 @@ router.get(
       status: req.query.status,
       page: req.query.page,
       limit: req.query.limit,
+      branchId: effectiveBranchScope(req),
     });
     res.json({ success: true, ...result });
   })
 );
 router.get(
-  '/plans/:id',
+  '/plans/:planId',
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.getPlan(req.params.id);
+    const data = await behaviorService.getPlan(req.params.planId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/plans/:id',
+  '/plans/:planId',
   validate(validateUpdatePlan),
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.updatePlan(req.params.id, req.body);
+    const data = await behaviorService.updatePlan(req.params.planId, req.body);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/plans/:id/approve',
+  '/plans/:planId/approve',
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.approvePlan(req.params.id, getUserId(req));
+    const data = await behaviorService.approvePlan(req.params.planId, getUserId(req));
     res.json({ success: true, data });
   })
 );
 router.post(
-  '/plans/:id/reviews',
+  '/plans/:planId/reviews',
   validate(validateAddReview),
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.addReview(req.params.id, {
+    const data = await behaviorService.addReview(req.params.planId, {
       ...req.body,
       reviewedBy: getUserId(req),
     });
@@ -140,7 +173,10 @@ router.get(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.getDashboard(req.query.branchId || req.user?.branchId);
+    // W1155 — effectiveBranchScope ignores ?branchId= spoofing for restricted callers
+    const data = await behaviorService.getDashboard(
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );

@@ -144,6 +144,34 @@ SpasticityInjectionSchema.virtual('muscleCount').get(function () {
 SpasticityInjectionSchema.set('toJSON', { virtuals: true });
 SpasticityInjectionSchema.set('toObject', { virtuals: true });
 
+// ── W1048: unified-core producer — spasticity injection completed ──
+// When a SpasticityInjection reaches status 'completed', publish a domain event
+// so the cross-module subscriber records a clinical milestone on the
+// beneficiary's longitudinal CareTimeline. Non-callback hook style (W483-safe).
+SpasticityInjectionSchema.pre('save', function () {
+  this.$__spasticityInjectionCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+SpasticityInjectionSchema.post('save', function emitSpasticityInjectionCompleted(doc) {
+  if (!doc || !doc.$__spasticityInjectionCompletedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('spasticity-injection', 'spasticity_injection.completed', {
+        injectionId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        agent: doc.agent || null,
+        procedureDate: doc.procedureDate || null,
+        completedAt: doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports =
   mongoose.models.SpasticityInjection ||
   mongoose.model('SpasticityInjection', SpasticityInjectionSchema);

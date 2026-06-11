@@ -53,8 +53,22 @@ describe('training-compliance-overdue', () => {
 
   test('fires on pending/overdue records past due; skips future, completed, waived', async () => {
     const raised = await runOne([
-      { _id: 't1', status: 'pending', dueDate: PAST, branchId: BRANCH, userId: 'u1', courseId: 'c1' },
-      { _id: 't2', status: 'overdue', dueDate: PAST, branchId: BRANCH, userId: 'u2', courseId: 'c2' },
+      {
+        _id: 't1',
+        status: 'pending',
+        dueDate: PAST,
+        branchId: BRANCH,
+        userId: 'u1',
+        courseId: 'c1',
+      },
+      {
+        _id: 't2',
+        status: 'overdue',
+        dueDate: PAST,
+        branchId: BRANCH,
+        userId: 'u2',
+        courseId: 'c2',
+      },
       { _id: 't3', status: 'pending', dueDate: FUTURE, branchId: BRANCH }, // not yet due
       { _id: 't4', status: 'completed', dueDate: PAST, branchId: BRANCH },
       { _id: 't5', status: 'waived', dueDate: PAST, branchId: BRANCH },

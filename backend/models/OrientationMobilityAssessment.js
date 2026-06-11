@@ -160,7 +160,12 @@ const OrientationMobilityAssessmentSchema = new mongoose.Schema(
 
     // ── Computed result ──────────────────────────────────────────────
     independenceScore: { type: Number, default: 0, min: 0, max: 100, index: true },
-    independenceLevel: { type: String, enum: INDEPENDENCE_LEVELS, default: 'dependent', index: true },
+    independenceLevel: {
+      type: String,
+      enum: INDEPENDENCE_LEVELS,
+      default: 'dependent',
+      index: true,
+    },
 
     // ── Training plan ────────────────────────────────────────────────
     trainingGoals: { type: [String], default: () => [] },
@@ -266,7 +271,8 @@ OrientationMobilityAssessmentSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('clinical-safety', 'om.assessment_finalized', {
         orientationMobilityAssessmentId: String(doc._id),

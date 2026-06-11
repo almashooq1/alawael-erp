@@ -909,7 +909,9 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
               { $match: { deleted_at: null } },
               { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
               { $sort: { total: -1 } },
-              { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
+              {
+                $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 },
+              },
             ])
             .toArray()
         : Promise.resolve([]),
@@ -993,7 +995,10 @@ router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) 
       // الإجازات حسب النوع
       db
         .collection('leave_requests')
-        .aggregate([{ $match: { ...hrBranchOnly, deleted_at: null } }, ...groupByField('leave_type')]) // W959 branch-scope
+        .aggregate([
+          { $match: { ...hrBranchOnly, deleted_at: null } },
+          ...groupByField('leave_type'),
+        ]) // W959 branch-scope
         .toArray(),
 
       // متوسط نسبة الحضور
@@ -1698,7 +1703,9 @@ router.get('/built-in/financial-summary', authenticate, requireBranchAccess, asy
             .aggregate([
               { $match: { deleted_at: null } },
               { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-              { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
+              {
+                $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 },
+              },
               { $sort: { total: -1 } },
             ])
             .toArray()

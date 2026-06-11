@@ -237,28 +237,32 @@ PainAssessmentSchema.virtual('painReduction').get(function () {
 PainAssessmentSchema.set('toJSON', { virtuals: true });
 PainAssessmentSchema.set('toObject', { virtuals: true });
 
-// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
-// On the draft→finalized flip → pain_assessment timeline row (present pain
-// escalates to warning).
-PainAssessmentSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ─── W1064: unified-core linkage — pain assessment finalized ────────────────
+// Milestone = the assessment transitions to 'finalized' (draft → finalized,
+// or created already finalized). Emits a timeline event so the beneficiary's
+// pain record is visible on the unified core. Non-callback hook style.
+PainAssessmentSchema.pre('save', function flagPainFinalized() {
+  this.$__painFinalizedNow =
+    this.status === 'finalized' && (this.isNew || this.isModified('status'));
 });
-PainAssessmentSchema.post('save', function (doc) {
+
+PainAssessmentSchema.post('save', function emitPainAssessmentFinalized(doc) {
+  if (!doc.$__painFinalizedNow) return;
   try {
-    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('clinical-assessment', 'pain.assessment_finalized', {
-        painAssessmentId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        scale: doc.scale,
-        score: doc.score,
-        painPresent: !!doc.painPresent,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    integrationBus.publish('pain-assessment', 'pain_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      scale: doc.scale,
+      score: doc.score,
+      painPresent: !!doc.painPresent,
+      significant: !!doc.isSignificantPain,
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
   }
 });
 

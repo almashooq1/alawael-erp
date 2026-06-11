@@ -345,7 +345,14 @@ router.patch('/submissions/:subId/status', async (req, res) => {
   try {
     const { status, reviewNote } = req.body;
     // Mirrors the FormSubmission.status enum (review-reachable states only)
-    const validStatuses = ['under_review', 'approved', 'rejected', 'returned', 'cancelled', 'archived'];
+    const validStatuses = [
+      'under_review',
+      'approved',
+      'rejected',
+      'returned',
+      'cancelled',
+      'archived',
+    ];
     if (!status || !validStatuses.includes(status))
       return res
         .status(400)
@@ -674,12 +681,10 @@ router.post('/:id/submit', async (req, res) => {
       if (isLayoutField(field) || field.readOnly || field.hidden || !field.required) continue;
       const v = data[field.name];
       if (v === undefined || v === null || v === '')
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Required field missing: ${field.label || field.name}`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `Required field missing: ${field.label || field.name}`,
+        });
     }
     // W1186 — initialize the approval chain from the template definition.
     const approvals = buildApprovalChain(template);

@@ -438,7 +438,7 @@ router.get('/cities', async (req, res) => {
  */
 router.get('/recent', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 1000); // W1182 — DoS cap
     const data = await Beneficiary.find({ ...branchFilter(req), isArchived: { $ne: true } })
       .select(
         'firstName lastName firstName_ar lastName_ar name category status progress sessions createdAt joinDate disability'

@@ -13,6 +13,13 @@ const ctrl = require('../controllers/rehabilitationPlan.controller');
 const { authenticateToken: authGuard } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W1148 (W269-class): ownership check for :beneficiaryId params + body refs.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 // ── القوالب المتاحة ──────────────────────────────────────────────────────
 // GET /api/rehab-plans/templates
 router.get('/templates', ctrl.getTemplates);

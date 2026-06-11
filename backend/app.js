@@ -954,6 +954,12 @@ try {
       // HR Modules — Round 10 mega-router (onboarding + loans + travel + insurance
       // + bands + positions + surveys + assets + kudos + policies + shift-swaps
       // + visas + org-chart + time-off-calendar + WPS export)
+      //
+      // OWNER MAP for /api/v1/hr (ADR-043 — the surface is split across two files;
+      // Express first-match-wins, so a new subpath must NOT collide with the other):
+      //   • THIS router (hr-modules) owns the Round-10 modules listed above.
+      //   • domains/hr/routes/hr.routes.js (mounted FIRST via _registry.js, dualMountAuth)
+      //     owns the CORE personnel subpaths: /employees, /leaves, /attendance.
       try {
         const { createHrModulesRouter } = require('./routes/hr/hr-modules.routes');
         app.use('/api/v1/hr', authenticate, createHrModulesRouter({ logger }));

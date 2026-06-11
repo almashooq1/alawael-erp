@@ -155,6 +155,30 @@ StorySurfaceVariantSchema.pre('save', async function () {
   }
 });
 
+// ── W1109 — publish story_surface.published when a variant goes live ──────────
+StorySurfaceVariantSchema.pre('save', function flagStorySurfacePublished() {
+  const becamePublished = (this.isNew || this.isModified('status')) && this.status === 'published';
+  this.$__storySurfacePublished = becamePublished;
+});
+
+StorySurfaceVariantSchema.post('save', function emitStorySurfacePublished(doc) {
+  if (!doc.$__storySurfacePublished) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('story-surface', 'story_surface.published', {
+      variantId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.storyBookId ? { storyBookId: String(doc.storyBookId) } : {}),
+      ...(doc.surfaceType ? { surfaceType: doc.surfaceType } : {}),
+      ...(doc.lang ? { lang: doc.lang } : {}),
+      publishedAt: new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports =
   mongoose.models.StorySurfaceVariant ||
   mongoose.model('StorySurfaceVariant', StorySurfaceVariantSchema);

@@ -150,9 +150,9 @@ BeneficiaryVoiceLogSchema.pre('save', async function () {
   if (this.captureModality === 'proxy' && this.capacityGrade !== 'absent') {
     if (!this.supportArrangement || this.supportArrangement.trim().length < 10) {
       throw new Error(
-          'BeneficiaryVoiceLog: proxy capture requires supportArrangement (≥10 chars) ' +
-            'documenting why direct capture from beneficiary was infeasible'
-        );
+        'BeneficiaryVoiceLog: proxy capture requires supportArrangement (≥10 chars) ' +
+          'documenting why direct capture from beneficiary was infeasible'
+      );
     }
   }
 
@@ -161,7 +161,9 @@ BeneficiaryVoiceLogSchema.pre('save', async function () {
     (this.entryKind === 'daily_rating' || this.entryKind === 'session_rating') &&
     (this.content?.ratingValue == null || this.content?.ratingScale == null)
   ) {
-    throw new Error(`BeneficiaryVoiceLog: ${this.entryKind} requires content.ratingValue + ratingScale`);
+    throw new Error(
+      `BeneficiaryVoiceLog: ${this.entryKind} requires content.ratingValue + ratingScale`
+    );
   }
 
   // AAC entries must have aacSymbols populated
@@ -171,8 +173,6 @@ BeneficiaryVoiceLogSchema.pre('save', async function () {
   ) {
     throw new Error('BeneficiaryVoiceLog: aac capture requires content.aacSymbols[]');
   }
-
-  
 });
 
 module.exports =

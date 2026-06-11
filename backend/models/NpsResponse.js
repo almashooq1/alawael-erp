@@ -70,4 +70,31 @@ NpsResponseSchema.index(
 // Bucket-by-branch dashboards.
 NpsResponseSchema.index({ branchId: 1, submittedAt: -1, bucket: 1 });
 
+// ── W1085: unified-core producer ───────────────────────────────────
+// Emit nps_response.recorded for a NEW response tied to a beneficiary so
+// the family-satisfaction signal lands on that beneficiary's core timeline.
+// Beneficiary is optional on this model — branch-only responses don't fire.
+// Non-callback (W483).
+NpsResponseSchema.pre('save', function flagNpsRecorded() {
+  this.$__npsRecorded = this.isNew && !!this.beneficiaryId;
+});
+
+NpsResponseSchema.post('save', function emitNpsRecorded(doc) {
+  if (!doc.$__npsRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('nps-response', 'nps_response.recorded', {
+      responseId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      surveyKey: doc.surveyKey || null,
+      score: typeof doc.score === 'number' ? doc.score : null,
+      bucket: doc.bucket || null,
+      submittedAt: doc.submittedAt || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports = mongoose.models.NpsResponse || mongoose.model('NpsResponse', NpsResponseSchema);

@@ -9,6 +9,27 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1155 — close the goal-keyed :id gap + list branch scoping:
+//   - :id renamed :goalId so the ownership hook actually fires
+//   - list pins restricted callers via effectiveBranchScope(req)
+const {
+  branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'goalId',
+  branchScopedResourceParam({
+    modelName: 'TherapeuticGoal',
+    label: 'goal',
+    loadModel: () => require('../models/TherapeuticGoal'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const mongoose = require('mongoose');
 const { TherapeuticGoal } = require('../models/TherapeuticGoal');
 const {
@@ -17,6 +38,10 @@ const {
   validateLogProgress,
   validate,
 } = require('../validators/goals.validator');
+// W1204 — Blueprint 43 R3 interface gate: "لا هدف بلا مقياس". Env-gated
+// (GOLDEN_THREAD_ENFORCEMENT=off|warn|enforce, default off) so deploys stay
+// inert until the caseload-attention queue (W1167) is drained.
+const goldenThreadGate = require('../../../intelligence/golden-thread-enforcement.lib');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -63,9 +88,26 @@ router.post(
   '/goals',
   validate(validateCreateGoal),
   asyncHandler(async (req, res) => {
-    const goal = new TherapeuticGoal(req.body);
+    // W1204 — R3 gate: goal without a linked measure is rejected (enforce)
+    // or flagged in the response (warn). Off by default.
+    const gate = goldenThreadGate.evaluateGate(goldenThreadGate.checkGoalPayload(req.body));
+    if (gate.action === 'reject') {
+      return res.status(422).json(goldenThreadGate.rejectionEnvelope(gate.violations));
+    }
+    // W1178 — restricted callers cannot spoof branchId on create; pin to own branch
+    const createScope = effectiveBranchScope(req);
+    const goal = new TherapeuticGoal({
+      ...req.body,
+      ...(createScope ? { branchId: createScope } : {}),
+    });
     await goal.save();
-    return res.status(201).json({ success: true, data: goal });
+    return res.status(201).json({
+      success: true,
+      data: goal,
+      ...(gate.action === 'warn'
+        ? { goldenThread: { mode: gate.mode, warnings: gate.violations } }
+        : {}),
+    });
   })
 );
 
@@ -84,6 +126,9 @@ router.get(
     if (carePlanId && mongoose.Types.ObjectId.isValid(carePlanId)) filter.carePlanId = carePlanId;
     if (status) filter.status = status;
     if (type) filter.type = type;
+    // W1155 — restricted callers are pinned to their own branch
+    const scopedBranchId = effectiveBranchScope(req);
+    if (scopedBranchId) filter.branchId = scopedBranchId;
 
     const skip = (Number(page) - 1) * Number(limit);
     const [goals, total] = await Promise.all([
@@ -102,31 +147,33 @@ router.get(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// GET /goals/:id — get single goal
-// ═══════════════════════════════════════════════════════════════════════════════
+// GET /goals/:goalId — get single goal
+// ═════════════════════════════════════════════════════════════════════════════
 router.get(
-  '/goals/:id',
+  '/goals/:goalId',
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findById(req.params.id).lean();
+    const goal = await TherapeuticGoal.findById(req.params.goalId).lean();
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
     return res.json({ success: true, data: goal });
   })
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PUT /goals/:id — update goal
-// ═══════════════════════════════════════════════════════════════════════════════
+// PUT /goals/:goalId — update goal
+// ═════════════════════════════════════════════════════════════════════════════
 router.put(
-  '/goals/:id',
+  '/goals/:goalId',
   validate(validateUpdateGoal),
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.id, req.body, {
+    // W1178 — ownership/identity fields are immutable via generic update
+    const { branchId: _branchId, beneficiaryId: _beneficiaryId, ...safeUpdate } = req.body;
+    const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.goalId, safeUpdate, {
       returnDocument: 'after',
       runValidators: true,
     }).lean();
@@ -136,16 +183,16 @@ router.put(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// POST /goals/:id/progress — record progress entry
-// ═══════════════════════════════════════════════════════════════════════════════
+// POST /goals/:goalId/progress — record progress entry
+// ═════════════════════════════════════════════════════════════════════════════
 router.post(
-  '/goals/:id/progress',
+  '/goals/:goalId/progress',
   validate(validateLogProgress),
   asyncHandler(async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    const goal = await TherapeuticGoal.findById(req.params.id);
+    const goal = await TherapeuticGoal.findById(req.params.goalId);
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
 
     goal.progressHistory = goal.progressHistory || [];

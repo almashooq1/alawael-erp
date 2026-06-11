@@ -127,4 +127,32 @@ gasScoringSchema.virtual('metExpected').get(function metExpected() {
   return this.achievedLevel >= 0;
 });
 
+// ── Unified-core producer (W1101): emit when a GAS level is first scored ──
+gasScoringSchema.pre('save', function flagGasScoringRecorded() {
+  this.$__gasScoringRecorded = this.isNew && this.status === 'active';
+});
+
+gasScoringSchema.post('save', function emitGasScoringRecorded(doc) {
+  if (!doc.$__gasScoringRecorded) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const expected =
+      doc.snapshot && typeof doc.snapshot.expectedOutcomeLevel === 'number'
+        ? doc.snapshot.expectedOutcomeLevel
+        : 0;
+    integrationBus.publish('gas-scoring', 'gas_scoring.recorded', {
+      scoringId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      goalId: doc.goalId ? String(doc.goalId) : undefined,
+      achievedLevel: doc.achievedLevel,
+      purpose: doc.purpose,
+      metExpected: doc.achievedLevel >= expected,
+      scoredAt: doc.scoredAt || new Date(),
+    });
+  } catch (_err) {
+    /* non-blocking: timeline linkage must never break a save */
+  }
+});
+
 module.exports = mongoose.models.GasScoring || mongoose.model('GasScoring', gasScoringSchema);

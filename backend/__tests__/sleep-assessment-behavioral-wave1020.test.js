@@ -106,15 +106,15 @@ describe('W1020 behavioral — severity drives plan + review requirements', () =
 
 describe('W1020 behavioral — OSA + referral gates', () => {
   it('REJECTS suspectedOSA with no referral', async () => {
-    await expect(
-      SleepAssessment.create(baseDoc({ suspectedOSA: true }))
-    ).rejects.toThrow(/referralMade/);
+    await expect(SleepAssessment.create(baseDoc({ suspectedOSA: true }))).rejects.toThrow(
+      /referralMade/
+    );
   });
 
   it('REJECTS referralMade with no referralTarget', async () => {
-    await expect(
-      SleepAssessment.create(baseDoc({ referralMade: true }))
-    ).rejects.toThrow(/referralTarget/);
+    await expect(SleepAssessment.create(baseDoc({ referralMade: true }))).rejects.toThrow(
+      /referralTarget/
+    );
   });
 
   it('SAVES suspectedOSA with an ENT referral', async () => {

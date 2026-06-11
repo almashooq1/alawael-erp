@@ -61,8 +61,12 @@ describe('W1046 — every clinical-safety model has a LIVE producer hook', () =>
       it('uses the W954-safe signature function(doc) — NOT a 1-param next', () => {
         // The post('save') handler must take `doc` (or be 0-param), never a
         // lone `next`, which the legacy mongoose.plugins shim wraps → save hang.
-        expect(src).toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*doc\\s*\\)`));
-        expect(src).not.toMatch(new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*next\\s*\\)`));
+        expect(src).toMatch(
+          new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*doc\\s*\\)`)
+        );
+        expect(src).not.toMatch(
+          new RegExp(`${schema}\\.post\\(\\s*['"]save['"]\\s*,\\s*function\\s*\\(\\s*next\\s*\\)`)
+        );
       });
 
       it('captures prior status via post("init") for status-change detection', () => {

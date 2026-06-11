@@ -33,9 +33,14 @@ module.exports = {
     const rows = await ctx.models.Vehicle.find({ status: ACTIVE });
     const findings = [];
     for (const v of rows) {
-      const regExp = v.registration && v.registration.expiryDate && new Date(v.registration.expiryDate) < now;
-      const insExp = v.insurance && v.insurance.policyExpiryDate && new Date(v.insurance.policyExpiryDate) < now;
-      const inspDue = v.inspection && v.inspection.nextInspectionDate && new Date(v.inspection.nextInspectionDate) < now;
+      const regExp =
+        v.registration && v.registration.expiryDate && new Date(v.registration.expiryDate) < now;
+      const insExp =
+        v.insurance && v.insurance.policyExpiryDate && new Date(v.insurance.policyExpiryDate) < now;
+      const inspDue =
+        v.inspection &&
+        v.inspection.nextInspectionDate &&
+        new Date(v.inspection.nextInspectionDate) < now;
       if (!regExp && !insExp && !inspDue) continue;
       const which = [
         regExp ? 'registration' : null,

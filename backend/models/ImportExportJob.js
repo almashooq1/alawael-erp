@@ -277,7 +277,6 @@ importExportJobSchema.pre('save', async function () {
   if (this.progress.total > 0) {
     this.progress.percentage = Math.round((this.progress.processed / this.progress.total) * 100);
   }
-
 });
 
 // Static: get module statistics

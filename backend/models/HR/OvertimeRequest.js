@@ -109,5 +109,4 @@ OvertimeRequestSchema.pre('save', async function () {
 // Registered as `HROvertimeRequest` to dodge the collision with the
 // canonical models/OvertimeRequest.js. Default export unchanged.
 module.exports =
-  mongoose.models.HROvertimeRequest ||
-  mongoose.model('HROvertimeRequest', OvertimeRequestSchema);
+  mongoose.models.HROvertimeRequest || mongoose.model('HROvertimeRequest', OvertimeRequestSchema);

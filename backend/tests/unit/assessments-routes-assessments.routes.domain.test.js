@@ -46,16 +46,16 @@ describe('domains/assessments/routes/assessments.routes.js', () => {
     expect(source).toMatch(/\/beneficiary\//);
   });
 
-  test('defines GET /:id route', () => {
-    expect(source).toMatch(/router\.get\s*\(\s*['"`]\/:id['"`]/);
+  test('defines GET /:assessmentId route', () => {
+    expect(source).toMatch(/router\.get\s*\(\s*['"`]\/:assessmentId['"`]/);
   });
 
-  test('defines PUT /:id route', () => {
-    expect(source).toMatch(/router\.put\s*\(\s*['"`]\/:id['"`]/);
+  test('defines PUT /:assessmentId route', () => {
+    expect(source).toMatch(/router\.put\s*\(\s*['"`]\/:assessmentId['"`]/);
   });
 
-  test('defines PUT /:id/complete route', () => {
-    expect(source).toMatch(/\/:id\/complete/);
+  test('defines PUT /:assessmentId/complete route', () => {
+    expect(source).toMatch(/\/:assessmentId\/complete/);
   });
 
   test('uses canonical beneficiary field (not beneficiaryId) in create', () => {

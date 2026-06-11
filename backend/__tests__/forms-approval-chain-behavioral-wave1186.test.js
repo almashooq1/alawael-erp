@@ -57,7 +57,12 @@ let app;
 const uid = () => new mongoose.Types.ObjectId();
 const ADMIN = { _id: uid(), role: 'admin', name: 'مدير النظام', email: 'admin@test' };
 const STAFF = { _id: uid(), role: 'therapist', name: 'أخصائي', email: 'staff@test' };
-const DIRECT_MANAGER = { _id: uid(), role: 'direct_manager', name: 'المدير المباشر', email: 'dm@test' };
+const DIRECT_MANAGER = {
+  _id: uid(),
+  role: 'direct_manager',
+  name: 'المدير المباشر',
+  email: 'dm@test',
+};
 const HR_OFFICER = { _id: uid(), role: 'hr_officer', name: 'الموارد البشرية', email: 'hr@test' };
 
 const CHAIN_TEMPLATE = {

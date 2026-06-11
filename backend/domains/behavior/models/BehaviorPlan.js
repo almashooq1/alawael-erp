@@ -162,4 +162,31 @@ const behaviorPlanSchema = new Schema(
 
 behaviorPlanSchema.index({ beneficiaryId: 1, status: 1 });
 
+// ── W1032: unified-core producer — behavior plan completed ──────────
+// When a BIP reaches 'completed', publish a domain event so the
+// cross-module subscriber records a milestone on the beneficiary's
+// longitudinal CareTimeline. Non-callback hook style (W483-safe).
+behaviorPlanSchema.pre('save', function () {
+  this.$__behaviorPlanCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+behaviorPlanSchema.post('save', function emitBehaviorPlanCompleted(doc) {
+  if (!doc || !doc.$__behaviorPlanCompletedNow) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    Promise.resolve(
+      integrationBus.publish('behavior', 'behavior.plan_completed', {
+        planId: String(doc._id),
+        beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        title: doc.title || null,
+        completedAt: doc.updatedAt || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_e) {
+    /* bus optional — never block persistence */
+  }
+});
+
 module.exports = mongoose.models.BehaviorPlan || mongoose.model('BehaviorPlan', behaviorPlanSchema);

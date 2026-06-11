@@ -84,11 +84,33 @@ class BaseDomainModule {
       throw new Error(`[Domain:${this.name}] Must be initialized before mounting`);
     }
 
+    // W1168 — SECURITY: domain mounts were the ONLY API surface with NO
+    // `authenticate` (legacy registry mounts use dualMountAuth, app.js uses
+    // per-mount authenticate). Legacy routers shadow /api/<name> and
+    // /api/v1/<name> via first-match, but /api/v2/<name> was served SOLELY by
+    // this bare mount — every domain route (incl. beneficiary/family/quality
+    // data) was anonymous-reachable, and all branch-isolation guards
+    // (assertBranchMatch family) silently no-op'd without req.user/branchScope.
+    // Same `authenticate` (= authenticateToken) used by dualMountAuth for
+    // behavioural consistency. Lazy require — circular-import safety at boot.
+    const { authenticate } = require('../../middleware/auth');
+
+    // W1171 — SECURITY: populate req.branchScope on EVERY domain route.
+    // Without it the W1140 branch-isolation guards (assertBranchMatch
+    // family: branchScopedBeneficiaryParam / bodyScopedBeneficiaryGuard /
+    // effectiveBranchScope) silently no-op — 13 of the 25 domain routers
+    // never called requireBranchAccess themselves, so their guards were
+    // DORMANT. Central wiring activates all of them at once and also
+    // rejects foreign ?branchId=/body.branchId requests fail-closed (403)
+    // for branch-restricted callers. Idempotent for the routers that
+    // already self-wire it (recomputes the same scope).
+    const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+
     // Mount on /api/<name> and /api/v1/<name> and /api/v2/<name>
     const basePath = this.name;
-    app.use(`/api/${basePath}`, this.router);
-    app.use(`/api/v1/${basePath}`, this.router);
-    app.use(`/api/v2/${basePath}`, this.router);
+    app.use(`/api/${basePath}`, authenticate, requireBranchAccess, this.router);
+    app.use(`/api/v1/${basePath}`, authenticate, requireBranchAccess, this.router);
+    app.use(`/api/v2/${basePath}`, authenticate, requireBranchAccess, this.router);
 
     logger.info(
       `[Domain:${this.name}] Mounted on /api/${basePath}, /api/v1/${basePath}, /api/v2/${basePath}`

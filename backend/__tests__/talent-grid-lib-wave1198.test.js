@@ -58,10 +58,16 @@ describe('W1198 talent-grid.lib — box mapping (all 9 corners)', () => {
 describe('W1198 talent-grid.lib — grid aggregation', () => {
   test('distribution + hiPo/risk rates, ignores invalid boxes', () => {
     const g = L.buildGrid([
-      { box: 9 }, { box: 9 }, { box: 8 }, // 3 hiPo
-      { box: 5 }, { box: 7 },
-      { box: 1 }, { box: 2 }, // 2 risk (+ box 4 none)
-      { box: 0 }, { box: 99 }, { box: null }, // invalid → ignored
+      { box: 9 },
+      { box: 9 },
+      { box: 8 }, // 3 hiPo
+      { box: 5 },
+      { box: 7 },
+      { box: 1 },
+      { box: 2 }, // 2 risk (+ box 4 none)
+      { box: 0 },
+      { box: 99 },
+      { box: null }, // invalid → ignored
     ]);
     expect(g.total).toBe(7);
     expect(g.counts[9]).toBe(2);

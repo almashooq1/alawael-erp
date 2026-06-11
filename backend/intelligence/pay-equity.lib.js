@@ -101,11 +101,18 @@ function computeGenderGap(rows) {
  * Nitaqat/Saudization context where Saudi vs expat pay parity is scrutinised.
  */
 function isSaudi(nationality) {
-  const n = String(nationality || '').trim().toLowerCase();
+  const n = String(nationality || '')
+    .trim()
+    .toLowerCase();
   return n === 'sa' || n === 'sau' || n === 'saudi' || n === 'ksa' || n === 'السعودية';
 }
 function computeNationalityGap(rows) {
-  return twoGroupGap(rows, r => (isSaudi(r.nationality) ? 'saudi' : 'nonSaudi'), 'saudi', 'nonSaudi');
+  return twoGroupGap(
+    rows,
+    r => (isSaudi(r.nationality) ? 'saudi' : 'nonSaudi'),
+    'saudi',
+    'nonSaudi'
+  );
 }
 
 /**

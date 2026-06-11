@@ -169,7 +169,11 @@ async function main() {
     await mongoose.disconnect();
     if (JSON_MODE) {
       process.stdout.write(
-        JSON.stringify({ mode: 'sync-approvals', updated: results.updated.length, ...results }, null, 2) + '\n'
+        JSON.stringify(
+          { mode: 'sync-approvals', updated: results.updated.length, ...results },
+          null,
+          2
+        ) + '\n'
       );
     } else {
       process.stdout.write(

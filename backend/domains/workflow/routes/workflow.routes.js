@@ -6,8 +6,19 @@
 
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { journeyService } = require('../services/JourneyService');
 const { workflowEngine } = require('../WorkflowEngine');
+// W1166 — cross-branch isolation (W269 doctrine Layer B). Journeys advance
+// the clinical lifecycle of an episode: before this wave any authed user
+// could advance/exception-advance/read ANY episode's journey, complete ANY
+// task, and spoof ?branchId / body.branchId on dashboards and journey start.
+const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
+const {
+  assertBranchMatch,
+  effectiveBranchScope,
+  enforceBeneficiaryBranch,
+} = require('../../../middleware/assertBranchMatch');
 const {
   validateStartJourney,
   validateAdvancePhase,
@@ -15,7 +26,7 @@ const {
   validate,
 } = require('../validators/workflow.validator');
 
-// ─── Helper ─────────────────────────────────────────────────────────────────
+// ─── Helper ───────────────────────────────────────────────────────────────────
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -24,6 +35,44 @@ function asyncHandler(fn) {
 function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
+
+router.use(requireBranchAccess); // W1166 — populate req.branchScope
+
+// W1166 — generic ownership param hook for branch-or-beneficiary scoped
+// resources (mirrors timeline's enforceEpisodeBranch): direct branchId match,
+// falling back to the owning beneficiary's branch for legacy docs without a
+// denormalized branchId. No-op for unrestricted callers / non-ObjectId params.
+function branchOrBeneficiaryParam(modelName, label) {
+  return async function (req, res, next, id) {
+    try {
+      if (!req.branchScope || !req.branchScope.restricted) return next();
+      if (!mongoose.isValidObjectId(id)) return next();
+      let Model;
+      try {
+        Model = mongoose.model(modelName);
+      } catch (_e) {
+        return res.status(503).json({
+          success: false,
+          message: `${modelName} model unavailable — refusing for safety (fail-closed)`,
+        });
+      }
+      const doc = await Model.findById(id).select('branchId beneficiaryId').lean();
+      if (!doc) {
+        return res.status(404).json({ success: false, message: `${label} not found` });
+      }
+      if (doc.branchId) {
+        assertBranchMatch(req, doc.branchId, label);
+      } else {
+        await enforceBeneficiaryBranch(req, doc.beneficiaryId);
+      }
+      return next();
+    } catch (err) {
+      return res.status(err.status || 403).json({ success: false, message: err.message });
+    }
+  };
+}
+router.param('episodeId', branchOrBeneficiaryParam('EpisodeOfCare', 'episode'));
+router.param('taskId', branchOrBeneficiaryParam('WorkflowTask', 'task'));
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Journey Endpoints
@@ -39,11 +88,20 @@ router.post(
   asyncHandler(async (req, res) => {
     const { beneficiaryId, referralData } = req.body;
 
+    try {
+      // W1166 — restricted callers may only start journeys for beneficiaries
+      // in their own branch (anti body-spoof).
+      await enforceBeneficiaryBranch(req, beneficiaryId);
+    } catch (err) {
+      return res.status(err.status || 403).json({ success: false, message: err.message });
+    }
+
     const result = await journeyService.startJourney({
       beneficiaryId,
       referralData,
       userId: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1166 — restricted callers are pinned to their branch (no body spoof)
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
 
@@ -138,7 +196,8 @@ router.get(
   '/journey/dashboard/active',
   asyncHandler(async (req, res) => {
     const data = await journeyService.getActiveJourneysDashboard({
-      branchId: req.query.branchId || req.user?.branchId,
+      // W1166 — restricted callers are pinned to their branch (no ?branchId spoof)
+      branchId: effectiveBranchScope(req) || req.query.branchId || req.user?.branchId,
       limit: parseInt(req.query.limit) || 100,
     });
     res.json({ success: true, data });
@@ -153,7 +212,8 @@ router.get(
   '/journey/analytics',
   asyncHandler(async (req, res) => {
     const data = await journeyService.getJourneyAnalytics({
-      branchId: req.query.branchId,
+      // W1166 — restricted callers are pinned to their branch (no ?branchId spoof)
+      branchId: effectiveBranchScope(req) || req.query.branchId,
       from: req.query.from,
       to: req.query.to,
     });
@@ -205,7 +265,10 @@ router.get(
   '/tasks/overdue',
   asyncHandler(async (req, res) => {
     const WorkflowTask = require('../models/WorkflowTask');
-    const tasks = await WorkflowTask.getOverdueTasks(req.query.branchId || req.user?.branchId);
+    // W1166 — restricted callers are pinned to their branch (no ?branchId spoof)
+    const tasks = await WorkflowTask.getOverdueTasks(
+      effectiveBranchScope(req) || req.query.branchId || req.user?.branchId
+    );
     res.json({ success: true, data: tasks });
   })
 );

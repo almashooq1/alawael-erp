@@ -252,25 +252,29 @@ PhysiotherapyAssessmentSchema.virtual('jointsMeasured').get(function () {
 PhysiotherapyAssessmentSchema.set('toJSON', { virtuals: true });
 PhysiotherapyAssessmentSchema.set('toObject', { virtuals: true });
 
-// ── Unified-core linkage (W1047) — native pre-compile hooks (W954-safe).
-// On the draft→finalized flip → physiotherapy_assessment timeline row.
-PhysiotherapyAssessmentSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ─── W1072: unified-core linkage — physiotherapy assessment finalized ───────
+// Milestone = the PT assessment transitions to 'finalized'. Emits a timeline
+// event (mobility baseline / re-assessment / discharge). Non-callback hook.
+PhysiotherapyAssessmentSchema.pre('save', function flagPtFinalized() {
+  this.$__ptFinalizedNow = this.status === 'finalized' && (this.isNew || this.isModified('status'));
 });
-PhysiotherapyAssessmentSchema.post('save', function (doc) {
+
+PhysiotherapyAssessmentSchema.post('save', function emitPhysiotherapyAssessmentFinalized(doc) {
+  if (!doc.$__ptFinalizedNow) return;
   try {
-    if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('clinical-assessment', 'physiotherapy.assessment_finalized', {
-        physiotherapyAssessmentId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        assessmentType: doc.assessmentType,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    integrationBus.publish('physiotherapy-assessment', 'physiotherapy_assessment.finalized', {
+      assessmentId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : undefined,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      assessmentType: doc.assessmentType,
+      mobilityStatus: doc.mobilityStatus,
+      homeProgramGiven: !!doc.homeProgramGiven,
+      finalizedAt: doc.assessedAt || doc.updatedAt || new Date(),
+    });
+  } catch (err) {
+    // best-effort; never block the save on an event-bus issue
+    void err;
   }
 });
 

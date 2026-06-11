@@ -278,7 +278,12 @@ waitlistEntrySchema.virtual('priorityScore').get(function () {
 });
 
 // ─── Middleware: تسجيل تاريخ تغيير الحالة ─────────────────────────────────────
-waitlistEntrySchema.pre('save', async function () {
+waitlistEntrySchema.pre('save', function () {
+  // Unified-core producer flag (W996): fire the admission event only when the
+  // applicant crosses into 'enrolled' (new-as-enrolled OR …→enrolled).
+  this.$__enrolledNow =
+    this.status === WAITLIST_STATUSES.ENROLLED && (this.isNew || this.isModified('status'));
+
   if (this.isModified('status') && !this.isNew) {
     this.statusHistory.push({
       status: this.status,
@@ -455,6 +460,34 @@ waitlistEntrySchema.statics.getStats = async function (branchId) {
     urgent: byPriority[PRIORITY_LEVELS.URGENT] || 0,
   };
 };
+
+// ─── Unified-core producer (W996) ──────────────────────────────────────────────
+// Enrolling a waitlist applicant opens the beneficiary's episode of care — it
+// lands at the head of the per-beneficiary CareTimeline. The flag is computed
+// in the callback-style pre('save') above (a second async pre hook would mix
+// hook styles and trip the W483 hook-style gate). Literal `integrationBus.publish`
+// keeps the W389/W392 producer-coverage guards green.
+waitlistEntrySchema.post('save', function (doc) {
+  try {
+    if (!this.$__enrolledNow) return; // only emit on enrollment
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiary) return; // no linked beneficiary → nothing to place on a timeline
+
+    Promise.resolve(
+      integrationBus.publish('admissions', 'admission.enrolled', {
+        waitlistEntryId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        branchId: doc.branch ? String(doc.branch) : '',
+        applicantName: doc.applicantName || '',
+        disabilityType: doc.disabilityType || '',
+        enrolledAt: doc.enrolledAt || undefined,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired (e.g. unit tests) — never block persistence */
+  }
+});
 
 // ─── Model ─────────────────────────────────────────────────────────────────────
 const WaitlistEntry =

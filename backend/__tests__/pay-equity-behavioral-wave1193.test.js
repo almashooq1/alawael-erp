@@ -26,7 +26,15 @@ function base(overrides = {}) {
     scope: { level: 'branch', department: null },
     computedAt: new Date('2026-06-01'),
     headcount: 10,
-    genderGap: { aCount: 5, bCount: 5, aMedian: 10000, bMedian: 9000, medianGapPct: 10, direction: 'female', reportable: true },
+    genderGap: {
+      aCount: 5,
+      bCount: 5,
+      aMedian: 10000,
+      bMedian: 9000,
+      medianGapPct: 10,
+      direction: 'female',
+      reportable: true,
+    },
     nationalityGap: { reportable: false },
     cohortOutliers: { count: 1, ratePct: 10, thresholdPct: 20, byTitle: false },
     equityScore: 85,
@@ -70,7 +78,9 @@ describe('W1193 PayEquitySnapshot — Wave-18 invariants reject on save', () => 
   });
 
   test('flaggedCount cannot exceed headcount', async () => {
-    await expect(Snap.create(base({ headcount: 3, flaggedCount: 9 }))).rejects.toThrow(/flaggedCount/);
+    await expect(Snap.create(base({ headcount: 3, flaggedCount: 9 }))).rejects.toThrow(
+      /flaggedCount/
+    );
   });
 
   test('department scope requires a department name', async () => {

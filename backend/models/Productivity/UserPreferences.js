@@ -67,7 +67,6 @@ UserPreferencesSchema.pre('save', async function () {
   if (Array.isArray(this.pinnedWidgets) && this.pinnedWidgets.length > 6) {
     throw new Error('UserPreferences: pinnedWidgets exceeds max of 6');
   }
-  
 });
 
 module.exports =

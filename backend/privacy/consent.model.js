@@ -95,7 +95,6 @@ ConsentSchema.pre('findOneAndUpdate', async function () {
       throw new Error(`Consent field '${f}' is immutable`);
     }
   }
-  
 });
 
 ConsentSchema.statics.latestFor = function (subjectType, subjectId, purpose) {

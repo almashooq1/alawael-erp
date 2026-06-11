@@ -158,6 +158,78 @@ const goalSchema = new mongoose.Schema(
       default: () => [],
     },
 
+    // ─── R1 (W1090) — Goal ↔ Measure linkage (golden thread gap #1) ─────
+    // @deprecated (ADR-040, W1133): tactical stopgap. The canonical
+    // goal↔measure↔outcome linkage lives on `TherapeuticGoal` (the hub of the
+    // outcomes/GAS/forecast services). New care-plan goals should reference a
+    // canonical TherapeuticGoal via `therapeuticGoalId` (below) rather than
+    // re-implement linkage here. Frozen pending the ADR-040 migration.
+    // Links a goal to the standardized measure(s) that prove its progress,
+    // closing the "goal has no measure" gap so every SMART goal is backed
+    // by a quantifiable instrument. This is the data foundation for honest
+    // outcome dashboards (MCID/GAS) and the CDSS Next-Best-Action engine.
+    // Per docs/blueprint/43-beneficiary-journey-operating-system.md
+    // §III gap #1 + §XVI.1 data contract. Mirrors the W452 icfMapping
+    // pattern (sub-schema + refs + invariants in pre('save')).
+    //
+    // All fields optional/defaulted so legacy Goal records stay valid;
+    // the care-plan builder populates them when a goal is drafted.
+    //
+    // Invariants (enforced in pre('save') hook below):
+    //   - At most ONE entry may have role: 'primary'.
+    //   - No duplicate measureId within the array.
+    //   - If targetScore is set, targetDirection must also be set.
+    linkedMeasures: {
+      type: [
+        new mongoose.Schema(
+          {
+            measureId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'MeasurementMaster',
+              required: true,
+            },
+            role: {
+              type: String,
+              enum: ['primary', 'secondary'],
+              default: 'primary',
+            },
+            // Optional back-reference to the baseline MeasurementResult so
+            // progress applications can be compared to their origin point
+            // (partially serves golden-thread gap #5).
+            baselineResultId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'MeasurementResult',
+              default: null,
+            },
+            targetScore: { type: Number, default: null },
+            targetDirection: {
+              type: String,
+              enum: ['increase', 'decrease', 'maintain'],
+            },
+            addedAt: { type: Date, default: Date.now },
+            addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+          },
+          { _id: false }
+        ),
+      ],
+      default: () => [],
+    },
+
+    // ─── ADR-040 (W1133) — bridge to the canonical goal model ──────────
+    // Optional reference to the canonical `TherapeuticGoal` (the model that
+    // anchors the goal↔measure↔outcome golden thread across ~20 services). The
+    // additive Option-C bridge: a CarePlan-embedded Goal keeps its IEP structure
+    // but points at the canonical goal so outcome/GAS/forecast logic resolves
+    // through ONE model. Optional + defaulted (legacy goals stay valid); the
+    // destructive consolidation (migrate callers + retire SmartGoal) stays gated
+    // on owner sign-off per ADR-040.
+    therapeuticGoalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TherapeuticGoal',
+      default: null,
+      index: true,
+    },
+
     // Metadata
     createdAt: {
       type: Date,
@@ -181,8 +253,20 @@ goalSchema.index({ participantId: 1, status: 1 });
 goalSchema.index({ createdBy: 1, createdAt: -1 });
 // W452 — fast lookup of goals by primary ICF code (used by aggregate reports)
 goalSchema.index({ 'icfMapping.icfCode': 1 });
+// R1 (W1090) — fast lookup of goals by linked measure (outcome dashboards)
+goalSchema.index({ 'linkedMeasures.measureId': 1 });
+// gap #4 (plan↔goal) — the "which IEP goals bridge to this canonical goal?"
+// query is already served by the field-level `index: true` on therapeuticGoalId
+// (W1133 bridge); no separate schema.index() (would be a duplicate — W1154).
 
-// W452 — ICF mapping invariants enforced before save.
+// W452 + R1 (W1090) — pre-save invariants. ASYNC style (no `next` callback):
+// this codebase runs Mongoose 9, which silently breaks pure callback-style
+// pre('save', function(next)) hooks — `next` is not passed, so every .save()
+// threw "next is not a function" (caught by the W1090 behavioral test; the
+// pre-existing icfMapping block had the same latent bug, never exercised by a
+// real .save()). Throwing aborts the save with the thrown error, exactly as
+// the old `return next(err)` did. See feedback_mongoose_9_pre_save_callback_
+// silent_break + the W483/W954 hook-style lessons.
 goalSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
@@ -196,7 +280,9 @@ goalSchema.pre('save', async function () {
     // Invariant 2: targetQualifier requires baselineQualifier
     for (const m of this.icfMapping) {
       if (typeof m.targetQualifier === 'number' && typeof m.baselineQualifier !== 'number') {
-        throw new Error(`Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`);
+        throw new Error(
+          `Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`
+        );
       }
     }
 
@@ -210,7 +296,31 @@ goalSchema.pre('save', async function () {
     }
   }
 
-  
+  // ─── R1 (W1090) — linkedMeasures invariants (golden-thread gap #1) ──
+  if (Array.isArray(this.linkedMeasures) && this.linkedMeasures.length > 0) {
+    // Invariant 1: at most one primary measure per goal
+    const primaryMeasures = this.linkedMeasures.filter(m => m.role === 'primary');
+    if (primaryMeasures.length > 1) {
+      throw new Error('Goal.linkedMeasures: at most one entry may have role: primary');
+    }
+
+    // Invariant 2: no duplicate measureId within the array
+    const seenMeasures = new Set();
+    for (const m of this.linkedMeasures) {
+      const key = String(m.measureId);
+      if (seenMeasures.has(key)) {
+        throw new Error(`Goal.linkedMeasures: duplicate measureId '${key}'`);
+      }
+      seenMeasures.add(key);
+    }
+
+    // Invariant 3: a targetScore requires a targetDirection (else it is ambiguous)
+    for (const m of this.linkedMeasures) {
+      if (typeof m.targetScore === 'number' && !m.targetDirection) {
+        throw new Error('Goal.linkedMeasures: targetScore set without targetDirection');
+      }
+    }
+  }
 });
 
 module.exports = mongoose.models.Goal || mongoose.model('Goal', goalSchema);

@@ -74,33 +74,38 @@ const clinicalPathwayPlanSchema = new mongoose.Schema(
 clinicalPathwayPlanSchema.index({ branchId: 1, status: 1, createdAt: -1 });
 clinicalPathwayPlanSchema.index({ beneficiaryId: 1, pathwayType: 1, status: 1 });
 
-// W956 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
-clinicalPathwayPlanSchema.pre('validate', async function validateInvariants() {
+clinicalPathwayPlanSchema.pre('validate', function validateInvariants() {
   if (this.targetEndDate && this.startDate && this.targetEndDate < this.startDate) {
     this.invalidate('targetEndDate', 'targetEndDate must be greater than or equal to startDate');
   }
 });
 
-// ── Unified-core linkage (W1075 — clinical-pathway island → CareTimeline) ──
-clinicalPathwayPlanSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1062: unified-core linkage ───────────────────────────────────────
+// Completing the pathway plan is the milestone. Publish
+// clinical_pathway.completed → CareTimeline. NON-callback save hooks only
+// (the pre('validate') above stays callback-style — different event).
+clinicalPathwayPlanSchema.pre('save', function () {
+  this.$__pathwayCompletedNow =
+    this.status === 'COMPLETED' && (this.isNew || this.isModified('status'));
 });
-clinicalPathwayPlanSchema.post('save', function (doc) {
+
+function emitClinicalPathwayCompleted(doc) {
+  if (!doc || !doc.$__pathwayCompletedNow) return;
   try {
-    if (doc.status !== 'COMPLETED' || this.$__prevStatus === 'COMPLETED') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
-    Promise.resolve(
-      integrationBus.publish('care-pathway', 'clinical-pathway.completed', {
-        clinicalPathwayPlanId: String(doc._id),
-        beneficiaryId: String(doc.beneficiaryId),
-        pathwayType: doc.pathwayType,
-      })
-    ).catch(() => {});
-  } catch (_) {
-    /* never block persistence */
+    integrationBus.publish('clinical-pathway', 'clinical_pathway.completed', {
+      planId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      pathwayType: doc.pathwayType,
+      completedAt: doc.targetEndDate || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
   }
-});
+}
+
+clinicalPathwayPlanSchema.post('save', emitClinicalPathwayCompleted);
 
 module.exports =
   mongoose.models.ClinicalPathwayPlan ||

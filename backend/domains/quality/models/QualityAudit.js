@@ -155,4 +155,29 @@ qualityAuditSchema.index({ scope: 1, branchId: 1, auditedAt: -1 });
 qualityAuditSchema.index({ beneficiaryId: 1, auditedAt: -1 });
 qualityAuditSchema.index({ complianceLevel: 1, branchId: 1 });
 
+// ── W1122 — publish quality_audit_record.completed for beneficiary-scoped audits ─
+qualityAuditSchema.pre('save', function flagQualityAuditRecordCompleted() {
+  this.$__qualityAuditRecordCompleted =
+    this.isNew && this.scope === 'beneficiary' && Boolean(this.beneficiaryId);
+});
+
+qualityAuditSchema.post('save', function emitQualityAuditRecordCompleted(doc) {
+  if (!doc.$__qualityAuditRecordCompleted) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('quality-audit-record', 'quality_audit_record.completed', {
+      auditId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(typeof doc.overallScore === 'number' ? { overallScore: doc.overallScore } : {}),
+      ...(doc.complianceLevel ? { complianceLevel: doc.complianceLevel } : {}),
+      ...(doc.auditType ? { auditType: doc.auditType } : {}),
+      completedAt: doc.auditedAt || doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports = mongoose.models.QualityAudit || mongoose.model('QualityAudit', qualityAuditSchema);

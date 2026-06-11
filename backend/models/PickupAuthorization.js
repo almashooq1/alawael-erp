@@ -106,6 +106,30 @@ PickupAuthorizationSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W1092 — unified-core linkage: emit when a pickup authorization is created
+// for the beneficiary (a non-guardian gains the right to collect them).
+PickupAuthorizationSchema.pre('save', function flagPickupAuthorizationRequested() {
+  this.$__pickupAuthorizationRequested = this.isNew;
+});
+
+PickupAuthorizationSchema.post('save', function emitPickupAuthorizationRequested(doc) {
+  if (!doc.$__pickupAuthorizationRequested) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('pickup-authorization', 'pickup_authorization.requested', {
+      authorizationId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      pickupPersonName: doc.pickupPersonName,
+      pickupPersonRelationship: doc.pickupPersonRelationship,
+      validFrom: doc.validFrom,
+      validUntil: doc.validUntil,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.PickupAuthorization ||
   mongoose.model('PickupAuthorization', PickupAuthorizationSchema);

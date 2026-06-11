@@ -66,9 +66,30 @@ beforeAll(async () => {
     db.collection('expenses').deleteMany({}),
   ]);
   await db.collection('invoices').insertMany([
-    { deleted_at: null, status: 'paid', total_amount: 100, vat_amount: 15, invoice_date: new Date('2026-01-15'), branch_id: oid(A) },
-    { deleted_at: null, status: 'paid', total_amount: 200, vat_amount: 30, invoice_date: new Date('2026-02-15'), branch_id: oid(A) },
-    { deleted_at: null, status: 'paid', total_amount: 500, vat_amount: 75, invoice_date: new Date('2026-01-20'), branch_id: oid(B) },
+    {
+      deleted_at: null,
+      status: 'paid',
+      total_amount: 100,
+      vat_amount: 15,
+      invoice_date: new Date('2026-01-15'),
+      branch_id: oid(A),
+    },
+    {
+      deleted_at: null,
+      status: 'paid',
+      total_amount: 200,
+      vat_amount: 30,
+      invoice_date: new Date('2026-02-15'),
+      branch_id: oid(A),
+    },
+    {
+      deleted_at: null,
+      status: 'paid',
+      total_amount: 500,
+      vat_amount: 75,
+      invoice_date: new Date('2026-01-20'),
+      branch_id: oid(B),
+    },
   ]);
   await db.collection('finance_payments').insertMany([
     { deleted_at: null, payment_method: 'cash', amount: 80 }, // no branch_id (unscopable)

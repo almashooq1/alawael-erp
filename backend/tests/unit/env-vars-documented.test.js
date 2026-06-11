@@ -53,6 +53,9 @@ const ALLOW_LIST = new Set([
   'HOST',
   'CI',
   'DEBUG',
+  // OS conventions (home-dir resolution in scripts/check-memory-health.js)
+  'HOME',
+  'USERPROFILE',
   // Process/runtime introspection
   'npm_package_version',
   'npm_lifecycle_event',

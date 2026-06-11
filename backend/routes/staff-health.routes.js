@@ -65,19 +65,28 @@ const WRITE_ROLES = [
   'physician',
 ];
 // Clinical decisions (clearance / restriction / closure) — clinicians + occ-health.
-const CLINICAL_ROLES = ['admin', 'superadmin', 'super_admin', 'occupational_health', 'physician', 'hr_manager'];
+const CLINICAL_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'occupational_health',
+  'physician',
+  'hr_manager',
+];
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
 router.use(requireBranchAccess);
 
-const num = (v, d) => (v === undefined || v === null || v === '' || isNaN(Number(v)) ? d : Number(v));
+const num = (v, d) =>
+  v === undefined || v === null || v === '' || isNaN(Number(v)) ? d : Number(v);
 const bad = (res, msg) => res.status(400).json({ success: false, message: msg });
 
 // ── List ────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), deletedAt: null };
-    if (req.query.recordType && TYPES.includes(req.query.recordType)) filter.recordType = req.query.recordType;
+    if (req.query.recordType && TYPES.includes(req.query.recordType))
+      filter.recordType = req.query.recordType;
     if (req.query.status && STATUSES.includes(req.query.status)) filter.status = req.query.status;
     if (mongoose.isValidObjectId(req.query.employeeId)) filter.employeeId = req.query.employeeId;
     const limit = Math.min(num(req.query.limit, 100), 500);
@@ -151,7 +160,11 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     const [total, byType, dueRows] = await Promise.all([
       Health.countDocuments(filter),
       Health.aggregate([{ $match: match }, { $group: { _id: '$recordType', n: { $sum: 1 } } }]),
-      Health.find({ ...filter, status: { $nin: ['closed'] }, nextDueDate: { $ne: null, $lte: new Date() } }),
+      Health.find({
+        ...filter,
+        status: { $nin: ['closed'] },
+        nextDueDate: { $ne: null, $lte: new Date() },
+      }),
     ]);
     res.json({
       success: true,
@@ -185,7 +198,8 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const b = req.body || {};
     if (!mongoose.isValidObjectId(b.employeeId)) return bad(res, 'معرّف الموظف مطلوب');
     if (!TYPES.includes(b.recordType)) return bad(res, 'نوع السجل غير صالح');
-    const branchId = effectiveBranchScope(req) || (mongoose.isValidObjectId(b.branchId) ? b.branchId : null);
+    const branchId =
+      effectiveBranchScope(req) || (mongoose.isValidObjectId(b.branchId) ? b.branchId : null);
 
     const doc = await Health.create({
       employeeId: b.employeeId,

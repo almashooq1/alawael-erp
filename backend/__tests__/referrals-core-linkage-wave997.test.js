@@ -3,16 +3,16 @@
 /**
  * referrals-core-linkage-wave997.test.js — W997.
  *
- * Wires the 4 fragmented referral subsystems onto ONE shared `referral` event
- * vocabulary on the unified-core timeline: accepted (info) / completed (success)
- * / rejected|declined (warning), with a `referralType` discriminator. Producers:
- * native post-save hooks in TherapyReferral / CommunityReferral / MedicalReferral
- * / Referral (FHIR portal). RUNTIME end-to-end against a real in-memory Mongo +
- * the real integration bus + real subscribers → `referral` CareTimeline rows.
+ * Wires referral subsystems onto ONE shared `referral` event vocabulary on
+ * the unified-core timeline: declined|rejected (warning), with a
+ * `referralType` discriminator. Producers: native post-save hooks in
+ * TherapyReferral / Referral (FHIR portal). RUNTIME end-to-end against a real
+ * in-memory Mongo + the real integration bus + real subscribers → `referral`
+ * CareTimeline rows.
  *
- * Covers both field-name variants (`beneficiary` and `beneficiaryId`) and the
- * coexistence with each model's pre-existing hooks (Medical's async pre-save,
- * Community's pre-find soft-delete).
+ * CommunityReferral / MedicalReferral linkage is covered by this branch's
+ * wave1061 / wave1001 suites (community_referral.completed /
+ * medical_referral.completed wiring).
  */
 
 jest.unmock('mongoose');
@@ -22,12 +22,12 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
-let TherapyReferral, CommunityReferral, MedicalReferral, Referral, CareTimeline;
+let TherapyReferral, Referral, CareTimeline;
 let seq = 0;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query);
     if (row) return row;
@@ -40,8 +40,6 @@ beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w997-referrals' } });
   await mongoose.connect(mongod.getUri());
   TherapyReferral = require('../models/TherapyReferral');
-  CommunityReferral = require('../models/CommunityReferral');
-  ({ MedicalReferral } = require('../models/medicalReferral.model'));
   ({ Referral } = require('../models/Referral'));
   ({ CareTimeline } = require('../domains/timeline/models/CareTimeline'));
   require('../models/Beneficiary');
@@ -58,14 +56,12 @@ afterAll(async () => {
 afterEach(async () => {
   await Promise.all([
     TherapyReferral.deleteMany({}),
-    CommunityReferral.deleteMany({}),
-    MedicalReferral.deleteMany({}),
     Referral.deleteMany({}),
     CareTimeline.deleteMany({}),
   ]);
 });
 
-describe('W997 — all 4 referral subsystems reach the unified-core timeline', () => {
+describe('W997 — referral subsystems reach the unified-core timeline', () => {
   it('TherapyReferral (beneficiary field): declined → WARNING referral row', async () => {
     const ben = new mongoose.Types.ObjectId();
     const r = await TherapyReferral.create({
@@ -83,42 +79,10 @@ describe('W997 — all 4 referral subsystems reach the unified-core timeline', (
     expect(tl.metadata.referralType).toBe('therapy');
   });
 
-  it('CommunityReferral (beneficiaryId field): accepted → INFO referral row', async () => {
-    const ben = new mongoose.Types.ObjectId();
-    const r = await CommunityReferral.create({
-      branchId: new mongoose.Types.ObjectId(),
-      beneficiaryId: ben,
-      beneficiaryName: 'سالم',
-      referralType: 'external',
-      referralDate: new Date(),
-      reasonForReferral: 'vocational support',
-      status: 'pending',
-    });
-    const loaded = await CommunityReferral.findById(r._id);
-    loaded.status = 'accepted';
-    await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: ben, eventType: 'referral' });
-    expect(tl).toBeTruthy();
-    expect(tl.category).toBe('clinical');
-    expect(tl.severity).toBe('info');
-    expect(tl.metadata.referralType).toBe('community');
-  });
-
-  it('MedicalReferral (coexists with async pre-save): completed → SUCCESS referral row', async () => {
-    const ben = new mongoose.Types.ObjectId();
-    const r = await MedicalReferral.create({
-      beneficiary: ben,
-      referralType: 'consultation',
-      status: 'draft',
-    });
-    const loaded = await MedicalReferral.findById(r._id);
-    loaded.status = 'completed';
-    await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: ben, eventType: 'referral' });
-    expect(tl).toBeTruthy();
-    expect(tl.severity).toBe('success');
-    expect(tl.metadata.referralType).toBe('medical');
-  });
+  // NOTE (merge of parallel waves): CommunityReferral and MedicalReferral
+  // linkage is covered by community-referral-completed-core-linkage-wave1061
+  // and medical-referral-core-linkage-wave1001 (this branch's wiring:
+  // community_referral.completed / medical_referral.completed eventTypes).
 
   it('Referral (FHIR portal, optional beneficiary present): rejected → WARNING referral row', async () => {
     const ben = new mongoose.Types.ObjectId();

@@ -622,6 +622,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
   dualMountAuth(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
   // HR — الموارد البشرية الموحدة — auth required (employee PII)
+  // OWNER MAP for /api/(v1/)?hr (ADR-043): this domain router owns the CORE
+  // personnel subpaths (/employees, /leaves, /attendance); the Round-10 module
+  // subpaths (/loans, /travel, /visas, …) are served by routes/hr/hr-modules.routes.js
+  // mounted at app.js (/api/v1/hr). Mounted FIRST here, so it wins on overlap —
+  // a new subpath must not collide with hr-modules. Branch-isolated in W1141.
   dualMountAuth(app, 'hr', safeRequire('../domains/hr/routes/hr.routes'));
   // Security/RBAC — الأمان وإدارة الصلاحيات الموحدة
   dualMountAuth(app, 'security/domain', safeRequire('../domains/security/routes/security-rbac.routes'));

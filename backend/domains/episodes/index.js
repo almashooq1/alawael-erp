@@ -29,7 +29,7 @@ class EpisodeRepository extends BaseRepository {
     });
   }
 
-  async findByTherapist(therapistId, { page = 1, limit = 20 } = {}) {
+  async findByTherapist(therapistId, { page = 1, limit = 20, branchId = null } = {}) {
     return this.findPaginated({
       filter: {
         $or: [
@@ -38,6 +38,8 @@ class EpisodeRepository extends BaseRepository {
         ],
         status: 'active',
         isDeleted: { $ne: true },
+        // W1150 — restricted callers see only their own branch's episodes
+        ...(branchId && { branchId }),
       },
       page,
       limit,

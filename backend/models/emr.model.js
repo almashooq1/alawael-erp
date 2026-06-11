@@ -530,8 +530,7 @@ AllergySchema.index({ 'allergen.type': 1 });
 module.exports = {
   MedicalRecord:
     mongoose.models.MedicalRecord || mongoose.model('MedicalRecord', MedicalRecordSchema),
-  VitalSign:
-    mongoose.models.EmrVitalSign || mongoose.model('EmrVitalSign', VitalSignSchema),
+  VitalSign: mongoose.models.EmrVitalSign || mongoose.model('EmrVitalSign', VitalSignSchema),
   LabResult: mongoose.models.LabResult || mongoose.model('LabResult', LabResultSchema),
   ClinicalNote:
     mongoose.models.EmrClinicalNote || mongoose.model('EmrClinicalNote', ClinicalNoteSchema),

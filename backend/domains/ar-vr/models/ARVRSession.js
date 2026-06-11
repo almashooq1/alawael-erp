@@ -240,4 +240,30 @@ arvrSessionSchema.index({ beneficiaryId: 1, startedAt: -1 });
 arvrSessionSchema.index({ therapistId: 1, startedAt: -1 });
 arvrSessionSchema.index({ 'scenario.scenarioId': 1 });
 
+// ── W1110 — publish arvr_session.completed when a session finishes ────────────
+arvrSessionSchema.pre('save', function flagArvrSessionCompleted() {
+  const becameCompleted = (this.isNew || this.isModified('status')) && this.status === 'completed';
+  this.$__arvrSessionCompleted = becameCompleted;
+});
+
+arvrSessionSchema.post('save', function emitArvrSessionCompleted(doc) {
+  if (!doc.$__arvrSessionCompleted) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('arvr-session', 'arvr_session.completed', {
+      sessionId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      ...(doc.therapistId ? { therapistId: String(doc.therapistId) } : {}),
+      ...(doc.technologyType ? { technologyType: doc.technologyType } : {}),
+      ...(typeof doc.plannedDurationMinutes === 'number'
+        ? { plannedDurationMinutes: doc.plannedDurationMinutes }
+        : {}),
+      completedAt: doc.endedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a bus failure */
+  }
+});
+
 module.exports = mongoose.models.ARVRSession || mongoose.model('ARVRSession', arvrSessionSchema);

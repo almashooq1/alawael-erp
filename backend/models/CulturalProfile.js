@@ -199,7 +199,9 @@ CulturalProfileSchema.index({ branchId: 1, 'genderPreferences.therapistGenderPre
 CulturalProfileSchema.pre('save', async function () {
   // Mahram required → mahramRelationship must be filled
   if (this.genderPreferences?.mahramRequired && !this.genderPreferences.mahramRelationship) {
-    throw new Error('CulturalProfile: mahramRequired=true requires mahramRelationship to be specified');
+    throw new Error(
+      'CulturalProfile: mahramRequired=true requires mahramRelationship to be specified'
+    );
   }
 
   // Medical fasting exemption requires details ≥10 chars
@@ -209,8 +211,8 @@ CulturalProfileSchema.pre('save', async function () {
     (!obs.medicalExemptionDetails || obs.medicalExemptionDetails.trim().length < 10)
   ) {
     throw new Error(
-        'CulturalProfile: hasMedicalExemptionFromFasting=true requires medicalExemptionDetails (≥10 chars)'
-      );
+      'CulturalProfile: hasMedicalExemptionFromFasting=true requires medicalExemptionDetails (≥10 chars)'
+    );
   }
 
   // Acceptable contact hours: startHour < endHour
@@ -218,12 +220,10 @@ CulturalProfileSchema.pre('save', async function () {
     const { startHour, endHour } = this.communication.acceptableContactHours;
     if (typeof startHour === 'number' && typeof endHour === 'number' && startHour >= endHour) {
       throw new Error(
-          'CulturalProfile: communication.acceptableContactHours.startHour must be < endHour'
-        );
+        'CulturalProfile: communication.acceptableContactHours.startHour must be < endHour'
+      );
     }
   }
-
-  
 });
 
 module.exports =

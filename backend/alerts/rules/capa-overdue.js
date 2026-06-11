@@ -50,7 +50,8 @@ module.exports = {
         key: `capa-overdue:${c._id}`,
         subject: { type: 'CapaItem', id: c._id },
         branchId: c.branchId,
-        message: `CAPA ${c.capaNumber || c._id} "${c.title || ''}" overdue${due ? ` (due ${due})` : ''}`.trim(),
+        message:
+          `CAPA ${c.capaNumber || c._id} "${c.title || ''}" overdue${due ? ` (due ${due})` : ''}`.trim(),
       };
       // High / critical priority corrective actions escalate to critical.
       if (c.priority === 'critical' || c.priority === 'high') finding.severity = 'critical';

@@ -80,5 +80,31 @@ SessionAttendanceSchema.index({ branchId: 1, scheduledDate: -1, status: 1 });
 // Therapist dashboard: their session attendance.
 SessionAttendanceSchema.index({ therapistId: 1, scheduledDate: -1 });
 
+// ── W1084: unified-core producer ───────────────────────────────────
+// Emit session_attendance.missed when a NEW attendance row records a
+// no_show / absent so the missed-care gap lands on the beneficiary's core
+// timeline. Present/late/cancelled and edits don't fire. Non-callback (W483).
+SessionAttendanceSchema.pre('save', function flagSessionMissed() {
+  this.$__sessionMissed = this.isNew && (this.status === 'no_show' || this.status === 'absent');
+});
+
+SessionAttendanceSchema.post('save', function emitSessionMissed(doc) {
+  if (!doc.$__sessionMissed) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('session-attendance', 'session_attendance.missed', {
+      attendanceId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      sessionId: doc.sessionId ? String(doc.sessionId) : null,
+      status: doc.status || null,
+      billable: doc.billable === true,
+      scheduledDate: doc.scheduledDate || doc.createdAt || new Date(),
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.SessionAttendance || mongoose.model('SessionAttendance', SessionAttendanceSchema);

@@ -42,10 +42,14 @@ async function resolveBranchIds(logger) {
   try {
     Branch = mongoose.model('Branch');
   } catch {
-    logger.warn('[pay-equity] Branch model unavailable + PAY_EQUITY_BRANCH_IDS unset; nothing to sweep');
+    logger.warn(
+      '[pay-equity] Branch model unavailable + PAY_EQUITY_BRANCH_IDS unset; nothing to sweep'
+    );
     return [];
   }
-  const filter = { $or: [{ status: 'active' }, { isActive: true }, { status: { $exists: false } }] };
+  const filter = {
+    $or: [{ status: 'active' }, { isActive: true }, { status: { $exists: false } }],
+  };
   const rows = await Branch.find(filter).select('_id').limit(500).lean();
   return rows.map(r => String(r._id));
 }
@@ -60,7 +64,9 @@ function breachesOf(doc, floor, ceiling) {
     ['nationality', doc.nationalityGap],
   ]) {
     if (g && g.reportable && typeof g.medianGapPct === 'number' && g.medianGapPct > ceiling) {
-      out.push(`${dim} medianGap=${g.medianGapPct}% > ceiling ${ceiling}% (disadvantaged: ${g.direction})`);
+      out.push(
+        `${dim} medianGap=${g.medianGapPct}% > ceiling ${ceiling}% (disadvantaged: ${g.direction})`
+      );
     }
   }
   return out;
@@ -121,7 +127,9 @@ function wirePayEquitySweeper(app, deps = {}) {
       TZ
     );
     scheduledCount++;
-    logger.info('[startup] W1194 pay-equity monitoring sweeper scheduled (monthly, 1st @ 06:00 Asia/Riyadh)');
+    logger.info(
+      '[startup] W1194 pay-equity monitoring sweeper scheduled (monthly, 1st @ 06:00 Asia/Riyadh)'
+    );
   }
 
   if (scheduledCount === 0) {

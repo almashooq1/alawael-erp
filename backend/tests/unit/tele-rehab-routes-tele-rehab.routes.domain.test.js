@@ -55,7 +55,8 @@ describe('domains/tele-rehab/routes/tele-rehab.routes.js', () => {
 
   test('has local dependencies (1)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(2);
+    // W1157: + assertBranchMatch middleware + TeleSession loadModel fallback
+    expect(locals.length).toBe(4);
   });
 
   test('has module.exports', () => {

@@ -197,8 +197,6 @@ accountingExpenseSchema.pre('save', async function () {
   if (this.isModified() && !this.isNew) {
     this.updatedBy = this.createdBy; // يمكن تحسينه للحصول على المستخدم الحالي
   }
-
-  
 });
 
 // Static method للحصول على إحصائيات المصروفات

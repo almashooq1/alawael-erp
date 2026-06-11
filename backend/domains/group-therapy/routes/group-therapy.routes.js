@@ -4,6 +4,36 @@
 
 const express = require('express');
 const router = express.Router();
+// W1140 — cross-branch isolation (W269 doctrine): auto-enforce beneficiary
+// ownership on every :beneficiaryId param + body-carried beneficiary ids.
+// W1157 — close the group/session-keyed :id gap + list scoping:
+//   - /:id → /:groupId (TherapyGroup), /sessions/:sessionId →
+//     /sessions/:groupSessionId (GroupSession) so ownership hooks fire first
+//   - list/dashboard use effectiveBranchScope (no ?branchId= spoofing)
+const {
+  branchScopedBeneficiaryParam,
+  branchScopedResourceParam,
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.param(
+  'groupId',
+  branchScopedResourceParam({
+    modelName: 'TherapyGroup',
+    label: 'therapy group',
+    loadModel: () => require('../models/TherapyGroup'),
+  })
+);
+router.param(
+  'groupSessionId',
+  branchScopedResourceParam({
+    modelName: 'GroupSession',
+    label: 'group session',
+    loadModel: () => require('../models/GroupSession'),
+  })
+);
+router.use(bodyScopedBeneficiaryGuard);
 const { groupTherapyService } = require('../services/GroupTherapyService');
 const {
   validateCreateGroup,
@@ -28,7 +58,8 @@ router.post(
     const data = await groupTherapyService.createGroup({
       ...req.body,
       createdBy: getUserId(req),
-      branchId: req.user?.branchId || req.body.branchId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
@@ -39,7 +70,8 @@ router.get(
     const data = await groupTherapyService.listGroups({
       status: req.query.status,
       type: req.query.type,
-      branchId: req.query.branchId || req.user?.branchId,
+      // W1157 — restricted callers are pinned to their own branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId,
       therapistId: req.query.therapistId,
       page: req.query.page,
       limit: req.query.limit,
@@ -50,7 +82,10 @@ router.get(
 router.get(
   '/dashboard',
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.getDashboard(req.query.branchId || req.user?.branchId);
+    // W1157 — effectiveBranchScope ignores ?branchId= spoofing for restricted callers
+    const data = await groupTherapyService.getDashboard(
+      effectiveBranchScope(req) || req.user?.branchId
+    );
     res.json({ success: true, data });
   })
 );
@@ -62,35 +97,35 @@ router.get(
   })
 );
 router.get(
-  '/:id',
+  '/:groupId',
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.getGroup(req.params.id);
+    const data = await groupTherapyService.getGroup(req.params.groupId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/:id',
+  '/:groupId',
   validate(validateUpdateGroup),
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.updateGroup(req.params.id, req.body);
+    const data = await groupTherapyService.updateGroup(req.params.groupId, req.body);
     res.json({ success: true, data });
   })
 );
 
 // Members
 router.post(
-  '/:id/members',
+  '/:groupId/members',
   validate(validateAddMember),
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.addMember(req.params.id, req.body);
+    const data = await groupTherapyService.addMember(req.params.groupId, req.body);
     res.json({ success: true, data });
   })
 );
 router.post(
-  '/:id/members/:beneficiaryId/withdraw',
+  '/:groupId/members/:beneficiaryId/withdraw',
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.removeMember(
-      req.params.id,
+      req.params.groupId,
       req.params.beneficiaryId,
       req.body.reason
     );
@@ -100,38 +135,42 @@ router.post(
 
 // Sessions
 router.post(
-  '/:id/sessions',
+  '/:groupId/sessions',
   validate(validateCreateGroupSession),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.createGroupSession({
       ...req.body,
-      groupId: req.params.id,
-      branchId: req.user?.branchId || req.body.branchId,
+      groupId: req.params.groupId,
+      // W1171 — pin: restricted callers cannot spoof a foreign branch
+      branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });
     res.status(201).json({ success: true, data });
   })
 );
 router.get(
-  '/:id/sessions',
+  '/:groupId/sessions',
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.getGroupSessions(
-      req.params.id,
+      req.params.groupId,
       parseInt(req.query.limit) || 20
     );
     res.json({ success: true, data, total: data.length });
   })
 );
 router.get(
-  '/sessions/:sessionId',
+  '/sessions/:groupSessionId',
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.getSessionDetails(req.params.sessionId);
+    const data = await groupTherapyService.getSessionDetails(req.params.groupSessionId);
     res.json({ success: true, data });
   })
 );
 router.put(
-  '/sessions/:sessionId/complete',
+  '/sessions/:groupSessionId/complete',
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.completeGroupSession(req.params.sessionId, req.body);
+    const data = await groupTherapyService.completeGroupSession(
+      req.params.groupSessionId,
+      req.body
+    );
     res.json({ success: true, data });
   })
 );

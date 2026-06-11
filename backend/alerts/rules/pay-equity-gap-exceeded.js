@@ -43,7 +43,9 @@ function breachesOf(snap) {
     ['nationality', snap.nationalityGap],
   ]) {
     if (g && g.reportable && typeof g.medianGapPct === 'number' && g.medianGapPct > GAP_CEILING) {
-      out.push(`${dim} median gap ${g.medianGapPct}% > ceiling ${GAP_CEILING}% (${g.direction} disadvantaged)`);
+      out.push(
+        `${dim} median gap ${g.medianGapPct}% > ceiling ${GAP_CEILING}% (${g.direction} disadvantaged)`
+      );
     }
   }
   return out;
@@ -53,7 +55,8 @@ module.exports = {
   id: 'pay-equity-gap-exceeded',
   severity: 'warning',
   category: 'hr',
-  description: 'Latest pay-equity snapshot breaches the equity-score floor or a reportable gap ceiling',
+  description:
+    'Latest pay-equity snapshot breaches the equity-score floor or a reportable gap ceiling',
 
   // exposed for the drift guard
   _breachesOf: breachesOf,

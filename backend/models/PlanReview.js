@@ -106,4 +106,32 @@ const planReviewSchema = new mongoose.Schema(
 planReviewSchema.index({ carePlan: 1, reviewDate: -1 });
 planReviewSchema.index({ beneficiary: 1, reviewDate: -1 });
 
+// ── W1053: unified-core linkage ───────────────────────────────────────
+// On creation, publish plan_review.recorded so the cross-module subscriber
+// records a clinical milestone on the beneficiary's CareTimeline. NON-callback
+// hooks only (global async save plugin puts Kareem in promise-adapter mode —
+// callback hooks would break at runtime).
+planReviewSchema.pre('save', function () {
+  this.$__planReviewRecordedNow = this.isNew;
+});
+
+function emitPlanReviewRecorded(doc) {
+  if (!doc || !doc.$__planReviewRecordedNow) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('plan-review', 'plan_review.recorded', {
+      reviewId: String(doc._id),
+      beneficiaryId: doc.beneficiary ? String(doc.beneficiary) : null,
+      reviewType: doc.reviewType,
+      progressRating: doc.progressRating,
+      reviewDate: doc.reviewDate,
+      recordedAt: doc.createdAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
+  }
+}
+
+planReviewSchema.post('save', emitPlanReviewRecorded);
+
 module.exports = mongoose.models.PlanReview || mongoose.model('PlanReview', planReviewSchema);

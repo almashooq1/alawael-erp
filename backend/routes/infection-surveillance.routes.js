@@ -190,7 +190,8 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       if (r.category) byCategory[r.category] = (byCategory[r.category] || 0) + 1;
       if (r.caseStatus) byStatus[r.caseStatus] = (byStatus[r.caseStatus] || 0) + 1;
       if (ACTIVE_STATUSES.includes(r.caseStatus)) active++;
-      if (r.excludedFromCenter && (!r.exclusionEnd || new Date(r.exclusionEnd).getTime() > now)) excluded++;
+      if (r.excludedFromCenter && (!r.exclusionEnd || new Date(r.exclusionEnd).getTime() > now))
+        excluded++;
       if (r.reportedToAuthority) reported++;
     }
     res.json({
@@ -250,7 +251,9 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       symptoms: Array.isArray(body.symptoms)
         ? body.symptoms.slice(0, 30).map(s => String(s).slice(0, 80))
         : [],
-      caseStatus: CASE_STATUSES.includes(String(body.caseStatus)) ? String(body.caseStatus) : 'suspected',
+      caseStatus: CASE_STATUSES.includes(String(body.caseStatus))
+        ? String(body.caseStatus)
+        : 'suspected',
       labConfirmed: !!body.labConfirmed,
       labResult: String(body.labResult || '').slice(0, 300),
       isolationRequired: !!body.isolationRequired,
@@ -281,7 +284,10 @@ router.post('/:id/resolve', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await InfectionSurveillanceCase.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await InfectionSurveillanceCase.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.caseStatus === 'resolved') {
       return res.status(409).json({ success: false, message: 'الحالة محلولة سلفاً' });
@@ -302,7 +308,10 @@ router.post('/:id/report-authority', requireRole(WRITE_ROLES), async (req, res) 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await InfectionSurveillanceCase.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await InfectionSurveillanceCase.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     row.reportedToAuthority = true;
     row.authorityReportDate = req.body?.at ? new Date(req.body.at) : new Date();
@@ -320,7 +329,10 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await InfectionSurveillanceCase.findOne({ _id: req.params.id, ...branchFilter(req) });
+    const row = await InfectionSurveillanceCase.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.caseStatus === 'resolved') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل حالة محلولة' });

@@ -57,39 +57,31 @@ communityReferralSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-// W997 — surface referral outcomes on the unified-core timeline (shared
-// `referral` domain). accepted / completed / rejected. Native pre-compile hooks
-// per the W970 pattern (the modelEventBridge-is-dead workaround); guarded +
-// fire-and-forget. Reads `beneficiary` OR `beneficiaryId` (this model uses
-// beneficiaryId, optional — guarded). post('save') is a different event from the
-// pre(/^find/) soft-delete filter above, so no hook-style conflict.
-communityReferralSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1061: unified-core linkage ───────────────────────────────────────
+// Completing a referral is the milestone. Publish
+// community_referral.completed → CareTimeline. NON-callback hooks only.
+communityReferralSchema.pre('save', function () {
+  this.$__communityReferralCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
 });
-communityReferralSchema.post('save', function (doc) {
+
+function emitCommunityReferralCompleted(doc) {
+  if (!doc || !doc.$__communityReferralCompletedNow) return;
   try {
-    if (doc.status === this.$__prevStatus) return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
-    const beneficiaryId = doc.beneficiary || doc.beneficiaryId;
-    if (!beneficiaryId) return;
-    const base = {
+    integrationBus.publish('community-referral', 'community_referral.completed', {
       referralId: String(doc._id),
-      beneficiaryId: String(beneficiaryId),
-      referralType: 'community',
-      status: doc.status,
-    };
-    if (doc.status === 'accepted') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.accepted', base)).catch(() => {});
-    } else if (doc.status === 'completed') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.completed', base)).catch(() => {});
-    } else if (doc.status === 'rejected' || doc.status === 'declined') {
-      Promise.resolve(integrationBus.publish('referral', 'referral.rejected', base)).catch(() => {});
-    }
-  } catch (_) {
-    /* bus not wired — never block persistence */
+      beneficiaryId: doc.beneficiaryId ? String(doc.beneficiaryId) : null,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      referralType: doc.referralType,
+      completedAt: doc.completedAt || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* bus optional — never block the write */
   }
-});
+}
+
+communityReferralSchema.post('save', emitCommunityReferralCompleted);
 
 module.exports =
   mongoose.models.CommunityReferral || mongoose.model('CommunityReferral', communityReferralSchema);

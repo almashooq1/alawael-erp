@@ -93,6 +93,31 @@ BeneficiaryDayAttendanceSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// W1090 — unified-core linkage: emit when the beneficiary is marked present
+// (or late) for the day at the day-rehab center.
+BeneficiaryDayAttendanceSchema.pre('save', function flagDayAttendancePresent() {
+  this.$__dayAttendancePresent =
+    this.isNew && (this.status === 'present' || this.status === 'late');
+});
+
+BeneficiaryDayAttendanceSchema.post('save', function emitDayAttendancePresent(doc) {
+  if (!doc.$__dayAttendancePresent) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('day-attendance', 'day_attendance.present', {
+      attendanceId: String(doc._id),
+      beneficiaryId: doc.beneficiaryId,
+      ...(doc.branchId ? { branchId: doc.branchId } : {}),
+      date: doc.date,
+      status: doc.status,
+      checkInTime: doc.checkInTime || null,
+      arrivedByBus: !!doc.arrivedByBus,
+    });
+  } catch (_e) {
+    /* bus optional — never block the write */
+  }
+});
+
 module.exports =
   mongoose.models.BeneficiaryDayAttendance ||
   mongoose.model('BeneficiaryDayAttendance', BeneficiaryDayAttendanceSchema);

@@ -55,11 +55,29 @@ describe('maintenance-work-order-overdue', () => {
   test('fires on an open WO past its scheduled date; skips current and terminal ones', async () => {
     const raised = await runOne({
       MaintenanceWorkOrder: finder([
-        { _id: 'w1', title: 'Replace HVAC filter', status: 'in_progress', scheduledDate: PAST, branchId: BRANCH },
-        { _id: 'w2', title: 'Paint hallway', status: 'scheduled', scheduledDate: FUTURE, branchId: BRANCH },
+        {
+          _id: 'w1',
+          title: 'Replace HVAC filter',
+          status: 'in_progress',
+          scheduledDate: PAST,
+          branchId: BRANCH,
+        },
+        {
+          _id: 'w2',
+          title: 'Paint hallway',
+          status: 'scheduled',
+          scheduledDate: FUTURE,
+          branchId: BRANCH,
+        },
         { _id: 'w3', title: 'Old job', status: 'completed', scheduledDate: PAST, branchId: BRANCH },
         { _id: 'w4', title: 'Draft idea', status: 'draft', scheduledDate: PAST, branchId: BRANCH },
-        { _id: 'w5', title: 'Cancelled job', status: 'cancelled', scheduledDate: PAST, branchId: BRANCH },
+        {
+          _id: 'w5',
+          title: 'Cancelled job',
+          status: 'cancelled',
+          scheduledDate: PAST,
+          branchId: BRANCH,
+        },
       ]),
     });
     expect(raised).toHaveLength(1);
@@ -73,7 +91,14 @@ describe('maintenance-work-order-overdue', () => {
   test('a critical-priority overdue WO escalates to critical', async () => {
     const raised = await runOne({
       MaintenanceWorkOrder: finder([
-        { _id: 'w6', title: 'Boiler fault', status: 'approved', scheduledDate: PAST, priority: 'critical', branchId: BRANCH },
+        {
+          _id: 'w6',
+          title: 'Boiler fault',
+          status: 'approved',
+          scheduledDate: PAST,
+          priority: 'critical',
+          branchId: BRANCH,
+        },
       ]),
     });
     expect(raised).toHaveLength(1);

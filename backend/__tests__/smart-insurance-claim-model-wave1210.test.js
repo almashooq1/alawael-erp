@@ -60,7 +60,9 @@ describe('W1210 SmartInsuranceClaim model', () => {
   });
 
   it('required identifiers carry defaults (the W1193 uuid lesson, applied at birth)', () => {
-    expect(modelSrc).toMatch(/claimUuid:[\s\S]{0,200}?default:\s*\(\)\s*=>\s*require\('crypto'\)\.randomUUID\(\)/);
+    expect(modelSrc).toMatch(
+      /claimUuid:[\s\S]{0,200}?default:\s*\(\)\s*=>\s*require\('crypto'\)\.randomUUID\(\)/
+    );
   });
 
   it('save hook is W978-canonical (async, NO next) and dual-writes halalas', () => {

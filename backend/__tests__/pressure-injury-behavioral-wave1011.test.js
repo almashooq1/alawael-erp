@@ -101,15 +101,15 @@ describe('W1011 behavioral — base save + enum gating', () => {
 
 describe('W1011 behavioral — clinical safety invariants', () => {
   it('REJECTS an active injury with no offloading order', async () => {
-    await expect(
-      PressureInjuryRecord.create(baseDoc({ offloadingOrders: [] }))
-    ).rejects.toThrow(/offloadingOrders/);
+    await expect(PressureInjuryRecord.create(baseDoc({ offloadingOrders: [] }))).rejects.toThrow(
+      /offloadingOrders/
+    );
   });
 
   it('REJECTS infectionSigns with no infectionAction', async () => {
-    await expect(
-      PressureInjuryRecord.create(baseDoc({ infectionSigns: true }))
-    ).rejects.toThrow(/infectionAction/);
+    await expect(PressureInjuryRecord.create(baseDoc({ infectionSigns: true }))).rejects.toThrow(
+      /infectionAction/
+    );
   });
 
   it('SAVES infectionSigns when an action is documented', async () => {

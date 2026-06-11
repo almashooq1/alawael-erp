@@ -25,7 +25,7 @@ let ADL, Integ, SelfAdv, DecRights, IndLiving, Caregiver;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
     if (row) return row;

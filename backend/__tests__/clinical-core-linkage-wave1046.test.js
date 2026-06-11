@@ -24,7 +24,7 @@ let Falls, Pressure, Sleep, OM, Driving, MedRec, Infection;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
     if (row) return row;
@@ -109,7 +109,10 @@ describe('W1046 — pressure injury identified + resolved reach the timeline', (
     reloaded.status = 'healed';
     reloaded.healedAt = new Date();
     await reloaded.save();
-    const resolved = await waitForTimeline({ beneficiaryId, eventType: 'pressure_injury_resolved' });
+    const resolved = await waitForTimeline({
+      beneficiaryId,
+      eventType: 'pressure_injury_resolved',
+    });
     expect(resolved).not.toBeNull();
     expect(resolved.severity).toBe('success');
   });

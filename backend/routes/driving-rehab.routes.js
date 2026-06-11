@@ -234,7 +234,8 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
     let finalized = 0;
     let fitToDrive = 0;
     for (const r of raw) {
-      if (r.recommendation) byRecommendation[r.recommendation] = (byRecommendation[r.recommendation] || 0) + 1;
+      if (r.recommendation)
+        byRecommendation[r.recommendation] = (byRecommendation[r.recommendation] || 0) + 1;
       if (r.status === 'finalized') finalized++;
       if (FIT_RECOMMENDATIONS.includes(r.recommendation)) fitToDrive++;
     }
@@ -263,7 +264,10 @@ router.get('/due', requireRole(READ_ROLES), async (req, res) => {
       status: 'finalized',
       nextReviewDue: { $ne: null, $lte: horizon },
     };
-    const raw = await DrivingRehabAssessment.find(base).sort({ nextReviewDue: 1 }).limit(300).lean();
+    const raw = await DrivingRehabAssessment.find(base)
+      .sort({ nextReviewDue: 1 })
+      .limit(300)
+      .lean();
     const overdue = [];
     const upcoming = [];
     for (const r of raw) {
@@ -389,7 +393,10 @@ router.post('/:id/add-equipment', requireRole(WRITE_ROLES), async (req, res) => 
     if (!ADAPTIVE_EQUIPMENT.includes(equipment)) {
       return res
         .status(400)
-        .json({ success: false, message: `equipment يجب أن يكون: ${ADAPTIVE_EQUIPMENT.join(' | ')}` });
+        .json({
+          success: false,
+          message: `equipment يجب أن يكون: ${ADAPTIVE_EQUIPMENT.join(' | ')}`,
+        });
     }
     const row = await DrivingRehabAssessment.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });

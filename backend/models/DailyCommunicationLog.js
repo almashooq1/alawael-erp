@@ -137,6 +137,32 @@ DailyCommunicationLogSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// ── W1086: unified-core producer ───────────────────────────────────
+// Emit daily_comm_log.published when a NEW log is published so each day's
+// parent-facing note lands on the beneficiary's family timeline. Drafts and
+// edits (incl. parent-seen toggles, amendments) don't fire. Non-callback (W483).
+DailyCommunicationLogSchema.pre('save', function flagDailyCommLogPublished() {
+  this.$__dailyCommLogPublished = this.isNew && this.status === 'published';
+});
+
+DailyCommunicationLogSchema.post('save', function emitDailyCommLogPublished(doc) {
+  if (!doc.$__dailyCommLogPublished) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    integrationBus.publish('daily-comm-log', 'daily_comm_log.published', {
+      logId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      date: doc.date || doc.createdAt || new Date(),
+      mood: doc.mood || null,
+      engagement: doc.engagement || null,
+      authorName: doc.authorName || null,
+    });
+  } catch (_e) {
+    /* bus optional in some contexts */
+  }
+});
+
 module.exports =
   mongoose.models.DailyCommunicationLog ||
   mongoose.model('DailyCommunicationLog', DailyCommunicationLogSchema);

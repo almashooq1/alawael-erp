@@ -108,9 +108,7 @@ describe('vehicle-document-expiry', () => {
 
   test('a sold/withdrawn vehicle is excluded even when expired', async () => {
     const raised = await runOne({
-      Vehicle: finder([
-        { _id: 'v4', status: SOLD, registration: { expiryDate: PAST } },
-      ]),
+      Vehicle: finder([{ _id: 'v4', status: SOLD, registration: { expiryDate: PAST } }]),
     });
     expect(raised).toHaveLength(0);
   });

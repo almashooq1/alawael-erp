@@ -260,41 +260,31 @@ TransitionPlanSchema.virtual('isOverdue').get(function () {
 TransitionPlanSchema.set('toJSON', { virtuals: true });
 TransitionPlanSchema.set('toObject', { virtuals: true });
 
-// W986 — surface life-stage transitions on the unified-core timeline: a
-// completed transition plan (the beneficiary successfully moved to the next
-// life stage — positive) and a cancelled one (the transition was abandoned).
-// Fires once on the status flip to completed / cancelled. Native pre-compile
-// hooks per the proven W970 pattern (the modelEventBridge-is-dead workaround —
-// hooks added after mongoose.model() compilation never fire); guarded +
-// fire-and-forget so persistence never blocks. Consumed by
-// dddCrossModuleSubscribers → CareTimeline (care_transition eventType, severity
-// by outcome).
-TransitionPlanSchema.post('init', function () {
-  this.$__prevStatus = this.status;
+// ── W1030: producer hooks — emit on transition completion → unified core ──
+// A transition plan reaching 'completed' is a life-stage milestone on the
+// beneficiary's longitudinal record. Non-callback hook style (W483-safe).
+TransitionPlanSchema.pre('save', function () {
+  this.$__transitionCompletedNow =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
 });
-TransitionPlanSchema.post('save', function (doc) {
+
+TransitionPlanSchema.post('save', function emitTransitionCompleted(doc) {
+  if (!this.$__transitionCompletedNow) return;
+  if (!doc.beneficiaryId) return;
   try {
-    if (doc.status === this.$__prevStatus) return; // no status change
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
-    if (!doc.beneficiaryId) return;
-    const base = {
-      transitionPlanId: String(doc._id),
-      beneficiaryId: String(doc.beneficiaryId),
-      transitionType: doc.transitionType || '',
-      targetPlacement: doc.targetPlacement || '',
-    };
-    if (doc.status === 'completed') {
-      Promise.resolve(integrationBus.publish('lifecycle', 'transition.completed', base)).catch(
-        () => {}
-      );
-    } else if (doc.status === 'cancelled') {
-      Promise.resolve(integrationBus.publish('lifecycle', 'transition.cancelled', base)).catch(
-        () => {}
-      );
-    }
-  } catch (_) {
-    /* bus not wired — never block persistence */
+    Promise.resolve(
+      integrationBus.publish('transition', 'transition.completed', {
+        transitionPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+        transitionType: doc.transitionType,
+        compositeReadinessScore: doc.compositeReadinessScore ?? null,
+        actualTransitionDate: doc.actualTransitionDate || new Date(),
+      })
+    ).catch(() => {});
+  } catch (_err) {
+    // bus optional — never block persistence
   }
 });
 

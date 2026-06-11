@@ -47,10 +47,36 @@ describe('staff-health-surveillance-overdue', () => {
   test('fires on overdue surveillance; skips future + closed + no-due', async () => {
     const raised = await runOne({
       StaffHealthRecord: finder([
-        { _id: 's1', recordType: 'tb_screening', recordNumber: 'OHR-2026-0001', status: 'open', nextDueDate: PAST, branchId: BRANCH, deletedAt: null },
-        { _id: 's2', recordType: 'immunization', status: 'open', nextDueDate: FUTURE, deletedAt: null }, // future
-        { _id: 's3', recordType: 'tb_screening', status: 'closed', nextDueDate: PAST, deletedAt: null }, // closed
-        { _id: 's4', recordType: 'periodic_checkup', status: 'open', nextDueDate: null, deletedAt: null }, // no due
+        {
+          _id: 's1',
+          recordType: 'tb_screening',
+          recordNumber: 'OHR-2026-0001',
+          status: 'open',
+          nextDueDate: PAST,
+          branchId: BRANCH,
+          deletedAt: null,
+        },
+        {
+          _id: 's2',
+          recordType: 'immunization',
+          status: 'open',
+          nextDueDate: FUTURE,
+          deletedAt: null,
+        }, // future
+        {
+          _id: 's3',
+          recordType: 'tb_screening',
+          status: 'closed',
+          nextDueDate: PAST,
+          deletedAt: null,
+        }, // closed
+        {
+          _id: 's4',
+          recordType: 'periodic_checkup',
+          status: 'open',
+          nextDueDate: null,
+          deletedAt: null,
+        }, // no due
       ]),
     });
     expect(raised).toHaveLength(1);
@@ -62,8 +88,21 @@ describe('staff-health-surveillance-overdue', () => {
   test('exposure-incident or restricted overdue escalates to critical', async () => {
     const raised = await runOne({
       StaffHealthRecord: finder([
-        { _id: 's5', recordType: 'exposure_incident', status: 'open', nextDueDate: PAST, deletedAt: null },
-        { _id: 's6', recordType: 'fitness_for_work', status: 'restricted', nextDueDate: PAST, restrictions: 'x', deletedAt: null },
+        {
+          _id: 's5',
+          recordType: 'exposure_incident',
+          status: 'open',
+          nextDueDate: PAST,
+          deletedAt: null,
+        },
+        {
+          _id: 's6',
+          recordType: 'fitness_for_work',
+          status: 'restricted',
+          nextDueDate: PAST,
+          restrictions: 'x',
+          deletedAt: null,
+        },
       ]),
     });
     expect(raised).toHaveLength(2);

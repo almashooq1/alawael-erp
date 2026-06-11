@@ -180,7 +180,6 @@ financialReportSchema.pre('save', async function () {
     income.incomeBeforeTax = income.operatingIncome - (income.financialCosts?.total || 0);
     income.netIncome = income.incomeBeforeTax - (income.incomeTax || 0);
   }
-
 });
 
 financialReportSchema.methods.validateEquation = function () {

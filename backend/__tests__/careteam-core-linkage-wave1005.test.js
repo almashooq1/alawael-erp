@@ -27,7 +27,7 @@ let EpisodeOfCare, CareTimeline;
 
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const row = await CareTimeline.findOne(query);
     if (row) return row;

@@ -199,8 +199,6 @@ aiRecommendationBundleSchema.pre('save', async function () {
   this.$__transitionReason = undefined;
   this.$__transitionNotes = undefined;
   this.$__transitionMfaTier = undefined;
-
-  
 });
 
 module.exports =

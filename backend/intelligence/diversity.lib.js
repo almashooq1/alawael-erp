@@ -19,7 +19,11 @@ const MIN_GROUP = 3;
 const SAUDI = new Set(['sa', 'sau', 'saudi', 'ksa', 'السعودية']);
 
 function isSaudi(nationality) {
-  return SAUDI.has(String(nationality || '').trim().toLowerCase());
+  return SAUDI.has(
+    String(nationality || '')
+      .trim()
+      .toLowerCase()
+  );
 }
 
 function round(n, dp = 1) {
@@ -127,7 +131,11 @@ function analyzeDiversity(rows, opts = {}) {
     },
     seniorityLens: {
       gender: representationByTier(clean, r => r.gender || null, tiers),
-      nationality: representationByTier(clean, r => (isSaudi(r.nationality) ? 'saudi' : 'nonSaudi'), tiers),
+      nationality: representationByTier(
+        clean,
+        r => (isSaudi(r.nationality) ? 'saudi' : 'nonSaudi'),
+        tiers
+      ),
     },
   };
 }

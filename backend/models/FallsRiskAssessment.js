@@ -233,10 +233,7 @@ FallsRiskAssessmentSchema.path('__invariants').validate(function () {
     this.invalidate('lastFallDate', 'lastFallDate required when assessmentType=post_fall');
     ok = false;
   }
-  if (
-    (this.historyOfFalling || Number(this.numberOfFallsLast6Months) > 0) &&
-    !this.lastFallDate
-  ) {
+  if ((this.historyOfFalling || Number(this.numberOfFallsLast6Months) > 0) && !this.lastFallDate) {
     this.invalidate('lastFallDate', 'lastFallDate required when a fall history is recorded');
     ok = false;
   }
@@ -293,7 +290,8 @@ FallsRiskAssessmentSchema.post('save', function (doc) {
   try {
     if (doc.status !== 'finalized' || this.$__prevStatus === 'finalized') return;
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     Promise.resolve(
       integrationBus.publish('clinical-safety', 'falls.assessment_finalized', {
         fallsRiskAssessmentId: String(doc._id),

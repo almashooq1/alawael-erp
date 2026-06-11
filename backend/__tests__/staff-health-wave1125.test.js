@@ -12,8 +12,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const MODEL_SRC = fs.readFileSync(path.join(__dirname, '..', 'models', 'StaffHealthRecord.js'), 'utf8');
-const ROUTE_SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'staff-health.routes.js'), 'utf8');
+const MODEL_SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'models', 'StaffHealthRecord.js'),
+  'utf8'
+);
+const ROUTE_SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'staff-health.routes.js'),
+  'utf8'
+);
 const REG_SRC = fs.readFileSync(
   path.join(__dirname, '..', 'routes', 'registries', 'features.registry.js'),
   'utf8'
@@ -22,7 +28,14 @@ const Model = require('../models/StaffHealthRecord');
 
 describe('W1125 — model shape', () => {
   it('covers the 6 occupational-health record types', () => {
-    for (const t of ['immunization', 'tb_screening', 'fitness_for_work', 'exposure_incident', 'periodic_checkup', 'respirator_fit_test']) {
+    for (const t of [
+      'immunization',
+      'tb_screening',
+      'fitness_for_work',
+      'exposure_incident',
+      'periodic_checkup',
+      'respirator_fit_test',
+    ]) {
       expect(Model.TYPES).toContain(t);
     }
   });
@@ -73,7 +86,10 @@ describe('W1125 — route surface', () => {
     expect(ROUTE_SRC).toMatch(/CONFIDENTIAL/i);
     expect(ROUTE_SRC).toMatch(/occupational_health/);
     // broad clinical roles must NOT be in the read set
-    const readBlock = ROUTE_SRC.slice(ROUTE_SRC.indexOf('const READ_ROLES'), ROUTE_SRC.indexOf('const WRITE_ROLES'));
+    const readBlock = ROUTE_SRC.slice(
+      ROUTE_SRC.indexOf('const READ_ROLES'),
+      ROUTE_SRC.indexOf('const WRITE_ROLES')
+    );
     expect(readBlock).not.toMatch(/'nursing'/);
     expect(readBlock).not.toMatch(/'therapist'/);
   });

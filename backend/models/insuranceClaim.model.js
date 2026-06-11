@@ -333,6 +333,36 @@ InsuranceClaimSchema.index({ beneficiary: 1, status: 1 });
 InsuranceClaimSchema.index({ contract: 1 });
 InsuranceClaimSchema.index({ status: 1, submissionDate: -1 });
 
+// ─── W1000: Insurance claim PAID → unified core ────────────────────────
+// A beneficiary's insurance claim reaching 'paid' is a financial/operational
+// milestone that closes the reimbursement loop. Native model hooks (sync,
+// no-next — matching the W994…W999 linkage style) publish the canonical event
+// exactly once on the transition into 'paid'. Subscribers in
+// integration/dddCrossModuleSubscribers.js project it onto the CareTimeline.
+InsuranceClaimSchema.pre('save', function flagClaimPaid() {
+  this.$__claimPaidNow = this.status === 'paid' && (this.isNew || this.isModified('status'));
+});
+
+InsuranceClaimSchema.post('save', function publishClaimPaid(doc) {
+  try {
+    if (!this.$__claimPaidNow) return;
+    if (!doc.beneficiary) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    integrationBus.publish('insurance-claims', 'insurance_claim.paid', {
+      claimId: String(doc._id),
+      claimNumber: doc.claimNumber || null,
+      beneficiaryId: String(doc.beneficiary),
+      claimType: doc.claimType || null,
+      payerShare: typeof doc.payerShare === 'number' ? doc.payerShare : null,
+      paymentAmount: (doc.payment && doc.payment.amount) || null,
+      paidAt: (doc.payment && doc.payment.date) || doc.updatedAt || new Date(),
+    });
+  } catch (_err) {
+    /* never block the save on a projection failure */
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // CLAIM ITEM — بند المطالبة
 // ═══════════════════════════════════════════════════════════════════════════

@@ -18,6 +18,14 @@ const controller = require('../controllers/communityIntegration.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W1148 (W269-class): requireBranchAccess only blocks explicit foreign
+// branchId in query/body — it does NOT verify :beneficiaryId ownership.
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
+router.use(bodyScopedBeneficiaryGuard);
 // Apply authentication to all routes
 router.use(authenticate);
 router.use(requireBranchAccess);

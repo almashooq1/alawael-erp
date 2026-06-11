@@ -76,7 +76,7 @@ describe('W954 — a sync `post(save, function(doc))` hook never hangs save()', 
   it('a legacy `pre(save, function(next))` callback still works (W946 rescue intact)', async () => {
     let preRan = false;
     const s2 = new mongoose.Schema({ v: Number });
-    // eslint-disable-next-line func-names
+
     s2.pre('save', function (next) {
       preRan = true;
       this.v = (this.v || 0) + 1;

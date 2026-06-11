@@ -28,9 +28,31 @@ function bareMount(router) {
 
 describe('W1191 safeMount-ed dashboard/rehab routers reject anonymous access (behavioral)', () => {
   const cases = [
-    { name: 'rehab-goal-suggestions', app: bareMount(rehabGoalSuggestions), probes: [['get', '/x/goals'], ['get', '/x/interventions']] },
-    { name: 'dashboard-alerts', app: bareMount(dashboardAlerts), probes: [['get', '/x/'], ['post', '/x/somekey/ack'], ['post', '/x/somekey/mute']] },
-    { name: 'dashboards-platform', app: bareMount(dashboardsPlatform), probes: [['get', '/x/catalog'], ['get', '/x/anything']] },
+    {
+      name: 'rehab-goal-suggestions',
+      app: bareMount(rehabGoalSuggestions),
+      probes: [
+        ['get', '/x/goals'],
+        ['get', '/x/interventions'],
+      ],
+    },
+    {
+      name: 'dashboard-alerts',
+      app: bareMount(dashboardAlerts),
+      probes: [
+        ['get', '/x/'],
+        ['post', '/x/somekey/ack'],
+        ['post', '/x/somekey/mute'],
+      ],
+    },
+    {
+      name: 'dashboards-platform',
+      app: bareMount(dashboardsPlatform),
+      probes: [
+        ['get', '/x/catalog'],
+        ['get', '/x/anything'],
+      ],
+    },
   ];
 
   for (const c of cases) {

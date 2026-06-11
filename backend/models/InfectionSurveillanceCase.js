@@ -138,7 +138,10 @@ InfectionSurveillanceCaseSchema.path('__invariants').validate(function () {
     ok = false;
   }
   if (this.reportedToAuthority && !this.authorityReportDate) {
-    this.invalidate('authorityReportDate', 'authorityReportDate required when reportedToAuthority=true');
+    this.invalidate(
+      'authorityReportDate',
+      'authorityReportDate required when reportedToAuthority=true'
+    );
     ok = false;
   }
   return ok;
@@ -168,7 +171,10 @@ InfectionSurveillanceCaseSchema.virtual('durationDays').get(function () {
   const start = this.onsetDate || this.date;
   if (!start) return null;
   const end = this.resolutionDate || new Date();
-  return Math.max(0, Math.floor((end.getTime() - new Date(start).getTime()) / (24 * 60 * 60 * 1000)));
+  return Math.max(
+    0,
+    Math.floor((end.getTime() - new Date(start).getTime()) / (24 * 60 * 60 * 1000))
+  );
 });
 
 InfectionSurveillanceCaseSchema.set('toJSON', { virtuals: true });
@@ -183,7 +189,8 @@ InfectionSurveillanceCaseSchema.post('init', function () {
 InfectionSurveillanceCaseSchema.post('save', function (doc) {
   try {
     const { integrationBus } = require('../integration/systemIntegrationBus');
-    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId) return;
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
     const prev = this.$__prevCaseStatus;
     const base = {
       infectionCaseId: String(doc._id),
@@ -196,9 +203,13 @@ InfectionSurveillanceCaseSchema.post('save', function (doc) {
       outbreakId: doc.outbreakId || '',
     };
     if (prev === undefined && doc.caseStatus !== 'ruled_out' && doc.caseStatus !== 'resolved') {
-      Promise.resolve(integrationBus.publish('clinical-safety', 'infection.case_opened', base)).catch(() => {});
+      Promise.resolve(
+        integrationBus.publish('clinical-safety', 'infection.case_opened', base)
+      ).catch(() => {});
     } else if (doc.caseStatus === 'resolved' && prev && prev !== 'resolved') {
-      Promise.resolve(integrationBus.publish('clinical-safety', 'infection.case_resolved', base)).catch(() => {});
+      Promise.resolve(
+        integrationBus.publish('clinical-safety', 'infection.case_resolved', base)
+      ).catch(() => {});
     }
   } catch (_) {
     /* never block persistence */

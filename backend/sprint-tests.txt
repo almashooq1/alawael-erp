@@ -1008,3 +1008,4 @@ __tests__/seed-hr-intelligence-wave1202.test.js
 __tests__/headcount-forecast-lib-wave1203.test.js
 __tests__/headcount-planning-routes-wave1203.test.js
 __tests__/headcount-plan-behavioral-wave1203.test.js
+__tests__/productivity-anomalies-wave1215.test.js

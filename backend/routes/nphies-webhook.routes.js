@@ -45,34 +45,54 @@ function _normalizePayload(raw) {
   };
 }
 
-// W457: NPHIES webhook secret MUST be set in production. Pre-W457 a
-// missing env defaulted to the literal 'nphies-dev-secret-change-me'
-// which an attacker could read from this source file → forge HMAC
-// signatures and inject fake claim-status updates (e.g. mark a denied
-// claim as approved, or vice versa).
-const _NPHIES_WEBHOOK_SECRET = (() => {
+// W457 + W1237: NPHIES webhook secret MUST be a real value in production.
+// Pre-W457 a missing env defaulted to the literal 'nphies-dev-secret-change-me'
+// which an attacker could read from this source file → forge HMAC signatures and
+// inject fake claim-status updates (e.g. mark a denied claim as approved).
+//
+// W457 first enforced this by THROWING at module load in production — but that
+// killed the whole route (W441 anti-pattern): every prod boot logged
+// '[ROUTE FAIL] /api/nphies-webhook ... NPHIES_WEBHOOK_SECRET' and the receiver
+// was left unmounted (observed 21×/day in prod Winston logs, 2026-06-11).
+//
+// W1237 keeps the security property but degrades gracefully: the route mounts,
+// and a request arriving with no real secret is refused PER-REQUEST with
+// 503 AUTH_SECRET_MISSING (NPHIES retries on 5xx), so a forged webhook is still
+// never processed without a provisioned secret. The env is read lazily per
+// request (Dynatrace-safe — no top-level env capture).
+let _warnedUnsetSecret = false;
+function _resolveWebhookSecret() {
   const v = process.env.NPHIES_WEBHOOK_SECRET;
   if (v) return v;
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      'NPHIES_WEBHOOK_SECRET is required in production — refusing to start with a known default'
-    );
+  if (process.env.NODE_ENV === 'production') return null; // unset in prod → refuse per-request
+  if (!_warnedUnsetSecret) {
+    console.warn('[nphies-webhook] NPHIES_WEBHOOK_SECRET unset — using non-prod fallback');
+    _warnedUnsetSecret = true;
   }
-  // dev/test only — emit warning
-
-  console.warn('[nphies-webhook] NPHIES_WEBHOOK_SECRET unset — using non-prod fallback');
   return 'nphies-dev-secret-change-me';
-})();
+}
 
 router.post(
   '/',
-  verifyWebhookHmac({
-    secret: _NPHIES_WEBHOOK_SECRET,
-    header: process.env.NPHIES_WEBHOOK_HEADER || 'X-NPHIES-Signature',
-    prefix: process.env.NPHIES_WEBHOOK_PREFIX || 'sha256=',
-    encoding: 'hex',
-    name: 'nphies',
-  }),
+  (req, res, next) => {
+    // W1237: refuse (not crash) when the shared secret is not provisioned.
+    const secret = _resolveWebhookSecret();
+    if (!secret) {
+      logger.warn('[nphies-webhook] refused — NPHIES_WEBHOOK_SECRET not configured');
+      return res.status(503).json({
+        accepted: false,
+        error: 'AUTH_SECRET_MISSING',
+        message: 'NPHIES webhook secret is not configured',
+      });
+    }
+    return verifyWebhookHmac({
+      secret,
+      header: process.env.NPHIES_WEBHOOK_HEADER || 'X-NPHIES-Signature',
+      prefix: process.env.NPHIES_WEBHOOK_PREFIX || 'sha256=',
+      encoding: 'hex',
+      name: 'nphies',
+    })(req, res, next);
+  },
   async (req, res) => {
     try {
       const payload = _normalizePayload(req.body);

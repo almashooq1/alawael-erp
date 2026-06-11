@@ -56,6 +56,22 @@ describe('W1224 official-letters route — source contract', () => {
     expect(routeSrc).not.toMatch(/Object\.assign\([^)]*req\.body/);
   });
 
+  test('W1231: beneficiary letters snapshot server-side from the canonical Beneficiary model', () => {
+    expect(routeSrc).toMatch(/mongoose\.model\('Beneficiary'\)/);
+    expect(routeSrc).toMatch(/fullNameArabic fullNameEnglish mrn/);
+    expect(routeSrc).toMatch(/kind: 'beneficiary'/);
+  });
+
+  test('W1231: issue enforces caller branch on BOTH subject kinds (W269 — foreign ids read as 404)', () => {
+    expect(routeSrc).toMatch(/effectiveBranchScope\(req\)/);
+    expect(routeSrc).toMatch(
+      /scope && emp\.branch_id && String\(emp\.branch_id\) !== String\(scope\)/
+    );
+    expect(routeSrc).toMatch(
+      /scope && ben\.branchId && String\(ben\.branchId\) !== String\(scope\)/
+    );
+  });
+
   test('list + detail are branch-scoped via branchFilter (W269)', () => {
     const listCount = (routeSrc.match(/branchFilter\(req\)/g) || []).length;
     expect(listCount).toBeGreaterThanOrEqual(3); // list + detail + revoke

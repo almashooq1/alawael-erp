@@ -22,6 +22,12 @@ beforeAll(async () => {
   await mongoose.connect(mongod.getUri());
   EC = require('../models/HR/EmployeeCompetency');
   RCR = require('../models/HR/RoleCompetencyRequirement');
+  // Build indexes NOW instead of racing autoIndex (W1222 lesson, inverse
+  // direction): the unique-index test needs the index to EXIST before the
+  // duplicate insert — on fast CI runners autoIndex sometimes hadn't
+  // finished and both inserts succeeded → flaky deploy-gate red.
+  await EC.init();
+  await RCR.init();
 });
 afterAll(async () => {
   await mongoose.disconnect();

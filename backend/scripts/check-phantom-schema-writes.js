@@ -41,6 +41,36 @@ const JSON_MODE = process.argv.includes('--json');
 // file::model-file-base::key — pre-existing findings to burn down (W325c
 // ratchet pattern): new entries must FAIL CI; fixed entries must be removed.
 const KNOWN_PHANTOM_WRITES = new Set([
+  "routes/electronic-directives.routes.js::document::MISSING::fileName",
+  "routes/electronic-directives.routes.js::document::MISSING::originalFileName",
+  "routes/electronic-directives.routes.js::document::MISSING::fileSize",
+  "routes/electronic-directives.routes.js::document::MISSING::filePath",
+  "routes/electronic-directives.routes.js::document::MISSING::uploadedBy",
+  "routes/email-v2.routes.js::communication::MISSING::title",
+  "routes/email-v2.routes.js::communication::MISSING::type",
+  "routes/email-v2.routes.js::communication::MISSING::receiver",
+  "routes/email-v2.routes.js::communication::MISSING::sentDate",
+  "routes/email-v2.routes.js::communication::MISSING::createdBy",
+  "routes/guardians.routes.js::guardian::MISSING::userId",
+  "routes/student-certificates.routes.js::document::MISSING::fileName",
+  "routes/student-certificates.routes.js::document::MISSING::originalFileName",
+  "routes/student-certificates.routes.js::document::MISSING::fileSize",
+  "routes/student-certificates.routes.js::document::MISSING::filePath",
+  "routes/student-certificates.routes.js::document::MISSING::uploadedBy",
+  "routes/student-complaints.routes.js::communication::MISSING::title",
+  "routes/student-complaints.routes.js::communication::MISSING::type",
+  "routes/student-complaints.routes.js::communication::MISSING::receiver",
+  "routes/student-complaints.routes.js::communication::MISSING::sentDate",
+  "routes/student-complaints.routes.js::communication::MISSING::createdBy",
+  "routes/student-elearning.routes.js::studentactivity::MISSING::beneficiaryId",
+  "routes/student-elearning.routes.js::studentactivity::MISSING::titleAr",
+  "routes/student-elearning.routes.js::studentactivity::MISSING::dueAt",
+  "routes/student-events.routes.js::studentactivity::MISSING::beneficiaryId",
+  "routes/student-events.routes.js::studentactivity::MISSING::titleAr",
+  "routes/student-events.routes.js::studentactivity::MISSING::dueAt",
+  "routes/student-rewards-store.routes.js::studentactivity::MISSING::beneficiaryId",
+  "routes/student-rewards-store.routes.js::studentactivity::MISSING::titleAr",
+  "routes/student-rewards-store.routes.js::studentactivity::MISSING::dueAt",
   "routes/electronic-directives.routes.js::document::directiveType",
   "routes/electronic-directives.routes.js::document::beneficiaryId",
   "routes/electronic-directives.routes.js::document::content",
@@ -141,6 +171,10 @@ const ALWAYS_ALLOWED = new Set([
 function scanObjectLiteral(src, openIdx) {
   if (src[openIdx] !== '{') return null;
   const keys = [];
+  // W1216 — per-key VALUE spans [{key, start, end}] so callers can inspect
+  // field definitions (required/default detection). Shorthand keys have no span.
+  const entries = [];
+  let current = null;
   let hasSpread = false;
   let depth = 0;
   let i = openIdx;
@@ -216,6 +250,7 @@ function scanObjectLiteral(src, openIdx) {
       if (c === '.' && next === '.' && src[i + 2] === '.') {
         hasSpread = true;
         expectKey = false;
+        current = null;
         i += 3;
         continue;
       }
@@ -232,6 +267,7 @@ function scanObjectLiteral(src, openIdx) {
         while (k < src.length && /\s/.test(src[k])) k += 1;
         if (src[k] === ':') {
           keys.push(key);
+          current = { key, start: k + 1 };
           expectKey = false;
           i = k + 1;
           continue;
@@ -247,6 +283,7 @@ function scanObjectLiteral(src, openIdx) {
         while (k < src.length && /\s/.test(src[k])) k += 1;
         if (src[k] === ':') {
           keys.push(word);
+          current = { key: word, start: k + 1 };
           expectKey = false;
           i = k + 1;
           continue;
@@ -254,11 +291,13 @@ function scanObjectLiteral(src, openIdx) {
         // shorthand `{ data, }` — the property name IS the key
         if (src[k] === ',' || src[k] === '}') {
           keys.push(word);
+          current = null;
           expectKey = false;
           i = j;
           continue;
         }
         expectKey = false;
+        current = null;
         i = j;
         continue;
       }
@@ -295,12 +334,19 @@ function scanObjectLiteral(src, openIdx) {
         continue;
       }
       depth -= 1;
-      if (depth === 0) return { keys, end: i, hasSpread };
+      if (depth === 0) {
+        if (current) entries.push({ ...current, end: i });
+        return { keys, entries, end: i, hasSpread };
+      }
       i += 1;
       continue;
     }
 
     if (depth === 1 && c === ',') {
+      if (current) {
+        entries.push({ ...current, end: i });
+        current = null;
+      }
       expectKey = true;
       i += 1;
       continue;
@@ -364,6 +410,60 @@ function extractSchemaKeySets(src) {
   return sets;
 }
 
+/**
+ * W1216 — top-level keys of the file's MAIN schema (largest literal — a
+ * multi-schema file carries sub-schemas whose required fields don't apply at
+ * the create() top level) that are REQUIRED with NO default. A create-site
+ * literal missing one of these throws ValidationError at runtime — the
+ * dominant killer found in the 2026-06-11 burn-down (uuid / branchId /
+ * startTime / fullName / recipientId / period / lines / organizationId…).
+ */
+function extractRequiredNoDefault(src) {
+  const objs = [];
+  const re = /new\s+(?:mongoose\.)?Schema\s*\(\s*/g;
+  let m;
+  while ((m = re.exec(src))) {
+    const i = m.index + m[0].length;
+    let obj = null;
+    if (src[i] === '{') {
+      obj = scanObjectLiteral(src, i);
+    } else {
+      const idM = /^([A-Za-z_$][\w$]*)/.exec(src.slice(i, i + 80));
+      if (idM) {
+        const defRe = new RegExp(
+          `(?:const|let|var)\\s+${idM[1].replace(/\$/g, '\\$')}\\s*=\\s*`,
+          'g'
+        );
+        const dm = defRe.exec(src);
+        if (dm) {
+          let j = dm.index + dm[0].length;
+          while (j < src.length && /\s/.test(src[j])) j += 1;
+          if (src[j] === '{') obj = scanObjectLiteral(src, j);
+        }
+      }
+    }
+    if (obj && obj.keys.length > 0) objs.push(obj);
+  }
+  if (!objs.length) return new Set();
+  const main = objs.reduce((a, b) => (b.keys.length > a.keys.length ? b : a));
+  const out = new Set();
+  for (const e of main.entries || []) {
+    const span = src.slice(e.start, e.end);
+    // Array-typed fields auto-default to [] — a `required:` inside the span
+    // belongs to a SUBDOC key (e.g. subScores: [{question: {required}}]),
+    // not to the field itself.
+    if (/^\s*\[/.test(span)) continue;
+    if (/\brequired\s*:\s*(true|\[)/.test(span) && !/\bdefault\s*:/.test(span)) {
+      // Hook-generated values (`this.<key> = …` anywhere in the model file —
+      // pre('validate')/pre('save') number generators etc.) satisfy the
+      // requirement at save time → not a caller obligation.
+      const hookAssigned = new RegExp(`this\\.${e.key}\\s*=`).test(src);
+      if (!hookAssigned) out.add(e.key);
+    }
+  }
+  return out;
+}
+
 // ─── repo walking ────────────────────────────────────────────────────────────
 
 function listJsFiles(dir) {
@@ -389,6 +489,7 @@ function buildModelIndex(modelsDir) {
   // whose schemas were unresolvable POISONS the base (deleted from index)
   // so partial key sets can't flood false positives.
   const index = new Map();
+  const requiredIndex = new Map(); // base → Set(required-no-default keys) | null=ambiguous
   const poisoned = new Set();
   for (const file of listJsFiles(modelsDir)) {
     let src;
@@ -418,9 +519,18 @@ function buildModelIndex(modelsDir) {
     const union = index.get(base) || new Set();
     for (const keys of sets) for (const k of keys) union.add(k);
     index.set(base, union);
+    // W1216 — required-with-no-default keys of the file's main schema. A base
+    // seen in MULTIPLE files is ambiguous for required-checks (we can't tell
+    // which file a binding resolves to) → drop it from the required index.
+    if (requiredIndex.has(base)) requiredIndex.set(base, null);
+    else requiredIndex.set(base, extractRequiredNoDefault(src));
   }
-  for (const base of poisoned) index.delete(base);
-  return index;
+  for (const base of poisoned) {
+    index.delete(base);
+    requiredIndex.delete(base);
+  }
+  for (const [base, v] of requiredIndex) if (!v || v.size === 0) requiredIndex.delete(base);
+  return { index, requiredIndex };
 }
 
 /** Resolve `X` → model file base, from require/model-lookup bindings. */
@@ -449,7 +559,7 @@ function scanRepo({ root = ROOT, baseline } = {}) {
     (path.resolve(root) === path.resolve(path.join(__dirname, '..'))
       ? KNOWN_PHANTOM_WRITES
       : new Set());
-  const modelIndex = buildModelIndex(path.join(root, 'models'));
+  const { index: modelIndex, requiredIndex } = buildModelIndex(path.join(root, 'models'));
   const findings = [];
   let scannedSites = 0;
   let skippedSites = 0;
@@ -484,15 +594,35 @@ function scanRepo({ root = ROOT, baseline } = {}) {
         continue;
       }
       scannedSites += 1;
+      const rel = path.relative(root, file).replace(/\\/g, '/');
+      const line = lineOf(src, m.index);
       const unknown = obj.keys.filter(k => !declared.has(k) && !ALWAYS_ALLOWED.has(k));
       for (const key of unknown) {
         findings.push({
-          file: path.relative(root, file).replace(/\\/g, '/'),
-          line: lineOf(src, m.index),
+          file: rel,
+          line,
           model: base,
           key,
-          id: `${path.relative(root, file).replace(/\\/g, '/')}::${base}::${key}`,
+          type: 'phantomKey',
+          id: `${rel}::${base}::${key}`,
         });
+      }
+      // W1216 — required-with-no-default keys ABSENT from the literal →
+      // guaranteed ValidationError at runtime.
+      const reqSet = requiredIndex.get(base);
+      if (reqSet) {
+        for (const rk of reqSet) {
+          if (!obj.keys.includes(rk) && !ALWAYS_ALLOWED.has(rk)) {
+            findings.push({
+              file: rel,
+              line,
+              model: base,
+              key: rk,
+              type: 'missingRequired',
+              id: `${rel}::${base}::MISSING::${rk}`,
+            });
+          }
+        }
       }
     }
   }
@@ -536,7 +666,11 @@ function main() {
       `check-phantom-schema-writes — models indexed: ${r.modelsIndexed}, create-sites verified: ${r.scannedSites} (skipped ${r.skippedSites})\n`
     );
     for (const f of r.newFindings) {
-      process.stdout.write(`  ✗ ${f.file}:${f.line} — ${f.model}.create() writes undeclared key '${f.key}'\n`);
+      const msg =
+        f.type === 'missingRequired'
+          ? `omits REQUIRED-no-default key '${f.key}' (throws at runtime)`
+          : `writes undeclared key '${f.key}'`;
+      process.stdout.write(`  ✗ ${f.file}:${f.line} — ${f.model}.create() ${msg}\n`);
     }
     for (const id of r.staleBaseline) {
       process.stdout.write(`  ⚠ stale baseline entry (fixed — remove from KNOWN_PHANTOM_WRITES): ${id}\n`);

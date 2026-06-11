@@ -179,6 +179,61 @@ describe('scanRepo (fixture repos)', () => {
   });
 });
 
+// ─── W1214 missing-required detector ─────────────────────────────────────────
+
+describe('scanRepo — missingRequired detector (W1214)', () => {
+  function makeRequiredFixture(modelExtra, createBody) {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'phantom-req-'));
+    fs.mkdirSync(path.join(root, 'models'));
+    fs.mkdirSync(path.join(root, 'routes'));
+    fs.mkdirSync(path.join(root, 'services'));
+    fs.writeFileSync(
+      path.join(root, 'models', 'Gadget.js'),
+      [
+        "const mongoose = require('mongoose');",
+        'const GadgetSchema = new mongoose.Schema({',
+        "  name: { type: String, required: true },",
+        modelExtra,
+        '});',
+        modelExtra.includes('hooked')
+          ? "GadgetSchema.pre('validate', async function () { this.hooked = 'x'; });"
+          : '',
+        "module.exports = mongoose.model('Gadget', GadgetSchema);",
+      ].join('\n')
+    );
+    fs.writeFileSync(
+      path.join(root, 'routes', 'gadget.routes.js'),
+      [
+        "const Gadget = require('../models/Gadget');",
+        `async function create(req) { return Gadget.create({ ${createBody} }); }`,
+        'module.exports = { create };',
+      ].join('\n')
+    );
+    return root;
+  }
+
+  it('flags a required-no-default key omitted from the create literal', () => {
+    const root = makeRequiredFixture("  code: { type: String, required: true },", 'name: 1');
+    const r = scanRepo({ root });
+    const missing = r.newFindings.filter(f => f.type === 'missingRequired');
+    expect(missing).toHaveLength(1);
+    expect(missing[0].key).toBe('code');
+    expect(missing[0].id).toContain('::MISSING::code');
+  });
+
+  it('does NOT flag when the key is provided, defaulted, hook-assigned, or array-typed', () => {
+    for (const [extra, body] of [
+      ["  code: { type: String, required: true },", 'name: 1, code: 2'], // provided
+      ["  code: { type: String, required: true, default: 'X' },", 'name: 1'], // default
+      ["  hooked: { type: String, required: true },", 'name: 1'], // hook-assigned
+      ["  subs: [{ q: { type: String, required: true } }],", 'name: 1'], // array-typed
+    ]) {
+      const r = scanRepo({ root: makeRequiredFixture(extra, body) });
+      expect(r.newFindings.filter(f => f.type === 'missingRequired')).toEqual([]);
+    }
+  });
+});
+
 // ─── CLI exit-code contract ──────────────────────────────────────────────────
 
 describe('check-phantom-schema-writes — CLI exit-code contract', () => {

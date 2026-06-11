@@ -115,4 +115,10 @@ module.exports = [
   // ── W1141 — financial / budget (1) ──────────────────────────
   // Active budget consumed ≥90% of allocation (≥100% = critical). Self-loading.
   require('./budget-overrun'),
+
+  // ── W1197 — HR / pay equity (1) ─────────────────────────────
+  // Latest pay-equity snapshot breaches the equity-score floor or a REPORTABLE
+  // demographic gap ceiling (closes the W1193/W1194 loop into the Alert sink).
+  // Self-loading (lazy PayEquitySnapshot lookup, no app.js model-loader edit).
+  require('./pay-equity-gap-exceeded'),
 ];

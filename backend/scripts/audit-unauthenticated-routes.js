@@ -86,6 +86,15 @@ while ((m = varMountRe.exec(registrySrc))) {
 // (C) safeMount(app, paths, './X.routes' | var) → NO auth (app.use without authenticate)
 const safeMountRe = /safeMount\s*\(\s*app\s*,[^]{0,160}?['"]\.\/([\w/-]+)\.routes['"]/g;
 while ((m = safeMountRe.exec(registrySrc))) mark(false, `${m[1]}.routes.js`);
+// (C2/W1192) safeMount(app, paths, '../routes/X.routes') — the ../routes form.
+// (C) only matched the './X.routes' spelling; the registries in routes/registries/**
+// reference modules as '../routes/X.routes' (relative to _registry.js, where
+// safeMount's require runs). Missing this left ~115 safeMounts classified as
+// "unknown mount" instead of "no-auth" — exactly how the W1190/W1191 anonymous
+// dashboard/rehab aliases reported confirmedCount:0 while live.
+const safeMountParentRe =
+  /safeMount\s*\(\s*app\s*,[^]{0,200}?['"]\.\.\/routes\/([\w/-]+)\.routes['"]/g;
+while ((m = safeMountParentRe.exec(registrySrc))) mark(false, `${m[1]}.routes.js`);
 const safeMountVarRe = /safeMount\s*\(\s*app\s*,\s*[^,]+,\s*(\w+)\s*\)/g;
 while ((m = safeMountVarRe.exec(registrySrc))) {
   if (varToFile[m[1]]) mark(false, varToFile[m[1]]);
@@ -162,6 +171,15 @@ const KNOWN_PUBLIC = new Set([
   'stub-missing.routes.js',
   // Visitor self check-in/login (/api/v1/public/visitor) — pre-auth by design.
   'visitor-auth.routes.js',
+  // W1192 — surfaced by the new ../routes safeMount modelling (C2). All three are
+  // intentionally public by their own file headers; they carry no PII/secrets and
+  // no mutations of protected state:
+  //   build-info (/api/build-info) — version/commit metadata, "carries no secrets".
+  'build-info.routes.js',
+  //   integrations-metrics (/api/health/metrics/integrations) — health-probe gauges.
+  'integrations-metrics.routes.js',
+  //   otp-auth (/api/.../otp) — OTP issue/verify IS a pre-auth login flow (like nafath).
+  'otp-auth.routes.js',
 ]);
 
 const findings = [];

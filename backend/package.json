@@ -329,6 +329,7 @@
     "supertest": "^7.2.2"
   },
   "overrides": {
+    "@grpc/grpc-js": ">=1.14.4",
     "fast-xml-parser": ">=5.5.7",
     "lodash": ">=4.17.24",
     "uuid": "^14.0.0",

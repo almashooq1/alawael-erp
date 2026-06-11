@@ -439,6 +439,51 @@ If **C is accepted**:
   `04-programs-sessions-progress-engine.prompt.md` READ FIRST). That belongs
   in its own ADR.
 
+## Addendum (2026-06-11, W1232/W1233) — a FOURTH structure: `SmartIEP`
+
+The original three-structure analysis **missed a fourth IEP-family model**,
+surfaced while building the Beneficiary-360 IEP cross-link (the Approach-B
+"surface IEP on the 360" follow-up). The "IEP" tier this ADR decided to keep is
+**itself internally duplicated**:
+
+| | Structure 2 — `IndividualEducationPlan` | **Structure 4 — `SmartIEP`** |
+| --- | --- | --- |
+| Model | [`backend/models/IndividualEducationPlan.js`](../../../backend/models/IndividualEducationPlan.js) | [`backend/models/SmartIEP.js`](../../../backend/models/SmartIEP.js) |
+| Route | `/api/v1/iep` ([`routes/iep.routes.js`](../../../backend/routes/iep.routes.js)) | `/api/v1/smart-iep` ([`rehabilitation-services/smart-iep-routes.js`](../../../backend/rehabilitation-services/smart-iep-routes.js)) |
+| Status enum | `draft/team_review/signed/active/completed/archived` | `draft/pending_review/active/under_review/completed/discontinued` |
+| Distinctive | Nafath `signatures[].nafathRequestId`, MoE `planYear` shape, W324/W329/W332 drift guards | parent-consent flow, goal-bank, meetings, `overall_progress`, transition/behavior-support plan types |
+| **web-admin UI** | **none** | **full** — `/iep` list+detail+new (2026-05-27) via `@/lib/iep-api` |
+| Canonical sense | **doc/legal**-canonical (this ADR named it "the MoE IEP") | **UI/product**-canonical (what clinicians actually use) |
+
+**The trap:** this ADR's DECIDED text named `IndividualEducationPlan` as "the
+MoE-mandated IEP … surfaced on the Beneficiary-360." But the only IEP a clinician
+can open in the go-forward UI is `SmartIEP`. Surfacing `IndividualEducationPlan`
+on the 360 (as **W1231** first did) produced a **dead-end card** (no detail page)
+pointing at a likely-empty model. **W1232** re-pointed the 360 card to `SmartIEP`
+(via the existing `@/lib/iep-api`, deep-linking the live `/iep/[id]`) — the
+pragmatic, UI-true choice — and reverted the W1231 `IndividualEducationPlan`
+client/types so the API layer is not fragmented too.
+
+**This does NOT overturn Approach B.** "Tier by use-case; IEP stays separate from
+`CarePlanVersion`" still holds. It only reveals that **the IEP tier has its own
+2→1 consolidation question** that Approach B must eventually answer:
+
+- **Open sub-question:** is `SmartIEP` or `IndividualEducationPlan` THE canonical
+  IEP? They have **complementary** strengths — `SmartIEP` owns the UI + richer
+  workflow; `IndividualEducationPlan` owns the **Nafath e-signature / MoE legal
+  shape**. A real consolidation would likely fold the Nafath-signature block into
+  `SmartIEP` (UI-canonical) and retire `/api/v1/iep`, OR formally scope them
+  (SmartIEP = working plan, IndividualEducationPlan = signed legal record). This
+  needs the **same stakeholder input** (MoE compliance lead) the parent ADR awaits
+  — do NOT auto-merge.
+- **Until then:** the 360 surfaces `SmartIEP` (W1232). Do **not** add a second
+  web-admin client for `IndividualEducationPlan` — that would deepen, not resolve,
+  the fragmentation.
+- **MFA sequencing (unchanged):** enforcing `requireMfaTier` on either IEP's
+  mutation routes is correctly **sequenced behind a step-up-aware editing UI** —
+  `requireMfaTier` hard-403s a no-MFA actor, so enforcing before the UI can render
+  a step-up prompt would dead-end clinicians on a legally-mandated document.
+
 ## References
 
 - [ADR-018 — rehabilitation-protocol-entity](018-rehabilitation-protocol-entity.md):

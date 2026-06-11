@@ -58,8 +58,20 @@ beforeEach(async () => {
   await TherapeuticGoal.collection.deleteMany({});
 });
 
-async function seedPlan({ beneficiaryId, branchId, status = 'approved', nextReviewAt, planType = 'individual_therapy' }) {
+async function seedPlan({
+  beneficiaryId,
+  branchId,
+  status = 'approved',
+  nextReviewAt,
+  planType = 'individual_therapy',
+}) {
   await CarePlanVersion.collection.insertOne({
+    // Raw insert bypasses mongoose defaults, so the UNIQUE
+    // {planId, versionNumber} index (CarePlanVersion.js:432) rejects a second
+    // {null,null} pair — the suite broke deterministically once autoIndex
+    // built the index (failed CI on main AND on the merged branch).
+    planId: new mongoose.Types.ObjectId(),
+    versionNumber: 1,
     beneficiaryId,
     branchId,
     status,
@@ -104,12 +116,17 @@ describe('rehab-plan-health (W1205) — assembleBeneficiaryPlanHealth (behaviora
     expect(r.grade.signals.reviewOverdueDays).toBeGreaterThanOrEqual(14);
     expect(r.grade.signals.goalCount).toBe(2);
     expect(r.grade.grade).toBe('AT_RISK'); // overdue ≥14 forces AT_RISK
-    expect(r.grade.actions.some((a) => a.dimension === 'review_cadence')).toBe(true);
+    expect(r.grade.actions.some(a => a.dimension === 'review_cadence')).toBe(true);
   });
 
   test('a draft (non-live) plan version is NOT treated as the active plan', async () => {
     const benId = oid();
-    await seedPlan({ beneficiaryId: benId, branchId: oid(), status: 'draft', nextReviewAt: daysAgo(5) });
+    await seedPlan({
+      beneficiaryId: benId,
+      branchId: oid(),
+      status: 'draft',
+      nextReviewAt: daysAgo(5),
+    });
     const r = await svc.assembleBeneficiaryPlanHealth(benId);
     expect(r.plan).toBeNull(); // draft is not in CARE_PLAN_VERSION_LIVE_STATUSES
     expect(r.grade.grade).toBe('NO_PLAN');

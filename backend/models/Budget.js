@@ -105,6 +105,19 @@ const budgetSchema = new mongoose.Schema(
     // الملاحظات
     notes: String,
 
+    // W1208 — سجل التخصيصات: the budgetManagement allocate endpoint has
+    // always pushed allocation records, but the field was never declared
+    // (strict mode silently dropped the history). Additive, class-C.
+    allocations: [
+      {
+        amount: Number,
+        description: String,
+        category: String,
+        allocatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        allocatedAt: { type: Date, default: Date.now },
+      },
+    ],
+
     // معلومات التتبع
     isDeleted: {
       type: Boolean,

@@ -1426,6 +1426,10 @@ on:
       - 'backend/__tests__/my-day-board-wave1204.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-plan-health-behavioral-wave1205.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/skills-gap-lib-wave1201.test.js'
+      - 'backend/__tests__/skills-gap-routes-wave1201.test.js'
+      - 'backend/__tests__/skills-gap-behavioral-wave1201.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2835,6 +2839,10 @@ on:
       - 'backend/__tests__/my-day-board-wave1204.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-plan-health-behavioral-wave1205.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/skills-gap-lib-wave1201.test.js'
+      - 'backend/__tests__/skills-gap-routes-wave1201.test.js'
+      - 'backend/__tests__/skills-gap-behavioral-wave1201.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

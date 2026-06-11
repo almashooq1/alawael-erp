@@ -3920,26 +3920,6 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  // ── Register all subscribers ───────────────────────────────────────
-  let registered = 0;
-  for (const sub of subscribers) {
-    try {
-      integrationBus.subscribe(sub.pattern, sub.handler);
-      registered++;
-    } catch {
-      // Fallback: use EventEmitter pattern if subscribe() not available
-      try {
-        integrationBus.on(sub.pattern, sub.handler);
-        registered++;
-      } catch (e2) {
-        logger.warn(`[DDD-CrossModule] Could not register: ${sub.name} — ${e2.message}`);
-      }
-    }
-  }
-
-  logger.info(
-    `[DDD-CrossModule] ✓ ${registered}/${subscribers.length} DDD event subscribers registered`
-  );
 
   // ─── Waitlist → Timeline: Added (W979) ────────────────────────────
   subscribers.push({
@@ -4977,6 +4957,27 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
       }
     },
   });
+
+  // ── Register all subscribers ───────────────────────────────────────
+  let registered = 0;
+  for (const sub of subscribers) {
+    try {
+      integrationBus.subscribe(sub.pattern, sub.handler);
+      registered++;
+    } catch {
+      // Fallback: use EventEmitter pattern if subscribe() not available
+      try {
+        integrationBus.on(sub.pattern, sub.handler);
+        registered++;
+      } catch (e2) {
+        logger.warn(`[DDD-CrossModule] Could not register: ${sub.name} — ${e2.message}`);
+      }
+    }
+  }
+
+  logger.info(
+    `[DDD-CrossModule] ✓ ${registered}/${subscribers.length} DDD event subscribers registered`
+  );
 
   return subscribers;
 }

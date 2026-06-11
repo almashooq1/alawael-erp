@@ -89,4 +89,30 @@ cdssAlertSchema.post('save', function emitCdssAlertRaised(doc) {
   }
 });
 
+// ── Unified-core linkage (W1075 — CDSS alert resolution → CareTimeline) ──
+// Ported from origin/main parallel wave: when an alert flips to 'resolved',
+// publish so the dddCrossModuleSubscribers persist a cdss_alert_resolved row.
+cdssAlertSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+cdssAlertSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'resolved' || this.$__prevStatus === 'resolved') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
+    Promise.resolve(
+      integrationBus.publish('cdss', 'alert.resolved', {
+        cdssAlertId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        alertType: doc.alertType,
+        severity: doc.severity,
+        wasActedUpon: !!doc.wasActedUpon,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 module.exports = mongoose.models.CdssAlert || mongoose.model('CdssAlert', cdssAlertSchema);

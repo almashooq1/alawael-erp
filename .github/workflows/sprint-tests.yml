@@ -1667,6 +1667,9 @@ on:
       - 'backend/__tests__/golden-thread-gate-routes-behavioral-wave1219.test.js'
       - 'backend/__tests__/pathway-bundles-routes-behavioral-wave1219.test.js'
       - 'backend/__tests__/next-best-action-routes-behavioral-wave1219.test.js'
+      - 'backend/__tests__/workforce-intelligence-service-wave1200.test.js'
+      - 'backend/__tests__/workforce-intelligence-routes-wave1200.test.js'
+      - 'backend/__tests__/my-day-board-wave1204.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3317,6 +3320,9 @@ on:
       - 'backend/__tests__/golden-thread-gate-routes-behavioral-wave1219.test.js'
       - 'backend/__tests__/pathway-bundles-routes-behavioral-wave1219.test.js'
       - 'backend/__tests__/next-best-action-routes-behavioral-wave1219.test.js'
+      - 'backend/__tests__/workforce-intelligence-service-wave1200.test.js'
+      - 'backend/__tests__/workforce-intelligence-routes-wave1200.test.js'
+      - 'backend/__tests__/my-day-board-wave1204.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

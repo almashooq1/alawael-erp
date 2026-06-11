@@ -996,3 +996,6 @@ __tests__/diversity-behavioral-wave1199.test.js
 __tests__/golden-thread-gate-routes-behavioral-wave1219.test.js
 __tests__/pathway-bundles-routes-behavioral-wave1219.test.js
 __tests__/next-best-action-routes-behavioral-wave1219.test.js
+__tests__/workforce-intelligence-service-wave1200.test.js
+__tests__/workforce-intelligence-routes-wave1200.test.js
+__tests__/my-day-board-wave1204.test.js

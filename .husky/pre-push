@@ -56,6 +56,24 @@ echo "[pre-push] wave-number collision check…"
 cd backend && npm run check:wave-collision
 cd ..
 
+# 2026-06-11 (W1217): block phantom-schema-write classes at the push gate.
+# Three killer classes, all proven repeatedly in the W1189→W1216 burn-down
+# (14 LIVE surfaces had thrown-or-returned-empty since shipping):
+#   1. create() writes a key the schema never declares → strict mode drops
+#      it SILENTLY (forms approvalWorkflow, reviewedAt, budget allocations…)
+#   2. create() omits a REQUIRED-no-default key → ValidationError on every
+#      call (uuid, branchId, startTime, fullName, recipientId, firstName…)
+#   3. (companion guard in W978 test) async no-param hook calling next()
+# Pure source scan (~1s, 770+ models indexed, 160+ create-sites verified).
+# HOW TO FIX on failure: align the writer to the model vocabulary (never
+# blanket-declare class-B keys — W324), or declare the field if the write is
+# intended (class C), then remove the id from KNOWN_PHANTOM_WRITES in
+# scripts/check-phantom-schema-writes.js. Triage doctrine:
+# docs/architecture/PHANTOM_WRITES_TRIAGE_2026-06-11.md
+echo "[pre-push] phantom-schema-writes check…"
+cd backend && npm run check:phantom-writes
+cd ..
+
 # 2026-05-28 (W531): block Express route-ordering shadowing — a literal
 # route declared AFTER a same-shape :param sibling is unreachable (the
 # param route wins and casts the literal segment as a Mongo ObjectId →

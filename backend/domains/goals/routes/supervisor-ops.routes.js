@@ -23,6 +23,7 @@ const {
   documentationBacklog,
   branchProductivity,
   summarizeOverdueReports,
+  dailyBoardForTherapist,
 } = require('../../../services/supervisorOps.service');
 const reassessmentLifecycleService = require('../../../services/reassessmentLifecycle.service');
 const { gatherBranchHealth } = require('../../../services/operationsHealth.service');
@@ -174,6 +175,30 @@ router.get(
 
     const limit = Math.min(parseInt(req.query.limit, 10) || 200, 500);
     const data = await reviewWorklist({ branchId, limit });
+    return res.json({ success: true, data });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /supervisor-ops/my-day[?date=]
+//   The SPECIALIST's own daily workflow board — the other half of the operational
+//   cycle (receive task → run session → DOCUMENT → complete). Returns the caller's
+//   clinical sessions for the day folded into "In-Process vs Complete" workflow
+//   states + the awaiting-documentation chase list. Caller-scoped to req.user
+//   (you only ever see YOUR OWN board → no cross-user access). READ-ONLY.
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/supervisor-ops/my-day',
+  asyncHandler(async (req, res) => {
+    const therapistId = req.user && (req.user._id || req.user.id);
+    if (!therapistId) {
+      return res.status(401).json({ success: false, error: 'authentication required' });
+    }
+    const date = req.query.date ? new Date(req.query.date) : undefined;
+    if (date && Number.isNaN(date.getTime())) {
+      return res.status(400).json({ success: false, error: 'invalid date' });
+    }
+    const data = await dailyBoardForTherapist(therapistId, date ? { date } : {});
     return res.json({ success: true, data });
   })
 );

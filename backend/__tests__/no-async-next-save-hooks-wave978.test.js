@@ -22,6 +22,10 @@ const path = require('path');
 
 const MODELS_DIR = path.resolve(__dirname, '..', 'models');
 const BROKEN_SAVE_HOOK = /\.(pre|post)\(\s*['"]save['"]\s*,\s*async function \(\s*next\s*\)/;
+// W1213 — 3rd variant of the class: an async NO-PARAM hook whose body still
+// CALLS next(...) → ReferenceError on every save (Communication crashed this
+// way until W1193; AccountingPayment until W1213). Catch it on ANY hook event.
+const ASYNC_NOPARAM_HOOK = /\.(pre|post)\(\s*['"](\w+)['"]\s*,\s*async function \(\s*\)\s*\{([\s\S]*?)\n\}\s*\)/g;
 
 function walk(dir, acc) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -39,6 +43,21 @@ describe('W978 — no async save hook declares next (Mongoose-9 throw class)', (
       BROKEN_SAVE_HOOK.test(fs.readFileSync(f, 'utf8'))
     );
     expect(offenders.map(f => path.relative(MODELS_DIR, f))).toEqual([]);
+  });
+
+  it('zero async NO-PARAM hooks call next() in their body (W1213 ReferenceError class)', () => {
+    const offenders = [];
+    for (const f of walk(MODELS_DIR, [])) {
+      const src = fs.readFileSync(f, 'utf8');
+      let m;
+      ASYNC_NOPARAM_HOOK.lastIndex = 0;
+      while ((m = ASYNC_NOPARAM_HOOK.exec(src))) {
+        if (/\bnext\s*\(/.test(m[3])) {
+          offenders.push(`${path.relative(MODELS_DIR, f)} :: ${m[1]}('${m[2]}')`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 });
 

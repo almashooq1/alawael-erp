@@ -15,14 +15,17 @@ router.use(requireBranchAccess);
 // ─── Overview stats (before /:id) ────────────────────────────────────────────
 router.get('/stats/overview', async (req, res) => {
   try {
-    // Use aggregation instead of loading all documents into memory
+    // Use aggregation instead of loading all documents into memory.
+    // W1208 — the model's totals are totalBudgeted/totalSpent (the phantom
+    // totalAmount/spentAmount sums were always zero).
     const [stats] = await Budget.aggregate([
+      { $match: { isDeleted: { $ne: true } } },
       {
         $group: {
           _id: null,
           totalBudgets: { $sum: 1 },
-          totalBudget: { $sum: { $ifNull: ['$totalAmount', 0] } },
-          totalSpent: { $sum: { $ifNull: ['$spentAmount', 0] } },
+          totalBudget: { $sum: { $ifNull: ['$totalBudgeted', 0] } },
+          totalSpent: { $sum: { $ifNull: ['$totalSpent', 0] } },
         },
       },
     ]);
@@ -48,7 +51,7 @@ router.get('/stats/overview', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { department, fiscalYear, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { isDeleted: { $ne: true } };
     if (department) filter.department = department;
     if (fiscalYear) filter.fiscalYear = +fiscalYear;
     const skip = (Math.max(1, +page) - 1) * +limit;
@@ -89,13 +92,31 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
     if (totalAmount !== undefined && (!Number.isFinite(numTotal) || numTotal < 0)) {
       return res.status(400).json({ success: false, message: 'المبلغ الإجمالي غير صالح' });
     }
+    // W1208 — realigned to the REAL Budget vocabulary: period/startDate/
+    // endDate/lines/totalBudgeted are REQUIRED (the phantom totalAmount/
+    // spentAmount/lineItems payload threw ValidationError on every create
+    // since the route shipped). period defaults to annual over the fiscal
+    // year; only line items carrying the subdoc-required accountId+amount
+    // are mapped.
+    const year = Number(fiscalYear) || new Date().getFullYear();
+    const total = Number.isFinite(numTotal) ? numTotal : 0;
+    const lines = (Array.isArray(lineItems) ? lineItems : [])
+      .filter(li => li && li.accountId && Number.isFinite(Number(li.amount)))
+      .map(li => ({
+        accountId: li.accountId,
+        amount: Number(li.amount),
+        notes: li.notes || li.description,
+      }));
     const budget = await Budget.create({
       name,
       department,
-      fiscalYear: fiscalYear || new Date().getFullYear(),
-      totalAmount: Number.isFinite(numTotal) ? numTotal : 0,
-      spentAmount: 0,
-      lineItems: lineItems || [],
+      fiscalYear: year,
+      period: 'annual',
+      startDate: new Date(year, 0, 1),
+      endDate: new Date(year, 11, 31),
+      lines,
+      totalBudgeted: total,
+      totalRemaining: total,
       status: 'draft',
       createdBy: req.user.id,
     });
@@ -109,9 +130,26 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { name, department, fiscalYear, totalAmount, lineItems, status, notes } = req.body;
+    // W1208 — explicit $set with the real vocabulary (phantom keys were
+    // silently dropped on every update).
+    const set = {};
+    if (name !== undefined) set.name = name;
+    if (department !== undefined) set.department = department;
+    if (fiscalYear !== undefined) set.fiscalYear = Number(fiscalYear);
+    if (totalAmount !== undefined) set.totalBudgeted = Number(totalAmount);
+    if (lineItems !== undefined)
+      set.lines = (Array.isArray(lineItems) ? lineItems : [])
+        .filter(li => li && li.accountId && Number.isFinite(Number(li.amount)))
+        .map(li => ({
+          accountId: li.accountId,
+          amount: Number(li.amount),
+          notes: li.notes || li.description,
+        }));
+    if (status !== undefined) set.status = status;
+    if (notes !== undefined) set.notes = notes;
     const budget = await Budget.findByIdAndUpdate(
       req.params.id,
-      { name, department, fiscalYear, totalAmount, lineItems, status, notes },
+      { $set: set },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
@@ -134,20 +172,25 @@ router.post('/:id/allocate', authorize(['admin', 'manager']), async (req, res) =
     if (numAmount > 10_000_000) {
       return res.status(400).json({ success: false, message: 'المبلغ يتجاوز الحد المسموح' });
     }
-    const newSpent = (budget.spentAmount || 0) + numAmount;
-    if (newSpent > budget.totalAmount) {
+    // W1208 — real totals are totalBudgeted/totalSpent (the phantom
+    // spentAmount/totalAmount comparison made every allocation either bypass
+    // the cap or fail); allocations history is now a declared subdoc.
+    const newSpent = (budget.totalSpent || 0) + numAmount;
+    if (newSpent > budget.totalBudgeted) {
       return res.status(400).json({
         success: false,
         message: 'المبلغ يتجاوز الميزانية المتاحة',
         data: {
-          remaining: budget.totalAmount - (budget.spentAmount || 0),
+          remaining: budget.totalBudgeted - (budget.totalSpent || 0),
         },
       });
     }
-    budget.spentAmount = newSpent;
-    if (!budget.allocations) budget.allocations = [];
+    budget.totalSpent = newSpent;
+    budget.totalRemaining = budget.totalBudgeted - newSpent;
+    budget.utilizationPercentage =
+      budget.totalBudgeted > 0 ? Math.round((newSpent / budget.totalBudgeted) * 100) : 0;
     budget.allocations.push({
-      amount,
+      amount: numAmount,
       description,
       category,
       allocatedBy: req.user.id,
@@ -165,8 +208,9 @@ router.get('/:id/variance', async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id).lean();
     if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
-    const total = budget.totalAmount || 0;
-    const spent = budget.spentAmount || 0;
+    // W1208 — real total fields (phantoms read as permanent zeros).
+    const total = budget.totalBudgeted || 0;
+    const spent = budget.totalSpent || 0;
     const variance = total - spent;
     const variancePercent = total > 0 ? ((variance / total) * 100).toFixed(1) : 0;
     res.json({

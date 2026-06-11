@@ -150,6 +150,8 @@ router.post(
       const seq = randomContractSuffix();
       const ts = Date.now().toString(36).slice(-4).toUpperCase();
       const contractNumber = `CT-${year}-${ts}${seq}`;
+      // W1208 — the model's value field is the nested contractValue object
+      // (the flat phantom `value` was silently dropped on every create).
       const contract = await Contract.create({
         contractNumber,
         contractTitle,
@@ -157,7 +159,9 @@ router.post(
         supplier,
         startDate,
         endDate,
-        value,
+        ...(Number.isFinite(Number(value))
+          ? { contractValue: { estimatedAnnualValue: Number(value) } }
+          : {}),
         liabilityInsurance,
         status: 'DRAFT',
         branchId: req.branchScope?.branchId || branchId || null,

@@ -41,10 +41,6 @@ const JSON_MODE = process.argv.includes('--json');
 // file::model-file-base::key — pre-existing findings to burn down (W325c
 // ratchet pattern): new entries must FAIL CI; fixed entries must be removed.
 const KNOWN_PHANTOM_WRITES = new Set([
-  "routes/budgetManagement.routes.js::budget::totalAmount",
-  "routes/budgetManagement.routes.js::budget::spentAmount",
-  "routes/budgetManagement.routes.js::budget::lineItems",
-  "routes/contracts.routes.js::contract.model::value",
   "routes/electronic-directives.routes.js::document::directiveType",
   "routes/electronic-directives.routes.js::document::beneficiaryId",
   "routes/electronic-directives.routes.js::document::content",

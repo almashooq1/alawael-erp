@@ -21,6 +21,9 @@
 
 const mongoose = require('mongoose');
 const logger = require('../../../utils/logger');
+// W1156 — golden-thread structural traversal (first consumer of the W1149/W1151
+// reverse-traversal indexes); exposed as the `goldenThread` widget.
+const goldenThreadService = require('../../../services/goldenThread.service');
 
 class Beneficiary360Service {
   /**
@@ -61,6 +64,7 @@ class Beneficiary360Service {
       'family',
       'alerts',
       'progress',
+      'goldenThread',
     ];
     const requestedWidgets =
       widgets && widgets.length > 0 ? widgets.filter(w => allWidgets.includes(w)) : allWidgets;
@@ -85,6 +89,9 @@ class Beneficiary360Service {
       family: () => this._buildFamily(beneficiary),
       alerts: () => this._buildAlerts(beneficiary),
       progress: () => this._buildProgress(beneficiaryId),
+      // W1156 — connected golden-thread graph (goal↔measure↔session↔assessment),
+      // NOT a parallel widget: each goal carries its sessions + source assessment.
+      goldenThread: () => goldenThreadService.traceByBeneficiary(beneficiaryId),
     };
 
     const results = await Promise.allSettled(

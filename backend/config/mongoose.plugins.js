@@ -29,9 +29,31 @@ const SLOW_QUERY_MS = parseInt(process.env.SLOW_QUERY_THRESHOLD_MS, 10) || 500;
 //
 // Modern hooks (no parameter, return-promise) and parallel hooks (two
 // parameters: next + done) bypass the wrapper untouched.
+// Extract the sole declared parameter name of a 1-arg function (best-effort).
+function firstParamName(fn) {
+  const src = Function.prototype.toString.call(fn);
+  let m = src.match(/^(?:async\s+)?function\b[^(]*\(\s*([^),\s]+)/);
+  if (!m) m = src.match(/^\s*\(\s*([^),\s]+)\s*\)\s*=>/); // (p) =>
+  if (!m) m = src.match(/^\s*([A-Za-z_$][\w$]*)\s*=>/); //  p  =>
+  return m ? m[1] : null;
+}
+
 function legacyHookAdapter(fn) {
   if (typeof fn !== 'function') return fn;
   if (fn.length !== 1) return fn; // 0 = modern, 2 = parallel — leave alone
+  // W954 (2026-06-08) — CRITICAL: only adapt a TRUE legacy callback hook, whose
+  // sole parameter is the `next` continuation. A 1-param POST hook receives the
+  // document (`post('save', function (doc) {…})`), NOT next. Wrapping it passed
+  // `next` in as `doc`; since the body neither calls next() nor returns a
+  // thenable, the wrapper Promise NEVER resolved → every .save()/.create() on
+  // any model carrying such a post hook HUNG until the caller timed out. This
+  // shim is registered globally in server.js, so it silently broke saves in
+  // production — a root cause of "البيانات لا تُحفظ" (data won't save). Keying on
+  // the param name leaves `(doc)` post hooks (and `(err)` handlers) untouched
+  // while still rescuing genuine `function (next) {…}` legacy hooks. (When the
+  // source can't be parsed, fall through and wrap — preserves the W946 rescue.)
+  const p = firstParamName(fn);
+  if (p && p !== 'next') return fn;
   // Avoid double-wrapping when registerGlobalPlugins runs again in tests.
   if (fn.__legacyShimmed) return fn;
 
@@ -195,4 +217,7 @@ module.exports = {
   toJSONPlugin,
   registerGlobalPlugins,
   getConnectionPoolHealth,
+  // Exported for the W954 regression guard (legacy-hook-adapter-wave954.test.js).
+  legacyHookAdapter,
+  firstParamName,
 };

@@ -238,10 +238,37 @@ async function applyForBeneficiary({ beneficiaryId, branchId, actorId, selection
         .select('code name abbreviation')
         .lean();
     }
+
+    // TherapeuticGoal.episodeId is REQUIRED (W1212 behavioral finding — the
+    // static guards passed while every create would have thrown at runtime).
+    // Resolution order: explicit selections.episodeId → the beneficiary's
+    // active EpisodeOfCare → refuse to fabricate (skip with reason).
+    let episodeId = null;
+    if (selections.episodeId && mongoose.isValidObjectId(selections.episodeId)) {
+      episodeId = selections.episodeId;
+    } else {
+      try {
+        const episode = await model('EpisodeOfCare')
+          .findOne({ beneficiaryId, status: 'active' })
+          .select('_id')
+          .sort({ createdAt: -1 })
+          .lean();
+        if (episode) episodeId = episode._id;
+      } catch (_err) {
+        /* model unregistered in this context — falls through to skip */
+      }
+    }
+
     if (!measure) {
       skipped.push({
         item: `goals:${goalTemplateIds.length}`,
         reason: 'لا هدف بلا مقياس — اختر primaryMeasureId صالحاً من المكتبة قبل إنشاء الأهداف (R3)',
+      });
+    } else if (!episodeId) {
+      skipped.push({
+        item: `goals:${goalTemplateIds.length}`,
+        reason:
+          'لا حلقة رعاية نشطة لهذا المستفيد — افتح حلقة (EpisodeOfCare) أو مرّر episodeId صراحة',
       });
     } else {
       const GoalBank = model('GoalBank');
@@ -257,6 +284,7 @@ async function applyForBeneficiary({ beneficiaryId, branchId, actorId, selection
       for (const tpl of templates) {
         const goal = await TherapeuticGoal.create({
           beneficiaryId,
+          episodeId,
           ...(effectiveBranchId ? { branchId: effectiveBranchId } : {}),
           title: `${tpl.category}: ${String(tpl.description).slice(0, 140)}`,
           description: tpl.description,

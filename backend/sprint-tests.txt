@@ -910,3 +910,5 @@ __tests__/operations-health-route-wave1196.test.js
 __tests__/golden-thread-enforcement-wave1204.test.js
 __tests__/pathway-bundles-wave1205.test.js
 __tests__/next-best-action-wave1206.test.js
+__tests__/pathway-bundles-behavioral-wave1212.test.js
+__tests__/next-best-action-behavioral-wave1212.test.js

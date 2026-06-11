@@ -101,6 +101,7 @@ router.post('/apply/:beneficiaryId', requireRole(WRITE_ROLES), async (req, res) 
       goalTemplateIds:
         req.body && Array.isArray(req.body.goalTemplateIds) ? req.body.goalTemplateIds : [],
       primaryMeasureId: (req.body && req.body.primaryMeasureId) || null,
+      episodeId: (req.body && req.body.episodeId) || null,
       startDate: (req.body && req.body.startDate) || null,
     };
 

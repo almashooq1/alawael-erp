@@ -4,7 +4,44 @@ Date: 2026-05-24
 
 ## Status
 
-🟡 **Proposed — needs clinical director + Ministry-of-Education compliance lead + early-intervention domain owner sign-off before implementation.**
+🟢 **DECIDED — Approach B (tier by use-case, formalize boundaries).** Decided 2026-06-11
+under delegated owner authority, grounded in the live-prod audit + the goal-model
+clinical-fit finding (below).
+
+> **DECISION (2026-06-11) — Approach B: tier by use-case; do NOT force-merge.**
+>
+> **Rationale (evidence-backed):**
+> 1. **Regulatory boundary is real, not fragmentation.** `IndividualEducationPlan`
+>    is **Ministry-of-Education-mandated** (carries `signatures[].nafathRequestId`,
+>    `planYear`, MoE-specific structure). It **cannot** be deprecated into a clinical
+>    care-plan without losing legal-compliance structure — so Approach A/C are
+>    rejected. `IFSP` is early-intervention-specific (its own lifecycle + natural-
+>    environment fields). These serve **distinct regulatory/clinical purposes**.
+> 2. **Empty prod data → no migration cost, pick the cleanest forward direction.**
+>    The 2026-06-11 prod audit shows `CarePlan = 0`, `TherapeuticPlan = 0` — there is
+>    **no data to migrate** under any approach, so the choice is purely about forward
+>    architecture, and the regulation-respecting one wins.
+> 3. **Consistency with ADR-040 (same session, same logic).** The goal models resolve
+>    the same way: `TherapeuticGoal` = canonical finalized goal; `SmartGoal` = a
+>    legitimate qualitative-suggestion tier (the assessment-engine templates are
+>    SMART-*text*-shaped, NOT numeric-`target.value`-shaped — confirmed by reading
+>    the templates). "Tier by use-case" is the coherent platform-wide answer.
+>
+> **What this means concretely:**
+> - **Canonical therapeutic/rehab plan** = `UnifiedCarePlan` / `CarePlanVersion`
+>   (the W41-51 workflow + the W44/W50 intelligence run on it).
+> - **Keep `IndividualEducationPlan`** as the MoE education plan; **keep `IFSP`** as
+>   the early-intervention plan — both **cross-linked by `beneficiaryId`**, both
+>   surfaced on the Beneficiary-360, both brought under MFA-tier enforcement
+>   (per ADR-019) as the next formalization step.
+> - **No regulatory requirement is changed or removed** by this decision (IEP/IFSP
+>   stay) → zero compliance risk; it only *formalizes* the existing boundaries.
+>
+> **Remaining (engineering, now unblocked):** MFA-enforce IEP/IFSP routes; add the
+> `beneficiaryId` cross-link surfacing; fix the `IFSP.child` semantic-mismatch ref
+> (W324/W329 class). These are safe, additive follow-ups — no model is merged.
+
+_(Original proposal + the A/B/C analysis + ecosystem counts retained below for the record.)_
 
 > **📋 Decision-ready brief**: see [026-DECISION-BRIEF.md](026-DECISION-BRIEF.md) for live codebase ecosystem counts (correcting some of the effort estimates below), stakeholder meeting agenda, and no-regrets pre-work items that ship value regardless of which approach wins.
 

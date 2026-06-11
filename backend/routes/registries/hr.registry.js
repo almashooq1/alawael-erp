@@ -189,5 +189,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Talent grid routes not mounted (module missing)');
   }
 
+  // ── Diversity & Inclusion analytics (W1199 — composition + indices + Saudization) ─
+  // Self-authenticating; aggregate-only (no salaries/identities), role-gated reads.
+  const diversityRouter = safeRequire('../routes/hr/diversity.routes');
+  if (diversityRouter) {
+    app.use('/api/hr/diversity', diversityRouter);
+    app.use('/api/v1/hr/diversity', diversityRouter);
+    logger.info('[HR] Diversity & Inclusion analytics mounted (/api/(v1/)?hr/diversity)');
+  } else {
+    logger.warn('[HR] Diversity routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

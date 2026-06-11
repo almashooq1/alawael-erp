@@ -1,4 +1,30 @@
-# ADR-040 — Consolidate the three goal models on `TherapeuticGoal` as canonical for the golden thread (🟡 Proposed)
+# ADR-040 — Consolidate the three goal models on `TherapeuticGoal` as canonical for the golden thread (🟢 DECIDED — Approach B, tier by use-case)
+
+> **🟢 DECISION (2026-06-11, delegated owner authority) — `TherapeuticGoal` canonical for FINALIZED goals; tier the rest by use-case (NOT a force-merge).**
+>
+> Grounded in: the live-prod audit (`SmartGoal = 0` — Q1 answered below) + a clinical
+> model-fit reading of the assessment-recommendation engine.
+>
+> - **`TherapeuticGoal`** = the canonical, golden-thread-linked **finalized** clinical
+>   goal (numeric `target.value`, W235 measure-links, MCID). ~20 services key on it.
+> - **`SmartGoal`** = retained as the **qualitative-suggestion tier**. Decisive finding:
+>   the assessment-recommendation engine's templates are SMART-***text***-shaped
+>   (`specific`/`measurable`/`achievable` prose + `timeBoundDays`), **not** numeric-
+>   `target.value`-shaped — so auto-converting engine output to `TherapeuticGoal`
+>   would **mis-extract or fabricate** a clinical target. That is rejected on
+>   patient-safety grounds (a fabricated target misleads the clinician). SmartGoal-
+>   for-suggestions is therefore a **legitimate distinct role**, not duplication.
+> - **Manual SmartGoal UI creation is deprecated** (the `smart-goals` page now carries
+>   a non-breaking soft-deprecation banner steering to `/therapeutic-goals`; prod
+>   SmartGoal = 0 so nothing is stranded). The `@deprecated` markers (W1133) stand.
+> - **`Goal` (IEP-embedded)** keeps its `therapeuticGoalId` bridge (W1133) — see ADR-026
+>   (also DECIDED 2026-06-11, Approach B): IEP stays as the MoE-mandated education plan.
+>
+> **Net:** the "destructive migration" Q1 worried about is a **no-op** (0 rows). The
+> consolidation direction is **set** — `TherapeuticGoal` canonical, SmartGoal tiered to
+> suggestions, manual SmartGoal UI sunset. **No clinical data is fabricated; no
+> regulation is changed.** Remaining engineering (write-fence the manual create path
+> once the UI fully migrates) is safe + owner-paced, no longer a blocking decision.
 
 > **Progress — additive phase SHIPPED under owner delegation (W1133, 2026-06-10):**
 > the non-destructive Option-C scaffolding is in: `Goal` gained an optional

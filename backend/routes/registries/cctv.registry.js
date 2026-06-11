@@ -17,6 +17,7 @@
  *   /cctv/audit           — PDPL audit + grants
  *   /cctv/parent-portal   — parent live-only access
  *   /cctv/admin           — ops dashboards + probe + reaper
+ *   /cctv/reports         — fast reports: employees / plates / visitors / AI overview (W1230)
  */
 'use strict';
 
@@ -115,6 +116,7 @@ function registerCctvRoutes(app, opts = {}) {
     ['/cctv/audit', '../cctv/audit.routes'],
     ['/cctv/parent-portal', '../cctv/parent-portal.routes'],
     ['/cctv/admin', '../cctv/admin.routes'],
+    ['/cctv/reports', '../cctv/reports.routes'],
   ];
   let ok = 0;
   for (const [base, mod] of mounts) {

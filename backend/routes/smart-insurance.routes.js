@@ -32,7 +32,8 @@ const router = require('express').Router();
 const smartInsuranceService = require('../services/smartInsurance.service');
 const InsuranceCompany = require('../models/InsuranceCompany');
 const InsurancePolicy = require('../models/InsurancePolicy');
-const InsuranceClaim = require('../models/InsuranceClaim');
+// W1210 — System-40 policy-based claims model (see models/SmartInsuranceClaim.js)
+const InsuranceClaim = require('../models/SmartInsuranceClaim');
 const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const { authenticate, authorize } = require('../middleware/auth');

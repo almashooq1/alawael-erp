@@ -9,7 +9,10 @@ const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const InsuranceCompany = require('../models/InsuranceCompany');
 const InsurancePolicy = require('../models/InsurancePolicy');
-const InsuranceClaim = require('../models/InsuranceClaim');
+// W1210 — the System-40 policy-based claims model (the old require bound the
+// CONTRACT-based insuranceClaim.model.js shim whose required fields this
+// service never set → submitClaim threw on every call since shipping).
+const InsuranceClaim = require('../models/SmartInsuranceClaim');
 const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const escapeRegex = require('../utils/escapeRegex');
@@ -163,6 +166,7 @@ class SmartInsuranceService {
       lineItems: data.lineItems || [],
       priorAuthId: data.priorAuthId || null,
       serviceDate: data.serviceDate || new Date(),
+      notes: data.notes || '',
       status: 'draft',
       branchId: data.branchId,
       createdBy: data.userId,
@@ -593,11 +597,13 @@ class SmartInsuranceService {
    * Aggregates denied claims grouped by `adjudication.denialReasons.code`.
    */
   async getRejectionAnalytics(branchId, dateFrom, dateTo) {
+    // W1210 — aligned to SmartInsuranceClaim vocabulary (the old match used
+    // the contract-model submissionDate + a phantom `branch` key).
     const match = {
       status: { $in: ['denied', 'partially_approved'] },
-      submissionDate: { $gte: new Date(dateFrom), $lte: new Date(dateTo) },
+      submittedAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) },
     };
-    if (branchId) match.branch = branchId;
+    if (branchId) match.branchId = branchId;
 
     const [byReason, totals] = await Promise.all([
       InsuranceClaim.aggregate([

@@ -476,6 +476,30 @@ client/types so the API layer is not fragmented too.
   (SmartIEP = working plan, IndividualEducationPlan = signed legal record). This
   needs the **same stakeholder input** (MoE compliance lead) the parent ADR awaits
   — do NOT auto-merge.
+
+- **Evidence gathered (W1234, 2026-06-11) — recommendation, not yet a decision:**
+  - **Prod data (read-only count):** `smart_ieps = 0` AND `individual_education_plans
+    = 0` — **both collections are empty in production.** Like the `SmartGoal = 0` /
+    `CarePlan = 0` finding that unblocked ADR-040/-026, this means the IEP 2→1
+    consolidation carries **zero data-migration cost** either way; it is a pure
+    forward-architecture choice with no legal record at risk.
+  - **Code integration (consumer audit):** `SmartIEP` is **deeply wired** — the live
+    `/iep` web-admin surface, `@/lib/iep-api`, `early-warning-system.js`,
+    `mdt-transition-quality.js`, and `blockchain/autoIssueSubscribers.js` (certificate
+    auto-issue) all consume it. `IndividualEducationPlan` is **thinly wired** — only
+    its own `iep.routes.js` plus a few `ref:` cross-links (`AssistiveDevice`,
+    `CommunicationAidProfile`, `TransitionPlan`); **no UI, no service/workflow
+    integration.**
+  - **Recommendation (delegated authority):** make **`SmartIEP` the go-forward
+    canonical IEP**. Treat **`/api/v1/iep` + `IndividualEducationPlan` as a deprecation
+    candidate** — but the retirement is **GATED on one capability question only**: does
+    `SmartIEP`'s parent-consent flow satisfy (or can it be extended to satisfy) the MoE
+    **legal-signature** requirement that `IndividualEducationPlan`'s
+    `signatures[].nafathRequestId` provides? Both being empty removes all data risk, so
+    this is **purely a compliance-capability-coverage question** for the MoE lead — NOT
+    a data-migration or "which is in use" question (the audit answered those: neither
+    holds data; SmartIEP holds the integration). Until that one question is confirmed,
+    keep `/api/v1/iep` mounted but add **no new consumers**.
 - **Until then:** the 360 surfaces `SmartIEP` (W1232). Do **not** add a second
   web-admin client for `IndividualEducationPlan` — that would deepen, not resolve,
   the fragmentation.

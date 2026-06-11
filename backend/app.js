@@ -2124,6 +2124,8 @@ require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logger });
 // W808 — PPM due-maintenance → preventive work orders (ENABLE_PPM_WO_SWEEPER=true).
 require('./startup/maintenanceHubBootstrap').wireMaintenanceHubSweepers(app, { logger });
+// W1194 — monthly pay-equity snapshot + gap-breach warn (ENABLE_PAY_EQUITY_SWEEPER=true).
+require('./startup/payEquitySweeperBootstrap').wirePayEquitySweeper(app, { logger });
 
 // W676 — DB backup producer cron (env-gated, default OFF). Closes the DR-drill
 // `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).

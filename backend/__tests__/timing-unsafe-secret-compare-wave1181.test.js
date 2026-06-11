@@ -157,7 +157,10 @@ describe('W1181 — timing-unsafe secret comparison drift guard', () => {
 
   describe('fixed sites stay fixed', () => {
     test('routes/branch-integration.routes.js uses timingSafeCompare', () => {
-      const src = fs.readFileSync(path.join(BACKEND, 'routes', 'branch-integration.routes.js'), 'utf8');
+      const src = fs.readFileSync(
+        path.join(BACKEND, 'routes', 'branch-integration.routes.js'),
+        'utf8'
+      );
       expect(src).toMatch(/require\(['"]\.\.\/utils\/timingSafeCompare['"]\)/);
       expect(src).toMatch(/timingSafeCompare\(apiKey,\s*process\.env\.INTEGRATION_SECRET_KEY/);
       expect(src).not.toMatch(/apiKey\s*!==\s*process\.env\.INTEGRATION_SECRET_KEY/);
@@ -221,7 +224,9 @@ describe('W1181 — timing-unsafe secret comparison drift guard', () => {
       expect(offenders.length).toBe(1);
     });
     test('flags !== on apiKey vs env', () => {
-      const offenders = findOffenders(`if (apiKey !== process.env.SECRET_KEY) return res.status(401);`);
+      const offenders = findOffenders(
+        `if (apiKey !== process.env.SECRET_KEY) return res.status(401);`
+      );
       expect(offenders.length).toBe(1);
     });
     test('exempts typeof type-guard', () => {

@@ -141,13 +141,13 @@ describe('W1182 — حارس سقف حدود الاستعلام (Memory DoS)', (
   });
 
   test('لا إدخالات أساس قديمة (ratchet-down)', () => {
-    const stale = [...KNOWN_UNBOUNDED_LIMIT_BASELINE].filter((key) => !found.has(key));
+    const stale = [...KNOWN_UNBOUNDED_LIMIT_BASELINE].filter(key => !found.has(key));
     expect(stale).toEqual([]);
   });
 
   // ===== اختبارات ذاتية للكاشف =====
   describe('الكاشف — اختبارات ذاتية', () => {
-    const detect = (src) => findUnboundedLimits(src, src.split('\n'));
+    const detect = src => findUnboundedLimits(src, src.split('\n'));
 
     test('يكتشف .limit(Number(req.query.limit) || 500) غير المحصون', () => {
       const v = detect('q.limit(Number(req.query.limit) || 500)');
@@ -214,7 +214,10 @@ describe('W1182 — حارس سقف حدود الاستعلام (Memory DoS)', (
 
     test.each(fixedSites)('%s يحتوي %i سقف/أسقف Math.min على limit', (rel, expectedCount) => {
       const content = fs.readFileSync(path.join(BACKEND_ROOT, rel), 'utf8');
-      const matches = content.match(/Math\.min\([^)]*req\.query\??\.limit[^)]*\)|Math\.min\((?:parseInt|Number)\(req\.query\??\.limit[^;]*W1182/g) || [];
+      const matches =
+        content.match(
+          /Math\.min\([^)]*req\.query\??\.limit[^)]*\)|Math\.min\((?:parseInt|Number)\(req\.query\??\.limit[^;]*W1182/g
+        ) || [];
       const w1182Caps = (content.match(/W1182/g) || []).length;
       expect(w1182Caps).toBeGreaterThanOrEqual(expectedCount);
       expect(matches.length + w1182Caps).toBeGreaterThan(0);

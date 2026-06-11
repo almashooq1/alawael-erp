@@ -76,7 +76,9 @@ describe('W1177 — legacy routes/: authority fields pinned AFTER ...req.body', 
     for (const full of files) {
       const offenders = findPinBeforeSpread(fs.readFileSync(full, 'utf8'));
       for (const o of offenders) {
-        all.push(`${path.relative(ROUTES, full).replace(/\\/g, '/')}:${o.line} [${o.field}] ${o.snippet}`);
+        all.push(
+          `${path.relative(ROUTES, full).replace(/\\/g, '/')}:${o.line} [${o.field}] ${o.snippet}`
+        );
       }
     }
     expect(all).toEqual([]);

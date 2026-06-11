@@ -359,7 +359,15 @@ userSchema.methods.incLoginAttempts = async function () {
         },
       },
     ],
-    { returnDocument: 'after', projection: { failedLoginAttempts: 1, lockUntil: 1 } }
+    // Mongoose 9 refuses array (aggregation-pipeline) updates unless
+    // `updatePipeline: true` is passed — without it every wrong-password
+    // login threw MongooseError and the route returned 500 (and the
+    // brute-force counter never incremented).
+    {
+      returnDocument: 'after',
+      projection: { failedLoginAttempts: 1, lockUntil: 1 },
+      updatePipeline: true,
+    }
   );
 
   if (!updated) return null;

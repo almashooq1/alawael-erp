@@ -200,5 +200,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Diversity routes not mounted (module missing)');
   }
 
+  // ── Workforce-intelligence capstone (W1200 — pay-equity + 9-box + diversity) ──
+  // Self-authenticating; fans out across the three surfaces into one branch summary.
+  const wfiRouter = safeRequire('../routes/hr/workforce-intelligence.routes');
+  if (wfiRouter) {
+    app.use('/api/hr/workforce-intelligence', wfiRouter);
+    app.use('/api/v1/hr/workforce-intelligence', wfiRouter);
+    logger.info('[HR] Workforce-intelligence summary mounted (/api/(v1/)?hr/workforce-intelligence)');
+  } else {
+    logger.warn('[HR] Workforce-intelligence routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

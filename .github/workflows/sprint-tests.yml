@@ -1419,6 +1419,9 @@ on:
       - 'backend/__tests__/diversity-lib-wave1199.test.js'
       - 'backend/__tests__/diversity-routes-wave1199.test.js'
       - 'backend/__tests__/diversity-behavioral-wave1199.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/workforce-intelligence-service-wave1200.test.js'
+      - 'backend/__tests__/workforce-intelligence-routes-wave1200.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2821,6 +2824,9 @@ on:
       - 'backend/__tests__/diversity-lib-wave1199.test.js'
       - 'backend/__tests__/diversity-routes-wave1199.test.js'
       - 'backend/__tests__/diversity-behavioral-wave1199.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/workforce-intelligence-service-wave1200.test.js'
+      - 'backend/__tests__/workforce-intelligence-routes-wave1200.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -26,7 +26,11 @@ jobs:
     # coverage on top of the full test surface, pushing total to 17+ min.
     # CI was cancelling here despite Sprint Tests success → false-failure
     # signal blocking deploy.
-    timeout-minutes: 25
+    # Bumped 25 → 40 (2026-06-11, PR #354 merge): sprint-tests.txt grew to
+    # 997 entries after the core-linkage arc + main's W1200/W1204 landed,
+    # pushing test:guard + test:sprint past 25 min (two consecutive runs
+    # cancelled at exactly 25m with all other 13 gates green).
+    timeout-minutes: 40
 
     steps:
       - name: Checkout code

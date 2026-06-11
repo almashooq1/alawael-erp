@@ -501,24 +501,41 @@ router.post('/:id/enroll', validateId, async (req, res) => {
       // التحقق من السعة
       await beneficiaryService.checkBranchCapacity(targetBranch);
 
-      // توليد رقم ملف
-      const branchCode = entry.branch?.code;
-      const fileNumber = await beneficiaryService.generateFileNumber(targetBranch, branchCode);
+      // W1209 — realigned to the canonical Beneficiary vocabulary: branchId
+      // is the official field; disability is the nested coarse-enum shape
+      // (same taxonomy bridge as the W926 registration normalizer). The
+      // model has NO fileNumber/referralSource fields — the old generated
+      // file number was silently discarded on every conversion, and referral
+      // provenance stays on the linked WaitlistEntry.
+      const WAITLIST_TO_MODEL_TYPE = {
+        physical: 'physical',
+        intellectual: 'mental',
+        autism: 'other',
+        hearing: 'sensory',
+        visual: 'sensory',
+        speech: 'speech',
+        multiple: 'multiple',
+        other: 'other',
+      };
+      const disType = WAITLIST_TO_MODEL_TYPE[entry.disabilityType] || 'other';
 
       const newBeneficiary = await Beneficiary.create({
-        branch: targetBranch,
-        fileNumber,
+        branchId: targetBranch,
         firstName_ar: entry.applicantName.split(' ')[0] || entry.applicantName,
         lastName_ar: entry.applicantName.split(' ').slice(-1)[0] || entry.applicantName,
         phone: entry.applicantPhone,
         email: entry.applicantEmail,
         nationalId: entry.applicantNationalId,
-        disabilityType: entry.disabilityType,
-        disabilitySeverity: entry.disabilitySeverity,
+        category: disType,
+        disability: {
+          type: disType,
+          severity: entry.disabilitySeverity,
+          // preserve the precise waitlist value for the UI round-trip (W926 pattern)
+          primaryType: entry.disabilityType,
+        },
         gender: entry.gender,
         status: 'active',
         enrollmentDate: new Date(),
-        referralSource: entry.referralSource,
         createdBy: req.user?._id,
       });
 

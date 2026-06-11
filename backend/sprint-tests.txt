@@ -858,3 +858,4 @@ __tests__/skills-gap-lib-wave1201.test.js
 __tests__/skills-gap-routes-wave1201.test.js
 __tests__/skills-gap-behavioral-wave1201.test.js
 __tests__/user-login-attempts-behavioral-wave1221.test.js
+__tests__/seed-hr-intelligence-wave1202.test.js

@@ -27,6 +27,7 @@ const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../../middleware/assertBranchMatch');
 const safeError = require('../../utils/safeError');
 const OfficialLetter = require('../../models/OfficialLetter');
 const { LETTER_TYPES } = require('../../models/OfficialLetter');
@@ -34,6 +35,8 @@ const { LETTER_TYPES } = require('../../models/OfficialLetter');
 const WRITE_ROLES = [
   'admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director', 'hr',
   'hr_officer', 'hr_specialist',
+  // beneficiary letters are typically issued by the social-work desk (W1231)
+  'social_worker',
 ];
 const REVOKE_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director'];
 
@@ -89,9 +92,14 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid letterType' });
     }
 
-    // Subject snapshot — employee letters snapshot from the system of record.
+    // Subject snapshot — letters snapshot from the system of record, and the
+    // subject must belong to the caller's branch (W269: a restricted user
+    // must not issue letters about another branch's people — 404, not 403,
+    // so foreign ids are indistinguishable from missing ones).
+    const scope = effectiveBranchScope(req);
     let subject = null;
     let branchId = null;
+    let payloadExtras = null;
     if (letterType === 'employment_certificate' || letterType === 'salary_certificate') {
       const employeeId = String(req.body.employeeId || '');
       if (!mongoose.isValidObjectId(employeeId)) {
@@ -109,6 +117,9 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       if (!emp) {
         return res.status(404).json({ success: false, message: 'Employee not found' });
       }
+      if (scope && emp.branch_id && String(emp.branch_id) !== String(scope)) {
+        return res.status(404).json({ success: false, message: 'Employee not found' });
+      }
       subject = {
         kind: 'employee',
         refId: emp._id,
@@ -119,6 +130,43 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         hireDate: emp.hire_date ?? null,
       };
       branchId = emp.branch_id ?? null;
+    } else if (letterType === 'beneficiary_certificate') {
+      const beneficiaryId = String(req.body.beneficiaryId || '');
+      if (!mongoose.isValidObjectId(beneficiaryId)) {
+        return res.status(400).json({ success: false, message: 'beneficiaryId is required' });
+      }
+      let Beneficiary;
+      try {
+        Beneficiary = mongoose.model('Beneficiary');
+      } catch {
+        return res.status(503).json({ success: false, message: 'Beneficiary model unavailable' });
+      }
+      const ben = await Beneficiary.findById(beneficiaryId)
+        .select(
+          'firstName middleName lastName fullNameArabic fullNameEnglish mrn nationalId branchId registrationDate status'
+        )
+        .lean();
+      if (!ben) {
+        return res.status(404).json({ success: false, message: 'Beneficiary not found' });
+      }
+      if (scope && ben.branchId && String(ben.branchId) !== String(scope)) {
+        return res.status(404).json({ success: false, message: 'Beneficiary not found' });
+      }
+      const composedAr = [ben.firstName, ben.middleName, ben.lastName].filter(Boolean).join(' ');
+      subject = {
+        kind: 'beneficiary',
+        refId: ben._id,
+        nameAr: ben.fullNameArabic || composedAr,
+        nameEn: ben.fullNameEnglish ?? null,
+        number: ben.mrn ?? null,
+        jobTitle: null,
+        hireDate: null,
+      };
+      payloadExtras = {
+        registrationDate: ben.registrationDate ?? null,
+        nationalId: ben.nationalId ?? null,
+      };
+      branchId = ben.branchId ?? null;
     } else {
       return res.status(400).json({ success: false, message: 'Unsupported letterType' });
     }
@@ -145,6 +193,9 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       if (payload.salary.basic <= 0) {
         return res.status(400).json({ success: false, message: 'salary.basic must be > 0' });
       }
+    }
+    if (payloadExtras) {
+      payload = { ...(payload || {}), ...payloadExtras };
     }
 
     const letter = await OfficialLetter.issue({

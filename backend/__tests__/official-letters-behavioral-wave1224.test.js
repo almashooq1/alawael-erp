@@ -108,6 +108,18 @@ describe('W1224 OfficialLetter.issue — sequencing + format', () => {
     ).rejects.toMatchObject({ code: 'INVALID_LETTER_TYPE' });
   });
 
+  test('W1231: beneficiary_certificate issues with BC prefix and beneficiary subject', async () => {
+    const letter = await OfficialLetter.issue({
+      letterType: 'beneficiary_certificate',
+      subject: subject({ kind: 'beneficiary', jobTitle: null, number: 'MRN-0042' }),
+      issuer: issuer(),
+      payload: { registrationDate: new Date('2026-01-15'), nationalId: '1234567890' },
+    });
+    expect(letter.refNumber).toBe(`BC-${YEAR}-0001`);
+    expect(letter.subject.kind).toBe('beneficiary');
+    expect(letter.payload.nationalId).toBe('1234567890');
+  });
+
   test('verifyTokens are unique across letters', async () => {
     const a = await OfficialLetter.issue({
       letterType: 'employment_certificate',

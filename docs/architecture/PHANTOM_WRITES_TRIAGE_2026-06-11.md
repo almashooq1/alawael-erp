@@ -138,9 +138,18 @@ lines and show the matched text.**
 
 ### P3 — low traffic / analytics-only
 
-9. **riskassessment** (5), **budget** (3 — model uses `amount`), **beneficiarytransfer**
-   (3), **notification/smartnotification `sentBy`** (2), **contract.model `value`** (1),
-   **insuranceeligibilitycheck — remaining**: none.
+9. ~~**riskassessment** (5)~~ + ~~**notification/smartnotification `sentBy`** (2)~~ —
+   **FIXED W1207/W1207b**: risk create missed REQUIRED organizationId (singleton-Org
+   resolution added) + phantom title/description/flat-1-5 scores → riskName/
+   riskDescription/assessment.{probability,impact} 0..1; risk UPDATE was silently
+   dropping every field. notifications-module send/bulk-send missed REQUIRED
+   recipientId+message + hyphenated channel enum violated + phantom sentBy/branchId;
+   /stats and **/inbox** filtered by phantom branchId (always zero/empty).
+   smartNotificationCenter defaults violated BOTH enums (type 'custom', category
+   'system') → threw on minimal payloads; sender field realigned.
+10. **budget** (3 — model uses `amount`), **beneficiarytransfer** (3), **waitlist
+    beneficiary** (5), **contract.model `value`** (1), **BeneficiaryService** (3,
+    callers unchecked) — remaining LIVE candidates.
 
 ## Burn-down protocol
 

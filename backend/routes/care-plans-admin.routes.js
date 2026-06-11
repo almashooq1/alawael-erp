@@ -27,6 +27,9 @@ const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
 const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 const { stripUpdateMeta } = require('../utils/sanitize');
+// W1204 — Blueprint 43 R3 interface gate: "لا هدف بلا مقياس" on embedded
+// care-plan goal create. Env-gated (GOLDEN_THREAD_ENFORCEMENT, default off).
+const goldenThreadGate = require('../intelligence/golden-thread-enforcement.lib');
 
 router.use(authenticateToken);
 // W654 — populate req.branchScope so branchFilter(req) works. = {} for
@@ -302,6 +305,13 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
     if (!plan || !domain)
       return res.status(400).json({ success: false, message: 'مسار المجال غير صالح' });
 
+    // W1204 — R3 gate: embedded goal without a linked measure is rejected
+    // (enforce) or flagged in the response (warn). Off by default.
+    const gtGate = goldenThreadGate.evaluateGate(goldenThreadGate.checkGoalPayload(req.body));
+    if (gtGate.action === 'reject') {
+      return res.status(422).json(goldenThreadGate.rejectionEnvelope(gtGate.violations));
+    }
+
     // Pre-fetch beneficiary to enforce branch gate. Without this, anyone
     // could push goals onto any care plan in any branch.
     const existing = await scopedCarePlanQuery(req, req.params.id).select('beneficiary').lean();
@@ -326,7 +336,14 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
-    res.json({ success: true, data: doc, message: 'تمت إضافة الهدف' });
+    res.json({
+      success: true,
+      data: doc,
+      message: 'تمت إضافة الهدف',
+      ...(gtGate.action === 'warn'
+        ? { goldenThread: { mode: gtGate.mode, warnings: gtGate.violations } }
+        : {}),
+    });
   } catch (err) {
     return safeError(res, err, 'care-plans.addGoal');
   }

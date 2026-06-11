@@ -35,6 +35,12 @@ const {
   validateUpdateSession,
   validate,
 } = require('../validators/sessions.validator');
+// W1204 — Blueprint 43 R3 interface gate: "لا جلسة بلا هدف". Completion (not
+// scheduling) is the enforcement point — a session may be scheduled during
+// intake before goals exist, but COMPLETING it without documenting progress
+// on at least one goal breaks the golden thread. Env-gated
+// (GOLDEN_THREAD_ENFORCEMENT=off|warn|enforce, default off).
+const goldenThreadGate = require('../../../intelligence/golden-thread-enforcement.lib');
 
 // Load model (registers it with Mongoose for the service layer)
 try {
@@ -174,8 +180,22 @@ router.put(
   '/:sessionId/complete',
   requireService,
   asyncHandler(async (req, res) => {
+    // W1204 — R3 gate: completing a session without at least one
+    // goalProgress[].goalId entry is rejected (enforce) or flagged (warn).
+    const gate = goldenThreadGate.evaluateGate(
+      goldenThreadGate.checkSessionCompletionPayload(req.body)
+    );
+    if (gate.action === 'reject') {
+      return res.status(422).json(goldenThreadGate.rejectionEnvelope(gate.violations));
+    }
     const session = await sessionsService.completeSession(req.params.sessionId, req.body);
-    res.json({ success: true, data: session });
+    res.json({
+      success: true,
+      data: session,
+      ...(gate.action === 'warn'
+        ? { goldenThread: { mode: gate.mode, warnings: gate.violations } }
+        : {}),
+    });
   })
 );
 

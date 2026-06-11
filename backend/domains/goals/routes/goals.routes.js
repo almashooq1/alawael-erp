@@ -38,6 +38,10 @@ const {
   validateLogProgress,
   validate,
 } = require('../validators/goals.validator');
+// W1204 — Blueprint 43 R3 interface gate: "لا هدف بلا مقياس". Env-gated
+// (GOLDEN_THREAD_ENFORCEMENT=off|warn|enforce, default off) so deploys stay
+// inert until the caseload-attention queue (W1167) is drained.
+const goldenThreadGate = require('../../../intelligence/golden-thread-enforcement.lib');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -84,6 +88,12 @@ router.post(
   '/goals',
   validate(validateCreateGoal),
   asyncHandler(async (req, res) => {
+    // W1204 — R3 gate: goal without a linked measure is rejected (enforce)
+    // or flagged in the response (warn). Off by default.
+    const gate = goldenThreadGate.evaluateGate(goldenThreadGate.checkGoalPayload(req.body));
+    if (gate.action === 'reject') {
+      return res.status(422).json(goldenThreadGate.rejectionEnvelope(gate.violations));
+    }
     // W1178 — restricted callers cannot spoof branchId on create; pin to own branch
     const createScope = effectiveBranchScope(req);
     const goal = new TherapeuticGoal({
@@ -91,7 +101,13 @@ router.post(
       ...(createScope ? { branchId: createScope } : {}),
     });
     await goal.save();
-    return res.status(201).json({ success: true, data: goal });
+    return res.status(201).json({
+      success: true,
+      data: goal,
+      ...(gate.action === 'warn'
+        ? { goldenThread: { mode: gate.mode, warnings: gate.violations } }
+        : {}),
+    });
   })
 );
 

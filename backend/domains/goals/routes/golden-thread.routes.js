@@ -21,6 +21,9 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { effectiveBranchScope } = require('../../../middleware/assertBranchMatch');
 const { attentionForBeneficiaries } = require('../../../services/goldenThread.service');
+// W1204 — R3 interface-gate status surface (read-only; supports the
+// off → warn → enforce rollout recipe).
+const goldenThreadGate = require('../../../intelligence/golden-thread-enforcement.lib');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -61,6 +64,33 @@ router.get(
     return res.json({
       success: true,
       data: { branchId: String(branchId), scanned: ids.length, capped, summary, rows },
+    });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /golden-thread/enforcement-status — R3 gate observability (W1204).
+//   Returns the live enforcement mode + the violation catalogue so ops can
+//   verify the flag state before/after flipping GOLDEN_THREAD_ENFORCEMENT.
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/golden-thread/enforcement-status',
+  asyncHandler(async (_req, res) => {
+    return res.json({
+      success: true,
+      data: {
+        mode: goldenThreadGate.enforcementMode(),
+        modes: goldenThreadGate.MODES,
+        gateErrorCode: goldenThreadGate.GATE_ERROR_CODE,
+        violationCodes: Object.keys(goldenThreadGate.VIOLATION_CODES),
+        enforcedAt: {
+          goalCreate: [
+            'POST /api/v1/goals/goals',
+            'POST /api/admin/care-plans/:id/goals/:domainPath',
+          ],
+          sessionComplete: ['PUT /api/v1/sessions/:sessionId/complete'],
+        },
+      },
     });
   })
 );

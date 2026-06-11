@@ -222,5 +222,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Skills-gap routes not mounted (module missing)');
   }
 
+  // ── Headcount planning & forecasting (W1203 — supply planning + hiring need) ──
+  // Self-authenticating; live current headcount from Employee + branch-isolated.
+  const headcountRouter = safeRequire('../routes/hr/headcount-planning.routes');
+  if (headcountRouter) {
+    app.use('/api/hr/headcount-planning', headcountRouter);
+    app.use('/api/v1/hr/headcount-planning', headcountRouter);
+    logger.info('[HR] Headcount planning mounted (/api/(v1/)?hr/headcount-planning)');
+  } else {
+    logger.warn('[HR] Headcount planning routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

@@ -1434,6 +1434,10 @@ on:
       - 'backend/__tests__/user-login-attempts-behavioral-wave1221.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/seed-hr-intelligence-wave1202.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/headcount-forecast-lib-wave1203.test.js'
+      - 'backend/__tests__/headcount-planning-routes-wave1203.test.js'
+      - 'backend/__tests__/headcount-plan-behavioral-wave1203.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2851,6 +2855,10 @@ on:
       - 'backend/__tests__/user-login-attempts-behavioral-wave1221.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/seed-hr-intelligence-wave1202.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/headcount-forecast-lib-wave1203.test.js'
+      - 'backend/__tests__/headcount-planning-routes-wave1203.test.js'
+      - 'backend/__tests__/headcount-plan-behavioral-wave1203.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

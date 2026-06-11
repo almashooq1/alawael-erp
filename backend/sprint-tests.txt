@@ -859,3 +859,6 @@ __tests__/skills-gap-routes-wave1201.test.js
 __tests__/skills-gap-behavioral-wave1201.test.js
 __tests__/user-login-attempts-behavioral-wave1221.test.js
 __tests__/seed-hr-intelligence-wave1202.test.js
+__tests__/headcount-forecast-lib-wave1203.test.js
+__tests__/headcount-planning-routes-wave1203.test.js
+__tests__/headcount-plan-behavioral-wave1203.test.js

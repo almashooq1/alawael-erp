@@ -519,10 +519,19 @@ router.post('/:id/enroll', validateId, async (req, res) => {
       };
       const disType = WAITLIST_TO_MODEL_TYPE[entry.disabilityType] || 'other';
 
+      // W1216 — firstName/lastName are the REQUIRED canonical name fields
+      // (the *_ar pair is optional); caught by the audit's new
+      // missing-required detector on its first run.
+      const nameParts = entry.applicantName.trim().split(/\s+/);
+      const firstName = nameParts[0] || entry.applicantName;
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : firstName;
+
       const newBeneficiary = await Beneficiary.create({
         branchId: targetBranch,
-        firstName_ar: entry.applicantName.split(' ')[0] || entry.applicantName,
-        lastName_ar: entry.applicantName.split(' ').slice(-1)[0] || entry.applicantName,
+        firstName,
+        lastName,
+        firstName_ar: firstName,
+        lastName_ar: lastName,
         phone: entry.applicantPhone,
         email: entry.applicantEmail,
         nationalId: entry.applicantNationalId,

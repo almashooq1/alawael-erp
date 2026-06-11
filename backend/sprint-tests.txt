@@ -836,3 +836,6 @@ __tests__/operations-health-wave1195.test.js
 __tests__/supervisor-ops-route-wave1170.test.js
 __tests__/supervisor-ops-service-behavioral-wave1169.test.js
 __tests__/supervisor-ops-service-wave1169.test.js
+__tests__/pay-equity-lib-wave1193.test.js
+__tests__/pay-equity-routes-wave1193.test.js
+__tests__/pay-equity-behavioral-wave1193.test.js

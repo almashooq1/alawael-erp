@@ -547,7 +547,6 @@ export default function Beneficiary360Page() {
             icon={<TimelineIcon />}
             iconPosition="start"
             label={`الخط الزمني`}
-            iconPosition="start"
           />
           <Tab
             icon={

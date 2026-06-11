@@ -120,6 +120,22 @@ If prod `SmartGoal` is also empty (or small), Q1 = "read-only-deprecate" and the
 retire ships as a guarded `--execute` script (dry-run default). The audit tooling is
 now verified end-to-end against a live DB.
 
+> **✅ Q1 ANSWERED — PROD VERDICT (2026-06-11, owner-authorized read-only audit via SSH).**
+> Ran `audit:goal-consolidation` against the **live production DB** (`alawael-api`,
+> Hostinger VPS). Result: **`SmartGoal = 0` docs in production** (matches dev). The
+> readiness verdict is explicit: *"SmartGoal is EMPTY (0 docs) → retire is trivial;
+> NO data migration needed. Safe to deprecate + remove writes."* Companion findings:
+> `Measure = 27` (canonical, ADR-041) vs `MeasurementMaster = 0` (empty → fence
+> trivial); `CarePlan = 0` / `TherapeuticPlan = 0` (ADR-042/026 both empty).
+>
+> **Consequence:** the **destructive SmartGoal→TherapeuticGoal migration risk is
+> eliminated** — there is no data to migrate or fabricate clinical fields for. Q1
+> resolves to **"read-only-deprecate"**: the only remaining SmartGoal work is the
+> code-level write-fence (the `@deprecated` markers from W1133 already stop new
+> code; removing the ≤2 write surfaces is now a safe, no-data-loss change). Q2–Q4
+> (IEP / embedded-care-plan-goal dispositions — a *different* data class) remain the
+> stakeholder's keep-vs-migrate call; they are unaffected by this SmartGoal finding.
+
 ## Consequences
 
 - **Positive:** one canonical goal for the golden thread; outcome/GAS/forecast

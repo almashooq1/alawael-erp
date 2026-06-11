@@ -75,6 +75,7 @@
     "audit:goal-consolidation": "node scripts/goal-model-consolidation-readiness.js",
     "audit:operations-health": "node scripts/operations-health.js",
     "consolidate:smartgoal": "node scripts/consolidate-smartgoal.js",
+    "audit:expense-anomalies": "node scripts/expense-anomaly-scan.js",
     "verify:supply-chain-staging": "node scripts/verify-supply-chain-staging.js",
     "verify:supply-chain-staging:json": "node scripts/verify-supply-chain-staging.js --json",
     "backfill:complaint-branchid": "node scripts/backfill-complaint-branchid.js",

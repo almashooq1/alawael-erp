@@ -245,5 +245,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Headcount planning routes not mounted (module missing)');
   }
 
+  // ── Succession readiness (W1207 — computed: 9-box + target-role competency + tenure) ─
+  // Self-authenticating; integrates W1198 talent + W1201 skills-gap. Branch-isolated.
+  const successionReadinessRouter = safeRequire('../routes/hr/succession-readiness.routes');
+  if (successionReadinessRouter) {
+    app.use('/api/hr/succession-readiness', successionReadinessRouter);
+    app.use('/api/v1/hr/succession-readiness', successionReadinessRouter);
+    logger.info('[HR] Succession readiness mounted (/api/(v1/)?hr/succession-readiness)');
+  } else {
+    logger.warn('[HR] Succession readiness routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

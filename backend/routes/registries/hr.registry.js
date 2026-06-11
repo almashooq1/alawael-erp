@@ -222,6 +222,18 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Skills-gap routes not mounted (module missing)');
   }
 
+  // ── Official letters issuance registry (W1224 — certificates + QR verify) ──
+  // Self-authenticating EXCEPT GET /verify/:token which is deliberately public
+  // (banks/authorities scan the QR printed on the letter to confirm issuance).
+  const officialLettersRouter = safeRequire('../routes/hr/official-letters.routes');
+  if (officialLettersRouter) {
+    app.use('/api/hr/official-letters', officialLettersRouter);
+    app.use('/api/v1/hr/official-letters', officialLettersRouter);
+    logger.info('[HR] Official-letters registry mounted (/api/(v1/)?hr/official-letters)');
+  } else {
+    logger.warn('[HR] Official-letters routes not mounted (module missing)');
+  }
+
   // ── Headcount planning & forecasting (W1203 — supply planning + hiring need) ──
   // Self-authenticating; live current headcount from Employee + branch-isolated.
   const headcountRouter = safeRequire('../routes/hr/headcount-planning.routes');

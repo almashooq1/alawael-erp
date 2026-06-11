@@ -1685,7 +1685,12 @@ on:
       - 'backend/__tests__/headcount-planning-routes-wave1203.test.js'
       - 'backend/__tests__/headcount-plan-behavioral-wave1203.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+<<<<<<< HEAD
       - 'backend/__tests__/productivity-anomalies-wave1215.test.js'
+=======
+      - 'backend/__tests__/official-letters-routes-wave1224.test.js'
+      - 'backend/__tests__/official-letters-behavioral-wave1224.test.js'
+>>>>>>> origin/main
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3354,7 +3359,12 @@ on:
       - 'backend/__tests__/headcount-planning-routes-wave1203.test.js'
       - 'backend/__tests__/headcount-plan-behavioral-wave1203.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+<<<<<<< HEAD
       - 'backend/__tests__/productivity-anomalies-wave1215.test.js'
+=======
+      - 'backend/__tests__/official-letters-routes-wave1224.test.js'
+      - 'backend/__tests__/official-letters-behavioral-wave1224.test.js'
+>>>>>>> origin/main
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

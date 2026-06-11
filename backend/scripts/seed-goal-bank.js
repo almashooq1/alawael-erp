@@ -125,6 +125,14 @@ async function main() {
     process.exit(0);
   }
 
+  // W1225 — load backend/.env like the app does, so `npm run seed:goal-bank`
+  // works on the VPS without a `-r dotenv/config` preload (the gap the first
+  // prod run hit). Lazy + best-effort: an exported MONGODB_URI still wins.
+  try {
+    require('dotenv').config();
+  } catch (_e) {
+    /* dotenv optional in stripped environments */
+  }
   const mongoose = require('mongoose');
   const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!uri) {

@@ -37,8 +37,14 @@ const WRITE_ROLES = [
 ];
 const REVOKE_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_manager', 'hr_director'];
 
-// ─── PUBLIC: QR verification (declared BEFORE authenticateToken) ──────────
-router.get('/verify/:token', async (req, res) => {
+// ─── PUBLIC: QR verification ───────────────────────────────────────────────
+// Declared BEFORE authenticateToken inside this router AND exported so the
+// registry can additionally mount it at /api/(v1/)?public/letter-verify/:token
+// — app.js gates the whole /api/v1/hr prefix with `authenticate` (multiple
+// `app.use('/api/v1/hr', authenticate, …)` sites), so a public endpoint can
+// never be reached under the /hr prefix. The /public mount is the real
+// QR-facing URL; the in-router copy stays for completeness.
+async function verifyLetterHandler(req, res) {
   try {
     const token = String(req.params.token || '');
     if (!/^[a-f0-9]{32}$/.test(token)) {
@@ -67,7 +73,9 @@ router.get('/verify/:token', async (req, res) => {
   } catch (err) {
     safeError(res, err, 'official-letters:verify');
   }
-});
+}
+
+router.get('/verify/:token', verifyLetterHandler);
 
 // ─── Everything below requires auth + branch context ──────────────────────
 router.use(authenticateToken);
@@ -236,3 +244,4 @@ router.post('/:id/revoke', requireRole(REVOKE_ROLES), async (req, res) => {
 });
 
 module.exports = router;
+module.exports.verifyLetterHandler = verifyLetterHandler;

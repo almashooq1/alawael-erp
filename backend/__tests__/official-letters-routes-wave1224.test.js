@@ -80,6 +80,16 @@ describe('W1224 registry mount', () => {
       /app\.use\('\/api\/v1\/hr\/official-letters', officialLettersRouter\)/
     );
   });
+
+  test('W1228: QR verify is ALSO mounted publicly OUTSIDE /hr (app.js gates /api/v1/hr with authenticate)', () => {
+    expect(routeSrc).toMatch(/module\.exports\.verifyLetterHandler = verifyLetterHandler/);
+    expect(registrySrc).toMatch(
+      /app\.get\('\/api\/public\/letter-verify\/:token', officialLettersRouter\.verifyLetterHandler\)/
+    );
+    expect(registrySrc).toMatch(
+      /app\.get\('\/api\/v1\/public\/letter-verify\/:token', officialLettersRouter\.verifyLetterHandler\)/
+    );
+  });
 });
 
 describe('W1224 OfficialLetter model — contract', () => {

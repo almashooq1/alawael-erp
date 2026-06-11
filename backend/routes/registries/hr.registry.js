@@ -229,7 +229,15 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   if (officialLettersRouter) {
     app.use('/api/hr/official-letters', officialLettersRouter);
     app.use('/api/v1/hr/official-letters', officialLettersRouter);
-    logger.info('[HR] Official-letters registry mounted (/api/(v1/)?hr/official-letters)');
+    // The QR-facing verify endpoint must live OUTSIDE /hr — app.js wraps the
+    // whole /api/v1/hr prefix in `authenticate` (W1228 fix).
+    if (typeof officialLettersRouter.verifyLetterHandler === 'function') {
+      app.get('/api/public/letter-verify/:token', officialLettersRouter.verifyLetterHandler);
+      app.get('/api/v1/public/letter-verify/:token', officialLettersRouter.verifyLetterHandler);
+    }
+    logger.info(
+      '[HR] Official-letters registry mounted (/api/(v1/)?hr/official-letters + public /api/(v1/)?public/letter-verify/:token)'
+    );
   } else {
     logger.warn('[HR] Official-letters routes not mounted (module missing)');
   }

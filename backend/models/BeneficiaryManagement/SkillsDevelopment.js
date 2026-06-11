@@ -178,15 +178,13 @@ skillsDevelopmentSchema.index({ endorsementCount: -1 });
 // skillCategory: removed — index:true creates implicit index
 
 // Pre-save middleware
-skillsDevelopmentSchema.pre('save', function (next) {
+skillsDevelopmentSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   // Update endorsement count
   if (this.endorsements) {
     this.endorsementCount = this.endorsements.length;
   }
-
-  next();
 });
 
 // Methods

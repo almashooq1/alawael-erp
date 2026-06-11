@@ -349,7 +349,7 @@ MudadComplianceReportSchema.index({ establishmentId: 1, reportMonth: 1 }, { uniq
 // ============================================================
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
 // Hooks registered before model compilation (this file has no other save hooks).
-MudadSalaryRecordSchema.pre('save', async function (next) {
+MudadSalaryRecordSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'basicSalary',
     'housingAllowance',
@@ -359,11 +359,9 @@ MudadSalaryRecordSchema.pre('save', async function (next) {
     'deductions',
     'netSalary',
   ]);
-  next();
 });
-MudadBatchSchema.pre('save', async function (next) {
+MudadBatchSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, ['totalAmount']);
-  next();
 });
 
 const MudadSalaryRecord =

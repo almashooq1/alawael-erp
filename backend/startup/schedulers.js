@@ -136,6 +136,17 @@ function setupSchedulers({ isTestEnv }) {
       if (care) {
         registerShutdownHook('Care', care.shutdown);
         logger.info('✅ Phase 17 Care Platform online (CRM lead funnel)');
+        // W983 — schedule the dormant retention sweep (churn re-assessment).
+        // careBootstrap builds retentionService but only a manual POST ever ran it;
+        // env-gated, default OFF (ENABLE_RETENTION_SWEEP=true). Guarded internally.
+        try {
+          require('./retentionSweeperBootstrap').wireRetentionSweeper({
+            retentionService: care.retentionService,
+            logger,
+          });
+        } catch (rsErr) {
+          logger.warn('⚠️  Retention sweeper wiring failed', { error: rsErr.message });
+        }
       }
     } catch (err) {
       logger.warn('⚠️  Care bootstrap failed', { error: err.message });

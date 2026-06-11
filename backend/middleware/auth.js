@@ -12,6 +12,15 @@ const {
 // Use centralized secret management (no hardcoded fallbacks)
 const JWT_SECRET = jwtSecret;
 
+// W947 — the JWT payload carries `id` (generateToken), not `_id`. Hundreds of
+// routes read `req.user._id` to stamp createdBy/uploadedBy/performedBy/audit
+// actor — all of which were silently null. Alias `_id` from `id` once at decode
+// so every existing `req.user._id` reads the authenticated user's ObjectId.
+function aliasUserId(decoded) {
+  if (decoded && decoded.id && !decoded._id) decoded._id = decoded.id;
+  return decoded;
+}
+
 // ── Lazy-loaded models (avoid circular deps at startup) ──────────────
 let _User, _Session;
 function _getUser() {
@@ -47,7 +56,7 @@ const requireAuth = async (req, res, next) => {
     // policy declarative and survives future jsonwebtoken-default
     // changes or accidental refactor to a Buffer/KeyObject secret.
     const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-    req.user = decoded;
+    req.user = aliasUserId(decoded);
     next();
   } catch (err) {
     if (err && err.name === 'TokenExpiredError') {
@@ -97,7 +106,7 @@ const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Token has been revoked' });
     }
 
-    req.user = decoded;
+    req.user = aliasUserId(decoded);
     req.userId = decoded.id || decoded.sub;
     req.userRole = decoded.role || 'user';
     req.permissions = decoded.permissions || [];
@@ -126,7 +135,7 @@ const optionalAuth = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
       if (!err) {
-        req.user = decoded;
+        req.user = aliasUserId(decoded);
         req.userId = decoded.id || decoded.sub;
         req.userRole = decoded.role || 'user';
       }

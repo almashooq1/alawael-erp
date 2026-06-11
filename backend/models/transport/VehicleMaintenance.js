@@ -45,7 +45,7 @@ const vehicleMaintenanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-vehicleMaintenanceSchema.pre('save', async function (next) {
+vehicleMaintenanceSchema.pre('save', async function () {
   if (!this.maintenance_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -58,7 +58,6 @@ vehicleMaintenanceSchema.pre('save', async function (next) {
     0
   );
   this.total_cost = this.labor_cost + this.parts_cost;
-  next();
 });
 
 vehicleMaintenanceSchema.index({ vehicle_id: 1, scheduled_date: -1 });

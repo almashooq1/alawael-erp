@@ -139,7 +139,7 @@ achievementSchema.index({ tags: 1 });
 achievementSchema.index({ branchId: 1, type: 1 });
 
 // Pre-save middleware
-achievementSchema.pre('save', function (next) {
+achievementSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   // Auto-assign points based on type if not specified
@@ -152,8 +152,6 @@ achievementSchema.pre('save', function (next) {
     };
     this.pointsAwarded = pointMap[this.type] || 50;
   }
-
-  next();
 });
 
 // Methods

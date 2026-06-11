@@ -221,6 +221,48 @@ const TemplateCard = ({ template, onFill, onView }) => {
   );
 };
 
+/* ═══ Approval Chain Inline (W1186) ═══ */
+const APPROVAL_STEP_COLORS = {
+  approved: '#4CAF50',
+  rejected: '#F44336',
+  pending: '#FF9800',
+  skipped: '#9E9E9E',
+};
+
+const ApprovalChainInline = ({ approvals }) => {
+  if (!approvals?.length) return null;
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+      {approvals.map((a, i) => {
+        const color = APPROVAL_STEP_COLORS[a.status] || '#9E9E9E';
+        const mark = a.status === 'approved' ? '✓' : a.status === 'rejected' ? '✗' : '⏳';
+        return (
+          <React.Fragment key={`${a.role}-${i}`}>
+            {i > 0 && (
+              <Typography variant="caption" color="text.disabled">
+                ←
+              </Typography>
+            )}
+            <Tooltip title={[a.approverName, a.comment].filter(Boolean).join(' — ')}>
+              <Chip
+                size="small"
+                label={`${a.label || a.role} ${mark}`}
+                sx={{
+                  height: 22,
+                  fontSize: '0.7rem',
+                  bgcolor: `${color}15`,
+                  color,
+                  fontWeight: 600,
+                }}
+              />
+            </Tooltip>
+          </React.Fragment>
+        );
+      })}
+    </Box>
+  );
+};
+
 /* ═══ Dynamic Form Field Renderer ═══ */
 const FormFieldRenderer = ({ field, value, onChange, error }) => {
   const commonProps = {
@@ -849,6 +891,7 @@ export default function FormTemplates() {
                   <TableCell sx={{ fontWeight: 700 }}>النموذج</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>سير الاعتماد</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>إجراء</TableCell>
                 </TableRow>
               </TableHead>
@@ -872,6 +915,9 @@ export default function FormTemplates() {
                           fontWeight: 600,
                         }}
                       />
+                    </TableCell>
+                    <TableCell>
+                      <ApprovalChainInline approvals={sub.approvals} />
                     </TableCell>
                     <TableCell>
                       <Tooltip title="عرض التفاصيل">
@@ -1195,6 +1241,13 @@ export default function FormTemplates() {
                       </Typography>
                     </Box>
                   </Box>
+
+                  {/* Approval chain progress (W1186) */}
+                  {sub.approvals?.length > 0 && (
+                    <Box sx={{ mb: 1.5 }}>
+                      <ApprovalChainInline approvals={sub.approvals} />
+                    </Box>
+                  )}
 
                   {/* Show submitted data summary */}
                   {sub.data && (

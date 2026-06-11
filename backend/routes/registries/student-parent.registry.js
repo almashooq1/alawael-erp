@@ -35,7 +35,12 @@ module.exports = function registerStudentParentRoutes(
   // PHANTOM: const studentEventsRoutes = safeRequire('../routes/student-events.routes');
   // PHANTOM: const studentElearningRoutes = safeRequire('../routes/student-elearning.routes');
   const parentsRouter = safeRequire('../routes/parents.routes');
-  // PHANTOM: const guardianPortalRouter = safeRequire('../routes/guardianPortal.routes');
+  // W1211 — un-phantomed: the file was created AFTER the W775 cleanup marked
+  // it phantom and was never re-wired. Repaired in W1197/W1199 (canonical
+  // Appointment vocabulary + PortalMessage messaging) and self-guarded
+  // (authenticate + requireBranchAccess + Guardian-ownership on every child
+  // route → 403 without a linked Guardian record).
+  const guardianPortalRouter = safeRequire('../routes/guardianPortal.routes');
   const parentPortalEnhancedRoutes = safeRequire('../routes/parent-portal-enhanced.routes');
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -63,8 +68,8 @@ module.exports = function registerStudentParentRoutes(
   // ── Parents & Guardian ─────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'parents', parentsRouter);
-  // PHANTOM-FIX: dualMount(app, 'guardian', guardianPortalRouter);
-  logger.info('[Student] Parent portal mounted (guardian skipped: phantom)');
+  dualMount(app, 'guardian', guardianPortalRouter); // W1211 — see import note
+  logger.info('[Student] Parent portal mounted (parents + guardian)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Parent Portal Full API (بوابة ولي الأمر الشاملة) ──────────────────

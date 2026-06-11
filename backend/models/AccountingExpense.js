@@ -185,20 +185,18 @@ accountingExpenseSchema.methods.reject = function (userId, reason) {
 };
 
 // Pre-save middleware للتحقق
-accountingExpenseSchema.pre('save', function (next) {
+accountingExpenseSchema.pre('save', async function () {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
   // التحقق من وجود سبب الرفض عند الرفض
   if (this.status === 'rejected' && !this.rejectionReason) {
-    return next(new Error('يجب تحديد سبب الرفض'));
+    throw new Error('يجب تحديد سبب الرفض');
   }
 
   // تحديث updatedBy
   if (this.isModified() && !this.isNew) {
     this.updatedBy = this.createdBy; // يمكن تحسينه للحصول على المستخدم الحالي
   }
-
-  next();
 });
 
 // Static method للحصول على إحصائيات المصروفات

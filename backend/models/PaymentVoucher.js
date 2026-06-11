@@ -117,7 +117,7 @@ paymentVoucherSchema.index({ type: 1, status: 1 });
 paymentVoucherSchema.index({ partyName: 1, date: -1 });
 paymentVoucherSchema.index({ organization: 1 });
 
-paymentVoucherSchema.pre('save', function (next) {
+paymentVoucherSchema.pre('save', async function () {
   if (this.isNew && !this.voucherNumber) {
     const prefix = this.type === 'receipt' ? 'RV' : 'PV';
     this.voucherNumber = `${prefix}-${Date.now()}`;
@@ -126,7 +126,6 @@ paymentVoucherSchema.pre('save', function (next) {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   // (Extends the existing callback-style hook in-style; no new hook added.)
   require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'taxAmount', 'netAmount']);
-  next();
 });
 
 module.exports =

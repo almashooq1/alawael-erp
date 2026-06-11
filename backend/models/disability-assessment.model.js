@@ -789,7 +789,7 @@ disabilityAssessmentSchema.statics.getRehabReadinessOverview = async function ()
 };
 
 // ── Pre-save: auto-calculate rehabilitation readiness level ──
-disabilityAssessmentSchema.pre('save', function (next) {
+disabilityAssessmentSchema.pre('save', async function () {
   const r = this.rehabilitation_readiness;
   if (r && r.motivation_score != null && r.cognitive_capacity != null) {
     const avg =
@@ -806,7 +806,6 @@ disabilityAssessmentSchema.pre('save', function (next) {
   }
 
   this.last_updated = new Date();
-  next();
 });
 
 module.exports =

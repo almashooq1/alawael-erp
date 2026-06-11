@@ -144,15 +144,15 @@ aiRecommendationBundleSchema.post('init', function (doc) {
 // Idempotent: re-saving without a status change is a no-op (no history entry).
 // New docs go straight to the default state without triggering validation
 // (creation flow is separate from transition flow).
-aiRecommendationBundleSchema.pre('save', function (next) {
+aiRecommendationBundleSchema.pre('save', async function () {
   // New doc — no transition to validate. History will be seeded by the
   // service layer's createDraft() if needed (e.g. DRAFT→DISCARDED on low
   // confidence happens in service code, not in the pre-save hook).
   if (this.isNew) {
     this.$__originalStatus = this.status;
-    return next();
+    return;
   }
-  if (!this.isModified('status')) return next();
+  if (!this.isModified('status')) return;
 
   const fromStatus = this.$__originalStatus;
   const toStatus = this.status;
@@ -162,7 +162,7 @@ aiRecommendationBundleSchema.pre('save', function (next) {
   // tests). Defer to the lib in that case via a permissive path.
   if (!fromStatus) {
     this.$__originalStatus = toStatus;
-    return next();
+    return;
   }
 
   const result = lib.validateTransition({
@@ -179,7 +179,7 @@ aiRecommendationBundleSchema.pre('save', function (next) {
     err.code = result.code;
     err.fromStatus = fromStatus;
     err.toStatus = toStatus;
-    return next(err);
+    throw err;
   }
 
   // Append to history (append-only audit per W325 P2 / W325 P3 pattern)
@@ -199,8 +199,6 @@ aiRecommendationBundleSchema.pre('save', function (next) {
   this.$__transitionReason = undefined;
   this.$__transitionNotes = undefined;
   this.$__transitionMfaTier = undefined;
-
-  next();
 });
 
 module.exports =

@@ -185,9 +185,8 @@ supportPlanSchema.index({ 'reviewSchedule.nextReviewDate': 1 });
 supportPlanSchema.index({ coordinatorId: 1 });
 
 // Pre-save middleware
-supportPlanSchema.pre('save', function (next) {
+supportPlanSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 // Methods

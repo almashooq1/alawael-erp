@@ -212,13 +212,12 @@ postRehabCaseSchema.index({ assignedSpecialist: 1, status: 1 });
 postRehabCaseSchema.index({ dischargeDate: 1 });
 
 // ── Auto-generate case number ──
-postRehabCaseSchema.pre('save', async function (next) {
+postRehabCaseSchema.pre('save', async function () {
   if (!this.caseNumber) {
     const count = await mongoose.model('PostRehabCase').countDocuments();
     const year = new Date().getFullYear();
     this.caseNumber = `PRF-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // ── Virtuals ──
@@ -235,6 +234,39 @@ postRehabCaseSchema.virtual('daysSinceDischarge').get(function () {
 
 postRehabCaseSchema.set('toJSON', { virtuals: true });
 postRehabCaseSchema.set('toObject', { virtuals: true });
+
+// W987 — surface post-rehab follow-up outcomes on the unified-core timeline: a
+// completed case (the beneficiary was successfully followed through — positive)
+// and a lost-to-follow-up case (the beneficiary disengaged — a clinically
+// important warning). Fires once on the status flip to COMPLETED /
+// LOST_TO_FOLLOW_UP. Native pre-compile hooks per the proven W970 pattern (the
+// modelEventBridge-is-dead workaround); guarded + fire-and-forget so
+// persistence never blocks. Consumed by dddCrossModuleSubscribers → CareTimeline.
+// NOTE: the beneficiary ref field is `beneficiary` (not `beneficiaryId`).
+postRehabCaseSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+postRehabCaseSchema.post('save', function (doc) {
+  try {
+    if (doc.status === this.$__prevStatus) return; // no status change
+    const { integrationBus } = require('../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiary) return;
+    const base = {
+      caseId: String(doc._id),
+      beneficiaryId: String(doc.beneficiary),
+      caseNumber: doc.caseNumber || '',
+      originalProgramName: doc.originalProgramName || '',
+    };
+    if (doc.status === 'COMPLETED') {
+      Promise.resolve(integrationBus.publish('followup', 'case.completed', base)).catch(() => {});
+    } else if (doc.status === 'LOST_TO_FOLLOW_UP') {
+      Promise.resolve(integrationBus.publish('followup', 'case.lost', base)).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
 
 const PostRehabCase =
   mongoose.models.PostRehabCase || mongoose.model('PostRehabCase', postRehabCaseSchema);

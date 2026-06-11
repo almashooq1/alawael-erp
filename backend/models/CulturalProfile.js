@@ -196,11 +196,11 @@ CulturalProfileSchema.index({ branchId: 1, 'language.arabicDialect': 1 });
 CulturalProfileSchema.index({ branchId: 1, 'genderPreferences.therapistGenderPreference': 1 });
 
 // W475 Wave-18 invariants
-CulturalProfileSchema.pre('save', function (next) {
+CulturalProfileSchema.pre('save', async function () {
   // Mahram required → mahramRelationship must be filled
   if (this.genderPreferences?.mahramRequired && !this.genderPreferences.mahramRelationship) {
-    return next(
-      new Error('CulturalProfile: mahramRequired=true requires mahramRelationship to be specified')
+    throw new Error(
+      'CulturalProfile: mahramRequired=true requires mahramRelationship to be specified'
     );
   }
 
@@ -210,10 +210,8 @@ CulturalProfileSchema.pre('save', function (next) {
     obs?.hasMedicalExemptionFromFasting &&
     (!obs.medicalExemptionDetails || obs.medicalExemptionDetails.trim().length < 10)
   ) {
-    return next(
-      new Error(
-        'CulturalProfile: hasMedicalExemptionFromFasting=true requires medicalExemptionDetails (≥10 chars)'
-      )
+    throw new Error(
+      'CulturalProfile: hasMedicalExemptionFromFasting=true requires medicalExemptionDetails (≥10 chars)'
     );
   }
 
@@ -221,15 +219,11 @@ CulturalProfileSchema.pre('save', function (next) {
   if (this.communication?.acceptableContactHours) {
     const { startHour, endHour } = this.communication.acceptableContactHours;
     if (typeof startHour === 'number' && typeof endHour === 'number' && startHour >= endHour) {
-      return next(
-        new Error(
-          'CulturalProfile: communication.acceptableContactHours.startHour must be < endHour'
-        )
+      throw new Error(
+        'CulturalProfile: communication.acceptableContactHours.startHour must be < endHour'
       );
     }
   }
-
-  next();
 });
 
 module.exports =

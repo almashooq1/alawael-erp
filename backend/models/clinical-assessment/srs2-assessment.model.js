@@ -81,7 +81,7 @@ SRS2AssessmentSchema.index({ notes: 'text' });
 
 // ─── Pre-save Hook ────────────────────────────────────────────────────────────
 
-SRS2AssessmentSchema.pre('save', function (next) {
+SRS2AssessmentSchema.pre('save', async function () {
   if (typeof this.total_t_score === 'number' && !this.severity_classification) {
     const t = this.total_t_score;
     if (t <= 59) {
@@ -98,7 +98,6 @@ SRS2AssessmentSchema.pre('save', function (next) {
       this.severity_classification_ar = 'شديد';
     }
   }
-  next();
 });
 
 // ─── Virtuals ─────────────────────────────────────────────────────────────────

@@ -87,14 +87,13 @@ AcademicYearSchema.index({ status: 1 });
 AcademicYearSchema.index({ startDate: 1, endDate: 1 });
 
 // Ensure only one current academic year
-AcademicYearSchema.pre('save', async function (next) {
+AcademicYearSchema.pre('save', async function () {
   if (this.isCurrent && this.isModified('isCurrent')) {
     await this.constructor.updateMany(
       { _id: { $ne: this._id }, isCurrent: true },
       { isCurrent: false }
     );
   }
-  next();
 });
 
 module.exports = {

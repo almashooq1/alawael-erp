@@ -148,7 +148,7 @@ const financialReportSchema = new mongoose.Schema(
 financialReportSchema.index({ organizationId: 1, reportType: 1 });
 financialReportSchema.index({ 'period.endDate': -1 });
 
-financialReportSchema.pre('save', function (next) {
+financialReportSchema.pre('save', async function () {
   if (this.balanceSheet) {
     const assets = this.balanceSheet.assets;
     if (assets.current)
@@ -180,8 +180,6 @@ financialReportSchema.pre('save', function (next) {
     income.incomeBeforeTax = income.operatingIncome - (income.financialCosts?.total || 0);
     income.netIncome = income.incomeBeforeTax - (income.incomeTax || 0);
   }
-
-  next();
 });
 
 financialReportSchema.methods.validateEquation = function () {

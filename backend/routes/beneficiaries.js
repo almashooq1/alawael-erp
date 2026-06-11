@@ -332,17 +332,25 @@ router.get('/statistics', async (req, res) => {
         $bucket: {
           groupBy: { $ifNull: ['$progress', 0] },
           boundaries: [0, 21, 41, 61, 81, 101],
-          default: 0,
+          // $bucket requires `default` to be < the lowest boundary OR >= the
+          // highest. `0` collided with boundary[0]=0, so any out-of-range
+          // progress (>100 or <0) routed to the default bucket made MongoDB
+          // throw "$bucket 'default' field must be less than the lowest
+          // boundary...". Use a non-numeric sentinel (sorts after all numbers
+          // in BSON order = valid) and drop it from the output below.
+          default: 'other',
           output: { count: { $sum: 1 } },
         },
       },
     ]);
 
     const progLabels = { 0: '0-20%', 21: '21-40%', 41: '41-60%', 61: '61-80%', 81: '81-100%' };
-    const progressDistFormatted = progDist.map(p => ({
-      range: progLabels[p._id] || '0-20%',
-      count: p.count,
-    }));
+    const progressDistFormatted = progDist
+      .filter(p => p._id !== 'other')
+      .map(p => ({
+        range: progLabels[p._id] || '0-20%',
+        count: p.count,
+      }));
 
     res.json({
       success: true,

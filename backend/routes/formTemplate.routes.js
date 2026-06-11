@@ -46,6 +46,21 @@ const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
+// Best-effort notification side-channels (same lazy pattern as
+// public-forms.routes.js) — absence of either must never break the API.
+let unifiedNotifier = null;
+try {
+  unifiedNotifier = require('../services/unifiedNotifier');
+} catch {
+  /* notifier optional */
+}
+let pushSendToAdmins = null;
+try {
+  pushSendToAdmins = require('./push.routes').sendToAdmins;
+} catch {
+  /* push optional */
+}
+
 const router = express.Router();
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -67,6 +82,22 @@ const canReview = req => REVIEW_ROLES.includes(req.user?.role);
 
 const LAYOUT_FIELD_TYPES = ['header', 'divider', 'paragraph', 'spacer'];
 const isLayoutField = f => LAYOUT_FIELD_TYPES.includes(f?.type);
+
+// W1186 — build the FormSubmission.approvals[] chain from the template's
+// DECLARED approvalSteps (defensive fallback to the legacy phantom
+// approvalWorkflow shape for any pre-W1186 doc that still carries one).
+function buildApprovalChain(template) {
+  const steps =
+    template.approvalSteps && template.approvalSteps.length > 0
+      ? template.approvalSteps
+      : (template.approvalWorkflow && template.approvalWorkflow.enabled
+          ? template.approvalWorkflow.steps
+          : []) || [];
+  return steps
+    .slice()
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((s, i) => ({ step: i, role: s.role, label: s.label || s.role, status: 'pending' }));
+}
 
 // UI metadata for /categories (ids mirror the FormTemplate.category enum)
 const CATEGORY_META = {
@@ -241,34 +272,41 @@ router.get('/submissions/my', async (req, res) => {
 });
 
 // ── GET /submissions/pending ───────────────────────────────────────────────
-router.get(
-  '/submissions/pending',
-  requireRole('admin', 'manager', 'supervisor', 'clinician'),
-  async (req, res) => {
-    try {
-      const FormSubmission = safeModel('FormSubmission');
-      if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
-      const { page = 1, limit = 50 } = req.query;
-      const filter = { status: { $in: ['submitted', 'under_review'] } };
-      const skip = (Number(page) - 1) * Number(limit);
-      const [data, total] = await Promise.all([
-        FormSubmission.find(filter)
-          .sort({ priority: -1, createdAt: 1 })
-          .skip(skip)
-          .limit(Number(limit))
-          .lean(),
-        FormSubmission.countDocuments(filter),
-      ]);
-      res.json({
-        success: true,
-        data,
-        pagination: { total, page: Number(page), limit: Number(limit) },
-      });
-    } catch (err) {
-      safeError(res, err, 'list pending submissions');
+// W1186b — reviewer-role users see the full pending queue; STEP-role users
+// (e.g. hr_officer / direct_manager, named by a template's approvalSteps but
+// outside REVIEW_ROLES) see only submissions where their role holds a
+// pending step — otherwise they could approve (PATCH allows it) but never
+// FIND their queue. Everyone else: 403.
+router.get('/submissions/pending', async (req, res) => {
+  try {
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormSubmission) return res.json({ success: true, data: [], pagination: { total: 0 } });
+    const { page = 1, limit = 50 } = req.query;
+    const filter = { status: { $in: ['submitted', 'under_review'] } };
+    if (!canReview(req)) {
+      const role = req.user?.role;
+      if (!role)
+        return res.status(403).json({ success: false, message: 'Not allowed to view the queue' });
+      filter.approvals = { $elemMatch: { status: 'pending', role } };
     }
+    const skip = (Number(page) - 1) * Number(limit);
+    const [data, total] = await Promise.all([
+      FormSubmission.find(filter)
+        .sort({ priority: -1, createdAt: 1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .lean(),
+      FormSubmission.countDocuments(filter),
+    ]);
+    res.json({
+      success: true,
+      data,
+      pagination: { total, page: Number(page), limit: Number(limit) },
+    });
+  } catch (err) {
+    safeError(res, err, 'list pending submissions');
   }
-);
+});
 
 // ── GET /submissions/:subId ────────────────────────────────────────────────
 router.get('/submissions/:subId', async (req, res) => {
@@ -281,7 +319,9 @@ router.get('/submissions/:subId', async (req, res) => {
     const doc = await FormSubmission.findById(req.params.subId).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
     const isOwner = String(doc.submittedBy?.userId || '') === String(req.user._id);
-    if (!isOwner && !canReview(req))
+    // W1186b — step-role reviewers may open submissions whose chain names them
+    const isStepReviewer = (doc.approvals || []).some(a => a.role === req.user?.role);
+    if (!isOwner && !canReview(req) && !isStepReviewer)
       return res
         .status(403)
         .json({ success: false, message: 'Not allowed to view this submission' });
@@ -292,64 +332,122 @@ router.get('/submissions/:subId', async (req, res) => {
 });
 
 // ── PATCH /submissions/:subId/status ──────────────────────────────────────
-router.patch(
-  '/submissions/:subId/status',
-  requireRole('admin', 'manager', 'supervisor', 'clinician'),
-  async (req, res) => {
-    try {
-      const { status, reviewNote } = req.body;
-      // Mirrors the FormSubmission.status enum (review-reachable states only)
-      const validStatuses = [
-        'under_review',
-        'approved',
-        'rejected',
-        'returned',
-        'cancelled',
-        'archived',
-      ];
-      if (!status || !validStatuses.includes(status))
+// W1186 — step-wise approval engine. When the submission carries a pending
+// approvals[] chain (initialized at submit from template.approvalSteps), an
+// approve/reject decision acts on the CURRENT pending step: approving
+// advances the chain (full 'approved' only when every step is done);
+// rejecting is terminal. Authorization for chain decisions: manage roles
+// (admin/super_admin/manager/supervisor) OR the exact role the pending step
+// names (e.g. hr_officer) — so step roles outside REVIEW_ROLES can act on
+// their own step. Non-chain submissions keep the direct status set, gated to
+// reviewer roles.
+router.patch('/submissions/:subId/status', async (req, res) => {
+  try {
+    const { status, reviewNote } = req.body;
+    // Mirrors the FormSubmission.status enum (review-reachable states only)
+    const validStatuses = [
+      'under_review',
+      'approved',
+      'rejected',
+      'returned',
+      'cancelled',
+      'archived',
+    ];
+    if (!status || !validStatuses.includes(status))
+      return res
+        .status(400)
+        .json({ success: false, message: `status must be one of: ${validStatuses.join(', ')}` });
+    if (status === 'rejected' && !reviewNote)
+      return res
+        .status(400)
+        .json({ success: false, message: 'reviewNote is required when rejecting' });
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormSubmission)
+      return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    if (!mongoose.isValidObjectId(req.params.subId))
+      return res.status(400).json({ success: false, message: 'Invalid submission id' });
+    const sub = await FormSubmission.findById(req.params.subId);
+    if (!sub) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+    const stepIdx = (sub.approvals || []).findIndex(a => a.status === 'pending');
+    const isChainDecision = stepIdx >= 0 && (status === 'approved' || status === 'rejected');
+
+    if (isChainDecision) {
+      const step = sub.approvals[stepIdx];
+      if (!canManage(req) && req.user?.role !== step.role)
         return res
-          .status(400)
-          .json({ success: false, message: `status must be one of: ${validStatuses.join(', ')}` });
-      if (status === 'rejected' && !reviewNote)
-        return res
-          .status(400)
-          .json({ success: false, message: 'reviewNote is required when rejecting' });
-      const FormSubmission = safeModel('FormSubmission');
-      if (!FormSubmission)
-        return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-      if (!mongoose.isValidObjectId(req.params.subId))
-        return res.status(400).json({ success: false, message: 'Invalid submission id' });
-      const set = { status };
-      if (status === 'approved') set.approvedAt = new Date();
+          .status(403)
+          .json({ success: false, message: 'Not your approval step', requiredRole: step.role });
+      step.status = status === 'approved' ? 'approved' : 'rejected';
+      step.approvedBy = req.user._id;
+      step.approverName = req.user.name || req.user.fullName || req.user.email;
+      step.comment = reviewNote;
+      step.date = new Date();
       if (status === 'rejected') {
-        set.rejectedAt = new Date();
-        set.rejectionReason = reviewNote;
+        sub.status = 'rejected';
+        sub.rejectionReason = reviewNote;
+        sub.rejectedAt = new Date();
+      } else {
+        sub.currentApprovalStep = stepIdx + 1;
+        const allDone = sub.approvals.every(a => a.status === 'approved' || a.status === 'skipped');
+        sub.status = allDone ? 'approved' : 'under_review';
+        if (allDone) sub.approvedAt = new Date();
       }
-      if (status === 'returned') set.returnReason = reviewNote || '';
-      const update = { $set: set };
-      if (reviewNote) {
-        update.$push = {
-          comments: {
-            userId: req.user._id,
-            userName: req.user.name || req.user.fullName || req.user.email,
-            userRole: req.user.role,
-            text: reviewNote,
-            type: status === 'returned' ? 'request_change' : 'comment',
-            isInternal: false,
-          },
-        };
+    } else {
+      if (!canReview(req))
+        return res
+          .status(403)
+          .json({ success: false, message: 'Not allowed to review submissions' });
+      sub.status = status;
+      if (status === 'approved') sub.approvedAt = new Date();
+      if (status === 'rejected') {
+        sub.rejectedAt = new Date();
+        sub.rejectionReason = reviewNote;
       }
-      const doc = await FormSubmission.findByIdAndUpdate(req.params.subId, update, {
-        returnDocument: 'after',
-      });
-      if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
-      res.json({ success: true, data: doc });
-    } catch (err) {
-      safeError(res, err, 'update submission status');
+      if (status === 'returned') sub.returnReason = reviewNote || '';
     }
+
+    sub.reviewedAt = new Date();
+    sub.reviewedBy = req.user._id;
+    if (reviewNote) {
+      sub.comments.push({
+        userId: req.user._id,
+        userName: req.user.name || req.user.fullName || req.user.email,
+        userRole: req.user.role,
+        text: reviewNote,
+        type: status === 'returned' ? 'request_change' : 'comment',
+        isInternal: false,
+      });
+    }
+    await sub.save();
+
+    // Best-effort: tell the submitter their request moved (terminal states).
+    if (['approved', 'rejected', 'returned'].includes(sub.status) && unifiedNotifier?.notify) {
+      const to = { email: sub.submittedBy?.email || '', phone: sub.submittedBy?.phone || '' };
+      if (to.email || to.phone) {
+        const statusLabel =
+          sub.status === 'approved'
+            ? 'تمت الموافقة على'
+            : sub.status === 'rejected'
+              ? 'تم رفض'
+              : 'أُعيد للتعديل';
+        unifiedNotifier
+          .notify({
+            to,
+            subject: `تحديث على طلبك ${sub.submissionNumber || ''}`,
+            body: `${statusLabel} طلبك "${sub.templateName}".${reviewNote ? `\nالملاحظات: ${reviewNote}` : ''}`,
+            templateKey: 'form.status-change',
+            metadata: { submissionId: String(sub._id), newStatus: sub.status },
+          })
+          .catch(() => {});
+      }
+    }
+
+    res.json({ success: true, data: sub.toObject() });
+  } catch (err) {
+    safeError(res, err, 'update submission status');
   }
-);
+});
 
 // ── POST / ─────────────────────────────────────────────────────────────────
 router.post('/', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
@@ -583,20 +681,22 @@ router.post('/:id/submit', async (req, res) => {
       if (isLayoutField(field) || field.readOnly || field.hidden || !field.required) continue;
       const v = data[field.name];
       if (v === undefined || v === null || v === '')
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Required field missing: ${field.label || field.name}`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `Required field missing: ${field.label || field.name}`,
+        });
     }
+    // W1186 — initialize the approval chain from the template definition.
+    const approvals = buildApprovalChain(template);
     const submission = await FormSubmission.create({
       templateId: template.templateId || String(template._id),
       templateName: template.name,
       templateVersion: template.version || 1,
       data,
       notes: body.notes,
-      status: 'submitted',
+      status: approvals.length > 0 ? 'under_review' : 'submitted',
+      approvals,
+      currentApprovalStep: 0,
       submittedBy: {
         userId: req.user._id,
         name: req.user.name || req.user.fullName || req.user.email,
@@ -604,12 +704,22 @@ router.post('/:id/submit', async (req, res) => {
         role: req.user.role,
       },
       tenantId: template.tenantId || undefined,
+      submittedAt: new Date(),
     });
     await FormTemplate.updateOne(
       { _id: template._id },
       { $inc: { usageCount: 1 }, $set: { lastUsedAt: new Date() } }
     );
     res.status(201).json({ success: true, data: submission });
+
+    // Best-effort: surface the new request to staff devices.
+    if (pushSendToAdmins) {
+      pushSendToAdmins({
+        title: `طلب جديد: ${template.name}`,
+        body: `${submission.submittedBy?.name || ''} · ${submission.submissionNumber || ''}`,
+        url: `/form-templates`,
+      }).catch(() => {});
+    }
   } catch (err) {
     if (err && err.name === 'ValidationError')
       return res.status(400).json({ success: false, message: err.message });

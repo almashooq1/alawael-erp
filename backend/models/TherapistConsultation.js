@@ -53,6 +53,31 @@ if (mongoose.models.TherapistConsultation) {
   therapistConsultationSchema.index({ requester: 1, status: 1 });
   therapistConsultationSchema.index({ consultant: 1, status: 1 });
 
+  // ── Unified-core linkage (W1075 — therapist-consultation island → CareTimeline) ──
+  const TC_DONE = ['answered', 'closed'];
+  therapistConsultationSchema.post('init', function () {
+    this.$__prevStatus = this.status;
+  });
+  therapistConsultationSchema.post('save', function (doc) {
+    try {
+      if (!TC_DONE.includes(doc.status) || TC_DONE.includes(this.$__prevStatus)) return;
+      const { integrationBus } = require('../integration/systemIntegrationBus');
+      if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary)
+        return;
+      Promise.resolve(
+        integrationBus.publish('care-coordination', 'consultation.answered', {
+          therapistConsultationId: String(doc._id),
+          beneficiaryId: String(doc.beneficiary),
+          topic: doc.topic,
+          status: doc.status,
+        })
+      ).catch(() => {});
+    } catch (_) {
+      /* never block persistence */
+    }
+  });
+
   module.exports =
-    mongoose.models.TherapistConsultation || mongoose.model('TherapistConsultation', therapistConsultationSchema);
+    mongoose.models.TherapistConsultation ||
+    mongoose.model('TherapistConsultation', therapistConsultationSchema);
 }

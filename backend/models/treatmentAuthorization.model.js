@@ -275,6 +275,29 @@ TreatmentAuthorizationSchema.index({ 'insurance.policyNumber': 1 });
 TreatmentAuthorizationSchema.index({ status: 1, 'workflow.expiresAt': 1 });
 TreatmentAuthorizationSchema.index({ branch: 1, createdAt: -1 });
 
+// ── Unified-core linkage (W1075 — treatment-authorization island → CareTimeline) ──
+const TA_DECIDED = ['approved', 'partially_approved', 'denied'];
+TreatmentAuthorizationSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+TreatmentAuthorizationSchema.post('save', function (doc) {
+  try {
+    if (!TA_DECIDED.includes(doc.status) || TA_DECIDED.includes(this.$__prevStatus)) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('authorization', 'treatment.authorization_decided', {
+        treatmentAuthorizationId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        decision: doc.status,
+        beneficiaryName: doc.beneficiaryName,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
+
 const TreatmentAuthorization =
   mongoose.models.TreatmentAuthorization ||
   mongoose.model('TreatmentAuthorization', TreatmentAuthorizationSchema);

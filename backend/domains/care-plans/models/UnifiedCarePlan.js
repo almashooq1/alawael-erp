@@ -292,13 +292,12 @@ unifiedCarePlanSchema.virtual('daysUntilReview').get(function () {
 
 // ─── Pre-save ───────────────────────────────────────────────────────────────
 
-unifiedCarePlanSchema.pre('save', function (next) {
+unifiedCarePlanSchema.pre('save', async function () {
   if (!this.planNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.planNumber = `CP-${dateStr}-${random}`;
   }
-  next();
 });
 
 // ─── Static Methods ─────────────────────────────────────────────────────────

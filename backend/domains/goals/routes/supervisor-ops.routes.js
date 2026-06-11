@@ -26,6 +26,7 @@ const {
 } = require('../../../services/supervisorOps.service');
 const reassessmentLifecycleService = require('../../../services/reassessmentLifecycle.service');
 const { gatherBranchHealth } = require('../../../services/operationsHealth.service');
+const { reviewWorklist } = require('../../../services/rehabPlanHealth.service');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -145,6 +146,34 @@ router.get(
 
     const sinceDays = Math.min(parseInt(req.query.days, 10) || 7, 90);
     const data = await gatherBranchHealth(mongoose, { branchId, sinceDays });
+    return res.json({ success: true, data });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /supervisor-ops/review-worklist[?branchId=&limit=]
+//   The branch "plans needing review" worklist: live care plans whose review is
+//   due/overdue, classified into W50 SLA severity (info/warning/critical),
+//   sorted most-overdue-first. The on-demand read-side of the W50 overdue-review
+//   cron. Same W269 branch scoping. READ-ONLY.
+// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/supervisor-ops/review-worklist',
+  asyncHandler(async (req, res) => {
+    const scoped = effectiveBranchScope(req);
+    let branchId = scoped || null;
+    if (!branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+      branchId = req.query.branchId;
+    }
+    if (!branchId) {
+      return res.status(400).json({
+        success: false,
+        error: 'branchId required — a cross-branch role must specify ?branchId.',
+      });
+    }
+
+    const limit = Math.min(parseInt(req.query.limit, 10) || 200, 500);
+    const data = await reviewWorklist({ branchId, limit });
     return res.json({ success: true, data });
   })
 );

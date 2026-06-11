@@ -40,7 +40,7 @@ const waitlistEntrySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-waitlistEntrySchema.pre('save', function (next) {
+waitlistEntrySchema.pre('save', async function () {
   // حساب أيام الانتظار
   this.waiting_days = Math.floor((Date.now() - this.registration_date) / (1000 * 60 * 60 * 24));
   // حساب نقاط الأولوية
@@ -57,7 +57,6 @@ waitlistEntrySchema.pre('save', function (next) {
   // إحالة طبية عاجلة
   if (this.urgent_medical_referral) score += 25;
   this.priority_score = score;
-  next();
 });
 
 waitlistEntrySchema.index({ branch_id: 1, service_type: 1, priority_score: -1 });

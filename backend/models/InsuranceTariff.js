@@ -46,11 +46,10 @@ InsuranceTariffSchema.index({ provider: 1, cptCode: 1, effectiveFrom: -1 });
 InsuranceTariffSchema.index({ providerId: 1, cptCode: 1, effectiveFrom: -1 });
 
 // Validation: effectiveTo must be after effectiveFrom when present.
-InsuranceTariffSchema.pre('validate', function (next) {
+InsuranceTariffSchema.pre('validate', async function () {
   if (this.effectiveTo && this.effectiveFrom && this.effectiveTo < this.effectiveFrom) {
-    return next(new Error('InsuranceTariff: effectiveTo must be on/after effectiveFrom'));
+    throw new Error('InsuranceTariff: effectiveTo must be on/after effectiveFrom');
   }
-  next();
 });
 
 module.exports =

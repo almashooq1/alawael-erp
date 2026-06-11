@@ -59,7 +59,9 @@ router.get('/beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req, r
     return res.json({ success: true, data });
   } catch (err) {
     if (err.statusCode)
-      return res.status(err.statusCode).json({ success: false, message: err.message });
+      return res
+        .status(err.statusCode || err.status)
+        .json({ success: false, message: err.message });
     return safeError(res, err, 'outcomes-rollup.beneficiary');
   }
 });

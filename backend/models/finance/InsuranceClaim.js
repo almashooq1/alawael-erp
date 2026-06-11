@@ -84,7 +84,7 @@ const insuranceClaimSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-insuranceClaimSchema.pre('save', async function (next) {
+insuranceClaimSchema.pre('save', async function () {
   if (!this.claim_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -104,7 +104,6 @@ insuranceClaimSchema.pre('save', async function (next) {
     'total_rejected',
     'patient_share',
   ]);
-  next();
 });
 
 // REMOVED DUPLICATE: insuranceClaimSchema.index({ claim_number: 1 }); — field already has index:true

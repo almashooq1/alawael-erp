@@ -137,7 +137,7 @@ importExportTemplateSchema.index({ isPublic: 1, isActive: 1 });
 importExportTemplateSchema.index({ createdBy: 1 });
 
 // Pre-save: Generate slug
-importExportTemplateSchema.pre('save', function (next) {
+importExportTemplateSchema.pre('save', async function () {
   if (!this.slug) {
     this.slug =
       this.name
@@ -147,7 +147,6 @@ importExportTemplateSchema.pre('save', function (next) {
       '-' +
       Date.now().toString(36);
   }
-  next();
 });
 
 // Static: Get templates for a module

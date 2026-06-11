@@ -144,12 +144,11 @@ const developmentalScreeningSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-developmentalScreeningSchema.pre('save', async function (next) {
+developmentalScreeningSchema.pre('save', async function () {
   if (!this.screeningNumber) {
     const count = await mongoose.model('DevelopmentalScreening').countDocuments();
     this.screeningNumber = `SCR-${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 developmentalScreeningSchema.index({ child: 1, screeningDate: -1 });

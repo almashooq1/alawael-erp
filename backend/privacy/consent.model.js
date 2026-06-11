@@ -79,7 +79,7 @@ const ConsentSchema = new mongoose.Schema(
 ConsentSchema.index({ subjectType: 1, subjectId: 1, purpose: 1, grantedAt: -1 });
 
 /** Disallow edits after creation (immutable ledger). */
-ConsentSchema.pre('findOneAndUpdate', function (next) {
+ConsentSchema.pre('findOneAndUpdate', async function () {
   const update = this.getUpdate() || {};
   const immutable = [
     'subjectType',
@@ -92,10 +92,9 @@ ConsentSchema.pre('findOneAndUpdate', function (next) {
   const $set = update.$set || update;
   for (const f of immutable) {
     if ($set && Object.prototype.hasOwnProperty.call($set, f)) {
-      return next(new Error(`Consent field '${f}' is immutable`));
+      throw new Error(`Consent field '${f}' is immutable`);
     }
   }
-  next();
 });
 
 ConsentSchema.statics.latestFor = function (subjectType, subjectId, purpose) {

@@ -273,14 +273,20 @@ router.post('/users', async (req, res) => {
     if (existing) {
       return res.status(400).json({ success: false, message: 'البريد الإلكتروني مسجل مسبقاً' });
     }
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ success: false, message: 'الاسم الكامل مطلوب' });
+    }
     const crypto = require('crypto');
     const tempPass = crypto.randomBytes(16).toString('hex');
+    // W1203 — User's declared fields are fullName (REQUIRED) + isActive; the
+    // old phantom name/status payload made this endpoint throw
+    // ValidationError on every admin user-create since it shipped.
     const user = await User.create({
-      name,
+      fullName: String(name).trim(),
       email,
       phone,
       role,
-      status: status || 'active',
+      isActive: (status || 'active') === 'active',
       password: tempPass,
     });
     const safeUser = await User.findById(user._id).select('-password').lean();
@@ -297,11 +303,19 @@ router.put('/users/:id', async (req, res) => {
     if (role && !ALLOWED_ROLES.includes(role)) {
       return res.status(400).json({ success: false, message: 'الدور غير مسموح به' });
     }
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email, phone, role, status },
-      { returnDocument: 'after', runValidators: true }
-    )
+    // W1203 — same phantom vocabulary on the update path: name/status were
+    // silently dropped, so admin edits to a user's name or activation state
+    // never persisted.
+    const updates = {};
+    if (name !== undefined) updates.fullName = name;
+    if (email !== undefined) updates.email = email;
+    if (phone !== undefined) updates.phone = phone;
+    if (role !== undefined) updates.role = role;
+    if (status !== undefined) updates.isActive = status === 'active';
+    const user = await User.findByIdAndUpdate(req.params.id, updates, {
+      returnDocument: 'after',
+      runValidators: true,
+    })
       .select('-password')
       .lean();
     if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });

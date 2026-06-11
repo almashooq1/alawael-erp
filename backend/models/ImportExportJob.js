@@ -265,7 +265,7 @@ importExportJobSchema.virtual('successRate').get(function () {
 });
 
 // Pre-save: Generate jobId
-importExportJobSchema.pre('save', function (next) {
+importExportJobSchema.pre('save', async function () {
   if (!this.jobId) {
     const prefix = this.type === 'export' ? 'EXP' : 'IMP';
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -277,8 +277,6 @@ importExportJobSchema.pre('save', function (next) {
   if (this.progress.total > 0) {
     this.progress.percentage = Math.round((this.progress.processed / this.progress.total) * 100);
   }
-
-  next();
 });
 
 // Static: get module statistics

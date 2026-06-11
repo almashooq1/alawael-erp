@@ -89,7 +89,7 @@ const taxFilingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-taxFilingSchema.pre('save', function (next) {
+taxFilingSchema.pre('save', async function () {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../intelligence/money.lib').deriveHalalas(this, [
     'preparedAmount',
@@ -107,7 +107,6 @@ taxFilingSchema.pre('save', function (next) {
     this.filingNumber = `TF-${this.type}-${Date.now().toString(36).toUpperCase()}`;
   }
   this.differenceAmount = (this.assessedAmount || 0) - (this.submittedAmount || 0);
-  next();
 });
 
 taxFilingSchema.index({ organization: 1, type: 1, periodStart: 1 });
@@ -155,7 +154,7 @@ const taxPenaltySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-taxPenaltySchema.pre('save', function (next) {
+taxPenaltySchema.pre('save', async function () {
   this.totalDue = (this.amount || 0) + (this.interestAmount || 0);
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../intelligence/money.lib').deriveHalalas(this, [
@@ -164,7 +163,6 @@ taxPenaltySchema.pre('save', function (next) {
     'totalDue',
     'paidAmount',
   ]);
-  next();
 });
 
 taxPenaltySchema.index({ organization: 1, filingId: 1 });

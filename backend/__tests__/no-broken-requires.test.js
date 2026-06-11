@@ -83,6 +83,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // That path resolves from domains/*/routes/, not from __tests__/ — the
   // scanner is fooled by the quoted assertion string, not a real import.
   path.join('__tests__', 'domain-resource-param-guards-wave1175.test.js'),
+  // W1189/W1194 check-phantom-schema-writes self-test writes
+  // `require('../models/Widget')` / `require('./shape')` etc. as fixture
+  // CONTENT (string arrays written to mkdtempSync repos) — same W522 class:
+  // literal fixture strings, not real imports.
+  path.join('__tests__', 'check-phantom-schema-writes-script.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

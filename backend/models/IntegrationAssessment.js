@@ -229,7 +229,7 @@ integrationAssessmentSchema.index({ overallIntegrationScore: -1 });
 integrationAssessmentSchema.index({ assessor: 1, assessmentDate: -1 });
 
 // ─── Pre-save: determine integration level ───────────────────────────────────
-integrationAssessmentSchema.pre('save', function (next) {
+integrationAssessmentSchema.pre('save', async function () {
   const score = this.overallIntegrationScore;
   if (score <= 20) this.integrationLevel = 'minimal';
   else if (score <= 40) this.integrationLevel = 'partial';
@@ -244,8 +244,27 @@ integrationAssessmentSchema.pre('save', function (next) {
     else if (diff < -5) this.trend = 'declining';
     else this.trend = 'stable';
   }
+});
 
-  next();
+// ── Unified-core linkage (W1120 — integration assessment island → CareTimeline) ──
+integrationAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+integrationAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'integration.assessment_completed', {
+        integrationAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        assessmentType: doc.assessmentType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
 });
 
 module.exports =

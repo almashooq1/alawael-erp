@@ -2,7 +2,7 @@
  * alerts-bootstrap.test.js — Wave 7.
  *
  * Verifies the one-call wiring helper composes a working stack:
- *   - engine has all 19 bundled rules registered
+ *   - engine has all 34 bundled rules registered
  *   - ctxFactory surfaces models + kpiHistoryStore + a fresh `now`
  *   - dispatcher persists raised findings through the AlertModel
  *   - scheduler integrates with the dispatcher.tick contract
@@ -23,10 +23,10 @@ const { buildAlertsStack } = require('../alerts/bootstrap');
 // own dedicated test suite (`alerts.dispatcher.test.js`).
 
 describe('buildAlertsStack — composition', () => {
-  test('registers every bundled rule (19)', () => {
+  test('registers every bundled rule (34)', () => {
     const stack = buildAlertsStack({ logger: { warn() {}, info() {}, error() {} } });
-    expect(stack.rules.length).toBe(19);
-    expect(stack.engine.rules.size).toBe(19);
+    expect(stack.rules.length).toBe(34);
+    expect(stack.engine.rules.size).toBe(34);
   });
 
   test('returns a fresh ctx from ctxFactory each call', () => {

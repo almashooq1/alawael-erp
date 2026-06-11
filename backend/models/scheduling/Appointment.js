@@ -65,7 +65,7 @@ const appointmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-appointmentSchema.pre('save', async function (next) {
+appointmentSchema.pre('save', async function () {
   if (!this.appointment_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -73,7 +73,6 @@ appointmentSchema.pre('save', async function (next) {
     });
     this.appointment_number = `APPT-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // REMOVED DUPLICATE: appointmentSchema.index({ appointment_number: 1 }); — field already has index:true

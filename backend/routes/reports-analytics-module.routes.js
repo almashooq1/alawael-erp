@@ -523,7 +523,9 @@ router.get('/analytics/executive', authenticate, requireBranchAccess, async (req
     const monthlyRegistrations = await db
       .collection('beneficiaries')
       .aggregate([
-        { $match: { deleted_at: null, createdAt: { $gte: sixMonthsAgo } } },
+        // W959 — was raw `{ deleted_at: null }` (cross-branch leak); reuse the
+        // handler's own branch-scoped buildMatch (beneficiaries carries branch_id).
+        { $match: buildMatch({ createdAt: { $gte: sixMonthsAgo } }) },
         {
           $group: {
             _id: {
@@ -547,7 +549,7 @@ router.get('/analytics/executive', authenticate, requireBranchAccess, async (req
     const revenueAgg = await db
       .collection('invoices')
       .aggregate([
-        { $match: { deleted_at: null, status: 'paid' } },
+        { $match: buildMatch({ status: 'paid' }) }, // W959 branch-scope (was raw leak)
         { $group: { _id: null, total: { $sum: '$total_amount' } } },
       ])
       .toArray();
@@ -734,7 +736,7 @@ router.get('/analytics/clinical', authenticate, requireBranchAccess, async (req,
       db
         .collection('rehab_goals')
         .aggregate([
-          { $match: { deleted_at: null } },
+          { $match: matchBase }, // W959 branch-scope (was raw leak; reuse handler matchBase)
           {
             $group: {
               _id: '$status',
@@ -797,6 +799,20 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       if (date_to) matchInvoice.invoice_date.$lte = new Date(date_to + 'T23:59:59.999Z');
     }
 
+    // W957 — branch-only scope (no date filter) for the sibling invoices
+    // aggregations below that previously matched raw `{ deleted_at: null }` and
+    // leaked every branch's revenue to a restricted caller. {} for an HQ caller
+    // (sees all — correct); { branch_id } for a restricted caller (fail-closed).
+    const branchOnly = {};
+    applyRawBranchScope(branchOnly, req, branch_id);
+
+    // W958 — finance_payments + expenses carry NO branch field, so they can't be
+    // per-branch scoped. Until they're denormalized, restrict the cross-branch
+    // breakdowns to HQ / cross-branch callers (effectiveBranchScope === null) and
+    // return [] for a branch-restricted caller (fail-closed — closes the W957
+    // residual leak without emptying the data for the HQ callers who may see all).
+    const hqOnly = effectiveBranchScope(req) == null;
+
     const [
       revenueSummary,
       revenueByMonth,
@@ -830,7 +846,7 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
       db
         .collection('invoices')
         .aggregate([
-          { $match: { deleted_at: null, status: 'paid' } },
+          { $match: { ...branchOnly, deleted_at: null, status: 'paid' } },
           {
             $group: {
               _id: { year: { $year: '$invoice_date' }, month: { $month: '$invoice_date' } },
@@ -852,44 +868,59 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
         .toArray(),
 
       // الإيرادات حسب طريقة الدفع
-      db
-        .collection('finance_payments')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          {
-            $group: {
-              _id: '$payment_method',
-              total: { $sum: '$amount' },
-              count: { $sum: 1 },
-            },
-          },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, method: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
-        ])
-        .toArray(),
+      // W957/W958 cross-branch leak: `finance_payments` (Payment) has NO branch
+      // field (audit: NEEDS DENORMALIZATION), so it can't be per-branch scoped.
+      // W958 gates it to HQ callers (hqOnly) and returns [] for a restricted
+      // caller — closes the leak fail-closed. Restore full per-branch data once
+      // branch_id is denormalized onto Payment (W613-style migration).
+      hqOnly
+        ? db
+            .collection('finance_payments')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              {
+                $group: {
+                  _id: '$payment_method',
+                  total: { $sum: '$amount' },
+                  count: { $sum: 1 },
+                },
+              },
+              { $sort: { total: -1 } },
+              { $project: { _id: 0, method: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
+            ])
+            .toArray()
+        : Promise.resolve([]),
 
       // الفواتير حسب الحالة
       db
         .collection('invoices')
-        .aggregate([{ $match: { deleted_at: null } }, ...groupByField('status')])
+        .aggregate([{ $match: { ...branchOnly, deleted_at: null } }, ...groupByField('status')])
         .toArray(),
 
       // المصروفات حسب الفئة
-      db
-        .collection('expenses')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
-        ])
-        .toArray(),
+      // W957/W958 cross-branch leak: `expenses` (Expense) has NO branch field
+      // (audit: NEEDS DENORMALIZATION) — same as finance_payments above. W958
+      // gates it to HQ callers and returns [] for a restricted caller. Restore
+      // per-branch data after a branch_id denormalization migration.
+      hqOnly
+        ? db
+            .collection('expenses')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
+              { $sort: { total: -1 } },
+              {
+                $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 },
+              },
+            ])
+            .toArray()
+        : Promise.resolve([]),
 
       // ملخص الضريبة (ZATCA)
       db
         .collection('invoices')
         .aggregate([
-          { $match: { deleted_at: null, status: 'paid' } },
+          { $match: { ...branchOnly, deleted_at: null, status: 'paid' } },
           {
             $group: {
               _id: null,
@@ -933,6 +964,11 @@ router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) 
     const matchHR = { deleted_at: null, is_active: true };
     applyRawBranchScope(matchHR, req, branch_id);
 
+    // W959 — branch-only scope (no is_active) for leave_requests / attendance_records,
+    // which previously matched raw `{ deleted_at: null }` and leaked across branches.
+    const hrBranchOnly = {};
+    applyRawBranchScope(hrBranchOnly, req, branch_id);
+
     const [
       headcountByDept,
       headcountByNationality,
@@ -959,14 +995,17 @@ router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) 
       // الإجازات حسب النوع
       db
         .collection('leave_requests')
-        .aggregate([{ $match: { deleted_at: null } }, ...groupByField('leave_type')])
+        .aggregate([
+          { $match: { ...hrBranchOnly, deleted_at: null } },
+          ...groupByField('leave_type'),
+        ]) // W959 branch-scope
         .toArray(),
 
       // متوسط نسبة الحضور
       db
         .collection('attendance_records')
         .aggregate([
-          { $match: { deleted_at: null } },
+          { $match: { ...hrBranchOnly, deleted_at: null } }, // W959 branch-scope (was raw leak)
           {
             $group: {
               _id: '$employee_id',
@@ -1162,7 +1201,7 @@ router.get('/analytics/quality', authenticate, requireBranchAccess, async (req, 
       db
         .collection('quality_measurements')
         .aggregate([
-          { $match: { deleted_at: null } },
+          { $match: matchBase }, // W959 branch-scope (was raw leak; reuse handler matchBase)
           { $sort: { measurement_date: -1 } },
           {
             $group: {
@@ -1605,6 +1644,10 @@ router.get('/built-in/financial-summary', authenticate, requireBranchAccess, asy
     }
     applyRawBranchScope(matchInv, req, branch_id);
 
+    // W959 — finance_payments + expenses carry no branch field (see W958); gate the
+    // cross-branch breakdowns to HQ callers, [] for a restricted caller (fail-closed).
+    const hqOnly = effectiveBranchScope(req) == null;
+
     const [invoices, payments, expenses] = await Promise.all([
       db
         .collection('invoices')
@@ -1630,37 +1673,43 @@ router.get('/built-in/financial-summary', authenticate, requireBranchAccess, asy
         ])
         .toArray(),
 
-      db
-        .collection('finance_payments')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          {
-            $group: {
-              _id: '$payment_method',
-              total: { $sum: '$amount' },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              method: '$_id',
-              total: { $round: ['$total', 2] },
-              count: 1,
-            },
-          },
-        ])
-        .toArray(),
+      hqOnly // W959 — unscopable (no branch field); HQ-only, [] for restricted
+        ? db
+            .collection('finance_payments')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              {
+                $group: {
+                  _id: '$payment_method',
+                  total: { $sum: '$amount' },
+                  count: { $sum: 1 },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  method: '$_id',
+                  total: { $round: ['$total', 2] },
+                  count: 1,
+                },
+              },
+            ])
+            .toArray()
+        : Promise.resolve([]),
 
-      db
-        .collection('expenses')
-        .aggregate([
-          { $match: { deleted_at: null } },
-          { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-          { $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 } },
-          { $sort: { total: -1 } },
-        ])
-        .toArray(),
+      hqOnly // W959 — unscopable (no branch field); HQ-only, [] for restricted
+        ? db
+            .collection('expenses')
+            .aggregate([
+              { $match: { deleted_at: null } },
+              { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
+              {
+                $project: { _id: 0, category: '$_id', total: { $round: ['$total', 2] }, count: 1 },
+              },
+              { $sort: { total: -1 } },
+            ])
+            .toArray()
+        : Promise.resolve([]),
     ]);
 
     res.json({

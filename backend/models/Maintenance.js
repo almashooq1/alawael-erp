@@ -121,9 +121,8 @@ maintenanceSchema.index({ createdBy: 1, createdAt: -1 });
 maintenanceSchema.index({ status: 1, priority: 1 });
 
 // Pre-save middleware
-maintenanceSchema.pre('save', function (next) {
+maintenanceSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.models.Maintenance || mongoose.model('Maintenance', maintenanceSchema);

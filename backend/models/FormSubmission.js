@@ -151,6 +151,16 @@ const FormSubmissionSchema = new mongoose.Schema(
     lastViewedAt: Date,
     approvedAt: Date,
     rejectedAt: Date,
+    // W1186 — declared so review handlers can persist them. Pre-W1186 the
+    // review routes assigned `reviewedAt` to an UNDECLARED path; strict mode
+    // silently dropped it on save, so review-time analytics (avgReviewMs)
+    // always reported zero.
+    reviewedAt: Date,
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // W1189 — same class, caught by check-phantom-schema-writes on its first
+    // run: three submit routes write submittedAt but it was never declared
+    // (public track endpoint already falls back to createdAt for this reason).
+    submittedAt: Date,
     dueDate: Date,
 
     // Multi-tenancy

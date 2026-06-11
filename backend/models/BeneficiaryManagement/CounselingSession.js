@@ -212,15 +212,13 @@ counselingSessionSchema.index({ createdAt: -1 });
 counselingSessionSchema.index({ branchId: 1, sessionStatus: 1 });
 
 // Pre-save middleware
-counselingSessionSchema.pre('save', function (next) {
+counselingSessionSchema.pre('save', async function () {
   this.updatedAt = new Date();
 
   // Calculate actual duration if both times are present
   if (this.actualStartTime && this.actualEndTime) {
     this.actualDuration = (this.actualEndTime - this.actualStartTime) / (1000 * 60); // in minutes
   }
-
-  next();
 });
 
 // Methods

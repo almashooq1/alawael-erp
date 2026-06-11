@@ -396,7 +396,7 @@ episodeOfCareSchema.virtual('timelineEvents', {
 
 // ─── Pre-save Middleware ─────────────────────────────────────────────────────
 
-episodeOfCareSchema.pre('save', function (next) {
+episodeOfCareSchema.pre('save', async function () {
   // Auto-generate episode number
   if (!this.episodeNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -435,8 +435,6 @@ episodeOfCareSchema.pre('save', function (next) {
       { name: 'discharge', status: 'pending' },
     ];
   }
-
-  next();
 });
 
 // ─── Instance Methods ───────────────────────────────────────────────────────
@@ -588,6 +586,54 @@ episodeOfCareSchema.statics.getStatistics = async function (branchId) {
     byType,
   };
 };
+
+// W1005 — surface care-team composition on the unified-core timeline. Care-team
+// membership is an EMBEDDED `careTeam[]` array (+ a denormalized `leadTherapistId`)
+// — so a model-level post-save hook can't see a single sub-doc change; instead it
+// DIFFS a post('init') snapshot vs the saved state. Fills the long-declared but
+// producerless `team_member_added` / `team_member_removed` / `lead_changed`
+// CareTimeline enum values. Native pre-compile W954-safe hooks (post(doc) /
+// 0-param) — coexist with the existing async 0-param pre('save'). Creation is
+// skipped (the `episodes.episode.created` event already covers the initial team);
+// only subsequent /team mutations emit.
+episodeOfCareSchema.post('init', function () {
+  this.$__prevTeam = (this.careTeam || []).filter(m => m.isActive).map(m => String(m.userId));
+  this.$__prevLead = this.leadTherapistId ? String(this.leadTherapistId) : null;
+});
+episodeOfCareSchema.post('save', function (doc) {
+  try {
+    if (doc.$__prevTeam === undefined) return; // create — episode.created covers it
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    if (!doc.beneficiaryId) return;
+    const base = { episodeId: String(doc._id), beneficiaryId: String(doc.beneficiaryId) };
+    const prevSet = new Set(doc.$__prevTeam);
+    const cur = (doc.careTeam || []).filter(m => m.isActive).map(m => String(m.userId));
+    const curSet = new Set(cur);
+    for (const uid of cur) {
+      if (!prevSet.has(uid)) {
+        Promise.resolve(
+          integrationBus.publish('careteam', 'careteam.member_added', { ...base, userId: uid })
+        ).catch(() => {});
+      }
+    }
+    for (const uid of doc.$__prevTeam) {
+      if (!curSet.has(uid)) {
+        Promise.resolve(
+          integrationBus.publish('careteam', 'careteam.member_removed', { ...base, userId: uid })
+        ).catch(() => {});
+      }
+    }
+    const curLead = doc.leadTherapistId ? String(doc.leadTherapistId) : null;
+    if (curLead && curLead !== doc.$__prevLead) {
+      Promise.resolve(
+        integrationBus.publish('careteam', 'careteam.lead_changed', { ...base, userId: curLead })
+      ).catch(() => {});
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 

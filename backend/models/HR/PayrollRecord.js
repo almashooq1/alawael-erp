@@ -46,7 +46,7 @@ const payrollRecordSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-payrollRecordSchema.pre('save', async function (next) {
+payrollRecordSchema.pre('save', async function () {
   if (!this.payroll_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -69,7 +69,6 @@ payrollRecordSchema.pre('save', async function (next) {
     this.advance_deduction +
     this.other_deductions;
   this.net_salary = this.gross_salary - this.total_deductions;
-  next();
 });
 
 payrollRecordSchema.index({ employee_id: 1, year: 1, month: 1 }, { unique: true });

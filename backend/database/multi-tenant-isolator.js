@@ -116,12 +116,12 @@ class MultiTenantIsolator {
       }
 
       // ── Pre-save: auto-inject tenantId ──
-      schema.pre('save', function (next) {
+      // W955 — async (Mongoose-9 native); no longer depends on the legacy-hook shim.
+      schema.pre('save', async function () {
         const ctx = self.getCurrentTenant();
         if (ctx && ctx.tenantId && !this[self._tenantField]) {
           this[self._tenantField] = ctx.tenantId;
         }
-        next();
       });
 
       // ── Pre-find: auto-scope queries ──

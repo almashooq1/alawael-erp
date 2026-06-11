@@ -98,7 +98,9 @@ SelfAdvocacyTrainingPlanSchema.index({ branchId: 1, status: 1 });
 SelfAdvocacyTrainingPlanSchema.index({ beneficiaryId: 1, status: 1 });
 
 // W462 Wave-18 invariants
-SelfAdvocacyTrainingPlanSchema.pre('save', function (next) {
+// W956 — async (Mongoose-9 native); a throw rejects the save exactly as
+// next(err) did. No longer depends on the legacy-hook shim.
+SelfAdvocacyTrainingPlanSchema.pre('save', async function () {
   // Refresh completion percentage via lib
   const curriculum = require('../intelligence/self-advocacy-curriculum.lib');
   const completedCodes = (this.modules || [])
@@ -115,15 +117,32 @@ SelfAdvocacyTrainingPlanSchema.pre('save', function (next) {
   // skipped status requires skipReason
   for (const m of this.modules || []) {
     if (m.status === 'skipped' && (!m.skipReason || m.skipReason.trim().length < 5)) {
-      return next(
-        new Error(
-          `SelfAdvocacyTrainingPlan: module '${m.rightCode}' marked skipped requires skipReason (≥5 chars)`
-        )
+      throw new Error(
+        `SelfAdvocacyTrainingPlan: module '${m.rightCode}' marked skipped requires skipReason (≥5 chars)`
       );
     }
   }
+});
 
-  next();
+// ── Unified-core linkage (W1120 — self-advocacy plan island → CareTimeline) ──
+SelfAdvocacyTrainingPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+SelfAdvocacyTrainingPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
+    Promise.resolve(
+      integrationBus.publish('self-advocacy', 'plan.completed', {
+        selfAdvocacyPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
 });
 
 module.exports =

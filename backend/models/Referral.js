@@ -250,6 +250,45 @@ fhirIntegrationLogSchema.index({ branch: 1, resourceType: 1, status: 1 });
 fhirIntegrationLogSchema.index({ referral: 1 });
 fhirIntegrationLogSchema.index({ createdAt: -1 });
 
+// W997 — surface referral outcomes on the unified-core timeline (shared
+// `referral` domain). accepted / completed / rejected. Native pre-compile hooks
+// per the W970 pattern (the modelEventBridge-is-dead workaround); guarded +
+// fire-and-forget. `beneficiary` is optional on this FHIR portal model (external
+// referrals may have no internal beneficiary yet) — guarded.
+referralSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+referralSchema.post('save', function (doc) {
+  try {
+    if (doc.status === this.$__prevStatus) return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    const beneficiaryId = doc.beneficiary || doc.beneficiaryId;
+    if (!beneficiaryId) return;
+    const base = {
+      referralId: String(doc._id),
+      beneficiaryId: String(beneficiaryId),
+      referralType: 'portal',
+      status: doc.status,
+    };
+    if (doc.status === 'accepted') {
+      Promise.resolve(integrationBus.publish('referral', 'referral.accepted', base)).catch(
+        () => {}
+      );
+    } else if (doc.status === 'completed') {
+      Promise.resolve(integrationBus.publish('referral', 'referral.completed', base)).catch(
+        () => {}
+      );
+    } else if (doc.status === 'rejected' || doc.status === 'declined') {
+      Promise.resolve(integrationBus.publish('referral', 'referral.rejected', base)).catch(
+        () => {}
+      );
+    }
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {

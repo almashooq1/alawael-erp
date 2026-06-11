@@ -1465,8 +1465,7 @@ try {
     // so a missing model just means that rule yields []. We only
     // surface models that Wave 3 rules actually reference.
     const modelNames = [
-      'Credential',
-      'IRP',
+      'EmployeeCredential', // W1147 real model for credential rules (replaced removed Credential); W1150 also dropped dead IRP
       'Invoice',
       'Incident',
       'Document',
@@ -1475,6 +1474,12 @@ try {
       'Goal',
       'Vaccination',
       'EmploymentContract',
+      'FacilityAsset', // W1006 — operational PPM/inspection-overdue rule
+      'MaintenanceWorkOrder', // W1007 — operational work-order-overdue rule
+      'Vehicle', // W1008 — operational vehicle-document-expiry rule
+      'Contract.model', // W1009 — operational contract-expired rule (file: Contract.model.js)
+      'InventoryStock', // W1070 — operational inventory-low-stock rule (object export)
+      'InventoryItem', // W1070 — inventory-low-stock threshold source (object export)
     ];
     const liveModels = {};
     for (const name of modelNames) {
@@ -2125,6 +2130,8 @@ require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logger });
 // W808 — PPM due-maintenance → preventive work orders (ENABLE_PPM_WO_SWEEPER=true).
 require('./startup/maintenanceHubBootstrap').wireMaintenanceHubSweepers(app, { logger });
+// W1194 — monthly pay-equity snapshot + gap-breach warn (ENABLE_PAY_EQUITY_SWEEPER=true).
+require('./startup/payEquitySweeperBootstrap').wirePayEquitySweeper(app, { logger });
 
 // W676 — DB backup producer cron (env-gated, default OFF). Closes the DR-drill
 // `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).

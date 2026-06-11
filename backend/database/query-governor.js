@@ -89,14 +89,15 @@ class QueryGovernor {
       }
 
       // ── Writes ──
-      schema.pre('save', function (next) {
-        if (!self._enabled) return next();
+      // W955 — async (Mongoose-9 native); throwing rejects the save exactly as
+      // next(err) did. No longer depends on the legacy-hook shim.
+      schema.pre('save', async function () {
+        if (!self._enabled) return;
         const ctx = self._getContext();
         if (ctx && !self._checkWriteBudget(ctx.userId, ctx.role)) {
-          return next(new Error('Write rate limit exceeded. Please try again later.'));
+          throw new Error('Write rate limit exceeded. Please try again later.');
         }
         self._trackMetric(modelName, 'write');
-        next();
       });
 
       const writeHooks = ['updateMany', 'deleteMany', 'insertMany'];

@@ -264,7 +264,7 @@ cashFlowSchema.index({ createdBy: 1 });
 cashFlowSchema.index({ 'period.startDate': 1, 'period.endDate': 1 });
 
 // ===== HOOKS =====
-cashFlowSchema.pre('save', function (next) {
+cashFlowSchema.pre('save', async function () {
   // ط­ط³ط§ط¨ ط§ظ„ط¥ط¬ظ…ط§ظ„ظٹط§طھ
   this.calculations.totalInflows = this.inflows.reduce((sum, inflow) => sum + inflow.amount, 0);
   this.calculations.totalOutflows = this.outflows.reduce((sum, outflow) => sum + outflow.amount, 0);
@@ -288,8 +288,6 @@ cashFlowSchema.pre('save', function (next) {
   if (this.calculations.totalOutflows > 0) {
     this.reserves.adequacyRatio = (this.reserves.total / this.calculations.totalOutflows) * 100;
   }
-
-  next();
 });
 
 // ===== METHODS =====

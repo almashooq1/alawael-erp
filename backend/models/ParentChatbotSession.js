@@ -80,7 +80,7 @@ const ParentChatbotSessionSchema = new mongoose.Schema(
 );
 
 // Wave-18 invariants
-ParentChatbotSessionSchema.pre('validate', function (next) {
+ParentChatbotSessionSchema.pre('validate', async function () {
   if (!Array.isArray(this.turns)) this.turns = [];
   if (this.turnCount !== this.turns.length) {
     // Self-heal rather than reject — turnCount is a denormalized
@@ -88,9 +88,9 @@ ParentChatbotSessionSchema.pre('validate', function (next) {
     this.turnCount = this.turns.length;
   }
   if (this.lastActivityAt && this.startedAt && this.lastActivityAt < this.startedAt) {
-    return next(new Error('lastActivityAt cannot precede startedAt'));
+    throw new Error('lastActivityAt cannot precede startedAt');
   }
-  return next();
+  return;
 });
 
 // TTL: documents whose `lastActivityAt` is older than 30 days are

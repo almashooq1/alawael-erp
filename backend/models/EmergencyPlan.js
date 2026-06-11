@@ -116,12 +116,12 @@ const EmergencyPlanSchema = new mongoose.Schema(
 );
 
 // Wave-18 invariant: at most ONE primary emergency contact.
-EmergencyPlanSchema.pre('save', function (next) {
+EmergencyPlanSchema.pre('save', async function () {
   if (Array.isArray(this.emergencyContacts)) {
     const primaries = this.emergencyContacts.filter(c => c.isPrimary === true);
     if (primaries.length > 1) {
-      return next(
-        new Error('EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true')
+      throw new Error(
+        'EmergencyPlan.emergencyContacts: at most one contact may have isPrimary: true'
       );
     }
   }
@@ -133,8 +133,30 @@ EmergencyPlanSchema.pre('save', function (next) {
     next.setMonth(next.getMonth() + months);
     this.nextReviewDue = next;
   }
+});
 
-  next();
+// ── Unified-core linkage (W1075 — emergency-plan island → CareTimeline) ──
+EmergencyPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+EmergencyPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'active' || this.$__prevStatus === 'active') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
+      return;
+    Promise.resolve(
+      integrationBus.publish('safety', 'emergency-plan.activated', {
+        emergencyPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiaryId),
+        conditionTypes: Array.isArray(doc.knownConditions)
+          ? doc.knownConditions.map(c => c && c.type).filter(Boolean)
+          : [],
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
 });
 
 module.exports =

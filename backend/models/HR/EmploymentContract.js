@@ -37,7 +37,7 @@ const employmentContractSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-employmentContractSchema.pre('save', async function (next) {
+employmentContractSchema.pre('save', async function () {
   if (!this.contract_number) {
     const year = new Date().getFullYear();
     const count = await this.constructor.countDocuments({
@@ -45,7 +45,6 @@ employmentContractSchema.pre('save', async function (next) {
     });
     this.contract_number = `EMP-CONTRACT-${year}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 employmentContractSchema.virtual('is_expired').get(function () {

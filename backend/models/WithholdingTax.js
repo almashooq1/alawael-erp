@@ -85,13 +85,12 @@ const withholdingTaxSchema = new mongoose.Schema(
 );
 
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
-withholdingTaxSchema.pre('save', async function (next) {
+withholdingTaxSchema.pre('save', async function () {
   require('../intelligence/money.lib').deriveHalalas(this, [
     'grossAmount',
     'withholdingAmount',
     'netAmount',
   ]);
-  next();
 });
 
 withholdingTaxSchema.index({ status: 1, fiscalYear: 1 });

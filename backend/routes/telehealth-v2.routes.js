@@ -28,6 +28,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -37,6 +38,11 @@ const Guardian = require('../models/Guardian');
 const Beneficiary = require('../models/Beneficiary');
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
+
+function scopedSessionById(req, id) {
+  return { _id: id, ...branchFilter(req) };
+}
 
 const HQ = ['admin', 'superadmin', 'super_admin'];
 const THERAPIST_ROLES = ['therapist', 'specialist', 'clinical_supervisor'];
@@ -82,7 +88,7 @@ router.post('/sessions/:id/create-room', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const session = await TherapySession.findById(req.params.id);
+    const session = await TherapySession.findOne(scopedSessionById(req, req.params.id));
     if (!session) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
 
     const who = await resolveRole(req, session);
@@ -133,7 +139,7 @@ router.post('/sessions/:id/join', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const session = await TherapySession.findById(req.params.id);
+    const session = await TherapySession.findOne(scopedSessionById(req, req.params.id));
     if (!session) return res.status(404).json({ success: false, message: 'غير موجود' });
 
     const who = await resolveRole(req, session);
@@ -175,7 +181,7 @@ router.post('/sessions/:id/end', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const session = await TherapySession.findById(req.params.id);
+    const session = await TherapySession.findOne(scopedSessionById(req, req.params.id));
     if (!session) return res.status(404).json({ success: false, message: 'غير موجود' });
 
     const who = await resolveRole(req, session);
@@ -218,7 +224,7 @@ router.get('/sessions/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const session = await TherapySession.findById(req.params.id)
+    const session = await TherapySession.findOne(scopedSessionById(req, req.params.id))
       .populate('beneficiary', 'firstName lastName firstName_ar lastName_ar beneficiaryNumber')
       .populate('therapist', 'firstName lastName firstName_ar lastName_ar fullName')
       .lean();
@@ -256,6 +262,7 @@ router.get('/my/upcoming', async (req, res) => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const filter = {
+      ...branchFilter(req),
       'telehealth.enabled': true,
       date: { $gte: now },
       status: { $in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
@@ -279,7 +286,9 @@ router.get('/my/upcoming', async (req, res) => {
       .populate('therapist', 'firstName lastName firstName_ar lastName_ar')
       .sort({ date: 1, startTime: 1 })
       .limit(50)
-      .select('title sessionType date startTime endTime status telehealth beneficiary therapist')
+      .select(
+        'title sessionType date startTime endTime status telehealth beneficiary therapist branchId'
+      )
       .lean();
     res.json({ success: true, items });
   } catch (err) {

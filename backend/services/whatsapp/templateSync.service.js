@@ -63,9 +63,8 @@ const WhatsAppTemplateSchema = new mongoose.Schema(
 WhatsAppTemplateSchema.index({ templateName: 1, language: 1 }, { unique: true });
 WhatsAppTemplateSchema.index({ status: 1 });
 
-WhatsAppTemplateSchema.pre('save', function (next) {
+WhatsAppTemplateSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 // Pattern D (W842): Meta provider template sync (distinct from comm/whatsapp-models Template)

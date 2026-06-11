@@ -197,7 +197,7 @@ adlAssessmentSchema.index({ assessor: 1, assessmentDate: -1 });
 adlAssessmentSchema.index({ status: 1 });
 
 // ─── حساب الدرجات قبل الحفظ ───
-adlAssessmentSchema.pre('save', function (next) {
+adlAssessmentSchema.pre('save', async function () {
   const allSkillArrays = {
     cooking: this.cookingSkills,
     cleaning: this.cleaningSkills,
@@ -238,8 +238,6 @@ adlAssessmentSchema.pre('save', function (next) {
   else if (this.overallScore >= 45) this.independenceLevel = 'partially_independent';
   else if (this.overallScore >= 25) this.independenceLevel = 'mostly_dependent';
   else this.independenceLevel = 'dependent';
-
-  next();
 });
 
 // ─── Virtuals ───
@@ -466,6 +464,27 @@ adlAssessmentSchema.statics.getBeneficiaryADLProgress = async function (benefici
     })),
   };
 };
+
+// ── Unified-core linkage (W1120 — ADL assessment island → CareTimeline) ──
+adlAssessmentSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+adlAssessmentSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('clinical-assessment', 'adl.assessment_completed', {
+        adlAssessmentId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+        assessmentType: doc.assessmentType,
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
+});
 
 module.exports =
   mongoose.models.ADLAssessment || mongoose.model('ADLAssessment', adlAssessmentSchema);

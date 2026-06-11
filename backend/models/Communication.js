@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 const mongoose = require('mongoose');
 
 const communicationSchema = new mongoose.Schema(
@@ -235,12 +234,14 @@ communicationSchema.methods.updateWorkflowStatus = function () {
 };
 
 // Middleware قبل الحفظ
+// W1193 — the old body called `next()` which was NEVER DECLARED (async hooks
+// take no next; the file's eslint-disable no-undef masked it) → ReferenceError
+// on every save that reached it. Async resolution completes the hook.
 communicationSchema.pre('save', async function () {
   // توليد رقم مرجعي إذا لم يكن موجود
   if (!this.referenceNumber) {
     this.referenceNumber = await this.constructor.generateReferenceNumber();
   }
-  next();
 });
 
 const Communication =

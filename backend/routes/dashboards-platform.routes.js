@@ -42,6 +42,14 @@
 
 const express = require('express');
 
+// W1191 — self-authenticate. The header says auth "is enforced by the caller
+// (authenticate is mounted upstream in app.js)", but phases.registry ALSO mounts
+// this via `safeMount` (bare app.use, NO injected auth), so the
+// `/api/(v1/)?dashboards-platform` alias exposed the role-gated dashboard payloads
+// to anonymous callers (req.user undefined → role checks operate on no identity).
+// This router-level gate protects EVERY mount; the app.js one re-validates idempotently.
+const { authenticate } = require('../middleware/auth');
+
 const dashboardRegistry = require('../config/dashboard.registry');
 const kpiRegistry = require('../config/kpi.registry');
 const widgetCatalog = require('../config/widget.catalog');
@@ -89,6 +97,7 @@ function defaultKpiResolver() {
  */
 function buildRouter({ kpiResolver, narrativeService } = {}) {
   const router = express.Router();
+  router.use(authenticate); // W1191 — gate EVERY mount (incl. the auth-less safeMount alias)
   const resolver = typeof kpiResolver === 'function' ? kpiResolver : defaultKpiResolver;
 
   router.get(

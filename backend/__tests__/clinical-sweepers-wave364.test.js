@@ -3,10 +3,10 @@
 /**
  * W364 + W370 + W383 + W393 drift guard — clinicalSweepersBootstrap shape.
  *
- * Locks the 13-sweeper bootstrap shape:
+ * Locks the 15-sweeper bootstrap shape:
  *   • exports wireClinicalSweepers(app, {logger})
- *   • 13 env-gated cron stanzas using independent ENABLE_*_SWEEPER flags
- *     (W364: 7, W370: +4, W383: +1, W393: +1)
+ *   • 15 env-gated cron stanzas using independent ENABLE_*_SWEEPER flags
+ *     (W364: 7, W370: +4, W383: +1, W393: +1, W1012: +2)
  *   • Asia/Riyadh timezone on every schedule
  *   • Only the RESPITE_NOSHOW sweeper mutates state (status flip)
  *   • Wired into app.js after riskSweeperBootstrap (clinical-services
@@ -50,7 +50,7 @@ describe('W364 clinicalSweepersBootstrap — exports', () => {
   });
 });
 
-describe('W364 + W370 + W383 + W393 — 13 sweepers, each env-gated independently', () => {
+describe('W364 + W370 + W383 + W393 + W1012 — 15 sweepers, each env-gated independently', () => {
   const envFlags = [
     // W364 original 7
     'ENABLE_SAFEGUARDING_SLA_SWEEPER',
@@ -69,6 +69,9 @@ describe('W364 + W370 + W383 + W393 — 13 sweepers, each env-gated independentl
     'ENABLE_ASSESSMENT_OVERDUE_SWEEPER',
     // W393 addition — CaregiverSupportProgram past targetCompletionDate
     'ENABLE_CAREGIVER_SUPPORT_OVERDUE_SWEEPER',
+    // W1012 additions (2, read-only) — clinical-safety reassessment cadence
+    'ENABLE_FALLS_REASSESSMENT_SWEEPER',
+    'ENABLE_PRESSURE_INJURY_REASSESSMENT_SWEEPER',
   ];
 
   for (const flag of envFlags) {
@@ -78,15 +81,15 @@ describe('W364 + W370 + W383 + W393 — 13 sweepers, each env-gated independentl
     });
   }
 
-  it('counts scheduledCount as it wires each sweeper (W364: 7, W370: +4, W383: +1, W393: +1 = 13)', () => {
+  it('counts scheduledCount as it wires each sweeper (W364: 7, W370: +4, W383: +1, W393: +1, W1012: +2 = 15)', () => {
     expect(SRC).toMatch(/let\s+scheduledCount\s*=\s*0/);
     const incs = SRC.match(/scheduledCount\+\+/g) || [];
-    expect(incs.length).toBe(13);
+    expect(incs.length).toBe(15);
   });
 
-  it('logger summary reports n/13 enabled (post-W393)', () => {
-    expect(SRC).toMatch(/all 13 disabled/);
-    expect(SRC).toMatch(/clinical sweepers wired:\s*\$\{scheduledCount\}\/13/);
+  it('logger summary reports n/15 enabled (post-W1012)', () => {
+    expect(SRC).toMatch(/all 15 disabled/);
+    expect(SRC).toMatch(/clinical sweepers wired:\s*\$\{scheduledCount\}\/15/);
   });
 });
 

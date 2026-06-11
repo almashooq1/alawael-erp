@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /**
  * ===================================================================
  * ACCOUNTING PAYMENT MODEL - نموذج الدفعة المحاسبية
@@ -125,32 +124,30 @@ accountingPaymentSchema.virtual('invoiceDetails', {
 });
 
 // Pre-save middleware
+// W1213 — the old body called `next()` (×4) which an async no-param hook
+// NEVER receives → ReferenceError on every AccountingPayment save (the same
+// crash class fixed on Communication in W1193; repo-wide hunt found this as
+// the last instance). Async hooks signal failure by THROWING (W483 canonical).
 accountingPaymentSchema.pre('save', async function () {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
   // إذا كانت الدفعة جديدة ومكتملة، تحديث الفاتورة
   if (this.isNew && this.status === 'completed') {
-    try {
-      const AccountingInvoice = mongoose.model('AccountingInvoice');
-      const invoice = await AccountingInvoice.findById(this.invoice);
+    const AccountingInvoice = mongoose.model('AccountingInvoice');
+    const invoice = await AccountingInvoice.findById(this.invoice);
 
-      if (!invoice) {
-        return next(new Error('الفاتورة غير موجودة'));
-      }
-
-      // التحقق من أن المبلغ لا يتجاوز المبلغ المتبقي
-      if (this.amount > invoice.remainingAmount) {
-        return next(new Error('المبلغ المدفوع يتجاوز المبلغ المتبقي في الفاتورة'));
-      }
-
-      // تحديث الفاتورة
-      await invoice.recordPayment(this.amount, this._id);
-    } catch (error) {
-      return next(error);
+    if (!invoice) {
+      throw new Error('الفاتورة غير موجودة');
     }
-  }
 
-  next();
+    // التحقق من أن المبلغ لا يتجاوز المبلغ المتبقي
+    if (this.amount > invoice.remainingAmount) {
+      throw new Error('المبلغ المدفوع يتجاوز المبلغ المتبقي في الفاتورة');
+    }
+
+    // تحديث الفاتورة
+    await invoice.recordPayment(this.amount, this._id);
+  }
 });
 
 // Post-remove middleware لتحديث الفاتورة عند حذف الدفعة

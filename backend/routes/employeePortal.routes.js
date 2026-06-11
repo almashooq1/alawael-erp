@@ -23,6 +23,18 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W1200 — the leave surface previously keyed reads/writes by phantom fields
+// (`employee`, user-id employeeId, `totalDays`); LeaveRequest's canonical key
+// is employeeId → Employee._id. Resolve the caller's Employee record once;
+// the user-id fallbacks keep any legacy rows readable.
+async function resolveLeaveIdentity(req) {
+  const employee = await Employee.findOne({ userId: req.user.id })
+    .select('_id branchId name department')
+    .lean();
+  const ids = [employee && employee._id, req.user._id, req.user.id].filter(Boolean);
+  return { employee, ids };
+}
 // ─── Root endpoint — GET /api/employee-portal ────────────────────────────────
 router.get('/', async (req, res) => {
   res.json({
@@ -98,11 +110,14 @@ router.get('/leaves/balance', async (req, res) => {
     const yearStart = new Date(currentYear, 0, 1);
     const yearEnd = new Date(currentYear, 11, 31);
 
-    // Count approved leaves per type for the current year
+    // Count approved leaves per type for the current year (W1200 — canonical
+    // employeeId key + the model's daysCount field; the phantom
+    // `$totalDays` sum always produced zero balances-used).
+    const { ids: leaveIds } = await resolveLeaveIdentity(req);
     const approvedLeaves = await LeaveRequest.aggregate([
       {
         $match: {
-          $or: [{ employee: req.user._id }, { employeeId: req.user.id }],
+          employeeId: { $in: leaveIds },
           status: 'approved',
           startDate: { $gte: yearStart, $lte: yearEnd },
         },
@@ -110,7 +125,7 @@ router.get('/leaves/balance', async (req, res) => {
       {
         $group: {
           _id: '$leaveType',
-          totalDays: { $sum: '$totalDays' },
+          totalDays: { $sum: '$daysCount' },
           count: { $sum: 1 },
         },
       },
@@ -147,28 +162,61 @@ router.post('/leaves', async (req, res) => {
       return res.status(400).json({ success: false, message: 'نوع الإجازة وتواريخها مطلوبة' });
     }
 
+    // W1200 — realigned to the REAL LeaveRequest vocabulary. The old payload
+    // wrote phantom fields (employee/employeeName/department/totalDays/
+    // isHalfDay/halfDayPeriod), keyed employeeId by the USER id (model refs
+    // Employee), and never set the REQUIRED branchId → every portal leave
+    // request threw ValidationError since it shipped.
+    const ALLOWED_LEAVE_TYPES = [
+      'annual',
+      'sick',
+      'emergency',
+      'maternity',
+      'paternity',
+      'study',
+      'hajj',
+      'unpaid',
+    ];
+    if (!ALLOWED_LEAVE_TYPES.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: `نوع الإجازة غير صالح. الأنواع المتاحة: ${ALLOWED_LEAVE_TYPES.join(', ')}`,
+      });
+    }
+
     // Calculate total days
     const start = new Date(startDate);
     const end = new Date(endDate);
     const diffMs = end - start;
     const totalDays = isHalfDay ? 0.5 : Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1);
 
-    // Look up employee info for denormalized fields
-    const employee = await Employee.findOne({ userId: req.user.id }).lean();
+    const { employee } = await resolveLeaveIdentity(req);
+    if (!employee) {
+      return res
+        .status(422)
+        .json({ success: false, message: 'لا يوجد ملف موظف مرتبط بحسابك — راجع الموارد البشرية' });
+    }
+    const branchId = req.user.branchId || employee.branchId;
+    if (!branchId) {
+      return res
+        .status(422)
+        .json({ success: false, message: 'تعذر تحديد الفرع — راجع الموارد البشرية' });
+    }
 
     const leaveRequest = await LeaveRequest.create({
-      employee: req.user._id,
-      employeeId: req.user.id,
-      employeeName: employee?.name || req.user.name || req.user.email,
-      department: employee?.department || 'غير محدد',
+      branchId,
+      employeeId: employee._id,
       leaveType: type,
       startDate: start,
       endDate: end,
-      totalDays,
-      isHalfDay: !!isHalfDay,
-      halfDayPeriod,
-      reason: reason || '',
+      daysCount: totalDays,
+      hoursCount: isHalfDay ? 4 : null,
+      reason: (reason && reason.trim()) || 'غير محدد',
+      notes: isHalfDay
+        ? `نصف يوم — ${halfDayPeriod === 'morning' ? 'الفترة الصباحية' : 'الفترة المسائية'}`
+        : null,
       status: 'pending',
+      createdBy: req.user._id,
     });
 
     res.status(201).json({
@@ -193,9 +241,9 @@ router.get('/leaves', async (req, res) => {
     const skip = (page - 1) * limit;
     const statusFilter = req.query.status;
 
-    const filter = {
-      $or: [{ employee: req.user._id }, { employeeId: req.user.id }],
-    };
+    // W1200 — canonical employeeId key (phantom `employee` matched nothing).
+    const { ids: leaveIds } = await resolveLeaveIdentity(req);
+    const filter = { employeeId: { $in: leaveIds } };
     if (statusFilter) filter.status = statusFilter;
 
     const [leaves, total] = await Promise.all([

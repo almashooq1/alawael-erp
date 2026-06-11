@@ -82,7 +82,9 @@ router.get('/suggest/:beneficiaryId', requireRole(READ_ROLES), async (req, res) 
     return res.json({ success: true, data: suggestion });
   } catch (err) {
     if (err.statusCode)
-      return res.status(err.statusCode).json({ success: false, message: err.message });
+      return res
+        .status(err.statusCode || err.status)
+        .json({ success: false, message: err.message });
     return safeError(res, err, 'pathway-bundles.suggest');
   }
 });
@@ -117,7 +119,9 @@ router.post('/apply/:beneficiaryId', requireRole(WRITE_ROLES), async (req, res) 
     return res.status(201).json({ success: true, data: result });
   } catch (err) {
     if (err.statusCode)
-      return res.status(err.statusCode).json({ success: false, message: err.message });
+      return res
+        .status(err.statusCode || err.status)
+        .json({ success: false, message: err.message });
     return safeError(res, err, 'pathway-bundles.apply');
   }
 });

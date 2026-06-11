@@ -103,7 +103,7 @@ FinancialNavigationPlanSchema.index({ branchId: 1, status: 1 });
 FinancialNavigationPlanSchema.index({ beneficiaryId: 1, status: 1 });
 
 // W469 Wave-18 — auto-compute financial stress + wellbeing + suggest programs
-FinancialNavigationPlanSchema.pre('save', function (next) {
+FinancialNavigationPlanSchema.pre('save', async function () {
   const navLib = require('../intelligence/benefits-navigator.lib');
   const wbciLib = require('../intelligence/family-wbci.lib');
 
@@ -149,8 +149,6 @@ FinancialNavigationPlanSchema.pre('save', function (next) {
       };
     });
   }
-
-  next();
 });
 
 function _incomeBandMidpoint(band) {

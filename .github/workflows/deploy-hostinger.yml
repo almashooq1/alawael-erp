@@ -120,16 +120,38 @@ jobs:
   # --audit-level=critical is informational and can flake from registry
   # outages we can't fix.
   test:
-    name: "🧪 Run Tests"
+    name: "🧪 Run Tests (shard ${{ matrix.shard }}/4)"
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    # 35 min: backend test count grew past 25,115 (jest 30 bump + new
-    # domain tests). Local: ~17 min on a fast box; GitHub runner ~50-100%
-    # slower → 25m kept hitting the cap on routine deploys (last one was
-    # the lockfile-refresh commit on 2026-05-13 timing out at exactly
-    # 25m16s, leaving production stale on e06a7667 for 11+ hours).
-    timeout-minutes: 35
+    # W952 (2026-06-08) — PERMANENT root fix for the recurring deploy-test
+    # timeout (W552 @ 25m → W951 @ 55m band-aids). The canonical `test:sprint`
+    # suite (25,115+ tests, growing with the 2026-06 W98x wave series) ran as a
+    # single ~35-min job and kept hitting the cap → "Run Tests" cancelled →
+    # "Deploy to VPS" skipped → prod silently stale (W976 stale ~2 days). Root
+    # cause = one serial run of an ever-growing suite. Fix = shard it 4 ways via
+    # jest --shard (deploy gates on ALL shards: needs.test.result=='success'
+    # requires every matrix leg green). Each shard ≈ suite/4 (~9 min) → scales as
+    # the suite grows. fail-fast:false so one failing shard still reports the rest.
+    #
+    # W953/W954 (2026-06-08) — the first run that actually COMPLETED (sharding
+    # let it finish instead of being cancelled at the cap) exposed TWO problems
+    # masked for months on Mongo-backed behavioral/route suites:
+    #   W953 (this step) — ~349 suites call `MongoMemoryServer.create()`, which
+    #     cold-downloads a ~90s mongod binary; on CI each is invoked INSIDE a
+    #     30-45s jest test, so the download is KILLED before it finishes. Fix =
+    #     download the binary ONCE in an unbounded pre-warm step + cache
+    #     ~/.cache/mongodb-binaries, so every MMS.create() then starts in ~1s.
+    #   W954 (config/mongoose.plugins.js) — the deeper cause, proven by the same
+    #     suites hanging LOCALLY where the binary was already cached: the global
+    #     legacy-hook shim wrapped `post('save', function(doc){})` hooks, leaving
+    #     the wrapper Promise unresolved → every .save() hung. Fixed separately;
+    #     this pre-warm only removes the CI cold-download half.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 
@@ -141,20 +163,38 @@ jobs:
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Run backend tests (canonical sprint gate)
+      # W953 — cache + pre-warm the MongoMemoryServer mongod binary (see comment
+      # above). restore-keys falls back to the most recent prior binary cache so
+      # a package-lock bump that doesn't change the mongod version is a cache hit.
+      - name: Cache MongoMemoryServer binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            mongodb-binaries-${{ runner.os }}-
+      - name: Pre-warm MongoMemoryServer binary (unbounded — avoids per-test download timeout)
         working-directory: backend
-        # W552: was bare `npm test` (the entire 2000+ file Jest surface) which hit
-        # the 35-min cap on every run → "🧪 Run Tests" cancelled → "🚀 Deploy to
-        # VPS" skipped → automated prod deploys silently dormant. Mirror W547 (the
-        # CI Pipeline fix): run the canonical gate (~13 min, well under the cap),
-        # the same suite Sprint Tests already proves green.
-        run: npm run test:guard && npm run test:sprint
+        run: |
+          node -e "const{MongoMemoryServer}=require('mongodb-memory-server');MongoMemoryServer.create().then(async m=>{console.log('mongod ready at',m.getUri());await m.stop();process.exit(0)}).catch(e=>{console.error('prewarm failed:',e&&e.message);process.exit(1)})" \
+            || echo '⚠️ MMS pre-warm failed — Mongo-backed tests may time out (binary mirror unreachable?)'
+
+      - name: Run backend tests (sharded sprint gate)
+        working-directory: backend
+        # jest --shard partitions the explicit sprint file list (run-sprint.js
+        # forwards extra argv to jest). test:guard is a fast meta-gate — run it
+        # once (shard 1) to avoid 4× redundancy. Same suite Sprint Tests proves
+        # green; this in-deploy run is the deploy's own gate.
+        run: |
+          if [ "${{ matrix.shard }}" = "1" ]; then npm run test:guard; fi
+          npm run test:sprint -- --shard=${{ matrix.shard }}/4
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
           MONGODB_URI: ""
 
       - name: Security audit
+        if: ${{ matrix.shard == 1 }}
         working-directory: backend
         run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found (non-blocking)"
 
@@ -277,18 +317,23 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          # Retry SSH connection up to 5 times (transient VPS issues are
-          # the #1 cause of otherwise-green deploys failing).
-          SSH_CMD='ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 '"${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-          for attempt in 1 2 3 4 5; do
+          # Retry SSH connection up to 8 times (~10 min total backoff).
+          # Transient GitHub→VPS failures are the #1 cause of otherwise-green
+          # deploys failing: W1202 observed 3 in one day where all 5 of the
+          # old attempts (~3.5 min) failed while the VPS was verifiably
+          # healthy (sshd active, fail2ban clean, SSH fine from elsewhere) —
+          # the window simply outlasted the backoff. ConnectTimeout raised
+          # 15→25 for slow-handshake windows.
+          SSH_CMD='ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=25 '"${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          for attempt in 1 2 3 4 5 6 7 8; do
             if $SSH_CMD "echo '✅ SSH test attempt $attempt ok'"; then
               echo "✅ SSH configured (attempt $attempt)"
               exit 0
             fi
-            echo "⚠️  SSH attempt $attempt failed — retrying in $((attempt * 10))s"
-            sleep $((attempt * 10))
+            echo "⚠️  SSH attempt $attempt failed — retrying in $((attempt * 12))s"
+            sleep $((attempt * 12))
           done
-          echo "❌ SSH connection failed after 5 attempts. Check VPS_HOST/VPS_USER/VPS_SSH_KEY and that the VPS is reachable."
+          echo "❌ SSH connection failed after 8 attempts (~10 min). Check VPS_HOST/VPS_USER/VPS_SSH_KEY and that the VPS is reachable."
           exit 1
 
       - name: Deploy backend

@@ -55,11 +55,10 @@ const DsrSchema = new mongoose.Schema(
 );
 
 /** Auto-set slaDeadline if not provided. */
-DsrSchema.pre('validate', function (next) {
+DsrSchema.pre('validate', async function () {
   if (!this.slaDeadline) {
     this.slaDeadline = new Date(Date.now() + SLA_DAYS * 24 * 60 * 60 * 1000);
   }
-  next();
 });
 
 DsrSchema.methods.isOverdue = function (now = Date.now()) {

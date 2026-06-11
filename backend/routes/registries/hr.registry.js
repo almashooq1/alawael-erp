@@ -164,5 +164,41 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] HR webhooks not mounted (factory or HrWebhookSubscription missing)');
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── Pay-equity analysis (W1193 — demographic pay-gap + cohort outliers) ───
+  // Self-authenticating (router.use(authenticateToken)+requireBranchAccess) so a
+  // plain app.use mount is safe; salary reads are role-gated + branch-isolated.
+  // ══════════════════════════════════════════════════════════════════════════
+  const payEquityRouter = safeRequire('../routes/hr/pay-equity.routes');
+  if (payEquityRouter) {
+    app.use('/api/hr/pay-equity', payEquityRouter);
+    app.use('/api/v1/hr/pay-equity', payEquityRouter);
+    logger.info('[HR] Pay-equity analysis mounted (/api/(v1/)?hr/pay-equity)');
+  } else {
+    logger.warn('[HR] Pay-equity routes not mounted (module missing)');
+  }
+
+  // ── 9-box talent matrix (W1198 — performance × potential placement) ───────
+  // Self-authenticating; salary-free but identity-bearing reads are role-gated.
+  const talentGridRouter = safeRequire('../routes/hr/talent-grid.routes');
+  if (talentGridRouter) {
+    app.use('/api/hr/talent-grid', talentGridRouter);
+    app.use('/api/v1/hr/talent-grid', talentGridRouter);
+    logger.info('[HR] Talent grid (9-box) mounted (/api/(v1/)?hr/talent-grid)');
+  } else {
+    logger.warn('[HR] Talent grid routes not mounted (module missing)');
+  }
+
+  // ── Diversity & Inclusion analytics (W1199 — composition + indices + Saudization) ─
+  // Self-authenticating; aggregate-only (no salaries/identities), role-gated reads.
+  const diversityRouter = safeRequire('../routes/hr/diversity.routes');
+  if (diversityRouter) {
+    app.use('/api/hr/diversity', diversityRouter);
+    app.use('/api/v1/hr/diversity', diversityRouter);
+    logger.info('[HR] Diversity & Inclusion analytics mounted (/api/(v1/)?hr/diversity)');
+  } else {
+    logger.warn('[HR] Diversity routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

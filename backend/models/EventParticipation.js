@@ -153,12 +153,11 @@ eventParticipationSchema.index({ beneficiary: 1, createdAt: -1 });
 eventParticipationSchema.index({ attendanceRate: -1 });
 
 // ─── Pre-save: recalculate attendance rate ───────────────────────────────────
-eventParticipationSchema.pre('save', function (next) {
+eventParticipationSchema.pre('save', async function () {
   const total = this.totalSessionsAttended + this.totalSessionsMissed;
   if (total > 0) {
     this.attendanceRate = Math.round((this.totalSessionsAttended / total) * 100);
   }
-  next();
 });
 
 module.exports =

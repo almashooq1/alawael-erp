@@ -698,4 +698,38 @@ try {
   // CI bootstrap — silently skip so the model still registers.
 }
 
+// W982 — surface beneficiary lifecycle status changes (active → completed /
+// paused / dropped) on the unified-core timeline. This is the ONLY path that
+// records a status change on the CareTimeline: the env-gated modelEventBridge
+// emits `beneficiary.beneficiary.status_changed` to the LIVE-registry
+// subscribers (notification/re-publish), which do NOT write the timeline. Here
+// we publish the canonical `core.beneficiary.status_changed` consumed by
+// dddCrossModuleSubscribers → CareTimeline. Native pre-compile hooks per the
+// proven W970 pattern; update-only (a status change, not creation); guarded,
+// fire-and-forget. The contract already exists (BENEFICIARY_DDD_EVENTS.STATUS_CHANGED).
+beneficiarySchema.pre('save', function () {
+  this.$__wasNew = this.isNew;
+});
+beneficiarySchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+beneficiarySchema.post('save', function (doc) {
+  try {
+    if (this.$__wasNew) return; // creation handled by core.beneficiary.registered
+    if (!doc.status || doc.status === this.$__prevStatus) return; // no status change
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function') return;
+    Promise.resolve(
+      integrationBus.publish('core', 'beneficiary.status_changed', {
+        beneficiaryId: String(doc._id),
+        oldStatus: this.$__prevStatus || 'unknown',
+        newStatus: doc.status,
+        reason: doc.statusReason || doc.statusChangeReason || '',
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* bus not wired — never block persistence */
+  }
+});
+
 module.exports = mongoose.models.Beneficiary || mongoose.model('Beneficiary', beneficiarySchema);

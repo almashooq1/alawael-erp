@@ -289,7 +289,7 @@ independentLivingPlanSchema.index({ createdBy: 1 });
 independentLivingPlanSchema.index({ startDate: 1, endDate: 1 });
 
 // ─── حساب التقدم قبل الحفظ ───
-independentLivingPlanSchema.pre('save', function (next) {
+independentLivingPlanSchema.pre('save', async function () {
   if (this.goals && this.goals.length > 0) {
     // حساب تقدم الفئات
     const categoryGoals = {};
@@ -311,7 +311,6 @@ independentLivingPlanSchema.pre('save', function (next) {
     const totalProgress = this.goals.reduce((acc, g) => acc + (g.progressPercentage || 0), 0);
     this.overallProgress = Math.round(totalProgress / this.goals.length);
   }
-  next();
 });
 
 // ─── Virtuals ───
@@ -333,6 +332,26 @@ independentLivingPlanSchema.virtual('durationWeeks').get(function () {
     return Math.ceil(ms / (7 * 24 * 60 * 60 * 1000));
   }
   return 0;
+});
+
+// ── Unified-core linkage (W1120 — independent-living plan island → CareTimeline) ──
+independentLivingPlanSchema.post('init', function () {
+  this.$__prevStatus = this.status;
+});
+independentLivingPlanSchema.post('save', function (doc) {
+  try {
+    if (doc.status !== 'completed' || this.$__prevStatus === 'completed') return;
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
+    Promise.resolve(
+      integrationBus.publish('independent-living', 'plan.completed', {
+        independentLivingPlanId: String(doc._id),
+        beneficiaryId: String(doc.beneficiary),
+      })
+    ).catch(() => {});
+  } catch (_) {
+    /* never block persistence */
+  }
 });
 
 module.exports =

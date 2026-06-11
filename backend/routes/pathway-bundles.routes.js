@@ -81,7 +81,7 @@ router.get('/suggest/:beneficiaryId', requireRole(READ_ROLES), async (req, res) 
     const suggestion = await pathwayBundleService.suggestForBeneficiary(req.params.beneficiaryId);
     return res.json({ success: true, data: suggestion });
   } catch (err) {
-    if (err.statusCode)
+    if (err.statusCode || err.status)
       return res
         .status(err.statusCode || err.status)
         .json({ success: false, message: err.message });
@@ -118,7 +118,7 @@ router.post('/apply/:beneficiaryId', requireRole(WRITE_ROLES), async (req, res) 
 
     return res.status(201).json({ success: true, data: result });
   } catch (err) {
-    if (err.statusCode)
+    if (err.statusCode || err.status)
       return res
         .status(err.statusCode || err.status)
         .json({ success: false, message: err.message });

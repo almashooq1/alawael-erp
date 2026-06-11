@@ -60,7 +60,7 @@ router.get('/beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req, r
     const result = await nbaService.computeForBeneficiary(req.params.beneficiaryId);
     return res.json({ success: true, data: result });
   } catch (err) {
-    if (err.statusCode)
+    if (err.statusCode || err.status)
       return res
         .status(err.statusCode || err.status)
         .json({ success: false, message: err.message });

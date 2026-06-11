@@ -1002,3 +1002,6 @@ __tests__/talent-grid-behavioral-wave1198.test.js
 __tests__/diversity-lib-wave1199.test.js
 __tests__/diversity-routes-wave1199.test.js
 __tests__/diversity-behavioral-wave1199.test.js
+__tests__/golden-thread-gate-routes-behavioral-wave1219.test.js
+__tests__/pathway-bundles-routes-behavioral-wave1219.test.js
+__tests__/next-best-action-routes-behavioral-wave1219.test.js

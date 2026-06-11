@@ -116,16 +116,6 @@ const KNOWN_PHANTOM_WRITES = new Set([
   "routes/student-rewards-store.routes.js::studentactivity::reason",
   "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
   "routes/student-rewards-store.routes.js::studentactivity::date",
-  "services/smartInsurance.service.js::insuranceclaim::claimUuid",
-  "services/smartInsurance.service.js::insuranceclaim::policyId",
-  "services/smartInsurance.service.js::insuranceclaim::insuranceCompanyId",
-  "services/smartInsurance.service.js::insuranceclaim::serviceSessionId",
-  "services/smartInsurance.service.js::insuranceclaim::billedAmount",
-  "services/smartInsurance.service.js::insuranceclaim::diagnosisCodes",
-  "services/smartInsurance.service.js::insuranceclaim::procedureCodes",
-  "services/smartInsurance.service.js::insuranceclaim::lineItems",
-  "services/smartInsurance.service.js::insuranceclaim::priorAuthId",
-  "services/smartInsurance.service.js::insuranceclaim::createdBy",
 ]);
 
 const ALWAYS_ALLOWED = new Set([

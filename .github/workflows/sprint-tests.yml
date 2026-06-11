@@ -1415,6 +1415,8 @@ on:
       - 'backend/__tests__/pay-equity-sweeper-wave1194.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pay-equity-alert-rule-wave1197.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-insurance-claim-model-wave1210.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2813,6 +2815,8 @@ on:
       - 'backend/__tests__/pay-equity-sweeper-wave1194.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pay-equity-alert-rule-wave1197.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-insurance-claim-model-wave1210.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

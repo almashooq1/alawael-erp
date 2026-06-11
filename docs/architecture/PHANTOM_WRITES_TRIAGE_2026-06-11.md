@@ -129,8 +129,12 @@ lines and show the matched text.**
    hoursCount, leaveType validated against the enum. Sibling phantom READS fixed too:
    balance aggregation summed phantom `$totalDays` (always-zero balances) and list/
    balance matched phantom `employee` key.
-9. **user** (`name, status, branch` in admin/user-management), **documentversion** (2),
-   **documentaccesslog** (1) — LIVE, next quick wins.
+9. ~~**user**~~ — **FIXED W1203**: admin create wrote phantom `name`/`status` while
+   `fullName` is REQUIRED → user-create threw since shipping; the UPDATE path silently
+   dropped name/activation edits. Realigned to `fullName`/`isActive`. The
+   user-management `branch` write was a VERIFIED FALSE POSITIVE — it is the official
+   `User.branchId` alias; the audit script now parses `alias:` declarations (class D
+   tooling fix). documentversion/documentaccesslog cleared in W1201.
 
 ### P3 — low traffic / analytics-only
 

@@ -14,6 +14,11 @@
 
 const mongoose = require('mongoose');
 const { BaseService } = require('../../_base/BaseService');
+// W1240 — CQRS read-model projection: keep the legacy TherapySession analytics model
+// in sync with every ClinicalSession write so UI-logged sessions reach Session-Center /
+// episodes / goal-progress / claims. Fail-safe (never throws), so it can never break a
+// session write. See therapySessionProjection.js + DDD_VS_LEGACY_MODEL_SPLIT_2026-06-12.md.
+const { projectClinicalSession } = require('./therapySessionProjection');
 
 class SessionsService extends BaseService {
   constructor() {
@@ -55,6 +60,7 @@ class SessionsService extends BaseService {
       scheduledDate: session.scheduledDate,
     });
 
+    await projectClinicalSession(session, { logger: this.logger });
     return session;
   }
 
@@ -180,6 +186,7 @@ class SessionsService extends BaseService {
       throw err;
     }
     this.emit('session:updated', { sessionId: session._id, fields: Object.keys(data) });
+    await projectClinicalSession(session, { logger: this.logger });
     return session;
   }
 
@@ -230,6 +237,7 @@ class SessionsService extends BaseService {
       duration: duration || session.duration,
     });
 
+    await projectClinicalSession(session, { logger: this.logger });
     return session;
   }
 
@@ -265,6 +273,7 @@ class SessionsService extends BaseService {
       reason,
     });
 
+    await projectClinicalSession(session, { logger: this.logger });
     return session;
   }
 

@@ -31,6 +31,17 @@ const therapySessionSchema = new mongoose.Schema(
     plan: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticPlan' },
     episodeOfCare: { type: mongoose.Schema.Types.ObjectId, ref: 'EpisodeOfCare', index: true },
     carePlan: { type: mongoose.Schema.Types.ObjectId, ref: 'CarePlan', index: true },
+    // W1240 — CQRS read-model link back to the source ClinicalSession (the UI write
+    // model in domains/sessions). Populated by therapySessionProjection.js so this
+    // model's analytics consumers see UI-logged sessions. sparse + unique → one
+    // projection per source ClinicalSession; manually-created sessions stay null.
+    sourceClinicalSessionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ClinicalSession',
+      index: true,
+      sparse: true,
+      unique: true,
+    },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', index: true },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
     // W647 — branch tenancy denormalization (R4). beneficiary is optional, so

@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
@@ -11,6 +12,44 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const RiskAssessment = require('../models/RiskAssessment');
 const safeError = require('../utils/safeError');
+
+// W1207 — RiskAssessment's real vocabulary (riskName/riskDescription/nested
+// assessment.{probability,impact} on a 0..1 scale/createdBy/REQUIRED
+// organizationId). The old phantom payload (title/description/flat 1-5
+// probability/identifiedBy, no organizationId) threw ValidationError on every
+// create since the route shipped.
+const MODEL_RISK_TYPES = [
+  'operational',
+  'financial',
+  'credit',
+  'market',
+  'liquidity',
+  'regulatory',
+  'fraud',
+  'reputational',
+];
+// The route's public API accepts strategic/compliance — map to the closest
+// model enum values.
+const RISK_TYPE_MAP = { strategic: 'operational', compliance: 'regulatory' };
+const toModelRiskType = t =>
+  MODEL_RISK_TYPES.includes(t) ? t : RISK_TYPE_MAP[t] || 'operational';
+// API scale is 1..5; the model stores 0..1.
+const toUnitScale = v => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0.6;
+  return n > 1 ? Math.min(n, 5) / 5 : Math.max(0, n);
+};
+// Single-org deployment: organizationId is REQUIRED on the model but absent
+// from req.user — resolve the singleton Organization.
+async function resolveOrganizationId() {
+  try {
+    const Organization = mongoose.model('Organization');
+    const org = await Organization.findOne().select('_id').lean();
+    return org ? org._id : null;
+  } catch (_) {
+    return null;
+  }
+}
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -125,18 +164,26 @@ router.post(
     try {
       const { title, description, riskType, probability, impact, mitigation } = req.body;
       if (!title) return res.status(400).json({ success: false, message: 'عنوان المخاطرة مطلوب' });
+      const organizationId = await resolveOrganizationId();
+      if (!organizationId)
+        return res
+          .status(422)
+          .json({ success: false, message: 'تعذر تحديد المنظمة — لا يوجد سجل Organization' });
       const count = await RiskAssessment.countDocuments();
       const riskId = `RSK-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
       const risk = await RiskAssessment.create({
         riskId,
-        title,
-        description,
-        riskType: riskType || 'operational',
-        probability: probability || 3,
-        impact: impact || 3,
-        mitigation,
+        organizationId,
+        riskName: title,
+        riskDescription: description || title,
+        riskType: toModelRiskType(riskType),
+        assessment: {
+          probability: toUnitScale(probability ?? 3),
+          impact: toUnitScale(impact ?? 3),
+        },
+        ...(mitigation ? { mitigation: { strategy: mitigation } } : {}),
         status: 'identified',
-        identifiedBy: req.user.id,
+        createdBy: req.user._id || req.user.id,
       });
       res.status(201).json({ success: true, data: risk, message: 'تم إنشاء تقييم المخاطرة' });
     } catch (error) {
@@ -150,9 +197,19 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { title, description, riskType, probability, impact, mitigation, status, owner } =
       req.body;
+    // W1207 — same phantom vocabulary on the update path (silently dropped).
+    const set = {};
+    if (title !== undefined) set.riskName = title;
+    if (description !== undefined) set.riskDescription = description;
+    if (riskType !== undefined) set.riskType = toModelRiskType(riskType);
+    if (probability !== undefined) set['assessment.probability'] = toUnitScale(probability);
+    if (impact !== undefined) set['assessment.impact'] = toUnitScale(impact);
+    if (mitigation !== undefined) set['mitigation.strategy'] = mitigation;
+    if (status !== undefined) set.status = status;
+    if (owner !== undefined) set.assignedTo = owner;
     const risk = await RiskAssessment.findByIdAndUpdate(
       req.params.id,
-      { title, description, riskType, probability, impact, mitigation, status, owner },
+      { $set: set },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });

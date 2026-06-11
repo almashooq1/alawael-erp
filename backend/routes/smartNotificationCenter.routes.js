@@ -121,15 +121,38 @@ router.post('/send', authorize(['admin', 'manager']), async (req, res) => {
     if (!recipient || !title || !message) {
       return res.status(400).json({ success: false, message: 'المستلم والعنوان والرسالة مطلوبة' });
     }
+    // W1207 — the model's sender field is `sender` (sentBy was phantom), and
+    // the old defaults violated BOTH enums: type 'custom' (allowed:
+    // info/…/approval) and category 'system' (allowed: general/…/maintenance)
+    // → every send threw ValidationError.
+    const SMART_TYPES = [
+      'info',
+      'warning',
+      'error',
+      'success',
+      'task',
+      'reminder',
+      'system',
+      'approval',
+    ];
+    const SMART_CATEGORIES = [
+      'general',
+      'hr',
+      'finance',
+      'medical',
+      'admin',
+      'security',
+      'maintenance',
+    ];
     const notif = await SmartNotification.create({
       recipient,
+      sender: req.user._id || req.user.id,
       title,
       message,
-      type: type || 'custom',
-      category: category || 'system',
+      type: SMART_TYPES.includes(type) ? type : 'info',
+      category: SMART_CATEGORIES.includes(category) ? category : 'general',
       priority: priority || 'medium',
       channel: channel || 'in_app',
-      sentBy: req.user.id,
     });
     res.status(201).json({ success: true, data: notif, message: 'تم إرسال الإشعار' });
   } catch (error) {

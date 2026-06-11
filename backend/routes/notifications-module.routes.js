@@ -38,6 +38,28 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 router.use(authenticate);
+
+// W1207 — mirror of models/Notification.js type enum (unknown values → 'info'
+// instead of a ValidationError).
+const NOTIF_TYPES = [
+  'info',
+  'success',
+  'warning',
+  'error',
+  'alert',
+  'system',
+  'task',
+  'reminder',
+  'approval',
+  'message',
+  'update',
+  'finance',
+  'hr',
+  'security',
+  'maintenance',
+  'general',
+  'notification',
+];
 router.use(requireBranchAccess);
 
 const safeModel = name => {
@@ -376,18 +398,23 @@ router.post('/send', requireRole('admin', 'manager', 'supervisor'), async (req, 
     const Notif = safeModel('Notification');
     if (!Notif)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const { userId, type, title, body, channel = 'in_app', data: payload } = req.body;
+    const { userId, type, title, body, channel = 'in-app', data: payload } = req.body;
     if (!userId || !title)
       return res.status(400).json({ success: false, message: 'userId and title are required' });
+    // W1207 — realigned to the real Notification vocabulary: recipientId +
+    // message are REQUIRED (the old payload missed both → threw on every
+    // send), the channel enum is hyphenated ('in-app', not 'in_app'), and
+    // sentBy/branchId are phantoms (sender provenance goes in metadata).
     const doc = await Notif.create({
+      recipientId: userId,
       userId,
-      type,
+      type: NOTIF_TYPES.includes(type) ? type : 'info',
       title,
+      message: body || title,
       body,
-      channel,
+      channel: channel === 'in_app' ? 'in-app' : channel,
       data: payload,
-      branchId: req.user.branchId,
-      sentBy: req.user._id,
+      metadata: { sentBy: String(req.user._id) },
       isRead: false,
     });
     res.status(201).json({ success: true, data: doc });
@@ -401,17 +428,20 @@ router.post('/bulk-send', requireRole('admin', 'manager'), async (req, res) => {
     const Notif = safeModel('Notification');
     if (!Notif)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const { userIds = [], type, title, body, channel = 'in_app' } = req.body;
+    const { userIds = [], type, title, body, channel = 'in-app' } = req.body;
     if (!userIds.length || !title)
       return res.status(400).json({ success: false, message: 'userIds and title are required' });
+    // W1207 — same realignment as /send (insertMany validates against the
+    // schema too: missing recipientId/message + 'in_app' all threw).
     const docs = userIds.map(uid => ({
+      recipientId: uid,
       userId: uid,
-      type,
+      type: NOTIF_TYPES.includes(type) ? type : 'info',
       title,
+      message: body || title,
       body,
-      channel,
-      branchId: req.user.branchId,
-      sentBy: req.user._id,
+      channel: channel === 'in_app' ? 'in-app' : channel,
+      metadata: { sentBy: String(req.user._id) },
       isRead: false,
     }));
     const result = await Notif.insertMany(docs, { ordered: false });
@@ -426,7 +456,9 @@ router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, 
     const Notif = safeModel('Notification');
     if (!Notif)
       return res.json({ success: true, data: { total: 0, unread: 0, read: 0, byChannel: [] } });
-    const base = { branchId: req.user.branchId };
+    // W1207 — Notification has no branchId; the phantom filter made every
+    // stat zero. Endpoint is reviewer-role gated → global counts.
+    const base = {};
     const [total, unread, byChannel] = await Promise.all([
       Notif.countDocuments(base),
       Notif.countDocuments({ ...base, isRead: false }),

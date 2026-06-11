@@ -326,10 +326,12 @@ router.get('/children/:id/sessions', async (req, res) => {
     if (!guardian) return res.status(403).json({ success: false, message: 'Access denied' });
     const Appointment = safeModel('Appointment');
     if (!Appointment) return res.json({ success: true, data: [] });
+    // W1199 — canonical `beneficiary` + UPPERCASE status enum (the phantom
+    // beneficiaryId/'completed' pair matched nothing → always empty).
     const data = await Appointment.find({
-      beneficiaryId: req.params.id,
+      beneficiary: req.params.id,
       branchId: req.user.branchId,
-      status: 'completed',
+      status: 'COMPLETED',
     })
       .sort({ date: -1 })
       .limit(10)
@@ -341,20 +343,24 @@ router.get('/children/:id/sessions', async (req, res) => {
 });
 
 // ── GET /messages ──────────────────────────────────────────────────────────
+// W1199 — rebound from the phantom Communication vocabulary (a correspondence-
+// management model whose REQUIRED title/sender.name/receiver.name the old
+// writes never set → every send threw, every read matched nothing) onto the
+// purpose-built PortalMessage model. Tenancy is participant-keyed (own
+// messages only) — PortalMessage has no branchId field.
 router.get('/messages', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
-    if (!Communication) return res.json({ success: true, data: [], pagination: { total: 0 } });
+    const PortalMessage = safeModel('PortalMessage');
+    if (!PortalMessage) return res.json({ success: true, data: [], pagination: { total: 0 } });
     const { page = 1, limit = 20 } = req.query;
     const filter = {
-      branchId: req.user.branchId,
-      $or: [{ senderId: req.user._id }, { recipientId: req.user._id }],
-      channel: { $in: ['portal', 'message'] },
+      deletedAt: null,
+      $or: [{ fromId: req.user._id }, { toId: req.user._id }],
     };
     const skip = (Number(page) - 1) * Number(limit);
     const [data, total] = await Promise.all([
-      Communication.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
-      Communication.countDocuments(filter),
+      PortalMessage.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
+      PortalMessage.countDocuments(filter),
     ]);
     res.json({
       success: true,
@@ -371,20 +377,20 @@ router.post('/messages', async (req, res) => {
   try {
     const { subject, body, recipientId, childId, priority = 'normal' } = req.body;
     if (!body) return res.status(400).json({ success: false, message: 'body is required' });
-    const Communication = safeModel('Communication');
-    if (!Communication)
+    if (!recipientId || !mongoose.isValidObjectId(recipientId))
+      return res.status(400).json({ success: false, message: 'recipientId is required' });
+    const PortalMessage = safeModel('PortalMessage');
+    if (!PortalMessage)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const doc = await Communication.create({
-      channel: 'portal',
-      direction: 'inbound',
-      status: 'open',
-      subject,
-      body,
-      senderId: req.user._id,
-      recipientId,
-      metadata: { childId, priority },
-      branchId: req.user.branchId,
-      createdAt: new Date(),
+    const doc = await PortalMessage.create({
+      fromId: req.user._id,
+      fromModel: 'User',
+      toId: recipientId,
+      toModel: 'User',
+      subject: (subject || 'رسالة من ولي أمر').slice(0, 200),
+      message: body,
+      priority: ['low', 'normal', 'high', 'urgent'].includes(priority) ? priority : 'normal',
+      relatedBeneficiaryId: mongoose.isValidObjectId(childId) ? childId : undefined,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -395,15 +401,24 @@ router.post('/messages', async (req, res) => {
 // ── GET /messages/:id ──────────────────────────────────────────────────────
 router.get('/messages/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
-    if (!Communication)
+    const PortalMessage = safeModel('PortalMessage');
+    if (!PortalMessage)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const doc = await Communication.findOne({
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'Invalid message id' });
+    const doc = await PortalMessage.findOne({
       _id: req.params.id,
-      branchId: req.user.branchId,
-      $or: [{ senderId: req.user._id }, { recipientId: req.user._id }],
+      deletedAt: null,
+      $or: [{ fromId: req.user._id }, { toId: req.user._id }],
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Message not found' });
+    // Opening your own inbox copy marks it read (best-effort).
+    if (String(doc.toId) === String(req.user._id) && !doc.isRead) {
+      PortalMessage.updateOne(
+        { _id: doc._id },
+        { $set: { isRead: true, readAt: new Date() } }
+      ).catch(() => {});
+    }
     res.json({ success: true, data: doc });
   } catch (err) {
     safeError(res, err, 'message detail');
@@ -415,20 +430,32 @@ router.post('/messages/:id/reply', async (req, res) => {
   try {
     const { body } = req.body;
     if (!body) return res.status(400).json({ success: false, message: 'body is required' });
-    const Communication = safeModel('Communication');
-    if (!Communication)
+    const PortalMessage = safeModel('PortalMessage');
+    if (!PortalMessage)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const original = await Communication.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        branchId: req.user.branchId,
-        $or: [{ senderId: req.user._id }, { recipientId: req.user._id }],
-      },
-      { $push: { thread: { body, senderId: req.user._id, sentAt: new Date() } } },
-      { returnDocument: 'after' }
-    );
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'Invalid message id' });
+    const original = await PortalMessage.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      $or: [{ fromId: req.user._id }, { toId: req.user._id }],
+    }).lean();
     if (!original) return res.status(404).json({ success: false, message: 'Message not found' });
-    res.json({ success: true, data: original });
+    const toId =
+      String(original.fromId) === String(req.user._id) ? original.toId : original.fromId;
+    const reply = await PortalMessage.create({
+      fromId: req.user._id,
+      fromModel: 'User',
+      toId,
+      toModel: 'User',
+      subject: `رد: ${original.subject}`.slice(0, 200),
+      message: body,
+      isReply: true,
+      repliedToId: original._id,
+      relatedBeneficiaryId: original.relatedBeneficiaryId || undefined,
+    });
+    await PortalMessage.updateOne({ _id: original._id }, { $push: { replies: reply._id } });
+    res.status(201).json({ success: true, data: reply });
   } catch (err) {
     safeError(res, err, 'reply message');
   }

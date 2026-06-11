@@ -32,6 +32,7 @@ module.exports = function registerFeatureRoutes(
   const clinicalPathwayRoutes = safeRequire('../routes/clinical-pathway.routes');
   const pathwayBundlesRoutes = safeRequire('../routes/pathway-bundles.routes');
   const nextBestActionRoutes = safeRequire('../routes/next-best-action.routes');
+  const outcomesRollupRoutes = safeRequire('../routes/outcomes-rollup.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
   const beneficiaryDayAttendanceRoutes = safeRequire('../routes/beneficiary-day-attendance.routes');
   const beneficiarySectionsRoutes = safeRequire('../routes/beneficiary-sections.routes');
@@ -136,6 +137,10 @@ module.exports = function registerFeatureRoutes(
   // measure alerts + goal progress + latest risk snapshot into one ranked
   // per-beneficiary action list + branch triage queue.
   dualMountAuth(app, 'next-best-action', nextBestActionRoutes, authenticate);
+  // Wave 1214 (Blueprint 43 §6.4 + R7): outcomes roll-up ladder — READ-ONLY
+  // aggregation goal → beneficiary → program(domain) → branch → center.
+  // Center tier is cross-branch-roles-only (restricted callers get 403).
+  dualMountAuth(app, 'outcomes-rollup', outcomesRollupRoutes, authenticate);
   dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
   // Wave 174: Daily rollcall (مركز تأهيل نهاري) — distinct from session attendance
   dualMountAuth(app, 'beneficiary-day-attendance', beneficiaryDayAttendanceRoutes, authenticate);

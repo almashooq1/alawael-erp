@@ -1580,6 +1580,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pathway-bundles-behavioral-wave1212.test.js'
       - 'backend/__tests__/next-best-action-behavioral-wave1212.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/outcomes-rollup-wave1214.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3143,6 +3145,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pathway-bundles-behavioral-wave1212.test.js'
       - 'backend/__tests__/next-best-action-behavioral-wave1212.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/outcomes-rollup-wave1214.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -128,7 +128,9 @@ router.get('/inbox', async (req, res) => {
     if (!Notif)
       return res.json({ success: true, data: [], pagination: { total: 0 }, unreadCount: 0 });
     const { page = 1, limit = 20, isRead, type } = req.query;
-    const filter = { userId: req.user._id, branchId: req.user.branchId };
+    // W1207 — Notification has no branchId; the phantom filter emptied every
+    // inbox. Ownership (userId) is the tenancy key.
+    const filter = { userId: req.user._id };
     if (isRead !== undefined) filter.isRead = isRead === 'true';
     if (type) filter.type = type;
     const skip = (Number(page) - 1) * Number(limit);

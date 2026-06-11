@@ -90,10 +90,32 @@ For each core data-entry entity, run the three-way trace:
 3. **Analytics/worker read:** which model do `intelligence/*`, the schedulers, the
    `reports`/`session-center`/`episodes` surfaces read? (often the legacy twin)
 
-A mismatch between (1) and (3) is a split. Still to check with this method:
-**assessments** (`ClinicalAssessment` DDD vs the several legacy `Assessment*`
-models), **goals** (`TherapeuticGoal` DDD vs `SmartGoal`/`Goal` — ADR-040 picked
-TherapeuticGoal; verify the analytics read it), **episodes**, **behavior**.
+A mismatch between (1) and (3) is a split.
+
+## Audit completed (W1239, 2026-06-12)
+
+The remaining core entities were traced. Full result table (severity = blast radius
+× whether the read side is a worker/compliance surface):
+
+| Entity | UI writes / 360 reads | Analytics/intelligence reads | Verdict |
+| --- | --- | --- | --- |
+| **Care plans** | `UnifiedCarePlan` | `CarePlanVersion` (≈10 intelligence files + the **prod-ON workers**) | 🔴 **SPLIT — severe** |
+| **Sessions** | `ClinicalSession` | `TherapySession` (session-center + **episodes** + goal-progress + claims + ICF + pain; 56 consumers) | 🔴 **SPLIT — severe** |
+| **IEP** | `SmartIEP` | (UI-less twin `IndividualEducationPlan`) | 🟠 related family (ADR-026 addendum) |
+| **Behavior** | `BehaviorRecord` / `BehaviorPlan` | **`BehaviorIncident`** — read by the risk/escalation engine (`escalation-predictor.lib`, `risk/sources/behavioral-escalation.source`, `risk/registry`) | 🟠 **divergence — classify** (is a UI "behavior record" the same as a risk "incident"? if yes → split feeding the risk engine blind; if a distinct concept → fine) |
+| **Goals** | `TherapeuticGoal` | **`SmartGoal`** read by 5 surfaces (`care-gap.loader`, `assessmentRecommendationEngine`, `therapistPortal.service`, `assessmentReassessmentSweeper`, `orchestrator-loaders`) | 🟠 **divergence — classify** per ADR-040 (SmartGoal is the legitimate qualitative-*suggestion* tier; but `therapistPortal`/`care-gap` reading it instead of `TherapeuticGoal` may be a real split, not tier-separation) |
+| **Assessments** | `ClinicalAssessment` | only `services/ai/smartReport.service` reads a legacy `Assessment*` | 🟢 **mostly consistent** (one AI-report surface to re-point) |
+| **Episodes** | `EpisodeOfCare` (consistent) | — but the episode **session-list reads `TherapySession`** (`episodes.routes.js:289`) | 🟡 **inherits the session split** — episode detail shows TherapySession, not the UI's ClinicalSession |
+
+**Conclusion.** The pattern is real and broad: **2 severe splits (care-plans,
+sessions), 2 needing concept-classification (goals, behavior), 1 minor
+(assessments), and episodes inheriting the session split.** Care-plans + sessions
+are the launch blockers; goals + behavior need a domain owner to decide
+split-vs-legitimate-tier; assessments is a one-file re-point.
+
+**Resolution priority for launch:** fix care-plans + sessions first (option 1
+bridge-on-write, coordinated with `feat/w928`). Classify goals + behavior next.
+Re-point the one assessment AI-report surface last.
 
 ---
 

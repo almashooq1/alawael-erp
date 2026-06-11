@@ -30,6 +30,22 @@ ValidationError at runtime** because the real model has different *required* fie
 | W1193 | `PriorAuthorization.uuid` + `InsuranceEligibilityCheck.uuid`: **required with no default and no caller ever set them** → `checkEligibility()` and `requestPriorAuth()` threw on every call. Schema-side `crypto.randomUUID()` default fixes all callers |
 | W1193 | Class-C declares: `PriorAuthorization.{insuranceCompanyId, estimatedStartDate, estimatedEndDate}`, `InsuranceEligibilityCheck.requestedService` |
 
+## ⚠ Liveness correction (W1200)
+
+The first liveness sweep counted COMMENTED registry lines as mounts. Re-verified with
+actual line inspection: `guardianPortal`, `email-v2`, `electronic-directives`, and ALL
+five `student-*` route files are **DORMANT** — their only registry references are
+`// PHANTOM:` / `// PHANTOM-FIX:` commented-out mounts (the W775-era stub-surface
+de-mounting). The W1197/W1199 guardianPortal repairs are therefore correct code on an
+UNMOUNTED surface — harmless, and ready if ADR-030 wires it, but they were not live
+user fixes. **LIVE writers confirmed by real mount lines**: `documents.smart`
+(_registry:783), `employeePortal` (×3 incl. app.js direct), `riskAssessment`
+(phases.registry), `budgetManagement` (finance.registry), `smartInsurance.service`
+(consumed by mounted smart-insurance.routes — the W1193 repairs WERE live fixes),
+`notifications-module`, `smartNotificationCenter`, `admin.routes`, `user-management`,
+`contracts`, `waitlist`. **Methodology rule: a liveness grep MUST exclude `//`-commented
+lines and show the matched text.**
+
 ## Open clusters (priority order)
 
 ### P1 — live user-facing surfaces, hard-broken (class A)
@@ -98,8 +114,15 @@ ValidationError at runtime** because the real model has different *required* fie
    `city→address.city`, `preferredLanguage→language`; class-C declares needed:
    `preferredContactMethod`, `canPickup`. Baseline ids stay (ratchet fires if revived).
 
-8. **leaverequest** (6), **user** (`name, status, branch` in admin/user-management),
-   **documentversion** (2), **documentaccesslog** (1).
+8. ~~**leaverequest** (6)~~ — **FIXED W1200** (LIVE surface, employeePortal mounted ×3):
+   POST /leaves never set REQUIRED `branchId` → threw since shipping; keyed employeeId
+   by USER id (model refs Employee); wrote 6 phantom fields. Realigned: employee
+   resolved via userId → `employeeId: employee._id`, `daysCount`, half-day → notes +
+   hoursCount, leaveType validated against the enum. Sibling phantom READS fixed too:
+   balance aggregation summed phantom `$totalDays` (always-zero balances) and list/
+   balance matched phantom `employee` key.
+9. **user** (`name, status, branch` in admin/user-management), **documentversion** (2),
+   **documentaccesslog** (1) — LIVE, next quick wins.
 
 ### P3 — low traffic / analytics-only
 

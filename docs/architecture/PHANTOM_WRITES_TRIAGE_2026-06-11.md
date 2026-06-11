@@ -51,10 +51,16 @@ ValidationError at runtime** because the real model has different *required* fie
    recipient, cc, bcc, sentAt, senderId…`); `models/Communication.js` is a
    **correspondence-management** model (required `title, subject, sender.name,
    receiver.name, sentDate, type enum incoming/outgoing/internal, createdBy.userId`)
-   → create throws. Candidate targets that already exist: `Conversation` + `Message`
-   statics (proven live in W276c), `DailyCommunicationLog`,
-   `rehab-center/family-communication.model`. **Fix = rebind each writer**, not extend
-   the correspondence model.
+   → create throws. **Fix = rebind each writer**, not extend the correspondence model.
+   - ✅ **guardianPortal — FIXED W1199**: whole messages section (inbox / send /
+     detail / reply) rebound to the purpose-built `PortalMessage` model (participant-
+     keyed tenancy, isRead/readAt on open, proper reply chain via
+     isReply/repliedToId/replies[]). Also fixed a 4th sibling phantom READ
+     (`/children/:id/sessions` used `beneficiaryId` + lowercase `'completed'`).
+   - ⏳ **email-v2** → candidate sink: an email-log model (locate the W340-listed
+     `EmailLog` registration — not at models/ root) or `models/communication/*`.
+   - ⏳ **student-complaints** → rebind to `models/Complaint.js` (subject/description/
+     category/submittedBy match; check `source`/`category` enums first).
 
 3. ~~**guardianPortal appointment booking** (4 keys)~~ — **FIXED W1197**: writer
    realigned to canonical vocabulary (`beneficiary` ref, Arabic `type` enum with

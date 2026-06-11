@@ -86,9 +86,24 @@ function readiness({ talentBands, targetCompetencyReadinessPct, tenureYears } = 
   };
 }
 
-/** Rank candidates (each {employeeId, name, readiness}) by score desc. */
+/**
+ * Score accessor tolerant of BOTH candidate shapes:
+ *   - flat   `{ score }`              — what successionReadinessService emits
+ *     (employeeReadiness spreads `...r`, so `score` lands at the top level)
+ *   - nested `{ readiness: { score } }` — the original lib-test shape
+ * W1207 shipped only the nested reader, so the live `/candidates` ranking sorted
+ * by `undefined` → DB-insertion order (the headline "ranked" feature was a no-op).
+ */
+function candidateScore(c) {
+  if (!c) return 0;
+  if (typeof c.score === 'number') return c.score;
+  if (typeof c.readiness?.score === 'number') return c.readiness.score;
+  return 0;
+}
+
+/** Rank candidates (flat `{score}` or nested `{readiness:{score}}`) by score desc. */
 function rankCandidates(candidates) {
-  return [...(candidates || [])].sort((a, b) => (b.readiness?.score || 0) - (a.readiness?.score || 0));
+  return [...(candidates || [])].sort((a, b) => candidateScore(b) - candidateScore(a));
 }
 
 module.exports = {
@@ -99,4 +114,5 @@ module.exports = {
   levelOf,
   readiness,
   rankCandidates,
+  candidateScore,
 };

@@ -81,6 +81,16 @@ describe('W1224 registry mount', () => {
     );
   });
 
+  test('W1229: verify paths are exempt from the global Redis GET cache', () => {
+    const perfSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'config', 'performance.js'),
+      'utf8'
+    );
+    expect(perfSrc).toMatch(/NO_CACHE_RE/);
+    expect(perfSrc).toMatch(/letter-verify/);
+    expect(perfSrc).toMatch(/official-letters\\\/verify/);
+  });
+
   test('W1228: QR verify is ALSO mounted publicly OUTSIDE /hr (app.js gates /api/v1/hr with authenticate)', () => {
     expect(routeSrc).toMatch(/module\.exports\.verifyLetterHandler = verifyLetterHandler/);
     expect(registrySrc).toMatch(

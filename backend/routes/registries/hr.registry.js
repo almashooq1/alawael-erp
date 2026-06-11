@@ -164,5 +164,19 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] HR webhooks not mounted (factory or HrWebhookSubscription missing)');
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── Pay-equity analysis (W1193 — demographic pay-gap + cohort outliers) ───
+  // Self-authenticating (router.use(authenticateToken)+requireBranchAccess) so a
+  // plain app.use mount is safe; salary reads are role-gated + branch-isolated.
+  // ══════════════════════════════════════════════════════════════════════════
+  const payEquityRouter = safeRequire('../routes/hr/pay-equity.routes');
+  if (payEquityRouter) {
+    app.use('/api/hr/pay-equity', payEquityRouter);
+    app.use('/api/v1/hr/pay-equity', payEquityRouter);
+    logger.info('[HR] Pay-equity analysis mounted (/api/(v1/)?hr/pay-equity)');
+  } else {
+    logger.warn('[HR] Pay-equity routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

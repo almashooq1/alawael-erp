@@ -98,10 +98,18 @@ lines and show the matched text.**
    date`) → throws. Either bind to a new `StudentActivityLog` model or map onto the
    task vocabulary.
 
-6. **document cluster** (12 keys; `electronic-directives`, `student-certificates`,
-   `documents.smart`). Directives/certificates piggyback on `Document` with fields it
-   lacks (`directiveType, requiredSigners, signatureStatus, verificationCode…`).
-   Needs per-surface decision (dedicated models vs Document.metadata).
+6. **document cluster** (12 keys) — split by liveness:
+   - ✅ **documents.smart — FIXED W1201** (LIVE, `_registry:783`): the whole file was
+     written against an imagined schema (`branchId`/`isDeleted`/`beneficiaryId`/
+     English `status:'active'`/`shares`/`currentVersion`/`accessedAt`/`fileUrl`+
+     `changeNote` on versions) — every create threw, every read matched nothing.
+     Realigned to the real models mirroring documents.routes' W933 mapping: Arabic
+     category/status maps, W933 `entityType:'Beneficiary'`+`entityId` linkage,
+     visibility via owner/isPublic/sharedWith (manage roles see all), versions carry
+     the REQUIRED filePath/fileName/fileSize/fileHash (URL-hash fallback documented),
+     access log keyed by timestamps.
+   - 💤 `electronic-directives` + `student-certificates` — DORMANT (PHANTOM de-mounts);
+     defer to ADR-030 with the dossier notes.
 
 7. **guardian** (8 flat contact keys) — **RECLASSIFIED W1198: DORMANT ROUTE, defer to
    ADR-030 (wire-vs-delete).** `routes/guardians.routes.js` is referenced by NO mount
@@ -121,8 +129,12 @@ lines and show the matched text.**
    hoursCount, leaveType validated against the enum. Sibling phantom READS fixed too:
    balance aggregation summed phantom `$totalDays` (always-zero balances) and list/
    balance matched phantom `employee` key.
-9. **user** (`name, status, branch` in admin/user-management), **documentversion** (2),
-   **documentaccesslog** (1) — LIVE, next quick wins.
+9. ~~**user**~~ — **FIXED W1203**: admin create wrote phantom `name`/`status` while
+   `fullName` is REQUIRED → user-create threw since shipping; the UPDATE path silently
+   dropped name/activation edits. Realigned to `fullName`/`isActive`. The
+   user-management `branch` write was a VERIFIED FALSE POSITIVE — it is the official
+   `User.branchId` alias; the audit script now parses `alias:` declarations (class D
+   tooling fix). documentversion/documentaccesslog cleared in W1201.
 
 ### P3 — low traffic / analytics-only
 

@@ -211,5 +211,16 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
     logger.warn('[HR] Workforce-intelligence routes not mounted (module missing)');
   }
 
+  // ── Skills-gap & competency development (W1201 — gap analysis + training needs) ─
+  // Self-authenticating; employee-keyed reads + branch-isolated org rollups.
+  const skillsGapRouter = safeRequire('../routes/hr/skills-gap.routes');
+  if (skillsGapRouter) {
+    app.use('/api/hr/skills-gap', skillsGapRouter);
+    app.use('/api/v1/hr/skills-gap', skillsGapRouter);
+    logger.info('[HR] Skills-gap analysis mounted (/api/(v1/)?hr/skills-gap)');
+  } else {
+    logger.warn('[HR] Skills-gap routes not mounted (module missing)');
+  }
+
   logger.info('[HR] All ~25 HR/Employee/Workforce modules mounted successfully');
 };

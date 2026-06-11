@@ -1,6 +1,12 @@
 # Phantom Schema Writes — Triage Dossier
 
-**Date:** 2026-06-11 · **Tool:** `npm run check:phantom-writes` (W1189) · **Baseline:** 127 findings (was 131; W1189 fixed 2, W1193 fixed 4 + 2 runtime bugs)
+**Date:** 2026-06-11 · **Tool:** `npm run check:phantom-writes` (W1189) · **Baseline:**
+**75** (was 131 — burned down across 10 waves W1189→W1210; every LIVE cluster fixed).
+**Everything remaining is DORMANT** (PHANTOM-de-mounted routes awaiting ADR-030
+wire-vs-delete: guardians, email-v2, electronic-directives, student-* ×5 — note the
+PHANTOM markers date from W775 when those FILES DID NOT EXIST yet; they were created
+later against imagined schemas and never wired). guardianPortal was repaired
+(W1197/W1199) and WIRED (W1211).
 
 ## Context
 
@@ -50,17 +56,16 @@ lines and show the matched text.**
 
 ### P1 — live user-facing surfaces, hard-broken (class A)
 
-1. **smartInsurance claims** (`services/smartInsurance.service.js`, 10 keys —
-   `claimUuid, policyId, insuranceCompanyId, serviceSessionId, billedAmount,
-   diagnosisCodes, procedureCodes, lineItems, priorAuthId, createdBy`).
-   `submitClaim()` writes a policy-based vocabulary matching **no** registered model.
-   It binds (via the `models/InsuranceClaim.js` re-export shim) to
-   `insuranceClaim.model.js` whose schema is contract-based with REQUIRED
-   `beneficiary/contract/visitDate/totalGross/totalNet` → **create throws every time**.
-   Even `models/nphies/InsuranceClaim.js` (`NphiesInsuranceClaim`) doesn't match
-   (`insurancePolicyId`, no `claimUuid`). **Decision needed:** map the service onto the
-   canonical contract-based schema, or give smart-insurance its own claim model
-   (then reconcile under ADR-021 patterns — there are already FOUR InsuranceClaim files).
+1. ~~**smartInsurance claims** (10 keys)~~ — **DECIDED + FIXED W1210** (W337
+   build-the-canonical precedent + ADR-021 Pattern D): built
+   `models/SmartInsuranceClaim.js` (DISTINCT registered name — 3 other InsuranceClaim
+   files exist) as the exact union of every field the service/routes read or write
+   (halalas dual-write, claimUuid required-WITH-default per the W1193 lesson, Mixed
+   lineItems so payer-variant shapes can't be strict-dropped, full adjudication +
+   NPHIES surface, soft delete). Service + routes rebound; rejection analytics
+   realigned (`submittedAt` + `branchId` — the old match mixed contract-model
+   `submissionDate` with a phantom `branch` key). 31-assertion drift guard in sprint.
+   `submitClaim()` works for the first time since System 40 shipped.
 
 2. **communication message-log writers** (13 keys; `email-v2`, `guardianPortal`,
    `student-complaints`). Writers want a **message log** (`channel, direction, body,

@@ -78,6 +78,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // fixture strings, not real imports — the scanner is fooled by the quotes.
   path.join('__tests__', 'check-authz-consolidation-script.test.js'),
   path.join('__tests__', 'check-can-scope-contract-script.test.js'),
+  // W1175 drift guard asserts route sources contain the literal string
+  // "require('../../../middleware/assertBranchMatch')" via toContain(...).
+  // That path resolves from domains/*/routes/, not from __tests__/ — the
+  // scanner is fooled by the quoted assertion string, not a real import.
+  path.join('__tests__', 'domain-resource-param-guards-wave1175.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

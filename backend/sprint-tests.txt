@@ -907,3 +907,6 @@ __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 tests/unit/ops-alerter.test.js
 __tests__/operations-health-wave1195.test.js
 __tests__/operations-health-route-wave1196.test.js
+__tests__/golden-thread-enforcement-wave1204.test.js
+__tests__/pathway-bundles-wave1205.test.js
+__tests__/next-best-action-wave1206.test.js

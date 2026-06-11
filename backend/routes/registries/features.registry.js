@@ -30,6 +30,8 @@ module.exports = function registerFeatureRoutes(
   const guardiansRoutes = safeRequire('../routes/guardians.routes');
   const familyHomeProgramRoutes = safeRequire('../routes/family-home-program.routes');
   const clinicalPathwayRoutes = safeRequire('../routes/clinical-pathway.routes');
+  const pathwayBundlesRoutes = safeRequire('../routes/pathway-bundles.routes');
+  const nextBestActionRoutes = safeRequire('../routes/next-best-action.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
   const beneficiaryDayAttendanceRoutes = safeRequire('../routes/beneficiary-day-attendance.routes');
   const beneficiarySectionsRoutes = safeRequire('../routes/beneficiary-sections.routes');
@@ -124,6 +126,16 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'family-home-program', familyHomeProgramRoutes, authenticate);
   // Wave 896: Clinical Pathway Engine — staged rehab pathway per beneficiary
   dualMountAuth(app, 'clinical-pathway', clinicalPathwayRoutes, authenticate);
+  // Wave 1205 (Blueprint 43 R4): disability pathway bundles — per-disability
+  // therapeutic fingerprint (registry catalogue + READ-ONLY suggest resolved
+  // against live Measure/GoalBank libraries + explicit-selection apply that
+  // materializes a ClinicalPathwayPlan + R3-compliant draft goals).
+  dualMountAuth(app, 'pathway-bundles', pathwayBundlesRoutes, authenticate);
+  // Wave 1206 (Blueprint 43 R6): unified Next-Best-Action engine — READ-ONLY
+  // CDSS layer fusing golden-thread trace + episode phase machine + open
+  // measure alerts + goal progress + latest risk snapshot into one ranked
+  // per-beneficiary action list + branch triage queue.
+  dualMountAuth(app, 'next-best-action', nextBestActionRoutes, authenticate);
   dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
   // Wave 174: Daily rollcall (مركز تأهيل نهاري) — distinct from session attendance
   dualMountAuth(app, 'beneficiary-day-attendance', beneficiaryDayAttendanceRoutes, authenticate);

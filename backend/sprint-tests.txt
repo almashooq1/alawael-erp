@@ -821,6 +821,7 @@ __tests__/dashboard-saved-views-auth-behavioral-wave1190.test.js
 __tests__/dashboard-rehab-safemount-auth-wave1191.test.js
 __tests__/dashboard-rehab-safemount-auth-behavioral-wave1191.test.js
 __tests__/check-phantom-schema-writes-script.test.js
+__tests__/auditor-safemount-coverage-wave1192.test.js
 __tests__/golden-thread-attention-behavioral-wave1165.test.js
 __tests__/golden-thread-attention-wave1165.test.js
 __tests__/golden-thread-caseload-route-wave1167.test.js

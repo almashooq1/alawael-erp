@@ -1384,6 +1384,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-phantom-schema-writes-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+<<<<<<< HEAD
       - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
       - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
       - 'backend/__tests__/golden-thread-caseload-route-wave1167.test.js'
@@ -1398,6 +1399,9 @@ on:
       - 'backend/__tests__/supervisor-ops-route-wave1170.test.js'
       - 'backend/__tests__/supervisor-ops-service-behavioral-wave1169.test.js'
       - 'backend/__tests__/supervisor-ops-service-wave1169.test.js'
+=======
+      - 'backend/__tests__/auditor-safemount-coverage-wave1192.test.js'
+>>>>>>> origin/main
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2765,6 +2769,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-phantom-schema-writes-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+<<<<<<< HEAD
       - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
       - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
       - 'backend/__tests__/golden-thread-caseload-route-wave1167.test.js'
@@ -2779,6 +2784,9 @@ on:
       - 'backend/__tests__/supervisor-ops-route-wave1170.test.js'
       - 'backend/__tests__/supervisor-ops-service-behavioral-wave1169.test.js'
       - 'backend/__tests__/supervisor-ops-service-wave1169.test.js'
+=======
+      - 'backend/__tests__/auditor-safemount-coverage-wave1192.test.js'
+>>>>>>> origin/main
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

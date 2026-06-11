@@ -98,10 +98,18 @@ lines and show the matched text.**
    date`) → throws. Either bind to a new `StudentActivityLog` model or map onto the
    task vocabulary.
 
-6. **document cluster** (12 keys; `electronic-directives`, `student-certificates`,
-   `documents.smart`). Directives/certificates piggyback on `Document` with fields it
-   lacks (`directiveType, requiredSigners, signatureStatus, verificationCode…`).
-   Needs per-surface decision (dedicated models vs Document.metadata).
+6. **document cluster** (12 keys) — split by liveness:
+   - ✅ **documents.smart — FIXED W1201** (LIVE, `_registry:783`): the whole file was
+     written against an imagined schema (`branchId`/`isDeleted`/`beneficiaryId`/
+     English `status:'active'`/`shares`/`currentVersion`/`accessedAt`/`fileUrl`+
+     `changeNote` on versions) — every create threw, every read matched nothing.
+     Realigned to the real models mirroring documents.routes' W933 mapping: Arabic
+     category/status maps, W933 `entityType:'Beneficiary'`+`entityId` linkage,
+     visibility via owner/isPublic/sharedWith (manage roles see all), versions carry
+     the REQUIRED filePath/fileName/fileSize/fileHash (URL-hash fallback documented),
+     access log keyed by timestamps.
+   - 💤 `electronic-directives` + `student-certificates` — DORMANT (PHANTOM de-mounts);
+     defer to ADR-030 with the dossier notes.
 
 7. **guardian** (8 flat contact keys) — **RECLASSIFIED W1198: DORMANT ROUTE, defer to
    ADR-030 (wire-vs-delete).** `routes/guardians.routes.js` is referenced by NO mount

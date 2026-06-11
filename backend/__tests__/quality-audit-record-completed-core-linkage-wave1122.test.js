@@ -47,6 +47,17 @@ async function settle() {
   await new Promise(r => setTimeout(r, 60));
 }
 
+/** Poll until a timeline row matching `query` exists (CI-load safe). */
+async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
+  const start = Date.now();
+  while (true) {
+    const row = await CareTimeline.findOne(query);
+    if (row) return row;
+    if (Date.now() - start > timeout) return null;
+    await new Promise(r => setTimeout(r, interval));
+  }
+}
+
 describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage', () => {
   test('records a quality success row for a beneficiary-scoped audit', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -54,7 +65,7 @@ describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage
     const doc = await QualityAudit.create(
       audit(beneficiaryId, { branchId, overallScore: 92, complianceLevel: 'excellent' })
     );
-    await settle();
+    await waitForTimeline({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -74,7 +85,7 @@ describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage
     await QualityAudit.create(
       audit(beneficiaryId, { overallScore: 41, complianceLevel: 'non_compliant' })
     );
-    await settle();
+    await waitForTimeline({ beneficiaryId });
 
     const row = await CareTimeline.findOne({ beneficiaryId }).lean();
     expect(row).toBeTruthy();
@@ -97,7 +108,7 @@ describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage
   test('does not double-record on a later save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await QualityAudit.create(audit(beneficiaryId));
-    await settle();
+    await waitForTimeline({ beneficiaryId });
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.overallScore = 90;

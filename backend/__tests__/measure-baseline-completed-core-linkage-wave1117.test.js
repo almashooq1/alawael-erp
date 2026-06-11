@@ -49,6 +49,17 @@ async function settle() {
   await new Promise(r => setTimeout(r, 60));
 }
 
+/** Poll until a timeline row matching `query` exists (CI-load safe). */
+async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
+  const start = Date.now();
+  while (true) {
+    const row = await CareTimeline.findOne(query);
+    if (row) return row;
+    if (Date.now() - start > timeout) return null;
+    await new Promise(r => setTimeout(r, interval));
+  }
+}
+
 describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline linkage', () => {
   test('records a clinical/success row when a baseline slot is completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -63,7 +74,7 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
     doc.baselineApplicationId = new mongoose.Types.ObjectId();
     doc.completedAt = new Date();
     await doc.save();
-    await settle();
+    await waitForTimeline({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -88,7 +99,7 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
         measureCode: 'GMFM88',
       })
     );
-    await settle();
+    await waitForTimeline({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -116,7 +127,7 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
         completedAt: new Date(),
       })
     );
-    await settle();
+    await waitForTimeline({ beneficiaryId });
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.state = 'BASELINE_LOCKED';

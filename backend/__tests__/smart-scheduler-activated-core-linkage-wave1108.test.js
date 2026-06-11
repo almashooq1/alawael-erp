@@ -54,6 +54,17 @@ afterEach(async () => {
   await SmartScheduler.deleteMany({});
 });
 
+/** Poll until a timeline row matching `query` exists (CI-load safe). */
+async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
+  const start = Date.now();
+  while (true) {
+    const row = await CareTimeline.findOne(query);
+    if (row) return row;
+    if (Date.now() - start > timeout) return null;
+    await new Promise(r => setTimeout(r, interval));
+  }
+}
+
 describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', () => {
   it('records an administrative/success row when a schedule is activated', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -65,7 +76,7 @@ describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', ()
 
     doc.status = 'active';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
+    await waitForTimeline({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(1);
@@ -82,7 +93,7 @@ describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     await SmartScheduler.create(scheduler(beneficiaryId, { status: 'active' }));
-    await new Promise(r => setTimeout(r, 30));
+    await waitForTimeline({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(1);
@@ -106,7 +117,7 @@ describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     const doc = await SmartScheduler.create(scheduler(beneficiaryId, { status: 'active' }));
-    await new Promise(r => setTimeout(r, 30));
+    await waitForTimeline({ beneficiaryId });
 
     doc.nextReviewDate = new Date();
     await doc.save();

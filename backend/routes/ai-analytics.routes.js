@@ -190,15 +190,7 @@ router.get(
 router.get(
   '/alerts',
   asyncHandler(async (req, res) => {
-    const {
-      branch_id,
-      alert_type,
-      severity,
-      is_read,
-      target_type,
-      page = 1,
-      per_page = 20,
-    } = req.query;
+    const { alert_type, severity, is_read, target_type, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
     Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
@@ -368,7 +360,7 @@ router.post(
 router.get(
   '/predictions',
   asyncHandler(async (req, res) => {
-    const { branch_id, prediction_type, status, page = 1, per_page = 20 } = req.query;
+    const { prediction_type, status, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
     Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
@@ -404,14 +396,7 @@ router.get(
 router.get(
   '/suggestions',
   asyncHandler(async (req, res) => {
-    const {
-      status,
-      beneficiary_id,
-      suggestion_type,
-      branch_id,
-      page = 1,
-      per_page = 20,
-    } = req.query;
+    const { status, beneficiary_id, suggestion_type, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
     Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
@@ -472,7 +457,7 @@ router.post(
 router.get(
   '/reports',
   asyncHandler(async (req, res) => {
-    const { beneficiary_id, report_type, status, branch_id, page = 1, per_page = 20 } = req.query;
+    const { beneficiary_id, report_type, status, page = 1, per_page = 20 } = req.query;
 
     const filter = { deleted_at: null };
     Object.assign(filter, aiBranchFilter(req)); // restricted → own branch (ignores spoofed ?branch_id); HQ → all
@@ -944,7 +929,6 @@ router.post(
 router.get(
   '/stats',
   asyncHandler(async (req, res) => {
-    const branchId = effectiveBranchScope(req);
     const branchFilter = aiBranchFilter(req);
 
     const [alertsByType, alertsBySeverity, predictionsByType, suggestionsByStatus] =

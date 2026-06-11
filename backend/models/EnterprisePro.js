@@ -131,7 +131,7 @@ const ComplianceChecklistSchema = new Schema(
 
 const ComplianceAlertSchema = new Schema(
   {
-    checklist: { type: Schema.Types.ObjectId, ref: 'ComplianceChecklist' },
+    checklist: { type: Schema.Types.ObjectId, ref: 'EnterpriseProComplianceChecklist' },
     itemIndex: Number,
     alertType: {
       type: String,
@@ -450,7 +450,7 @@ const CRMDealSchema = new Schema(
     title: { type: String, required: true },
     titleAr: String,
     contact: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMContact' },
-    pipeline: { type: Schema.Types.ObjectId, ref: 'CRMPipeline' },
+    pipeline: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMPipeline' },
     stage: { type: Schema.Types.ObjectId }, // stage _id within pipeline
     stageName: String,
     value: { type: Number, default: 0 },
@@ -483,7 +483,7 @@ const CRMActivitySchema = new Schema(
     subject: { type: String, required: true },
     description: String,
     contact: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMContact' },
-    deal: { type: Schema.Types.ObjectId, ref: 'CRMDeal' },
+    deal: { type: Schema.Types.ObjectId, ref: 'EnterpriseProCRMDeal' },
     dueDate: Date,
     completedAt: Date,
     status: {
@@ -717,8 +717,8 @@ const ProjectTaskSchema = new Schema(
     priority: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
     assignee: { type: Schema.Types.ObjectId, ref: 'User' },
     reporter: { type: Schema.Types.ObjectId, ref: 'User' },
-    parentTask: { type: Schema.Types.ObjectId, ref: 'ProjectTask' }, // subtask support
-    dependencies: [{ type: Schema.Types.ObjectId, ref: 'ProjectTask' }], // blocked by
+    parentTask: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProjectTask' }, // subtask support
+    dependencies: [{ type: Schema.Types.ObjectId, ref: 'EnterpriseProProjectTask' }], // blocked by
     milestone: Number, // milestone index in project.milestones
     dueDate: Date,
     startDate: Date,
@@ -745,7 +745,7 @@ ProjectTaskSchema.index({ assignee: 1, status: 1 });
 const ProjectTimeLogSchema = new Schema(
   {
     project: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProject', required: true },
-    task: { type: Schema.Types.ObjectId, ref: 'ProjectTask' },
+    task: { type: Schema.Types.ObjectId, ref: 'EnterpriseProProjectTask' },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     hours: { type: Number, required: true },
     date: { type: Date, required: true },

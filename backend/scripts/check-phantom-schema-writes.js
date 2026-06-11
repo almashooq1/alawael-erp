@@ -41,8 +41,6 @@ const JSON_MODE = process.argv.includes('--json');
 // file::model-file-base::key — pre-existing findings to burn down (W325c
 // ratchet pattern): new entries must FAIL CI; fixed entries must be removed.
 const KNOWN_PHANTOM_WRITES = new Set([
-  "routes/admin.routes.js::user::name",
-  "routes/admin.routes.js::user::status",
   "routes/budgetManagement.routes.js::budget::totalAmount",
   "routes/budgetManagement.routes.js::budget::spentAmount",
   "routes/budgetManagement.routes.js::budget::lineItems",
@@ -129,7 +127,6 @@ const KNOWN_PHANTOM_WRITES = new Set([
   "routes/student-rewards-store.routes.js::studentactivity::reason",
   "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
   "routes/student-rewards-store.routes.js::studentactivity::date",
-  "routes/user-management.routes.js::user::branch",
   "routes/waitlist.routes.js::beneficiary::branch",
   "routes/waitlist.routes.js::beneficiary::fileNumber",
   "routes/waitlist.routes.js::beneficiary::disabilityType",
@@ -431,6 +428,16 @@ function buildModelIndex(modelsDir) {
     }
     const base = path.basename(file, '.js').toLowerCase();
     const sets = extractSchemaKeySets(src);
+    // W1203 — mongoose field aliases (`alias: 'branch'` on branchId) accept
+    // writes under the alias name; count them as declared keys. Verified
+    // false-positive class: user-management's `branch` write is the official
+    // User.branchId alias. Only when the schema itself parsed — aliases must
+    // never un-poison an unparseable file.
+    if (sets.length > 0) {
+      const aliasRe = /\balias\s*:\s*['"](\w+)['"]/g;
+      let am;
+      while ((am = aliasRe.exec(src))) sets.push([am[1]]);
+    }
     if (sets.length === 0) {
       // No parseable schema. If the file LOOKS like it defines one (mentions
       // Schema), poison the base; pure re-export shims don't poison.

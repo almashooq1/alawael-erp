@@ -5,7 +5,7 @@ const goalBankSchema = new mongoose.Schema(
     domain: {
       type: String,
       required: true,
-      enum: ['SPEECH', 'OCCUPATIONAL', 'PHYSICAL', 'BEHAVIORAL', 'SPECIAL_EDU'],
+      enum: ['SPEECH', 'OCCUPATIONAL', 'PHYSICAL', 'BEHAVIORAL', 'SPECIAL_EDU', 'LIFE_SKILLS'],
     },
 
     category: { type: String, required: true }, // e.g., "Articulation", "Fine Motor", "Social Skills"

@@ -26,12 +26,22 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'seed-goal-bank.js');
 const { CATALOG, STARTER_TAGS } = require('../scripts/seed-goal-bank');
 
-const GOALBANK_DOMAINS = ['SPEECH', 'OCCUPATIONAL', 'PHYSICAL', 'BEHAVIORAL', 'SPECIAL_EDU'];
+const GOALBANK_DOMAINS = [
+  'SPEECH',
+  'OCCUPATIONAL',
+  'PHYSICAL',
+  'BEHAVIORAL',
+  'SPECIAL_EDU',
+  'LIFE_SKILLS',
+]; // W1246 added LIFE_SKILLS
 const DIFFICULTIES = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 
 describe('W1223 catalog shape', () => {
   test('source enums in this guard match models/GoalBank.js', () => {
-    const src = require('fs').readFileSync(path.join(__dirname, '..', 'models', 'GoalBank.js'), 'utf8');
+    const src = require('fs').readFileSync(
+      path.join(__dirname, '..', 'models', 'GoalBank.js'),
+      'utf8'
+    );
     for (const d of GOALBANK_DOMAINS) expect(src).toContain(`'${d}'`);
     for (const d of DIFFICULTIES) expect(src).toContain(`'${d}'`);
   });

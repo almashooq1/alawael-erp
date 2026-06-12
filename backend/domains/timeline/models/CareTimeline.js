@@ -202,6 +202,8 @@ const careTimelineSchema = new mongoose.Schema(
         'clinical_risk_score_escalated',
         'corrective_action_opened',
         'complaint_resolved', // W1136 — beneficiary-linked complaint resolved → unified core
+        'official_letter_issued', // W1240 — registry letter issued for a beneficiary
+        'official_letter_revoked', // W1240 — registry letter revoked
         // Family
         'family_contact',
         'family_meeting',

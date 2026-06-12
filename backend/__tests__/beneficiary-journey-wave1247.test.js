@@ -96,6 +96,18 @@ describe('W1247 branch isolation (W269 doctrine)', () => {
   });
 });
 
+describe('W1277 care-plan slot reads the canonical model first', () => {
+  test('unified-first with live statuses, legacy fallback, source tag, family version', () => {
+    expect(routeSrc).toContain("tryModel('UnifiedCarePlan')");
+    expect(routeSrc).toContain(
+      "status: { $in: ['draft', 'pending_approval', 'active', 'under_review'] }"
+    );
+    expect(routeSrc).toContain("__source: 'unified'");
+    expect(routeSrc).toContain("__source: 'legacy'");
+    expect(routeSrc).toContain('carePlan.familyVersion && carePlan.familyVersion.body');
+  });
+});
+
 describe('W1247 mount', () => {
   test('mounted via dualMountAuth in features.registry (never plain dualMount)', () => {
     expect(registrySrc).toContain(

@@ -85,6 +85,44 @@ care-plan domain owner to decide a canonical model and a staged migration:
   not one-shot bridges. Until decided, **UI-authored care plans will not reach the
   prod-ON review/retry workers** — this remains a 🔴 launch blocker for care plans.
 
+#### Recommended direction (W1244 — recommendation, owner decides)
+
+**Recommend option (b): `UnifiedCarePlan` becomes the canonical care plan; port
+`CarePlanVersion`'s workflow/intelligence onto it; goals stay as `TherapeuticGoal`
+references.** Rationale, evidence-backed:
+
+1. **It is the only direction consistent with ADR-040.** ADR-040 already made
+   `TherapeuticGoal` the canonical goal (referenced, with its own `icfCode`/
+   `priorityScore`/target). `UnifiedCarePlan` *references* `TherapeuticGoal` —
+   aligned. `CarePlanVersion` *embeds* a second copy of goal detail (its own
+   `body.goals[].icfCode/priorityScore/statement`) — that embedded copy is the very
+   goal-duplication ADR-040 set out to remove. Choosing option (a) would re-entrench
+   it. Choosing (b) retires it.
+2. **Zero data cost** — both care-plan collections are empty in prod (W1235), so this
+   is pure forward-architecture; no migration of live plans.
+3. **The UI + 360 already author/read `UnifiedCarePlan`** — keeping the write side
+   put means no frontend rework and no risk to the live data-entry spine.
+
+What option (b) actually requires (a real, staged migration — **not** a one-shot):
+
+- Lift the **review lifecycle** (W41-51 statuses + transitions + `reviewSchedule`)
+  onto `UnifiedCarePlan` (it already has `reviewDate`/`reviewCycle` — extend to the
+  full cadence the W50/W45 workers expect).
+- Lift the **integrity layer** (`signatureChain` + `evidenceHash`) onto
+  `UnifiedCarePlan` so the compliance/audit guarantees survive — this is the only
+  genuinely hard part and should ship first, behind tests, as its own PR.
+- **Re-point the ~10 `intelligence/care-plan*` consumers + the prod-ON W973 workers**
+  from `CarePlanVersion` to `UnifiedCarePlan`, one file per PR, each with a behavioral
+  test (the W1240/W1242 template), so the review/retry/plateau/side-effect engines
+  read the model the UI writes.
+- Resolve goal detail through the `TherapeuticGoal` references (not an embedded copy)
+  wherever the intelligence needs `icfCode`/`priorityScore`/progress.
+- Finally retire `CarePlanVersion` (empty, no consumers left) + its embedded-goal body.
+
+This is the biggest item left in the audit and the one place a projection is unsafe
+(W1241 — would fabricate clinical data). It needs the care-plan domain owner to
+approve the direction; the per-file re-point work is then mechanical and testable.
+
 ### 3. IEP — `SmartIEP` (UI) vs `IndividualEducationPlan` (W200b) — related instance
 
 Not a DDD/legacy split but the same "two models, UI uses one" family. Resolved

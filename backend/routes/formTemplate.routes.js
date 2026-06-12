@@ -464,7 +464,7 @@ router.post('/', requireRole('admin', 'manager', 'supervisor'), async (req, res)
     const doc = await FormTemplate.create({
       templateId:
         body.templateId ||
-        `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+        `custom-${Date.now().toString(36)}-${require('crypto').randomBytes(3).toString('hex').slice(0, 4)}`,
       name,
       nameEn: body.nameEn,
       description: body.description,
@@ -613,7 +613,7 @@ router.post('/:id/duplicate', requireRole('admin', 'manager', 'supervisor'), asy
     } = original;
     const copy = await FormTemplate.create({
       ...rest,
-      templateId: `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      templateId: `custom-${Date.now().toString(36)}-${require('crypto').randomBytes(3).toString('hex').slice(0, 4)}`,
       name: `${original.name} (نسخة)`,
       isBuiltIn: false,
       isPublished: false,

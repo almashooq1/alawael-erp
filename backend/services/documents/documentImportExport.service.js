@@ -469,15 +469,23 @@ class DocumentImportExportService {
   }
 
   _parseSimpleXML(xmlText) {
-    // Simple XML parser for document elements
+    // Simple linear-time XML parser for document elements (no backtracking regex)
     const docs = [];
-    const docMatches = xmlText.match(/<document>([\s\S]*?)<\/document>/g) || [];
-    for (const dm of docMatches) {
+    const text = String(xmlText);
+    const parts = text.split('<document>').slice(1);
+    for (const part of parts) {
+      const end = part.indexOf('</document>');
+      if (end === -1) continue;
+      const dm = part.slice(0, end);
       const doc = {};
-      const fieldMatches = dm.match(/<(\w+)>([\s\S]*?)<\/\1>/g) || [];
-      for (const fm of fieldMatches) {
-        const m = fm.match(/<(\w+)>([\s\S]*?)<\/\1>/);
-        if (m && m[1] !== 'document') doc[m[1]] = m[2].trim();
+      const openTag = /<(\w+)>/g;
+      let fm;
+      while ((fm = openTag.exec(dm))) {
+        const tag = fm[1];
+        const close = dm.indexOf(`</${tag}>`, openTag.lastIndex);
+        if (close === -1) continue;
+        if (tag !== 'document') doc[tag] = dm.slice(openTag.lastIndex, close).trim();
+        openTag.lastIndex = close + tag.length + 3;
       }
       docs.push(doc);
     }

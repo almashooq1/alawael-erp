@@ -641,7 +641,7 @@ router.post('/', async (req, res) => {
     }
 
     // التحقق من صيغة البريد الإلكتروني
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && !/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(email)) {
       return res.status(400).json({ success: false, message: 'صيغة البريد الإلكتروني غير صالحة' });
     }
 

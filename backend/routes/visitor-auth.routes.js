@@ -69,7 +69,7 @@ function normalize(c) {
 }
 
 function isEmail(c) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c);
+    return /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(c);
 }
 
 function isPhone(c) {

@@ -96,7 +96,7 @@ router.post('/:key/preview', requireRole(READ_ROLES), (req, res) => {
 router.post('/:key/test-send', requireRole(SEND_ROLES), async (req, res) => {
   try {
     const to = req.body && req.body.to;
-    if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(to)))
+    if (!to || !/^[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+$/.test(String(to)))
       return res.status(400).json({ success: false, message: 'حقل to بريد صالح مطلوب' });
 
     const variables =

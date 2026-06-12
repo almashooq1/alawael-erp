@@ -432,8 +432,8 @@ class DocumentAIAssistantService {
 
     // Amounts
     const amountPatterns = [
-      /(\d[\d,]+(?:\.\d{1,2})?)\s*(?:ريال|ر\.س|SAR|دولار|USD)/g,
-      /(?:ريال|SAR|دولار)\s*(\d[\d,]+(?:\.\d{1,2})?)/g,
+      /(\d(?:,?\d)*(?:\.\d{1,2})?)\s*(?:ريال|ر\.س|SAR|دولار|USD)/g,
+      /(?:ريال|SAR|دولار)\s*(\d(?:,?\d)*(?:\.\d{1,2})?)/g,
     ];
     for (const p of amountPatterns) {
       let m;
@@ -442,7 +442,7 @@ class DocumentAIAssistantService {
 
     // References / IDs
     const refPatterns = [
-      /(?:رقم|#|No\.?)\s*:?\s*([A-Z0-9][\w-]{2,20})/gi,
+      /(?:رقم|#|No\.?)[\s:]*([A-Z0-9][\w-]{2,20})/gi,
       /\b[A-Z]{2,5}[-/]\d{3,10}\b/g,
     ];
     for (const p of refPatterns) {
@@ -456,7 +456,7 @@ class DocumentAIAssistantService {
     while ((pm = phonePattern.exec(text))) metadata.phones.push(pm[0].trim());
 
     // Emails
-    const emailPattern = /[\w.+-]+@[\w-]+\.[\w.]+/g;
+    const emailPattern = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
     let em;
     while ((em = emailPattern.exec(text))) metadata.emails.push(em[0]);
 

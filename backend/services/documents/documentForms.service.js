@@ -270,7 +270,7 @@ function validateFieldValue(field, value) {
   }
 
   // Type-specific validations
-  if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    if (field.type === 'email' && !/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value)) {
     errors.push({ fieldId: field.fieldId, message: 'بريد إلكتروني غير صالح' });
   }
   if (field.type === 'phone' && !/^\+?[\d\s-()]{7,20}$/.test(value)) {

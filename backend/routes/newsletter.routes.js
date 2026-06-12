@@ -57,7 +57,7 @@ router.post('/subscribe', limiter, async (req, res) => {
       .trim()
       .slice(0, 120);
     const locale = req.body?.locale === 'en' ? 'en' : 'ar';
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(email)) {
       return res.status(400).json({ success: false, message: 'بريد إلكتروني غير صالح' });
     }
 

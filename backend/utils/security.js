@@ -97,8 +97,8 @@ const detectSuspiciousActivity = req => {
   const suspiciousPatterns = [
     // SQL injection patterns - must be more specific
     /(\bSELECT\s+.*\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.*\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|INDEX)\b|\bCREATE\s+TABLE\b|\bALTER\s+TABLE\b|\bEXEC\b|\bUNION\s+SELECT\b)/i,
-    // XSS patterns
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    // XSS patterns — presence of an opening script tag is sufficient for detection (linear-time)
+    /<script\b/i,
     // Path traversal
     /\.\.\//g,
   ];

@@ -300,13 +300,14 @@ router.post(
     try {
       const { title, description, content, category, tags, sections } = req.body;
 
-      // Generate slug
-      const slug = title
+      // Generate slug (linear-time dash trim)
+      let slug = String(title)
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+        .replace(/[\s_]+/g, '-');
+      while (slug.startsWith('-')) slug = slug.slice(1);
+      while (slug.endsWith('-')) slug = slug.slice(0, -1);
 
       const article = new KnowledgeArticle({
         title,

@@ -225,7 +225,7 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
     if (honeypot || tooFast) {
       // Pretend success so bot scripts don't probe further. Use the same
       // shape and randomness as a real number so pattern-matching fails.
-      const fakeRand = Math.random().toString(36).slice(2, 6).toUpperCase();
+      const fakeRand = require('crypto').randomBytes(3).toString('hex').slice(0, 4).toUpperCase();
       return res.status(201).json({
         ok: true,
         submissionNumber: `PUB-${Date.now().toString(36)}-${fakeRand}`,
@@ -283,9 +283,10 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
         });
     }
 
-    const submissionNumber = `PUB-${Date.now().toString(36)}-${Math.random()
-      .toString(36)
-      .slice(2, 6)
+    const submissionNumber = `PUB-${Date.now().toString(36)}-${require('crypto')
+      .randomBytes(3)
+      .toString('hex')
+      .slice(0, 4)
       .toUpperCase()}`;
 
     const sub = await FormSubmission.create({

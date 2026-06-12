@@ -181,7 +181,7 @@ router.post('/:templateId/submit', async (req, res) => {
         });
     }
 
-    const submissionNumber = `SUB-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const submissionNumber = `SUB-${Date.now().toString(36)}-${require('crypto').randomBytes(3).toString('hex').slice(0, 4).toUpperCase()}`;
 
     const sub = await FormSubmission.create({
       templateId: tpl.templateId || String(tpl._id),

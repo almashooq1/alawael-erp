@@ -182,6 +182,6 @@ export const validateStep = (step, frm) => {
 
 export const generateEmpNumber = () => {
   const year = new Date().getFullYear().toString().slice(-2);
-  const rand = Math.floor(1000 + Math.random() * 9000);
+  const rand = 1000 + (window.crypto.getRandomValues(new Uint32Array(1))[0] % 9000);
   return `EMP-${year}${rand}`;
 };

@@ -499,10 +499,17 @@ ${discountXml}
    * حساب SHA-256 hash للفاتورة (مع إزالة UBLExtensions)
    */
   calculateInvoiceHash(xmlContent) {
-    // إزالة UBLExtensions من XML قبل الحساب
-    const cleanedXml = xmlContent
-      .replace(/<ext:UBLExtensions>[\s\S]*?<\/ext:UBLExtensions>/g, '')
-      .replace(/^\s*[\r\n]/gm, '');
+    // إزالة UBLExtensions من XML قبل الحساب (إزالة خطية بدون regex متراجع)
+    const startTag = '<ext:UBLExtensions>';
+    const endTag = '</ext:UBLExtensions>';
+    let cleanedXml = String(xmlContent);
+    let s;
+    while ((s = cleanedXml.indexOf(startTag)) !== -1) {
+      const e = cleanedXml.indexOf(endTag, s);
+      if (e === -1) break;
+      cleanedXml = cleanedXml.slice(0, s) + cleanedXml.slice(e + endTag.length);
+    }
+    cleanedXml = cleanedXml.replace(/^[ \t]*[\r\n]/gm, '');
 
     return crypto.createHash('sha256').update(cleanedXml, 'utf8').digest('base64');
   }

@@ -46,7 +46,7 @@ const GuardianSchema = new Schema(
       required: [true, 'البريد الإلكتروني مطلوب'],
       unique: true,
       lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'صيغة البريد غير صحيحة'],
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'صيغة البريد غير صحيحة'],
     },
     phone: {
       type: String,

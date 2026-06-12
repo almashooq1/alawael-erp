@@ -336,6 +336,28 @@ jobs:
           echo "❌ SSH connection failed after 8 attempts (~10 min). Check VPS_HOST/VPS_USER/VPS_SSH_KEY and that the VPS is reachable."
           exit 1
 
+      # W1237 — anti-regression guard. Rerunning a FAILED older run's deploy
+      # job AFTER a newer run already succeeded re-rsyncs OLDER main onto
+      # prod (live incident 2026-06-11: such a rerun silently reverted the
+      # W1229 security fix until caught by a disk grep). Run numbers are
+      # monotonic per workflow and reruns KEEP their original number, so an
+      # older rerun always carries a smaller number than what's stamped.
+      - name: Anti-regression guard (refuse older run over newer deploy)
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          DEPLOYED=$($SSH_CMD $SSH_TARGET "head -1 ${{ env.APP_DIR }}/DEPLOY_STAMP 2>/dev/null" || echo "")
+          INCOMING="${{ github.run_number }}"
+          echo "deployed run: '${DEPLOYED:-none}' — incoming run: #$INCOMING"
+          if [ -n "$DEPLOYED" ] && [ "$DEPLOYED" -eq "$DEPLOYED" ] 2>/dev/null && [ "$DEPLOYED" -gt "$INCOMING" ]; then
+            echo "❌ REFUSING TO DEPLOY: run #$INCOMING is OLDER than already-deployed run #$DEPLOYED."
+            echo "   This is almost always a rerun of a stale failed run after a newer run"
+            echo "   succeeded — deploying it would silently REVERT prod to older code."
+            echo "   To deliberately roll back, use workflow_dispatch (gets a fresh run number)."
+            exit 1
+          fi
+          echo "✅ Guard passed — proceeding"
+
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
         run: |
@@ -546,6 +568,17 @@ jobs:
             nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"
           REMOTE_SCRIPT
+
+      # W1237 — stamp AFTER the cutover (rsync + pm2 restart) succeeded.
+      # Line 1: run number (read by the anti-regression guard above).
+      # Lines 2-3: sha + timestamp for humans debugging "what is on prod?".
+      - name: Stamp deployment
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          printf '%s\n%s\n%s\n' "${{ github.run_number }}" "${{ github.sha }}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            | $SSH_CMD $SSH_TARGET "cat > ${{ env.APP_DIR }}/DEPLOY_STAMP"
+          echo "✅ Stamped run #${{ github.run_number }} (${{ github.sha }})"
 
       - name: Apply idempotent seeds (post-restart)
         if: needs.preflight.outputs.deploy_backend == 'true'

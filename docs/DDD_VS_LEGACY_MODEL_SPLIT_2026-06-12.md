@@ -219,6 +219,15 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > SENDS for a UI-authored plan with the correct audit label. 12 tests.
 > **The full family chain now works for UI plans: activate → generate →
 > notify → W45 retry → audit trail.**
+>
+> ✅ **W1261 (2026-06-12): the LAST open row of the audit table closed.** > `smartReport.service` (AI monthly parent reports) now dual-reads: legacy
+> `Assessment` (unchanged) + the canonical `ClinicalAssessment` the UI
+> writes (rows normalized to the report shape: tool→type,
+> assessmentDate→date, score-or-rawScore→total_score; fail-soft). 3 MMS
+> tests (period filtering, beneficiary scoping, faithful-or-null score).
+> Together with W1240 (sessions), W1242+W1251 (behavior), ADR-026 (IEP),
+> ADR-040/041 (care plans + goals tiering), **every row of the W1239
+> per-entity trace now has a shipped resolution or a recorded decision.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

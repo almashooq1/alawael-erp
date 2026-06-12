@@ -154,6 +154,7 @@ const AdminSystemSettings = () => {
     setSettings(prev => {
       const updated = JSON.parse(JSON.stringify(prev));
       const parts = path.split('.');
+      if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) return prev;
       let target = updated;
       for (let i = 0; i < parts.length - 1; i++) {
         if (!target[parts[i]]) target[parts[i]] = {};

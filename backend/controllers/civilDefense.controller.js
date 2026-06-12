@@ -731,7 +731,7 @@ class CivilDefenseController {
   async uploadSafetyDocuments(req, res) {
     try {
       const { facilityId, documents } = req.body;
-      const files = req.files || [];
+      const files = Array.isArray(req.files) ? req.files : [];
 
       const uploadedDocs = [];
       for (let i = 0; i < files.length; i++) {

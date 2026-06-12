@@ -260,7 +260,7 @@ class DocumentSearchEngine {
    */
   async quickSearch(query, userId, limit = 8) {
     try {
-      if (!query || query.length < SEARCH_CONFIG.minQueryLength) {
+      if (typeof query !== 'string' || query.length < SEARCH_CONFIG.minQueryLength) {
         return { results: [], suggestions: [] };
       }
 

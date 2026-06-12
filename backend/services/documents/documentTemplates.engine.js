@@ -510,10 +510,11 @@ class DocumentTemplatesEngine {
       if (filters.category) query.category = filters.category;
       if (filters.department) query.department = filters.department;
       if (filters.search) {
+        const safeSearch = String(filters.search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         query.$or = [
-          { name: { $regex: filters.search, $options: 'i' } },
-          { description: { $regex: filters.search, $options: 'i' } },
-          { tags: { $in: [new RegExp(filters.search, 'i')] } },
+          { name: { $regex: safeSearch, $options: 'i' } },
+          { description: { $regex: safeSearch, $options: 'i' } },
+          { tags: { $in: [new RegExp(safeSearch, 'i')] } },
         ];
       }
 

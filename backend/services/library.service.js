@@ -1385,7 +1385,7 @@ class LibraryService {
   }
 
   searchResources(query) {
-    if (!query || query.length < 2) {
+    if (typeof query !== 'string' || query.length < 2) {
       throw Object.assign(new Error('يجب إدخال حرفين على الأقل للبحث'), { statusCode: 400 });
     }
     const q = query.toLowerCase();

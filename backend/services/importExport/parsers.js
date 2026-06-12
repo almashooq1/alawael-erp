@@ -519,7 +519,10 @@ function applyTransform(value, rule) {
       }
       if (rule.startsWith('replace:')) {
         const [, from, to] = rule.match(/^replace:(.+?):(.*)$/) || [];
-        return from ? str.replace(new RegExp(from, 'g'), to || '') : str;
+        // 'from' is a literal token from the mapping rule, not a regex.
+        return from
+          ? str.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to || '')
+          : str;
       }
       if (rule.startsWith('substring:')) {
         const [start, end] = rule.substring(10).split(',').map(Number);

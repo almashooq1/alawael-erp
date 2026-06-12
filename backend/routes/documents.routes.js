@@ -743,8 +743,9 @@ router.get(
     const skip = (Number(page) - 1) * Number(limit);
 
     // sortBy: prefix '-' means desc
-    const sortField = sortBy.startsWith('-') ? sortBy.slice(1) : sortBy;
-    const sortDir = sortBy.startsWith('-') ? -1 : 1;
+    const sortByStr = String(sortBy);
+    const sortField = sortByStr.startsWith('-') ? sortByStr.slice(1) : sortByStr;
+    const sortDir = sortByStr.startsWith('-') ? -1 : 1;
     const sort = { [sortField]: sortDir };
 
     const [documents, total] = await Promise.all([

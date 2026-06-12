@@ -127,7 +127,7 @@ class OAuthService {
         pkce
       );
 
-      const sep = redirectUri.includes('?') ? '&' : '?';
+      const sep = String(redirectUri).includes('?') ? '&' : '?';
       const redirectParams = new URLSearchParams({ code: authCode, state: authState });
       if (nonce) redirectParams.append('nonce', nonce);
 

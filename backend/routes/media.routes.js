@@ -399,7 +399,7 @@ router.post(
       if (album) {
         const totalSize = req.files.reduce((s, f) => s + f.size, 0);
         await MediaAlbum.findByIdAndUpdate(album, {
-          $inc: { mediaCount: req.files.length, totalSize },
+          $inc: { mediaCount: mediaItems.length, totalSize },
         });
       }
 

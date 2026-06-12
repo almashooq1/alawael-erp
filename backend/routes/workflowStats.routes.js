@@ -204,7 +204,7 @@ router.get('/stats/workload', authMiddleware, requireBranchAccess, async (req, r
 router.get('/search', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { q, type = 'all', page = 1, limit = 20 } = req.query;
-    if (!q || q.length < 2) {
+    if (typeof q !== 'string' || q.length < 2) {
       return res
         .status(400)
         .json({ success: false, message: 'كلمة البحث يجب أن تكون حرفين على الأقل' });

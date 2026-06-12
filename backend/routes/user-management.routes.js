@@ -23,11 +23,16 @@ const isValidObjectId = id => mongoose.Types.ObjectId.isValid(id);
 // ─── Helper: Sanitize string input ────────────────────────
 const sanitize = str => {
   if (!str || typeof str !== 'string') return str;
-  return str
-    .replace(/[<>]/g, '') // strip HTML brackets
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '')
-    .trim();
+  let s = str;
+  let prev;
+  do {
+    prev = s;
+    s = s
+      .replace(/[<>]/g, '') // strip HTML brackets
+      .replace(/(javascript|vbscript|data)\s*:/gi, '')
+      .replace(/on\w+=/gi, '');
+  } while (s !== prev);
+  return s.trim();
 };
 
 // ─── Helper: Validate password strength ───────────────────

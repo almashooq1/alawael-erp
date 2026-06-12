@@ -434,8 +434,14 @@ class GPSSecurityService {
    * Path Traversal Prevention
    */
   static sanitizePath(path) {
-    // منع ../../../ وما شابهها
-    return path.replace(/\.\.\//g, '').replace(/\\/g, '/');
+    // منع ../../../ وما شابهها — كرّر حتى الثبات لسد التجاوزات المتداخلة
+    let p = String(path).replace(/\\/g, '/');
+    let prev;
+    do {
+      prev = p;
+      p = p.replace(/\.\.\//g, '');
+    } while (p !== prev);
+    return p;
   }
 
   /**

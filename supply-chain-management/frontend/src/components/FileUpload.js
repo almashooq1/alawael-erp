@@ -56,7 +56,12 @@ export default function FileUpload({
       return false;
     }
     for (const file of selected) {
-      if (accept !== '*/*' && !file.type.match(accept.replace('*', '.*'))) {
+      if (
+        accept !== '*/*' &&
+        !file.type.match(
+          new RegExp(accept.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*'))
+        )
+      ) {
         setError(`نوع الملف غير مدعوم: ${file.name}`);
         return false;
       }

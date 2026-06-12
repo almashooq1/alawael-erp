@@ -227,7 +227,13 @@ export const sanitizationUtils = {
    */
   removeHtml(str) {
     if (typeof str !== 'string') return str;
-    return str.replace(/<[^>]*>/g, '').trim();
+    let s = str;
+    let prev;
+    do {
+      prev = s;
+      s = s.replace(/<[^>]*>/g, '');
+    } while (s !== prev);
+    return s.trim();
   },
 
   /**

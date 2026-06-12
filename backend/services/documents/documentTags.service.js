@@ -384,7 +384,7 @@ class DocumentTagsService {
       if (activeOnly) filter.isActive = true;
       if (categoryId) filter.category = categoryId;
       if (search) {
-        const regex = new RegExp(search, 'i');
+        const regex = new RegExp(String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         filter.$or = [{ name: regex }, { nameAr: regex }, { synonyms: regex }];
       }
 

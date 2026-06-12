@@ -62,6 +62,7 @@ const PayrollSettings = () => {
     setSettings(prev => {
       const copy = JSON.parse(JSON.stringify(prev));
       const keys = path.split('.');
+      if (keys.some(k => k === '__proto__' || k === 'constructor' || k === 'prototype')) return prev;
       let obj = copy;
       for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
       obj[keys[keys.length - 1]] = value;

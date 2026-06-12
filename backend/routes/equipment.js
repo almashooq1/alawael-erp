@@ -19,7 +19,8 @@ router.get('/', async (req, res) => {
     const filter = {};
     if (category) filter.category = category;
     if (status) filter.status = status;
-    if (location) filter.location = new RegExp(location, 'i');
+    if (location)
+      filter.location = new RegExp(String(location).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     const skip = (Math.max(1, +page) - 1) * +limit;
     const [data, total] = await Promise.all([
       Equipment.find(filter).sort({ name: 1 }).skip(skip).limit(+limit).lean(),

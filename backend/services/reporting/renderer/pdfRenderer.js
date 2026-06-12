@@ -51,11 +51,11 @@ function htmlToLines(html) {
     .replace(/<li[^>]*>/gi, '- ')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&') // decode &amp; LAST to avoid double-decoding
     .split(/\r?\n/)
     .map(l => l.trim())
     .filter((l, i, a) => l.length > 0 || (i > 0 && a[i - 1].length > 0));

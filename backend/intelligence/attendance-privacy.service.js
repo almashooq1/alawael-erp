@@ -43,6 +43,7 @@ function _getByPath(obj, path) {
 function _setByPath(obj, path, value) {
   if (!obj || !path) return;
   const parts = path.split('.');
+  if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) return;
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     if (cur[parts[i]] == null) cur[parts[i]] = {};

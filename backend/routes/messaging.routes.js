@@ -55,7 +55,7 @@ router.get('/search', async (req, res) => {
     const { q: query } = req.query;
     const userId = req.user?.id || req.user?.userId;
 
-    if (!query || query.length < 2) {
+    if (typeof query !== 'string' || query.length < 2) {
       return res.status(400).json({
         success: false,
         message: 'Search query must be at least 2 characters',

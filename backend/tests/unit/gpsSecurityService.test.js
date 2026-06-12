@@ -239,16 +239,18 @@ describe('GPSSecurityService', () => {
   // ── 9. hashPassword ────────────────────────────────────────────────────
 
   describe('hashPassword', () => {
-    it('returns a SHA-256 hex digest (64 chars)', () => {
+    it('returns a salted scrypt hash (scrypt$salt$derived)', () => {
       const hash = GPSSecurityService.hashPassword('my-password');
-      expect(hash.length).toBe(64);
-      expect(/^[a-f0-9]+$/.test(hash)).toBe(true);
+      const parts = hash.split('$');
+      expect(parts[0]).toBe('scrypt');
+      expect(/^[a-f0-9]{32}$/.test(parts[1])).toBe(true);
+      expect(/^[a-f0-9]{64}$/.test(parts[2])).toBe(true);
     });
 
-    it('same password => same hash', () => {
+    it('same password => different hash (salted)', () => {
       const h1 = GPSSecurityService.hashPassword('abc');
       const h2 = GPSSecurityService.hashPassword('abc');
-      expect(h1).toBe(h2);
+      expect(h1).not.toBe(h2);
     });
 
     it('different password => different hash', () => {

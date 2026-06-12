@@ -179,7 +179,11 @@ const metricsHandler = (req, res) => {
               .map(p => {
                 const idx = p.indexOf('=');
                 const k = p.slice(0, idx);
-                const v = p.slice(idx + 1).replace(/"/g, '\\"');
+                const v = p
+                  .slice(idx + 1)
+                  .replace(/\\/g, '\\\\')
+                  .replace(/"/g, '\\"')
+                  .replace(/\n/g, '\\n');
                 return `${k}="${v}"`;
               })
               .join(',');

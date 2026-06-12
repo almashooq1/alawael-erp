@@ -120,6 +120,17 @@ describe('W1224 OfficialLetter.issue — sequencing + format', () => {
     expect(letter.payload.nationalId).toBe('1234567890');
   });
 
+  test('W1235: experience_certificate issues with XC prefix and end-of-service payload', async () => {
+    const letter = await OfficialLetter.issue({
+      letterType: 'experience_certificate',
+      subject: subject(),
+      issuer: issuer(),
+      payload: { endDate: new Date('2026-05-31'), terminationType: 'resignation' },
+    });
+    expect(letter.refNumber).toBe(`XC-${YEAR}-0001`);
+    expect(letter.payload.terminationType).toBe('resignation');
+  });
+
   test('verifyTokens are unique across letters', async () => {
     const a = await OfficialLetter.issue({
       letterType: 'employment_certificate',

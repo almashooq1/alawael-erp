@@ -25,6 +25,7 @@ const LETTER_TYPES = Object.freeze({
   employment_certificate: { prefix: 'EC', labelAr: 'خطاب تعريف بالعمل' },
   salary_certificate: { prefix: 'SC', labelAr: 'خطاب تعريف بالراتب' },
   beneficiary_certificate: { prefix: 'BC', labelAr: 'خطاب تعريف بمستفيد' },
+  experience_certificate: { prefix: 'XC', labelAr: 'شهادة خبرة' },
 });
 
 // ─── Atomic sequence counter (one doc per letterType+year) ────────────────

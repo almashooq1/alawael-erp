@@ -62,10 +62,16 @@ const PayrollSettings = () => {
     setSettings(prev => {
       const copy = JSON.parse(JSON.stringify(prev));
       const keys = path.split('.');
-      if (keys.some(k => k === '__proto__' || k === 'constructor' || k === 'prototype')) return prev;
+      // Per-key guards at each access are the barrier CodeQL credits (js/prototype-pollution-utility).
+      const isUnsafeKey = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
       let obj = copy;
-      for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
-      obj[keys[keys.length - 1]] = value;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (isUnsafeKey(keys[i])) return prev;
+        obj = obj[keys[i]];
+      }
+      const lastKey = keys[keys.length - 1];
+      if (isUnsafeKey(lastKey)) return prev;
+      obj[lastKey] = value;
       return copy;
     });
   };

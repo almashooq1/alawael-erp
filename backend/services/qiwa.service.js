@@ -155,11 +155,13 @@ class QiwaService extends EventEmitter {
     const startTime = Date.now();
     const cacheKey = `${method}:${endpoint}:${JSON.stringify(data || {})}`;
     // Force all requests onto the configured Qiwa baseURL: reject absolute or
-    // protocol-relative URLs so callers cannot redirect requests to another host (SSRF).
-    const url = String(endpoint);
-    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(url) || url.startsWith('//')) {
+    // protocol-relative URLs so callers cannot redirect requests to another host (SSRF),
+    // then prefix '/' so axios can never interpret the path as a new origin.
+    const rawEndpoint = String(endpoint);
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(rawEndpoint) || rawEndpoint.startsWith('//')) {
       throw new Error('Absolute URLs are not allowed; pass a relative Qiwa API path');
     }
+    const url = '/' + rawEndpoint.replace(/^[/\\]+/, '');
 
     // Check cache
     if (method === 'GET' && !options.skipCache) {

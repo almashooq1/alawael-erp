@@ -435,7 +435,7 @@ class DocumentIntelligenceService {
     const dateMatch = text.match(/\d{4}[-/]\d{1,2}[-/]\d{1,2}/);
     if (dateMatch) tags.add(`تاريخ:${dateMatch[0]}`);
 
-    const amountMatch = text.match(/(\d[\d,]*\.?\d*)\s*(ريال|SAR|USD|EUR)/i);
+    const amountMatch = text.match(/(\b\d(?:,?\d)*(?:\.\d+)?)\s*(ريال|SAR|USD|EUR)/i);
     if (amountMatch) tags.add('مالي');
 
     // تواريخ هجرية
@@ -496,7 +496,8 @@ class DocumentIntelligenceService {
     }
 
     // استخراج المبالغ
-    const amountPattern = /(\d(?:,?\d)*(?:\.\d+)?)\s*(ريال|SAR|USD|EUR|دولار|يورو)/gi;
+    // \b prevents quadratic rescanning inside long digit runs (CodeQL js/polynomial-redos)
+    const amountPattern = /(\b\d(?:,?\d)*(?:\.\d+)?)\s*(ريال|SAR|USD|EUR|دولار|يورو)/gi;
     let amountMatch;
     while ((amountMatch = amountPattern.exec(text)) !== null) {
       entities.amounts.push({ value: amountMatch[1], currency: amountMatch[2] });
@@ -510,7 +511,8 @@ class DocumentIntelligenceService {
     }
 
     // استخراج الإيميلات
-    const emailPattern = /[\w+-]+(?:\.[\w+-]+)*@[\w-]+(?:\.[\w-]+)*\.\w{2,}/g;
+    // Lookbehind prevents quadratic rescanning inside long local-part runs (CodeQL js/polynomial-redos)
+    const emailPattern = /(?<![\w.+-])[\w+-]+(?:\.[\w+-]+)*@[\w-]+(?:\.[\w-]+)*\.\w{2,}/g;
     const emails = text.match(emailPattern);
     if (emails) entities.emails.push(...emails);
 

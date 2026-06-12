@@ -154,13 +154,18 @@ const AdminSystemSettings = () => {
     setSettings(prev => {
       const updated = JSON.parse(JSON.stringify(prev));
       const parts = path.split('.');
-      if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) return prev;
+      // Per-key guards at each access are the barrier CodeQL credits (js/prototype-pollution-utility).
+      const isUnsafeKey = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
       let target = updated;
       for (let i = 0; i < parts.length - 1; i++) {
-        if (!target[parts[i]]) target[parts[i]] = {};
-        target = target[parts[i]];
+        const key = parts[i];
+        if (isUnsafeKey(key)) return prev;
+        if (!target[key]) target[key] = {};
+        target = target[key];
       }
-      target[parts[parts.length - 1]] = value;
+      const lastKey = parts[parts.length - 1];
+      if (isUnsafeKey(lastKey)) return prev;
+      target[lastKey] = value;
       return updated;
     });
     setHasChanges(true);

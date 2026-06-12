@@ -182,6 +182,14 @@ export const validateStep = (step, frm) => {
 
 export const generateEmpNumber = () => {
   const year = new Date().getFullYear().toString().slice(-2);
-  const rand = 1000 + (window.crypto.getRandomValues(new Uint32Array(1))[0] % 9000);
+  // Rejection sampling avoids modulo bias (CodeQL js/biased-cryptographic-random):
+  // 4294962000 is the largest multiple of 9000 ≤ 2^32.
+  const buf = new Uint32Array(1);
+  let v;
+  do {
+    window.crypto.getRandomValues(buf);
+    v = buf[0];
+  } while (v >= 4294962000);
+  const rand = 1000 + (v % 9000);
   return `EMP-${year}${rand}`;
 };

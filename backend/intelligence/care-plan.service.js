@@ -31,6 +31,7 @@
  *   • SignatureChain appended on every significant transition with hash-chaining
  */
 
+const crypto = require('crypto');
 const reg = require('./care-planning.registry');
 const sod = require('./sod.lib');
 
@@ -819,7 +820,7 @@ function createCarePlanService({
       return fail(REASON.AMENDMENT_FORBIDDEN, { detail: 'only branch_manager may amend' });
     }
 
-    const amendmentId = `amd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const amendmentId = `amd_${Date.now()}_${crypto.randomBytes(4).toString('hex').slice(0, 6)}`;
     pv.amendments = [
       ...(pv.amendments || []),
       {

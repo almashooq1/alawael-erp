@@ -105,8 +105,10 @@ function buildRouter({ handler, verifiers = {}, logger = console } = {}) {
     const q = req.query || {};
     const expected = verifiers.whatsappVerifyToken;
     if (expected && q['hub.verify_token'] === expected) {
-      // text/plain so the echoed challenge can never render as HTML.
-      return res.status(200).type('text/plain').send(String(q['hub.challenge'] || ''));
+      // Meta's challenge is alphanumeric — strip anything else so the echo can
+      // never contain HTML (CodeQL js/reflected-xss), and serve as text/plain.
+      const challenge = String(q['hub.challenge'] || '').replace(/[^0-9A-Za-z._-]/g, '');
+      return res.status(200).type('text/plain').send(challenge);
     }
     return res.status(403).json({ error: 'verify_token_mismatch' });
   });

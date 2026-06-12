@@ -414,7 +414,10 @@ class ComplianceCalendarService {
       : Object.keys(this.adapters);
 
     const computedArrays = await Promise.all(
-      adapterIds.filter(id => Object.hasOwn(this.adapters, id)).map(id => this.adapters[id]({ withinDays }))
+      adapterIds.map(id => {
+        const adapterFn = Object.hasOwn(this.adapters, id) ? this.adapters[id] : undefined;
+        return typeof adapterFn === 'function' ? adapterFn({ withinDays }) : [];
+      })
     );
     let computed = computedArrays.flat();
 

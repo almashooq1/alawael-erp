@@ -26,7 +26,11 @@ function isValidSessionId(sessionId) {
 
 function _outDir(sessionId) {
   if (!isValidSessionId(sessionId)) throw new Error('invalid sessionId');
-  return path.join(config.hls.outDir, sessionId);
+  // resolve + startsWith containment is the barrier CodeQL credits for js/path-injection.
+  const root = path.resolve(config.hls.outDir);
+  const dir = path.resolve(root, sessionId);
+  if (!dir.startsWith(root + path.sep)) throw new Error('invalid sessionId');
+  return dir;
 }
 
 function _ensureDir(dir) {

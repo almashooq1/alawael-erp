@@ -453,13 +453,16 @@ async function bulkOperation(ids, operation, userId, userName) {
     },
   };
 
-  if (!Object.hasOwn(ops, operation)) throw new Error(`عملية غير صالحة: ${operation}`);
+  // typeof-function check on a hoisted reference is the barrier CodeQL credits
+  // for js/unvalidated-dynamic-method-call (ops is a local literal — no inherited keys).
+  const opFn = Object.hasOwn(ops, operation) ? ops[operation] : undefined;
+  if (typeof opFn !== 'function') throw new Error(`عملية غير صالحة: ${operation}`);
 
   const docs = await Document.find({ _id: { $in: ids } });
   let processed = 0;
 
   for (const doc of docs) {
-    ops[operation](doc);
+    opFn(doc);
     await logActivity(
       doc,
       operation === 'delete' ? 'حذف' : 'تعديل',

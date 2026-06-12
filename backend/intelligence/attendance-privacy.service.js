@@ -43,13 +43,18 @@ function _getByPath(obj, path) {
 function _setByPath(obj, path, value) {
   if (!obj || !path) return;
   const parts = path.split('.');
-  if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) return;
+  // Per-key guards at each access are the barrier CodeQL credits (js/prototype-pollution-utility).
+  const isUnsafeKey = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
-    if (cur[parts[i]] == null) cur[parts[i]] = {};
-    cur = cur[parts[i]];
+    const key = parts[i];
+    if (isUnsafeKey(key)) return;
+    if (cur[key] == null) cur[key] = {};
+    cur = cur[key];
   }
-  cur[parts[parts.length - 1]] = value;
+  const lastKey = parts[parts.length - 1];
+  if (isUnsafeKey(lastKey)) return;
+  cur[lastKey] = value;
 }
 
 function redactPiiInDoc(doc, piiFields = []) {

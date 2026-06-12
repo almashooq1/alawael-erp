@@ -432,8 +432,9 @@ class DocumentAIAssistantService {
 
     // Amounts
     const amountPatterns = [
-      /(\d(?:,?\d)*(?:\.\d{1,2})?)\s*(?:ريال|ر\.س|SAR|دولار|USD)/g,
-      /(?:ريال|SAR|دولار)\s*(\d(?:,?\d)*(?:\.\d{1,2})?)/g,
+      // \b prevents quadratic rescanning inside long digit runs (CodeQL js/polynomial-redos)
+      /(\b\d(?:,?\d)*(?:\.\d{1,2})?)\s*(?:ريال|ر\.س|SAR|دولار|USD)/g,
+      /(?:ريال|SAR|دولار)\s*(\b\d(?:,?\d)*(?:\.\d{1,2})?)/g,
     ];
     for (const p of amountPatterns) {
       let m;
@@ -456,7 +457,8 @@ class DocumentAIAssistantService {
     while ((pm = phonePattern.exec(text))) metadata.phones.push(pm[0].trim());
 
     // Emails
-    const emailPattern = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
+    // Lookbehind prevents quadratic rescanning inside long local-part runs (CodeQL js/polynomial-redos)
+    const emailPattern = /(?<![\w.+-])[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
     let em;
     while ((em = emailPattern.exec(text))) metadata.emails.push(em[0]);
 

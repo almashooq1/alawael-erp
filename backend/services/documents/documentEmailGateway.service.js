@@ -12,6 +12,21 @@ const crypto = require('crypto');
 const EventEmitter = require('events');
 const logger = require('../../utils/logger');
 
+/**
+ * Strip HTML tags to derive a plain-text body. Iterates to a fixpoint so
+ * nested fragments like `<scr<x>ipt>` cannot survive a single pass
+ * (CodeQL js/incomplete-multi-character-sanitization).
+ */
+function stripHtmlTags(html) {
+  let text = String(html);
+  let prev;
+  do {
+    prev = text;
+    text = text.replace(/<[^<>]*>/g, '');
+  } while (text !== prev);
+  return text;
+}
+
 /* ─── Email Message Model ────────────────────────────────────── */
 const emailMessageSchema = new mongoose.Schema(
   {
@@ -290,10 +305,7 @@ class DocumentEmailGatewayService extends EventEmitter {
       cc: (cc || []).map(r => (typeof r === 'string' ? { email: r } : r)),
       bcc: (bcc || []).map(r => (typeof r === 'string' ? { email: r } : r)),
       subject: finalSubject,
-      body:
-        typeof finalBody === 'string'
-          ? { html: finalBody, text: finalBody.replace(/<[^<>]*>/g, '') }
-          : finalBody,
+      body: typeof finalBody === 'string' ? { html: finalBody, text: stripHtmlTags(finalBody) } : finalBody,
       attachments,
       status: 'queued',
       priority: priority || 'normal',

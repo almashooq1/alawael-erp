@@ -48,6 +48,18 @@ async function gatherMonthlyData(beneficiary, periodStart, periodEnd) {
     }
   })();
 
+  // W1261 — the UI writes ClinicalAssessment (domains/assessments service →
+  // the canonical models/ClinicalAssessment registration); the legacy
+  // Assessment model is UI-less. Dual-read so AI monthly parent reports see
+  // UI-entered assessments (final row of the DDD_VS_LEGACY split table).
+  const ClinicalAssessment = (() => {
+    try {
+      return require('../../models/ClinicalAssessment');
+    } catch {
+      return null;
+    }
+  })();
+
   let sessions = [];
   let goals = [];
   let assessments = [];
@@ -74,6 +86,26 @@ async function gatherMonthlyData(beneficiary, periodStart, periodEnd) {
         { date: { $gte: periodStart, $lte: periodEnd } },
       ],
     }).lean();
+  }
+
+  // W1261 — UI-entered assessments, normalized to the report row shape.
+  // Fail-soft: an error here never blocks the rest of the report data.
+  if (ClinicalAssessment) {
+    try {
+      const clinicalRows = await ClinicalAssessment.find({
+        beneficiary: beneficiary._id,
+        assessmentDate: { $gte: periodStart, $lte: periodEnd },
+      }).lean();
+      assessments = assessments.concat(
+        clinicalRows.map(c => ({
+          assessment_type: c.tool || c.category || 'assessment',
+          assessment_date: c.assessmentDate,
+          total_score: c.score != null ? c.score : c.rawScore != null ? c.rawScore : null,
+        }))
+      );
+    } catch (_e) {
+      /* fail-soft */
+    }
   }
 
   const attendedSessions = sessions.filter(

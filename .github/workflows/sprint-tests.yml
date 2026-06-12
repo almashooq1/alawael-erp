@@ -1732,6 +1732,8 @@ on:
       - 'backend/__tests__/family-version-unified-wave1259.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/careplanversion-deprecation-ratchet-wave1260.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smartreport-clinical-assessments-wave1261.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3447,6 +3449,8 @@ on:
       - 'backend/__tests__/family-version-unified-wave1259.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/careplanversion-deprecation-ratchet-wave1260.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smartreport-clinical-assessments-wave1261.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

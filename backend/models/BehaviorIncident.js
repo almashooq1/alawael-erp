@@ -59,6 +59,17 @@ const behaviorIncidentSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // W1242 — link back to the source BehaviorRecord (the UI write model in
+    // domains/behavior). Populated by behaviorIncidentProjection.js so the
+    // risk/escalation engine sees UI-logged behavior. sparse + unique → one
+    // projection per source; manually-created incidents stay null.
+    sourceBehaviorRecordId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'BehaviorRecord',
+      index: true,
+      sparse: true,
+      unique: true,
+    },
     behaviorType: {
       type: String,
       enum: BEHAVIOR_TYPES,

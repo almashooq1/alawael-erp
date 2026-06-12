@@ -1701,6 +1701,8 @@ on:
       - 'backend/__tests__/cctv-reports-behavioral-wave1230.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/session-therapy-projection-wave1240.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/behavior-incident-projection-wave1242.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3385,6 +3387,8 @@ on:
       - 'backend/__tests__/cctv-reports-behavioral-wave1230.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/session-therapy-projection-wave1240.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/behavior-incident-projection-wave1242.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

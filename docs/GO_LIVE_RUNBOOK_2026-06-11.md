@@ -1,5 +1,29 @@
 # Go-Live / Launch Enablement Runbook — 2026-06-11
 
+> ## ✅ Session addendum — 2026-06-12 (W1246–W1271)
+>
+> Most of this runbook's engineering items were CLOSED in the 2026-06-12
+> session. Current state:
+>
+> - **Phase-C splits:** sessions FIXED (W1240 projection) · care plans
+>   DECIDED+EXECUTED (ADR-040 (b): W1252-W1259 full chain) + FROZEN
+>   (ADR-041 + W1260 ratchet) · behavior FIXED (W1251 snake→camel
+>   projection — UI incidents reach the escalation engine) · assessments
+>   FIXED (W1261) · goals classification COMPLETE (W1262). **The
+>   DDD-vs-legacy audit is fully adjudicated — zero open splits.**
+> - **Step 2 reference seeds:** EXECUTED on dev (verified counts: 80 form
+>   templates · 105 ICF codes · 270 CBAHI attestations · 72 goal-bank
+>   goals · 39 CoA accounts · 25 insurance tariffs · 27 measures).
+> - **Verification tools (new, permanent):** > `npm run smoke:careplan` (W1263 — the full care-plan chain live, 9/9)
+>   and `npm run smoke:launch-spine` (W1268 — Phase-B register/session+
+>   projection/form, 5/5). Run both after any deploy.
+> - **New operational surfaces:** journey 360 (W1247/8) · review-cadence
+>   board (W1249/50) · smart plan composer + proposal→draft bridge
+>   (W1264-W1267) · center-ops pulse with the missing-plans gap detector
+>   deep-linked into the composer (W1269-W1271).
+> - **Still owner-gated (unchanged):** SMTP credentials (THE hard blocker)
+>   · demo-data fate (step 0) · real org/staff creation (step 3).
+
 **Purpose.** The platform is **feature-complete but pre-adoption** (see
 [PRODUCTION_DATA_REALITY_2026-06-11.md](PRODUCTION_DATA_REALITY_2026-06-11.md):
 1,486 collections, only 27 non-empty; operational core = 7 beneficiaries / 3 users
@@ -27,12 +51,12 @@ Every consolidation is **free right now** because the target collections are emp
 (prod counts: all 0). Deciding now means real launch data lands on one canonical
 model instead of fragmenting across two. Three decisions; two already recorded:
 
-| Domain | Canonical (go-forward) | Secondary → disposition | Status |
-| --- | --- | --- | --- |
-| **Care plan** | `UnifiedCarePlan` / `CarePlanVersion` | IEP/IFSP kept + cross-linked (regulatory) | ✅ ADR-026 DECIDED (Approach B) |
-| **Goal** | `TherapeuticGoal` | `SmartGoal` = qualitative-suggestion tier | ✅ ADR-040 DECIDED (Approach B) |
-| **IEP** | `SmartIEP` (`/api/v1/smart-iep`) | `IndividualEducationPlan` (`/api/v1/iep`) = deprecation candidate, gated on the MoE-Nafath-signature capability question | ✅ ADR-026 addendum (W1232–W1234) |
-| **Clinical session** | ⚠️ **UNRESOLVED — write/read split (see below)** | not a simple pick — `ClinicalSession` (UI+360) vs `TherapySession` (analytics+56) | 🔴 **LAUNCH BLOCKER — resolve before sessions are logged at scale** |
+| Domain               | Canonical (go-forward)                           | Secondary → disposition                                                                                                  | Status                                                              |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **Care plan**        | `UnifiedCarePlan` / `CarePlanVersion`            | IEP/IFSP kept + cross-linked (regulatory)                                                                                | ✅ ADR-026 DECIDED (Approach B)                                     |
+| **Goal**             | `TherapeuticGoal`                                | `SmartGoal` = qualitative-suggestion tier                                                                                | ✅ ADR-040 DECIDED (Approach B)                                     |
+| **IEP**              | `SmartIEP` (`/api/v1/smart-iep`)                 | `IndividualEducationPlan` (`/api/v1/iep`) = deprecation candidate, gated on the MoE-Nafath-signature capability question | ✅ ADR-026 addendum (W1232–W1234)                                   |
+| **Clinical session** | ⚠️ **UNRESOLVED — write/read split (see below)** | not a simple pick — `ClinicalSession` (UI+360) vs `TherapySession` (analytics+56)                                        | 🔴 **LAUNCH BLOCKER — resolve before sessions are logged at scale** |
 
 ### Clinical-session — CORRECTION + launch-blocker (W1237)
 
@@ -43,12 +67,12 @@ model instead of fragmenting across two. Three decisions; two already recorded:
 
 What the trace actually shows:
 
-| Path | Model | Collection (prod) |
-| --- | --- | --- |
-| **UI writes** a session (`POST /api/v1/sessions`, `domains/sessions`) | **`ClinicalSession`** | `clinical_sessions` = **0** |
-| **Beneficiary-360** "sessions" widget (`beneficiary360.service.js:391`) | **`ClinicalSession`** | (same — consistent ✅) |
-| **Session-Center KPIs** (`sessionCenter.service.js` — _"facade فوق TherapySession"_) | **`TherapySession`** | `therapysessions` = **1** (demo) |
-| **Episodes, goal-progress, appointments, NPHIES claims, ICF, pain** (the 56 consumers) | **`TherapySession`** | (same) |
+| Path                                                                                   | Model                 | Collection (prod)                |
+| -------------------------------------------------------------------------------------- | --------------------- | -------------------------------- |
+| **UI writes** a session (`POST /api/v1/sessions`, `domains/sessions`)                  | **`ClinicalSession`** | `clinical_sessions` = **0**      |
+| **Beneficiary-360** "sessions" widget (`beneficiary360.service.js:391`)                | **`ClinicalSession`** | (same — consistent ✅)           |
+| **Session-Center KPIs** (`sessionCenter.service.js` — _"facade فوق TherapySession"_)   | **`TherapySession`**  | `therapysessions` = **1** (demo) |
+| **Episodes, goal-progress, appointments, NPHIES claims, ICF, pain** (the 56 consumers) | **`TherapySession`**  | (same)                           |
 
 **There is NO sync between `ClinicalSession` and `TherapySession`.** Consequence at
 launch: a session logged through the UI lands in `ClinicalSession` → **shows on the
@@ -78,15 +102,15 @@ specialized DTT/ABA sub-type and is out of scope of the 3-general-session questi
 
 ## Phase A — go-live sequence (grounded in existing scripts)
 
-| # | Step | Command / action | Notes |
-| --- | --- | --- | --- |
-| 0 | **Decide demo-data fate** | (owner) keep or clear the ~60 demo records | `seed-demo-showcase.js --reset` clears them. **Destructive — owner-gated.** Clearing avoids polluting real reports/KPIs; keeping is fine for a soft launch. Do NOT run blind. |
-| 1 | **DB structure** | `node backend/scripts/setup-database.js --env production --check` then without `--check` | master setup: indexes + step ordering; `--check` previews first |
-| 2 | **Seed reference/config** (real, keep) | `npm run seed:forms-catalog` · `seed:cbahi` · `seed:icf-codes`* · `seed:measures-catalog`* · `seed:finance-coa`* · `seed:insurance-tariffs`* | reference data is legitimately seeded (not demo); idempotent. *verify exact npm alias in `backend/package.json` |
-| 3 | **Create REAL org + staff** | (owner, via UI/admin) real branches → real users → role assignment | **Real PII — not seeded.** This is the actual launch act. Roles list: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md`. |
-| 4 | **Verify critical paths** | see Phase B | login → register beneficiary → log session → submit form |
-| 5 | **Enable crons in order** | read-only sweepers first, mutating last | already flipped this session: care-plan workers, alerts engine, model-event bridge, clinical sweepers (14/15). Respite-no-show (mutating/outward) stays OFF pending sign-off. |
-| 6 | **Mail** | provision `SMTP_USER`/`SMTP_PASS` + restart pm2 `--update-env` | THE blocker (top of doc). Until done, all mail no-ops. |
+| #   | Step                                   | Command / action                                                                                                                             | Notes                                                                                                                                                                         |
+| --- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | **Decide demo-data fate**              | (owner) keep or clear the ~60 demo records                                                                                                   | `seed-demo-showcase.js --reset` clears them. **Destructive — owner-gated.** Clearing avoids polluting real reports/KPIs; keeping is fine for a soft launch. Do NOT run blind. |
+| 1   | **DB structure**                       | `node backend/scripts/setup-database.js --env production --check` then without `--check`                                                     | master setup: indexes + step ordering; `--check` previews first                                                                                                               |
+| 2   | **Seed reference/config** (real, keep) | `npm run seed:forms-catalog` · `seed:cbahi` · `seed:icf-codes`_ · `seed:measures-catalog`_ · `seed:finance-coa`_ · `seed:insurance-tariffs`_ | reference data is legitimately seeded (not demo); idempotent. \*verify exact npm alias in `backend/package.json`                                                              |
+| 3   | **Create REAL org + staff**            | (owner, via UI/admin) real branches → real users → role assignment                                                                           | **Real PII — not seeded.** This is the actual launch act. Roles list: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md`.                                                    |
+| 4   | **Verify critical paths**              | see Phase B                                                                                                                                  | login → register beneficiary → log session → submit form                                                                                                                      |
+| 5   | **Enable crons in order**              | read-only sweepers first, mutating last                                                                                                      | already flipped this session: care-plan workers, alerts engine, model-event bridge, clinical sweepers (14/15). Respite-no-show (mutating/outward) stays OFF pending sign-off. |
+| 6   | **Mail**                               | provision `SMTP_USER`/`SMTP_PASS` + restart pm2 `--update-env`                                                                               | THE blocker (top of doc). Until done, all mail no-ops.                                                                                                                        |
 
 Prod topology for steps 1/5/6: `ssh -i ~/.ssh/alawael_deploy root@72.60.84.56`,
 app at `/home/alawael/app/backend` (pm2 `alawael-api` as user `alawael`),
@@ -123,8 +147,8 @@ broad module-building.
 
 Per the reality snapshot, adding clinical/admin modules has **diminishing marginal
 value** at 7 beneficiaries / 3 users — the ~190 surfaces already built are empty.
-**Recommendation:** build new breadth only for a *specific, named, near-term launch
-need*; otherwise the leverage is in A + B + C above. The breadth is not the
+**Recommendation:** build new breadth only for a _specific, named, near-term launch
+need_; otherwise the leverage is in A + B + C above. The breadth is not the
 constraint; adoption is.
 
 ---

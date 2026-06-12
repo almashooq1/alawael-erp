@@ -1021,3 +1021,4 @@ __tests__/cctv-reports-behavioral-wave1230.test.js
 __tests__/session-therapy-projection-wave1240.test.js
 __tests__/behavior-incident-projection-wave1242.test.js
 __tests__/cache-invalidation-basepath-wave1234.test.js
+__tests__/email-templates-wave1242.test.js

@@ -115,6 +115,31 @@ router.get(
   })
 );
 
+/* ─── POST /care-plans/from-proposal/:beneficiaryId — W1266 ─────────
+ * The clinician-approved bridge: composes (or accepts) the W1264 proposal,
+ * applies the clinician's selections, resolves the OPEN episode, and
+ * creates a REAL DRAFT UnifiedCarePlan. Body (all optional):
+ *   { goalIndexes?: number[], interventionIndexes?: number[] }
+ * 409 when no open episode exists. Draft only — never activates. */
+router.post(
+  '/from-proposal/:beneficiaryId',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const { createFromProposal } = require('../../../services/carePlanComposer.service');
+    const result = await createFromProposal({
+      beneficiaryId: req.params.beneficiaryId,
+      actorId: req.user ? req.user.id || req.user._id : null,
+      selections: {
+        goalIndexes: Array.isArray(req.body.goalIndexes) ? req.body.goalIndexes : undefined,
+        interventionIndexes: Array.isArray(req.body.interventionIndexes)
+          ? req.body.interventionIndexes
+          : undefined,
+      },
+    });
+    res.status(201).json({ success: true, data: result });
+  })
+);
+
 /* ─── GET /care-plans/:planId/audit-trail — W1257 (ADR-040 (b)) ────
  * PDPL Art.13 compliance timeline for a UI-authored plan: lifecycle +
  * hash-chained signatures (W1252) + family-notification attempts (W1254),

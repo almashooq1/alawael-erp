@@ -192,9 +192,108 @@ async function suggestDraftPlan(beneficiaryId) {
   return composeDraftFromSuggestion(suggestion);
 }
 
+// ─── W1266: proposal → REAL draft UnifiedCarePlan ───────────────────
+//
+// The clinician-approved bridge. Resolves the beneficiary's OPEN episode
+// (UnifiedCarePlan.episodeId is required), filters the proposal by the
+// clinician's selections, strips the explanation-only fields (`why` is for
+// the screen, not the record), and creates a DRAFT plan through
+// CarePlansService.createPlan. Never activates — draft only.
+
+const OPEN_EPISODE_STATUSES = Object.freeze(['planned', 'active', 'on_hold', 'suspended']);
+
+function _pick(arr, indexes) {
+  if (!Array.isArray(indexes)) return arr; // no selection → take all
+  const set = new Set(indexes.map(Number).filter(Number.isInteger));
+  return arr.filter((_x, i) => set.has(i));
+}
+
+/**
+ * @param {Object} args
+ *   - beneficiaryId  (required)
+ *   - actorId        req.user id → createdBy
+ *   - selections     optional { goalIndexes?: number[], interventionIndexes?: number[] }
+ *   - proposal       optional precomposed proposal (testability/UI pass-through);
+ *                    composed live when absent
+ * @returns {{ plan, counts, source: 'composer' }}
+ */
+async function createFromProposal({
+  beneficiaryId,
+  actorId = null,
+  selections = {},
+  proposal = null,
+}) {
+  const mongoose = require('mongoose');
+
+  const composed = proposal || (await suggestDraftPlan(beneficiaryId));
+  if (!composed || !composed.ok) {
+    const err = new Error('تعذر تأليف المقترح لهذا المستفيد');
+    err.statusCode = 422;
+    throw err;
+  }
+
+  // Resolve the open episode — required by the plan schema.
+  const EpisodeOfCare = mongoose.model('EpisodeOfCare');
+  const episode = await EpisodeOfCare.findOne({
+    beneficiaryId,
+    status: { $in: [...OPEN_EPISODE_STATUSES] },
+  })
+    .sort({ createdAt: -1 })
+    .select('_id branchId')
+    .lean();
+  if (!episode) {
+    const err = new Error(
+      'لا توجد حلقة علاجية مفتوحة لهذا المستفيد — افتح حلقة أولاً ثم أنشئ الخطة'
+    );
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const goals = _pick(composed.proposal.globalGoals || [], selections.goalIndexes).map(g => ({
+    title: g.title,
+    type: g.type,
+    criteria: g.criteria || undefined,
+    priority: g.priority,
+    status: 'pending',
+    notes: g.notes || undefined, // provenance kept; `why` (screen-only) stripped
+  }));
+  const interventions = _pick(
+    composed.proposal.globalInterventions || [],
+    selections.interventionIndexes
+  ).map(iv => ({
+    title: iv.title,
+    title_ar: iv.title_ar || undefined,
+    domain: iv.domain,
+    frequency: iv.frequency || undefined,
+    status: 'planned',
+    evidence: iv.evidence || undefined,
+  }));
+
+  const { carePlansService } = require('../domains/care-plans/services/CarePlansService');
+  const plan = await carePlansService.createPlan({
+    beneficiaryId,
+    episodeId: episode._id,
+    type: composed.proposal.type,
+    title_ar: composed.proposal.title_ar,
+    reviewCycle: composed.proposal.reviewCycle,
+    globalGoals: goals,
+    globalInterventions: interventions,
+    branchId:
+      episode.branchId || (composed.beneficiary && composed.beneficiary.branchId) || undefined,
+    createdBy: actorId || undefined,
+  });
+
+  return {
+    plan,
+    counts: { goals: goals.length, interventions: interventions.length },
+    source: 'composer',
+  };
+}
+
 module.exports = {
   composeDraftFromSuggestion,
   suggestDraftPlan,
+  createFromProposal,
   GOALBANK_TO_GOALREF_TYPE,
   GOALBANK_TO_PROGRAM_DOMAIN,
   MODALITY_TO_INTERVENTION_DOMAIN,

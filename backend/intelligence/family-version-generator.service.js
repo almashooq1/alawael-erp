@@ -366,8 +366,94 @@ function isFamilyReady(generationResult) {
   );
 }
 
+// ─── W1259: UnifiedCarePlan adapter (ADR-040 (b)) ────────────────────
+//
+// PURE field-name mapping from the UI's plan model into the generator's
+// input contract. Faithful-or-absent: only content the clinician actually
+// entered is mapped; nothing is invented.
+
+const UNIFIED_TYPE_TO_DOMAIN = Object.freeze({
+  academic: 'academic',
+  behavioral: 'behavior',
+  communication: 'language',
+  motor: 'motor',
+  speech: 'expressive_language',
+  social: 'social',
+  life_skill: 'adl',
+  cognitive: 'cognitive',
+  // sensory / vocational / other → generator falls back to 'مهارة عامة'
+});
+
+const UNIFIED_PRIORITY_TO_SCORE = Object.freeze({ high: 0.9, medium: 0.6, low: 0.3 });
+
+const UNIFIED_CYCLE_TO_WEEKS = Object.freeze({
+  weekly: 1,
+  biweekly: 2,
+  monthly: 4,
+  quarterly: 12,
+  custom: 4,
+});
+
+function _gatherUnifiedGoals(src) {
+  const out = [...(src.globalGoals || [])];
+  const gather = group => {
+    if (!group || !group.domains) return;
+    for (const section of Object.values(group.domains)) {
+      if (section && Array.isArray(section.goals)) out.push(...section.goals);
+    }
+  };
+  gather(src.educational);
+  gather(src.therapeutic);
+  gather(src.lifeSkills);
+  return out;
+}
+
+function mapUnifiedPlanToFamilyBody(unifiedPlan) {
+  const src =
+    typeof unifiedPlan.toObject === 'function' ? unifiedPlan.toObject() : unifiedPlan || {};
+  const goals = _gatherUnifiedGoals(src)
+    .filter(g => g && (g.title || g.target))
+    .map(g => ({
+      statement: [g.title, g.target].filter(Boolean).join(' — '),
+      domain: UNIFIED_TYPE_TO_DOMAIN[g.type] || g.type || null,
+      priorityScore: UNIFIED_PRIORITY_TO_SCORE[g.priority] ?? 0.5,
+    }));
+
+  const fam = src.familyComponent || {};
+  const coaching = Array.isArray(fam.parentTraining)
+    ? fam.parentTraining.filter(Boolean).join('. ')
+    : '';
+
+  return {
+    goals,
+    familyRole: {
+      ...(coaching ? { coachingPlan: coaching } : {}),
+      homeProgram:
+        typeof fam.homeProgram === 'string' && fam.homeProgram.trim().length > 0
+          ? [{ activity: fam.homeProgram.trim() }]
+          : [],
+    },
+    reviewSchedule: {
+      nextReviewAt: src.nextReviewDate || null,
+      cadenceWeeks: UNIFIED_CYCLE_TO_WEEKS[src.reviewCycle] || null,
+    },
+  };
+}
+
+/** Generate the family version straight from a UnifiedCarePlan doc. */
+function generateForUnifiedPlan(unifiedPlan, ctx = {}) {
+  if (!unifiedPlan || typeof unifiedPlan !== 'object') {
+    return { ok: false, reason: 'INVALID_PLAN_BODY', markdown: null };
+  }
+  const result = generate(mapUnifiedPlanToFamilyBody(unifiedPlan), ctx);
+  result.source = 'unified';
+  return result;
+}
+
 module.exports = {
   generate,
+  generateForUnifiedPlan,
+  mapUnifiedPlanToFamilyBody,
   isFamilyReady,
   DEFAULTS,
   // Exposed for testing

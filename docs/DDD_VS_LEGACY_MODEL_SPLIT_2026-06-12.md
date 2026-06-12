@@ -205,6 +205,20 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > 4 tests. **ADR-040 (b) consumer re-point map: COMPLETE** (integrity W1252,
 > scanner W1253, family-retry W1254, plateau W1255, audit-trail W1257,
 > side-effects W1258, plan-recommendation reclassified).
+>
+> ✅ **W1259 (2026-06-12): the family-version product gap CLOSED.** The W43
+> generator gained a pure unified adapter (`generateForUnifiedPlan`:
+> goals gathered across global + all section groups with type→domain +
+> priority→score maps; string homeProgram → activity list; reviewCycle →
+> cadence — faithful-or-absent). `UnifiedCarePlan.familyVersion` lifted
+> (same 3-field shape). `activatePlan` generates + stores it ONLY when the
+> deterministic safety floor passes (readability ≤ grade cap, zero
+> forbidden clinical terms, all required sections) — a requiresRewrite
+> result is never sent to a family. End-to-end MMS proof: the
+> `notify_family` handler that skipped (`no_family_body`) pre-W1259 now
+> SENDS for a UI-authored plan with the correct audit label. 12 tests.
+> **The full family chain now works for UI plans: activate → generate →
+> notify → W45 retry → audit trail.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

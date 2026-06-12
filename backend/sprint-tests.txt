@@ -1032,4 +1032,5 @@ __tests__/family-retry-unified-wave1254.test.js
 __tests__/plateau-detector-unified-wave1255.test.js
 __tests__/audit-trail-unified-wave1257.test.js
 __tests__/side-effects-entity-type-wave1258.test.js
+__tests__/email-migration-digests-wave1246.test.js
 __tests__/family-version-unified-wave1259.test.js

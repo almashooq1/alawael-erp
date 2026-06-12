@@ -1023,3 +1023,4 @@ __tests__/behavior-incident-projection-wave1242.test.js
 __tests__/cache-invalidation-basepath-wave1234.test.js
 __tests__/email-templates-wave1242.test.js
 __tests__/beneficiary-journey-wave1247.test.js
+__tests__/review-cadence-wave1249.test.js

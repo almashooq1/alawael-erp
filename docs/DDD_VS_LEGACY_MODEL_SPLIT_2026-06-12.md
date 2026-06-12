@@ -250,6 +250,20 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 >
 > **The audit that opened this document is now fully adjudicated: zero
 > open splits, zero unclassified divergences.**
+>
+> ✅ **W1272–W1274 (2026-06-12): the trace extended to EVERY family-facing
+> surface.** The original audit swept intelligence/analytics consumers;
+> applying the same lens to the family surfaces found and closed two more
+> splits and cleared the rest:
+>
+> | Surface                                                          | Verdict                                                                                                                                                                                                                   |
+> | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | `parent-portal-v1` care-plan endpoint                            | **WAS a split** (read the legacy 3rd model `CarePlan` only) → ✅ FIXED W1272: unified-first via the pure `portal-plan-mapper.lib` (no clinician-internal leakage — tested), legacy fallback, family version rides along   |
+> | `parent-portal-v2` (the MOBILE mount) care-plan + overview count | **WAS a split** → ✅ FIXED W1273: unified-first, shape-compatible payload (mobile unchanged), counts sum both models                                                                                                      |
+> | `parent-portal-enhanced` + `parentPortal.routes`                 | ✅ **clean** (W1274 audit): self-authenticated (`router.use(authenticate)` + `requireBranchAccess` after the public login endpoints), W441 body-guarded, and **plan-agnostic** (zero care-plan reads → no split exposure) |
+>
+> **Every known consumer class is now traced: intelligence, workers,
+> analytics, compliance, admin UI, web portal, and mobile.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

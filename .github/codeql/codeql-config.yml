@@ -1,0 +1,31 @@
+# CodeQL configuration for alawael-erp (W1276).
+#
+# Why advanced setup instead of default setup:
+#   The first default-setup scan (2026-06-12) produced 4,890
+#   js/missing-rate-limiting alerts — all false positives. The backend
+#   applies a global Redis-backed limiter to every API route:
+#     backend/startup/middleware.js:  app.use('/api', apiLimiter);
+#   CodeQL cannot see the limiter because it is wired in a separate
+#   startup module, and every new route file would re-trigger the rule.
+#   Default setup does not support query filters, so we exclude the rule
+#   here and keep every other security query active.
+
+name: "alawael-erp CodeQL config"
+
+paths-ignore:
+  # Dead code graveyard — archived, never deployed.
+  - _archived
+  # Generated / vendored / non-source artifacts.
+  - coverage
+  - uploads
+  - logs
+  - "**/node_modules"
+  # Prose-only documentation (code snippets are illustrative).
+  - docs
+
+query-filters:
+  # False positive at scale: global `app.use('/api', apiLimiter)` in
+  # backend/startup/middleware.js (express-rate-limit + rate-limit-redis)
+  # already rate-limits every API route. See header comment.
+  - exclude:
+      id: js/missing-rate-limiting

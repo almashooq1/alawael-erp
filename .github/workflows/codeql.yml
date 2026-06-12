@@ -1,0 +1,63 @@
+# ════════════════════════════════════════════════════════════════════
+#  CodeQL — advanced setup (W1276).
+#
+#  Replaces GitHub's default setup, which cannot exclude queries.
+#  First default scan produced 4,890 js/missing-rate-limiting false
+#  positives (global apiLimiter in backend/startup/middleware.js is
+#  invisible to the query). Config lives in .github/codeql/codeql-config.yml.
+#
+#  Languages mirror what default setup detected: JS/TS, Python, Actions.
+# ════════════════════════════════════════════════════════════════════
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly full re-scan (Mondays 03:24 UTC) to pick up new queries.
+    - cron: '24 3 * * 1'
+
+# Stop superseded scans on the same ref — main moves fast (parallel waves).
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
+          - language: actions
+            build-mode: none
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"

@@ -100,7 +100,11 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     let subject = null;
     let branchId = null;
     let payloadExtras = null;
-    if (letterType === 'employment_certificate' || letterType === 'salary_certificate') {
+    if (
+      letterType === 'employment_certificate' ||
+      letterType === 'salary_certificate' ||
+      letterType === 'experience_certificate'
+    ) {
       const employeeId = String(req.body.employeeId || '');
       if (!mongoose.isValidObjectId(employeeId)) {
         return res.status(400).json({ success: false, message: 'employeeId is required' });
@@ -112,7 +116,9 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         return res.status(503).json({ success: false, message: 'Employee model unavailable' });
       }
       const emp = await Employee.findById(employeeId)
-        .select('name_ar name_en employee_number job_title_ar job_title_en hire_date branch_id')
+        .select(
+          'name_ar name_en employee_number job_title_ar job_title_en hire_date branch_id termination_date termination_type'
+        )
         .lean();
       if (!emp) {
         return res.status(404).json({ success: false, message: 'Employee not found' });
@@ -130,6 +136,20 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         hireDate: emp.hire_date ?? null,
       };
       branchId = emp.branch_id ?? null;
+      if (letterType === 'experience_certificate') {
+        // End of service: prefer the system of record; fall back to an
+        // HR-entered last working day; null = still employed (the letter
+        // wording adapts).
+        let endDate = emp.termination_date ?? null;
+        if (!endDate && req.body.endDate) {
+          const d = new Date(String(req.body.endDate));
+          if (!Number.isNaN(d.getTime())) endDate = d;
+        }
+        payloadExtras = {
+          endDate,
+          terminationType: emp.termination_type ?? null,
+        };
+      }
     } else if (letterType === 'beneficiary_certificate') {
       const beneficiaryId = String(req.body.beneficiaryId || '');
       if (!mongoose.isValidObjectId(beneficiaryId)) {

@@ -7,6 +7,11 @@
 
 const mongoose = require('mongoose');
 const { BaseService } = require('../../_base/BaseService');
+// W1242 — CQRS projection: mirror every BehaviorRecord write into the legacy
+// BehaviorIncident the risk/escalation engine reads, so UI-logged behavior (esp.
+// aggression) reaches the spike detector. Fail-safe (never throws). See
+// behaviorIncidentProjection.js + DDD_VS_LEGACY_MODEL_SPLIT_2026-06-12.md.
+const { projectBehaviorRecord } = require('./behaviorIncidentProjection');
 
 class BehaviorService extends BaseService {
   constructor() {
@@ -36,6 +41,7 @@ class BehaviorService extends BaseService {
         severity: data.behavior.severity,
       });
     }
+    await projectBehaviorRecord(record, { logger: this.logger });
     return record;
   }
 

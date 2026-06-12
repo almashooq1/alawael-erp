@@ -87,11 +87,18 @@ describe('care-gap.loader — ctx assembly', () => {
   const benId2 = new mongoose.Types.ObjectId();
   const branchId = new mongoose.Types.ObjectId();
 
-  function buildLoader({ beneficiaries, carePlans = [], smartGoals = [], vaccinations = [] } = {}) {
+  function buildLoader({
+    beneficiaries,
+    carePlans = [],
+    smartGoals = [],
+    therapeuticGoals = [],
+    vaccinations = [],
+  } = {}) {
     return createCareGapLoader({
       Beneficiary: modelFromRows(beneficiaries),
       CarePlan: modelFromRows(carePlans),
       SmartGoal: modelFromRows(smartGoals),
+      TherapeuticGoal: modelFromRows(therapeuticGoals),
       Vaccination: modelFromRows(vaccinations),
       now: () => fixedNow,
     });
@@ -164,6 +171,54 @@ describe('care-gap.loader — ctx assembly', () => {
     expect(b.activeCarePlan).toBeNull();
     expect(b.activeGoals).toHaveLength(1);
     expect(b.dueVaccinations).toHaveLength(0);
+  });
+
+  // W1243 — care-gap stalled detection now reads the canonical TherapeuticGoal
+  // (the model the UI writes), not only the deprecated/empty SmartGoal.
+  test('attaches TherapeuticGoal (in_progress) into activeGoals, merged with SmartGoals', async () => {
+    const loader = buildLoader({
+      beneficiaries: [{ _id: benId1, branchId }],
+      smartGoals: [
+        { _id: 'sg-1', beneficiary: benId1, status: 'active', updatedAt: new Date('2026-03-01') },
+      ],
+      therapeuticGoals: [
+        {
+          _id: 'tg-1',
+          beneficiaryId: benId1,
+          status: 'in_progress',
+          updatedAt: new Date('2026-02-01'),
+        },
+        {
+          _id: 'tg-2',
+          beneficiaryId: benId1,
+          status: 'in_progress',
+          updatedAt: new Date('2026-05-10'),
+        },
+      ],
+    });
+    const ctx = await loader();
+    const a = ctx.beneficiaries.find(x => String(x._id) === String(benId1));
+    // 1 SmartGoal + 2 TherapeuticGoals all merged into activeGoals
+    expect(a.activeGoals).toHaveLength(3);
+    const tg1 = a.activeGoals.find(g => String(g._id) === 'tg-1');
+    expect(tg1).toBeTruthy();
+    expect(tg1.status).toBe('in-progress'); // normalized for the stalled generator
+    expect(tg1.lastProgressAt).toEqual(new Date('2026-02-01')); // updatedAt proxy
+  });
+
+  test('TherapeuticGoal query failure is non-fatal (SmartGoals still attach)', async () => {
+    const loader = createCareGapLoader({
+      Beneficiary: modelFromRows([{ _id: benId1, branchId }]),
+      SmartGoal: modelFromRows([
+        { _id: 'sg-1', beneficiary: benId1, status: 'active', updatedAt: new Date('2026-03-01') },
+      ]),
+      TherapeuticGoal: modelThatThrows('tg boom'),
+      now: () => fixedNow,
+      logger: { warn: () => {} },
+    });
+    const ctx = await loader();
+    const a = ctx.beneficiaries.find(x => String(x._id) === String(benId1));
+    expect(a.activeGoals).toHaveLength(1); // SmartGoal still there, TG failure swallowed
   });
 
   test('maps SmartGoal.status=active to in-progress (generator expects that name)', async () => {

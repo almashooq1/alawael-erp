@@ -56,6 +56,12 @@ describe('W1224 official-letters route — source contract', () => {
     expect(routeSrc).not.toMatch(/Object\.assign\([^)]*req\.body/);
   });
 
+  test('W1235: experience certificates ride the employee branch with end-of-service snapshot', () => {
+    expect(routeSrc).toMatch(/letterType === 'experience_certificate'/);
+    expect(routeSrc).toMatch(/termination_date termination_type/);
+    expect(routeSrc).toMatch(/terminationType: emp\.termination_type/);
+  });
+
   test('W1231: beneficiary letters snapshot server-side from the canonical Beneficiary model', () => {
     expect(routeSrc).toMatch(/mongoose\.model\('Beneficiary'\)/);
     expect(routeSrc).toMatch(/fullNameArabic fullNameEnglish mrn/);

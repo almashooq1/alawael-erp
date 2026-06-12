@@ -114,6 +114,29 @@ const initializeRedis = () => {
 // bypass the cache entirely.
 const NO_CACHE_RE = /\/letter-verify\/|\/official-letters\/verify\//;
 
+/**
+ * W1234: derive the cache-invalidation base path for a WRITE request.
+ *
+ * The previous rule stripped only a TRAILING /:objectId, so the ~720
+ * action-suffix mutations in this codebase (`POST /x/:id/approve`,
+ * `PATCH /x/:id/status`, `POST /x/:id/items/:itemId/complete`, …) cleared
+ * a pattern that matches NOTHING — list + detail GETs kept serving the
+ * pre-action state for the full 300s TTL (the W1229 revoke bug was one
+ * instance of this class, caught live).
+ *
+ * New rule: strip from the FIRST id-like segment (Mongo ObjectId or UUID)
+ * to the end — `/api/x/:id/anything/:id2/status` → `/api/x`. Broader
+ * clearing only costs a few extra cache misses; it can never serve stale
+ * data, so over-matching is the safe direction.
+ */
+const ID_SEGMENT_TAIL_RE =
+  /\/([a-f0-9]{24}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(\/[^/]+)*\/?$/i;
+
+const invalidationBasePath = (url) => {
+  const path = String(url || '').split('?')[0];
+  return path.replace(ID_SEGMENT_TAIL_RE, '');
+};
+
 const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
   return async (req, res, next) => {
     if (req.method === 'GET' && NO_CACHE_RE.test((req.originalUrl || req.url || '').split('?')[0])) {
@@ -122,8 +145,8 @@ const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
     if (!redis || req.method !== 'GET') {
       // For write operations (POST/PUT/PATCH/DELETE), invalidate related cache
       if (redis && req.method !== 'GET' && req.method !== 'OPTIONS' && req.method !== 'HEAD') {
-        // Extract the base API path (e.g., /api/accounting/expenses/:id -> /api/accounting/expenses)
-        const basePath = (req.originalUrl || req.url).split('?')[0].replace(/\/[a-f0-9]{24}$/i, '');
+        // W1234: /x/:id, /x/:id/approve, /x/:id/sub/:id2/status → /x
+        const basePath = invalidationBasePath(req.originalUrl || req.url);
         clearCache(`${prefix}${basePath}*`).catch(() => {});
       }
       return next();
@@ -442,6 +465,7 @@ const getMemoryPressure = () => {
 module.exports = {
   initializeRedis,
   cacheMiddleware,
+  invalidationBasePath,
   clearCache,
   getCacheStats,
   compressionMiddleware,

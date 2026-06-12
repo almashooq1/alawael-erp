@@ -34,6 +34,13 @@ const { execFile, execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// Load env from BOTH candidate locations. On the VPS the real secrets
+// (MONGODB_URI with credentials) live in backend/.env — loading only the
+// repo-root .env left MONGODB_URI undefined → unauthenticated localhost
+// fallback → countDocuments returned -1 for every collection (the
+// 2026-06-12 daily-drill failure). dotenv never overrides already-set vars,
+// so real process.env / earlier file wins.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 require('dotenv').config({ path: path.join(__dirname, '../..', '.env') });
 
 const logger = require('../utils/logger');
@@ -164,7 +171,12 @@ async function decryptIfNeeded(backup) {
 async function restoreToSandbox(backup, sandboxDb) {
   const sourceUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
   const parsed = parseMongoUri(sourceUri);
-  const targetUri = `${parsed.base}/${sandboxDb}${parsed.authQuery}`;
+  // IMPORTANT: the restore URI must NOT contain a db name. A db in the URI
+  // puts mongorestore into the deprecated --db mode, which skips per-DB dump
+  // subdirectories ("don't know what to do with subdirectory ..., skipping")
+  // and silently restores 0 documents. Namespace targeting is done purely
+  // via --nsFrom/--nsTo below. (Verified on VPS 2026-06-12.)
+  const targetUri = `${parsed.base}/${parsed.authQuery}`;
 
   // Decrypt to a temp file if the archive is `.gz.enc`. Cleanup afterwards.
   const { archivePath, cleanup } = await decryptIfNeeded(backup);
@@ -190,8 +202,31 @@ async function restoreToSandbox(backup, sandboxDb) {
       ];
       await execFileAsync('mongorestore', args);
     } else {
-      // directory dump from db-backup.js — restore with --dir
-      const args = ['--uri', targetUri, '--dir=' + archivePath, '--gzip', '--drop'];
+      // Directory dump from db-backup.js. The dump root contains a per-DB
+      // subdirectory (e.g. <dump>/alawael_erp/*.bson.gz). Restoring the ROOT
+      // without --nsFrom/--nsTo makes mongorestore target the ORIGINAL db
+      // name — a silent no-op for the sandbox at best, and with --drop a
+      // restore over PRODUCTION at worst. Point --dir at the single DB
+      // subdirectory and remap it into the sandbox with --nsFrom/--nsTo.
+      const entries = fs
+        .readdirSync(archivePath, { withFileTypes: true })
+        .filter(e => e.isDirectory());
+      if (entries.length !== 1) {
+        throw new Error(
+          `dump_layout_unexpected: expected exactly 1 db subdirectory in ${archivePath}, found ${entries.length}`
+        );
+      }
+      const dumpDbName = entries[0].name;
+      const args = [
+        '--uri',
+        targetUri,
+        '--dir=' + archivePath,
+        '--gzip',
+        '--nsInclude=' + dumpDbName + '.*',
+        '--nsFrom=' + dumpDbName + '.*',
+        '--nsTo=' + sandboxDb + '.*',
+        '--drop',
+      ];
       await execFileAsync('mongorestore', args);
     }
   } finally {

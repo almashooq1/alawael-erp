@@ -33,7 +33,17 @@ const DISABILITY_PATHWAY_BUNDLES = Object.freeze({
     pathwayType: 'AUTISM_EARLY_INTERVENTION',
     guidanceAssessments: Object.freeze(['M-CHAT-R/F', 'CARS-2', 'Vineland-3']),
     measureTargetPopulations: Object.freeze(['autism', 'intellectual_disability', 'down_syndrome']),
-    measureCategories: Object.freeze(['developmental', 'behavioral', 'adaptive', 'social']),
+    // W1225 — include screening/diagnostic: the canonical autism instruments
+    // (M-CHAT-R, CARS-2) are catalogued under those categories, so the
+    // original list resolved ZERO measures against the live prod library.
+    measureCategories: Object.freeze([
+      'developmental',
+      'behavioral',
+      'adaptive',
+      'social',
+      'screening',
+      'diagnostic',
+    ]),
     goalBankDomains: Object.freeze(['BEHAVIORAL', 'SPECIAL_EDU', 'SPEECH']),
     interventionsAr: Object.freeze(['ABA/DTT', 'AAC', 'حمية حسية', 'خطة سلوك']),
     defaultStages: Object.freeze([
@@ -100,7 +110,14 @@ const DISABILITY_PATHWAY_BUNDLES = Object.freeze({
     pathwayType: 'SPEECH_LANGUAGE',
     guidanceAssessments: Object.freeze(['تقييم النطق واللغة', 'تقييم البلع (IDDSI)', 'MLU']),
     measureTargetPopulations: Object.freeze(['language_delay', 'autism']),
-    measureCategories: Object.freeze(['speech_language', 'developmental']),
+    // W1225 — +screening/quality_of_life so 'all'-population screens (SDQ,
+    // PedsQL) and autism-population screens resolve for speech intakes.
+    measureCategories: Object.freeze([
+      'speech_language',
+      'developmental',
+      'screening',
+      'quality_of_life',
+    ]),
     goalBankDomains: Object.freeze(['SPEECH']),
     interventionsAr: Object.freeze(['علاج نطق', 'AAC', 'حمية بلع IDDSI']),
     defaultStages: Object.freeze([
@@ -128,7 +145,16 @@ const DISABILITY_PATHWAY_BUNDLES = Object.freeze({
     pathwayType: 'GENERIC_REHAB',
     guidanceAssessments: Object.freeze(['تقييم نفسي-تربوي', 'Vineland-3']),
     measureTargetPopulations: Object.freeze(['learning_disability']),
-    measureCategories: Object.freeze(['academic', 'cognitive', 'adaptive']),
+    // W1225 — +screening/quality_of_life: no live instrument carries the
+    // learning_disability population yet, so 'all'-population screens (SDQ,
+    // PedsQL) are the realistic intake set for this bundle.
+    measureCategories: Object.freeze([
+      'academic',
+      'cognitive',
+      'adaptive',
+      'screening',
+      'quality_of_life',
+    ]),
     goalBankDomains: Object.freeze(['SPECIAL_EDU']),
     interventionsAr: Object.freeze(['تربية خاصة', 'مهارات حياتية', 'دعم أكاديمي']),
     defaultStages: Object.freeze([

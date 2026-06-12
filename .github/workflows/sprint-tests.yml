@@ -1708,8 +1708,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-templates-wave1242.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
+      - 'backend/__tests__/official-letter-timeline-linkage-wave1240.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
       - 'backend/__tests__/review-cadence-wave1249.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3402,8 +3403,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-templates-wave1242.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
+      - 'backend/__tests__/official-letter-timeline-linkage-wave1240.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
       - 'backend/__tests__/review-cadence-wave1249.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'

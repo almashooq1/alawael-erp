@@ -108,7 +108,7 @@ function toneColors(tone) {
 }
 
 function renderBlockHtml(block, vars) {
-  const P = (s) => interpolate(s, vars, { html: true });
+  const P = s => interpolate(s, vars, { html: true });
   switch (block.type) {
     case 'greeting':
       return `<p style="margin:0 0 14px;font-size:16px;font-weight:700;color:${BRAND.ink};">${P(block.ar)}</p>`;
@@ -124,7 +124,7 @@ function renderBlockHtml(block, vars) {
     }
     case 'kv': {
       const rows = (block.rows || [])
-        .map((r) => {
+        .map(r => {
           const value = P(r.value);
           if (!value) return '';
           return (
@@ -167,7 +167,7 @@ function renderBlockHtml(block, vars) {
 /* ─────────────────────────── block renderers (text) ─────────────────────── */
 
 function renderBlockText(block, vars) {
-  const P = (s) => interpolate(s, vars, { html: false });
+  const P = s => interpolate(s, vars, { html: false });
   switch (block.type) {
     case 'greeting':
     case 'paragraph':
@@ -176,7 +176,7 @@ function renderBlockText(block, vars) {
       return `» ${P(block.ar)}`;
     case 'kv':
       return (block.rows || [])
-        .map((r) => {
+        .map(r => {
           const v = P(r.value);
           return v ? `- ${r.labelAr}: ${v}` : '';
         })
@@ -255,12 +255,12 @@ function renderTemplate(key, variables = {}) {
     ? interpolate(template.preheaderAr, variables, { html: false })
     : '';
 
-  const bodyHtml = template.blocks.map((b) => renderBlockHtml(b, variables)).join('\n');
+  const bodyHtml = template.blocks.map(b => renderBlockHtml(b, variables)).join('\n');
   const html = wrapLayout({ bodyHtml, preheader, titleAr: template.titleAr });
 
   const text =
     template.blocks
-      .map((b) => renderBlockText(b, variables))
+      .map(b => renderBlockText(b, variables))
       .filter(Boolean)
       .join('\n\n') + `\n\n—\n${BRAND.nameAr}`;
 

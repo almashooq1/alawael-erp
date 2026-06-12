@@ -52,6 +52,8 @@ module.exports = function registerFeatureRoutes(
   const assistiveDeviceRoutes = safeRequire('../routes/assistive-device.routes');
   const cbahiRoutes = safeRequire('../routes/cbahi.routes');
   const transitionPlanRoutes = safeRequire('../routes/transition-plan.routes');
+  const beneficiaryJourneyRoutes = safeRequire('../routes/beneficiary-journey.routes'); // W1247
+  const reviewCadenceRoutes = safeRequire('../routes/review-cadence.routes'); // W1249
   const adaptiveSportsRoutes = safeRequire('../routes/adaptive-sports.routes');
   const respiteRoutes = safeRequire('../routes/respite.routes');
   const dietPrescriptionRoutes = safeRequire('../routes/diet-prescription.routes');
@@ -193,6 +195,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'cbahi', cbahiRoutes, authenticate);
   // Wave 361: Transition planning persistence (خطة الانتقال) — graduates W251 scaffold
   dualMountAuth(app, 'transition-plan', transitionPlanRoutes, authenticate);
+  dualMountAuth(app, 'beneficiary-journey', beneficiaryJourneyRoutes, authenticate); // W1247
+  dualMountAuth(app, 'review-cadence', reviewCadenceRoutes, authenticate); // W1249
   // Wave 362: Adaptive sports persistence (الرياضة التكيّفية) — graduates scaffold
   dualMountAuth(app, 'adaptive-sports', adaptiveSportsRoutes, authenticate);
   // Wave 363: Respite booking (حجز الرعاية المؤقتة) — Disability Authority service category

@@ -74,6 +74,7 @@ const { createPlateauDetectorScheduler } = require('./care-plan-plateau-detector
 function bootstrapCarePlanning(opts = {}) {
   const {
     CarePlanVersion,
+    UnifiedCarePlan = null, // W1253 — optional second scan source (ADR-040 (b))
     BeneficiaryFile = null,
     governance,
     notifier = null,
@@ -195,6 +196,7 @@ function bootstrapCarePlanning(opts = {}) {
 
   const overdueReviewScanner = createOverdueReviewScanner({
     planVersionModel: CarePlanVersion,
+    unifiedPlanModel: UnifiedCarePlan, // W1253 — UI-authored plans now scanned too
     notifier: notifier && typeof notifier.send === 'function' ? notifier : null,
     resolveAudienceForRole,
     logger,

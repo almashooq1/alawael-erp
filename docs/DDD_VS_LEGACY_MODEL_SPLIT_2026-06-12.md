@@ -139,6 +139,17 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 >   tamper detection. **Next steps (per-file re-points of the ~10
 >   `intelligence/care-plan*` consumers + the W973 workers, one PR each with a
 >   behavioral test) remain OPEN.**
+>
+> ✅ **W1253 (2026-06-12): first prod-ON worker re-pointed.** The W50
+> overdue-review scanner now dual-scans: legacy `CarePlanVersion` (unchanged) +
+> `UnifiedCarePlan` (UI-authored; statuses active/under_review, due at
+> `nextReviewDate`, author/approver via createdBy/approvedBy) normalized into
+> the same severity/dedupe/notify pipeline with `payload.source` tagging.
+> Optional dep + fail-soft (unified query errors never block the legacy scan).
+> Wired through `care-plan-bootstrap` ← `startup/carePlanningBootstrap` (lazy,
+> degrades to legacy-only). 5 new MMS tests + the original W50 suite green.
+> **Remaining re-points: family-retry worker (W45), plateau detector,
+> side-effects/audit-trail/hash-chain consumers, plan-recommendation.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

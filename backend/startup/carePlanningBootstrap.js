@@ -122,8 +122,19 @@ function wireCarePlanning(app, deps = {}) {
           }
         }
 
+        // W1253 — ADR-040 (b): hand the engine the UI's care-plan model so the
+        // W50 overdue scanner sees UI-authored plans. Optional; fail-soft.
+        let UnifiedCarePlanModel = null;
+        try {
+          UnifiedCarePlanModel =
+            require('../domains/care-plans/models/UnifiedCarePlan').UnifiedCarePlan || null;
+        } catch (_e) {
+          /* optional — engine degrades to legacy-only scanning */
+        }
+
         const careplan = bootstrapCarePlanning({
           CarePlanVersion,
+          UnifiedCarePlan: UnifiedCarePlanModel,
           BeneficiaryFile,
           governance: governanceSvc,
           notifier: cpNotifier,

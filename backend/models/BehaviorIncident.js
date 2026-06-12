@@ -70,6 +70,19 @@ const behaviorIncidentSchema = new mongoose.Schema(
       sparse: true,
       unique: true,
     },
+    // W1251 — link back to the rehabilitation-advanced incident (the model the
+    // web-admin behavior UI ACTUALLY writes via POST /api/v1/rehabilitation-
+    // advanced/behavior-incidents; registered name 'AggregatedBehaviorIncident').
+    // Populated by services/rehabAdvancedBehaviorProjection.js so UI-logged
+    // behavior reaches the risk/escalation engine. sparse + unique → one
+    // projection per source row; manually-created incidents stay null.
+    sourceRehabAdvancedIncidentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AggregatedBehaviorIncident',
+      index: true,
+      sparse: true,
+      unique: true,
+    },
     behaviorType: {
       type: String,
       enum: BEHAVIOR_TYPES,

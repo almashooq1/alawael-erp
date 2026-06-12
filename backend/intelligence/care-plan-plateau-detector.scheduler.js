@@ -53,8 +53,18 @@ function _dedupeKey(planVersionId, verdict) {
  *   - now                    () → Date
  *   - metrics                optional { incPlateauOutcome(verdict), observeGoalsAtRisk(count) }
  */
+// W1255 — UnifiedCarePlan.reviewCycle → cadenceWeeks equivalent.
+const REVIEW_CYCLE_TO_WEEKS = Object.freeze({
+  weekly: 1,
+  biweekly: 2,
+  monthly: 4,
+  quarterly: 12,
+  custom: 4,
+});
+
 function createPlateauDetectorScheduler({
   planVersionModel = null,
+  unifiedPlanModel = null, // W1255 — ADR-040 (b): also review UnifiedCarePlan (the model the UI writes)
   collectSignals = null,
   notifier = null,
   insightEmitter = null,
@@ -118,6 +128,48 @@ function createPlateauDetectorScheduler({
     }
 
     candidates = Array.isArray(candidates) ? candidates : [];
+
+    // W1255 — second source: UnifiedCarePlan (UI-authored), normalized into
+    // the CarePlanVersion-like shape the loop expects. Optional + fail-soft.
+    if (unifiedPlanModel) {
+      try {
+        const uCursor = unifiedPlanModel.find({
+          isDeleted: { $ne: true },
+          status: { $in: ['active', 'under_review'] },
+        });
+        let uRows = [];
+        if (uCursor && typeof uCursor.limit === 'function') {
+          uRows = await uCursor.limit(limit).lean();
+        } else if (uCursor && typeof uCursor.exec === 'function') {
+          uRows = await uCursor.exec();
+        } else if (Array.isArray(uCursor)) {
+          uRows = uCursor;
+        } else if (uCursor && typeof uCursor.then === 'function') {
+          uRows = await uCursor;
+        }
+        candidates = candidates.concat(
+          (Array.isArray(uRows) ? uRows : []).map(p => ({
+            _id: p._id,
+            planId: p.planNumber || String(p._id),
+            versionNumber: p.version != null ? p.version : 1,
+            beneficiaryId: p.beneficiaryId,
+            branchId: p.branchId,
+            authorId: p.createdBy,
+            reviewerId: p.approvedBy,
+            approvedAt: p.approvedAt,
+            reviewSchedule: {
+              cadenceWeeks: REVIEW_CYCLE_TO_WEEKS[p.reviewCycle] || DEFAULTS.cadenceWeeksFallback,
+              nextReviewAt: p.nextReviewDate,
+            },
+            metadata: { lastPlateauReviewAt: p.lastPlateauReviewAt || null },
+            source: 'unified',
+          }))
+        );
+      } catch (err) {
+        summary.errors.push({ phase: 'query-unified', message: err.message });
+      }
+    }
+
     summary.scanned = candidates.length;
 
     for (const pv of candidates) {
@@ -201,6 +253,7 @@ function createPlateauDetectorScheduler({
               triggerCount: review.triggers.length,
               atRiskGoalCount: atRiskCount,
               dischargeReady: review.dischargeReadiness.ready,
+              source: pv.source || 'legacy', // W1255 — which care-plan model
             },
             dedupeKey: _dedupeKey(String(pv._id), review.holisticVerdict),
           });
@@ -242,9 +295,14 @@ function createPlateauDetectorScheduler({
         }
       }
 
-      // 3. Stamp lastPlateauReviewAt
+      // 3. Stamp lastPlateauReviewAt (per-source: UnifiedCarePlan declares a
+      // top-level field — W1255 — while CarePlanVersion keeps metadata.*)
       try {
-        if (typeof pv.save === 'function') {
+        if (pv.source === 'unified') {
+          if (unifiedPlanModel && typeof unifiedPlanModel.updateOne === 'function') {
+            await unifiedPlanModel.updateOne({ _id: pv._id }, { $set: { lastPlateauReviewAt: t } });
+          }
+        } else if (typeof pv.save === 'function') {
           pv.metadata = { ...(pv.metadata || {}), lastPlateauReviewAt: t };
           await pv.save();
         } else if (typeof planVersionModel.updateOne === 'function') {

@@ -124,6 +124,88 @@ This is the biggest item left in the audit and the one place a projection is uns
 (W1241 — would fabricate clinical data). It needs the care-plan domain owner to
 approve the direction; the per-file re-point work is then mechanical and testable.
 
+> ✅ **DIRECTION APPROVED + STEP 1 SHIPPED (W1252, 2026-06-12).** The domain owner
+> approved option (b) (UnifiedCarePlan canonical). Step 1 — the integrity layer —
+> is done: `signatureChain` (append-only, hash-chained; signature-hash payload
+> format IDENTICAL to `CarePlanVersion.computeSignatureHash` for cross-model
+> verifiability) + `evidenceHash` (sha256 over a deterministic canonicalization of
+> the clinical body via `extractClinicalBody`) lifted onto `UnifiedCarePlan`, with
+> `appendSignature`/`verifySignatureChain`/`sealEvidence`/`verifyEvidence` methods
+>
+> - a pre-save immutability invariant (evidenceHash cannot change once set).
+>   `CarePlansService.activatePlan` now records the 'activate' signature + seals
+>   evidence when the route passes the actor (fail-safe otherwise — enforcement
+>   flips once all callers pass actors). 8 tests incl. cross-model hash-compat +
+>   tamper detection. **Next steps (per-file re-points of the ~10
+>   `intelligence/care-plan*` consumers + the W973 workers, one PR each with a
+>   behavioral test) remain OPEN.**
+>
+> ✅ **W1253 (2026-06-12): first prod-ON worker re-pointed.** The W50
+> overdue-review scanner now dual-scans: legacy `CarePlanVersion` (unchanged) +
+> `UnifiedCarePlan` (UI-authored; statuses active/under_review, due at
+> `nextReviewDate`, author/approver via createdBy/approvedBy) normalized into
+> the same severity/dedupe/notify pipeline with `payload.source` tagging.
+> Optional dep + fail-soft (unified query errors never block the legacy scan).
+> Wired through `care-plan-bootstrap` ← `startup/carePlanningBootstrap` (lazy,
+> degrades to legacy-only). 5 new MMS tests + the original W50 suite green.
+> **Remaining re-points: family-retry worker (W45), plateau detector,
+> side-effects/audit-trail/hash-chain consumers, plan-recommendation.**
+>
+> ✅ **W1254 (2026-06-12): second prod-ON worker re-pointed + a latent
+> persistence bug root-fixed.** `familyNotifications[]` lifted field-for-field
+> onto `UnifiedCarePlan`; the W45 family-retry worker dual-scans (legacy
+> statuses unchanged; unified = active/under_review with a failed attempt),
+> `details[].source` tagging, fail-soft. **Root-fix:** the worker's real-model
+> path fetched candidates `.lean()`, so every retry mutation (retries++,
+> status flips, manual_override) hit a missing `.save()` and was silently
+> dropped — backoff/exhaustion state reset on every cron run (potential
+> notification spam). Candidates are now hydrated against real models while
+> legacy mock shapes are honored unchanged. 5 MMS tests (incl. persistence
+> proofs) + the original W50 suite green (38/38 across the worker suites).
+> **Remaining: plateau detector, side-effects/audit-trail/hash-chain
+> consumers, plan-recommendation.**
+>
+> ✅ **W1255 (2026-06-12): plateau detector re-pointed.** Dual-review with
+> normalized unified rows (reviewCycle → cadenceWeeks map; nextReviewDate;
+> createdBy/approvedBy as author/reviewer), `payload.source` tagging,
+> fail-soft. Cadence stamp: `lastPlateauReviewAt` declared top-level on
+> `UnifiedCarePlan` (so the `$set` survives strict mode) while
+> CarePlanVersion keeps `metadata.*`. 4 MMS tests through the REAL W44
+> progress reviewer (overdue-review trigger fires for a UI plan; stamp
+> persists + half-cadence gate honored) + W50 suite green (32/32).
+> **Remaining: side-effects/audit-trail/hash-chain consumers,
+> plan-recommendation.**
+>
+> ✅ **W1257 (2026-06-12): audit trail serves UnifiedCarePlan.** The W45
+> aggregator is pure, and the W1252/W1254 lifts used identical shapes, so
+> the adapter is a field-name normalization (`buildUnifiedAuditTrail`:
+> planNumber→planId, version→versionNumber, createdBy/approvedBy as
+> author/approver). Legacy-only structures (validation/rejection/
+> amendments) emit NO events — faithful-or-absent. Exposed at
+> `GET /api/v1/care-plans/:planId/audit-trail` with the same role-based
+> redaction (clinical/family/executive). 5 tests incl. tamper flagging +
+> family redaction. **Remaining: side-effects consumers,
+> plan-recommendation.**
+>
+> ✅ **W1258 (2026-06-12): consumer map CLOSED.** Final audit findings:
+> **(a) side-effects** — the W45 handlers are doc-agnostic (no model reads;
+> they operate on the passed doc), so they have served UnifiedCarePlan since
+> W1254; the only inaccuracy was the audit label hard-coded to
+> 'CarePlanVersion' — now source-faithful via `entityTypeOf()` (legacy
+> carries versionNumber; unified carries planNumber/version; ambiguous →
+> legacy, conservative). **(b) plan-recommendation** — the builder is PURE
+> (reads only care-planning.registry, no model reads): **reclassified — not
+> a split.** Its UnifiedCarePlan integration is a future product feature.
+> **(c) family-version gap recorded:** UnifiedCarePlan has no
+> `familyVersion.body` (the W43 generator was never ported), so
+> notify_family faithfully SKIPS for unified plans (no fabricated family
+> content). Porting the W43 family-version generator to UnifiedCarePlan is
+> the one remaining **product feature** needed for end-to-end family
+> notifications on UI plans — a feature gap, not a data-visibility split.
+> 4 tests. **ADR-040 (b) consumer re-point map: COMPLETE** (integrity W1252,
+> scanner W1253, family-retry W1254, plateau W1255, audit-trail W1257,
+> side-effects W1258, plan-recommendation reclassified).
+
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 
 A web-admin write-path verification pass (always check what the UI **actually** POSTs,
@@ -161,6 +243,20 @@ severity/observedAt`) — same W1240 template, but from the **correct** source. 
 deferred for a **carefully-verified** follow-up (behavior was mis-analysed twice;
 a third change should be built only after confirming the snake model's exact registered
 name + collection + that no `'BehaviorIncident'` model-name collision exists).
+
+> ✅ **FIXED (W1251, 2026-06-12).** The mandated verification was performed first and
+> corrected one more detail: the UI write model is registered as
+> **`AggregatedBehaviorIncident`** (models/rehabilitation-advanced.model.js:1686 —
+> exported under the local name `BehaviorIncident`, which is the naming trap that
+> caused the earlier mis-analyses); `RehabAdvancedBehaviorIncident` is a THIRD,
+> route-unused registration (models/rehab-advanced/BehaviorIncident.model.js). No
+> model-name collision with the camel target. The write path (`buildCrud` →
+> `Model.create`) fires save hooks. Fix shipped as
+> `services/rehabAdvancedBehaviorProjection.js` (W1240/W1242 template: fail-safe,
+> faithful-or-null, idempotent upsert keyed by new sparse+unique
+> `BehaviorIncident.sourceRehabAdvancedIncidentId`) + post-save/post-findOneAndUpdate
+> hooks on the snake schema. 9 tests incl. an MMS behavioral proof that the
+> spike-rule aggregation now counts UI-logged (physical + verbal) aggression.
 
 **Lesson reinforced:** for every split, verify the UI's ACTUAL write endpoint + the
 model that endpoint persists — never assume "the UI writes the `domains/*` model."

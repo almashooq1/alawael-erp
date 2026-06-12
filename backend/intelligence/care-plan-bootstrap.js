@@ -74,6 +74,7 @@ const { createPlateauDetectorScheduler } = require('./care-plan-plateau-detector
 function bootstrapCarePlanning(opts = {}) {
   const {
     CarePlanVersion,
+    UnifiedCarePlan = null, // W1253 — optional second scan source (ADR-040 (b))
     BeneficiaryFile = null,
     governance,
     notifier = null,
@@ -187,6 +188,7 @@ function bootstrapCarePlanning(opts = {}) {
   // 6. Background workers (caller is responsible for scheduling)
   const familyRetryWorker = createFamilyRetryWorker({
     planVersionModel: CarePlanVersion,
+    unifiedPlanModel: UnifiedCarePlan, // W1254 — UI-authored plans now served too
     sideEffectHandlers,
     logger,
     now,
@@ -195,6 +197,7 @@ function bootstrapCarePlanning(opts = {}) {
 
   const overdueReviewScanner = createOverdueReviewScanner({
     planVersionModel: CarePlanVersion,
+    unifiedPlanModel: UnifiedCarePlan, // W1253 — UI-authored plans now scanned too
     notifier: notifier && typeof notifier.send === 'function' ? notifier : null,
     resolveAudienceForRole,
     logger,
@@ -208,6 +211,7 @@ function bootstrapCarePlanning(opts = {}) {
   if (typeof collectProgressSignals === 'function') {
     plateauScheduler = createPlateauDetectorScheduler({
       planVersionModel: CarePlanVersion,
+      unifiedPlanModel: UnifiedCarePlan, // W1255 — UI-authored plans now reviewed too
       collectSignals: collectProgressSignals,
       notifier: notifier && typeof notifier.send === 'function' ? notifier : null,
       insightEmitter,

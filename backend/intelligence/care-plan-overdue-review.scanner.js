@@ -99,6 +99,7 @@ async function _resolveRecipients(pv, severity, resolveAudienceForRole) {
  */
 function createOverdueReviewScanner({
   planVersionModel = null,
+  unifiedPlanModel = null, // W1253 — ADR-040 (b): also scan UnifiedCarePlan (the model the UI writes)
   notifier = null,
   resolveAudienceForRole = null,
   logger = console,
@@ -107,6 +108,24 @@ function createOverdueReviewScanner({
 } = {}) {
   if (!planVersionModel) {
     throw new Error('overdue-review.scanner: planVersionModel is required');
+  }
+
+  // W1253 — UnifiedCarePlan live statuses + field mapping. The UI writes
+  // UnifiedCarePlan (status active/under_review, due date at nextReviewDate,
+  // author at createdBy, approver at approvedBy); the scanner's internal
+  // shape stays CarePlanVersion-like so severity/dedupe/notify logic is
+  // shared verbatim across both sources.
+  const UNIFIED_ELIGIBLE_STATUSES = ['active', 'under_review'];
+  function _normalizeUnified(p) {
+    return {
+      _id: p._id,
+      planId: p.planNumber || String(p._id),
+      branchId: p.branchId,
+      authorId: p.createdBy,
+      reviewerId: p.approvedBy,
+      reviewSchedule: { nextReviewAt: p.nextReviewDate },
+      source: 'unified',
+    };
   }
 
   async function runOnce({ limit = DEFAULTS.limitPerRun } = {}) {
@@ -141,6 +160,32 @@ function createOverdueReviewScanner({
     }
 
     candidates = Array.isArray(candidates) ? candidates : [];
+
+    // W1253 — second source: UnifiedCarePlan (UI-authored plans). Optional +
+    // fail-soft: a query error here never blocks the legacy scan.
+    if (unifiedPlanModel) {
+      try {
+        const uCursor = unifiedPlanModel.find({
+          isDeleted: { $ne: true },
+          status: { $in: UNIFIED_ELIGIBLE_STATUSES },
+          nextReviewDate: { $lte: t, $ne: null },
+        });
+        let uRows = [];
+        if (uCursor && typeof uCursor.limit === 'function') {
+          uRows = await uCursor.limit(limit).lean();
+        } else if (uCursor && typeof uCursor.exec === 'function') {
+          uRows = await uCursor.exec();
+        } else if (Array.isArray(uCursor)) {
+          uRows = uCursor;
+        } else if (uCursor && typeof uCursor.then === 'function') {
+          uRows = await uCursor;
+        }
+        candidates = candidates.concat((Array.isArray(uRows) ? uRows : []).map(_normalizeUnified));
+      } catch (err) {
+        summary.errors.push({ phase: 'query-unified', message: err.message });
+      }
+    }
+
     summary.scanned = candidates.length;
 
     for (const pv of candidates) {
@@ -170,6 +215,7 @@ function createOverdueReviewScanner({
               daysOverdue,
               severity,
               nextReviewAt: dueDate.toISOString(),
+              source: pv.source || 'legacy', // W1253 — which care-plan model
             },
             dedupeKey,
           });

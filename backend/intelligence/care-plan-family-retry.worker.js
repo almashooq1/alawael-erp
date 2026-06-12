@@ -79,6 +79,7 @@ function _evaluateAttempt(attempt, now) {
  */
 function createFamilyRetryWorker({
   planVersionModel = null,
+  unifiedPlanModel = null, // W1254 — ADR-040 (b): also serve UnifiedCarePlan (the model the UI writes)
   sideEffectHandlers = {},
   logger = console,
   now = () => new Date(),
@@ -87,6 +88,11 @@ function createFamilyRetryWorker({
   if (!planVersionModel) {
     throw new Error('family-retry.worker: planVersionModel is required');
   }
+
+  // W1254 — UnifiedCarePlan's post-approval (live) statuses. familyNotifications
+  // was lifted field-for-field onto UnifiedCarePlan, so the per-attempt logic
+  // below is shared verbatim; only the status eligibility differs per model.
+  const UNIFIED_RETRYABLE_STATUSES = ['active', 'under_review'];
   // Handler is optional at construction time — gracefully skipped at
   // runtime if the bootstrap didn't wire family notifications.
   const handler = sideEffectHandlers[HANDLER_NAMES.NOTIFY_FAMILY];
@@ -124,31 +130,74 @@ function createFamilyRetryWorker({
     // We rely on application-level invariants (status + familyNotifications)
     // rather than a query-side $elemMatch so this works against both the
     // real Mongoose model and the lightweight test mock.
+    //
+    // W1254 — fetched HYDRATED (no .lean()): pre-W1254 the real-model path
+    // used .lean(), so the retry mutations below (retries++, status flips,
+    // manual_override) hit `typeof pv.save === 'function'` === false and were
+    // NEVER persisted — meaning backoff/exhaustion state silently reset every
+    // run against real data. Hydrated docs restore persistence; the mock
+    // paths (array / thenable / exec) are unchanged.
+    async function _fetch(model, query) {
+      const cursor = model.find(query);
+      if (cursor && typeof cursor.limit === 'function') {
+        const limited = cursor.limit(limit * 4);
+        // Real mongoose Query is thenable → await yields HYDRATED docs
+        // (the W1254 persistence fix). Legacy test mocks return a plain
+        // { lean } object instead — honor that shape unchanged.
+        if (limited && typeof limited.then === 'function') return await limited;
+        if (limited && typeof limited.lean === 'function') return await limited.lean();
+        return Array.isArray(limited) ? limited : [];
+      } else if (cursor && typeof cursor.exec === 'function') {
+        return await cursor.exec();
+      } else if (Array.isArray(cursor)) {
+        return cursor;
+      } else if (cursor && typeof cursor.then === 'function') {
+        return await cursor;
+      }
+      return [];
+    }
+
     let candidates = [];
     try {
-      const cursor = planVersionModel.find({
+      const legacyRows = await _fetch(planVersionModel, {
         status: { $in: ['saved_to_record', 'family_notification_sent'] },
       });
-      if (cursor && typeof cursor.limit === 'function') {
-        candidates = await cursor.limit(limit * 4).lean();
-      } else if (cursor && typeof cursor.exec === 'function') {
-        candidates = await cursor.exec();
-      } else if (Array.isArray(cursor)) {
-        candidates = cursor;
-      } else if (cursor && typeof cursor.then === 'function') {
-        candidates = await cursor;
-      }
+      candidates = (Array.isArray(legacyRows) ? legacyRows : []).map(pv => ({
+        pv,
+        source: 'legacy',
+      }));
     } catch (err) {
       logger.warn && logger.warn(`[family-retry] scan failed: ${err.message}`);
       return { ...summary, scanError: err.message };
     }
 
-    candidates = Array.isArray(candidates) ? candidates : [];
+    // W1254 — second source: UnifiedCarePlan (UI-authored). Optional +
+    // fail-soft: an error here never blocks the legacy scan.
+    if (unifiedPlanModel) {
+      try {
+        const uRows = await _fetch(unifiedPlanModel, {
+          isDeleted: { $ne: true },
+          status: { $in: UNIFIED_RETRYABLE_STATUSES },
+          'familyNotifications.status': 'failed',
+        });
+        candidates = candidates.concat(
+          (Array.isArray(uRows) ? uRows : []).map(pv => ({ pv, source: 'unified' }))
+        );
+      } catch (err) {
+        logger.warn &&
+          logger.warn(`[family-retry] unified scan failed (non-fatal): ${err.message}`);
+      }
+    }
+
     summary.scanned = candidates.length;
 
-    for (const pv of candidates) {
+    for (const { pv, source } of candidates) {
       if (summary.retried >= limit) break;
-      if (!_isRetryableStatus(pv.status)) continue;
+      const statusOk =
+        source === 'unified'
+          ? UNIFIED_RETRYABLE_STATUSES.includes(pv.status)
+          : _isRetryableStatus(pv.status);
+      if (!statusOk) continue;
       const notifications = Array.isArray(pv.familyNotifications) ? pv.familyNotifications : [];
       // Pick the most-recent failed attempt only (don't pile retries
       // on multiple historical attempts in the same run).
@@ -208,6 +257,7 @@ function createFamilyRetryWorker({
           attemptId: target.attemptId,
           action: 'retried_ok',
           newAttempt: verdict.nextAttempt,
+          source, // W1254
         });
       } else {
         summary.failed += 1;
@@ -221,6 +271,7 @@ function createFamilyRetryWorker({
           action: 'retried_failed',
           newAttempt: verdict.nextAttempt,
           reason: target.failureReason,
+          source, // W1254
         });
       }
 

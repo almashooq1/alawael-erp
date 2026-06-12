@@ -76,6 +76,16 @@ function createCarePlanSideEffectHandlers({
   logger = console,
   metrics = null,
 } = {}) {
+  // W1258 — handlers are doc-agnostic and (since W1254) receive UnifiedCarePlan
+  // docs through the family-retry worker; the audit label must stay faithful.
+  // Legacy docs carry versionNumber; unified docs carry planNumber/version.
+  function entityTypeOf(planVersion) {
+    if (!planVersion || typeof planVersion !== 'object') return 'CarePlanVersion';
+    if (planVersion.versionNumber != null) return 'CarePlanVersion';
+    if (planVersion.planNumber != null || planVersion.version != null) return 'UnifiedCarePlan';
+    return 'CarePlanVersion';
+  }
+
   async function _audit(action, metadata) {
     if (!auditLogger || typeof auditLogger.log !== 'function') return;
     try {
@@ -83,7 +93,7 @@ function createCarePlanSideEffectHandlers({
         action,
         actorUserId: metadata?.actor?.userId || null,
         actorRole: metadata?.actor?.role || null,
-        entityType: 'CarePlanVersion',
+        entityType: metadata?.entityType || 'CarePlanVersion', // W1258
         entityId: metadata?.planVersionId || null,
         metadata: metadata || {},
       });
@@ -311,6 +321,7 @@ function createCarePlanSideEffectHandlers({
     if (!body) {
       await _audit('care-plan.notify_family.side-effect.skipped', {
         planVersionId,
+        entityType: entityTypeOf(planVersion), // W1258
         reason: 'no_family_body',
       });
       return { ok: false, name: HANDLER_NAMES.NOTIFY_FAMILY, reason: 'no_family_body' };
@@ -320,6 +331,7 @@ function createCarePlanSideEffectHandlers({
       // No channel client wired — log a notification and return manual_override hint
       await _audit('care-plan.notify_family.side-effect.manual', {
         planVersionId,
+        entityType: entityTypeOf(planVersion), // W1258
         reason: 'no_family_channel_client',
       });
       return {
@@ -348,6 +360,7 @@ function createCarePlanSideEffectHandlers({
 
     await _audit('care-plan.notify_family.side-effect', {
       planVersionId,
+      entityType: entityTypeOf(planVersion), // W1258
       channel,
       success,
       attempt,

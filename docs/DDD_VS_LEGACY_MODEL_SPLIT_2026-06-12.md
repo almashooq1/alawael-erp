@@ -228,6 +228,28 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > Together with W1240 (sessions), W1242+W1251 (behavior), ADR-026 (IEP),
 > ADR-040/041 (care plans + goals tiering), **every row of the W1239
 > per-entity trace now has a shipped resolution or a recorded decision.**
+>
+> ✅ **W1262 (2026-06-12): the goals-row classification COMPLETED — no
+> remaining split.** The four SmartGoal-reading surfaces flagged for
+> classification, each traced per ADR-040's tier doctrine ("does it need
+> FINALIZED goals or SUGGESTIONS?"):
+>
+> 1. `care-gap.loader` — needed finalized → **was a real split, FIXED W1243**.
+> 2. `assessmentRecommendationEngine` — produces suggestions; SmartGoal is
+>    its decided output tier (ADR-040's own model-fit analysis) →
+>    **legitimate**.
+> 3. `assessmentReassessmentSweeper` (W206e) — keyed on SmartGoal-only
+>    fields (`timeBoundDate`, `overallProgress`); "suggestion deadline
+>    passed → re-run the engine" is INTERNAL to the suggestion tier;
+>    finalized-goal monitoring lives in the W235 linkage review cycle +
+>    the fixed care-gap loader → **legitimate (tier-internal)**.
+> 4. `therapistPortal.service` SmartGoal CRUD (therapistPro routes) — the
+>    deprecated manual tier's API; UI already carries the ADR-040
+>    soft-deprecation banner; prod SmartGoal = 0 → **legitimate-deprecated**
+>    (retires with the manual tier, not a data-visibility gap).
+>
+> **The audit that opened this document is now fully adjudicated: zero
+> open splits, zero unclassified divergences.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

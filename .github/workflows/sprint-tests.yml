@@ -1708,6 +1708,11 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-templates-wave1242.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/official-letter-timeline-linkage-wave1240.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
+      - 'backend/__tests__/review-cadence-wave1249.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-advanced-behavior-projection-wave1251.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unified-care-plan-integrity-wave1252.test.js'
@@ -3401,6 +3406,11 @@ on:
       - 'backend/__tests__/cache-invalidation-basepath-wave1234.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-templates-wave1242.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/official-letter-timeline-linkage-wave1240.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-journey-wave1247.test.js'
+      - 'backend/__tests__/review-cadence-wave1249.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-advanced-behavior-projection-wave1251.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js

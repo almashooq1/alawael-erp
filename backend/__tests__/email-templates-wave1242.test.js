@@ -22,7 +22,7 @@ const registry = require('../intelligence/email-templates.registry');
 const renderer = require('../services/email/templateRenderer.service');
 
 const BACKEND = path.join(__dirname, '..');
-const read = (rel) => fs.readFileSync(path.join(BACKEND, rel), 'utf8');
+const read = rel => fs.readFileSync(path.join(BACKEND, rel), 'utf8');
 
 const VAR_RE = /\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g;
 function varsIn(str) {
@@ -185,6 +185,8 @@ describe('W1242 static wiring', () => {
   test('mounted via dualMountAuth in features.registry', () => {
     const src = read('routes/registries/features.registry.js');
     expect(src).toMatch(/safeRequire\('\.\.\/routes\/email-templates\.routes'\)/);
-    expect(src).toMatch(/dualMountAuth\(app, 'email-templates', emailTemplatesRoutes, authenticate\)/);
+    expect(src).toMatch(
+      /dualMountAuth\(app, 'email-templates', emailTemplatesRoutes, authenticate\)/
+    );
   });
 });

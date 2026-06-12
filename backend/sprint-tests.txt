@@ -1036,3 +1036,4 @@ __tests__/email-migration-digests-wave1246.test.js
 __tests__/family-version-unified-wave1259.test.js
 __tests__/careplanversion-deprecation-ratchet-wave1260.test.js
 __tests__/smartreport-clinical-assessments-wave1261.test.js
+__tests__/care-plan-composer-wave1264.test.js

@@ -100,6 +100,21 @@ router.get(
   })
 );
 
+/* ─── GET /care-plans/suggest-draft/:beneficiaryId — W1264 ─────────
+ * مؤلّف الخطة الذكي: READ-ONLY proposal composed from the pathway bundle
+ * (disability-matched) + the LIVE GoalBank (age-windowed Arabic SMART
+ * texts) + the programs library (evidence-ranked, contraindication-aware).
+ * Refuse-to-fabricate: the clinician reviews/edits — nothing auto-saves. */
+router.get(
+  '/suggest-draft/:beneficiaryId',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const { suggestDraftPlan } = require('../../../services/carePlanComposer.service');
+    const proposal = await suggestDraftPlan(req.params.beneficiaryId);
+    res.json({ success: true, data: proposal });
+  })
+);
+
 /* ─── GET /care-plans/:planId/audit-trail — W1257 (ADR-040 (b)) ────
  * PDPL Art.13 compliance timeline for a UI-authored plan: lifecycle +
  * hash-chained signatures (W1252) + family-notification attempts (W1254),

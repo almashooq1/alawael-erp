@@ -8,6 +8,27 @@
  */
 
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+
+// ─── W1252: integrity layer (ADR-040 option (b) step 1, owner-approved) ─────
+// Lifted from CarePlanVersion (the W41-51 clinical-legal document) so that
+// UnifiedCarePlan — the model the UI actually writes — carries the same
+// compliance guarantees: an append-only hash-chained signature trail + a
+// sha256 evidence lock over the clinical body. Signature-hash payload format
+// is IDENTICAL to CarePlanVersion.computeSignatureHash for cross-model
+// verifiability during the staged migration.
+const SignatureSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    role: { type: String, required: true, maxlength: 100 },
+    action: { type: String, required: true, maxlength: 100 },
+    signedAt: { type: Date, required: true, default: Date.now },
+    nafathSignatureId: { type: String, default: null, maxlength: 200 },
+    prevHash: { type: String, default: null, maxlength: 128 },
+    hash: { type: String, required: true, maxlength: 128 },
+  },
+  { _id: false }
+);
 
 const goalRefSchema = new mongoose.Schema(
   {
@@ -231,6 +252,10 @@ const unifiedCarePlanSchema = new mongoose.Schema(
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt: Date,
 
+    // ── Integrity layer (W1252 — lifted from CarePlanVersion) ────────
+    signatureChain: { type: [SignatureSchema], default: () => [] },
+    evidenceHash: { type: String, default: null, maxlength: 128 },
+
     // ── Version Control ─────────────────────────────────────────────
     version: { type: Number, default: 1 },
     previousVersionId: { type: mongoose.Schema.Types.ObjectId, ref: 'UnifiedCarePlan' },
@@ -299,6 +324,125 @@ unifiedCarePlanSchema.pre('save', async function () {
     this.planNumber = `CP-${dateStr}-${random}`;
   }
 });
+
+// ─── W1252: evidenceHash immutability (mirrors CarePlanVersion invariant 6:
+// "evidenceHash, once set on approval, cannot change") ───────────────────────
+unifiedCarePlanSchema.pre('save', async function () {
+  if (!this.isNew && this.isModified('evidenceHash')) {
+    const prior = await this.constructor.findById(this._id).select('evidenceHash').lean();
+    if (prior && prior.evidenceHash && prior.evidenceHash !== this.evidenceHash) {
+      throw new Error('evidenceHash is immutable once set (W1252 integrity invariant)');
+    }
+  }
+});
+
+// ─── W1252: integrity statics + methods ─────────────────────────────────────
+
+/** Deterministic deep canonical JSON (recursively sorted object keys). */
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (value instanceof Date) return JSON.stringify(value.toISOString());
+  if (value && typeof value === 'object') {
+    const keys = Object.keys(value).sort();
+    return `{${keys.map(k => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(value === undefined ? null : value);
+}
+
+/**
+ * The clinical substance the evidence lock covers — plan content only,
+ * excluding volatile workflow/audit fields (status, approvals, timestamps,
+ * the chain itself).
+ */
+unifiedCarePlanSchema.statics.extractClinicalBody = function (plan) {
+  const src = typeof plan.toObject === 'function' ? plan.toObject() : plan;
+  return {
+    type: src.type ?? null,
+    startDate: src.startDate ?? null,
+    endDate: src.endDate ?? null,
+    reviewCycle: src.reviewCycle ?? null,
+    educational: src.educational ?? null,
+    therapeutic: src.therapeutic ?? null,
+    lifeSkills: src.lifeSkills ?? null,
+    globalGoals: src.globalGoals ?? [],
+    globalInterventions: src.globalInterventions ?? [],
+    familyComponent: src.familyComponent ?? null,
+  };
+};
+
+unifiedCarePlanSchema.statics.computeEvidenceHash = function (planBody) {
+  return crypto.createHash('sha256').update(canonicalJson(planBody)).digest('hex');
+};
+
+// IDENTICAL payload format to CarePlanVersion.computeSignatureHash —
+// cross-model verifiability during the staged ADR-040 (b) migration.
+unifiedCarePlanSchema.statics.computeSignatureHash = function ({
+  userId,
+  role,
+  action,
+  signedAt,
+  prevHash,
+}) {
+  const payload = `${userId}|${role}|${action}|${
+    signedAt instanceof Date ? signedAt.toISOString() : signedAt
+  }|${prevHash || ''}`;
+  return crypto.createHash('sha256').update(payload).digest('hex');
+};
+
+/** Append a hash-chained signature entry. Returns the appended entry. */
+unifiedCarePlanSchema.methods.appendSignature = function ({
+  userId,
+  role,
+  action,
+  signedAt = new Date(),
+  nafathSignatureId = null,
+}) {
+  const chain = this.signatureChain || [];
+  const prevHash = chain.length > 0 ? chain[chain.length - 1].hash : null;
+  const hash = this.constructor.computeSignatureHash({ userId, role, action, signedAt, prevHash });
+  const entry = { userId, role, action, signedAt, nafathSignatureId, prevHash, hash };
+  this.signatureChain.push(entry);
+  return entry;
+};
+
+/** Walk the chain re-computing every link. */
+unifiedCarePlanSchema.methods.verifySignatureChain = function () {
+  const chain = this.signatureChain || [];
+  for (let i = 0; i < chain.length; i++) {
+    const e = chain[i];
+    const expectedPrev = i === 0 ? null : chain[i - 1].hash;
+    if ((e.prevHash || null) !== expectedPrev) return { ok: false, brokenAt: i };
+    const recomputed = this.constructor.computeSignatureHash({
+      userId: e.userId,
+      role: e.role,
+      action: e.action,
+      signedAt: e.signedAt,
+      prevHash: e.prevHash,
+    });
+    if (recomputed !== e.hash) return { ok: false, brokenAt: i };
+  }
+  return { ok: true, brokenAt: null };
+};
+
+/** Lock the clinical body (idempotent; immutability enforced by pre-save). */
+unifiedCarePlanSchema.methods.sealEvidence = function () {
+  if (this.evidenceHash) return this.evidenceHash;
+  this.evidenceHash = this.constructor.computeEvidenceHash(
+    this.constructor.extractClinicalBody(this)
+  );
+  return this.evidenceHash;
+};
+
+/** Recompute the body hash and compare against the stored lock. */
+unifiedCarePlanSchema.methods.verifyEvidence = function () {
+  if (!this.evidenceHash) return { ok: false, reason: 'no evidenceHash set' };
+  const recomputed = this.constructor.computeEvidenceHash(
+    this.constructor.extractClinicalBody(this)
+  );
+  return recomputed === this.evidenceHash
+    ? { ok: true, reason: null }
+    : { ok: false, reason: 'clinical body diverged from sealed evidenceHash' };
+};
 
 // ─── Static Methods ─────────────────────────────────────────────────────────
 

@@ -124,6 +124,22 @@ This is the biggest item left in the audit and the one place a projection is uns
 (W1241 — would fabricate clinical data). It needs the care-plan domain owner to
 approve the direction; the per-file re-point work is then mechanical and testable.
 
+> ✅ **DIRECTION APPROVED + STEP 1 SHIPPED (W1252, 2026-06-12).** The domain owner
+> approved option (b) (UnifiedCarePlan canonical). Step 1 — the integrity layer —
+> is done: `signatureChain` (append-only, hash-chained; signature-hash payload
+> format IDENTICAL to `CarePlanVersion.computeSignatureHash` for cross-model
+> verifiability) + `evidenceHash` (sha256 over a deterministic canonicalization of
+> the clinical body via `extractClinicalBody`) lifted onto `UnifiedCarePlan`, with
+> `appendSignature`/`verifySignatureChain`/`sealEvidence`/`verifyEvidence` methods
+>
+> - a pre-save immutability invariant (evidenceHash cannot change once set).
+>   `CarePlansService.activatePlan` now records the 'activate' signature + seals
+>   evidence when the route passes the actor (fail-safe otherwise — enforcement
+>   flips once all callers pass actors). 8 tests incl. cross-model hash-compat +
+>   tamper detection. **Next steps (per-file re-points of the ~10
+>   `intelligence/care-plan*` consumers + the W973 workers, one PR each with a
+>   behavioral test) remain OPEN.**
+
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 
 A web-admin write-path verification pass (always check what the UI **actually** POSTs,

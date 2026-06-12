@@ -1709,6 +1709,8 @@ on:
       - 'backend/__tests__/email-templates-wave1242.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-advanced-behavior-projection-wave1251.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/unified-care-plan-integrity-wave1252.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3401,6 +3403,8 @@ on:
       - 'backend/__tests__/email-templates-wave1242.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/rehab-advanced-behavior-projection-wave1251.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/unified-care-plan-integrity-wave1252.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

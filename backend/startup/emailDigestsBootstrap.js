@@ -36,7 +36,7 @@ function wireEmailDigests(app, { logger = console } = {}) {
   }
   const branchIds = String(process.env.EMAIL_DIGEST_BRANCH_IDS || '')
     .split(',')
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean);
   if (!branchIds.length) {
     logger.warn('[email-digests] EMAIL_DIGEST_BRANCH_IDS empty — nothing to schedule');
@@ -52,7 +52,7 @@ function wireEmailDigests(app, { logger = console } = {}) {
         const outcomes = await digests.sendDigests(emails, { logger });
         logger.info(
           `[email-digests] baseline-due ${branchId}: ${emails.length} emails, ` +
-            `${outcomes.filter((o) => o.ok).length} ok, skipped=${JSON.stringify(skipped)}`
+            `${outcomes.filter(o => o.ok).length} ok, skipped=${JSON.stringify(skipped)}`
         );
       } catch (err) {
         logger.error(`[email-digests] baseline-due ${branchId} failed: ${err.message}`);
@@ -67,7 +67,7 @@ function wireEmailDigests(app, { logger = console } = {}) {
         const outcomes = await digests.sendDigests(emails, { logger });
         logger.info(
           `[email-digests] weekly ${branchId}: ${emails.length} emails, ` +
-            `${outcomes.filter((o) => o.ok).length} ok, meta=${JSON.stringify(skipped)}`
+            `${outcomes.filter(o => o.ok).length} ok, meta=${JSON.stringify(skipped)}`
         );
       } catch (err) {
         logger.error(`[email-digests] weekly ${branchId} failed: ${err.message}`);

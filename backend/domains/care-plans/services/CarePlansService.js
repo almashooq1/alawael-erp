@@ -182,6 +182,26 @@ class CarePlansService extends BaseService {
             action: 'activate',
           });
           doc.sealEvidence();
+
+          // W1259 — generate the family-friendly version (W43 generator via
+          // its unified adapter) so notify_family + the W45 retry worker can
+          // serve UI plans. Stored ONLY when the deterministic safety floor
+          // passes (readability + forbidden-term + section checks); a
+          // requiresRewrite result is never sent to a family.
+          try {
+            const famGen = require('../../../intelligence/family-version-generator.service');
+            const fam = famGen.generateForUnifiedPlan(doc);
+            if (fam && fam.ok && famGen.isFamilyReady(fam)) {
+              doc.familyVersion = {
+                body: fam.markdown,
+                readabilityGrade: fam.readability ? fam.readability.grade : null,
+                generatedAt: new Date(),
+              };
+            }
+          } catch (_e) {
+            /* fail-safe — family version is best-effort at activation */
+          }
+
           await doc.save();
         }
       } catch (e) {

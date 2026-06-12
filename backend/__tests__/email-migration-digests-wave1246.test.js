@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BACKEND = path.join(__dirname, '..');
-const read = (rel) => fs.readFileSync(path.join(BACKEND, rel), 'utf8');
+const read = rel => fs.readFileSync(path.join(BACKEND, rel), 'utf8');
 
 const renderer = require('../services/email/templateRenderer.service');
 const { getTemplate } = require('../intelligence/email-templates.registry');
@@ -41,9 +41,15 @@ describe('W1246 migration — utils/emailService.js converges on the renderer', 
   });
 
   test('helpers keep their public signatures + send text alternative', () => {
-    expect(src).toMatch(/async function sendNewCommunicationEmail\(communication, recipientEmail\)/);
-    expect(src).toMatch(/async function sendApprovalRequestEmail\(communication, approverEmail, stageIndex\)/);
-    expect(src).toMatch(/async function sendStatusChangeEmail\(communication, recipientEmail, oldStatus, newStatus\)/);
+    expect(src).toMatch(
+      /async function sendNewCommunicationEmail\(communication, recipientEmail\)/
+    );
+    expect(src).toMatch(
+      /async function sendApprovalRequestEmail\(communication, approverEmail, stageIndex\)/
+    );
+    expect(src).toMatch(
+      /async function sendStatusChangeEmail\(communication, recipientEmail, oldStatus, newStatus\)/
+    );
     expect((src.match(/text: rendered\.text/g) || []).length).toBe(3);
   });
 
@@ -99,7 +105,7 @@ describe('W1246 digests — service + bootstrap wiring', () => {
     const { wireEmailDigests } = require('../startup/emailDigestsBootstrap');
     const logs = [];
     const out = wireEmailDigests(null, {
-      logger: { info: (m) => logs.push(m), warn: (m) => logs.push(m), error: () => {} },
+      logger: { info: m => logs.push(m), warn: m => logs.push(m), error: () => {} },
     });
     expect(out.enabled).toBe(false);
     expect(logs.join(' ')).toMatch(/disabled/);
@@ -107,6 +113,8 @@ describe('W1246 digests — service + bootstrap wiring', () => {
 
   test('app.js wires the bootstrap after the sweeper chain', () => {
     const src = read('app.js');
-    expect(src).toContain("require('./startup/emailDigestsBootstrap').wireEmailDigests(app, { logger });");
+    expect(src).toContain(
+      "require('./startup/emailDigestsBootstrap').wireEmailDigests(app, { logger });"
+    );
   });
 });

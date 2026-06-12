@@ -25,7 +25,7 @@
 const mongoose = require('mongoose');
 const { renderTemplate } = require('./templateRenderer.service');
 
-const model = (name) => mongoose.model(name);
+const model = name => mongoose.model(name);
 
 const APP_URL = () => process.env.FRONTEND_URL || 'https://alaweal.org';
 
@@ -45,10 +45,10 @@ async function buildBaselineDueEmails({ branchId }) {
 
   for (const ben of beneficiaries) {
     const result = await nba.computeForBeneficiary(ben._id);
-    const baselineActions = result.actions.filter((a) => a.code === 'CAPTURE_BASELINE');
+    const baselineActions = result.actions.filter(a => a.code === 'CAPTURE_BASELINE');
     if (!baselineActions.length) continue;
 
-    const goalIds = baselineActions.map((a) => a.evidence && a.evidence.goalId).filter(Boolean);
+    const goalIds = baselineActions.map(a => a.evidence && a.evidence.goalId).filter(Boolean);
     const goals = await model('TherapeuticGoal')
       .find({ _id: { $in: goalIds } })
       .select('title assignedTo')
@@ -106,8 +106,11 @@ async function buildWeeklySupervisorDigest({ branchId }) {
 
   const Beneficiary = model('Beneficiary');
   const ids = (
-    await Beneficiary.find({ branchId, isDeleted: { $ne: true } }).select('_id').limit(300).lean()
-  ).map((b) => b._id);
+    await Beneficiary.find({ branchId, isDeleted: { $ne: true } })
+      .select('_id')
+      .limit(300)
+      .lean()
+  ).map(b => b._id);
   const caseload = await nba.computeForCaseload(ids);
   const top = caseload.rows[0];
 
@@ -116,7 +119,11 @@ async function buildWeeklySupervisorDigest({ branchId }) {
     .select('name fullName email')
     .lean();
 
-  const branch = await model('Branch').findById(branchId).select('name nameAr').lean().catch(() => null);
+  const branch = await model('Branch')
+    .findById(branchId)
+    .select('name nameAr')
+    .lean()
+    .catch(() => null);
   const branchName = (branch && (branch.nameAr || branch.name)) || String(branchId);
 
   const vars = {
@@ -135,7 +142,7 @@ async function buildWeeklySupervisorDigest({ branchId }) {
     opsUrl: `${APP_URL()}/supervisor-ops`,
   };
 
-  const emails = supervisors.map((s) => ({
+  const emails = supervisors.map(s => ({
     to: s.email,
     ...renderTemplate('WEEKLY_SUPERVISOR_DIGEST', {
       ...vars,

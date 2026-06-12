@@ -1659,6 +1659,31 @@ const dischargePlanSchema = new Schema(
 // ============================================
 
 behaviorIncidentSchema.index({ beneficiary_id: 1, 'incident_info.date': -1 });
+
+// ─── W1251: project every UI-written incident into the risk-engine-readable
+// `BehaviorIncident` (collection behavior_incidents). The escalation predictor
+// (`behavioral.aggression.frequency.spike_200`) reads ONLY that model; without
+// this hook, incidents logged via POST /api/v1/rehabilitation-advanced/
+// behavior-incidents were invisible to it (DDD_VS_LEGACY_MODEL_SPLIT §2c).
+// FAIL-SAFE: the projection never throws; a sync failure must never break the
+// clinical write. Both hooks async per the W483 canonical hook style.
+behaviorIncidentSchema.post('save', async function w1251ProjectOnSave(doc) {
+  try {
+    const { projectRehabAdvancedIncident } = require('../services/rehabAdvancedBehaviorProjection');
+    await projectRehabAdvancedIncident(doc, { logger: console });
+  } catch (_e) {
+    /* fail-safe — never propagate */
+  }
+});
+behaviorIncidentSchema.post('findOneAndUpdate', async function w1251ProjectOnUpdate(doc) {
+  try {
+    if (!doc) return;
+    const { projectRehabAdvancedIncident } = require('../services/rehabAdvancedBehaviorProjection');
+    await projectRehabAdvancedIncident(doc, { logger: console });
+  } catch (_e) {
+    /* fail-safe — never propagate */
+  }
+});
 behaviorPlanSchema.index({ beneficiary_id: 1, status: 1 });
 vocationalProfileSchema.index({ beneficiary_id: 1 });
 homeProgramSchema.index({ beneficiary_id: 1, status: 1 });

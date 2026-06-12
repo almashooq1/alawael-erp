@@ -162,6 +162,20 @@ deferred for a **carefully-verified** follow-up (behavior was mis-analysed twice
 a third change should be built only after confirming the snake model's exact registered
 name + collection + that no `'BehaviorIncident'` model-name collision exists).
 
+> ✅ **FIXED (W1251, 2026-06-12).** The mandated verification was performed first and
+> corrected one more detail: the UI write model is registered as
+> **`AggregatedBehaviorIncident`** (models/rehabilitation-advanced.model.js:1686 —
+> exported under the local name `BehaviorIncident`, which is the naming trap that
+> caused the earlier mis-analyses); `RehabAdvancedBehaviorIncident` is a THIRD,
+> route-unused registration (models/rehab-advanced/BehaviorIncident.model.js). No
+> model-name collision with the camel target. The write path (`buildCrud` →
+> `Model.create`) fires save hooks. Fix shipped as
+> `services/rehabAdvancedBehaviorProjection.js` (W1240/W1242 template: fail-safe,
+> faithful-or-null, idempotent upsert keyed by new sparse+unique
+> `BehaviorIncident.sourceRehabAdvancedIncidentId`) + post-save/post-findOneAndUpdate
+> hooks on the snake schema. 9 tests incl. an MMS behavioral proof that the
+> spike-rule aggregation now counts UI-logged (physical + verbal) aggression.
+
 **Lesson reinforced:** for every split, verify the UI's ACTUAL write endpoint + the
 model that endpoint persists — never assume "the UI writes the `domains/*` model."
 Sessions/care-plans matched the assumption; behavior did not.

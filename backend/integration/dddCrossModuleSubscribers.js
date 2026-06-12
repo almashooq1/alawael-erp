@@ -3337,6 +3337,56 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   });
 
   subscribers.push({
+    name: 'official-letter:issued → timeline:record',
+    pattern: 'official-letter.official_letter.issued',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'official_letter_issued',
+            category: 'administrative',
+            severity: 'success',
+            title: `Official letter issued — ${event.payload.refNumber}`,
+            title_ar: `صدر خطاب رسمي للمستفيد (${event.payload.refNumber})`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] OfficialLetter issued timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
+    name: 'official-letter:revoked → timeline:record',
+    pattern: 'official-letter.official_letter.revoked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            eventType: 'official_letter_revoked',
+            category: 'administrative',
+            severity: 'warning',
+            title: `Official letter revoked — ${event.payload.refNumber}`,
+            title_ar: `أُبطل خطاب رسمي للمستفيد (${event.payload.refNumber})`,
+            ...(event.payload.branchId ? { branchId: event.payload.branchId } : {}),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] OfficialLetter revoked timeline failed: ${err.message}`);
+      }
+    },
+  });
+
+  subscribers.push({
     name: 'insurance-policy:activated → timeline:record',
     pattern: 'insurance-policy.insurance_policy.activated',
     handler: async event => {

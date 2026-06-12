@@ -118,6 +118,46 @@ officialLetterSchema.pre('validate', async function () {
   }
 });
 
+// ── W1240 core-linkage: beneficiary letters surface on the unified
+// CareTimeline (golden-thread doctrine — every beneficiary milestone is
+// linked to the beneficiary + the timeline + time). Native pre-compile
+// hooks (W933 lesson: hooks added after mongoose.model() never fire);
+// publish is best-effort and never blocks the save.
+officialLetterSchema.pre('save', function flagLetterEvents() {
+  this.$__letterIssued = this.isNew;
+  this.$__letterRevoked =
+    !this.isNew && this.isModified('status') && this.status === 'revoked';
+});
+
+officialLetterSchema.post('save', function emitLetterEvents(doc) {
+  if (doc.subject?.kind !== 'beneficiary') return;
+  const issued = doc.$__letterIssued;
+  const revoked = doc.$__letterRevoked;
+  if (!issued && !revoked) return;
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    const payload = {
+      letterId: String(doc._id),
+      refNumber: doc.refNumber,
+      letterType: doc.letterType,
+      beneficiaryId: String(doc.subject.refId),
+      subjectNameAr: doc.subject.nameAr,
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+    };
+    if (issued) {
+      integrationBus.publish('official-letter', 'official_letter.issued', payload);
+    }
+    if (revoked) {
+      integrationBus.publish('official-letter', 'official_letter.revoked', {
+        ...payload,
+        revokeReason: doc.revokeReason ?? null,
+      });
+    }
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
+  }
+});
+
 /**
  * Atomically issue a letter: claim the next sequence for (type, year),
  * format the official reference number, and persist the snapshot.

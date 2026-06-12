@@ -123,6 +123,48 @@ This is the biggest item left in the audit and the one place a projection is uns
 (W1241 — would fabricate clinical data). It needs the care-plan domain owner to
 approve the direction; the per-file re-point work is then mechanical and testable.
 
+### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
+
+A web-admin write-path verification pass (always check what the UI **actually** POSTs,
+the W1231 lesson) corrected the behavior row. The earlier premise — "UI writes
+`BehaviorRecord` (domains/behavior)" — was **wrong**. Behavior is a **3–4-way model
+fragmentation**:
+
+| Model | Who writes/reads it | Shape / collection |
+| --- | --- | --- |
+| `RehabAdvancedBehaviorIncident` (`models/rehabilitation-advanced.model.js`) | **the web-admin behavior UI WRITES it** (`POST /api/v1/rehabilitation-advanced/behavior-incidents`, `buildCrud`) | **snake** — `beneficiary_id`, `behavior_type.category`, `incident_info` |
+| `BehaviorIncident` (`models/BehaviorIncident.js`) | **the risk/escalation engine READS it** (`behavioral.aggression.frequency.spike_200`) | **camel** — `beneficiaryId`, `behaviorType`, `observedAt`; collection `behavior_incidents` |
+| `BehaviorRecord` (`domains/behavior`) | **no UI writer** (mounted at `/api/v1/behavior`, but the web-admin never calls it) | DDD; my W1242 projection SOURCE |
+| `AggregatedBehaviorIncident` | analytics aggregation | — |
+
+**Consequences:**
+
+1. **W1242 (`BehaviorRecord → BehaviorIncident`) addresses a path the UI does not
+   use.** It is harmless (additive, fail-safe, fires only when `BehaviorRecord` is
+   written — which the web-admin never does) and forward-looking (ready if a future UI
+   migrates to `domains/behavior`), but it did **not** close the active gap. The earlier
+   "patient-safety: aggression reaches escalation" framing was incorrect for the live UI.
+2. **The REAL behavior gap is `RehabAdvancedBehaviorIncident` (snake, UI-written) →
+   `BehaviorIncident` (camel, risk-engine-read).** Different models, different
+   collections, snake-vs-camel field shapes → **UI-logged behavior never reaches the
+   escalation predictor.** This is the genuine patient-safety gap and it remains OPEN.
+3. **Sessions (W1240) and care-plans (W1238) were RE-VERIFIED correct** by the same
+   pass: `sessionApi.create/complete` (session-form + my-day) genuinely writes
+   `ClinicalSession`; `carePlanApi` genuinely writes `UnifiedCarePlan`. Those fixes/
+   findings stand.
+
+**The real behavior fix** is a faithful snake→camel projection
+(`RehabAdvancedBehaviorIncident → BehaviorIncident`: `behavior_type.category →
+behaviorType`, `beneficiary_id → beneficiaryId`, `incident_info.intensity/date →
+severity/observedAt`) — same W1240 template, but from the **correct** source. It is
+deferred for a **carefully-verified** follow-up (behavior was mis-analysed twice;
+a third change should be built only after confirming the snake model's exact registered
+name + collection + that no `'BehaviorIncident'` model-name collision exists).
+
+**Lesson reinforced:** for every split, verify the UI's ACTUAL write endpoint + the
+model that endpoint persists — never assume "the UI writes the `domains/*` model."
+Sessions/care-plans matched the assumption; behavior did not.
+
 ### 3. IEP — `SmartIEP` (UI) vs `IndividualEducationPlan` (W200b) — related instance
 
 Not a DDD/legacy split but the same "two models, UI uses one" family. Resolved

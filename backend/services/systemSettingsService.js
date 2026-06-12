@@ -342,21 +342,53 @@ const systemSettingsService = {
   /**
    * Test email configuration by sending a test email
    */
-  async testEmailConfig() {
+  async testEmailConfig(toOverride) {
     try {
-      const settings = await SystemSettings.getInstance();
-      const { smtpServer, smtpPort, fromEmail, enableSSL } = settings.email || {};
-      if (!smtpServer || !fromEmail) {
-        return { success: false, message: 'إعدادات SMTP غير مكتملة' };
+      // W1243: send a REAL test via the canonical transport (utils/emailService)
+      // which reads the live env (SENDGRID_API_KEY, else SMTP_USER/SMTP_PASS) —
+      // the same path the app's actual mail uses. The pre-W1243 implementation
+      // only read a DB SystemSettings doc and SIMULATED success without sending,
+      // so the admin "Test Email" button reported success while sending nothing
+      // (and threw once the DB doc lacked smtp fields). Now it reflects reality.
+      const { setupEmailTransporter, emailStatus } = require('../utils/emailService');
+      const transporter = setupEmailTransporter();
+      if (!transporter) {
+        return {
+          success: false,
+          message:
+            'إعدادات البريد غير مكتملة — اضبط SMTP_USER/SMTP_PASS أو SENDGRID_API_KEY على الخادم ثم أعد المحاولة',
+        };
       }
-      // Simulate test (in production, send real email via nodemailer)
+      const fromAddr = process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
+      const from = process.env.EMAIL_FROM_NAME
+        ? `${process.env.EMAIL_FROM_NAME} <${fromAddr}>`
+        : fromAddr;
+      const to = toOverride || process.env.OPS_ALERT_EMAIL || fromAddr || process.env.SMTP_USER;
+      if (!to) {
+        return {
+          success: false,
+          message: 'لا يوجد مستلِم — مرّر بريداً أو اضبط OPS_ALERT_EMAIL/EMAIL_FROM',
+        };
+      }
+      const info = await transporter.sendMail({
+        from,
+        to,
+        subject: 'Al-Awael ERP — اختبار إعدادات البريد ✅',
+        text: 'رسالة اختبار من زر «اختبار البريد» في لوحة الإدارة للتأكّد من صحة إعدادات SMTP/SendGrid على الخادم الإنتاجي.',
+      });
+      const status = typeof emailStatus === 'function' ? emailStatus() : {};
       logger.info(
-        `Test email config: ${smtpServer}:${smtpPort} from ${fromEmail} SSL=${enableSSL}`
+        `Test email sent to ${to} via ${status.provider || 'smtp'} (messageId=${info.messageId})`
       );
-      return { success: true, message: 'تم إرسال بريد إلكتروني تجريبي بنجاح' };
+      return {
+        success: true,
+        message: `تم إرسال بريد تجريبي إلى ${to} بنجاح`,
+        messageId: info.messageId,
+        provider: status.provider || 'smtp',
+      };
     } catch (error) {
       logger.error('Error testing email config:', error);
-      return { success: false, message: 'فشل في إرسال البريد التجريبي' };
+      return { success: false, message: `فشل إرسال البريد التجريبي: ${error.message}` };
     }
   },
 

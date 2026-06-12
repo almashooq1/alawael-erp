@@ -432,7 +432,9 @@ function verifyWebhook(req, res) {
   const expected = cfg().verifyToken;
   if (mode === 'subscribe' && expected && token === expected) {
     logger.info('[WhatsApp] Webhook verified ✓');
-    return res.status(200).send(challenge);
+    // text/plain: the challenge is echoed verbatim — never let a browser
+    // interpret it as HTML (CodeQL js/reflected-xss).
+    return res.status(200).type('text/plain').send(String(challenge || ''));
   }
   logger.warn('[WhatsApp] Webhook verification failed — token mismatch');
   return res.sendStatus(403);

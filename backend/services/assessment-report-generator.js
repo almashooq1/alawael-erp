@@ -383,13 +383,29 @@ class AssessmentReportGenerator {
   }
 
   /* ─── تغليف HTML ─────────────────────────────────────────── */
+  static _escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   static _wrapHTML(header, body, footer, type) {
+    // Escape everything interpolated into the document — header/body/footer
+    // contain DB-sourced values (beneficiary names, notes) that must never
+    // render as HTML (CodeQL js/reflected-xss / stored XSS).
+    const safeType = this._escapeHtml(type);
+    const safeHeader = this._escapeHtml(header);
+    const safeBody = this._escapeHtml(body);
+    const safeFooter = this._escapeHtml(footer).replace(/\n/g, '<br>');
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>تقرير التقييم — ${type}</title>
+  <title>تقرير التقييم — ${safeType}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; padding: 40px; background: #fff; color: #333; line-height: 1.8; }
@@ -414,8 +430,8 @@ class AssessmentReportGenerator {
     <div class="header">
       <h1>📋 تقرير التقييم</h1>
     </div>
-    <pre class="body">${header}\n\n${body}</pre>
-    <div class="footer">${footer.replace(/\n/g, '<br>')}</div>
+    <pre class="body">${safeHeader}\n\n${safeBody}</pre>
+    <div class="footer">${safeFooter}</div>
   </div>
 </body>
 </html>`;

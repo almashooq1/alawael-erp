@@ -74,7 +74,12 @@ app.post('/hls/stop', (req, res) => {
 });
 
 // ─── HLS static serving (manifest + segments) ────────────────────────────
+const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+
 app.get('/hls/:sessionId/index.m3u8', (req, res) => {
+  if (!SESSION_ID_RE.test(req.params.sessionId)) {
+    return res.status(400).json({ ok: false, code: 'BAD_SESSION_ID' });
+  }
   const file = path.join(hlsManager._outDir(req.params.sessionId), 'index.m3u8');
   if (!fs.existsSync(file)) return res.status(404).json({ ok: false, code: 'NOT_READY' });
   res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
@@ -83,6 +88,9 @@ app.get('/hls/:sessionId/index.m3u8', (req, res) => {
 });
 
 app.get('/hls/:sessionId/:segment', (req, res) => {
+  if (!SESSION_ID_RE.test(req.params.sessionId)) {
+    return res.status(400).json({ ok: false, code: 'BAD_SESSION_ID' });
+  }
   const segment = req.params.segment;
   if (!/^seg_\d+\.ts$/.test(segment)) {
     return res.status(400).json({ ok: false, code: 'BAD_SEGMENT' });

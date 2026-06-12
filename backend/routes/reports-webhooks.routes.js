@@ -105,7 +105,8 @@ function buildRouter({ handler, verifiers = {}, logger = console } = {}) {
     const q = req.query || {};
     const expected = verifiers.whatsappVerifyToken;
     if (expected && q['hub.verify_token'] === expected) {
-      return res.status(200).send(String(q['hub.challenge'] || ''));
+      // text/plain so the echoed challenge can never render as HTML.
+      return res.status(200).type('text/plain').send(String(q['hub.challenge'] || ''));
     }
     return res.status(403).json({ error: 'verify_token_mismatch' });
   });

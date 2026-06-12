@@ -18,7 +18,14 @@ const log = require('./logger');
 
 const sessions = new Map(); // sessionId → { proc, rtspUrl, startedAt, lastHeartbeatAt }
 
+// Strict sessionId format — blocks path traversal (CodeQL js/path-injection).
+const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+function isValidSessionId(sessionId) {
+  return typeof sessionId === 'string' && SESSION_ID_RE.test(sessionId);
+}
+
 function _outDir(sessionId) {
+  if (!isValidSessionId(sessionId)) throw new Error('invalid sessionId');
   return path.join(config.hls.outDir, sessionId);
 }
 
@@ -61,6 +68,9 @@ function spawnFfmpeg(sessionId, rtspUrl) {
 }
 
 function start({ sessionId, rtspUrl }) {
+  if (!isValidSessionId(sessionId)) {
+    return { ok: false, code: 'BAD_SESSION_ID' };
+  }
   if (sessions.has(sessionId)) {
     return { ok: true, alreadyRunning: true };
   }

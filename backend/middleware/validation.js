@@ -205,9 +205,10 @@ const sanitizeInput = (req, res, next) => {
   const sanitizeValue = value => {
     if (typeof value === 'string') {
       return value
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
         .replace(/'/g, '&#x27;')
         .trim();
     }

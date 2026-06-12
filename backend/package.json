@@ -29,6 +29,7 @@
     "seed:forms-catalog:dry": "node scripts/seed-forms-catalog.js --dry-run",
     "seed:forms-catalog:reset": "node scripts/seed-forms-catalog.js --reset",
     "seed:rag-policies": "node scripts/seed-rag-policies.js",
+    "smoke:careplan": "node scripts/smoke-careplan-chain.js",
     "seed:rag-policies:dry": "node scripts/seed-rag-policies.js --dry-run",
     "seed:rag-policies:list": "node scripts/seed-rag-policies.js --list",
     "seed:cbahi": "node scripts/seed-cbahi-attestations.js",

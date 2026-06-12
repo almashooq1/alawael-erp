@@ -42,6 +42,7 @@ function careGapLoader({ models = {}, logger = console } = {}) {
     Beneficiary: models.Beneficiary,
     CarePlan: models.CarePlan || null,
     SmartGoal: models.SmartGoal || null,
+    TherapeuticGoal: models.TherapeuticGoal || null, // W1243 — canonical goal (UI write)
     Vaccination: models.Vaccination || null,
     logger,
   });

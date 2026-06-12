@@ -50,6 +50,11 @@ function createCareGapLoader({
   Beneficiary,
   CarePlan = null,
   SmartGoal = null,
+  // W1243 — TherapeuticGoal is the canonical goal model the UI writes (domains/goals).
+  // care-gap stalled-goal detection previously read only the deprecated/empty SmartGoal,
+  // so UI-entered goals never produced a stalled-goal care gap (DDD↔legacy split, goals
+  // row). Read both: SmartGoal (legacy/portal) + TherapeuticGoal (canonical), merged.
+  TherapeuticGoal = null,
   Vaccination = null,
   maxBeneficiaries = DEFAULT_MAX_BENEFICIARIES,
   stalledDays = DEFAULT_STALLED_DAYS,
@@ -133,6 +138,35 @@ function createCareGapLoader({
         }
       } catch (err) {
         logger.warn && logger.warn(`[care-gap.loader] smartgoal query failed: ${err.message}`);
+      }
+    }
+
+    // 3b. Pull open TherapeuticGoals (the canonical goal the UI writes) — W1243.
+    // Same stalled-detection shape as the SmartGoal block above, merged into the
+    // same per-beneficiary map. `status:'in_progress'` ≙ open; `updatedAt` proxies
+    // `lastProgressAt` (a progress log bumps the goal). Additive: a beneficiary's
+    // stalled goals are now detected across BOTH models.
+    if (TherapeuticGoal) {
+      try {
+        const tgoals = await TherapeuticGoal.find({
+          beneficiaryId: { $in: beneficiaryIds },
+          status: 'in_progress',
+          isDeleted: { $ne: true },
+        })
+          .select('_id beneficiaryId status updatedAt')
+          .lean();
+        for (const g of tgoals) {
+          const key = String(g.beneficiaryId);
+          if (!goalsByBen.has(key)) goalsByBen.set(key, []);
+          goalsByBen.get(key).push({
+            _id: g._id,
+            status: 'in-progress',
+            lastProgressAt: g.updatedAt,
+          });
+        }
+      } catch (err) {
+        logger.warn &&
+          logger.warn(`[care-gap.loader] therapeuticgoal query failed: ${err.message}`);
       }
     }
 

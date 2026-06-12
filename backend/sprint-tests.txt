@@ -1022,4 +1022,7 @@ __tests__/session-therapy-projection-wave1240.test.js
 __tests__/behavior-incident-projection-wave1242.test.js
 __tests__/cache-invalidation-basepath-wave1234.test.js
 __tests__/email-templates-wave1242.test.js
+__tests__/official-letter-timeline-linkage-wave1240.test.js
+__tests__/beneficiary-journey-wave1247.test.js
+__tests__/review-cadence-wave1249.test.js
 __tests__/rehab-advanced-behavior-projection-wave1251.test.js

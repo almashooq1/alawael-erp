@@ -1,0 +1,28 @@
+{
+  "_comment": "Copy to launch-branches.config.json and fill with your REAL branches. code is unique + uppercased (e.g. JED-MAIN, RYD-NORTH). name_ar + name_en required. type: hq|main|branch|satellite (default branch). status: active|inactive|maintenance|opening_soon (default active). location optional. Run --dry-run first; then provision staff with the new branchCode values.",
+  "branches": [
+    {
+      "code": "HQ",
+      "name_ar": "المقر الرئيسي",
+      "name_en": "Head Office",
+      "short_name": "HQ",
+      "type": "hq",
+      "is_hq": true,
+      "location": { "city_ar": "الرياض", "city_en": "Riyadh", "address_ar": "...", "phone": "+9661xxxxxxx" }
+    },
+    {
+      "code": "JED-MAIN",
+      "name_ar": "فرع جدة الرئيسي",
+      "name_en": "Jeddah Main",
+      "type": "main",
+      "location": { "city_ar": "جدة", "city_en": "Jeddah", "address_ar": "...", "phone": "+9661xxxxxxx" }
+    },
+    {
+      "code": "RYD-NORTH",
+      "name_ar": "فرع الرياض الشمالي",
+      "name_en": "Riyadh North",
+      "type": "branch",
+      "location": { "city_ar": "الرياض", "city_en": "Riyadh", "address_ar": "..." }
+    }
+  ]
+}

@@ -124,6 +124,58 @@ This is the biggest item left in the audit and the one place a projection is uns
 (W1241 — would fabricate clinical data). It needs the care-plan domain owner to
 approve the direction; the per-file re-point work is then mechanical and testable.
 
+> ✅ **DIRECTION APPROVED + STEP 1 SHIPPED (W1252, 2026-06-12).** The domain owner
+> approved option (b) (UnifiedCarePlan canonical). Step 1 — the integrity layer —
+> is done: `signatureChain` (append-only, hash-chained; signature-hash payload
+> format IDENTICAL to `CarePlanVersion.computeSignatureHash` for cross-model
+> verifiability) + `evidenceHash` (sha256 over a deterministic canonicalization of
+> the clinical body via `extractClinicalBody`) lifted onto `UnifiedCarePlan`, with
+> `appendSignature`/`verifySignatureChain`/`sealEvidence`/`verifyEvidence` methods
+>
+> - a pre-save immutability invariant (evidenceHash cannot change once set).
+>   `CarePlansService.activatePlan` now records the 'activate' signature + seals
+>   evidence when the route passes the actor (fail-safe otherwise — enforcement
+>   flips once all callers pass actors). 8 tests incl. cross-model hash-compat +
+>   tamper detection. **Next steps (per-file re-points of the ~10
+>   `intelligence/care-plan*` consumers + the W973 workers, one PR each with a
+>   behavioral test) remain OPEN.**
+>
+> ✅ **W1253 (2026-06-12): first prod-ON worker re-pointed.** The W50
+> overdue-review scanner now dual-scans: legacy `CarePlanVersion` (unchanged) +
+> `UnifiedCarePlan` (UI-authored; statuses active/under_review, due at
+> `nextReviewDate`, author/approver via createdBy/approvedBy) normalized into
+> the same severity/dedupe/notify pipeline with `payload.source` tagging.
+> Optional dep + fail-soft (unified query errors never block the legacy scan).
+> Wired through `care-plan-bootstrap` ← `startup/carePlanningBootstrap` (lazy,
+> degrades to legacy-only). 5 new MMS tests + the original W50 suite green.
+> **Remaining re-points: family-retry worker (W45), plateau detector,
+> side-effects/audit-trail/hash-chain consumers, plan-recommendation.**
+>
+> ✅ **W1254 (2026-06-12): second prod-ON worker re-pointed + a latent
+> persistence bug root-fixed.** `familyNotifications[]` lifted field-for-field
+> onto `UnifiedCarePlan`; the W45 family-retry worker dual-scans (legacy
+> statuses unchanged; unified = active/under_review with a failed attempt),
+> `details[].source` tagging, fail-soft. **Root-fix:** the worker's real-model
+> path fetched candidates `.lean()`, so every retry mutation (retries++,
+> status flips, manual_override) hit a missing `.save()` and was silently
+> dropped — backoff/exhaustion state reset on every cron run (potential
+> notification spam). Candidates are now hydrated against real models while
+> legacy mock shapes are honored unchanged. 5 MMS tests (incl. persistence
+> proofs) + the original W50 suite green (38/38 across the worker suites).
+> **Remaining: plateau detector, side-effects/audit-trail/hash-chain
+> consumers, plan-recommendation.**
+>
+> ✅ **W1255 (2026-06-12): plateau detector re-pointed.** Dual-review with
+> normalized unified rows (reviewCycle → cadenceWeeks map; nextReviewDate;
+> createdBy/approvedBy as author/reviewer), `payload.source` tagging,
+> fail-soft. Cadence stamp: `lastPlateauReviewAt` declared top-level on
+> `UnifiedCarePlan` (so the `$set` survives strict mode) while
+> CarePlanVersion keeps `metadata.*`. 4 MMS tests through the REAL W44
+> progress reviewer (overdue-review trigger fires for a UI plan; stamp
+> persists + half-cadence gate honored) + W50 suite green (32/32).
+> **Remaining: side-effects/audit-trail/hash-chain consumers,
+> plan-recommendation.**
+
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 
 A web-admin write-path verification pass (always check what the UI **actually** POSTs,

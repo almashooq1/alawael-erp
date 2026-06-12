@@ -153,7 +153,7 @@ class CarePlansService extends BaseService {
    * @param {string} id
    * @returns {Promise<Object>} الخطة المفعّلة
    */
-  async activatePlan(id) {
+  async activatePlan(id, { actor } = {}) {
     const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
@@ -165,6 +165,32 @@ class CarePlansService extends BaseService {
       const err = new Error('خطة الرعاية غير موجودة');
       err.statusCode = 404;
       throw err;
+    }
+
+    // W1252 — integrity layer (ADR-040 (b) step 1): when the activating actor
+    // is known, append an 'activate' signature to the hash chain + seal the
+    // clinical body. FAIL-SAFE: integrity recording must never break the
+    // activation itself (enforcement flips in a later wave once all callers
+    // pass the actor).
+    if (actor && actor.id) {
+      try {
+        const doc = await UnifiedCarePlan.findById(id);
+        if (doc) {
+          doc.appendSignature({
+            userId: actor.id,
+            role: actor.role || 'approver',
+            action: 'activate',
+          });
+          doc.sealEvidence();
+          await doc.save();
+        }
+      } catch (e) {
+        // non-fatal — surfaced via logs only
+
+        console.warn(
+          `[CarePlansService] W1252 integrity recording failed (non-fatal): ${e.message}`
+        );
+      }
     }
 
     // W380: canonical contract event (was ad-hoc 'care-plan:activated' pre-W380).

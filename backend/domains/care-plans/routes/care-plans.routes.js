@@ -126,7 +126,11 @@ router.put(
   '/:planId/activate',
   requireService,
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.activatePlan(req.params.planId);
+    // W1252 — pass the activating actor so the integrity layer records the
+    // hash-chained 'activate' signature + seals the clinical body.
+    const plan = await carePlansService.activatePlan(req.params.planId, {
+      actor: req.user ? { id: req.user.id || req.user._id, role: req.user.role } : undefined,
+    });
     res.json({ success: true, data: plan });
   })
 );

@@ -186,6 +186,25 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > redaction (clinical/family/executive). 5 tests incl. tamper flagging +
 > family redaction. **Remaining: side-effects consumers,
 > plan-recommendation.**
+>
+> ✅ **W1258 (2026-06-12): consumer map CLOSED.** Final audit findings:
+> **(a) side-effects** — the W45 handlers are doc-agnostic (no model reads;
+> they operate on the passed doc), so they have served UnifiedCarePlan since
+> W1254; the only inaccuracy was the audit label hard-coded to
+> 'CarePlanVersion' — now source-faithful via `entityTypeOf()` (legacy
+> carries versionNumber; unified carries planNumber/version; ambiguous →
+> legacy, conservative). **(b) plan-recommendation** — the builder is PURE
+> (reads only care-planning.registry, no model reads): **reclassified — not
+> a split.** Its UnifiedCarePlan integration is a future product feature.
+> **(c) family-version gap recorded:** UnifiedCarePlan has no
+> `familyVersion.body` (the W43 generator was never ported), so
+> notify_family faithfully SKIPS for unified plans (no fabricated family
+> content). Porting the W43 family-version generator to UnifiedCarePlan is
+> the one remaining **product feature** needed for end-to-end family
+> notifications on UI plans — a feature gap, not a data-visibility split.
+> 4 tests. **ADR-040 (b) consumer re-point map: COMPLETE** (integrity W1252,
+> scanner W1253, family-retry W1254, plateau W1255, audit-trail W1257,
+> side-effects W1258, plan-recommendation reclassified).
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

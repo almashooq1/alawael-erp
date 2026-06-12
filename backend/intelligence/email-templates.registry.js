@@ -609,6 +609,38 @@ const EMAIL_TEMPLATES = Object.freeze({
     }),
   }),
 
+  MEASURE_ALERT_REASSIGNED: T({
+    key: 'MEASURE_ALERT_REASSIGNED',
+    category: 'clinical',
+    titleAr: 'إعادة تعيين تنبيه قياس',
+    subjectAr: '[الأوائل] {{directionLabel}} — {{alertType}}',
+    subjectEn: 'Measure alert reassigned — {{alertType}}',
+    preheaderAr: 'خطورة {{severity}} — افتح صندوق العمل للمتابعة',
+    blocks: Object.freeze([
+      T({ type: 'greeting', ar: 'مرحباً {{recipientName}}،' }),
+      T({ type: 'panel', tone: 'warning', ar: '{{directionLabel}}' }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'المعالج الآخر', value: '{{otherTherapist}}' }),
+          T({ labelAr: 'نوع التنبيه', value: '{{alertType}}' }),
+          T({ labelAr: 'الخطورة', value: '{{severity}}' }),
+          T({ labelAr: 'السبب', value: '{{reason}}' }),
+        ]),
+      }),
+      T({ type: 'cta', labelAr: 'فتح صندوق العمل الذكي', urlVar: 'inboxUrl' }),
+    ]),
+    variables: Object.freeze({
+      recipientName: T({ required: true, labelAr: 'المستلم', sample: 'أ. نورة' }),
+      directionLabel: T({ required: true, labelAr: 'الاتجاه', sample: 'استلمت حالة جديدة' }),
+      otherTherapist: T({ required: false, labelAr: 'المعالج الآخر', sample: 'a4f2c1b9' }),
+      alertType: T({ required: true, labelAr: 'نوع التنبيه', sample: 'PLATEAU_DETECTED' }),
+      severity: T({ required: false, labelAr: 'الخطورة', sample: 'متوسطة' }),
+      reason: T({ required: false, labelAr: 'السبب', sample: 'إعادة توزيع الحالات' }),
+      inboxUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/smart-inbox' }),
+    }),
+  }),
+
   STAFF_ANNOUNCEMENT: T({
     key: 'STAFF_ANNOUNCEMENT',
     category: 'hr',

@@ -42,9 +42,9 @@ describe('rehabilitation-services/escalation-notifications-service.js', () => {
     expect(source).toMatch(/required\s*:\s*true/);
   });
 
-  test('has npm dependencies (2)', () => {
+  test('has npm dependencies (3)', () => {
     const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
-    expect(npms.length).toBe(2);
+    expect(npms.length).toBe(3);
   });
 
   test('has module.exports', () => {

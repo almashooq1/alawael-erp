@@ -80,32 +80,29 @@ function _defaultGetUserById(userId) {
 }
 
 function _renderEmail({ payload, recipient, isFrom, isTo }) {
+  // W1270 — render via the W1242 registry (MEASURE_ALERT_REASSIGNED): shared
+  // professional RTL layout + auto plain-text. Same return shape (+text).
   const direction = isFrom
     ? 'تم نقل حالة من قائمتك'
     : isTo
       ? 'استلمت حالة جديدة'
       : 'إعادة تعيين حالة قياس';
   const otherId = isFrom ? payload.toTherapistId : payload.fromTherapistId;
-  const otherShort = otherId ? String(otherId).slice(-8) : '—';
-  const subject = `[Alawael] ${direction} — ${payload.alertType || 'تنبيه قياس'}`;
   const recipientName =
     [recipient?.firstName_ar, recipient?.lastName_ar].filter(Boolean).join(' ').trim() ||
     [recipient?.firstName, recipient?.lastName].filter(Boolean).join(' ').trim() ||
     'الزميل/ة';
-  const html = `
-    <div dir="rtl" style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;">
-      <p>مرحباً ${escapeHtml(recipientName)},</p>
-      <p><strong>${escapeHtml(direction)}</strong></p>
-      <ul>
-        <li>المعالج الآخر: ${escapeHtml(otherShort)}</li>
-        <li>نوع التنبيه: ${escapeHtml(payload.alertType || 'غير محدد')}</li>
-        <li>الخطورة: ${escapeHtml(payload.severity || 'متوسطة')}</li>
-        ${payload.reason ? `<li>السبب: ${escapeHtml(payload.reason)}</li>` : ''}
-      </ul>
-      <p>افتح صندوق العمل لمتابعة الحالة في النظام.</p>
-    </div>
-  `;
-  return { subject, html };
+  const { renderTemplate } = require('./email/templateRenderer.service');
+  const rendered = renderTemplate('MEASURE_ALERT_REASSIGNED', {
+    recipientName,
+    directionLabel: direction,
+    otherTherapist: otherId ? String(otherId).slice(-8) : null,
+    alertType: payload.alertType || 'تنبيه قياس',
+    severity: payload.severity || 'متوسطة',
+    reason: payload.reason || null,
+    inboxUrl: (process.env.FRONTEND_URL || 'https://alaweal.org') + '/smart-inbox',
+  });
+  return { subject: rendered.subject, html: rendered.html, text: rendered.text };
 }
 
 function escapeHtml(s) {

@@ -446,6 +446,23 @@ class EmailManager {
     if (!to) return { success: false, error: 'MISSING_RECIPIENT' };
 
     try {
+      // W1270 — registry bridge: render through the W1242 professional
+      // catalogue when an adapter can satisfy its variable contract from
+      // this data shape; otherwise fall through to the legacy engine
+      // untouched (refuse-to-fabricate — a send never breaks on adoption).
+      const { tryRegistryRender } = require('./registryBridge');
+      const bridged = tryRegistryRender(templateName, data);
+      if (bridged) {
+        return this.send({
+          to,
+          subject: options.subject || bridged.subject,
+          html: bridged.html,
+          text: bridged.text,
+          metadata: { template: bridged.key, registryBridge: true, ...options.metadata },
+          ...options,
+        });
+      }
+
       const rendered = this.templateEngine.render(templateName, data);
       return this.send({
         to,

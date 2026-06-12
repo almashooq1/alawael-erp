@@ -36,13 +36,33 @@ class CarePlansService extends BaseService {
       throw err;
     }
 
+    // W1266 ROOT FIX (W1217-class): the previous payload wrote undeclared
+    // keys (`goals`/`interventions` — silently dropped by strict mode),
+    // passed `type:'rehabilitation'` (not in the enum → ValidationError),
+    // and omitted the REQUIRED `startDate`. Mapped to the real schema, with
+    // back-compat for callers still sending the old key names.
+    const VALID_TYPES = [
+      'comprehensive',
+      'focused',
+      'iep',
+      'irp',
+      'crisis',
+      'maintenance',
+      'transition',
+    ];
     const plan = await UnifiedCarePlan.create({
       beneficiaryId: data.beneficiaryId,
       episodeId: data.episodeId,
-      type: data.type || 'rehabilitation',
-      goals: data.goals || [],
-      interventions: data.interventions || [],
-      primaryTherapistId: data.primaryTherapistId,
+      type: VALID_TYPES.includes(data.type) ? data.type : 'comprehensive',
+      title_ar: data.title_ar || data.title || undefined,
+      startDate: data.startDate ? new Date(data.startDate) : new Date(),
+      reviewCycle: data.reviewCycle || 'monthly',
+      nextReviewDate: data.nextReviewDate ? new Date(data.nextReviewDate) : undefined,
+      globalGoals: data.globalGoals || data.goals || [],
+      globalInterventions: data.globalInterventions || data.interventions || [],
+      familyComponent: data.familyComponent || undefined,
+      branchId: data.branchId || undefined,
+      createdBy: data.createdBy || data.primaryTherapistId || undefined,
       status: 'draft',
     });
 

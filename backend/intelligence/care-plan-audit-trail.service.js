@@ -373,8 +373,46 @@ function buildAuditTrail(planVersion, options = {}) {
   };
 }
 
+// ─── W1257: UnifiedCarePlan adapter (ADR-040 (b)) ────────────────────
+//
+// The aggregator above is PURE, and W1252/W1254 lifted signatureChain /
+// evidenceHash / familyNotifications onto UnifiedCarePlan with IDENTICAL
+// shapes — so serving the UI's care-plan model only needs a field-name
+// normalization (planNumber→planId, version→versionNumber,
+// createdBy→authorId, approvedBy→approverId). Fields UnifiedCarePlan does
+// not carry (validation, rejection, amendments, supersession) simply emit
+// no events — faithful-or-absent, never fabricated.
+
+function normalizeUnifiedPlanForAudit(p) {
+  const src = typeof p.toObject === 'function' ? p.toObject() : p;
+  return {
+    _id: src._id,
+    planId: src.planNumber || String(src._id || ''),
+    versionNumber: src.version != null ? src.version : 1,
+    status: src.status,
+    createdAt: src.createdAt,
+    authorId: src.createdBy,
+    approvedAt: src.approvedAt,
+    approverId: src.approvedBy,
+    signatureChain: src.signatureChain || [],
+    evidenceHash: src.evidenceHash || null,
+    familyNotifications: src.familyNotifications || [],
+  };
+}
+
+function buildUnifiedAuditTrail(unifiedPlan, options = {}) {
+  if (!unifiedPlan || typeof unifiedPlan !== 'object') {
+    return buildAuditTrail(unifiedPlan, options);
+  }
+  const trail = buildAuditTrail(normalizeUnifiedPlanForAudit(unifiedPlan), options);
+  if (trail && trail.ok) trail.source = 'unified';
+  return trail;
+}
+
 module.exports = {
   buildAuditTrail,
+  buildUnifiedAuditTrail,
+  normalizeUnifiedPlanForAudit,
   verifySignatureChain,
   EVENT_KIND,
   FAMILY_VISIBLE_EVENTS,

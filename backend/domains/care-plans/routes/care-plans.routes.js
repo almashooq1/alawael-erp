@@ -100,6 +100,28 @@ router.get(
   })
 );
 
+/* ─── GET /care-plans/:planId/audit-trail — W1257 (ADR-040 (b)) ────
+ * PDPL Art.13 compliance timeline for a UI-authored plan: lifecycle +
+ * hash-chained signatures (W1252) + family-notification attempts (W1254),
+ * with integrity verification. Read-only; role-based redaction via
+ * ?redactFor=family|executive|clinical (defaults to clinical). */
+router.get(
+  '/:planId/audit-trail',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const {
+      buildUnifiedAuditTrail,
+    } = require('../../../intelligence/care-plan-audit-trail.service');
+    const plan = await carePlansService.getPlanById(req.params.planId);
+    const allowed = ['clinical', 'family', 'executive'];
+    const redactFor = allowed.includes(String(req.query.redactFor))
+      ? String(req.query.redactFor)
+      : 'clinical';
+    const trail = buildUnifiedAuditTrail(plan, { redactFor });
+    res.json({ success: true, data: trail });
+  })
+);
+
 /* ─── GET /care-plans/:planId ─────────────────────────────────── */
 router.get(
   '/:planId',

@@ -175,6 +175,17 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > persists + half-cadence gate honored) + W50 suite green (32/32).
 > **Remaining: side-effects/audit-trail/hash-chain consumers,
 > plan-recommendation.**
+>
+> ✅ **W1257 (2026-06-12): audit trail serves UnifiedCarePlan.** The W45
+> aggregator is pure, and the W1252/W1254 lifts used identical shapes, so
+> the adapter is a field-name normalization (`buildUnifiedAuditTrail`:
+> planNumber→planId, version→versionNumber, createdBy/approvedBy as
+> author/approver). Legacy-only structures (validation/rejection/
+> amendments) emit NO events — faithful-or-absent. Exposed at
+> `GET /api/v1/care-plans/:planId/audit-trail` with the same role-based
+> redaction (clinical/family/executive). 5 tests incl. tamper flagging +
+> family redaction. **Remaining: side-effects consumers,
+> plan-recommendation.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

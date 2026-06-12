@@ -171,6 +171,9 @@ router.get('/by-beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req
 
     const Transition = tryModel('BeneficiaryLifecycleTransition');
     const Episode = tryModel('EpisodeOfCare');
+    // W1277 — the canonical UnifiedCarePlan FIRST (ADR-041); the legacy
+    // CarePlanVersion stays as fallback during the retirement window.
+    const UnifiedPlan = tryModel('UnifiedCarePlan');
     const CarePlan = tryModel('CarePlanVersion');
     const TransitionPlan = tryModel('TransitionPlan');
     const PostRehabCase = tryModel('PostRehabCase');
@@ -182,9 +185,22 @@ router.get('/by-beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req
       Episode
         ? Episode.findOne({ beneficiaryId }).sort({ createdAt: -1 }).lean()
         : Promise.resolve(null),
-      CarePlan
-        ? CarePlan.findOne({ beneficiaryId }).sort({ createdAt: -1 }).lean()
-        : Promise.resolve(null),
+      // W1277: unified first, legacy fallback inside one settled slot
+      (async () => {
+        if (UnifiedPlan) {
+          const u = await UnifiedPlan.findOne({
+            beneficiaryId,
+            isDeleted: { $ne: true },
+            status: { $in: ['draft', 'pending_approval', 'active', 'under_review'] },
+          })
+            .sort({ createdAt: -1 })
+            .lean();
+          if (u) return { ...u, __source: 'unified' };
+        }
+        if (!CarePlan) return null;
+        const legacy = await CarePlan.findOne({ beneficiaryId }).sort({ createdAt: -1 }).lean();
+        return legacy ? { ...legacy, __source: 'legacy' } : null;
+      })(),
       TransitionPlan
         ? TransitionPlan.findOne({ beneficiaryId }).sort({ createdAt: -1 }).lean()
         : Promise.resolve(null),
@@ -233,8 +249,12 @@ router.get('/by-beneficiary/:beneficiaryId', requireRole(READ_ROLES), async (req
           ? {
               id: carePlan._id,
               status: carePlan.status || null,
-              version: carePlan.version || null,
+              version: carePlan.version || carePlan.versionNumber || null,
               updatedAt: carePlan.updatedAt || null,
+              source: carePlan.__source || 'legacy', // W1277
+              titleAr: carePlan.title_ar || null,
+              // W1259 family version — staff preview of what the family sees
+              familyVersion: (carePlan.familyVersion && carePlan.familyVersion.body) || null,
             }
           : null,
         transitionPlan: transitionPlan

@@ -448,6 +448,26 @@ router.get('/beneficiaries/:id/care-plan', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
+    // ── W1272: the canonical UnifiedCarePlan FIRST (ADR-041) ───────────
+    // The UI authors UnifiedCarePlan; reading only the legacy CarePlan left
+    // parents seeing "no active care plan" for real plans — and the W1259
+    // family version never reached the family's own portal. Fail-soft:
+    // any error here falls through to the legacy branch unchanged.
+    try {
+      const { UnifiedCarePlan } = require('../domains/care-plans/models/UnifiedCarePlan');
+      const { mapUnifiedPlanToPortalPayload } = require('../intelligence/portal-plan-mapper.lib');
+      const uPlan = await UnifiedCarePlan.findOne({
+        beneficiaryId: req.params.id,
+        isDeleted: { $ne: true },
+        status: { $in: ['active', 'under_review'] },
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+      if (uPlan) return res.json(mapUnifiedPlanToPortalPayload(uPlan));
+    } catch (_e) {
+      /* fall through to legacy */
+    }
+
     const CarePlan = require('../models/CarePlan');
     const plan = await CarePlan.findOne({ beneficiary: req.params.id, status: 'ACTIVE' }).lean();
     if (!plan)

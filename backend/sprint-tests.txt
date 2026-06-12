@@ -1039,3 +1039,4 @@ __tests__/smartreport-clinical-assessments-wave1261.test.js
 __tests__/care-plan-composer-wave1264.test.js
 __tests__/care-plan-from-proposal-wave1266.test.js
 __tests__/center-ops-wave1269.test.js
+__tests__/portal-plan-mapper-wave1272.test.js

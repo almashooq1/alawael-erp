@@ -8,14 +8,24 @@
       "short_name": "HQ",
       "type": "hq",
       "is_hq": true,
-      "location": { "city_ar": "الرياض", "city_en": "Riyadh", "address_ar": "...", "phone": "+9661xxxxxxx" }
+      "location": {
+        "city_ar": "الرياض",
+        "city_en": "Riyadh",
+        "address_ar": "...",
+        "phone": "+9661xxxxxxx"
+      }
     },
     {
       "code": "JED-MAIN",
       "name_ar": "فرع جدة الرئيسي",
       "name_en": "Jeddah Main",
       "type": "main",
-      "location": { "city_ar": "جدة", "city_en": "Jeddah", "address_ar": "...", "phone": "+9661xxxxxxx" }
+      "location": {
+        "city_ar": "جدة",
+        "city_en": "Jeddah",
+        "address_ar": "...",
+        "phone": "+9661xxxxxxx"
+      }
     },
     {
       "code": "RYD-NORTH",

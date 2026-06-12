@@ -36,6 +36,7 @@ const GOALBANK_DOMAIN_TO_GOAL_DOMAIN = Object.freeze({
   PHYSICAL: 'motor_gross',
   BEHAVIORAL: 'behavioral',
   SPECIAL_EDU: 'academic',
+  LIFE_SKILLS: 'self_care',
 });
 
 function ageInYears(dateOfBirth) {

@@ -46,7 +46,7 @@ const CATEGORIES = Object.freeze([
 const BLOCK_TYPES = Object.freeze(['greeting', 'paragraph', 'panel', 'kv', 'cta', 'divider']);
 const PANEL_TONES = Object.freeze(['info', 'success', 'warning', 'danger']);
 
-const T = (def) => Object.freeze(def);
+const T = def => Object.freeze(def);
 
 const EMAIL_TEMPLATES = Object.freeze({
   // ── الحساب والدخول ────────────────────────────────────────────────────────
@@ -59,10 +59,22 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'تم إنشاء حسابك بنجاح — ابدأ رحلتك معنا',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{name}}،' }),
-      T({ type: 'paragraph', ar: 'يسعدنا انضمامك إلى منصة مراكز الأوائل للتأهيل. تم إنشاء حسابك بنجاح ويمكنك الدخول مباشرة باستخدام بريدك الإلكتروني.' }),
-      T({ type: 'kv', rows: Object.freeze([T({ labelAr: 'البريد الإلكتروني', value: '{{email}}' }), T({ labelAr: 'الدور', value: '{{role}}' })]) }),
+      T({
+        type: 'paragraph',
+        ar: 'يسعدنا انضمامك إلى منصة مراكز الأوائل للتأهيل. تم إنشاء حسابك بنجاح ويمكنك الدخول مباشرة باستخدام بريدك الإلكتروني.',
+      }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'البريد الإلكتروني', value: '{{email}}' }),
+          T({ labelAr: 'الدور', value: '{{role}}' }),
+        ]),
+      }),
       T({ type: 'cta', labelAr: 'الدخول إلى المنصة', urlVar: 'loginUrl' }),
-      T({ type: 'paragraph', ar: 'إن لم تكن أنت من أنشأ هذا الحساب فتجاهل هذه الرسالة أو تواصل مع الدعم.' }),
+      T({
+        type: 'paragraph',
+        ar: 'إن لم تكن أنت من أنشأ هذا الحساب فتجاهل هذه الرسالة أو تواصل مع الدعم.',
+      }),
     ]),
     variables: Object.freeze({
       name: T({ required: true, labelAr: 'اسم المستخدم', sample: 'أ. سارة القحطاني' }),
@@ -81,7 +93,10 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'استخدم الرمز أدناه لإعادة تعيين كلمة المرور',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{name}}،' }),
-      T({ type: 'paragraph', ar: 'تلقّينا طلباً لإعادة تعيين كلمة المرور لحسابك. استخدم الرمز التالي خلال {{expiryMinutes}} دقيقة:' }),
+      T({
+        type: 'paragraph',
+        ar: 'تلقّينا طلباً لإعادة تعيين كلمة المرور لحسابك. استخدم الرمز التالي خلال {{expiryMinutes}} دقيقة:',
+      }),
       T({ type: 'panel', tone: 'info', ar: 'رمز التحقق: {{otp}}' }),
       T({ type: 'paragraph', ar: 'إن لم تطلب ذلك فتجاهل هذه الرسالة — حسابك آمن ولن يتغير شيء.' }),
     ]),
@@ -103,14 +118,21 @@ const EMAIL_TEMPLATES = Object.freeze({
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي ولي الأمر،' }),
       T({ type: 'paragraph', ar: 'نذكّركم بموعد {{beneficiaryName}} القادم في مركز الأوائل:' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'الخدمة', value: '{{serviceType}}' }),
-        T({ labelAr: 'الأخصائي', value: '{{therapistName}}' }),
-        T({ labelAr: 'التاريخ', value: '{{date}}' }),
-        T({ labelAr: 'الوقت', value: '{{time}}' }),
-        T({ labelAr: 'الفرع', value: '{{branchName}}' }),
-      ]) }),
-      T({ type: 'panel', tone: 'warning', ar: 'نرجو الحضور قبل الموعد بعشر دقائق. وفي حال تعذّر الحضور يرجى إبلاغنا قبل 24 ساعة لإعادة الجدولة.' }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'الخدمة', value: '{{serviceType}}' }),
+          T({ labelAr: 'الأخصائي', value: '{{therapistName}}' }),
+          T({ labelAr: 'التاريخ', value: '{{date}}' }),
+          T({ labelAr: 'الوقت', value: '{{time}}' }),
+          T({ labelAr: 'الفرع', value: '{{branchName}}' }),
+        ]),
+      }),
+      T({
+        type: 'panel',
+        tone: 'warning',
+        ar: 'نرجو الحضور قبل الموعد بعشر دقائق. وفي حال تعذّر الحضور يرجى إبلاغنا قبل 24 ساعة لإعادة الجدولة.',
+      }),
     ]),
     variables: Object.freeze({
       beneficiaryName: T({ required: true, labelAr: 'اسم المستفيد', sample: 'محمد العتيبي' }),
@@ -131,9 +153,16 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'سنتواصل معكم لإعادة الجدولة في أقرب وقت',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي ولي الأمر،' }),
-      T({ type: 'panel', tone: 'danger', ar: 'نأسف لإبلاغكم بإلغاء موعد {{beneficiaryName}} ({{serviceType}}) المقرر يوم {{date}} الساعة {{time}}.' }),
+      T({
+        type: 'panel',
+        tone: 'danger',
+        ar: 'نأسف لإبلاغكم بإلغاء موعد {{beneficiaryName}} ({{serviceType}}) المقرر يوم {{date}} الساعة {{time}}.',
+      }),
       T({ type: 'paragraph', ar: 'السبب: {{reason}}' }),
-      T({ type: 'paragraph', ar: 'سيتواصل معكم فريق المواعيد خلال يوم عمل لإعادة الجدولة بما يناسبكم. نعتذر عن أي إزعاج.' }),
+      T({
+        type: 'paragraph',
+        ar: 'سيتواصل معكم فريق المواعيد خلال يوم عمل لإعادة الجدولة بما يناسبكم. نعتذر عن أي إزعاج.',
+      }),
     ]),
     variables: Object.freeze({
       beneficiaryName: T({ required: true, labelAr: 'اسم المستفيد', sample: 'سارة القحطاني' }),
@@ -154,21 +183,38 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'ما تم العمل عليه اليوم وواجب المنزل',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي ولي أمر {{beneficiaryName}}،' }),
-      T({ type: 'paragraph', ar: 'أُنجزت اليوم جلسة {{serviceType}} مع {{therapistName}}. ملخص ما تم:' }),
+      T({
+        type: 'paragraph',
+        ar: 'أُنجزت اليوم جلسة {{serviceType}} مع {{therapistName}}. ملخص ما تم:',
+      }),
       T({ type: 'panel', tone: 'info', ar: '{{summary}}' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'الأهداف المعمول عليها', value: '{{goalsWorked}}' }),
-        T({ labelAr: 'الواجب المنزلي', value: '{{homework}}' }),
-      ]) }),
-      T({ type: 'paragraph', ar: 'مشاركتكم في تطبيق الواجب المنزلي تضاعف أثر الجلسات. لأي استفسار تواصلوا معنا عبر بوابة الأهل.' }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'الأهداف المعمول عليها', value: '{{goalsWorked}}' }),
+          T({ labelAr: 'الواجب المنزلي', value: '{{homework}}' }),
+        ]),
+      }),
+      T({
+        type: 'paragraph',
+        ar: 'مشاركتكم في تطبيق الواجب المنزلي تضاعف أثر الجلسات. لأي استفسار تواصلوا معنا عبر بوابة الأهل.',
+      }),
     ]),
     variables: Object.freeze({
       beneficiaryName: T({ required: true, labelAr: 'المستفيد', sample: 'محمد' }),
       serviceType: T({ required: true, labelAr: 'الخدمة', sample: 'علاج نطق' }),
       therapistName: T({ required: true, labelAr: 'الأخصائي', sample: 'أ. ريم الحربي' }),
-      summary: T({ required: true, labelAr: 'الملخص', sample: 'عمل ممتاز على أصوات /س/ في بداية الكلمة بدقة 80%' }),
+      summary: T({
+        required: true,
+        labelAr: 'الملخص',
+        sample: 'عمل ممتاز على أصوات /س/ في بداية الكلمة بدقة 80%',
+      }),
       goalsWorked: T({ required: false, labelAr: 'الأهداف', sample: 'النطق — المفردات' }),
-      homework: T({ required: false, labelAr: 'الواجب', sample: 'تمرين بطاقات الصور 10 دقائق يومياً' }),
+      homework: T({
+        required: false,
+        labelAr: 'الواجب',
+        sample: 'تمرين بطاقات الصور 10 دقائق يومياً',
+      }),
     }),
   }),
 
@@ -181,14 +227,25 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'خطوة جديدة في رحلة التقدم — نبارك لكم',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي ولي أمر {{beneficiaryName}}،' }),
-      T({ type: 'panel', tone: 'success', ar: 'نبارك لكم! حقق {{beneficiaryName}} الهدف العلاجي: «{{goalTitle}}» 🎉' }),
-      T({ type: 'paragraph', ar: 'هذا الإنجاز ثمرة المواظبة على الجلسات وتطبيق التوصيات في المنزل. سيناقش الفريق الهدف التالي في المراجعة القادمة.' }),
+      T({
+        type: 'panel',
+        tone: 'success',
+        ar: 'نبارك لكم! حقق {{beneficiaryName}} الهدف العلاجي: «{{goalTitle}}» 🎉',
+      }),
+      T({
+        type: 'paragraph',
+        ar: 'هذا الإنجاز ثمرة المواظبة على الجلسات وتطبيق التوصيات في المنزل. سيناقش الفريق الهدف التالي في المراجعة القادمة.',
+      }),
       T({ type: 'cta', labelAr: 'عرض تقرير التقدم', urlVar: 'progressUrl' }),
     ]),
     variables: Object.freeze({
       beneficiaryName: T({ required: true, labelAr: 'المستفيد', sample: 'محمد العتيبي' }),
       goalTitle: T({ required: true, labelAr: 'الهدف', sample: 'تكوين جملة من 3-4 كلمات' }),
-      progressUrl: T({ required: false, labelAr: 'رابط التقرير', sample: 'https://alaweal.org/portal/progress' }),
+      progressUrl: T({
+        required: false,
+        labelAr: 'رابط التقرير',
+        sample: 'https://alaweal.org/portal/progress',
+      }),
     }),
   }),
 
@@ -201,17 +258,31 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'أهداف موصولة بمقاييس دون قياس أول — من طابور الإجراء الأفضل التالي',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{therapistName}}،' }),
-      T({ type: 'paragraph', ar: 'رصد محرّك «الإجراء الأفضل التالي» أهدافاً نشطة لـ{{beneficiaryName}} موصولة بمقاييس لكن دون خط أساس مسجّل:' }),
+      T({
+        type: 'paragraph',
+        ar: 'رصد محرّك «الإجراء الأفضل التالي» أهدافاً نشطة لـ{{beneficiaryName}} موصولة بمقاييس لكن دون خط أساس مسجّل:',
+      }),
       T({ type: 'panel', tone: 'warning', ar: '{{goalsList}}' }),
-      T({ type: 'paragraph', ar: 'تسجيل خط الأساس يجعل قياس التقدم لاحقاً صادقاً وقابلاً للدفاع أمام الأسرة والجهات.' }),
+      T({
+        type: 'paragraph',
+        ar: 'تسجيل خط الأساس يجعل قياس التقدم لاحقاً صادقاً وقابلاً للدفاع أمام الأسرة والجهات.',
+      }),
       T({ type: 'cta', labelAr: 'فتح طابور الإجراءات', urlVar: 'nbaUrl' }),
     ]),
     variables: Object.freeze({
       therapistName: T({ required: true, labelAr: 'الأخصائي', sample: 'أ. فيصل' }),
       beneficiaryName: T({ required: true, labelAr: 'المستفيد', sample: 'محمد العتيبي' }),
       goalCount: T({ required: true, labelAr: 'عدد الأهداف', sample: '3' }),
-      goalsList: T({ required: true, labelAr: 'قائمة الأهداف', sample: 'المفردات — النطق — تكوين الجمل' }),
-      nbaUrl: T({ required: false, labelAr: 'رابط الطابور', sample: 'https://alaweal.org/next-best-action' }),
+      goalsList: T({
+        required: true,
+        labelAr: 'قائمة الأهداف',
+        sample: 'المفردات — النطق — تكوين الجمل',
+      }),
+      nbaUrl: T({
+        required: false,
+        labelAr: 'رابط الطابور',
+        sample: 'https://alaweal.org/next-best-action',
+      }),
     }),
   }),
 
@@ -224,7 +295,11 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'الأكثر تأخراً أولاً — مطلوب جدولة مراجعات',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{supervisorName}}،' }),
-      T({ type: 'panel', tone: 'danger', ar: 'يوجد {{count}} خطة رعاية تجاوزت موعد مراجعتها الدورية، أقدمها متأخر {{maxOverdueDays}} يوماً.' }),
+      T({
+        type: 'panel',
+        tone: 'danger',
+        ar: 'يوجد {{count}} خطة رعاية تجاوزت موعد مراجعتها الدورية، أقدمها متأخر {{maxOverdueDays}} يوماً.',
+      }),
       T({ type: 'paragraph', ar: '{{plansList}}' }),
       T({ type: 'cta', labelAr: 'فتح لوحة عمليات الإشراف', urlVar: 'opsUrl' }),
     ]),
@@ -233,8 +308,16 @@ const EMAIL_TEMPLATES = Object.freeze({
       count: T({ required: true, labelAr: 'العدد', sample: '4' }),
       branchName: T({ required: true, labelAr: 'الفرع', sample: 'فرع الرياض' }),
       maxOverdueDays: T({ required: true, labelAr: 'أقصى تأخير', sample: '21' }),
-      plansList: T({ required: false, labelAr: 'القائمة', sample: 'محمد (21 يوماً) — سارة (14 يوماً) — فيصل (9 أيام)' }),
-      opsUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/supervisor-ops' }),
+      plansList: T({
+        required: false,
+        labelAr: 'القائمة',
+        sample: 'محمد (21 يوماً) — سارة (14 يوماً) — فيصل (9 أيام)',
+      }),
+      opsUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/supervisor-ops',
+      }),
     }),
   }),
 
@@ -249,12 +332,15 @@ const EMAIL_TEMPLATES = Object.freeze({
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي {{guardianName}}،' }),
       T({ type: 'paragraph', ar: 'صدرت فاتورة جديدة لخدمات {{beneficiaryName}}:' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'رقم الفاتورة', value: '{{invoiceNumber}}' }),
-        T({ labelAr: 'الفترة', value: '{{period}}' }),
-        T({ labelAr: 'المبلغ', value: '{{amount}} ريال' }),
-        T({ labelAr: 'تاريخ الاستحقاق', value: '{{dueDate}}' }),
-      ]) }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'رقم الفاتورة', value: '{{invoiceNumber}}' }),
+          T({ labelAr: 'الفترة', value: '{{period}}' }),
+          T({ labelAr: 'المبلغ', value: '{{amount}} ريال' }),
+          T({ labelAr: 'تاريخ الاستحقاق', value: '{{dueDate}}' }),
+        ]),
+      }),
       T({ type: 'cta', labelAr: 'عرض الفاتورة والسداد', urlVar: 'invoiceUrl' }),
       T({ type: 'paragraph', ar: 'لأي استفسار عن الفاتورة يسعد فريق الحسابات بخدمتكم.' }),
     ]),
@@ -265,7 +351,11 @@ const EMAIL_TEMPLATES = Object.freeze({
       period: T({ required: false, labelAr: 'الفترة', sample: 'يونيو 2026' }),
       amount: T({ required: true, labelAr: 'المبلغ', sample: '2,400' }),
       dueDate: T({ required: true, labelAr: 'الاستحقاق', sample: '25 يونيو 2026' }),
-      invoiceUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/portal/invoices' }),
+      invoiceUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/portal/invoices',
+      }),
     }),
   }),
 
@@ -278,13 +368,20 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'تم استلام دفعتكم بنجاح',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي {{guardianName}}،' }),
-      T({ type: 'panel', tone: 'success', ar: 'تم استلام دفعتكم بمبلغ {{amount}} ريال بنجاح. شكراً لكم.' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'رقم الإيصال', value: '{{receiptNumber}}' }),
-        T({ labelAr: 'الفاتورة', value: '{{invoiceNumber}}' }),
-        T({ labelAr: 'طريقة السداد', value: '{{method}}' }),
-        T({ labelAr: 'التاريخ', value: '{{paidAt}}' }),
-      ]) }),
+      T({
+        type: 'panel',
+        tone: 'success',
+        ar: 'تم استلام دفعتكم بمبلغ {{amount}} ريال بنجاح. شكراً لكم.',
+      }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'رقم الإيصال', value: '{{receiptNumber}}' }),
+          T({ labelAr: 'الفاتورة', value: '{{invoiceNumber}}' }),
+          T({ labelAr: 'طريقة السداد', value: '{{method}}' }),
+          T({ labelAr: 'التاريخ', value: '{{paidAt}}' }),
+        ]),
+      }),
     ]),
     variables: Object.freeze({
       guardianName: T({ required: true, labelAr: 'ولي الأمر', sample: 'أ. سعود' }),
@@ -307,12 +404,15 @@ const EMAIL_TEMPLATES = Object.freeze({
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'عزيزي ولي أمر {{beneficiaryName}}،' }),
       T({ type: 'paragraph', ar: 'إليكم خلاصة شهر {{month}}:' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'جلسات منفذة', value: '{{sessionsCount}}' }),
-        T({ labelAr: 'نسبة الحضور', value: '{{attendancePct}}%' }),
-        T({ labelAr: 'أهداف نشطة', value: '{{activeGoals}}' }),
-        T({ labelAr: 'أهداف تحققت هذا الشهر', value: '{{achievedGoals}}' }),
-      ]) }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'جلسات منفذة', value: '{{sessionsCount}}' }),
+          T({ labelAr: 'نسبة الحضور', value: '{{attendancePct}}%' }),
+          T({ labelAr: 'أهداف نشطة', value: '{{activeGoals}}' }),
+          T({ labelAr: 'أهداف تحققت هذا الشهر', value: '{{achievedGoals}}' }),
+        ]),
+      }),
       T({ type: 'panel', tone: 'info', ar: 'أبرز الملاحظات: {{highlights}}' }),
       T({ type: 'cta', labelAr: 'عرض التقرير الكامل', urlVar: 'reportUrl' }),
     ]),
@@ -323,8 +423,16 @@ const EMAIL_TEMPLATES = Object.freeze({
       attendancePct: T({ required: true, labelAr: 'الحضور', sample: '92' }),
       activeGoals: T({ required: true, labelAr: 'أهداف نشطة', sample: '3' }),
       achievedGoals: T({ required: true, labelAr: 'أهداف محققة', sample: '1' }),
-      highlights: T({ required: false, labelAr: 'الملاحظات', sample: 'تحسن ملحوظ في المبادرة بالتواصل' }),
-      reportUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/portal/reports' }),
+      highlights: T({
+        required: false,
+        labelAr: 'الملاحظات',
+        sample: 'تحسن ملحوظ في المبادرة بالتواصل',
+      }),
+      reportUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/portal/reports',
+      }),
     }),
   }),
 
@@ -338,7 +446,11 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'تفاصيل الحادثة والإجراء المطلوب',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{recipientName}}،' }),
-      T({ type: 'panel', tone: 'danger', ar: 'سُجّلت حادثة من نوع «{{incidentType}}» بدرجة {{severity}} في {{branchName}} بتاريخ {{occurredAt}}.' }),
+      T({
+        type: 'panel',
+        tone: 'danger',
+        ar: 'سُجّلت حادثة من نوع «{{incidentType}}» بدرجة {{severity}} في {{branchName}} بتاريخ {{occurredAt}}.',
+      }),
       T({ type: 'paragraph', ar: 'الوصف: {{description}}' }),
       T({ type: 'paragraph', ar: 'الإجراء المطلوب: {{requiredAction}}' }),
       T({ type: 'cta', labelAr: 'فتح سجل الحادثة', urlVar: 'incidentUrl' }),
@@ -349,9 +461,21 @@ const EMAIL_TEMPLATES = Object.freeze({
       severity: T({ required: true, labelAr: 'الدرجة', sample: 'متوسطة' }),
       branchName: T({ required: true, labelAr: 'الفرع', sample: 'فرع الرياض' }),
       occurredAt: T({ required: true, labelAr: 'التاريخ', sample: '12 يونيو 2026 — 10:20' }),
-      description: T({ required: true, labelAr: 'الوصف', sample: 'انزلاق أثناء النشاط الحركي دون إصابة' }),
-      requiredAction: T({ required: false, labelAr: 'الإجراء', sample: 'مراجعة وتوقيع خلال 24 ساعة' }),
-      incidentUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/quality/incidents' }),
+      description: T({
+        required: true,
+        labelAr: 'الوصف',
+        sample: 'انزلاق أثناء النشاط الحركي دون إصابة',
+      }),
+      requiredAction: T({
+        required: false,
+        labelAr: 'الإجراء',
+        sample: 'مراجعة وتوقيع خلال 24 ساعة',
+      }),
+      incidentUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/quality/incidents',
+      }),
     }),
   }),
 
@@ -365,11 +489,21 @@ const EMAIL_TEMPLATES = Object.freeze({
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'الزملاء الأعزاء،' }),
       T({ type: 'paragraph', ar: '{{body}}' }),
-      T({ type: 'kv', rows: Object.freeze([T({ labelAr: 'الجهة المصدرة', value: '{{issuer}}' }), T({ labelAr: 'تاريخ السريان', value: '{{effectiveDate}}' })]) }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'الجهة المصدرة', value: '{{issuer}}' }),
+          T({ labelAr: 'تاريخ السريان', value: '{{effectiveDate}}' }),
+        ]),
+      }),
     ]),
     variables: Object.freeze({
       title: T({ required: true, labelAr: 'العنوان', sample: 'تحديث سياسة الإجازات' }),
-      body: T({ required: true, labelAr: 'النص', sample: 'اعتباراً من الشهر القادم تُقدَّم طلبات الإجازة عبر المنصة فقط…' }),
+      body: T({
+        required: true,
+        labelAr: 'النص',
+        sample: 'اعتباراً من الشهر القادم تُقدَّم طلبات الإجازة عبر المنصة فقط…',
+      }),
       issuer: T({ required: false, labelAr: 'الجهة', sample: 'الموارد البشرية' }),
       effectiveDate: T({ required: false, labelAr: 'السريان', sample: '1 يوليو 2026' }),
     }),
@@ -384,12 +518,15 @@ const EMAIL_TEMPLATES = Object.freeze({
     preheaderAr: 'صحة العمليات، الإنتاجية، وما يحتاج انتباهك',
     blocks: Object.freeze([
       T({ type: 'greeting', ar: 'مرحباً {{supervisorName}}،' }),
-      T({ type: 'kv', rows: Object.freeze([
-        T({ labelAr: 'جلسات منفذة', value: '{{sessionsCount}}' }),
-        T({ labelAr: 'نسبة التوثيق', value: '{{docPct}}%' }),
-        T({ labelAr: 'تنبيهات مفتوحة', value: '{{alertsCount}}' }),
-        T({ labelAr: 'درجة صحة العمليات', value: '{{healthGrade}}' }),
-      ]) }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'جلسات منفذة', value: '{{sessionsCount}}' }),
+          T({ labelAr: 'نسبة التوثيق', value: '{{docPct}}%' }),
+          T({ labelAr: 'تنبيهات مفتوحة', value: '{{alertsCount}}' }),
+          T({ labelAr: 'درجة صحة العمليات', value: '{{healthGrade}}' }),
+        ]),
+      }),
       T({ type: 'panel', tone: 'info', ar: 'الأكثر إلحاحاً: {{topAttention}}' }),
       T({ type: 'cta', labelAr: 'فتح لوحة العمليات', urlVar: 'opsUrl' }),
     ]),
@@ -400,8 +537,16 @@ const EMAIL_TEMPLATES = Object.freeze({
       docPct: T({ required: true, labelAr: 'التوثيق', sample: '91' }),
       alertsCount: T({ required: true, labelAr: 'التنبيهات', sample: '5' }),
       healthGrade: T({ required: true, labelAr: 'الصحة', sample: 'HEALTHY' }),
-      topAttention: T({ required: false, labelAr: 'الانتباه', sample: '3 أهداف بلا خط أساس لدى محمد' }),
-      opsUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/supervisor-ops' }),
+      topAttention: T({
+        required: false,
+        labelAr: 'الانتباه',
+        sample: '3 أهداف بلا خط أساس لدى محمد',
+      }),
+      opsUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/supervisor-ops',
+      }),
     }),
   }),
 });

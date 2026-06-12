@@ -3970,7 +3970,6 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-
   // ─── Waitlist → Timeline: Added (W979) ────────────────────────────
   subscribers.push({
     name: 'waitlist:added → timeline:record',

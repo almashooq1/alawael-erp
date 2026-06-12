@@ -38,8 +38,7 @@ const counterSchema = new Schema(
 );
 
 const OfficialLetterCounter =
-  mongoose.models.OfficialLetterCounter ||
-  mongoose.model('OfficialLetterCounter', counterSchema);
+  mongoose.models.OfficialLetterCounter || mongoose.model('OfficialLetterCounter', counterSchema);
 
 // ─── Letter schema ─────────────────────────────────────────────────────────
 const subjectSchema = new Schema(
@@ -125,8 +124,7 @@ officialLetterSchema.pre('validate', async function () {
 // publish is best-effort and never blocks the save.
 officialLetterSchema.pre('save', function flagLetterEvents() {
   this.$__letterIssued = this.isNew;
-  this.$__letterRevoked =
-    !this.isNew && this.isModified('status') && this.status === 'revoked';
+  this.$__letterRevoked = !this.isNew && this.isModified('status') && this.status === 'revoked';
 });
 
 officialLetterSchema.post('save', function emitLetterEvents(doc) {

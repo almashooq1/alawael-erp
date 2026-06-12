@@ -58,9 +58,7 @@ const STATUSES = ['active', 'inactive', 'maintenance', 'opening_soon'];
   const Branch = require('../models/Branch');
 
   if (LIST) {
-    const branches = await Branch.find()
-      .select('code name_ar name_en type status is_hq')
-      .lean();
+    const branches = await Branch.find().select('code name_ar name_en type status is_hq').lean();
     console.log(`Existing branches (${branches.length}):`);
     branches.forEach(b =>
       console.log(
@@ -113,7 +111,9 @@ const STATUSES = ['active', 'inactive', 'maintenance', 'opening_soon'];
         continue;
       }
       if (b.status && !STATUSES.includes(b.status)) {
-        console.log(`  ✗ skip ${id}: invalid status "${b.status}" (allowed: ${STATUSES.join('/')})`);
+        console.log(
+          `  ✗ skip ${id}: invalid status "${b.status}" (allowed: ${STATUSES.join('/')})`
+        );
         errors++;
         continue;
       }
@@ -134,10 +134,14 @@ const STATUSES = ['active', 'inactive', 'maintenance', 'opening_soon'];
         location: b.location || undefined,
       };
       if (DRY) {
-        console.log(`  [dry] would create ${code} (${doc.name_ar}) type=${doc.type}${doc.is_hq ? ' HQ' : ''}`);
+        console.log(
+          `  [dry] would create ${code} (${doc.name_ar}) type=${doc.type}${doc.is_hq ? ' HQ' : ''}`
+        );
       } else {
         await Branch.create(doc);
-        console.log(`  ✓ created ${code} (${doc.name_ar}) type=${doc.type}${doc.is_hq ? ' HQ' : ''}`);
+        console.log(
+          `  ✓ created ${code} (${doc.name_ar}) type=${doc.type}${doc.is_hq ? ' HQ' : ''}`
+        );
       }
       created++;
     } catch (e) {
@@ -146,9 +150,13 @@ const STATUSES = ['active', 'inactive', 'maintenance', 'opening_soon'];
     }
   }
 
-  console.log(`\n${DRY ? '[DRY RUN] ' : ''}Done. created=${created} skipped(existing)=${skipped} errors=${errors}`);
+  console.log(
+    `\n${DRY ? '[DRY RUN] ' : ''}Done. created=${created} skipped(existing)=${skipped} errors=${errors}`
+  );
   if (created && !DRY) {
-    console.log('Next: provision staff with `npm run provision:staff` using these branchCode values.');
+    console.log(
+      'Next: provision staff with `npm run provision:staff` using these branchCode values.'
+    );
   }
   await mongoose.disconnect();
 })().catch(e => {

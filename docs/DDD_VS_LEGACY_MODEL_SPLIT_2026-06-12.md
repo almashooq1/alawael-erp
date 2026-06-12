@@ -164,6 +164,17 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > proofs) + the original W50 suite green (38/38 across the worker suites).
 > **Remaining: plateau detector, side-effects/audit-trail/hash-chain
 > consumers, plan-recommendation.**
+>
+> ✅ **W1255 (2026-06-12): plateau detector re-pointed.** Dual-review with
+> normalized unified rows (reviewCycle → cadenceWeeks map; nextReviewDate;
+> createdBy/approvedBy as author/reviewer), `payload.source` tagging,
+> fail-soft. Cadence stamp: `lastPlateauReviewAt` declared top-level on
+> `UnifiedCarePlan` (so the `$set` survives strict mode) while
+> CarePlanVersion keeps `metadata.*`. 4 MMS tests through the REAL W44
+> progress reviewer (overdue-review trigger fires for a UI plan; stamp
+> persists + half-cadence gate honored) + W50 suite green (32/32).
+> **Remaining: side-effects/audit-trail/hash-chain consumers,
+> plan-recommendation.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

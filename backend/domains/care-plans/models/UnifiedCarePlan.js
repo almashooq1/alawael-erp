@@ -283,6 +283,10 @@ const unifiedCarePlanSchema = new mongoose.Schema(
     // W45 family-retry worker can serve UI-authored plans) ───────────
     familyNotifications: { type: [FamilyNotificationSchema], default: () => [] },
 
+    // ── W1255 — plateau-detector cadence stamp (declared so the scheduler's
+    // $set survives strict mode; CarePlanVersion keeps it under metadata) ──
+    lastPlateauReviewAt: { type: Date, default: null },
+
     // ── Version Control ─────────────────────────────────────────────
     version: { type: Number, default: 1 },
     previousVersionId: { type: mongoose.Schema.Types.ObjectId, ref: 'UnifiedCarePlan' },

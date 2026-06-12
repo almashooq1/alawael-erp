@@ -211,6 +211,7 @@ function bootstrapCarePlanning(opts = {}) {
   if (typeof collectProgressSignals === 'function') {
     plateauScheduler = createPlateauDetectorScheduler({
       planVersionModel: CarePlanVersion,
+      unifiedPlanModel: UnifiedCarePlan, // W1255 — UI-authored plans now reviewed too
       collectSignals: collectProgressSignals,
       notifier: notifier && typeof notifier.send === 'function' ? notifier : null,
       insightEmitter,

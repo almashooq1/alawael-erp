@@ -1026,3 +1026,4 @@ __tests__/rehab-advanced-behavior-projection-wave1251.test.js
 __tests__/unified-care-plan-integrity-wave1252.test.js
 __tests__/overdue-scanner-unified-wave1253.test.js
 __tests__/family-retry-unified-wave1254.test.js
+__tests__/plateau-detector-unified-wave1255.test.js

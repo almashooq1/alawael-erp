@@ -117,8 +117,14 @@ class ImportExportProService {
       const fs = require('fs');
       const exportsDir = path.join(__dirname, '../exports');
       if (!fs.existsSync(exportsDir)) fs.mkdirSync(exportsDir, { recursive: true });
-      const storedName = path.basename(`${job.jobId}_${result.fileName}`.replace(/[\\/]/g, '_'));
+      const storedName = path
+        .basename(`${job.jobId}_${result.fileName}`.replace(/[\\/]/g, '_'))
+        .replace(/\.\./g, '_');
       const filePath = path.join(exportsDir, storedName);
+      // حارس احتواء صريح: لا كتابة خارج مجلد exports
+      if (!path.resolve(filePath).startsWith(path.resolve(exportsDir) + path.sep)) {
+        throw new Error('Invalid export file name');
+      }
       fs.writeFileSync(filePath, result.buffer);
 
       job.file = {

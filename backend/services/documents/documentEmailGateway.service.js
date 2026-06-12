@@ -292,7 +292,7 @@ class DocumentEmailGatewayService extends EventEmitter {
       subject: finalSubject,
       body:
         typeof finalBody === 'string'
-          ? { html: finalBody, text: finalBody.replace(/<[^>]+>/g, '') }
+          ? { html: finalBody, text: finalBody.replace(/<[^<>]*>/g, '') }
           : finalBody,
       attachments,
       status: 'queued',

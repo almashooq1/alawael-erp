@@ -355,6 +355,95 @@ const EMAIL_TEMPLATES = Object.freeze({
     }),
   }),
 
+  // ── الاتصالات الإدارية (W1246 — migration targets of utils/emailService) ──
+  NEW_COMMUNICATION: T({
+    key: 'NEW_COMMUNICATION',
+    category: 'system',
+    titleAr: 'إشعار اتصال إداري جديد',
+    subjectAr: 'اتصال جديد: {{title}}',
+    subjectEn: 'New communication: {{title}}',
+    preheaderAr: 'مرجع {{referenceNumber}} — أولوية {{priority}}',
+    blocks: Object.freeze([
+      T({ type: 'paragraph', ar: 'ورد اتصال إداري جديد يخصك:' }),
+      T({ type: 'kv', rows: Object.freeze([
+        T({ labelAr: 'رقم المرجع', value: '{{referenceNumber}}' }),
+        T({ labelAr: 'العنوان', value: '{{title}}' }),
+        T({ labelAr: 'النوع', value: '{{type}}' }),
+        T({ labelAr: 'الأولوية', value: '{{priority}}' }),
+        T({ labelAr: 'تاريخ الإرسال', value: '{{sentDate}}' }),
+        T({ labelAr: 'المرسل', value: '{{senderName}}' }),
+        T({ labelAr: 'القسم', value: '{{senderDepartment}}' }),
+      ]) }),
+      T({ type: 'panel', tone: 'info', ar: '{{subjectText}}' }),
+      T({ type: 'cta', labelAr: 'عرض التفاصيل الكاملة', urlVar: 'viewUrl' }),
+    ]),
+    variables: Object.freeze({
+      title: T({ required: true, labelAr: 'العنوان', sample: 'تحديث آلية الدوام' }),
+      referenceNumber: T({ required: true, labelAr: 'المرجع', sample: 'COM-2026-0142' }),
+      type: T({ required: false, labelAr: 'النوع', sample: 'تعميم' }),
+      priority: T({ required: false, labelAr: 'الأولوية', sample: 'عالية' }),
+      sentDate: T({ required: false, labelAr: 'التاريخ', sample: '12 يونيو 2026' }),
+      senderName: T({ required: true, labelAr: 'المرسل', sample: 'إدارة الموارد البشرية' }),
+      senderDepartment: T({ required: false, labelAr: 'القسم', sample: 'الموارد البشرية' }),
+      subjectText: T({ required: true, labelAr: 'الموضوع', sample: 'يرجى الاطلاع على التحديثات المرفقة والعمل بموجبها.' }),
+      viewUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/communications-system/view/1' }),
+    }),
+  }),
+
+  APPROVAL_REQUEST: T({
+    key: 'APPROVAL_REQUEST',
+    category: 'system',
+    titleAr: 'طلب موافقة على اتصال',
+    subjectAr: 'طلب موافقة: {{title}}',
+    subjectEn: 'Approval request: {{title}}',
+    preheaderAr: 'مرحلة {{stageName}} — بانتظار قرارك',
+    blocks: Object.freeze([
+      T({ type: 'panel', tone: 'warning', ar: 'يُرجى مراجعة الاتصال التالي والموافقة عليه أو رفضه:' }),
+      T({ type: 'kv', rows: Object.freeze([
+        T({ labelAr: 'رقم المرجع', value: '{{referenceNumber}}' }),
+        T({ labelAr: 'العنوان', value: '{{title}}' }),
+        T({ labelAr: 'المرحلة', value: '{{stageName}}' }),
+        T({ labelAr: 'الأولوية', value: '{{priority}}' }),
+      ]) }),
+      T({ type: 'panel', tone: 'info', ar: '{{subjectText}}' }),
+      T({ type: 'cta', labelAr: '✓ موافقة', urlVar: 'approveUrl' }),
+      T({ type: 'cta', labelAr: '✗ رفض', urlVar: 'rejectUrl' }),
+    ]),
+    variables: Object.freeze({
+      title: T({ required: true, labelAr: 'العنوان', sample: 'اعتماد خطة التدريب' }),
+      referenceNumber: T({ required: true, labelAr: 'المرجع', sample: 'COM-2026-0150' }),
+      stageName: T({ required: true, labelAr: 'المرحلة', sample: 'موافقة المدير المباشر' }),
+      priority: T({ required: false, labelAr: 'الأولوية', sample: 'متوسطة' }),
+      subjectText: T({ required: true, labelAr: 'الموضوع', sample: 'خطة التدريب الصيفي للأخصائيين.' }),
+      approveUrl: T({ required: true, labelAr: 'رابط الموافقة', sample: 'https://alaweal.org/communications-system/approve/1' }),
+      rejectUrl: T({ required: true, labelAr: 'رابط الرفض', sample: 'https://alaweal.org/communications-system/reject/1' }),
+    }),
+  }),
+
+  STATUS_CHANGE: T({
+    key: 'STATUS_CHANGE',
+    category: 'system',
+    titleAr: 'تحديث حالة اتصال',
+    subjectAr: 'تحديث حالة: {{title}}',
+    subjectEn: 'Status update: {{title}}',
+    preheaderAr: '{{oldStatusLabel}} ← {{newStatusLabel}}',
+    blocks: Object.freeze([
+      T({ type: 'kv', rows: Object.freeze([
+        T({ labelAr: 'رقم المرجع', value: '{{referenceNumber}}' }),
+        T({ labelAr: 'العنوان', value: '{{title}}' }),
+      ]) }),
+      T({ type: 'panel', tone: 'info', ar: 'تغيّرت الحالة من «{{oldStatusLabel}}» إلى «{{newStatusLabel}}».' }),
+      T({ type: 'cta', labelAr: 'عرض التفاصيل', urlVar: 'viewUrl' }),
+    ]),
+    variables: Object.freeze({
+      title: T({ required: true, labelAr: 'العنوان', sample: 'طلب صيانة قاعة العلاج' }),
+      referenceNumber: T({ required: true, labelAr: 'المرجع', sample: 'COM-2026-0133' }),
+      oldStatusLabel: T({ required: true, labelAr: 'الحالة السابقة', sample: 'قيد المراجعة' }),
+      newStatusLabel: T({ required: true, labelAr: 'الحالة الجديدة', sample: 'مكتمل' }),
+      viewUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/communications-system/view/1' }),
+    }),
+  }),
+
   STAFF_ANNOUNCEMENT: T({
     key: 'STAFF_ANNOUNCEMENT',
     category: 'hr',

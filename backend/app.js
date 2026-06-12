@@ -2132,6 +2132,9 @@ require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logge
 require('./startup/maintenanceHubBootstrap').wireMaintenanceHubSweepers(app, { logger });
 // W1194 — monthly pay-equity snapshot + gap-breach warn (ENABLE_PAY_EQUITY_SWEEPER=true).
 require('./startup/payEquitySweeperBootstrap').wirePayEquitySweeper(app, { logger });
+// W1246 — NBA baseline-due (daily 07:30) + weekly supervisor digest (Sun 07:00)
+// emails via the W1242 template renderer (ENABLE_EMAIL_DIGESTS=true + EMAIL_DIGEST_BRANCH_IDS).
+require('./startup/emailDigestsBootstrap').wireEmailDigests(app, { logger });
 
 // W676 — DB backup producer cron (env-gated, default OFF). Closes the DR-drill
 // `no_backup_found` gap: feeds backups/mongodb (the dir dr-verify.js scans).

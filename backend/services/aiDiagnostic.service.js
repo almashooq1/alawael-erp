@@ -912,9 +912,10 @@ class AIDiagnosticService {
   updateGoalProgress(id, progress, milestoneIndex) {
     const g = this.getGoal(id);
     g.progress = Math.max(0, Math.min(100, progress));
-    if (milestoneIndex !== undefined && g.milestones[milestoneIndex]) {
-      g.milestones[milestoneIndex].achieved = true;
-      g.milestones[milestoneIndex].date = new Date().toISOString().slice(0, 10);
+    const mIdx = Number(milestoneIndex);
+    if (milestoneIndex !== undefined && Number.isInteger(mIdx) && mIdx >= 0 && g.milestones[mIdx]) {
+      g.milestones[mIdx].achieved = true;
+      g.milestones[mIdx].date = new Date().toISOString().slice(0, 10);
     }
     if (g.progress >= 100) {
       g.status = 'achieved';

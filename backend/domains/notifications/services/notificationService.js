@@ -227,7 +227,7 @@ async function send(opts) {
 
   const results = {};
   const promises = effectiveChannels.map(async channel => {
-    const adapter = channelAdapters[channel];
+    const adapter = Object.hasOwn(channelAdapters, channel) ? channelAdapters[channel] : undefined;
     if (!adapter) {
       results[channel] = { success: false, error: `Unknown channel: ${channel}` };
       return;

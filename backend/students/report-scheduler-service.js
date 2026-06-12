@@ -214,6 +214,10 @@ const FREQUENCY_CRON_MAP = {
   },
 };
 
+// Guarded lookup: only own keys of the map are callable (prevents prototype access).
+const cronFor = (frequency, ...args) =>
+  Object.hasOwn(FREQUENCY_CRON_MAP, frequency) ? FREQUENCY_CRON_MAP[frequency](...args) : undefined;
+
 // ═══════════════════════════════════════════════════════════════
 // 📧 REPORT EMAIL TEMPLATE BUILDER
 // ═══════════════════════════════════════════════════════════════
@@ -499,7 +503,8 @@ class ReportSchedulerService {
     // Build cron expression
     const cronExpr =
       sub.cronExpression ||
-      FREQUENCY_CRON_MAP[sub.frequency]?.(
+      cronFor(
+        sub.frequency,
         sub.scheduledTime,
         sub.frequency === 'weekly' ? sub.scheduledDayOfWeek : sub.scheduledDayOfMonth
       );
@@ -943,7 +948,8 @@ class ReportSchedulerService {
    */
   async createSubscription(data) {
     // Build cron expression
-    const cronExpr = FREQUENCY_CRON_MAP[data.frequency]?.(
+    const cronExpr = cronFor(
+      data.frequency,
       data.scheduledTime,
       data.frequency === 'weekly' ? data.scheduledDayOfWeek : data.scheduledDayOfMonth
     );
@@ -987,7 +993,8 @@ class ReportSchedulerService {
       data.scheduledDayOfWeek ||
       data.scheduledDayOfMonth
     ) {
-      sub.cronExpression = FREQUENCY_CRON_MAP[sub.frequency]?.(
+      sub.cronExpression = cronFor(
+        sub.frequency,
         sub.scheduledTime,
         sub.frequency === 'weekly' ? sub.scheduledDayOfWeek : sub.scheduledDayOfMonth
       );

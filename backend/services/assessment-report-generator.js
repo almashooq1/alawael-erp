@@ -139,7 +139,7 @@ class AssessmentReportGenerator {
       'family-needs': () => this._familyNeedsBody(doc),
     };
 
-    if (generators[type]) return generators[type]();
+    if (Object.hasOwn(generators, type)) return generators[type]();
     return this._genericBody(doc);
   }
 

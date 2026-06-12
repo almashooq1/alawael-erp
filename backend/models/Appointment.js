@@ -181,7 +181,7 @@ appointmentSchema.pre('save', function () {
       d.getFullYear().toString().slice(-2) +
       String(d.getMonth() + 1).padStart(2, '0') +
       String(d.getDate()).padStart(2, '0');
-    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const rand = require('crypto').randomBytes(3).toString('hex').toUpperCase();
     this.appointmentNumber = `${prefix}-${ts}-${rand}`;
   }
 

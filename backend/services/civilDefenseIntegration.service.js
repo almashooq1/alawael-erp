@@ -97,7 +97,9 @@ class CivilDefenseIntegrationService {
         return cachedStatus;
       }
 
-      const response = await axios.get(`${this.apiBaseUrl}/certificates/${certificateId}/status`, {
+      const response = await axios.get(
+        `${this.apiBaseUrl}/certificates/${encodeURIComponent(certificateId)}/status`,
+        {
         headers: this.getAuthHeaders(),
         timeout: this.requestTimeout,
       });
@@ -130,7 +132,7 @@ class CivilDefenseIntegrationService {
   async renewSafetyCertificate(certificateId, buildingData) {
     try {
       const response = await axios.post(
-        `${this.apiBaseUrl}/certificates/${certificateId}/renew`,
+        `${this.apiBaseUrl}/certificates/${encodeURIComponent(certificateId)}/renew`,
         {
           certificate_id: certificateId,
           building_data: buildingData,
@@ -265,7 +267,9 @@ class CivilDefenseIntegrationService {
         return cachedStatus;
       }
 
-      const response = await axios.get(`${this.apiBaseUrl}/compliance/status/${facilityId}`, {
+      const response = await axios.get(
+        `${this.apiBaseUrl}/compliance/status/${encodeURIComponent(facilityId)}`,
+        {
         headers: this.getAuthHeaders(),
         timeout: this.requestTimeout,
       });
@@ -297,7 +301,7 @@ class CivilDefenseIntegrationService {
    */
   async getViolations(facilityId) {
     try {
-      const response = await axios.get(`${this.apiBaseUrl}/violations/${facilityId}`, {
+      const response = await axios.get(`${this.apiBaseUrl}/violations/${encodeURIComponent(facilityId)}`, {
         headers: this.getAuthHeaders(),
         timeout: this.requestTimeout,
       });
@@ -373,7 +377,9 @@ class CivilDefenseIntegrationService {
    */
   async getFireSafetyStatus(facilityId) {
     try {
-      const response = await axios.get(`${this.apiBaseUrl}/fire-safety/status/${facilityId}`, {
+      const response = await axios.get(
+        `${this.apiBaseUrl}/fire-safety/status/${encodeURIComponent(facilityId)}`,
+        {
         headers: this.getAuthHeaders(),
         timeout: this.requestTimeout,
       });
@@ -452,7 +458,7 @@ class CivilDefenseIntegrationService {
   async getEmergencyDrillResults(drillId) {
     try {
       const response = await axios.get(
-        `${this.apiBaseUrl}/emergency-management/drills/${drillId}/results`,
+        `${this.apiBaseUrl}/emergency-management/drills/${encodeURIComponent(drillId)}/results`,
         {
           headers: this.getAuthHeaders(),
           timeout: this.requestTimeout,

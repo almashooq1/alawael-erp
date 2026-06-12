@@ -856,7 +856,11 @@ router.patch(
   async (req, res) => {
     try {
       const { status } = req.body;
-      const { trackingId, gapIndex } = req.params;
+      const { trackingId } = req.params;
+      const gapIndex = Number(req.params.gapIndex);
+      if (!Number.isInteger(gapIndex) || gapIndex < 0) {
+        return res.status(400).json({ success: false, message: 'Invalid gap index' });
+      }
 
       const tracking = await ComplianceTracking.findById(trackingId);
       if (!tracking) {

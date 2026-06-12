@@ -842,6 +842,10 @@ class OCRDocumentService {
 
   _applyCorrection(extraction, fieldPath, newValue) {
     const parts = fieldPath.split('.');
+    const FORBIDDEN_KEYS = ['__proto__', 'constructor', 'prototype'];
+    if (parts.some(p => FORBIDDEN_KEYS.includes(p.replace(/\[\d+\]$/, '')))) {
+      return; // block prototype-polluting paths
+    }
     let target = extraction.structuredData;
 
     for (let i = 0; i < parts.length - 1; i++) {

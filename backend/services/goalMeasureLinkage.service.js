@@ -152,7 +152,8 @@ class GoalMeasureLinkageSvc {
     if (!Goal || !Measure) throw _err('[goalMeasureLinkage] models unavailable');
     const goal = await Goal.findById(goalId);
     if (!goal) throw _err(`goal not found: ${goalId}`, REASON_CODES.GOAL_NOT_FOUND);
-    const obj = goal.objectives?.[objectiveIndex];
+    const objIdx = Number(objectiveIndex);
+    const obj = Number.isInteger(objIdx) && objIdx >= 0 ? goal.objectives?.[objIdx] : undefined;
     if (!obj) {
       throw _err(`objective index ${objectiveIndex} not found`, REASON_CODES.OBJECTIVE_NOT_FOUND);
     }

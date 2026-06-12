@@ -117,7 +117,7 @@ class ImportExportProService {
       const fs = require('fs');
       const exportsDir = path.join(__dirname, '../exports');
       if (!fs.existsSync(exportsDir)) fs.mkdirSync(exportsDir, { recursive: true });
-      const storedName = `${job.jobId}_${result.fileName}`;
+      const storedName = path.basename(`${job.jobId}_${result.fileName}`.replace(/[\\/]/g, '_'));
       const filePath = path.join(exportsDir, storedName);
       fs.writeFileSync(filePath, result.buffer);
 
@@ -1032,7 +1032,7 @@ class ImportExportProService {
     const mongoQuery = { ...query };
 
     // Apply date range
-    if (dateRange && dateRange.field) {
+    if (dateRange && dateRange.field && /^[A-Za-z0-9_.]+$/.test(dateRange.field)) {
       mongoQuery[dateRange.field] = {};
       if (dateRange.from) mongoQuery[dateRange.field].$gte = new Date(dateRange.from);
       if (dateRange.to) mongoQuery[dateRange.field].$lte = new Date(dateRange.to);

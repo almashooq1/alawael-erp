@@ -97,6 +97,7 @@ class Beneficiary360Service {
     const results = await Promise.allSettled(
       requestedWidgets.map(async w => {
         const start = Date.now();
+        if (!Object.hasOwn(builders, w)) return { widget: w, error: 'unknown_widget' };
         const data = await builders[w]();
         return { widget: w, data, ms: Date.now() - start };
       })

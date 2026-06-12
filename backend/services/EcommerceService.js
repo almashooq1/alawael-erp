@@ -319,7 +319,7 @@ class EcommerceService {
         throw new Error('Cart is empty');
       }
 
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const sessionId = `session_${Date.now()}_${require('crypto').randomBytes(8).toString('hex')}`;
 
       const checkout = new Checkout({
         userId,

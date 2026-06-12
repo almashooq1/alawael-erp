@@ -453,7 +453,7 @@ async function bulkOperation(ids, operation, userId, userName) {
     },
   };
 
-  if (!ops[operation]) throw new Error(`عملية غير صالحة: ${operation}`);
+  if (!Object.hasOwn(ops, operation)) throw new Error(`عملية غير صالحة: ${operation}`);
 
   const docs = await Document.find({ _id: { $in: ids } });
   let processed = 0;

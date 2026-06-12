@@ -410,11 +410,11 @@ class ComplianceCalendarService {
 
     // ── computed events via adapters ───────────────────────────
     const adapterIds = source
-      ? [source].filter(id => this.adapters[id])
+      ? [source].filter(id => Object.hasOwn(this.adapters, id))
       : Object.keys(this.adapters);
 
     const computedArrays = await Promise.all(
-      adapterIds.map(id => this.adapters[id]({ withinDays }))
+      adapterIds.filter(id => Object.hasOwn(this.adapters, id)).map(id => this.adapters[id]({ withinDays }))
     );
     let computed = computedArrays.flat();
 

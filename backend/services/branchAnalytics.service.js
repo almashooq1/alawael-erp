@@ -187,7 +187,7 @@ async function forecastMetric(branchCode, metric = 'revenue', forecastDays = 7, 
     session_completion_rate: l => l.sessions?.completion_rate || 0,
   };
 
-  const extractor = extractors[metric];
+  const extractor = Object.hasOwn(extractors, metric) ? extractors[metric] : undefined;
   if (!extractor) return { error: `Unknown metric: ${metric}` };
 
   const points = logs.map((log, i) => ({ x: i, y: extractor(log) }));

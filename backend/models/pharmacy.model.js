@@ -199,7 +199,7 @@ prescriptionSchema.index({ status: 1, createdAt: -1 });
 
 prescriptionSchema.pre('save', async function () {
   if (!this.prescriptionNumber) {
-    this.prescriptionNumber = `RX-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    this.prescriptionNumber = `RX-${Date.now()}-${require('crypto').randomBytes(4).toString('hex').toUpperCase()}`;
   }
   if (!this.validUntil) {
     this.validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);

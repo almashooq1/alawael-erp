@@ -745,7 +745,11 @@ const outcomeContracting = {
 
   updateMetricValue: async (req, res) => {
     try {
-      const { metricIndex, currentValue } = req.body;
+      const { currentValue } = req.body;
+      const metricIndex = Number(req.body.metricIndex);
+      if (!Number.isInteger(metricIndex) || metricIndex < 0) {
+        return res.status(400).json({ success: false, message: 'مؤشر غير صالح' });
+      }
       const doc = await OutcomeContract.findById(req.params.id);
       if (!doc) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
       if (doc.outcomeMetrics[metricIndex]) {

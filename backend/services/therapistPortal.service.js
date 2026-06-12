@@ -1052,8 +1052,7 @@ class TherapistPortalService {
       consultationNumber: { $regex: `^TC-${year}` },
     });
     const consultationNumber = `TC-${year}-${String(count + 1).padStart(5, '0')}`;
-    const uuid =
-      data.uuid || `tc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const uuid = data.uuid || `tc-${require('crypto').randomUUID()}`;
     return Teleconsultation.create({
       ...data,
       uuid,

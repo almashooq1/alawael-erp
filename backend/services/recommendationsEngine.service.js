@@ -410,7 +410,7 @@ class RecommendationsEngineService extends EventEmitter {
         throw new Error(`A/B test not found: ${testId}`);
       }
 
-      const results = test.results[variant];
+      const results = Object.hasOwn(test.results, variant) ? test.results[variant] : undefined;
       if (!results) {
         throw new Error(`Variant not found: ${variant}`);
       }

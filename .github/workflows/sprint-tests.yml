@@ -14,6 +14,11 @@
 # ════════════════════════════════════════════════════════════════════
 name: "🧪 Sprint Tests"
 
+# Least-privilege token: jobs only checkout + run jest, no repo writes.
+# CodeQL actions/missing-workflow-permissions.
+permissions:
+  contents: read
+
 on:
   # NOTE: GitHub Actions doesn't expand YAML anchors inside `paths:` lists,
   # so push and pull_request keep identical literal lists. If you add a

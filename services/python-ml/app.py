@@ -74,7 +74,8 @@ def predict():
         })
     except Exception as e:
         log.error(f'Prediction error: {e}')
-        return jsonify({'error': str(e)}), 500
+        # Do not echo exception details to the client (CodeQL py/stack-trace-exposure)
+        return jsonify({'error': 'Prediction failed'}), 500
 
 # ─── Data Analysis ────────────────────────────────────────────────────────────
 
@@ -98,7 +99,8 @@ def analyze():
         })
     except Exception as e:
         log.error(f'Analysis error: {e}')
-        return jsonify({'error': str(e)}), 500
+        # Do not echo exception details to the client (CodeQL py/stack-trace-exposure)
+        return jsonify({'error': 'Analysis failed'}), 500
 
 # ─── AI Recommendations ──────────────────────────────────────────────────────
 
@@ -122,7 +124,8 @@ def recommend():
         })
     except Exception as e:
         log.error(f'Recommendation error: {e}')
-        return jsonify({'error': str(e)}), 500
+        # Do not echo exception details to the client (CodeQL py/stack-trace-exposure)
+        return jsonify({'error': 'Recommendation failed'}), 500
 
 # ─── Models Registry ──────────────────────────────────────────────────────────
 

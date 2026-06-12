@@ -39,7 +39,8 @@
     "tar": "^7.5.11",
     "test-exclude": "^7.0.1",
     "uuid": "^14.0.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.3",
+    "joi": "^18.2.1"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",

@@ -39,13 +39,51 @@ integrity. The 360 looking correct masks the gap.
 > review, no family-retry, no plateau detection, no side-effect tracking, no
 > audit-trail/hash-chain entry. The workers are live but blind to real UI data.
 
-### 2. Clinical sessions — `ClinicalSession` (write/360) vs `TherapySession` (analytics) 🔴
+### 2. Clinical sessions — `ClinicalSession` (write/360) vs `TherapySession` (analytics) — ✅ **FIXED (W1240)**
 
-(Full detail in the go-live runbook, Phase C.) UI writes `ClinicalSession`
-(`domains/sessions`); 360 reads it ✅; **Session-Center KPIs + episodes +
-goal-progress + NPHIES claims + ICF + pain (the 56 `TherapySession` consumers) read
-`TherapySession`**. No sync. UI-logged sessions are invisible to analytics/episodes/
-goal-progress.
+UI writes `ClinicalSession` (`domains/sessions`); 360 reads it ✅; Session-Center KPIs
++ episodes + goal-progress + NPHIES claims + ICF + pain (the 56 `TherapySession`
+consumers) read `TherapySession`. No sync → UI-logged sessions were invisible to all
+of them.
+
+**Resolved by a CQRS read-model projection** (`domains/sessions/services/
+therapySessionProjection.js`, PR #426). Every `ClinicalSession` write
+(schedule/update/complete/cancel via `SessionsService`) faithfully projects a
+`TherapySession` keyed by `sourceClinicalSessionId` (sparse+unique, idempotent).
+**FAIL-SAFE** (never throws → can't break the session write); **faithful-or-null**
+(`therapistId`→`therapist` via `Employee.user_id`, null when unlinked — never wrong).
+8 behavioral tests; no regression. This worked because `TherapySession` is a faithful
+*analytics mirror* — every field it needs can be mapped or safely left null.
+
+### 2a. Why care-plans CANNOT use the same projection (W1241) — ⛔ patient-safety boundary
+
+The session fix does **not** generalize to care-plans. `CarePlanVersion` is not an
+analytics mirror — it is a **rich, hash-chained clinical-legal document** whose `body`
+**requires** structured fields the UI's `UnifiedCarePlan` does not carry:
+
+| `CarePlanVersion` requires | `UnifiedCarePlan` (UI) has |
+| --- | --- |
+| `body.goals[].icfCode` (regex `/^[bsde]\d+$/`), `priorityScore` (0-1), `statement`, `domain`, `status` | only a goal **reference** (`goalId → TherapeuticGoal`) in section groups |
+| `body.programs[]` / `measures[]` / `tests[]` with `goalRefs` | — (not modeled) |
+| `signatureChain` (append-only, **hash-chained**) + `evidenceHash` (sha256 body lock) | — |
+
+A projection would therefore have to **fabricate ICF codes, priority scores, and goal
+statements the clinician never entered, and forge hash-chain/evidence integrity
+records.** That crosses two hard lines — **no fabricated clinical data** and **no
+forged audit integrity** — so a care-plan projection is **rejected**, not deferred.
+
+**The care-plan split is a genuine consolidation, not a projection.** It needs the
+care-plan domain owner to decide a canonical model and a staged migration:
+
+- **CarePlanVersion is the value-bearing model** (W41-51 workflow + W44/W50 intelligence
+  + hash-chain + the prod-ON W973 workers + ~10 intelligence files). The thin
+  `UnifiedCarePlan` references `TherapeuticGoal` instead of embedding clinical detail.
+- The honest options are **(a) re-point the UI/360 to author `CarePlanVersion`** (the UI
+  form must capture the rich clinical fields — a frontend+backend effort), or
+  **(b) re-point the intelligence/workers to read `UnifiedCarePlan` + `TherapeuticGoal`**
+  (port W50/W45/hash-chain logic to the reference-based schema). Both are migrations,
+  not one-shot bridges. Until decided, **UI-authored care plans will not reach the
+  prod-ON review/retry workers** — this remains a 🔴 launch blocker for care plans.
 
 ### 3. IEP — `SmartIEP` (UI) vs `IndividualEducationPlan` (W200b) — related instance
 

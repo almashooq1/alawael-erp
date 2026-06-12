@@ -1,0 +1,30 @@
+{
+  "_comment": "Copy to launch-staff.config.json and fill with your real staff. role must be a valid User role (e.g. super_admin, admin, branch_manager, supervisor, doctor, therapist, nurse, receptionist, accountant, hr_manager). branchName/branchCode must match an existing branch exactly (run: npm run provision:staff:list). Omit password to auto-generate a temp one (printed once). Run --dry-run first.",
+  "users": [
+    {
+      "fullName": "مدير النظام",
+      "username": "admin",
+      "email": "admin@alaweal.org",
+      "role": "super_admin",
+      "password": "ChangeMe!2026"
+    },
+    {
+      "fullName": "مدير فرع جدة",
+      "email": "manager.jeddah@alaweal.org",
+      "role": "branch_manager",
+      "branchName": "فرع جدة"
+    },
+    {
+      "fullName": "أخصائي علاج طبيعي",
+      "email": "pt1@alaweal.org",
+      "role": "therapist",
+      "branchName": "فرع جدة"
+    },
+    {
+      "fullName": "موظف استقبال",
+      "email": "reception.jeddah@alaweal.org",
+      "role": "receptionist",
+      "branchName": "فرع جدة"
+    }
+  ]
+}

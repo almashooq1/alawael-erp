@@ -248,7 +248,24 @@ router.get('/children/:id/overview', async (req, res) => {
           date: { $gte: now, $lte: weekAhead },
           status: { $in: ['SCHEDULED', 'CONFIRMED'] },
         }),
-        CarePlan.countDocuments({ beneficiary: req.params.id, status: 'ACTIVE' }),
+        // W1273 — count BOTH care-plan models (legacy + canonical unified)
+        (async () => {
+          const legacy = await CarePlan.countDocuments({
+            beneficiary: req.params.id,
+            status: 'ACTIVE',
+          });
+          try {
+            const { UnifiedCarePlan } = require('../domains/care-plans/models/UnifiedCarePlan');
+            const unified = await UnifiedCarePlan.countDocuments({
+              beneficiaryId: req.params.id,
+              isDeleted: { $ne: true },
+              status: { $in: ['active', 'under_review'] },
+            });
+            return legacy + unified;
+          } catch (_e) {
+            return legacy;
+          }
+        })(),
         ClinicalAssessment.countDocuments({ beneficiary: req.params.id }),
         ClinicalAssessment.findOne({ beneficiary: req.params.id })
           .sort({ assessmentDate: -1 })
@@ -309,6 +326,78 @@ router.get('/children/:id/care-plan', async (req, res) => {
   try {
     const check = await assertChildAccess(req, req.params.id);
     if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    // ── W1273: the canonical UnifiedCarePlan FIRST (ADR-041) — same split
+    // the W1272 fix closed in v1; v2 is what the MOBILE app consumes.
+    // Shape-compatible payload (mobile keeps working unchanged) + the
+    // W1259 family version rides along additively. Fail-soft to legacy.
+    try {
+      const { UnifiedCarePlan } = require('../domains/care-plans/models/UnifiedCarePlan');
+      const uPlan = await UnifiedCarePlan.findOne({
+        beneficiaryId: req.params.id,
+        isDeleted: { $ne: true },
+        status: { $in: ['active', 'under_review'] },
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+      if (uPlan) {
+        const collect = [];
+        for (const section of ['educational', 'therapeutic', 'lifeSkills']) {
+          const sec = uPlan[section];
+          if (!sec || !sec.domains) continue;
+          for (const [domKey, dom] of Object.entries(sec.domains)) {
+            if (!dom || !Array.isArray(dom.goals) || dom.goals.length === 0) continue;
+            for (const g of dom.goals) {
+              collect.push({
+                section,
+                domain: domKey,
+                title: g.title,
+                type: g.type,
+                status: String(g.status || 'pending').toUpperCase(),
+                progress: g.progress || 0,
+                target: g.target,
+                criteria: g.criteria,
+                targetDate: null,
+              });
+            }
+          }
+        }
+        for (const g of uPlan.globalGoals || []) {
+          collect.push({
+            section: 'global',
+            domain: 'global',
+            title: g.title,
+            type: g.type,
+            status: String(g.status || 'pending').toUpperCase(),
+            progress: g.progress || 0,
+            target: g.target,
+            criteria: g.criteria,
+            targetDate: null,
+          });
+        }
+        return res.json({
+          success: true,
+          data: {
+            planNumber: uPlan.planNumber,
+            startDate: uPlan.startDate,
+            reviewDate: uPlan.nextReviewDate || uPlan.reviewDate || null,
+            status: String(uPlan.status || 'draft').toUpperCase(),
+            sections: {
+              educational: !!(uPlan.educational && uPlan.educational.domains),
+              therapeutic: !!(uPlan.therapeutic && uPlan.therapeutic.domains),
+              lifeSkills: !!(uPlan.lifeSkills && uPlan.lifeSkills.domains),
+            },
+            goals: collect,
+            totalGoals: collect.length,
+            achievedGoals: collect.filter(g => g.status === 'ACHIEVED').length,
+            familyVersion: (uPlan.familyVersion && uPlan.familyVersion.body) || null, // W1259
+            source: 'unified',
+          },
+        });
+      }
+    } catch (_e) {
+      /* fall through to legacy */
+    }
 
     const plan =
       (await CarePlan.findOne({ beneficiary: req.params.id, status: 'ACTIVE' })

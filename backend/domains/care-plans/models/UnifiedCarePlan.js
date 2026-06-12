@@ -30,6 +30,29 @@ const SignatureSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// W1254 — same shape as CarePlanVersion.FamilyNotificationSchema (field-for-
+// field) so the W45 retry worker's attempt logic is shared verbatim.
+const FamilyNotificationSchema = new mongoose.Schema(
+  {
+    attemptId: { type: String, required: true, maxlength: 100 },
+    channel: {
+      type: String,
+      enum: ['email', 'sms', 'whatsapp', 'portal', 'manual'],
+      required: true,
+    },
+    attemptedAt: { type: Date, required: true, default: Date.now },
+    status: {
+      type: String,
+      enum: ['queued', 'sent', 'delivered', 'read', 'failed', 'manual_override'],
+      required: true,
+    },
+    retries: { type: Number, default: 0, min: 0, max: 5 },
+    failureReason: { type: String, default: null, maxlength: 500 },
+    acknowledgedAt: { type: Date, default: null },
+  },
+  { _id: false }
+);
+
 const goalRefSchema = new mongoose.Schema(
   {
     goalId: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticGoal' },
@@ -255,6 +278,10 @@ const unifiedCarePlanSchema = new mongoose.Schema(
     // ── Integrity layer (W1252 — lifted from CarePlanVersion) ────────
     signatureChain: { type: [SignatureSchema], default: () => [] },
     evidenceHash: { type: String, default: null, maxlength: 128 },
+
+    // ── Family notifications (W1254 — lifted from CarePlanVersion so the
+    // W45 family-retry worker can serve UI-authored plans) ───────────
+    familyNotifications: { type: [FamilyNotificationSchema], default: () => [] },
 
     // ── Version Control ─────────────────────────────────────────────
     version: { type: Number, default: 1 },

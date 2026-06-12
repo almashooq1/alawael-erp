@@ -188,6 +188,7 @@ function bootstrapCarePlanning(opts = {}) {
   // 6. Background workers (caller is responsible for scheduling)
   const familyRetryWorker = createFamilyRetryWorker({
     planVersionModel: CarePlanVersion,
+    unifiedPlanModel: UnifiedCarePlan, // W1254 — UI-authored plans now served too
     sideEffectHandlers,
     logger,
     now,

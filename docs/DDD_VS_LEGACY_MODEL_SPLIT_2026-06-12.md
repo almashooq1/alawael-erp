@@ -150,6 +150,20 @@ approve the direction; the per-file re-point work is then mechanical and testabl
 > degrades to legacy-only). 5 new MMS tests + the original W50 suite green.
 > **Remaining re-points: family-retry worker (W45), plateau detector,
 > side-effects/audit-trail/hash-chain consumers, plan-recommendation.**
+>
+> ✅ **W1254 (2026-06-12): second prod-ON worker re-pointed + a latent
+> persistence bug root-fixed.** `familyNotifications[]` lifted field-for-field
+> onto `UnifiedCarePlan`; the W45 family-retry worker dual-scans (legacy
+> statuses unchanged; unified = active/under_review with a failed attempt),
+> `details[].source` tagging, fail-soft. **Root-fix:** the worker's real-model
+> path fetched candidates `.lean()`, so every retry mutation (retries++,
+> status flips, manual_override) hit a missing `.save()` and was silently
+> dropped — backoff/exhaustion state reset on every cron run (potential
+> notification spam). Candidates are now hydrated against real models while
+> legacy mock shapes are honored unchanged. 5 MMS tests (incl. persistence
+> proofs) + the original W50 suite green (38/38 across the worker suites).
+> **Remaining: plateau detector, side-effects/audit-trail/hash-chain
+> consumers, plan-recommendation.**
 
 ### 2c. CORRECTION (W1245) — the behavior row was mis-analysed; W1242 fixed an unused path
 

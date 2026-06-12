@@ -60,7 +60,7 @@ async function main() {
     // Verify: find the user back using findOne
     const verify = await usersCol.findOne({ email: 'superadmin@alawael.com' });
     console.log('✅ Verification - User found:', verify ? verify.email : 'NOT FOUND');
-    console.log('✅ Password hash starts with:', verify?.password?.substring(0, 10));
+    console.log('✅ Password hash present:', Boolean(verify?.password));
 
     // Test password comparison
     const match = await bcrypt.compare(password, verify.password);

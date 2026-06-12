@@ -22,8 +22,10 @@ async function hashPassword(plain) {
       const bcrypt = require('bcryptjs');
       return await bcrypt.hash(plain, 12);
     } catch {
-      // fallback: SHA-256 (not for production use)
-      return '$sha256$' + crypto.createHash('sha256').update(plain).digest('hex');
+      // fallback: salted scrypt (bcryptjs missing — dev-only path, W1277)
+      const salt = crypto.randomBytes(16).toString('hex');
+      const derived = crypto.scryptSync(plain, salt, 32).toString('hex');
+      return `$scrypt$${salt}$${derived}`;
     }
   }
 }

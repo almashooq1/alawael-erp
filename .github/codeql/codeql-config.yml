@@ -29,3 +29,21 @@ query-filters:
   # already rate-limits every API route. See header comment.
   - exclude:
       id: js/missing-rate-limiting
+  # False positive at scale (2,931 alerts, W1277): the project has ZERO SQL
+  # databases — no mysql/pg/sequelize/knex/typeorm dependency anywhere.
+  # Every flagged sink is a Mongoose query (Model.find/findOne/...), and
+  # NoSQL operator injection is neutralized globally before any route:
+  #   backend/startup/middleware.js L164: app.use(sanitizeInput)
+  #   backend/middleware/sanitize.js: express-mongo-sanitize({replaceWith:'_'})
+  # which strips `$`/`.` keys from req.body/query/params. CodeQL cannot see
+  # the wiring across the startup module boundary (same blind spot as the
+  # rate-limiting rule above).
+  - exclude:
+      id: js/sql-injection
+  # Noise at scale (764 alerts, W1277): name-based heuristic flags ordinary
+  # REST filter params (?beneficiary=, ?status=, ?nationalId=) read in GET
+  # list endpoints as "sensitive data in query string". These are resource
+  # filters, not credentials/secrets; the API is HTTPS-only and auth is via
+  # Authorization headers, never query strings.
+  - exclude:
+      id: js/sensitive-get-query

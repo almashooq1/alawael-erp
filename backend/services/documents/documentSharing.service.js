@@ -12,6 +12,39 @@ const crypto = require('crypto');
 const logger = require('../../utils/logger');
 
 // ─────────────────────────────────────────────
+// تجزئة كلمات مرور روابط المشاركة
+// scrypt مملّح (CodeQL js/insufficient-password-hash) مع توافق خلفي
+// للهاشات القديمة المخزّنة بصيغة SHA-256 hex بلا ملح.
+// ─────────────────────────────────────────────
+
+function hashLinkPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derived = crypto.scryptSync(String(password), salt, 32).toString('hex');
+  return `scrypt$${salt}$${derived}`;
+}
+
+function verifyLinkPassword(password, stored) {
+  if (!stored) return false;
+  if (stored.startsWith('scrypt$')) {
+    const [, salt, expected] = stored.split('$');
+    const derived = crypto.scryptSync(String(password || ''), salt, 32).toString('hex');
+    return (
+      expected.length === derived.length &&
+      crypto.timingSafeEqual(Buffer.from(derived, 'hex'), Buffer.from(expected, 'hex'))
+    );
+  }
+  // Legacy unsalted SHA-256 (pre-W1277 links) — accept until links expire.
+  const legacy = crypto
+    .createHash('sha256')
+    .update(String(password || ''))
+    .digest('hex');
+  return (
+    legacy.length === stored.length &&
+    crypto.timingSafeEqual(Buffer.from(legacy, 'hex'), Buffer.from(stored, 'hex'))
+  );
+}
+
+// ─────────────────────────────────────────────
 // مخطط المشاركة
 // ─────────────────────────────────────────────
 
@@ -208,9 +241,7 @@ class DocumentSharingService {
         shareType: 'public_link',
         permission: data.permission || 'view',
         shareLink,
-        shareLinkPassword: data.password
-          ? crypto.createHash('sha256').update(data.password).digest('hex')
-          : null,
+        shareLinkPassword: data.password ? hashLinkPassword(data.password) : null,
         expiresAt: data.expiresAt || null,
         message: data.message || '',
         sharedBy,
@@ -236,11 +267,7 @@ class DocumentSharingService {
 
       // التحقق من كلمة المرور
       if (share.shareLinkPassword) {
-        const hashed = crypto
-          .createHash('sha256')
-          .update(password || '')
-          .digest('hex');
-        if (hashed !== share.shareLinkPassword) {
+        if (!verifyLinkPassword(password, share.shareLinkPassword)) {
           throw new Error('كلمة المرور غير صحيحة');
         }
       }

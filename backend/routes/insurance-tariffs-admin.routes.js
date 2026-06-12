@@ -100,7 +100,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 
     return res.json({ ok: true, page: p, limit: l, total, rows });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to list tariffs'));
+    return safeError(res, err, 'failed to list tariffs', { shape: 'ok' });
   }
 });
 
@@ -114,7 +114,7 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
     return res.json({ ok: true, row });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to fetch tariff'));
+    return safeError(res, err, 'failed to fetch tariff', { shape: 'ok' });
   }
 });
 
@@ -149,7 +149,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (err.message?.includes('effectiveTo must be on/after effectiveFrom')) {
       return res.status(400).json({ ok: false, error: 'invalid_date_range' });
     }
-    return res.status(500).json(safeError(err, 'failed to create tariff'));
+    return safeError(res, err, 'failed to create tariff', { shape: 'ok' });
   }
 });
 
@@ -187,7 +187,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (err.message?.includes('effectiveTo must be on/after effectiveFrom')) {
       return res.status(400).json({ ok: false, error: 'invalid_date_range' });
     }
-    return res.status(500).json(safeError(err, 'failed to update tariff'));
+    return safeError(res, err, 'failed to update tariff', { shape: 'ok' });
   }
 });
 
@@ -210,7 +210,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 
     return res.json({ ok: true, row });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to disable tariff'));
+    return safeError(res, err, 'failed to disable tariff', { shape: 'ok' });
   }
 });
 
@@ -228,7 +228,7 @@ router.post('/:id/restore', requireRole(WRITE_ROLES), async (req, res) => {
 
     return res.json({ ok: true, row });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to restore tariff'));
+    return safeError(res, err, 'failed to restore tariff', { shape: 'ok' });
   }
 });
 

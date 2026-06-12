@@ -418,10 +418,12 @@ class GPSSecurityService {
   }
 
   /**
-   * تشفير كلمات المرور (Hashing)
+   * تشفير كلمات المرور (Hashing) — scrypt مملّح (W1277)
    */
   static hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const derived = crypto.scryptSync(String(password), salt, 32).toString('hex');
+    return `scrypt$${salt}$${derived}`;
   }
 
   /**

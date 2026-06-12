@@ -745,7 +745,7 @@ router.post('/bulk-create-claims', requireRole(WRITE_ROLES), async (req, res) =>
 
     return res.status(report.dryRun ? 200 : 201).json(report);
   } catch (err) {
-    return res.status(500).json(safeError(err, 'bulk create-claims failed'));
+    return safeError(res, err, 'bulk create-claims failed');
   }
 });
 
@@ -796,7 +796,7 @@ router.post('/:id/create-claim', requireRole(WRITE_ROLES), async (req, res) => {
       dryRun: result.dryRun,
     });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to bridge session into claim'));
+    return safeError(res, err, 'failed to bridge session into claim');
   }
 });
 

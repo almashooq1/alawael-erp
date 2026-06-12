@@ -155,7 +155,7 @@ class MOIPassportService extends EventEmitter {
    */
   _generateCacheKey(endpoint, params) {
     const paramsStr = JSON.stringify(params);
-    return crypto.createHash('md5').update(`${endpoint}:${paramsStr}`).digest('hex');
+    return crypto.createHash('sha256').update(`${endpoint}:${paramsStr}`).digest('hex');
   }
 
   /**

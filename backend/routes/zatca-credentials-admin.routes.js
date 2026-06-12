@@ -131,7 +131,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 
     return res.json({ ok: true, page: p, limit: l, total, rows: rows.map(redact) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to list credentials'));
+    return safeError(res, err, 'failed to list credentials', { shape: 'ok' });
   }
 });
 
@@ -145,7 +145,7 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
     return res.json({ ok: true, row: redact(row) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to fetch credential'));
+    return safeError(res, err, 'failed to fetch credential', { shape: 'ok' });
   }
 });
 
@@ -173,7 +173,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     });
     return res.status(201).json({ ok: true, row: redact(row) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to create credential'));
+    return safeError(res, err, 'failed to create credential', { shape: 'ok' });
   }
 });
 
@@ -208,7 +208,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     });
     return res.json({ ok: true, row: redact(row) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to update credential'));
+    return safeError(res, err, 'failed to update credential', { shape: 'ok' });
   }
 });
 
@@ -224,7 +224,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     await row.save();
     return res.json({ ok: true, row: redact(row) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to disable credential'));
+    return safeError(res, err, 'failed to disable credential', { shape: 'ok' });
   }
 });
 
@@ -240,7 +240,7 @@ router.post('/:id/restore', requireRole(WRITE_ROLES), async (req, res) => {
     await row.save();
     return res.json({ ok: true, row: redact(row) });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to restore credential'));
+    return safeError(res, err, 'failed to restore credential', { shape: 'ok' });
   }
 });
 
@@ -278,7 +278,7 @@ router.post('/:id/onboard', requireRole(WRITE_ROLES), async (req, res) => {
     const fresh = await ZatcaCredential.findById(req.params.id);
     return res.json({ ok: true, row: redact(fresh), serviceResult: result });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to onboard credential'));
+    return safeError(res, err, 'failed to onboard credential', { shape: 'ok' });
   }
 });
 
@@ -306,7 +306,7 @@ router.post('/:id/production', requireRole(WRITE_ROLES), async (req, res) => {
     const fresh = await ZatcaCredential.findById(req.params.id);
     return res.json({ ok: true, row: redact(fresh), serviceResult: result });
   } catch (err) {
-    return res.status(500).json(safeError(err, 'failed to obtain production csid'));
+    return safeError(res, err, 'failed to obtain production csid', { shape: 'ok' });
   }
 });
 

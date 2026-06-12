@@ -303,7 +303,7 @@ function createIsapiAdapter({
 // ═══════════════════════════════════════════════════════════════
 
 function _shortHash(s) {
-  return crypto.createHash('sha1').update(String(s)).digest('hex').slice(0, 16);
+  return crypto.createHash('sha256').update(String(s)).digest('hex').slice(0, 16);
 }
 
 function _isapiError(operation, deviceCode, kind) {

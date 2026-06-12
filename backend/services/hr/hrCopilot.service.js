@@ -157,7 +157,7 @@ function createLruCache({ maxEntries = 100 } = {}) {
 
 function hashKey(prefix, payload) {
   const json = JSON.stringify(payload);
-  return `${prefix}:${crypto.createHash('sha1').update(json).digest('hex').slice(0, 16)}`;
+  return `${prefix}:${crypto.createHash('sha256').update(json).digest('hex').slice(0, 16)}`;
 }
 
 function extractText(response) {

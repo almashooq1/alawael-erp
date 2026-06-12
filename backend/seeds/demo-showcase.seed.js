@@ -543,7 +543,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       first: 'هند',
       last: 'السعيد',
       email: 'parent.hind@demo.alawael.com',
-      nid: '2100000004',
+      nid: '2100000014',
       relationship: 'mother',
     },
     {

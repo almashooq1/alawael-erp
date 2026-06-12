@@ -22,12 +22,12 @@ integrity. The 360 looking correct masks the gap.
 
 ### 1. Care plans — `UnifiedCarePlan` (write/360) vs `CarePlanVersion` (intelligence) 🔴 most severe
 
-| Path | Model |
-| --- | --- |
-| UI create/submit/approve/reject (`POST /api/v1/care-plans`, `domains/care-plans`) | **`UnifiedCarePlan`** |
-| Beneficiary-360 care-plan widget | **`UnifiedCarePlan`** (consistent ✅) |
-| **The ENTIRE care-plan intelligence** — `care-plan.service` (W50 review), `care-plan-bootstrap`, **`care-plan-family-retry.worker` (W45)**, `care-plan-side-effects.service`, `care-plan-audit-trail.service`, `evidence-snapshot.lib`, `hash-chain.lib`, `beneficiary-lifecycle.service`, `plan-recommendation` | **`CarePlanVersion`** |
-| `rehabPlanHealth.service` (W1201) | **`CarePlanVersion`-first**, UnifiedCarePlan fallback |
+| Path                                                                                                                                                                                                                                                                                                             | Model                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| UI create/submit/approve/reject (`POST /api/v1/care-plans`, `domains/care-plans`)                                                                                                                                                                                                                                | **`UnifiedCarePlan`**                                 |
+| Beneficiary-360 care-plan widget                                                                                                                                                                                                                                                                                 | **`UnifiedCarePlan`** (consistent ✅)                 |
+| **The ENTIRE care-plan intelligence** — `care-plan.service` (W50 review), `care-plan-bootstrap`, **`care-plan-family-retry.worker` (W45)**, `care-plan-side-effects.service`, `care-plan-audit-trail.service`, `evidence-snapshot.lib`, `hash-chain.lib`, `beneficiary-lifecycle.service`, `plan-recommendation` | **`CarePlanVersion`**                                 |
+| `rehabPlanHealth.service` (W1201)                                                                                                                                                                                                                                                                                | **`CarePlanVersion`-first**, UnifiedCarePlan fallback |
 
 **No bridge in either direction** (verified: `domains/care-plans` never references
 `CarePlanVersion`, and the intelligence never references `UnifiedCarePlan`).
@@ -42,9 +42,10 @@ integrity. The 360 looking correct masks the gap.
 ### 2. Clinical sessions — `ClinicalSession` (write/360) vs `TherapySession` (analytics) — ✅ **FIXED (W1240)**
 
 UI writes `ClinicalSession` (`domains/sessions`); 360 reads it ✅; Session-Center KPIs
-+ episodes + goal-progress + NPHIES claims + ICF + pain (the 56 `TherapySession`
-consumers) read `TherapySession`. No sync → UI-logged sessions were invisible to all
-of them.
+
+- episodes + goal-progress + NPHIES claims + ICF + pain (the 56 `TherapySession`
+  consumers) read `TherapySession`. No sync → UI-logged sessions were invisible to all
+  of them.
 
 **Resolved by a CQRS read-model projection** (`domains/sessions/services/
 therapySessionProjection.js`, PR #426). Every `ClinicalSession` write
@@ -53,7 +54,7 @@ therapySessionProjection.js`, PR #426). Every `ClinicalSession` write
 **FAIL-SAFE** (never throws → can't break the session write); **faithful-or-null**
 (`therapistId`→`therapist` via `Employee.user_id`, null when unlinked — never wrong).
 8 behavioral tests; no regression. This worked because `TherapySession` is a faithful
-*analytics mirror* — every field it needs can be mapped or safely left null.
+_analytics mirror_ — every field it needs can be mapped or safely left null.
 
 ### 2a. Why care-plans CANNOT use the same projection (W1241) — ⛔ patient-safety boundary
 
@@ -61,11 +62,11 @@ The session fix does **not** generalize to care-plans. `CarePlanVersion` is not 
 analytics mirror — it is a **rich, hash-chained clinical-legal document** whose `body`
 **requires** structured fields the UI's `UnifiedCarePlan` does not carry:
 
-| `CarePlanVersion` requires | `UnifiedCarePlan` (UI) has |
-| --- | --- |
+| `CarePlanVersion` requires                                                                             | `UnifiedCarePlan` (UI) has                                               |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | `body.goals[].icfCode` (regex `/^[bsde]\d+$/`), `priorityScore` (0-1), `statement`, `domain`, `status` | only a goal **reference** (`goalId → TherapeuticGoal`) in section groups |
-| `body.programs[]` / `measures[]` / `tests[]` with `goalRefs` | — (not modeled) |
-| `signatureChain` (append-only, **hash-chained**) + `evidenceHash` (sha256 body lock) | — |
+| `body.programs[]` / `measures[]` / `tests[]` with `goalRefs`                                           | — (not modeled)                                                          |
+| `signatureChain` (append-only, **hash-chained**) + `evidenceHash` (sha256 body lock)                   | —                                                                        |
 
 A projection would therefore have to **fabricate ICF codes, priority scores, and goal
 statements the clinician never entered, and forge hash-chain/evidence integrity
@@ -76,8 +77,8 @@ forged audit integrity** — so a care-plan projection is **rejected**, not defe
 care-plan domain owner to decide a canonical model and a staged migration:
 
 - **CarePlanVersion is the value-bearing model** (W41-51 workflow + W44/W50 intelligence
-  + hash-chain + the prod-ON W973 workers + ~10 intelligence files). The thin
-  `UnifiedCarePlan` references `TherapeuticGoal` instead of embedding clinical detail.
+  - hash-chain + the prod-ON W973 workers + ~10 intelligence files). The thin
+    `UnifiedCarePlan` references `TherapeuticGoal` instead of embedding clinical detail.
 - The honest options are **(a) re-point the UI/360 to author `CarePlanVersion`** (the UI
   form must capture the rich clinical fields — a frontend+backend effort), or
   **(b) re-point the intelligence/workers to read `UnifiedCarePlan` + `TherapeuticGoal`**
@@ -93,8 +94,8 @@ references.** Rationale, evidence-backed:
 
 1. **It is the only direction consistent with ADR-040.** ADR-040 already made
    `TherapeuticGoal` the canonical goal (referenced, with its own `icfCode`/
-   `priorityScore`/target). `UnifiedCarePlan` *references* `TherapeuticGoal` —
-   aligned. `CarePlanVersion` *embeds* a second copy of goal detail (its own
+   `priorityScore`/target). `UnifiedCarePlan` _references_ `TherapeuticGoal` —
+   aligned. `CarePlanVersion` _embeds_ a second copy of goal detail (its own
    `body.goals[].icfCode/priorityScore/statement`) — that embedded copy is the very
    goal-duplication ADR-040 set out to remove. Choosing option (a) would re-entrench
    it. Choosing (b) retires it.
@@ -130,12 +131,12 @@ the W1231 lesson) corrected the behavior row. The earlier premise — "UI writes
 `BehaviorRecord` (domains/behavior)" — was **wrong**. Behavior is a **3–4-way model
 fragmentation**:
 
-| Model | Who writes/reads it | Shape / collection |
-| --- | --- | --- |
-| `RehabAdvancedBehaviorIncident` (`models/rehabilitation-advanced.model.js`) | **the web-admin behavior UI WRITES it** (`POST /api/v1/rehabilitation-advanced/behavior-incidents`, `buildCrud`) | **snake** — `beneficiary_id`, `behavior_type.category`, `incident_info` |
-| `BehaviorIncident` (`models/BehaviorIncident.js`) | **the risk/escalation engine READS it** (`behavioral.aggression.frequency.spike_200`) | **camel** — `beneficiaryId`, `behaviorType`, `observedAt`; collection `behavior_incidents` |
-| `BehaviorRecord` (`domains/behavior`) | **no UI writer** (mounted at `/api/v1/behavior`, but the web-admin never calls it) | DDD; my W1242 projection SOURCE |
-| `AggregatedBehaviorIncident` | analytics aggregation | — |
+| Model                                                                       | Who writes/reads it                                                                                              | Shape / collection                                                                         |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `RehabAdvancedBehaviorIncident` (`models/rehabilitation-advanced.model.js`) | **the web-admin behavior UI WRITES it** (`POST /api/v1/rehabilitation-advanced/behavior-incidents`, `buildCrud`) | **snake** — `beneficiary_id`, `behavior_type.category`, `incident_info`                    |
+| `BehaviorIncident` (`models/BehaviorIncident.js`)                           | **the risk/escalation engine READS it** (`behavioral.aggression.frequency.spike_200`)                            | **camel** — `beneficiaryId`, `behaviorType`, `observedAt`; collection `behavior_incidents` |
+| `BehaviorRecord` (`domains/behavior`)                                       | **no UI writer** (mounted at `/api/v1/behavior`, but the web-admin never calls it)                               | DDD; my W1242 projection SOURCE                                                            |
+| `AggregatedBehaviorIncident`                                                | analytics aggregation                                                                                            | —                                                                                          |
 
 **Consequences:**
 
@@ -161,6 +162,20 @@ deferred for a **carefully-verified** follow-up (behavior was mis-analysed twice
 a third change should be built only after confirming the snake model's exact registered
 name + collection + that no `'BehaviorIncident'` model-name collision exists).
 
+> ✅ **FIXED (W1251, 2026-06-12).** The mandated verification was performed first and
+> corrected one more detail: the UI write model is registered as
+> **`AggregatedBehaviorIncident`** (models/rehabilitation-advanced.model.js:1686 —
+> exported under the local name `BehaviorIncident`, which is the naming trap that
+> caused the earlier mis-analyses); `RehabAdvancedBehaviorIncident` is a THIRD,
+> route-unused registration (models/rehab-advanced/BehaviorIncident.model.js). No
+> model-name collision with the camel target. The write path (`buildCrud` →
+> `Model.create`) fires save hooks. Fix shipped as
+> `services/rehabAdvancedBehaviorProjection.js` (W1240/W1242 template: fail-safe,
+> faithful-or-null, idempotent upsert keyed by new sparse+unique
+> `BehaviorIncident.sourceRehabAdvancedIncidentId`) + post-save/post-findOneAndUpdate
+> hooks on the snake schema. 9 tests incl. an MMS behavioral proof that the
+> spike-rule aggregation now counts UI-logged (physical + verbal) aggression.
+
 **Lesson reinforced:** for every split, verify the UI's ACTUAL write endpoint + the
 model that endpoint persists — never assume "the UI writes the `domains/*` model."
 Sessions/care-plans matched the assumption; behavior did not.
@@ -176,7 +191,7 @@ At 7 demo beneficiaries the split is invisible (no real UI data exists yet). **T
 moment real care plans and sessions are entered through the UI, half the platform's
 value — the intelligence, the schedulers, the analytics, the compliance trail —
 silently stops seeing them.** This is precisely the class of bug that only surfaces
-*after* go-live, when it is most expensive.
+_after_ go-live, when it is most expensive.
 
 ## Resolution options (decide before real data is entered)
 
@@ -187,7 +202,7 @@ silently stops seeing them.** This is precisely the class of bug that only surfa
 2. **Re-point reads.** Migrate the intelligence/analytics/workers to read the DDD
    models. Correct long-term, but large blast radius (care-plan intelligence alone
    is ~10 files; sessions ~56 consumers).
-3. **Consolidate** to one model per concept. Free *today* (legacy twins are
+3. **Consolidate** to one model per concept. Free _today_ (legacy twins are
    effectively empty in prod) but the heaviest change.
 
 ## ⚠️ Coordination — do not race the parallel effort
@@ -215,15 +230,15 @@ A mismatch between (1) and (3) is a split.
 The remaining core entities were traced. Full result table (severity = blast radius
 × whether the read side is a worker/compliance surface):
 
-| Entity | UI writes / 360 reads | Analytics/intelligence reads | Verdict |
-| --- | --- | --- | --- |
-| **Care plans** | `UnifiedCarePlan` | `CarePlanVersion` (≈10 intelligence files + the **prod-ON workers**) | 🔴 **SPLIT — severe** |
-| **Sessions** | `ClinicalSession` | `TherapySession` (session-center + **episodes** + goal-progress + claims + ICF + pain; 56 consumers) | 🔴 **SPLIT — severe** |
-| **IEP** | `SmartIEP` | (UI-less twin `IndividualEducationPlan`) | 🟠 related family (ADR-026 addendum) |
-| **Behavior** | `BehaviorRecord` / `BehaviorPlan` | **`BehaviorIncident`** — read by the risk/escalation engine (`escalation-predictor.lib`, `risk/sources/behavioral-escalation.source`, `risk/registry`) | 🟠 **divergence — classify** (is a UI "behavior record" the same as a risk "incident"? if yes → split feeding the risk engine blind; if a distinct concept → fine) |
-| **Goals** | `TherapeuticGoal` | **`SmartGoal`** read by 5 surfaces (`care-gap.loader`, `assessmentRecommendationEngine`, `therapistPortal.service`, `assessmentReassessmentSweeper`, `orchestrator-loaders`) | 🟠 **divergence — classify** per ADR-040 (SmartGoal is the legitimate qualitative-*suggestion* tier; but `therapistPortal`/`care-gap` reading it instead of `TherapeuticGoal` may be a real split, not tier-separation) |
-| **Assessments** | `ClinicalAssessment` | only `services/ai/smartReport.service` reads a legacy `Assessment*` | 🟢 **mostly consistent** (one AI-report surface to re-point) |
-| **Episodes** | `EpisodeOfCare` (consistent) | — but the episode **session-list reads `TherapySession`** (`episodes.routes.js:289`) | 🟡 **inherits the session split** — episode detail shows TherapySession, not the UI's ClinicalSession |
+| Entity          | UI writes / 360 reads             | Analytics/intelligence reads                                                                                                                                                 | Verdict                                                                                                                                                                                                                 |
+| --------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Care plans**  | `UnifiedCarePlan`                 | `CarePlanVersion` (≈10 intelligence files + the **prod-ON workers**)                                                                                                         | 🔴 **SPLIT — severe**                                                                                                                                                                                                   |
+| **Sessions**    | `ClinicalSession`                 | `TherapySession` (session-center + **episodes** + goal-progress + claims + ICF + pain; 56 consumers)                                                                         | 🔴 **SPLIT — severe**                                                                                                                                                                                                   |
+| **IEP**         | `SmartIEP`                        | (UI-less twin `IndividualEducationPlan`)                                                                                                                                     | 🟠 related family (ADR-026 addendum)                                                                                                                                                                                    |
+| **Behavior**    | `BehaviorRecord` / `BehaviorPlan` | **`BehaviorIncident`** — read by the risk/escalation engine (`escalation-predictor.lib`, `risk/sources/behavioral-escalation.source`, `risk/registry`)                       | 🟠 **divergence — classify** (is a UI "behavior record" the same as a risk "incident"? if yes → split feeding the risk engine blind; if a distinct concept → fine)                                                      |
+| **Goals**       | `TherapeuticGoal`                 | **`SmartGoal`** read by 5 surfaces (`care-gap.loader`, `assessmentRecommendationEngine`, `therapistPortal.service`, `assessmentReassessmentSweeper`, `orchestrator-loaders`) | 🟠 **divergence — classify** per ADR-040 (SmartGoal is the legitimate qualitative-_suggestion_ tier; but `therapistPortal`/`care-gap` reading it instead of `TherapeuticGoal` may be a real split, not tier-separation) |
+| **Assessments** | `ClinicalAssessment`              | only `services/ai/smartReport.service` reads a legacy `Assessment*`                                                                                                          | 🟢 **mostly consistent** (one AI-report surface to re-point)                                                                                                                                                            |
+| **Episodes**    | `EpisodeOfCare` (consistent)      | — but the episode **session-list reads `TherapySession`** (`episodes.routes.js:289`)                                                                                         | 🟡 **inherits the session split** — episode detail shows TherapySession, not the UI's ClinicalSession                                                                                                                   |
 
 **Conclusion.** The pattern is real and broad: **2 severe splits (care-plans,
 sessions), 2 needing concept-classification (goals, behavior), 1 minor

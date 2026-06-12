@@ -161,7 +161,15 @@ class QiwaService extends EventEmitter {
     if (/^[a-z][a-z0-9+.-]*:\/\//i.test(rawEndpoint) || rawEndpoint.startsWith('//')) {
       throw new Error('Absolute URLs are not allowed; pass a relative Qiwa API path');
     }
-    const url = '/' + rawEndpoint.replace(/^[/\\]+/, '');
+    // Encode every path segment so user-derived IDs can never inject '/',
+    // '..', '?', '#', or a new origin into the request URL (SSRF barrier).
+    const url =
+      '/' +
+      rawEndpoint
+        .replace(/^[/\\]+/, '')
+        .split('/')
+        .map(seg => encodeURIComponent(seg))
+        .join('/');
 
     // Check cache
     if (method === 'GET' && !options.skipCache) {

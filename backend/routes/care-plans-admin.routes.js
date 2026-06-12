@@ -18,6 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const CarePlan = require('../models/CarePlan');
@@ -59,7 +60,7 @@ const WRITE_ROLES = [
 
 function generatePlanNumber() {
   const y = new Date().getFullYear();
-  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const rand = crypto.randomBytes(4).toString('hex').slice(0, 6).toUpperCase();
   return `CP-${y}-${rand}`;
 }
 

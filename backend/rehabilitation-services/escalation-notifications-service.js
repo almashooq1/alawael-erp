@@ -5,6 +5,7 @@
 
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const crypto = require('crypto');
 
 // ============================================================
 // Schema تعريف نموذج قواعد التصعيد
@@ -321,7 +322,7 @@ class EscalationNotificationsService extends EventEmitter {
       const rule = await EscalationRule.findOne({ ruleId, isActive: true });
       if (!rule) throw new Error(`القاعدة ${ruleId} غير موجودة أو معطّلة`);
 
-      const notificationId = `NOTIF-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      const notificationId = `NOTIF-${Date.now()}-${crypto.randomBytes(4).toString('hex').slice(0, 6).toUpperCase()}`;
       const title = this._buildTitle(rule, triggerData);
       const body = this._buildMessage(rule.messageTemplateAr, triggerData);
 

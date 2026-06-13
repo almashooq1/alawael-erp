@@ -31,6 +31,7 @@
 'use strict';
 
 const { execFile, execSync } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -153,7 +154,7 @@ async function decryptIfNeeded(backup) {
   const { decryptFile } = require('../utils/backup-crypto');
   const tmpPath = path.join(
     require('os').tmpdir(),
-    `dr-verify-${Date.now()}-${Math.random().toString(36).slice(2)}.gz`
+    `dr-verify-${Date.now()}-${crypto.randomBytes(8).toString('hex')}.gz`
   );
   await decryptFile({ inputPath: backup.path, outputPath: tmpPath, keyHex });
   return {

@@ -140,8 +140,7 @@ if (require.main === module) {
   const host = config.server.bindHost;
   app.listen(port, host, () => {
     log.info(
-      `[boot] CCTV edge gateway listening on ${host}:${port} ` +
-        `(branch=${config.branchCode || '?'}, central=${config.central.url})`,
+      `[boot] CCTV edge gateway listening on ${host}:${port} ` + `(branch=${config.branchCode || '?'}, central=${config.central.url})`,
     );
     bootWorkers();
   });

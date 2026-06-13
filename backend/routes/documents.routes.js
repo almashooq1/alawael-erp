@@ -339,7 +339,11 @@ router.post(
     }
 
     const url = String(fileUrl).trim();
-    const baseName = url.split(/[\\/?#]/).filter(Boolean).pop() || 'document';
+    const baseName =
+      url
+        .split(/[\\/?#]/)
+        .filter(Boolean)
+        .pop() || 'document';
     // JWT carries `id` (not `_id`); the existing /upload handler's req.user._id
     // is itself buggy — read both here so uploadedBy is actually populated.
     const actorId = req.user.id || req.user._id;

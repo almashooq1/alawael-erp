@@ -1961,10 +1961,20 @@ class TherapistPortalService {
     // saved"). Map name↔nameAr and derive a valid `type` (from the form's `focus`
     // when it matches the enum, else 'mixed') so the group actually saves.
     const TYPE_ENUM = new Set([
-      'social_skills', 'language_group', 'motor_group', 'sensory_group',
-      'behavioral_group', 'life_skills', 'academic_readiness', 'parent_training',
-      'sibling_support', 'transition_group', 'recreation', 'art_therapy',
-      'music_therapy', 'mixed',
+      'social_skills',
+      'language_group',
+      'motor_group',
+      'sensory_group',
+      'behavioral_group',
+      'life_skills',
+      'academic_readiness',
+      'parent_training',
+      'sibling_support',
+      'transition_group',
+      'recreation',
+      'art_therapy',
+      'music_therapy',
+      'mixed',
     ]);
     const payload = { ...data, facilitator: data.facilitator || therapistId };
     if (!payload.nameAr && payload.name) payload.nameAr = payload.name;

@@ -42,20 +42,30 @@ function spawnFfmpeg(sessionId, rtspUrl) {
   _ensureDir(dir);
   const m3u8 = path.join(dir, 'index.m3u8');
   const args = [
-    '-loglevel', 'warning',
-    '-rtsp_transport', 'tcp',
-    '-i', rtspUrl,
-    '-c:v', 'copy',
-    '-c:a', 'aac',
-    '-f', 'hls',
-    '-hls_time', String(config.hls.segmentDurationSec),
-    '-hls_list_size', String(config.hls.listSize),
-    '-hls_flags', 'delete_segments+omit_endlist+independent_segments',
-    '-hls_segment_filename', path.join(dir, 'seg_%05d.ts'),
+    '-loglevel',
+    'warning',
+    '-rtsp_transport',
+    'tcp',
+    '-i',
+    rtspUrl,
+    '-c:v',
+    'copy',
+    '-c:a',
+    'aac',
+    '-f',
+    'hls',
+    '-hls_time',
+    String(config.hls.segmentDurationSec),
+    '-hls_list_size',
+    String(config.hls.listSize),
+    '-hls_flags',
+    'delete_segments+omit_endlist+independent_segments',
+    '-hls_segment_filename',
+    path.join(dir, 'seg_%05d.ts'),
     m3u8,
   ];
   const proc = spawn(config.hls.ffmpegBin, args, { stdio: ['ignore', 'pipe', 'pipe'] });
-  proc.stderr?.on('data', (buf) => {
+  proc.stderr?.on('data', buf => {
     const line = buf.toString().trim();
     if (line) log.debug(`[hls:${sessionId}] ${line.slice(0, 200)}`);
   });
@@ -127,15 +137,18 @@ function list() {
 let reaperTimer = null;
 function startReaper() {
   if (reaperTimer) return;
-  reaperTimer = setInterval(() => {
-    const cutoff = Date.now() - config.hls.idleTimeoutMs;
-    for (const [sid, s] of sessions.entries()) {
-      if (s.lastHeartbeatAt < cutoff) {
-        log.info(`[hls] reaping idle session ${sid}`);
-        stop(sid);
+  reaperTimer = setInterval(
+    () => {
+      const cutoff = Date.now() - config.hls.idleTimeoutMs;
+      for (const [sid, s] of sessions.entries()) {
+        if (s.lastHeartbeatAt < cutoff) {
+          log.info(`[hls] reaping idle session ${sid}`);
+          stop(sid);
+        }
       }
-    }
-  }, Math.max(5000, config.hls.idleTimeoutMs / 4));
+    },
+    Math.max(5000, config.hls.idleTimeoutMs / 4),
+  );
   reaperTimer.unref?.();
 }
 

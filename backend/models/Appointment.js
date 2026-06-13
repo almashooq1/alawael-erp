@@ -240,9 +240,9 @@ appointmentSchema.post('save', function (doc) {
         })
       ).catch(() => {});
     } else if (doc.status === 'NO_SHOW' && this.$__prevApptStatus !== 'NO_SHOW') {
-      Promise.resolve(
-        integrationBus.publish('appointments', 'appointment.no_show', base)
-      ).catch(() => {});
+      Promise.resolve(integrationBus.publish('appointments', 'appointment.no_show', base)).catch(
+        () => {}
+      );
     }
   } catch (_) {
     /* bus not wired (e.g. unit tests) — never block persistence */

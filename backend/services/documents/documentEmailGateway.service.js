@@ -305,7 +305,10 @@ class DocumentEmailGatewayService extends EventEmitter {
       cc: (cc || []).map(r => (typeof r === 'string' ? { email: r } : r)),
       bcc: (bcc || []).map(r => (typeof r === 'string' ? { email: r } : r)),
       subject: finalSubject,
-      body: typeof finalBody === 'string' ? { html: finalBody, text: stripHtmlTags(finalBody) } : finalBody,
+      body:
+        typeof finalBody === 'string'
+          ? { html: finalBody, text: stripHtmlTags(finalBody) }
+          : finalBody,
       attachments,
       status: 'queued',
       priority: priority || 'normal',

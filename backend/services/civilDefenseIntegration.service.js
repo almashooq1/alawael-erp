@@ -100,9 +100,10 @@ class CivilDefenseIntegrationService {
       const response = await axios.get(
         `${this.apiBaseUrl}/certificates/${encodeURIComponent(certificateId)}/status`,
         {
-        headers: this.getAuthHeaders(),
-        timeout: this.requestTimeout,
-      });
+          headers: this.getAuthHeaders(),
+          timeout: this.requestTimeout,
+        }
+      );
 
       const statusData = {
         certificateId,
@@ -270,9 +271,10 @@ class CivilDefenseIntegrationService {
       const response = await axios.get(
         `${this.apiBaseUrl}/compliance/status/${encodeURIComponent(facilityId)}`,
         {
-        headers: this.getAuthHeaders(),
-        timeout: this.requestTimeout,
-      });
+          headers: this.getAuthHeaders(),
+          timeout: this.requestTimeout,
+        }
+      );
 
       const complianceStatus = {
         facilityId,
@@ -301,10 +303,13 @@ class CivilDefenseIntegrationService {
    */
   async getViolations(facilityId) {
     try {
-      const response = await axios.get(`${this.apiBaseUrl}/violations/${encodeURIComponent(facilityId)}`, {
-        headers: this.getAuthHeaders(),
-        timeout: this.requestTimeout,
-      });
+      const response = await axios.get(
+        `${this.apiBaseUrl}/violations/${encodeURIComponent(facilityId)}`,
+        {
+          headers: this.getAuthHeaders(),
+          timeout: this.requestTimeout,
+        }
+      );
 
       return {
         facilityId,
@@ -380,9 +385,10 @@ class CivilDefenseIntegrationService {
       const response = await axios.get(
         `${this.apiBaseUrl}/fire-safety/status/${encodeURIComponent(facilityId)}`,
         {
-        headers: this.getAuthHeaders(),
-        timeout: this.requestTimeout,
-      });
+          headers: this.getAuthHeaders(),
+          timeout: this.requestTimeout,
+        }
+      );
 
       return {
         facilityId,

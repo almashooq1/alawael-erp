@@ -685,7 +685,8 @@ describe('updateAvailability', () => {
     expect(mockAvailability.findOneAndUpdate).toHaveBeenCalledTimes(1);
     const args = mockAvailability.findOneAndUpdate.mock.calls[0];
     expect(args[0]).toEqual({ therapist: tid });
-    expect(args[2]).toEqual({ new: true, upsert: true });
+    expect(args[2]).toEqual(expect.objectContaining({ upsert: true }));
+    expect(args[2].new === true || args[2].returnDocument === 'after').toBe(true);
   });
 
   it('should handle preferences update', async () => {
@@ -712,7 +713,8 @@ describe('addException', () => {
     const args = mockAvailability.findOneAndUpdate.mock.calls[0];
     expect(args[1].$push.exceptions.$each).toEqual([exception]);
     expect(args[1].$push.exceptions.$slice).toBe(-200);
-    expect(args[2]).toEqual({ new: true, upsert: true });
+    expect(args[2]).toEqual(expect.objectContaining({ upsert: true }));
+    expect(args[2].new === true || args[2].returnDocument === 'after').toBe(true);
   });
 });
 
@@ -882,7 +884,8 @@ describe('saveSessionReport', () => {
     const docArgs = mockDocumentation.findOneAndUpdate.mock.calls[0];
     expect(docArgs[0]).toEqual({ session: 'sess1' });
     expect(docArgs[1].soapNote.subjective.patientReports).toBe('S');
-    expect(docArgs[2]).toEqual({ upsert: true, new: true });
+    expect(docArgs[2]).toEqual(expect.objectContaining({ upsert: true }));
+    expect(docArgs[2].new === true || docArgs[2].returnDocument === 'after').toBe(true);
   });
 
   it('should set quality.isComplete=true when all SOAP fields present', async () => {

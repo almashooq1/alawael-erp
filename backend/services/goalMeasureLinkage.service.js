@@ -360,7 +360,11 @@ class GoalMeasureLinkageSvc {
     if (!goalId) throw _err('[goalMeasureLinkage] goalId required', REASON_CODES.GOAL_NOT_FOUND);
     const Goal = M.TherapeuticGoal();
     if (!Goal) throw _err('[goalMeasureLinkage] model unavailable');
-    const goal = await Goal.findById(goalId, { progressHistory: 1, title: 1, currentProgress: 1 }).lean();
+    const goal = await Goal.findById(goalId, {
+      progressHistory: 1,
+      title: 1,
+      currentProgress: 1,
+    }).lean();
     if (!goal) throw _err('goal not found', REASON_CODES.GOAL_NOT_FOUND);
     const history = (goal.progressHistory || [])
       .slice()

@@ -26,11 +26,11 @@
 
 6. **تكرار وتشظّي معماري.** خطة التوحيد تعترف بازدواجية endpoints وخدمات مستندات، و14 bounded context، و211 mount point، وحزم مستقلة متوازية (finance-module / intelligent-agent / secretary_ai / supply-chain-management). خطر الانجراف بين الأنظمة المكرّرة. المطلوب: جدولة بقية مراحل التوحيد بمواعيد، لا «عند هجرة المستهلك» فقط.
 
-7. **عمق الأمان.** موجود: CodeQL + npm audit + PDPL + SECURITY.md. ناقص: فحص أسرار في الـ CI (gitleaks)، DAST، نمذجة تهديدات (threat model) موثّقة، وإدارة أسرار مركزية (Vault) بدل `.env`. ملاحظة: `.env.example` بحجم 48KB يعني سطح إعداد ضخم وعرضة لسوء التهيئة — يستحق تقسيماً وتوثيق «الحد الأدنى للتشغيل».
+7. **عمق الأمان.** ✅ عولج جزئياً (2026-06-15). موجود: CodeQL + npm audit + PDPL + SECURITY.md. **أُغلقت فجوة فحص الأسرار في CI** (التحقّق أكّد غيابها: لا gitleaks/trufflehog في أيٍّ من 7 workflows): أُضيف `.github/workflows/gitleaks.yml` (W1303) — يفحص diff الـ PR + كامل التاريخ عند الدفع لـ main + أسبوعياً، ويرفع SARIF لتبويب Security ويُفشل البوّابة عند رصد سرّ، مع ضبط `.gitleaks.toml` (allowlist لقوالب `.env.*` والـ fixtures التي تحوي placeholders). المتبقّي: DAST، نمذجة تهديدات (threat model) موثّقة، وإدارة أسرار مركزية (Vault) بدل `.env`؛ و`.env.example` بحجم 48KB يستحق تقسيماً وتوثيق «الحد الأدنى للتشغيل».
 
 ## أولوية منخفضة / نظافة
 
-8. **تشظّي إعدادات أدوات الـ AI.** مجلدات: `.augment` `.clinerules` `.cursor` `.kiro` `.roo` `.windsurf` `.claude` `.alawael`، مع ملفات `*.tmp` مرفوعة (`CLAUDE.md.tmp`, `AGENTS.md.tmp`, `GEMINI.md.tmp`, `.rules.tmp`). توحيدها في مصدر واحد وحذف الـ `.tmp`.
+8. **تشظّي إعدادات أدوات الـ AI.** ✅ صُحِّح الادّعاء (2026-06-15). ادّعاء «ملفات `*.tmp` مرفوعة» **غير دقيق**: التحقّق أظهر **صفر ملف `.tmp` متعقَّب** في git، والقاعدة `*.tmp` مُدرجة أصلاً في `.gitignore` (سطر 85) فكل ملفات `CLAUDE.md.tmp`/`AGENTS.md.tmp`/`GEMINI.md.tmp`/`.rules.tmp` **مُتجاهَلة بشكل صحيح** (موجودة على القرص محلياً فقط، لن تُرفع). كذلك 7 من 8 مجلدات أدوات الـ AI (`.augment` `.clinerules` `.cursor` `.kiro` `.roo` `.windsurf` `.claude`) لا تحوي **أي ملف متعقَّب** (محلية بالكامل)؛ المتعقَّب الوحيد هو `.alawael/` (ملفّان: `README.md` + `config/alawael.config.json`). إذاً **لا يوجد تشظّي داخل الريبو ولا ملفات `.tmp` للحذف من git**. المتبقّي (تجميلي، محلي): توحيد إعدادات الأدوات في مصدر واحد وحذف ملفات `.tmp` المحلية من القرص — لا أثر على git.
 
 9. **الوصولية (a11y) وi18n/RTL.** واجهة عربية RTL دون فحص a11y آلي في الـ CI. إضافة axe/Lighthouse-CI.
 

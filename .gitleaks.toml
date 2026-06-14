@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------
+#  .gitleaks.toml -- secret-scan tuning (W1303, GAPS Item 7).
+#
+#  Extends gitleaks' built-in rule set, then allowlists the paths that
+#  legitimately contain placeholder-shaped strings:
+#    - *.env.example / *.env.development / *.env.production templates
+#      (the 48KB env surface noted in GAPS Item 7) -- these hold dummy
+#      values like `your-api-key-here`, never real secrets.
+#    - test fixtures / __tests__ / tests -- mock tokens + sample JWTs.
+#    - _archived/ -- historical dumps (already gitignored, but full-history
+#      scans still reach old commits).
+#  A genuine secret committed OUTSIDE these paths still fails the gate.
+# ---------------------------------------------------------------------
+
+# Inherit gitleaks' default rules (the action sets this implicitly, but
+# being explicit keeps the config self-documenting).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for placeholder-bearing paths"
+
+paths = [
+  # Env templates — dummy values only, never real credentials.
+  '''.*\.env\.example$''',
+  '''.*\.env\.development$''',
+  '''.*\.env\.production$''',
+  '''.*env\.example.*''',
+  # Test fixtures + suites — mock tokens / sample JWTs.
+  '''.*/__tests__/.*''',
+  '''.*/tests/.*''',
+  '''.*\.test\.js$''',
+  '''.*\.spec\.js$''',
+  # Historical archive (gitignored on HEAD, but reachable in old commits).
+  '''_archived/.*''',
+  '''.*/_archived/.*''',
+  # Lockfiles — hashes look high-entropy but are integrity digests.
+  '''.*package-lock\.json$''',
+  '''.*pnpm-lock\.yaml$''',
+]
+
+# Common placeholder tokens that the default rules may flag in docs/examples.
+regexes = [
+  '''(?i)your[-_]?(api[-_]?key|secret|token|password)[-_]?here''',
+  '''(?i)(example|placeholder|dummy|changeme|change[-_]?me|xxxx+)''',
+  '''(?i)(test|mock|sample|fake)[-_]?(secret|token|key|password)''',
+]

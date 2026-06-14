@@ -1,0 +1,56 @@
+# ════════════════════════════════════════════════════════════════════
+#  Gitleaks — secret scanning in CI (W1303, closes GAPS Item 7).
+#
+#  Before this, CI had CodeQL (code vulns) + npm audit (deps) but NO
+#  secret scanning — a committed API key / DB password / private key
+#  would pass every gate. Gitleaks scans the diff on PRs and the full
+#  history on push to main + weekly, uploading SARIF to the Security tab.
+#
+#  Tuning lives in `.gitleaks.toml` at repo root (allowlist for the
+#  48KB .env.EXAMPLE templates + test fixtures, which legitimately
+#  contain placeholder-shaped strings).
+# ════════════════════════════════════════════════════════════════════
+name: "Secret Scan (gitleaks)"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly full-history re-scan (Mondays 04:11 UTC).
+    - cron: '11 4 * * 1'
+
+# Cancel superseded scans on the same ref — main moves fast (parallel waves).
+concurrency:
+  group: gitleaks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          # Full history so push/scheduled scans cover the whole repo,
+          # not just the latest commit. PRs scan only the PR diff.
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ github.workspace }}/.gitleaks.toml
+          # SARIF feeds the Security tab; the action also fails the job
+          # (non-zero exit) when a leak is found, gating the PR.
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+          GITLEAKS_ENABLE_SUMMARY: "true"

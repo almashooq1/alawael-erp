@@ -144,15 +144,15 @@ function createFamilyRetryWorker({
         // Real mongoose Query is thenable → await yields HYDRATED docs
         // (the W1254 persistence fix). Legacy test mocks return a plain
         // { lean } object instead — honor that shape unchanged.
-        if (limited && typeof limited.then === 'function') return await limited;
-        if (limited && typeof limited.lean === 'function') return await limited.lean();
+        if (limited && typeof limited.then === 'function') return limited;
+        if (limited && typeof limited.lean === 'function') return limited.lean();
         return Array.isArray(limited) ? limited : [];
       } else if (cursor && typeof cursor.exec === 'function') {
-        return await cursor.exec();
+        return cursor.exec();
       } else if (Array.isArray(cursor)) {
         return cursor;
       } else if (cursor && typeof cursor.then === 'function') {
-        return await cursor;
+        return cursor;
       }
       return [];
     }

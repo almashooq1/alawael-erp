@@ -137,7 +137,7 @@ const KNOWN_DORMANT_BASELINE = new Set([
   //    is resolved. Path format: relative to backend/, POSIX, no
   //    leading slash.
 
-  // CLI_TOOL (5) — referenced ONLY from an admin-invoked seed/migration
+  // CLI_TOOL (6) — referenced ONLY from an admin-invoked seed/migration
   // script (+ its own test). NOT auto-loaded at runtime by design. These
   // are legitimately "not wired" — keep baselined unless a decision is
   // made to run them on a schedule via a *Bootstrap.js cron.
@@ -146,6 +146,7 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/hr/hrAuditRetentionService.js', // ← scripts/hr-audit-retention.js
   'services/hr/hrCredentialStatusSync.js', // ← scripts/hr-credential-sync.js
   'services/rehabSeedPlanner.js', // ← scripts/rehab-seed-planner.js
+  'services/financeAnomaly.service.js', // ← scripts/expense-anomaly-scan.js (W1218 Tier-3 expense anomaly CLI)
 
   // TEST_ONLY — built + unit-tested but referenced by NO production code
   // path. The real dormancy class. Disposition history (see triage doc):
@@ -165,7 +166,10 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/base/BaseCrudService.js', // base class — adopt across CRUD services OR delete
   'services/finance/zatcaCalculation.service.js', // ⚠ ZATCA compliance — verify vs live zatca path first
   'services/gpsSecurityService.js', // entangled w/ W440 security drift-guard (verifyAPIKey timing-safe)
-  'services/isolationForest.service.js', // deliberate Phase16-18 ship — anomaly ML; wire OR delete
+  // services/isolationForest.service.js — RATCHETED-DOWN 2026-06-14:
+  //   now WIRED — consumed by services/financeAnomaly.service.js
+  //   (buildIsolationForestDetector) for the W1218 Tier-3 expense
+  //   anomaly scan. No longer dormant.
   'services/rehabilitation/RehabService.js', // deliberate module add; rehab system is fragmented (future ADR)
   // services/reporting/webhookHandler.js — RATCHETED-DOWN 2026-06-05 (W933/W941):
   //   wired via routes/reports-webhooks.routes.js self-init when ENABLE_REPORT_WEBHOOKS=true

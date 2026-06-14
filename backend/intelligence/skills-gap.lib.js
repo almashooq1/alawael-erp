@@ -26,7 +26,8 @@ function clampLevel(n) {
 
 /** Per-competency gap for one employee against their role's requirements. */
 function employeeGaps(requirements, currentByKey) {
-  const cur = currentByKey instanceof Map ? currentByKey : new Map(Object.entries(currentByKey || {}));
+  const cur =
+    currentByKey instanceof Map ? currentByKey : new Map(Object.entries(currentByKey || {}));
   const rows = (requirements || []).map(req => {
     const required = clampLevel(req.requiredLevel);
     const current = clampLevel(cur.get(req.competencyKey));
@@ -42,8 +43,6 @@ function employeeGaps(requirements, currentByKey) {
       met: gap === 0,
     };
   });
-  const totalRequired = rows.reduce((a, r) => a + r.requiredLevel, 0);
-  const totalCurrentCapped = rows.reduce((a, r) => a + Math.min(r.currentLevel, r.requiredLevel), 0);
   return {
     competencies: rows,
     requiredCount: rows.length,
@@ -53,7 +52,10 @@ function employeeGaps(requirements, currentByKey) {
     totalGap: rows.reduce((a, r) => a + r.gap, 0),
     // weighted readiness: how much of the (criticality-weighted) requirement is met
     readinessPct: weightedReadiness(rows),
-    topGaps: rows.filter(r => r.gap > 0).sort((a, b) => gapScore(b) - gapScore(a)).slice(0, 5),
+    topGaps: rows
+      .filter(r => r.gap > 0)
+      .sort((a, b) => gapScore(b) - gapScore(a))
+      .slice(0, 5),
   };
 
   function gapScore(r) {
@@ -117,7 +119,8 @@ function matchTrainings(gapKeyToName, trainings) {
   const out = [];
   for (const t of trainings || []) {
     const covered = (t.skillsCovered || []).filter(s => keys.has(s));
-    if (covered.length) out.push({ trainingId: t._id, title: t.title, covers: covered, coversCount: covered.length });
+    if (covered.length)
+      out.push({ trainingId: t._id, title: t.title, covers: covered, coversCount: covered.length });
   }
   return out.sort((a, b) => b.coversCount - a.coversCount);
 }

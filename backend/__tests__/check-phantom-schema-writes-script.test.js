@@ -88,6 +88,7 @@ describe('scanObjectLiteral', () => {
       "  'quoted-key': 1, // line comment { with brace",
       '  /* block } comment */',
       '  shorthand,',
+      // eslint-disable-next-line no-template-curly-in-string -- intentional fixture: feeds `${ }` text to the scanner under test
       '  tpl: `text ${ { inner: 1 } } more`,',
       "  str: 'a } b { c',",
       '}',
@@ -184,7 +185,7 @@ describe('scanRepo — missingRequired detector (W1214)', () => {
       [
         "const mongoose = require('mongoose');",
         'const GadgetSchema = new mongoose.Schema({',
-        "  name: { type: String, required: true },",
+        '  name: { type: String, required: true },',
         modelExtra,
         '});',
         modelExtra.includes('hooked')
@@ -205,7 +206,7 @@ describe('scanRepo — missingRequired detector (W1214)', () => {
   }
 
   it('flags a required-no-default key omitted from the create literal', () => {
-    const root = makeRequiredFixture("  code: { type: String, required: true },", 'name: 1');
+    const root = makeRequiredFixture('  code: { type: String, required: true },', 'name: 1');
     const r = scanRepo({ root });
     const missing = r.newFindings.filter(f => f.type === 'missingRequired');
     expect(missing).toHaveLength(1);
@@ -215,10 +216,10 @@ describe('scanRepo — missingRequired detector (W1214)', () => {
 
   it('does NOT flag when the key is provided, defaulted, hook-assigned, or array-typed', () => {
     for (const [extra, body] of [
-      ["  code: { type: String, required: true },", 'name: 1, code: 2'], // provided
+      ['  code: { type: String, required: true },', 'name: 1, code: 2'], // provided
       ["  code: { type: String, required: true, default: 'X' },", 'name: 1'], // default
-      ["  hooked: { type: String, required: true },", 'name: 1'], // hook-assigned
-      ["  subs: [{ q: { type: String, required: true } }],", 'name: 1'], // array-typed
+      ['  hooked: { type: String, required: true },', 'name: 1'], // hook-assigned
+      ['  subs: [{ q: { type: String, required: true } }],', 'name: 1'], // array-typed
     ]) {
       const r = scanRepo({ root: makeRequiredFixture(extra, body) });
       expect(r.newFindings.filter(f => f.type === 'missingRequired')).toEqual([]);

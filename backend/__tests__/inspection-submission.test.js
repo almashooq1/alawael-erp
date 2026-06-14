@@ -168,7 +168,14 @@ describe('InspectionSubmissionService.bulkSubmit', () => {
 
 describe('InspectionSubmissionService.getDashboard', () => {
   test('counts + fail rate + avg score', async () => {
-    const svc = createInspectionSubmissionService({ model: InspectionSubmission });
+    // Pin `now` relative to the seeded capturedAt so the default 30-day
+    // dashboard window always covers the test data. Without this the test
+    // is a time-bomb: it silently passes only while the real clock is
+    // within 30 days of the hard-coded 2026-05-15 capture date.
+    const svc = createInspectionSubmissionService({
+      model: InspectionSubmission,
+      now: () => new Date('2026-05-20T00:00:00Z'),
+    });
     await svc.submit(
       {
         clientUuid: 'u-a',

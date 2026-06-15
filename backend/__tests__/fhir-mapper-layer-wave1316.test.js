@@ -234,6 +234,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     standardKey: 'IPC.1',
     status: 'met',
   },
+  SeatAllocation: {
+    beneficiaryId: '64a1111111111111111111aa',
+    branchId: '64a2222222222222222222bb',
+    effectiveFrom: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

@@ -149,6 +149,13 @@ const MINIMAL_FIXTURES = Object.freeze({
     status: 'completed',
     scheduledStart: '2026-02-01T09:00:00.000Z',
   },
+  ARVRSession: {
+    beneficiaryId: '64a1111111111111111111aa',
+    therapistId: '64a555555555555555555555',
+    status: 'completed',
+    scheduledStart: '2026-02-01T09:00:00.000Z',
+    scenarioId: 'balance-forest-01',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

@@ -181,6 +181,11 @@ const MINIMAL_FIXTURES = Object.freeze({
     physicalDemand: 'low',
     status: 'active',
   },
+  TransitionPlan: {
+    beneficiaryId: '64a1111111111111111111aa',
+    transitionType: 'school_to_work',
+    status: 'in_progress',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

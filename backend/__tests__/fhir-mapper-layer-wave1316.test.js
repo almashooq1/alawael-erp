@@ -215,6 +215,13 @@ const MINIMAL_FIXTURES = Object.freeze({
     status: 'completed',
     eventDate: '2026-01-10T00:00:00.000Z',
   },
+  BiomedicalWasteRecord: {
+    branchId: '64a2222222222222222222bb',
+    wasteCategory: 'sharps',
+    quantityKg: 1.5,
+    generationDate: '2026-02-01T08:00:00.000Z',
+    status: 'generated',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

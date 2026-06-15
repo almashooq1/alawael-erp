@@ -1614,3 +1614,4 @@ __tests__/assistive-device-to-fhir-wave1319.test.js
 __tests__/safeguarding-concern-to-fhir-wave1320.test.js
 __tests__/beneficiary-diet-prescription-to-fhir-wave1321.test.js
 __tests__/sensory-diet-program-to-fhir-wave1322.test.js
+__tests__/communication-aid-profile-to-fhir-wave1323.test.js

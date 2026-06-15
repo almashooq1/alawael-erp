@@ -114,6 +114,11 @@ const MINIMAL_FIXTURES = Object.freeze({
     beneficiaryId: '64a1111111111111111111aa',
     status: 'active',
   },
+  CommunicationAidProfile: {
+    beneficiaryId: '64a1111111111111111111aa',
+    vocabularyLevel: 'single_word',
+    lifecycleStatus: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

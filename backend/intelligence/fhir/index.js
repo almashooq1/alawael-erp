@@ -21,6 +21,7 @@
  *   SensoryDietProgram → CarePlan  (W1322)
  *   CommunicationAidProfile → Observation (W1323)
  *   ProstheticOrthoticOrder → DeviceRequest (W1324)
+ *   InstrumentalSwallowStudy → DiagnosticReport (W1325)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -45,6 +46,9 @@ const {
 const { sensoryDietProgramToFhir } = require('./sensory-diet-program-to-fhir.lib');
 const { communicationAidProfileToFhir } = require('./communication-aid-profile-to-fhir.lib');
 const { prostheticOrthoticOrderToFhir } = require('./prosthetic-orthotic-order-to-fhir.lib');
+const {
+  instrumentalSwallowStudyToFhir,
+} = require('./instrumental-swallow-study-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -66,6 +70,7 @@ const MAPPERS = Object.freeze({
   SensoryDietProgram: sensoryDietProgramToFhir,
   CommunicationAidProfile: communicationAidProfileToFhir,
   ProstheticOrthoticOrder: prostheticOrthoticOrderToFhir,
+  InstrumentalSwallowStudy: instrumentalSwallowStudyToFhir,
 });
 
 /**
@@ -91,6 +96,7 @@ const RESOURCE_TYPES = Object.freeze({
   SensoryDietProgram: 'CarePlan',
   CommunicationAidProfile: 'Observation',
   ProstheticOrthoticOrder: 'DeviceRequest',
+  InstrumentalSwallowStudy: 'DiagnosticReport',
 });
 
 module.exports = {
@@ -109,6 +115,7 @@ module.exports = {
   sensoryDietProgramToFhir,
   communicationAidProfileToFhir,
   prostheticOrthoticOrderToFhir,
+  instrumentalSwallowStudyToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

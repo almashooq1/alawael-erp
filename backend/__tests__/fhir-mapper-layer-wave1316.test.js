@@ -125,6 +125,11 @@ const MINIMAL_FIXTURES = Object.freeze({
     prescribedDate: '2026-02-01T09:00:00.000Z',
     stage: 'prescribed',
   },
+  InstrumentalSwallowStudy: {
+    beneficiaryId: '64a1111111111111111111aa',
+    studyType: 'vfss',
+    status: 'completed',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

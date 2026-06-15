@@ -271,6 +271,8 @@ describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () =>
       'validateFhirResource',
       'validateFhirBundle',
       'buildOperationOutcome',
+      'checkResourceReferences',
+      'checkBundleReferences',
       'toValidatedFhir',
       'toValidatedFhirBundle',
     ]);

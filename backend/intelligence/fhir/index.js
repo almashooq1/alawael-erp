@@ -85,6 +85,10 @@ const { buildFhirBundle, buildFhirBundleFromEntities } = require('./fhir-bundle.
 const { validateFhirResource, validateFhirBundle } = require('./fhir-validate.lib');
 const { buildOperationOutcome } = require('./fhir-operation-outcome.lib');
 const {
+  checkResourceReferences,
+  checkBundleReferences,
+} = require('./fhir-reference-integrity.lib');
+const {
   toValidatedFhir: _toValidatedFhir,
   toValidatedFhirBundle: _toValidatedFhirBundle,
 } = require('./fhir-convert.lib');
@@ -233,6 +237,8 @@ module.exports = {
   validateFhirResource,
   validateFhirBundle,
   buildOperationOutcome,
+  checkResourceReferences,
+  checkBundleReferences,
   toValidatedFhir,
   toValidatedFhirBundle,
   MAPPERS,

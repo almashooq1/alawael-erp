@@ -11,6 +11,7 @@
  *   Assessment     → Observation    (W1311)
  *   Session        → Encounter      (W1312)
  *   PlanOfCare     → CarePlan       (W1313)
+ *   Measure        → Questionnaire  (W1314)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -23,6 +24,7 @@ const { episodeOfCareToFhir } = require('./episode-of-care-to-fhir.lib');
 const { assessmentToFhirObservation } = require('./assessment-to-fhir.lib');
 const { sessionToFhirEncounter } = require('./session-to-fhir.lib');
 const { planOfCareToFhir } = require('./plan-of-care-to-fhir.lib');
+const { measureToFhirQuestionnaire } = require('./measure-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -34,6 +36,7 @@ const MAPPERS = Object.freeze({
   Assessment: assessmentToFhirObservation,
   Session: sessionToFhirEncounter,
   PlanOfCare: planOfCareToFhir,
+  Measure: measureToFhirQuestionnaire,
 });
 
 module.exports = {
@@ -42,5 +45,6 @@ module.exports = {
   assessmentToFhirObservation,
   sessionToFhirEncounter,
   planOfCareToFhir,
+  measureToFhirQuestionnaire,
   MAPPERS,
 };

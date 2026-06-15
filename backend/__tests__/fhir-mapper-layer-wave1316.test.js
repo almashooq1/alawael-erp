@@ -257,8 +257,10 @@ describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () =>
   });
 
   it('every named mapper export appears exactly once in MAPPERS', () => {
+    // Non-mapper function exports (layer utilities, not per-entity mappers).
+    const NON_MAPPER_EXPORTS = new Set(['buildFhirBundle', 'buildFhirBundleFromEntities']);
     const exportedMappers = Object.entries(fhir)
-      .filter(([k, v]) => typeof v === 'function' && k !== 'MAPPERS')
+      .filter(([k, v]) => typeof v === 'function' && k !== 'MAPPERS' && !NON_MAPPER_EXPORTS.has(k))
       .map(([, v]) => v);
     const dispatched = new Set(Object.values(fhir.MAPPERS));
     exportedMappers.forEach(fn => {

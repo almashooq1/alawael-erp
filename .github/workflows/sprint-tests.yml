@@ -2385,6 +2385,8 @@ on:
       - 'backend/__tests__/cbahi-attestation-to-fhir-wave1341.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/seat-allocation-to-fhir-wave1342.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/fhir-bundle-wave1343.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4748,6 +4750,8 @@ on:
       - 'backend/__tests__/cbahi-attestation-to-fhir-wave1341.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/seat-allocation-to-fhir-wave1342.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/fhir-bundle-wave1343.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

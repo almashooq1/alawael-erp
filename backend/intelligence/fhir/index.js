@@ -81,6 +81,7 @@ const { biomedicalWasteRecordToFhir } = require('./biomedical-waste-record-to-fh
 const { sponsorshipToFhir } = require('./sponsorship-to-fhir.lib');
 const { cbahiAttestationToFhir } = require('./cbahi-attestation-to-fhir.lib');
 const { seatAllocationToFhir } = require('./seat-allocation-to-fhir.lib');
+const { buildFhirBundle, buildFhirBundleFromEntities } = require('./fhir-bundle.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -199,6 +200,8 @@ module.exports = {
   sponsorshipToFhir,
   cbahiAttestationToFhir,
   seatAllocationToFhir,
+  buildFhirBundle,
+  buildFhirBundleFromEntities,
   MAPPERS,
   RESOURCE_TYPES,
 };

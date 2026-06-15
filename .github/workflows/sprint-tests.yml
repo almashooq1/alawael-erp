@@ -2355,6 +2355,8 @@ on:
       - 'backend/__tests__/spasticity-injection-to-fhir-wave1326.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/group-therapy-session-to-fhir-wave1327.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/tele-rehab-session-to-fhir-wave1328.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4688,6 +4690,8 @@ on:
       - 'backend/__tests__/spasticity-injection-to-fhir-wave1326.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/group-therapy-session-to-fhir-wave1327.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/tele-rehab-session-to-fhir-wave1328.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

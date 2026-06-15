@@ -75,6 +75,13 @@ const MINIMAL_FIXTURES = Object.freeze({
     reason: 'RISK_NO_SOURCES_AVAILABLE',
     explanation: 'No risk sources were available.',
   },
+  SeizureEvent: {
+    beneficiaryId: '64a1111111111111111111aa',
+    date: '2026-02-01',
+    startTime: '2026-02-01T08:00:00.000Z',
+    type: 'tonic_clonic',
+    status: 'recorded',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

@@ -2333,6 +2333,8 @@ on:
       - 'backend/__tests__/risk-profile-to-fhir-wave1315.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/fhir-mapper-layer-wave1316.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seizure-event-to-fhir-wave1317.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4644,6 +4646,8 @@ on:
       - 'backend/__tests__/risk-profile-to-fhir-wave1315.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/fhir-mapper-layer-wave1316.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/seizure-event-to-fhir-wave1317.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

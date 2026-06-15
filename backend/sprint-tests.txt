@@ -1608,3 +1608,4 @@ __tests__/plan-of-care-to-fhir-wave1313.test.js
 __tests__/measure-to-fhir-wave1314.test.js
 __tests__/risk-profile-to-fhir-wave1315.test.js
 __tests__/fhir-mapper-layer-wave1316.test.js
+__tests__/seizure-event-to-fhir-wave1317.test.js

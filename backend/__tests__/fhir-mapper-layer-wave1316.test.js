@@ -162,6 +162,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     sessionDate: '2026-02-01T09:00:00.000Z',
     programArea: 'communication',
   },
+  CreativeArtsTherapySession: {
+    beneficiaryId: '64a1111111111111111111aa',
+    status: 'completed',
+    sessionDate: '2026-02-01T09:00:00.000Z',
+    modality: 'music',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

@@ -229,6 +229,11 @@ const MINIMAL_FIXTURES = Object.freeze({
     startDate: '2026-01-01T00:00:00.000Z',
     status: 'active',
   },
+  CbahiAttestation: {
+    branchId: '64a2222222222222222222bb',
+    standardKey: 'IPC.1',
+    status: 'met',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

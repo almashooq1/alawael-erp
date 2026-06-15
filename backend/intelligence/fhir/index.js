@@ -37,6 +37,7 @@
  *   StaffHealthRecord → Observation (W1338)
  *   BiomedicalWasteRecord → SupplyDelivery (W1339)
  *   Sponsorship → Coverage (W1340)
+ *   CbahiAttestation → Observation (W1341)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -77,6 +78,7 @@ const { facilityAssetToFhir } = require('./facility-asset-to-fhir.lib');
 const { staffHealthRecordToFhir } = require('./staff-health-record-to-fhir.lib');
 const { biomedicalWasteRecordToFhir } = require('./biomedical-waste-record-to-fhir.lib');
 const { sponsorshipToFhir } = require('./sponsorship-to-fhir.lib');
+const { cbahiAttestationToFhir } = require('./cbahi-attestation-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -114,6 +116,7 @@ const MAPPERS = Object.freeze({
   StaffHealthRecord: staffHealthRecordToFhir,
   BiomedicalWasteRecord: biomedicalWasteRecordToFhir,
   Sponsorship: sponsorshipToFhir,
+  CbahiAttestation: cbahiAttestationToFhir,
 });
 
 /**
@@ -155,6 +158,7 @@ const RESOURCE_TYPES = Object.freeze({
   StaffHealthRecord: 'Observation',
   BiomedicalWasteRecord: 'SupplyDelivery',
   Sponsorship: 'Coverage',
+  CbahiAttestation: 'Observation',
 });
 
 module.exports = {
@@ -189,6 +193,7 @@ module.exports = {
   staffHealthRecordToFhir,
   biomedicalWasteRecordToFhir,
   sponsorshipToFhir,
+  cbahiAttestationToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

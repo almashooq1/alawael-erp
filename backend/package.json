@@ -270,6 +270,7 @@
     "routes:list": "node scripts/inspect-routes.js",
     "routes:stats": "node scripts/inspect-routes.js --stats",
     "stats": "node scripts/project-stats.js",
+    "stats:json": "node scripts/project-stats.js --json",
     "cleanup": "node scripts/cleanup.js",
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js",

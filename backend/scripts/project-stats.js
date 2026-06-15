@@ -83,6 +83,61 @@ function formatNumber(num) {
   return num.toLocaleString();
 }
 
+// ─── Machine-readable collector (W1305, GAPS Item 5) ─────────────────────────
+// Returns the same numbers main() renders, as a plain object. This is the
+// prerequisite for auto-updating README / failing CI on doc drift — a script
+// can `JSON.parse(execSync('npm run stats:json'))` and diff against a marker
+// block instead of anyone hand-editing stale counts. Pure (reads only), so
+// it's covered by project-stats-script.test.js.
+function collectStats(root = ROOT) {
+  const js = countFiles(root, ['.js']);
+  const json = countFiles(root, ['.json']);
+  const md = countFiles(root, ['.md']);
+
+  const archDirs = {
+    models: 'models',
+    routes: 'routes',
+    controllers: 'controllers',
+    middleware: 'middleware',
+    services: 'services',
+    utils: 'utils',
+    validators: 'validators',
+    config: 'config',
+    seeds: 'seed',
+    migrations: 'migrations',
+  };
+  const architecture = {};
+  for (const [key, sub] of Object.entries(archDirs)) {
+    architecture[key] = countInDir(path.join(root, sub), /\.js$/);
+  }
+
+  const tests = countFiles(path.join(root, '__tests__'), ['.test.js', '.spec.js']);
+  const e2e = countFiles(path.join(root, 'e2e'), ['.test.js', '.spec.js']);
+
+  let deps = 0;
+  let devDeps = 0;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    deps = Object.keys(pkg.dependencies || {}).length;
+    devDeps = Object.keys(pkg.devDependencies || {}).length;
+  } catch {
+    /* ignore */
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    code: {
+      jsFiles: js.count,
+      jsLines: js.lines,
+      jsonFiles: json.count,
+      mdFiles: md.count,
+    },
+    architecture,
+    tests: { unitIntegration: tests.count, e2e: e2e.count },
+    dependencies: { production: deps, development: devDeps },
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 function main() {
   console.log(
@@ -213,4 +268,12 @@ function main() {
   console.log(`\n${C.green}${C.bold}✅ Statistics gathered!${C.reset}\n`);
 }
 
-main();
+if (require.main === module) {
+  if (process.argv.includes('--json')) {
+    process.stdout.write(JSON.stringify(collectStats(), null, 2) + '\n');
+  } else {
+    main();
+  }
+}
+
+module.exports = { collectStats, countFiles, countInDir };

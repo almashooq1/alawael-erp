@@ -1276,6 +1276,7 @@ __tests__/route-optimization-registry.test.js
 __tests__/route-optimization-service.test.js
 __tests__/routes-spread-order-mass-assignment-wave1177.test.js
 __tests__/routes-svc-method-resolution.test.js
+__tests__/project-stats-script.test.js
 __tests__/run-sprint-script.test.js
 __tests__/runbooks-referenced.test.js
 __tests__/safe-error-shape-wave422.test.js

@@ -1,7 +1,7 @@
 /**
  * NationalAddressScreen — demo screen exercising the RN
  * NationalAddressField component end-to-end against the
- * /api/v1/wasel/address/verify-and-stamp endpoint.
+ * /api/v1/wasel-address/verify-and-stamp endpoint.
  *
  * Drop this into a stack navigator to let users (parent, therapist,
  * driver) update their national address from the mobile app. The

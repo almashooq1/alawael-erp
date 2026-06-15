@@ -15,6 +15,7 @@ import notify from '../notify';
 import telehealth from '../telehealth';
 import therapistWorkbench from '../therapistWorkbench';
 import parentPortal from '../parentPortal';
+import nationalAddress from '../nationalAddress';
 
 const mockedApi = api as jest.Mocked<typeof api>;
 
@@ -99,6 +100,39 @@ describe('nafath module', () => {
     mockedApi.post.mockResolvedValue({ success: true, status: 'EXPIRED' });
     await nafath.cancel('r1');
     expect(mockedApi.post).toHaveBeenCalledWith('/auth/nafath/cancel/r1', {});
+  });
+});
+
+describe('nationalAddress module', () => {
+  // Regression for W1308: the client previously posted to
+  // '/api/v1/wasel/address/...' which (a) double-prefixed /api/v1 against
+  // the ApiService baseURL and (b) used a slash instead of the hyphenated
+  // 'wasel-address' mount — guaranteeing a 404. Paths MUST be relative to
+  // the /api/v1 baseURL and match the backend mount exactly.
+  it('verifyAndStamp() posts to the hyphenated, un-prefixed path', async () => {
+    mockedApi.post.mockResolvedValue({ success: true, verified: true, address: {} });
+    await nationalAddress.verifyAndStamp({ shortCode: 'RFYA1234' });
+    expect(mockedApi.post).toHaveBeenCalledWith('/wasel-address/verify-and-stamp', {
+      shortCode: 'RFYA1234',
+    });
+    // Hard guard against the exact regression: no double /api/v1, no slash form.
+    const calledPath = mockedApi.post.mock.calls[0][0];
+    expect(calledPath).not.toMatch(/\/api\/v1\//);
+    expect(calledPath).not.toMatch(/wasel\/address/);
+  });
+
+  it('verifyAndStamp() unwraps res.data when present', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, verified: false, address: {} } });
+    const res = await nationalAddress.verifyAndStamp({ shortCode: 'X' });
+    expect(res.verified).toBe(false);
+  });
+
+  it('searchByNationalId() posts to the hyphenated, un-prefixed path', async () => {
+    mockedApi.post.mockResolvedValue({ success: true, status: 'match', addresses: [] });
+    await nationalAddress.searchByNationalId('1234567890');
+    expect(mockedApi.post).toHaveBeenCalledWith('/wasel-address/search-by-id', {
+      nationalId: '1234567890',
+    });
   });
 });
 

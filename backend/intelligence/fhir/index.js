@@ -42,6 +42,23 @@ const MAPPERS = Object.freeze({
   RiskProfile: riskProfileToFhir,
 });
 
+/**
+ * Declared FHIR R4 resourceType each canonical mapper produces. Kept beside
+ * MAPPERS (same keys) as an explicit, testable contract: the W1316 drift guard
+ * asserts every mapper actually emits the resourceType named here, so a future
+ * mapper edit that silently changes its output type fails CI.
+ * @type {Record<string, string>}
+ */
+const RESOURCE_TYPES = Object.freeze({
+  Beneficiary: 'Patient',
+  EpisodeOfCare: 'EpisodeOfCare',
+  Assessment: 'Observation',
+  Session: 'Encounter',
+  PlanOfCare: 'CarePlan',
+  Measure: 'Questionnaire',
+  RiskProfile: 'RiskAssessment',
+});
+
 module.exports = {
   beneficiaryToFhirPatient,
   episodeOfCareToFhir,
@@ -51,4 +68,5 @@ module.exports = {
   measureToFhirQuestionnaire,
   riskProfileToFhir,
   MAPPERS,
+  RESOURCE_TYPES,
 };

@@ -23,6 +23,7 @@
  *   ProstheticOrthoticOrder → DeviceRequest (W1324)
  *   InstrumentalSwallowStudy → DiagnosticReport (W1325)
  *   SpasticityInjection → Procedure (W1326)
+ *   GroupTherapySession → Encounter (W1327)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -49,6 +50,7 @@ const { communicationAidProfileToFhir } = require('./communication-aid-profile-t
 const { prostheticOrthoticOrderToFhir } = require('./prosthetic-orthotic-order-to-fhir.lib');
 const { instrumentalSwallowStudyToFhir } = require('./instrumental-swallow-study-to-fhir.lib');
 const { spasticityInjectionToFhir } = require('./spasticity-injection-to-fhir.lib');
+const { groupTherapySessionToFhir } = require('./group-therapy-session-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -72,6 +74,7 @@ const MAPPERS = Object.freeze({
   ProstheticOrthoticOrder: prostheticOrthoticOrderToFhir,
   InstrumentalSwallowStudy: instrumentalSwallowStudyToFhir,
   SpasticityInjection: spasticityInjectionToFhir,
+  GroupTherapySession: groupTherapySessionToFhir,
 });
 
 /**
@@ -99,6 +102,7 @@ const RESOURCE_TYPES = Object.freeze({
   ProstheticOrthoticOrder: 'DeviceRequest',
   InstrumentalSwallowStudy: 'DiagnosticReport',
   SpasticityInjection: 'Procedure',
+  GroupTherapySession: 'Encounter',
 });
 
 module.exports = {
@@ -119,6 +123,7 @@ module.exports = {
   prostheticOrthoticOrderToFhir,
   instrumentalSwallowStudyToFhir,
   spasticityInjectionToFhir,
+  groupTherapySessionToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

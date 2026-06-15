@@ -201,6 +201,14 @@ const MINIMAL_FIXTURES = Object.freeze({
     emergencyContactName: 'Abu Khalid',
     emergencyContactPhone: '+966500000000',
   },
+  FacilityAsset: {
+    assetTag: 'FA-0001',
+    name: 'Passenger Elevator A',
+    category: 'elevator',
+    branchId: '64a2222222222222222222bb',
+    criticality: 'life_safety',
+    status: 'in_service',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

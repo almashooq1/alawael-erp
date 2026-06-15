@@ -1628,3 +1628,4 @@ __tests__/adaptive-sports-program-to-fhir-wave1333.test.js
 __tests__/transition-plan-to-fhir-wave1334.test.js
 __tests__/caregiver-support-program-to-fhir-wave1335.test.js
 __tests__/respite-booking-to-fhir-wave1336.test.js
+__tests__/facility-asset-to-fhir-wave1337.test.js

@@ -1631,3 +1631,4 @@ __tests__/respite-booking-to-fhir-wave1336.test.js
 __tests__/facility-asset-to-fhir-wave1337.test.js
 __tests__/staff-health-record-to-fhir-wave1338.test.js
 __tests__/biomedical-waste-record-to-fhir-wave1339.test.js
+__tests__/sponsorship-to-fhir-wave1340.test.js

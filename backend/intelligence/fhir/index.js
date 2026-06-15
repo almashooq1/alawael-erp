@@ -36,6 +36,7 @@
  *   FacilityAsset → Device (W1337)
  *   StaffHealthRecord → Observation (W1338)
  *   BiomedicalWasteRecord → SupplyDelivery (W1339)
+ *   Sponsorship → Coverage (W1340)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -75,6 +76,7 @@ const { respiteBookingToFhir } = require('./respite-booking-to-fhir.lib');
 const { facilityAssetToFhir } = require('./facility-asset-to-fhir.lib');
 const { staffHealthRecordToFhir } = require('./staff-health-record-to-fhir.lib');
 const { biomedicalWasteRecordToFhir } = require('./biomedical-waste-record-to-fhir.lib');
+const { sponsorshipToFhir } = require('./sponsorship-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -111,6 +113,7 @@ const MAPPERS = Object.freeze({
   FacilityAsset: facilityAssetToFhir,
   StaffHealthRecord: staffHealthRecordToFhir,
   BiomedicalWasteRecord: biomedicalWasteRecordToFhir,
+  Sponsorship: sponsorshipToFhir,
 });
 
 /**
@@ -151,6 +154,7 @@ const RESOURCE_TYPES = Object.freeze({
   FacilityAsset: 'Device',
   StaffHealthRecord: 'Observation',
   BiomedicalWasteRecord: 'SupplyDelivery',
+  Sponsorship: 'Coverage',
 });
 
 module.exports = {
@@ -184,6 +188,7 @@ module.exports = {
   facilityAssetToFhir,
   staffHealthRecordToFhir,
   biomedicalWasteRecordToFhir,
+  sponsorshipToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

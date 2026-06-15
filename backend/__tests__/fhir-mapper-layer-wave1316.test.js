@@ -222,6 +222,13 @@ const MINIMAL_FIXTURES = Object.freeze({
     generationDate: '2026-02-01T08:00:00.000Z',
     status: 'generated',
   },
+  Sponsorship: {
+    donorId: '64a6666666666666666666ff',
+    beneficiaryId: '64a1111111111111111111aa',
+    sponsorshipType: 'full',
+    startDate: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

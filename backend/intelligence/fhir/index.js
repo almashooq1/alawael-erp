@@ -84,6 +84,10 @@ const { seatAllocationToFhir } = require('./seat-allocation-to-fhir.lib');
 const { buildFhirBundle, buildFhirBundleFromEntities } = require('./fhir-bundle.lib');
 const { validateFhirResource, validateFhirBundle } = require('./fhir-validate.lib');
 const { buildOperationOutcome } = require('./fhir-operation-outcome.lib');
+const {
+  toValidatedFhir: _toValidatedFhir,
+  toValidatedFhirBundle: _toValidatedFhirBundle,
+} = require('./fhir-convert.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -168,6 +172,28 @@ const RESOURCE_TYPES = Object.freeze({
   SeatAllocation: 'Appointment',
 });
 
+/**
+ * Convenience front door: map a canonical record → FHIR resource, validate it,
+ * and produce an OperationOutcome — with the MAPPERS table auto-injected so
+ * barrel consumers never pass it. (W1346)
+ * @param {string} entityName
+ * @param {object} record
+ * @param {object} [opts] {mapperOpts, validateOpts, outcomeOpts}
+ */
+function toValidatedFhir(entityName, record, opts = {}) {
+  return _toValidatedFhir(entityName, record, { ...opts, mappers: MAPPERS });
+}
+
+/**
+ * Convenience front door: map several canonical records → FHIR Bundle, validate
+ * the Bundle, and produce an OperationOutcome — MAPPERS auto-injected. (W1346)
+ * @param {Array<{entityName: string, record: object}>} entries
+ * @param {object} [opts] {bundleOpts, validateOpts, outcomeOpts}
+ */
+function toValidatedFhirBundle(entries, opts = {}) {
+  return _toValidatedFhirBundle(entries, { ...opts, mappers: MAPPERS });
+}
+
 module.exports = {
   beneficiaryToFhirPatient,
   episodeOfCareToFhir,
@@ -207,6 +233,8 @@ module.exports = {
   validateFhirResource,
   validateFhirBundle,
   buildOperationOutcome,
+  toValidatedFhir,
+  toValidatedFhirBundle,
   MAPPERS,
   RESOURCE_TYPES,
 };

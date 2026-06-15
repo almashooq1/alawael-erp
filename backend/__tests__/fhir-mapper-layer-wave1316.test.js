@@ -174,6 +174,13 @@ const MINIMAL_FIXTURES = Object.freeze({
     sessionDate: '2026-02-01T09:00:00.000Z',
     modality: 'hydrotherapy',
   },
+  AdaptiveSportsProgram: {
+    beneficiaryId: '64a1111111111111111111aa',
+    sport: 'boccia',
+    category: 'individual',
+    physicalDemand: 'low',
+    status: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

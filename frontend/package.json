@@ -17,6 +17,7 @@
     "quality:fast": "jest --passWithNoTests --coverage",
     "quality:ci": "jest --passWithNoTests --coverage --watchAll=false",
     "quality": "npm run quality:ci",
+    "test:a11y": "jest src/__tests__/a11y-smoke.test.jsx",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "analyze": "npx source-map-explorer 'build/static/js/*.js'"

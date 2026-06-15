@@ -2351,6 +2351,8 @@ on:
       - 'backend/__tests__/prosthetic-orthotic-order-to-fhir-wave1324.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/instrumental-swallow-study-to-fhir-wave1325.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/spasticity-injection-to-fhir-wave1326.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4680,6 +4682,8 @@ on:
       - 'backend/__tests__/prosthetic-orthotic-order-to-fhir-wave1324.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/instrumental-swallow-study-to-fhir-wave1325.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/spasticity-injection-to-fhir-wave1326.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

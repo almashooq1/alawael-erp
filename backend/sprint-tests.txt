@@ -1617,3 +1617,4 @@ __tests__/sensory-diet-program-to-fhir-wave1322.test.js
 __tests__/communication-aid-profile-to-fhir-wave1323.test.js
 __tests__/prosthetic-orthotic-order-to-fhir-wave1324.test.js
 __tests__/instrumental-swallow-study-to-fhir-wave1325.test.js
+__tests__/spasticity-injection-to-fhir-wave1326.test.js

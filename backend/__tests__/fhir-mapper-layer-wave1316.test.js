@@ -130,6 +130,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     studyType: 'vfss',
     status: 'completed',
   },
+  SpasticityInjection: {
+    beneficiaryId: '64a1111111111111111111aa',
+    agent: 'botulinum_toxin_a',
+    procedureDate: '2026-02-01T09:00:00.000Z',
+    status: 'completed',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

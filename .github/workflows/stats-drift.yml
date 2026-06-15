@@ -1,0 +1,77 @@
+# ════════════════════════════════════════════════════════════════════
+#  Docs stats drift gate (W1351, closes the CI-wiring half of GAPS Item 5).
+#
+#  GAPS Item 5 = "documentation drifts from reality". W1305 added the
+#  machine-readable `collectStats()` + `npm run stats:json`; W1349 added
+#  the pure render/extract/apply/check engine + `stats:write`/`stats:check`
+#  with PROJECT-STATS markers. This workflow is the missing CI half: it
+#  runs `stats:check` against docs/PROJECT_STATS.md and FAILS the build
+#  when the embedded structural counts (files / models / routes / services
+#  / tests / deps) drift from the live backend — so adding or removing a
+#  model/route/service must be accompanied by `npm run stats:write`.
+#
+#  The block deliberately excludes volatile jsLines + timestamp, so this
+#  gate only fires on real structural drift, not on every line edit.
+#  Fix when it fails:  cd backend && npm run stats:write ../docs/PROJECT_STATS.md
+# ════════════════════════════════════════════════════════════════════
+name: "📊 Docs Stats Drift"
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/models/**'
+      - 'backend/routes/**'
+      - 'backend/controllers/**'
+      - 'backend/middleware/**'
+      - 'backend/services/**'
+      - 'backend/validators/**'
+      - 'backend/migrations/**'
+      - 'backend/__tests__/**'
+      - 'backend/package.json'
+      - 'backend/scripts/project-stats.js'
+      - 'docs/PROJECT_STATS.md'
+      - '.github/workflows/stats-drift.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/models/**'
+      - 'backend/routes/**'
+      - 'backend/controllers/**'
+      - 'backend/middleware/**'
+      - 'backend/services/**'
+      - 'backend/validators/**'
+      - 'backend/migrations/**'
+      - 'backend/__tests__/**'
+      - 'backend/package.json'
+      - 'backend/scripts/project-stats.js'
+      - 'docs/PROJECT_STATS.md'
+      - '.github/workflows/stats-drift.yml'
+
+concurrency:
+  group: stats-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: stats:check docs/PROJECT_STATS.md
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run stats drift check
+        working-directory: backend
+        # No npm install needed — project-stats.js is dependency-free
+        # (only Node built-ins fs/path). Fails (exit 1) on drift or a
+        # missing PROJECT-STATS block.
+        run: node scripts/project-stats.js --check ../docs/PROJECT_STATS.md

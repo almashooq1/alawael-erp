@@ -110,6 +110,10 @@ const MINIMAL_FIXTURES = Object.freeze({
     beneficiaryId: '64a1111111111111111111aa',
     status: 'active',
   },
+  SensoryDietProgram: {
+    beneficiaryId: '64a1111111111111111111aa',
+    status: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

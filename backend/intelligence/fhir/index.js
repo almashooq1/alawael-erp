@@ -18,6 +18,7 @@
  *   AssistiveDevice  → Device       (W1319)
  *   SafeguardingConcern → Flag      (W1320)
  *   BeneficiaryDietPrescription → NutritionOrder (W1321)
+ *   SensoryDietProgram → CarePlan  (W1322)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -39,6 +40,7 @@ const { safeguardingConcernToFhir } = require('./safeguarding-concern-to-fhir.li
 const {
   beneficiaryDietPrescriptionToFhir,
 } = require('./beneficiary-diet-prescription-to-fhir.lib');
+const { sensoryDietProgramToFhir } = require('./sensory-diet-program-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -57,6 +59,7 @@ const MAPPERS = Object.freeze({
   AssistiveDevice: assistiveDeviceToFhir,
   SafeguardingConcern: safeguardingConcernToFhir,
   BeneficiaryDietPrescription: beneficiaryDietPrescriptionToFhir,
+  SensoryDietProgram: sensoryDietProgramToFhir,
 });
 
 /**
@@ -79,6 +82,7 @@ const RESOURCE_TYPES = Object.freeze({
   AssistiveDevice: 'Device',
   SafeguardingConcern: 'Flag',
   BeneficiaryDietPrescription: 'NutritionOrder',
+  SensoryDietProgram: 'CarePlan',
 });
 
 module.exports = {
@@ -94,6 +98,7 @@ module.exports = {
   assistiveDeviceToFhir,
   safeguardingConcernToFhir,
   beneficiaryDietPrescriptionToFhir,
+  sensoryDietProgramToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

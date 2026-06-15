@@ -1623,3 +1623,4 @@ __tests__/tele-rehab-session-to-fhir-wave1328.test.js
 __tests__/arvr-session-to-fhir-wave1329.test.js
 __tests__/dtt-session-to-fhir-wave1330.test.js
 __tests__/creative-arts-therapy-session-to-fhir-wave1331.test.js
+__tests__/adjunct-therapy-session-to-fhir-wave1332.test.js

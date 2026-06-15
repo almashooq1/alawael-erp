@@ -2322,6 +2322,9 @@ on:
       - 'backend/__tests__/beneficiary-to-fhir-wave1309.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/episode-of-care-to-fhir-wave1310.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assessment-to-fhir-wave1311.test.js'
+      - 'backend/__tests__/session-to-fhir-wave1312.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4622,6 +4625,9 @@ on:
       - 'backend/__tests__/beneficiary-to-fhir-wave1309.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/episode-of-care-to-fhir-wave1310.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assessment-to-fhir-wave1311.test.js'
+      - 'backend/__tests__/session-to-fhir-wave1312.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -2375,6 +2375,8 @@ on:
       - 'backend/__tests__/respite-booking-to-fhir-wave1336.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/facility-asset-to-fhir-wave1337.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/staff-health-record-to-fhir-wave1338.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4728,6 +4730,8 @@ on:
       - 'backend/__tests__/respite-booking-to-fhir-wave1336.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/facility-asset-to-fhir-wave1337.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/staff-health-record-to-fhir-wave1338.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

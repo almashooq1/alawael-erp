@@ -209,6 +209,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     criticality: 'life_safety',
     status: 'in_service',
   },
+  StaffHealthRecord: {
+    employeeId: '64a3333333333333333333cc',
+    recordType: 'immunization',
+    status: 'completed',
+    eventDate: '2026-01-10T00:00:00.000Z',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

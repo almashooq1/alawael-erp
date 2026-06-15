@@ -1610,3 +1610,4 @@ __tests__/risk-profile-to-fhir-wave1315.test.js
 __tests__/fhir-mapper-layer-wave1316.test.js
 __tests__/seizure-event-to-fhir-wave1317.test.js
 __tests__/behavior-incident-to-fhir-wave1318.test.js
+__tests__/assistive-device-to-fhir-wave1319.test.js

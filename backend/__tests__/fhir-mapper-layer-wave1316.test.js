@@ -90,6 +90,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     behavior: 'Self-injurious head banging',
     severity: 'high',
   },
+  AssistiveDevice: {
+    assetTag: 'AD-0001',
+    name: 'Pediatric manual wheelchair',
+    category: 'wheelchair',
+    availability: 'available',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

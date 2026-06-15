@@ -2359,6 +2359,8 @@ on:
       - 'backend/__tests__/tele-rehab-session-to-fhir-wave1328.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arvr-session-to-fhir-wave1329.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dtt-session-to-fhir-wave1330.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4696,6 +4698,8 @@ on:
       - 'backend/__tests__/tele-rehab-session-to-fhir-wave1328.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arvr-session-to-fhir-wave1329.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dtt-session-to-fhir-wave1330.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

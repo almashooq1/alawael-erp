@@ -26,6 +26,7 @@
  *   GroupTherapySession → Encounter (W1327)
  *   TeleRehabSession → Encounter (W1328)
  *   ARVRSession → Encounter (W1329)
+ *   DttSession → Encounter (W1330)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -55,6 +56,7 @@ const { spasticityInjectionToFhir } = require('./spasticity-injection-to-fhir.li
 const { groupTherapySessionToFhir } = require('./group-therapy-session-to-fhir.lib');
 const { teleRehabSessionToFhir } = require('./tele-rehab-session-to-fhir.lib');
 const { arvrSessionToFhir } = require('./arvr-session-to-fhir.lib');
+const { dttSessionToFhir } = require('./dtt-session-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -81,6 +83,7 @@ const MAPPERS = Object.freeze({
   GroupTherapySession: groupTherapySessionToFhir,
   TeleRehabSession: teleRehabSessionToFhir,
   ARVRSession: arvrSessionToFhir,
+  DttSession: dttSessionToFhir,
 });
 
 /**
@@ -111,6 +114,7 @@ const RESOURCE_TYPES = Object.freeze({
   GroupTherapySession: 'Encounter',
   TeleRehabSession: 'Encounter',
   ARVRSession: 'Encounter',
+  DttSession: 'Encounter',
 });
 
 module.exports = {
@@ -134,6 +138,7 @@ module.exports = {
   groupTherapySessionToFhir,
   teleRehabSessionToFhir,
   arvrSessionToFhir,
+  dttSessionToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

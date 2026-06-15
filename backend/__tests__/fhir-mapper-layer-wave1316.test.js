@@ -191,6 +191,16 @@ const MINIMAL_FIXTURES = Object.freeze({
     programType: 'caregiver_training',
     status: 'in_progress',
   },
+  RespiteBooking: {
+    beneficiaryId: '64a1111111111111111111aa',
+    bookingType: 'day',
+    status: 'requested',
+    startAt: '2026-02-01T08:00:00.000Z',
+    endAt: '2026-02-01T16:00:00.000Z',
+    nightCount: 0,
+    emergencyContactName: 'Abu Khalid',
+    emergencyContactPhone: '+966500000000',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

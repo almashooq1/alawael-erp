@@ -96,6 +96,16 @@ const MINIMAL_FIXTURES = Object.freeze({
     category: 'wheelchair',
     availability: 'available',
   },
+  SafeguardingConcern: {
+    subjectKind: 'beneficiary',
+    subjectBeneficiaryId: '64a1111111111111111111aa',
+    reportedBy: '64c3333333333333333333cc',
+    reportedAt: '2026-02-01T08:00:00.000Z',
+    category: 'neglect',
+    severity: 'high',
+    description: 'Repeated unexplained absences and signs of poor nutrition',
+    status: 'reported',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

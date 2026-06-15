@@ -16,6 +16,7 @@
  *   SeizureEvent   → Observation    (W1317)
  *   BehaviorIncident → Observation  (W1318)
  *   AssistiveDevice  → Device       (W1319)
+ *   SafeguardingConcern → Flag      (W1320)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -33,6 +34,7 @@ const { riskProfileToFhir } = require('./risk-profile-to-fhir.lib');
 const { seizureEventToFhir } = require('./seizure-event-to-fhir.lib');
 const { behaviorIncidentToFhir } = require('./behavior-incident-to-fhir.lib');
 const { assistiveDeviceToFhir } = require('./assistive-device-to-fhir.lib');
+const { safeguardingConcernToFhir } = require('./safeguarding-concern-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -49,6 +51,7 @@ const MAPPERS = Object.freeze({
   SeizureEvent: seizureEventToFhir,
   BehaviorIncident: behaviorIncidentToFhir,
   AssistiveDevice: assistiveDeviceToFhir,
+  SafeguardingConcern: safeguardingConcernToFhir,
 });
 
 /**
@@ -69,6 +72,7 @@ const RESOURCE_TYPES = Object.freeze({
   SeizureEvent: 'Observation',
   BehaviorIncident: 'Observation',
   AssistiveDevice: 'Device',
+  SafeguardingConcern: 'Flag',
 });
 
 module.exports = {
@@ -82,6 +86,7 @@ module.exports = {
   seizureEventToFhir,
   behaviorIncidentToFhir,
   assistiveDeviceToFhir,
+  safeguardingConcernToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

@@ -31,6 +31,7 @@
  *   AdjunctTherapySession → Encounter (W1332)
  *   AdaptiveSportsProgram → CarePlan (W1333)
  *   TransitionPlan → CarePlan (W1334)
+ *   CaregiverSupportProgram → CarePlan (W1335)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -65,6 +66,7 @@ const { creativeArtsTherapySessionToFhir } = require('./creative-arts-therapy-se
 const { adjunctTherapySessionToFhir } = require('./adjunct-therapy-session-to-fhir.lib');
 const { adaptiveSportsProgramToFhir } = require('./adaptive-sports-program-to-fhir.lib');
 const { transitionPlanToFhir } = require('./transition-plan-to-fhir.lib');
+const { caregiverSupportProgramToFhir } = require('./caregiver-support-program-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -96,6 +98,7 @@ const MAPPERS = Object.freeze({
   AdjunctTherapySession: adjunctTherapySessionToFhir,
   AdaptiveSportsProgram: adaptiveSportsProgramToFhir,
   TransitionPlan: transitionPlanToFhir,
+  CaregiverSupportProgram: caregiverSupportProgramToFhir,
 });
 
 /**
@@ -131,6 +134,7 @@ const RESOURCE_TYPES = Object.freeze({
   AdjunctTherapySession: 'Encounter',
   AdaptiveSportsProgram: 'CarePlan',
   TransitionPlan: 'CarePlan',
+  CaregiverSupportProgram: 'CarePlan',
 });
 
 module.exports = {
@@ -159,6 +163,7 @@ module.exports = {
   adjunctTherapySessionToFhir,
   adaptiveSportsProgramToFhir,
   transitionPlanToFhir,
+  caregiverSupportProgramToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

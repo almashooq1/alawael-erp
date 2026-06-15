@@ -2369,6 +2369,8 @@ on:
       - 'backend/__tests__/adaptive-sports-program-to-fhir-wave1333.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-to-fhir-wave1334.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/caregiver-support-program-to-fhir-wave1335.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4716,6 +4718,8 @@ on:
       - 'backend/__tests__/adaptive-sports-program-to-fhir-wave1333.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transition-plan-to-fhir-wave1334.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/caregiver-support-program-to-fhir-wave1335.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

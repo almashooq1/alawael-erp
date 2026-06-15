@@ -342,6 +342,7 @@ __tests__/check-memory-health-script.test.js
 __tests__/check-mfa-tier-lib-wave275c.test.js
 __tests__/check-mongoose-hook-style-script.test.js
 __tests__/check-phantom-schema-writes-script.test.js
+__tests__/check-retention-coverage-script.test.js
 __tests__/check-risk-rule-keys-script.test.js
 __tests__/check-role-registry-divergence-script.test.js
 __tests__/check-route-shadowing-script.test.js

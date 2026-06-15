@@ -6,6 +6,7 @@ jest.mock('../../ApiService', () => ({
     put: jest.fn(),
     delete: jest.fn(),
   },
+  API_BASE_URL: 'https://api.alawael.com/api/v1',
 }));
 
 import api from '../../ApiService';
@@ -16,6 +17,7 @@ import telehealth from '../telehealth';
 import therapistWorkbench from '../therapistWorkbench';
 import parentPortal from '../parentPortal';
 import nationalAddress from '../nationalAddress';
+import { cctv } from '../cctv';
 
 const mockedApi = api as jest.Mocked<typeof api>;
 
@@ -346,5 +348,111 @@ describe('parentPortal module', () => {
     const res = await parentPortal.childAttendance('c1');
     expect(mockedApi.get).toHaveBeenCalledWith('/parent-v2/children/c1/attendance');
     expect(res).toBe(att);
+  });
+});
+
+describe('cctv module', () => {
+  // cctv unwraps res.data (an envelope), so mocks wrap the envelope: { data: { success, data } }.
+  it('listForBranch() unwraps data and url-encodes the branch', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [{ _id: 'cam1' }] } });
+    const res = await cctv.listForBranch('BR 1');
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/cameras/by-branch/BR%201');
+    expect(res).toHaveLength(1);
+  });
+
+  it('listForBranch() appends an encoded status query when given', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [] } });
+    await cctv.listForBranch('BR1', 'online');
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/cameras/by-branch/BR1?status=online');
+  });
+
+  it('getCamera() reads by encoded id', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: { _id: 'cam/1' } } });
+    const res = await cctv.getCamera('cam/1');
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/cameras/cam%2F1');
+    expect(res._id).toBe('cam/1');
+  });
+
+  it('statsByBranch() reads the aggregate endpoint', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [{ branchCode: 'B1', total: 2, online: 1, offline: 1 }] } });
+    const res = await cctv.statsByBranch();
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/cameras/stats/by-branch');
+    expect(res[0].online).toBe(1);
+  });
+
+  it('unwrap throws on { success: false } envelopes', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: false, message: 'denied' } });
+    await expect(cctv.getCamera('x')).rejects.toThrow('denied');
+  });
+
+  it('startLive() posts cameraId + requireGrant default true', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, data: { sessionId: 's1', hlsUrl: 'u', expiresAt: 'z' } } });
+    const res = await cctv.startLive('cam1');
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/streams/live', { cameraId: 'cam1', requireGrant: true });
+    expect(res.sessionId).toBe('s1');
+  });
+
+  it('startLive() honours requireGrant=false', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, data: { sessionId: 's1', hlsUrl: 'u', expiresAt: 'z' } } });
+    await cctv.startLive('cam1', false);
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/streams/live', { cameraId: 'cam1', requireGrant: false });
+  });
+
+  it('heartbeat() + stopStream() post to the encoded session path', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true } });
+    await cctv.heartbeat('sess 1');
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/streams/sess%201/heartbeat');
+    await cctv.stopStream('sess 1');
+    expect(mockedApi.post).toHaveBeenLastCalledWith('/cctv/streams/sess%201/stop');
+  });
+
+  it('snapshotUrl() builds a full origin URL relative to the shared base', () => {
+    expect(cctv.snapshotUrl('cam 1')).toBe('https://api.alawael.com/api/v1/cctv/streams/snapshot/cam%201');
+  });
+
+  it('ptz() + ptzStop() post body to the encoded camera path', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true } });
+    await cctv.ptz('cam1', { pan: 1, tilt: -2 });
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/streams/ptz/cam1', { pan: 1, tilt: -2 });
+    await cctv.ptzStop('cam1');
+    expect(mockedApi.post).toHaveBeenLastCalledWith('/cctv/streams/ptz/cam1/stop');
+  });
+
+  it('listEvents() builds a query string from defined params only', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [] } });
+    await cctv.listEvents({ branchCode: 'B1', severity: 'high', cameraId: undefined, limit: 10 });
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/events?branchCode=B1&severity=high&limit=10');
+  });
+
+  it('listEvents() omits the query string entirely when no params', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [] } });
+    await cctv.listEvents();
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/events');
+  });
+
+  it('listAlerts() builds a query string and unwraps', async () => {
+    mockedApi.get.mockResolvedValue({ data: { success: true, data: [{ _id: 'a1' }] } });
+    const res = await cctv.listAlerts({ branchCode: 'B1', severity: 'critical' });
+    expect(mockedApi.get).toHaveBeenCalledWith('/cctv/alerts?branchCode=B1&severity=critical');
+    expect(res).toHaveLength(1);
+  });
+
+  it('acknowledgeAlert() posts to the encoded ack path', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, data: { _id: 'a1', status: 'acknowledged' } } });
+    const res = await cctv.acknowledgeAlert('a1');
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/alerts/a1/acknowledge');
+    expect(res.status).toBe('acknowledged');
+  });
+
+  it('resolveAlert() posts resolution + status (defaults to resolved)', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, data: { _id: 'a1', status: 'resolved' } } });
+    await cctv.resolveAlert('a1', 'cleared');
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/alerts/a1/resolve', { resolution: 'cleared', status: 'resolved' });
+  });
+
+  it('escalateAlert() posts the optional incidentId', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true, data: { _id: 'a1', status: 'escalated' } } });
+    await cctv.escalateAlert('a1', 'inc1');
+    expect(mockedApi.post).toHaveBeenCalledWith('/cctv/alerts/a1/escalate', { incidentId: 'inc1' });
   });
 });

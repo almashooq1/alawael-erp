@@ -89,6 +89,9 @@ const {
   checkBundleReferences,
 } = require('./fhir-reference-integrity.lib');
 const {
+  buildCapabilityStatement: _buildCapabilityStatement,
+} = require('./fhir-capability-statement.lib');
+const {
   toValidatedFhir: _toValidatedFhir,
   toValidatedFhirBundle: _toValidatedFhirBundle,
 } = require('./fhir-convert.lib');
@@ -198,6 +201,15 @@ function toValidatedFhirBundle(entries, opts = {}) {
   return _toValidatedFhirBundle(entries, { ...opts, mappers: MAPPERS });
 }
 
+/**
+ * Generate the layer's FHIR R4 CapabilityStatement with RESOURCE_TYPES
+ * auto-injected so callers never pass the table. (W1348)
+ * @param {object} [opts] {date, publisher, fhirVersion, status, url, softwareName}
+ */
+function buildCapabilityStatement(opts = {}) {
+  return _buildCapabilityStatement(RESOURCE_TYPES, opts);
+}
+
 module.exports = {
   beneficiaryToFhirPatient,
   episodeOfCareToFhir,
@@ -239,6 +251,7 @@ module.exports = {
   buildOperationOutcome,
   checkResourceReferences,
   checkBundleReferences,
+  buildCapabilityStatement,
   toValidatedFhir,
   toValidatedFhirBundle,
   MAPPERS,

@@ -8,9 +8,10 @@
  * acknowledge from the field, snapshot fetch.
  */
 
-import api from '../ApiService';
-// Note: snapshotUrl reads EXPO_PUBLIC_API_URL directly because ApiService
-// keeps its axios instance private. Keep the two in sync.
+import api, { API_BASE_URL } from '../ApiService';
+// Note: snapshotUrl needs the origin OUTSIDE the private axios instance
+// (it builds an <Image> src), so it reuses the shared API_BASE_URL default
+// re-exported by ApiService instead of duplicating the fallback string.
 
 export type CctvCameraStatus = 'provisioned' | 'online' | 'offline' | 'degraded' | 'retired';
 
@@ -128,7 +129,7 @@ export const cctv = {
     await api.post(`${BASE}/streams/${encodeURIComponent(sessionId)}/stop`);
   },
   snapshotUrl(cameraId: string): string {
-    const base = (process.env.EXPO_PUBLIC_API_URL || 'https://api.alawael.com/api/v1').replace(/\/+$/, '');
+    const base = API_BASE_URL.replace(/\/+$/, '');
     return `${base}${BASE}/streams/snapshot/${encodeURIComponent(cameraId)}`;
   },
   async ptz(cameraId: string, body: { pan?: number; tilt?: number; zoom?: number }): Promise<void> {

@@ -9,6 +9,11 @@ import { showMessage } from 'react-native-flash-message';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.alawael.com/api/v1';
 
+// Re-exported so callers that need the origin OUTSIDE the private axios
+// instance (e.g. building an <Image> src) share the SINGLE default string
+// instead of duplicating it (W1308 drift fix).
+export { API_BASE_URL };
+
 // 22-char base64url-ish id — matches what the backend middleware
 // accepts (^[a-zA-Z0-9_\-.=+/]{1,128}$) so the server preserves it
 // rather than generating a fresh one. Good enough for correlation;

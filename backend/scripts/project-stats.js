@@ -208,8 +208,34 @@ function applyStatsBlock(markdown, block) {
 }
 
 /**
+ * Normalize a rendered/embedded stats block for whitespace-insensitive
+ * comparison. Markdown formatters (Prettier, markdownlint --fix) re-pad table
+ * cells to align columns, which would make a byte-exact compare flap on every
+ * save. This collapses per-cell padding and treats any separator run of dashes
+ * (`| --- |` ↔ `| ------ |`) as equal, while preserving cell CONTENT — so a
+ * real count drift (a changed value) is still detected. Pure.
+ * @param {string} block
+ * @returns {string}
+ */
+function normalizeStatsBlock(block) {
+  return String(block)
+    .split('\n')
+    .map(line => {
+      const t = line.trim();
+      if (!t.startsWith('|')) return t;
+      const cells = t.split('|').map(c => c.trim());
+      // separator cells (`---`, `:--:`, `------`) collapse to a single token
+      return cells.map(c => (/^:?-{2,}:?$/.test(c) ? '---' : c)).join('|');
+    })
+    .filter(l => l.length > 0)
+    .join('\n');
+}
+
+/**
  * Compare the block embedded in a markdown string against a freshly rendered
  * one. Pure. Invalidity (missing block / drift) is reported, never thrown.
+ * Comparison is whitespace-insensitive for table formatting (see
+ * normalizeStatsBlock) so it is robust to markdown auto-formatters.
  * @param {string} markdown
  * @param {string} rendered freshly rendered block
  * @returns {{ ok: boolean, reason: string }}
@@ -222,7 +248,7 @@ function checkStatsBlock(markdown, rendered) {
       reason: 'no PROJECT-STATS block found (add the markers, then run stats:write)',
     };
   }
-  if (existing.trim() !== rendered.trim()) {
+  if (normalizeStatsBlock(existing) !== normalizeStatsBlock(rendered)) {
     return { ok: false, reason: 'PROJECT-STATS block is stale (run stats:write to refresh)' };
   }
   return { ok: true, reason: 'up to date' };
@@ -410,6 +436,7 @@ module.exports = {
   extractStatsBlock,
   applyStatsBlock,
   checkStatsBlock,
+  normalizeStatsBlock,
   STATS_MARKER_START,
   STATS_MARKER_END,
 };

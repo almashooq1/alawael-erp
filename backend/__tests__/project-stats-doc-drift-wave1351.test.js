@@ -38,7 +38,8 @@ describe('PROJECT_STATS doc — markers + workflow wiring (W1351)', () => {
     // a non-empty block sits between the markers
     const block = extractStatsBlock(md);
     expect(block).not.toBeNull();
-    expect(block).toMatch(/\| Metric \| Count \|/);
+    // padding-tolerant: markdown formatters re-align table columns
+    expect(block).toMatch(/\|\s*Metric\s*\|\s*Count\s*\|/);
   });
 
   it('the embedded block carries the expected drift-meaningful metric rows', () => {

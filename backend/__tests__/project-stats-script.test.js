@@ -197,6 +197,19 @@ describe('project-stats — stats-block automation (GAPS Item 5 doc-drift gate)'
     expect(checkStatsBlock(`x\n${stale}\ny`, block).ok).toBe(false);
   });
 
+  it('checkStatsBlock tolerates markdown-formatter column padding (no flap)', () => {
+    const block = renderStatsBlock(FIXTURE);
+    // simulate Prettier/markdownlint re-aligning table columns + dash runs
+    const padded = block
+      .replace(/^\| /gm, '|   ')
+      .replace(/ \|$/gm, '   |')
+      .replace(/\| --- \| --- \|/g, '| ------------------------ | ----- |');
+    expect(checkStatsBlock(`x\n${padded}\ny`, block)).toEqual({
+      ok: true,
+      reason: 'up to date',
+    });
+  });
+
   it('write-then-check is consistent against live stats', () => {
     const rendered = renderStatsBlock(collectStats());
     const written = applyStatsBlock('# Live\n', rendered);

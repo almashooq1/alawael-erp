@@ -19,6 +19,10 @@
 
 const fhir = require('../intelligence/fhir');
 const { canonical } = require('../intelligence/canonical');
+const {
+  validateFhirResource,
+  validateFhirBundle,
+} = require('../intelligence/fhir/fhir-validate.lib');
 
 /**
  * Minimal canonical-valid fixtures, one per mapped entity. Each is the SMALLEST
@@ -109,6 +113,9 @@ const MINIMAL_FIXTURES = Object.freeze({
   BeneficiaryDietPrescription: {
     beneficiaryId: '64a1111111111111111111aa',
     status: 'active',
+    // prescribedAt → NutritionOrder.dateTime, which FHIR R4 marks 1..1; a real
+    // prescription always carries it, so it belongs in the realistic minimal.
+    prescribedAt: '2026-02-01T09:00:00.000Z',
   },
   SensoryDietProgram: {
     beneficiaryId: '64a1111111111111111111aa',
@@ -258,7 +265,12 @@ describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () =>
 
   it('every named mapper export appears exactly once in MAPPERS', () => {
     // Non-mapper function exports (layer utilities, not per-entity mappers).
-    const NON_MAPPER_EXPORTS = new Set(['buildFhirBundle', 'buildFhirBundleFromEntities']);
+    const NON_MAPPER_EXPORTS = new Set([
+      'buildFhirBundle',
+      'buildFhirBundleFromEntities',
+      'validateFhirResource',
+      'validateFhirBundle',
+    ]);
     const exportedMappers = Object.entries(fhir)
       .filter(([k, v]) => typeof v === 'function' && k !== 'MAPPERS' && !NON_MAPPER_EXPORTS.has(k))
       .map(([, v]) => v);
@@ -313,5 +325,28 @@ describe('W1316 FHIR mapper layer — output shape + purity', () => {
     Object.entries(MINIMAL_FIXTURES).forEach(([name, fixture]) => {
       expect(canonical[name].safeParse(fixture).success).toBe(true);
     });
+  });
+});
+
+describe('W1316 FHIR mapper layer — FHIR R4 structural validity (W1344)', () => {
+  Object.keys(fhir.MAPPERS).forEach(name => {
+    it(`${name} emits a structurally-valid ${fhir.RESOURCE_TYPES[name]}`, () => {
+      const out = fhir.MAPPERS[name](MINIMAL_FIXTURES[name]);
+      const result = validateFhirResource(out);
+      // Surface the actual errors in the failure message for fast triage.
+      expect(result.errors).toEqual([]);
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  it('a Bundle of every mapper output is structurally valid', () => {
+    const resources = Object.keys(fhir.MAPPERS).map(name =>
+      fhir.MAPPERS[name](MINIMAL_FIXTURES[name])
+    );
+    const bundle = fhir.buildFhirBundle(resources, { type: 'collection' });
+    const result = validateFhirBundle(bundle);
+    expect(result.errors).toEqual([]);
+    expect(result.valid).toBe(true);
+    expect(result.entryCount).toBe(resources.length);
   });
 });

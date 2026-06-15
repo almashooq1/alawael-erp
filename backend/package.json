@@ -182,6 +182,7 @@
     "test:perf": "node --max-old-space-size=8192 node_modules/.bin/jest \"stress-load|performance-load|load\\.test|performance-tuning|advanced-performance|phase-22-performance\" --no-coverage --runInBand --forceExit",
     "test:load:smoke": "k6 run tests/load/k6-smoke.js",
     "test:load": "k6 run tests/load/k6-load.js",
+    "test:load:gov": "k6 run tests/load/k6-gov-integrations.js",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,ts,json,md}\"",

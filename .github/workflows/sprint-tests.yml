@@ -2397,6 +2397,8 @@ on:
       - 'backend/__tests__/fhir-reference-integrity-wave1347.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/fhir-capability-statement-wave1348.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/k6-gov-integrations-load-profile-wave1350.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4772,6 +4774,8 @@ on:
       - 'backend/__tests__/fhir-reference-integrity-wave1347.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/fhir-capability-statement-wave1348.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/k6-gov-integrations-load-profile-wave1350.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

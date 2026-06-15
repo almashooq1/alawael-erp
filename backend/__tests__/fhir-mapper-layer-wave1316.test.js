@@ -82,6 +82,14 @@ const MINIMAL_FIXTURES = Object.freeze({
     type: 'tonic_clonic',
     status: 'recorded',
   },
+  BehaviorIncident: {
+    beneficiaryId: '64a1111111111111111111aa',
+    reportedBy: '64c3333333333333333333cc',
+    occurredAt: '2026-02-01T08:00:00.000Z',
+    antecedent: 'Transition to a new activity',
+    behavior: 'Self-injurious head banging',
+    severity: 'high',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

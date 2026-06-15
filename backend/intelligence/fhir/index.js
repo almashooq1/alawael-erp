@@ -14,6 +14,7 @@
  *   Measure        → Questionnaire  (W1314)
  *   RiskProfile    → RiskAssessment (W1315)
  *   SeizureEvent   → Observation    (W1317)
+ *   BehaviorIncident → Observation  (W1318)
  *
  * Usage:
  *   const fhir = require('./intelligence/fhir');
@@ -29,6 +30,7 @@ const { planOfCareToFhir } = require('./plan-of-care-to-fhir.lib');
 const { measureToFhirQuestionnaire } = require('./measure-to-fhir.lib');
 const { riskProfileToFhir } = require('./risk-profile-to-fhir.lib');
 const { seizureEventToFhir } = require('./seizure-event-to-fhir.lib');
+const { behaviorIncidentToFhir } = require('./behavior-incident-to-fhir.lib');
 
 /**
  * Map a canonical entity to its FHIR resource by canonical entity name.
@@ -43,6 +45,7 @@ const MAPPERS = Object.freeze({
   Measure: measureToFhirQuestionnaire,
   RiskProfile: riskProfileToFhir,
   SeizureEvent: seizureEventToFhir,
+  BehaviorIncident: behaviorIncidentToFhir,
 });
 
 /**
@@ -61,6 +64,7 @@ const RESOURCE_TYPES = Object.freeze({
   Measure: 'Questionnaire',
   RiskProfile: 'RiskAssessment',
   SeizureEvent: 'Observation',
+  BehaviorIncident: 'Observation',
 });
 
 module.exports = {
@@ -72,6 +76,7 @@ module.exports = {
   measureToFhirQuestionnaire,
   riskProfileToFhir,
   seizureEventToFhir,
+  behaviorIncidentToFhir,
   MAPPERS,
   RESOURCE_TYPES,
 };

@@ -138,6 +138,96 @@ function collectStats(root = ROOT) {
   };
 }
 
+// ─── Stats-block automation (GAPS Item 5: doc-drift gate) ────────────────────
+// A doc opts in by embedding the two markers below. `npm run stats:write <file>`
+// fills/refreshes the block; `npm run stats:check <file>` fails CI when the
+// embedded block no longer matches the live counts. Deliberately renders ONLY
+// drift-meaningful counts (files + architecture + tests + deps) — NOT volatile
+// jsLines or the generatedAt timestamp — so the gate fires on real structural
+// drift (a model/route/service added or removed) and not on every line edit.
+const STATS_MARKER_START =
+  '<!-- PROJECT-STATS:START (auto-generated — run `npm run stats:write <file>`) -->';
+const STATS_MARKER_END = '<!-- PROJECT-STATS:END -->';
+
+/**
+ * Render the deterministic markdown stats block (markers included) from a stats
+ * object. Pure: same stats in → same string out (no timestamp, no line counts).
+ * @param {ReturnType<typeof collectStats>} stats
+ * @returns {string}
+ */
+function renderStatsBlock(stats) {
+  const a = stats.architecture || {};
+  const rows = [
+    ['JavaScript files', stats.code.jsFiles],
+    ['JSON files', stats.code.jsonFiles],
+    ['Markdown files', stats.code.mdFiles],
+    ['Models', a.models],
+    ['Routes', a.routes],
+    ['Controllers', a.controllers],
+    ['Middleware', a.middleware],
+    ['Services', a.services],
+    ['Validators', a.validators],
+    ['Migrations', a.migrations],
+    ['Tests (unit/integration)', stats.tests.unitIntegration],
+    ['Tests (e2e)', stats.tests.e2e],
+    ['Dependencies (prod)', stats.dependencies.production],
+    ['Dependencies (dev)', stats.dependencies.development],
+  ];
+  const body = rows.map(([label, value]) => `| ${label} | ${value} |`).join('\n');
+  return [STATS_MARKER_START, '| Metric | Count |', '| --- | --- |', body, STATS_MARKER_END].join(
+    '\n'
+  );
+}
+
+/**
+ * Extract the inclusive marker-to-marker block from a markdown string.
+ * @param {string} markdown
+ * @returns {string|null} the block (markers included) or null if absent/malformed.
+ */
+function extractStatsBlock(markdown) {
+  if (typeof markdown !== 'string') return null;
+  const start = markdown.indexOf(STATS_MARKER_START);
+  if (start === -1) return null;
+  const end = markdown.indexOf(STATS_MARKER_END, start);
+  if (end === -1) return null;
+  return markdown.slice(start, end + STATS_MARKER_END.length);
+}
+
+/**
+ * Insert (or replace) the stats block in a markdown string. Pure — returns the
+ * new string, does no IO. Appends at EOF when no block is present yet.
+ * @param {string} markdown
+ * @param {string} block rendered block (markers included)
+ * @returns {string}
+ */
+function applyStatsBlock(markdown, block) {
+  const existing = extractStatsBlock(markdown);
+  if (existing !== null) return markdown.replace(existing, block);
+  const sep = markdown.length === 0 || markdown.endsWith('\n') ? '' : '\n';
+  return `${markdown}${sep}\n${block}\n`;
+}
+
+/**
+ * Compare the block embedded in a markdown string against a freshly rendered
+ * one. Pure. Invalidity (missing block / drift) is reported, never thrown.
+ * @param {string} markdown
+ * @param {string} rendered freshly rendered block
+ * @returns {{ ok: boolean, reason: string }}
+ */
+function checkStatsBlock(markdown, rendered) {
+  const existing = extractStatsBlock(markdown);
+  if (existing === null) {
+    return {
+      ok: false,
+      reason: 'no PROJECT-STATS block found (add the markers, then run stats:write)',
+    };
+  }
+  if (existing.trim() !== rendered.trim()) {
+    return { ok: false, reason: 'PROJECT-STATS block is stale (run stats:write to refresh)' };
+  }
+  return { ok: true, reason: 'up to date' };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 function main() {
   console.log(
@@ -269,11 +359,57 @@ function main() {
 }
 
 if (require.main === module) {
-  if (process.argv.includes('--json')) {
+  const argv = process.argv.slice(2);
+  if (argv.includes('--json')) {
     process.stdout.write(JSON.stringify(collectStats(), null, 2) + '\n');
+  } else if (argv.includes('--check') || argv.includes('--write')) {
+    const mode = argv.includes('--write') ? 'write' : 'check';
+    const file = argv.find(a => !a.startsWith('--'));
+    if (!file) {
+      console.error(`✖ stats:${mode} requires a target markdown file path`);
+      process.exit(2);
+    }
+    const target = path.resolve(process.cwd(), file);
+    const rendered = renderStatsBlock(collectStats());
+    let markdown = '';
+    try {
+      markdown = fs.readFileSync(target, 'utf8');
+    } catch {
+      if (mode === 'check') {
+        console.error(`✖ stats:check — cannot read ${file}`);
+        process.exit(2);
+      }
+    }
+    if (mode === 'write') {
+      const next = applyStatsBlock(markdown, rendered);
+      if (next !== markdown) {
+        fs.writeFileSync(target, next);
+        console.log(`✓ stats:write — refreshed PROJECT-STATS block in ${file}`);
+      } else {
+        console.log(`✓ stats:write — ${file} already up to date`);
+      }
+    } else {
+      const result = checkStatsBlock(markdown, rendered);
+      if (result.ok) {
+        console.log(`✓ stats:check — ${file} is ${result.reason}`);
+      } else {
+        console.error(`✖ stats:check — ${file}: ${result.reason}`);
+        process.exit(1);
+      }
+    }
   } else {
     main();
   }
 }
 
-module.exports = { collectStats, countFiles, countInDir };
+module.exports = {
+  collectStats,
+  countFiles,
+  countInDir,
+  renderStatsBlock,
+  extractStatsBlock,
+  applyStatsBlock,
+  checkStatsBlock,
+  STATS_MARKER_START,
+  STATS_MARKER_END,
+};

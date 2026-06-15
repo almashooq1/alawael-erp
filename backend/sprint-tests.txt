@@ -1606,3 +1606,4 @@ __tests__/assessment-to-fhir-wave1311.test.js
 __tests__/session-to-fhir-wave1312.test.js
 __tests__/plan-of-care-to-fhir-wave1313.test.js
 __tests__/measure-to-fhir-wave1314.test.js
+__tests__/risk-profile-to-fhir-wave1315.test.js

@@ -106,6 +106,10 @@ const MINIMAL_FIXTURES = Object.freeze({
     description: 'Repeated unexplained absences and signs of poor nutrition',
     status: 'reported',
   },
+  BeneficiaryDietPrescription: {
+    beneficiaryId: '64a1111111111111111111aa',
+    status: 'active',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

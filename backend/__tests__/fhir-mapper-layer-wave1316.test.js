@@ -119,6 +119,12 @@ const MINIMAL_FIXTURES = Object.freeze({
     vocabularyLevel: 'single_word',
     lifecycleStatus: 'active',
   },
+  ProstheticOrthoticOrder: {
+    beneficiaryId: '64a1111111111111111111aa',
+    deviceCategory: 'afo',
+    prescribedDate: '2026-02-01T09:00:00.000Z',
+    stage: 'prescribed',
+  },
 });
 
 describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () => {

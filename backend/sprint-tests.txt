@@ -1636,3 +1636,4 @@ __tests__/cbahi-attestation-to-fhir-wave1341.test.js
 __tests__/seat-allocation-to-fhir-wave1342.test.js
 __tests__/fhir-bundle-wave1343.test.js
 __tests__/fhir-validate-wave1344.test.js
+__tests__/fhir-operation-outcome-wave1345.test.js

@@ -270,6 +270,7 @@ describe('W1316 FHIR mapper layer — barrel ↔ canonical registry sync', () =>
       'buildFhirBundleFromEntities',
       'validateFhirResource',
       'validateFhirBundle',
+      'buildOperationOutcome',
     ]);
     const exportedMappers = Object.entries(fhir)
       .filter(([k, v]) => typeof v === 'function' && k !== 'MAPPERS' && !NON_MAPPER_EXPORTS.has(k))

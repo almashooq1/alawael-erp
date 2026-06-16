@@ -1051,3 +1051,4 @@ __tests__/alerts-email-notify-wave1244.test.js
 __tests__/whatsapp-bot-new-units-wave1380.test.js
 __tests__/whatsapp-bot-interactive-menu-wave1381.test.js
 __tests__/whatsapp-bot-intelligence-wave1382.test.js
+__tests__/whatsapp-bot-bilingual-wave1383.test.js

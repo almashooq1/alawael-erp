@@ -191,6 +191,8 @@ const whatsappConversationSchema = new mongoose.Schema(
       step: { type: Number, default: 0 },
       phase: { type: String, enum: ['collecting', 'confirming', null], default: null },
       collected: { type: mongoose.Schema.Types.Mixed, default: {} },
+      // W1383: sticky bilingual preference for this conversation (ar | en).
+      lang: { type: String, enum: ['ar', 'en'], default: 'ar' },
       updatedAt: Date,
     },
 

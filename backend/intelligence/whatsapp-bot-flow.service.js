@@ -1,38 +1,37 @@
 'use strict';
 
 /**
- * whatsapp-bot-flow.service.js — W1372.
+ * whatsapp-bot-flow.service.js — W1372 (+ W1381 interactive, W1382 intelligence,
+ * W1383 bilingual).
  *
  * The **stateful finite-state machine** for the menu-driven WhatsApp bot. It is
  * PURE: `handleTurn(flowState, rawText, ctx)` takes the persisted flow state +
  * the inbound message + light context and returns a plan:
  *
  *   {
- *     reply: string,            // the text to send back
- *     nextFlowState: object,    // persist this on the conversation (idle = {unit:null})
+ *     reply: string,            // the text to send back (in the active language)
+ *     nextFlowState: object,    // persist this (idle = {unit:null}); carries `lang`
  *     sideEffect: { kind, unit, collected } | null,  // dispatcher acts on this
  *     handled: boolean,         // false ⇒ engine declined; caller may fall through
+ *     menu: boolean,            // true ⇒ reply is the main menu (render as a list)
  *   }
  *
- * No DB, no network, no `Date.now()`-dependent branching. The dispatcher
- * (whatsappWebhook.service) owns ALL I/O: sending the reply, persisting
- * `nextFlowState`, and acting on `sideEffect` (escalate / create record).
+ * No DB, no network, no `Date.now()`-dependent branching (except the injectable
+ * isFlowStale clock). The dispatcher owns ALL I/O.
  *
- * State shape (persisted on WhatsAppConversation.botFlow):
- *   { unit: <unitId|null>, step: <int>, collected: {…}, phase: 'collecting'|'confirming' }
- * An "idle" state is `{ unit: null }` (or null/undefined).
+ * W1383: every user-facing string is resolved through the i18n overlay by the
+ * effective language, which is sticky on `flowState.lang` (default Arabic) and
+ * switchable via an explicit language trigger ("english" / "عربي").
  *
  * @module intelligence/whatsapp-bot-flow.service
  */
 
 const reg = require('./whatsapp-bot-flow.registry');
+const i18n = require('./whatsapp-bot-flow.i18n');
 
 const IDLE = Object.freeze({ unit: null, step: 0, collected: {}, phase: null });
 
-// W1382: an abandoned multi-step flow shouldn't trap a sender forever. If their
-// persisted flow hasn't advanced within this window, the dispatcher resets it to
-// idle (a fresh message starts over at the menu). 6 hours balances "don't lose a
-// mid-registration in-progress" against "don't resume a day-old dead flow".
+// W1382: TTL after which an untouched active flow is considered abandoned.
 const FLOW_TTL_MS = 6 * 60 * 60 * 1000;
 
 /** Is the user currently inside a flow? */
@@ -40,10 +39,7 @@ function isActive(flowState) {
   return !!(flowState && flowState.unit && reg.UNIT_BY_ID[flowState.unit]);
 }
 
-/**
- * W1382: is a persisted flow stale (active but untouched beyond the TTL)? Pure —
- * `nowMs` is injected so it's deterministic to test. Idle flows are never stale.
- */
+/** W1382: is a persisted flow stale (active but untouched beyond the TTL)? Pure. */
 function isFlowStale(flowState, nowMs, ttlMs = FLOW_TTL_MS) {
   if (!isActive(flowState)) return false;
   const updated = flowState.updatedAt ? new Date(flowState.updatedAt).getTime() : NaN;
@@ -51,15 +47,7 @@ function isFlowStale(flowState, nowMs, ttlMs = FLOW_TTL_MS) {
   return nowMs - updated > ttlMs;
 }
 
-/**
- * W1382: classify a handled turn for lightweight usage analytics. Pure. Returns
- * `{ event, unit }` where event ∈ menu | enter | step | complete | idle.
- *   - menu:     the main menu was shown
- *   - enter:    a (multi-step) unit flow was just entered
- *   - step:     advanced within the same active flow
- *   - complete: a flow finished (emitted a side effect)
- *   - idle:     returned to / stayed idle without a side effect
- */
+/** W1382: classify a handled turn for usage analytics. Pure. */
 function deriveBotEvent(plan, priorState) {
   if (!plan) return { event: 'idle', unit: null };
   if (plan.menu) return { event: 'menu', unit: null };
@@ -71,83 +59,88 @@ function deriveBotEvent(plan, priorState) {
   return { event: 'idle', unit: null };
 }
 
-// ─── Rendering helpers ───────────────────────────────────────────────────────
+// ─── Rendering helpers (W1383: all language-aware) ──────────────────────────
 
-/**
- * Build the welcome + numbered main menu (spec §4). Discloses the bot identity
- * and offers human escalation — required for WhatsApp business-bot policy. When
- * `ctx.guardianName` is known, personalize the greeting.
- */
+/** Build the welcome + numbered main menu in the active language. */
 function renderWelcome(ctx = {}) {
-  const greeting = ctx.guardianName ? `مرحباً ${ctx.guardianName} 👋` : 'مرحباً بك 👋';
+  const lang = i18n.normLang(ctx.lang);
+  const greeting = ctx.guardianName
+    ? i18n.fw('greetingNamed', lang, ctx.guardianName)
+    : i18n.fw('greeting', lang);
   const lines = [
     greeting,
-    `أنا *مساعد الأوائل الذكي* (بوت افتراضي 🤖) الخاص بـ ${reg.CENTER.nameAr} – ${reg.CENTER.cityAr}.`,
-    'أسعد بخدمتك في كل ما يتعلق بتأهيل ورعاية أبنائكم وبناتكم ❤️',
-    'يمكنك في أي وقت كتابة "موظف" للتحدث مع شخص بشري.',
+    i18n.fw('intro', lang, reg.CENTER.nameAr, reg.CENTER.cityAr),
+    i18n.fw('help', lang),
+    i18n.fw('humanHint', lang),
     '',
-    'يرجى اختيار أحد الخيارات بكتابة رقمه:',
+    i18n.fw('choose', lang),
     '',
   ];
-  reg.UNITS.forEach((u, i) => lines.push(`${i + 1}) ${u.label}`));
+  reg.UNITS.forEach((u, i) => lines.push(`${i + 1}) ${i18n.unitLabel(u.id, u.label, lang)}`));
   lines.push('');
-  lines.push(reg.MENU_HINT);
+  lines.push(i18n.fw('menuHint', lang));
   return lines.join('\n');
 }
 
-/** Prompt text for a given unit + step index. */
-function stepPrompt(unit, stepIndex) {
+/** Prompt text for a given unit + step index, localized. */
+function stepPrompt(unit, stepIndex, lang) {
   const step = unit.steps[stepIndex];
-  return step ? step.prompt : '';
+  return step ? i18n.stepPrompt(unit.id, step.key, step.prompt, lang) : '';
 }
 
 /** First message when entering a multi-step unit: optional intro + step 0. */
-function enterUnitMessage(unit) {
-  const first = stepPrompt(unit, 0);
-  return unit.intro ? `${unit.intro}\n\n${first}` : first;
+function enterUnitMessage(unit, lang) {
+  const first = stepPrompt(unit, 0, lang);
+  const intro = i18n.unitIntro(unit.id, unit.intro, lang);
+  return intro ? `${intro}\n\n${first}` : first;
 }
 
-/**
- * Build the "please review" summary from collected answers (spec: every flow
- * summarizes before confirming). Skips empty optional fields.
- */
-function renderSummary(unit, collected) {
-  const lines = [`📋 *ملخص طلبك (${unit.label}):*`, ''];
+/** Build the "please review" summary from collected answers, localized. */
+function renderSummary(unit, collected, lang) {
+  const label = i18n.unitLabel(unit.id, unit.label, lang);
+  const lines = [i18n.fw('summaryHeader', lang, label), ''];
   for (const step of unit.steps) {
     const val = collected[step.key];
     if (val == null || String(val).trim() === '') continue;
-    const label = step.prompt
+    const promptText = i18n.stepPrompt(unit.id, step.key, step.prompt, lang);
+    const fieldLabel = promptText
       .replace(/[:：].*$/s, '')
       .replace(/\s*\(.*\)\s*$/s, '')
       .trim();
-    lines.push(`• ${label}: ${val}`);
+    lines.push(`• ${fieldLabel}: ${val}`);
   }
   lines.push('');
-  lines.push('هل تؤكد إرسال الطلب؟ (نعم / لا)');
+  lines.push(i18n.fw('confirmQ', lang));
   return lines.join('\n');
 }
 
-/**
- * Closing message after a flow completes. Unit 6 (home exercises) resolves
- * department-specific content; everything else uses the unit's `closing` (or a
- * `finalize()` for the static units). Always appends the menu hint.
- */
-function renderClosing(unit, collected) {
+/** Closing message after a flow completes, localized; always appends the hint. */
+function renderClosing(unit, collected, lang) {
   let body;
-  if (typeof unit.finalize === 'function') {
-    body = unit.finalize(collected);
+  if (unit.id === 'info') {
+    body = i18n.contentBlock('info', reg.INFO_TEXT, lang);
+  } else if (unit.id === 'notifications') {
+    body = i18n.contentBlock('notifications', reg.NOTIFICATIONS_INFO, lang);
+  } else if (unit.id === 'location') {
+    body = i18n.contentBlock('location', reg.LOCATION_INFO, lang);
+  } else if (unit.id === 'faq') {
+    body = reg.resolveFaqAnswer(collected.faqTopic); // Arabic content (translation follow-up)
   } else if (unit.id === 'home_exercises') {
     const key = reg.resolveDepartmentKey(collected.department || '');
-    body = key
-      ? reg.HOME_EXERCISES[key]
-      : [
-          'لم أتعرّف على القسم المطلوب بدقة. القسم المتاح: وظيفي / نطق / تربية خاصة / سلوك.',
-          'يمكنك إعادة المحاولة من القائمة، أو اكتب "موظف" للمساعدة.',
-        ].join('\n');
+    if (key) body = reg.HOME_EXERCISES[key]; // Arabic content (translation follow-up)
+    else
+      body =
+        i18n.normLang(lang) === 'en'
+          ? "I couldn't identify the department. Available: occupational / speech / special education / behavior. Try again from the menu or type \"agent\"."
+          : [
+              'لم أتعرّف على القسم المطلوب بدقة. القسم المتاح: وظيفي / نطق / تربية خاصة / سلوك.',
+              'يمكنك إعادة المحاولة من القائمة، أو اكتب "موظف" للمساعدة.',
+            ].join('\n');
   } else {
-    body = unit.closing || 'تم استلام طلبك بنجاح ✅';
+    const fallback = i18n.normLang(lang) === 'en' ? 'Your request was received ✅' : 'تم استلام طلبك بنجاح ✅';
+    body = i18n.unitClosing(unit.id, unit.closing || fallback, lang);
   }
-  return `${body}\n\n${reg.MENU_HINT}`;
+  return `${body}\n\n${i18n.fw('menuHint', lang)}`;
 }
 
 // ─── Core state machine ──────────────────────────────────────────────────────
@@ -156,112 +149,125 @@ function result(reply, nextFlowState, sideEffect = null, handled = true) {
   return { reply, nextFlowState, sideEffect, handled };
 }
 
+/** Attach the active language to a (cloned) state object. */
+function withLang(state, lang) {
+  return { ...state, lang: i18n.normLang(lang) };
+}
+
 // W1381: the main-menu result carries `menu: true` so the dispatcher can render
-// it as a native interactive WhatsApp list (when interactive mode is enabled)
-// instead of the numbered-text fallback. The text reply is always present so
-// non-interactive clients still work.
-function menuResult(ctx) {
-  return { reply: renderWelcome(ctx), nextFlowState: { ...IDLE }, sideEffect: null, handled: true, menu: true };
+// it as a native interactive list. `prefix` prepends a one-line notice (used by
+// the W1383 language-switch acknowledgement). Always carries the active lang.
+function menuResult(ctx, prefix) {
+  const lang = i18n.normLang(ctx.lang);
+  let reply = renderWelcome(ctx);
+  if (prefix) reply = `${prefix}\n\n${reply}`;
+  return { reply, nextFlowState: { ...IDLE, lang }, sideEffect: null, handled: true, menu: true };
 }
 
 /**
  * Enter a unit from idle: zero-step units finalize immediately (and emit any
  * side effect); multi-step units start collecting at step 0.
  */
-function enterUnit(unitId, ctx) {
+function enterUnit(unitId, ctx = {}) {
+  const lang = i18n.normLang(ctx.lang);
   const unit = reg.UNIT_BY_ID[unitId];
   if (!unit) return menuResult(ctx);
 
   if (!unit.steps.length) {
-    // Static / zero-step unit (info, notifications): reply + back to idle.
     const sideEffect =
       unit.sideEffect && unit.sideEffect !== reg.SIDE_EFFECT.NONE
         ? { kind: unit.sideEffect, unit: unit.id, collected: {} }
         : null;
-    return result(renderClosing(unit, {}), { ...IDLE }, sideEffect);
+    return result(renderClosing(unit, {}, lang), { ...IDLE, lang }, sideEffect);
   }
 
-  return result(enterUnitMessage(unit), {
+  return result(enterUnitMessage(unit, lang), {
     unit: unit.id,
     step: 0,
     collected: {},
     phase: reg.PHASE.COLLECTING,
+    lang,
   });
 }
 
-/**
- * Advance a collecting flow after storing the current answer.
- * Returns the next plan (more prompts, summary→confirm, or immediate closing).
- */
+/** Advance a collecting flow after storing the current answer. */
 function advanceCollecting(unit, state, rawText) {
+  const lang = i18n.normLang(state.lang);
   const collected = { ...(state.collected || {}) };
   const step = unit.steps[state.step];
-  // Store the answer. Optional steps accept a skip token → empty string.
   collected[step.key] = step.optional && reg.isSkip(rawText) ? '' : String(rawText).trim();
 
   const nextIndex = state.step + 1;
   if (nextIndex < unit.steps.length) {
-    return result(stepPrompt(unit, nextIndex), {
+    return result(stepPrompt(unit, nextIndex, lang), {
       unit: unit.id,
       step: nextIndex,
       collected,
       phase: reg.PHASE.COLLECTING,
+      lang,
     });
   }
 
-  // Collection complete.
   if (unit.confirm) {
-    return result(renderSummary(unit, collected), {
+    return result(renderSummary(unit, collected, lang), {
       unit: unit.id,
       step: state.step,
       collected,
       phase: reg.PHASE.CONFIRMING,
+      lang,
     });
   }
 
-  // Read-only / informational unit: finalize now.
   const sideEffect =
     unit.sideEffect && unit.sideEffect !== reg.SIDE_EFFECT.NONE
       ? { kind: unit.sideEffect, unit: unit.id, collected }
       : null;
-  return result(renderClosing(unit, collected), { ...IDLE }, sideEffect);
+  return result(renderClosing(unit, collected, lang), { ...IDLE, lang }, sideEffect);
 }
 
 /**
  * Handle one inbound turn.
  *
- * @param {object|null} flowState - persisted state ({unit:null} when idle)
+ * @param {object|null} flowState - persisted state ({unit:null} when idle); may carry `lang`
  * @param {string} rawText - the inbound message text (raw, not normalized)
- * @param {object} [ctx] - { guardianName?, beneficiaryName? } for personalization
- * @returns {{reply:string, nextFlowState:object, sideEffect:object|null, handled:boolean}}
+ * @param {object} [ctx] - { guardianName?, beneficiaryName?, lang? }
  */
 function handleTurn(flowState, rawText, ctx = {}) {
   const text = rawText == null ? '' : String(rawText);
   const active = isActive(flowState);
+
+  // W1383: resolve the effective (sticky) language + honor an explicit switch.
+  const current = i18n.normLang((flowState && flowState.lang) || ctx.lang);
+  const lang = i18n.detectLangPreference(text, current);
+  const lctx = { ...ctx, lang };
+
+  // Explicit language switch → acknowledge + show the menu in the new language.
+  if (text.trim() && lang !== current) {
+    return menuResult(lctx, i18n.fw('switched', lang));
+  }
 
   // Empty / media-only inbound: if mid-flow, re-ask current prompt; else menu.
   if (!text.trim()) {
     if (active) {
       const unit = reg.UNIT_BY_ID[flowState.unit];
       if (flowState.phase === reg.PHASE.CONFIRMING) {
-        return result('يرجى الرد بـ (نعم) للتأكيد أو (لا) للإلغاء.', flowState);
+        return result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
       }
-      return result(stepPrompt(unit, flowState.step), flowState);
+      return result(stepPrompt(unit, flowState.step, lang), withLang(flowState, lang));
     }
-    return menuResult(ctx);
+    return menuResult(lctx);
   }
 
   // Menu trigger ALWAYS resets to the main menu, even mid-flow.
   if (reg.isMenuTrigger(text)) {
-    return menuResult(ctx);
+    return menuResult(lctx);
   }
 
   // ─── Idle: route to a unit or show the menu ──────────────────────────────
   if (!active) {
     const unitId = reg.resolveUnitId(text);
-    if (unitId) return enterUnit(unitId, ctx);
-    // Unrecognized while idle → greet + show the menu (safe default, spec §15).
-    return menuResult(ctx);
+    if (unitId) return enterUnit(unitId, lctx);
+    return menuResult(lctx);
   }
 
   // ─── Active flow ─────────────────────────────────────────────────────────
@@ -269,7 +275,7 @@ function handleTurn(flowState, rawText, ctx = {}) {
 
   // Abort words (distinct from "إلغاء" so unit-3 action answers survive).
   if (reg.isCancelTrigger(text)) {
-    return result(`تم إلغاء العملية الحالية.\n\n${reg.MENU_HINT}`, { ...IDLE });
+    return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
   }
 
   if (flowState.phase === reg.PHASE.CONFIRMING) {
@@ -279,16 +285,16 @@ function handleTurn(flowState, rawText, ctx = {}) {
         unit.sideEffect && unit.sideEffect !== reg.SIDE_EFFECT.NONE
           ? { kind: unit.sideEffect, unit: unit.id, collected }
           : null;
-      return result(renderClosing(unit, collected), { ...IDLE }, sideEffect);
+      return result(renderClosing(unit, collected, lang), { ...IDLE, lang }, sideEffect);
     }
     if (reg.isNo(text)) {
-      return result(`تم إلغاء الطلب ولم يُرسَل.\n\n${reg.MENU_HINT}`, { ...IDLE });
+      return result(`${i18n.fw('notSent', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
     }
-    return result('يرجى الرد بـ (نعم) للتأكيد أو (لا) للإلغاء.', flowState);
+    return result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
   }
 
   // Collecting phase.
-  return advanceCollecting(unit, flowState, text);
+  return advanceCollecting(unit, withLang(flowState, lang), text);
 }
 
 module.exports = {

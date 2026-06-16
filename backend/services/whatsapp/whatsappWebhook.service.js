@@ -349,7 +349,12 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       const botFlow = require('../../intelligence/whatsapp-bot-flow.service');
       const botReg = require('../../intelligence/whatsapp-bot-flow.registry');
       const interactiveEnabled = process.env.ENABLE_WHATSAPP_BOT_INTERACTIVE === 'true';
-      const botCtx = { guardianName: ctxName, beneficiaryName };
+      // W1383: carry the sticky language preference from the persisted flow state.
+      const botCtx = {
+        guardianName: ctxName,
+        beneficiaryName,
+        lang: (conv.botFlow && conv.botFlow.lang) || undefined,
+      };
       const rawPrior =
         conv.botFlow && conv.botFlow.unit !== undefined
           ? conv.botFlow
@@ -376,7 +381,14 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
             { _id: conv._id },
             {
               $set: {
-                botFlow: { unit: null, step: 0, collected: {}, phase: null, updatedAt: new Date() },
+                botFlow: {
+                  unit: null,
+                  step: 0,
+                  collected: {},
+                  phase: null,
+                  lang: botCtx.lang || 'ar',
+                  updatedAt: new Date(),
+                },
                 lastMessageAt: new Date(),
                 unreadCount: 0,
               },

@@ -1650,3 +1650,5 @@ __tests__/fhir-patient-read-behavioral-wave1359.test.js
 __tests__/env-example-strict-keys-drift-wave1360.test.js
 __tests__/fhir-metadata-route-behavioral-wave1361.test.js
 __tests__/parent-portal-guardian-phone-persist.test.js
+__tests__/fhir-everything-route-wave1364.test.js
+__tests__/fhir-everything-behavioral-wave1364.test.js

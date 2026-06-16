@@ -1,0 +1,177 @@
+'use strict';
+
+/**
+ * W1364 — behavioral counterpart to the W1364 static drift guard
+ * (`fhir-everything-route-wave1364.test.js`).
+ *
+ * WHY: the static guard proves GET /Patient/:id/$everything DECLARES its three
+ * gates (flag + branch + consent) and behaviourally proves only the flag-OFF
+ * default (404, no PHI). The security-critical flag-ON path — does the PDPL
+ * consent gate ACTUALLY block, and does the happy path ACTUALLY emit a valid
+ * FHIR R4 searchset Bundle containing the Patient + its EpisodeOfCare
+ * compartment — needs the wired code RUN (CLAUDE.md W349 lesson).
+ *
+ * Asserts (flag ON, real Express + MongoMemoryServer):
+ *   1. active consent → 200 + valid searchset Bundle (Patient + Episodes).
+ *   2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks).
+ *   3. REVOKED consent → 403 (proves the revokedAt:null filter).
+ *   4. nonexistent id → 404 (no PHI for a missing beneficiary).
+ *   5. malformed id → 400 (input gate, before any DB lookup).
+ *
+ * Branch isolation (gate 2) is intentionally NOT re-proven here — the route
+ * mounts WITHOUT req.branchScope, so enforceBeneficiaryBranch is a documented
+ * no-op (assertBranchMatch.js header), and W269's 64-test suite covers it.
+ *
+ * Docs are seeded via raw collection.insertOne to bypass heavy schema
+ * validators — the route only reads mapper-relevant fields.
+ *
+ * Run: cd backend && npx jest --config=jest.config.js \
+ *   __tests__/fhir-everything-behavioral-wave1364.test.js --runInBand
+ */
+
+jest.unmock('mongoose');
+jest.setTimeout(30000);
+
+const mongoose = require('mongoose');
+const express = require('express');
+const request = require('supertest');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+let mongod;
+let app;
+let Beneficiary;
+let Consent;
+let EpisodeOfCare;
+
+const oid = () => new mongoose.Types.ObjectId();
+
+async function seedBeneficiary(id) {
+  await Beneficiary.collection.insertOne({
+    _id: id,
+    firstName: 'Sara',
+    lastName: 'Al-Otaibi',
+    nationalId: '1234567890',
+    gender: 'female',
+    dateOfBirth: new Date('2015-03-01T00:00:00.000Z'),
+    status: 'active',
+    branchId: oid(),
+  });
+}
+
+async function seedConsent(beneficiaryId, overrides = {}) {
+  await Consent.collection.insertOne({
+    beneficiaryId,
+    type: 'data_sharing',
+    grantedBy: oid(),
+    grantedAt: new Date(),
+    revokedAt: null,
+    expiresAt: null,
+    ...overrides,
+  });
+}
+
+async function seedEpisode(beneficiaryId, overrides = {}) {
+  await EpisodeOfCare.collection.insertOne({
+    beneficiaryId,
+    status: 'active',
+    startDate: new Date('2024-01-01T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
+beforeAll(async () => {
+  mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1364-fhir-everything' } });
+  await mongoose.connect(mongod.getUri());
+
+  Beneficiary = require('../models/Beneficiary');
+  if (Beneficiary && Beneficiary.default) Beneficiary = Beneficiary.default;
+  ({ Consent } = require('../models/Consent'));
+  ({ EpisodeOfCare } = require('../domains/episodes/models/EpisodeOfCare'));
+
+  process.env.ENABLE_FHIR_PHI_EXPORT = 'true';
+  delete require.cache[require.resolve('../routes/fhir.routes')];
+  const router = require('../routes/fhir.routes');
+
+  app = express();
+  app.use('/fhir', router);
+});
+
+afterAll(async () => {
+  delete process.env.ENABLE_FHIR_PHI_EXPORT;
+  await mongoose.disconnect().catch(() => null);
+  if (mongod) await mongod.stop().catch(() => null);
+});
+
+beforeEach(async () => {
+  await Beneficiary.collection.deleteMany({});
+  await Consent.collection.deleteMany({});
+  await EpisodeOfCare.collection.deleteMany({});
+});
+
+describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () => {
+  it('1. active consent → 200 + valid searchset Bundle (Patient + Episodes)', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    await seedEpisode(id);
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    expect(res.body.type).toBe('searchset');
+    expect(Array.isArray(res.body.entry)).toBe(true);
+    // Patient + at least the one seeded EpisodeOfCare.
+    expect(res.body.entry.length).toBeGreaterThanOrEqual(2);
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    expect(types).toContain('EpisodeOfCare');
+  });
+
+  it('2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks PHI)', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedEpisode(id);
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(403)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('OperationOutcome');
+    expect(Array.isArray(res.body.issue)).toBe(true);
+    expect(res.body.issue.length).toBeGreaterThan(0);
+  });
+
+  it('3. REVOKED consent → 403 (revokedAt:null filter excludes it)', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id, { revokedAt: new Date() });
+
+    const res = await request(app).get(`/fhir/Patient/${id}/$everything`).expect(403);
+    expect(res.body.resourceType).toBe('OperationOutcome');
+  });
+
+  it('4. nonexistent beneficiary id → 404 (no PHI for a missing record)', async () => {
+    const res = await request(app)
+      .get(`/fhir/Patient/${oid()}/$everything`)
+      .expect(404)
+      .expect('Content-Type', /application\/fhir\+json/);
+    expect(res.body.resourceType).toBe('OperationOutcome');
+  });
+
+  it('5. malformed (non-ObjectId) id → 400 (input gate, no DB lookup)', async () => {
+    const res = await request(app)
+      .get('/fhir/Patient/not-a-valid-objectid/$everything')
+      .expect(400)
+      .expect('Content-Type', /application\/fhir\+json/);
+    expect(res.body.resourceType).toBe('OperationOutcome');
+    expect(Array.isArray(res.body.issue)).toBe(true);
+    expect(res.body.issue.length).toBeGreaterThan(0);
+    expect(typeof res.body.issue[0].code).toBe('string');
+    expect(res.body.issue[0].code.length).toBeGreaterThan(0);
+  });
+});

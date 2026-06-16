@@ -32,8 +32,18 @@
  *   before any PHI can leave — the product/consent decision stays with the
  *   operator, this only wires the mechanism.
  *
- * Still deferred: $everything export + Bundle search endpoints (multi-resource,
- * broader consent surface) remain a separate product decision.
+ * PHI export — GET /Patient/:id/$everything (W1364):
+ *   The FHIR R4 patient-compartment operation. Returns a searchset Bundle of
+ *   the Patient plus every EpisodeOfCare in the beneficiary's compartment (the
+ *   platform's canonical unifying core). It is PHI-exposing and multi-resource,
+ *   so it ships behind the SAME three gates as GET /Patient/:id — identical
+ *   default-OFF feature flag, branch isolation, and data_sharing consent — so
+ *   production behavior is unchanged until an operator deliberately opts in.
+ *   The Bundle is structurally validated (toValidatedFhirBundle, W1346) before
+ *   it is returned; a malformed compartment yields 422 + OperationOutcome, not
+ *   a partial leak. Additional compartment resource types (assessments,
+ *   sessions, care-plans) are a follow-up once each canonical-shape↔mapper
+ *   mapping is verified — deliberately scoped to the verified Episode core here.
  */
 
 const mongoose = require('mongoose');
@@ -44,6 +54,7 @@ const router = express.Router();
 const {
   buildCapabilityStatement,
   toValidatedFhir,
+  toValidatedFhirBundle,
   buildOperationOutcome,
 } = require('../intelligence/fhir');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
@@ -130,6 +141,91 @@ router.get('/Patient/:id', async (req, res) => {
       return res.status(422).type('application/fhir+json').json(operationOutcome);
     }
     return res.status(200).type('application/fhir+json').json(resource);
+  } catch (err) {
+    const status = err && err.status ? err.status : 500;
+    const code = status === 403 ? 'forbidden' : status === 404 ? 'not-found' : 'exception';
+    return fhirError(res, status, (err && err.message) || 'export failed', code);
+  }
+});
+
+/**
+ * Resolve the EpisodeOfCare model if it is registered, else null. The model is
+ * registered by the episodes domain bootstrap in a live process; treating an
+ * unregistered model as "no episodes" keeps $everything robust rather than
+ * throwing a MissingSchemaError.
+ * @returns {import('mongoose').Model<any>|null}
+ */
+function tryEpisodeModel() {
+  try {
+    return mongoose.model('EpisodeOfCare');
+  } catch (_e) {
+    return null;
+  }
+}
+
+/**
+ * GET /Patient/:id/$everything — FHIR R4 patient-compartment export.
+ * PHI-exposing + multi-resource. Gated identically to GET /Patient/:id
+ * (feature flag default OFF → 404, branch isolation, data_sharing consent).
+ */
+router.get('/Patient/:id/\\$everything', async (req, res) => {
+  // Gate 1 — feature flag. OFF by default: behave as if the route is absent.
+  if (!FHIR_PHI_EXPORT_ENABLED) {
+    return fhirError(res, 404, 'resource not found', 'not-found');
+  }
+
+  const { id } = req.params;
+  if (!mongoose.isValidObjectId(id)) {
+    return fhirError(res, 400, 'invalid Patient id', 'value');
+  }
+
+  try {
+    // Gate 2 — branch isolation (W269).
+    await enforceBeneficiaryBranch(req, id);
+
+    const Beneficiary = mongoose.model('Beneficiary');
+    const beneficiary = await Beneficiary.findById(id).lean();
+    if (!beneficiary) {
+      return fhirError(res, 404, 'Patient not found', 'not-found');
+    }
+
+    // Gate 3 — PDPL consent (active, non-revoked, non-expired data_sharing).
+    const { Consent } = require('../models/Consent');
+    const now = new Date();
+    const consent = await Consent.findOne({
+      beneficiaryId: id,
+      type: 'data_sharing',
+      revokedAt: null,
+      $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
+    })
+      .select('_id')
+      .lean();
+    if (!consent) {
+      return fhirError(
+        res,
+        403,
+        'active data_sharing consent required for FHIR export',
+        'forbidden'
+      );
+    }
+
+    // Compartment — Patient + every EpisodeOfCare (the canonical unifying core).
+    const entries = [{ entityName: 'Beneficiary', record: beneficiary }];
+    const EpisodeOfCare = tryEpisodeModel();
+    if (EpisodeOfCare) {
+      const episodes = await EpisodeOfCare.find({ beneficiaryId: id }).lean();
+      for (const episode of episodes) {
+        entries.push({ entityName: 'EpisodeOfCare', record: episode });
+      }
+    }
+
+    const { bundle, validation, operationOutcome } = toValidatedFhirBundle(entries, {
+      bundleOpts: { type: 'searchset' },
+    });
+    if (!validation.valid) {
+      return res.status(422).type('application/fhir+json').json(operationOutcome);
+    }
+    return res.status(200).type('application/fhir+json').json(bundle);
   } catch (err) {
     const status = err && err.status ? err.status : 500;
     const code = status === 403 ? 'forbidden' : status === 404 ? 'not-found' : 'exception';

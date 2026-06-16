@@ -1770,6 +1770,8 @@ on:
       - 'backend/__tests__/whatsapp-bot-intelligence-wave1382.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-bilingual-wave1383.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assert-beneficiary-in-scope-wave1378.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3518,6 +3520,8 @@ on:
       - 'backend/__tests__/whatsapp-bot-intelligence-wave1382.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-bilingual-wave1383.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/assert-beneficiary-in-scope-wave1378.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -34,7 +34,12 @@ const BACKEND_ROOT = path.resolve(__dirname, '..');
 const AUDIT = path.join(BACKEND_ROOT, 'scripts', 'audit-untenanted-aggregations.js');
 
 // Baseline captured 2026-06-05: { rawCollectionSites: 68, untenantedCandidateSites: 765 }.
-const MAX_RAW_COLLECTION_SITES = 68; // tight — fail on any NEW raw-driver aggregate
+// W1376 ratchet 68→69 (2026-06-16): the new site is services/launchReadiness.service.js's
+// `countSafe(coll)` — a deliberately PLATFORM-WIDE ops readiness probe (W1375). It answers
+// "is the system's seed/reference data ready to launch?" and MUST see all branches; tenant-
+// scoping it would be semantically wrong. Verified not a tenant-data-leak vector before
+// ratcheting (it counts config/reference collections, returns counts only, never rows).
+const MAX_RAW_COLLECTION_SITES = 69; // tight — fail on any NEW raw-driver aggregate
 const MAX_UNTENANTED_CANDIDATES = 820; // buffered flood-cap (765 + headroom for churn)
 
 function runAudit() {
@@ -59,7 +64,7 @@ describe('C3 — untenanted-aggregations surface does not grow (ratchet)', () =>
     expect(typeof report.untenantedCandidateSites).toBe('number');
   });
 
-  it('NO new raw db.collection() aggregate leaks (tenantScope-blind) — pinned at 68', () => {
+  it('NO new raw db.collection() aggregate leaks (tenantScope-blind) — pinned at 69', () => {
     expect(report.rawCollectionSites).toBeLessThanOrEqual(MAX_RAW_COLLECTION_SITES);
   });
 

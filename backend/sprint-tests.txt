@@ -1658,3 +1658,4 @@ __tests__/fhir-everything-route-wave1364.test.js
 __tests__/fhir-everything-behavioral-wave1364.test.js
 __tests__/documents-preview-disposition-behavioral-wave1374.test.js
 __tests__/files-download-disposition-behavioral-wave1375.test.js
+__tests__/files-download-path-boundary-behavioral-wave1376.test.js

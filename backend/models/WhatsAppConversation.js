@@ -179,6 +179,21 @@ const whatsappConversationSchema = new mongoose.Schema(
     resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     resolutionNote: String,
 
+    // ── W1372: stateful menu-bot flow state ──────────────────────────────
+    // Persists where the inbound sender is within a multi-step bot flow
+    // (registration / appointment / complaint / human callback, etc.). `unit`
+    // is null when idle (between flows). `collected` holds the partial answers
+    // gathered so far. The FSM lives in intelligence/whatsapp-bot-flow.service;
+    // this field is just its persisted cursor. `Mixed` keeps the engine free to
+    // evolve its collected-field shape without a schema migration.
+    botFlow: {
+      unit: { type: String, default: null }, // active unit id (null = idle)
+      step: { type: Number, default: 0 },
+      phase: { type: String, enum: ['collecting', 'confirming', null], default: null },
+      collected: { type: mongoose.Schema.Types.Mixed, default: {} },
+      updatedAt: Date,
+    },
+
     // Embedded data
     messages: [messageSchema],
     latestInsight: insightSchema,

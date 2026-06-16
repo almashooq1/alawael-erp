@@ -49,12 +49,37 @@ const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch'
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { jwtSecret } = require('../config/secrets');
+
+/**
+ * Persist a change on the currently-authenticated guardian's record.
+ * The parent-portal JWT carries only `guardianPhone` (no id), so the guardian
+ * is resolved by their current phone. Best-effort: a missing Guardian row (the
+ * portal allows OTP login without a pre-existing Guardian doc) is a no-op, never
+ * an error. Uses lazy `mongoose.model` so unit tests can mock the model.
+ * @returns {Promise<object|null>} the updated Guardian doc, or null if none.
+ */
+async function persistCurrentGuardian(req, update) {
+  const currentPhone = req && req.user && req.user.guardianPhone;
+  if (!currentPhone) return null;
+  try {
+    const Guardian = mongoose.model('Guardian');
+    return await Guardian.findOneAndUpdate(
+      { phone: currentPhone },
+      { $set: update },
+      { new: true }
+    );
+  } catch (err) {
+    logger.warn('[ParentPortal] guardian persist skipped: ' + err.message);
+    return null;
+  }
+}
 
 // Models
 const {
@@ -877,8 +902,16 @@ router.put('/settings', async (req, res) => {
       return res.status(422).json({ success: false, message: 'طريقة تواصل غير مدعومة' });
     }
 
-    // TODO: حفظ الإعدادات في نموذج Guardian
-    return res.json({ success: true, message: 'تم تحديث الإعدادات بنجاح' });
+    // Persist supported preferences on the guardian record.
+    const update = {};
+    if (language) update.language = language;
+    const updated = Object.keys(update).length ? await persistCurrentGuardian(req, update) : null;
+
+    return res.json({
+      success: true,
+      message: 'تم تحديث الإعدادات بنجاح',
+      persisted: Boolean(updated),
+    });
   } catch (err) {
     safeError(res, err, '[ParentPortal] update settings error');
   }
@@ -969,12 +1002,16 @@ router.post('/settings/change-phone/verify', async (req, res) => {
     otpRecord.verifiedAt = new Date();
     await otpRecord.save();
 
-    // TODO: تحديث رقم الهاتف في نموذج Guardian
+    // Persist the new phone on the guardian record (was a silent no-op before).
+    const updated = await persistCurrentGuardian(req, { phone: newPhone });
 
     return res.json({
       success: true,
       message: 'تم تغيير رقم الهاتف بنجاح',
       newPhone: maskPhone(newPhone),
+      persisted: Boolean(updated),
+      // The session token still carries the old phone; client should re-login.
+      reauthRequired: true,
     });
   } catch (err) {
     safeError(res, err, '[ParentPortal] change-phone verify error');
@@ -1119,3 +1156,5 @@ router.post('/admin/notifications/broadcast', async (req, res) => {
 });
 
 module.exports = router;
+// Exposed for unit testing (guardian persistence on phone/settings changes).
+module.exports.persistCurrentGuardian = persistCurrentGuardian;

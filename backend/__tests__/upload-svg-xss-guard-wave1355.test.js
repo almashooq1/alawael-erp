@@ -41,6 +41,15 @@ const DANGEROUS_MIME_LITERALS = ["'image/svg+xml'", '"image/svg+xml"'];
 // Files that currently ALLOW a dangerous MIME in an upload allowlist WITHOUT
 // wiring validateUploadedFile. Each is a documented residual risk (#6).
 // Ratchet DOWN only — never add. Remediating a file removes it from here.
+//
+// NOTE (W1356 accuracy): this guard tracks the UPLOAD-side validator only.
+// Of the two baselined routes, `documents.routes.js` is ALSO mitigated at the
+// SERVE side (W462: its /preview + /download force Content-Disposition:
+// attachment + sandbox CSP for svg/html), as is files.routes.js (W463). The
+// genuinely-exposed route is `uploads.routes.js` — served by nginx statically
+// (/uploads/*), so no Node disposition guard applies. Both stay baselined here
+// because wiring the upload-side validator is still the canonical defense; the
+// serve-side guard is a separate, complementary layer. See THREAT_MODEL §4 #6.
 const KNOWN_UNVALIDATED_SVG_UPLOAD_ROUTES = new Set(['documents.routes.js', 'uploads.routes.js']);
 
 /** Recursively collect *.js files under a directory. */

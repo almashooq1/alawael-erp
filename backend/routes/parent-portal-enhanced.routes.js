@@ -93,6 +93,21 @@ const {
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
 const { createCustomLimiter } = require('../middleware/rateLimiter');
 const safeError = require('../utils/safeError');
+const sendSMS = require('../services/smsService');
+
+/**
+ * Fire-and-forget OTP delivery via the canonical SMS service. The service is a
+ * graceful no-op until a provider (Unifonic/Twilio) is wired, so this never
+ * blocks or breaks the auth flow; failures are logged, not thrown.
+ */
+async function sendOtpSms(phone, message) {
+  try {
+    return await sendSMS(phone, message);
+  } catch (err) {
+    logger.warn('[ParentPortal] OTP SMS send failed: ' + err.message);
+    return { success: false, error: err.message };
+  }
+}
 const parentOtpSendLimiter = createCustomLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -161,7 +176,8 @@ router.post('/send-otp', parentOtpSendLimiter, async (req, res) => {
       ipAddress: req.ip,
     });
 
-    // TODO: إرسال SMS عبر SmsService في الإنتاج
+    // Deliver via the canonical SMS service (graceful no-op until a provider is wired).
+    await sendOtpSms(phone, `رمز الدخول لبوابة ولي الأمر: ${otp}`);
     if (process.env.NODE_ENV !== 'production') {
       logger.info(
         `[ParentPortal] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`
@@ -942,7 +958,8 @@ router.post('/settings/change-phone', async (req, res) => {
       ipAddress: req.ip,
     });
 
-    // TODO: إرسال SMS للرقم الجديد
+    // Deliver to the new number via the canonical SMS service.
+    await sendOtpSms(newPhone, `رمز تأكيد تغيير رقم الجوال: ${otp}`);
     if (process.env.NODE_ENV !== 'production') {
       logger.info(`[ParentPortal] Change phone OTP for ${newPhone}: ${otp}`);
     }

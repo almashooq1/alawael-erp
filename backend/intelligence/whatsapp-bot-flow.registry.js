@@ -708,16 +708,37 @@ function resolveFaqAnswer(topicText) {
 }
 
 /**
+ * Score a message against every unit's keyword catalogue (W1382 — smarter NLU).
+ * Each matched keyword contributes its length (longer keyword = stronger, more
+ * specific signal), so the BEST-matching unit wins rather than the first one in
+ * iteration order. Returns `{ unitId, score }` for the top match, or null.
+ */
+function scoreUnits(text) {
+  const n = normalize(text);
+  if (!n) return null;
+  let best = null;
+  for (const [unitId, keywords] of Object.entries(UNIT_KEYWORDS)) {
+    let score = 0;
+    for (const kw of keywords) {
+      const nk = normalize(kw);
+      if (!nk) continue;
+      const hit = nk.length <= 2 ? n === nk : n.includes(nk);
+      if (hit) score += nk.length;
+    }
+    if (score > 0 && (!best || score > best.score)) best = { unitId, score };
+  }
+  return best;
+}
+
+/**
  * Resolve the unit a user wants from idle: numeric selection first, then
- * free-text keyword routing (spec §15). Returns a unit id or null.
+ * score-based free-text keyword routing (spec §15). Returns a unit id or null.
  */
 function resolveUnitId(text) {
   const sel = parseMenuSelection(text);
   if (sel) return UNITS[sel - 1].id;
-  for (const [unitId, keywords] of Object.entries(UNIT_KEYWORDS)) {
-    if (matchesAny(text, keywords)) return unitId;
-  }
-  return null;
+  const best = scoreUnits(text);
+  return best ? best.unitId : null;
 }
 
 /**
@@ -768,6 +789,7 @@ module.exports = {
   isSkip,
   parseMenuSelection,
   resolveUnitId,
+  scoreUnits,
   resolveDepartmentKey,
   resolveFaqAnswer,
   buildMainMenuList,

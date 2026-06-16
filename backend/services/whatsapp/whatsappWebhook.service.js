@@ -350,10 +350,15 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       const botReg = require('../../intelligence/whatsapp-bot-flow.registry');
       const interactiveEnabled = process.env.ENABLE_WHATSAPP_BOT_INTERACTIVE === 'true';
       const botCtx = { guardianName: ctxName, beneficiaryName };
-      const priorState =
+      const rawPrior =
         conv.botFlow && conv.botFlow.unit !== undefined
           ? conv.botFlow
           : { unit: null, step: 0, collected: {}, phase: null };
+      // W1382: drop an abandoned (stale) flow back to idle so a fresh message
+      // restarts at the menu instead of resuming a dead multi-step flow.
+      const priorState = botFlow.isFlowStale(rawPrior, Date.now())
+        ? { unit: null, step: 0, collected: {}, phase: null }
+        : rawPrior;
 
       // W1381: native interactive-menu navigation. A tapped row arrives as an
       // interactive reply whose id we namespaced (`BOTNAV:cat:*` / `:unit:*`). A
@@ -389,6 +394,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       if (plan && plan.handled) {
         await dispatchBotPlan({
           plan,
+          priorState,
           conv,
           fromPhone,
           senderName,
@@ -588,6 +594,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
 // persistence, and (4) escalation of any non-served side effect. Never throws.
 async function dispatchBotPlan({
   plan,
+  priorState,
   conv,
   fromPhone,
   senderName,
@@ -675,6 +682,17 @@ async function dispatchBotPlan({
       `nextUnit=${plan.nextFlowState?.unit || 'idle'} | sideEffect=${plan.sideEffect?.kind || 'none'} | ` +
       `liveData=${suppressEscalation} | interactive=${!!(plan.menu && interactiveEnabled)}`
   );
+
+  // W1382: lightweight usage analytics — a parseable line ops can aggregate to
+  // see which units are most used / which flows complete. No PII beyond the
+  // event + unit (phone is already in the handled log above).
+  try {
+    const botFlow = require('../../intelligence/whatsapp-bot-flow.service');
+    const ev = botFlow.deriveBotEvent(plan, priorState);
+    logger.info(`[WhatsApp BotAnalytics] event=${ev.event} unit=${ev.unit || '-'}`);
+  } catch (_e) {
+    /* analytics is best-effort */
+  }
 }
 
 // ─── W1372: escalate a completed bot-flow side effect to staff ──────────────

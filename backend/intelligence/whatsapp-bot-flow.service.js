@@ -29,9 +29,46 @@ const reg = require('./whatsapp-bot-flow.registry');
 
 const IDLE = Object.freeze({ unit: null, step: 0, collected: {}, phase: null });
 
+// W1382: an abandoned multi-step flow shouldn't trap a sender forever. If their
+// persisted flow hasn't advanced within this window, the dispatcher resets it to
+// idle (a fresh message starts over at the menu). 6 hours balances "don't lose a
+// mid-registration in-progress" against "don't resume a day-old dead flow".
+const FLOW_TTL_MS = 6 * 60 * 60 * 1000;
+
 /** Is the user currently inside a flow? */
 function isActive(flowState) {
   return !!(flowState && flowState.unit && reg.UNIT_BY_ID[flowState.unit]);
+}
+
+/**
+ * W1382: is a persisted flow stale (active but untouched beyond the TTL)? Pure —
+ * `nowMs` is injected so it's deterministic to test. Idle flows are never stale.
+ */
+function isFlowStale(flowState, nowMs, ttlMs = FLOW_TTL_MS) {
+  if (!isActive(flowState)) return false;
+  const updated = flowState.updatedAt ? new Date(flowState.updatedAt).getTime() : NaN;
+  if (!Number.isFinite(updated)) return false; // unknown age → don't reset
+  return nowMs - updated > ttlMs;
+}
+
+/**
+ * W1382: classify a handled turn for lightweight usage analytics. Pure. Returns
+ * `{ event, unit }` where event ∈ menu | enter | step | complete | idle.
+ *   - menu:     the main menu was shown
+ *   - enter:    a (multi-step) unit flow was just entered
+ *   - step:     advanced within the same active flow
+ *   - complete: a flow finished (emitted a side effect)
+ *   - idle:     returned to / stayed idle without a side effect
+ */
+function deriveBotEvent(plan, priorState) {
+  if (!plan) return { event: 'idle', unit: null };
+  if (plan.menu) return { event: 'menu', unit: null };
+  if (plan.sideEffect) return { event: 'complete', unit: plan.sideEffect.unit };
+  const nextUnit = plan.nextFlowState && plan.nextFlowState.unit;
+  const priorUnit = priorState && priorState.unit;
+  if (nextUnit && nextUnit !== priorUnit) return { event: 'enter', unit: nextUnit };
+  if (nextUnit) return { event: 'step', unit: nextUnit };
+  return { event: 'idle', unit: null };
 }
 
 // ─── Rendering helpers ───────────────────────────────────────────────────────
@@ -256,7 +293,10 @@ function handleTurn(flowState, rawText, ctx = {}) {
 
 module.exports = {
   IDLE,
+  FLOW_TTL_MS,
   isActive,
+  isFlowStale,
+  deriveBotEvent,
   handleTurn,
   // exported for tests / dispatcher reuse
   renderWelcome,

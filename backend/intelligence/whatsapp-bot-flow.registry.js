@@ -422,6 +422,53 @@ const UNIT_BY_ID = Object.freeze(
   }, {})
 );
 
+// ─── W1381: native interactive menu (WhatsApp list) ─────────────────────────
+// WhatsApp interactive lists cap at 10 rows, but we have 14 units — so the menu
+// is TWO-LEVEL: a list of CATEGORIES (≤10 rows), and tapping a category sends a
+// sub-list of that category's units. Reply IDs are namespaced `BOTNAV:cat:<id>`
+// / `BOTNAV:unit:<id>` so the dispatcher can tell a bot-menu tap from any other
+// interactive reply in the system. Short labels keep row titles within the
+// 24-char WhatsApp limit without ugly mid-word truncation.
+const NAV_PREFIX = 'BOTNAV:';
+
+const SHORT_LABELS = Object.freeze({
+  info: 'عن المركز وخدماته',
+  register: 'تسجيل مستفيد جديد',
+  appointment: 'حجز / تعديل موعد',
+  attendance: 'الحضور والانصراف',
+  session_reports: 'تقارير الجلسات',
+  home_exercises: 'تمارين منزلية',
+  billing: 'الرسوم والفواتير',
+  notifications: 'الإشعارات',
+  complaint: 'شكوى أو ملاحظة',
+  human: 'تواصل مع موظف',
+  faq: 'أسئلة شائعة',
+  location: 'الموقع والاتجاهات',
+  satisfaction: 'تقييم الخدمة',
+  emergency: '🚨 بلاغ عاجل',
+});
+
+const MENU_CATEGORIES = Object.freeze([
+  { id: 'services', title: '📋 الخدمات والتسجيل', units: ['info', 'register', 'appointment'] },
+  {
+    id: 'reports',
+    title: '📊 التقارير والمتابعة',
+    units: ['attendance', 'session_reports', 'home_exercises'],
+  },
+  { id: 'finance', title: '💳 الرسوم والإشعارات', units: ['billing', 'notifications'] },
+  { id: 'help', title: '❓ معلومات ومساعدة', units: ['faq', 'location'] },
+  { id: 'feedback', title: '📝 شكاوى وتقييم', units: ['complaint', 'satisfaction'] },
+  { id: 'human', title: '👤 تواصل بشري', units: ['human'] },
+  { id: 'emergency', title: '🚨 بلاغ عاجل', units: ['emergency'] },
+]);
+
+const CATEGORY_BY_ID = Object.freeze(
+  MENU_CATEGORIES.reduce((acc, c) => {
+    acc[c.id] = c;
+    return acc;
+  }, {})
+);
+
 // ─── Triggers + free-text keyword routing (spec §15 — NLU lite) ──────────────
 // Words that ALWAYS reset to the main menu (even mid-flow).
 const MENU_TRIGGERS = Object.freeze([
@@ -596,6 +643,58 @@ function parseMenuSelection(text) {
   return n >= 1 && n <= UNITS.length ? n : null;
 }
 
+// ─── W1381: interactive-list builders + nav-reply parser (pure) ─────────────
+
+/**
+ * Build the top-level interactive menu as a category list. Returns a plain data
+ * object the dispatcher passes to `whatsappService.sendInteractiveList`. Pure.
+ */
+function buildMainMenuList(ctx = {}) {
+  const greeting = ctx.guardianName ? `مرحباً ${ctx.guardianName} 👋` : 'مرحباً بك 👋';
+  return {
+    bodyText: `${greeting}\nأنا مساعد الأوائل الذكي (بوت 🤖). اختر القسم المطلوب:`,
+    buttonLabel: 'القائمة',
+    sectionTitle: 'الأقسام',
+    items: MENU_CATEGORIES.map(c => ({ id: `${NAV_PREFIX}cat:${c.id}`, title: c.title })),
+  };
+}
+
+/**
+ * Build the sub-list of units inside one category. Returns null for an unknown
+ * category id. Each row's id is `BOTNAV:unit:<unitId>`. Pure.
+ */
+function buildCategoryList(catId) {
+  const cat = CATEGORY_BY_ID[catId];
+  if (!cat) return null;
+  return {
+    bodyText: `${cat.title}\nاختر الخدمة:`,
+    buttonLabel: 'اختر',
+    sectionTitle: cat.title,
+    items: cat.units.map(uid => ({
+      id: `${NAV_PREFIX}unit:${uid}`,
+      title: SHORT_LABELS[uid] || (UNIT_BY_ID[uid] && UNIT_BY_ID[uid].label) || uid,
+    })),
+  };
+}
+
+/**
+ * Parse a namespaced interactive-reply id. Returns `{kind:'cat'|'unit', id}` for
+ * a bot-menu tap, or null for anything else (so non-bot interactive replies are
+ * left alone). Pure.
+ */
+function parseNav(replyId) {
+  if (!replyId || typeof replyId !== 'string' || !replyId.startsWith(NAV_PREFIX)) return null;
+  const rest = replyId.slice(NAV_PREFIX.length);
+  const sep = rest.indexOf(':');
+  if (sep < 0) return null;
+  const kind = rest.slice(0, sep);
+  const id = rest.slice(sep + 1);
+  if ((kind !== 'cat' && kind !== 'unit') || !id) return null;
+  if (kind === 'cat' && !CATEGORY_BY_ID[id]) return null;
+  if (kind === 'unit' && !UNIT_BY_ID[id]) return null;
+  return { kind, id };
+}
+
 /**
  * Resolve a FAQ topic answer (unit 11) from the user's typed number. Returns the
  * matching answer, or a graceful fallback when the number is out of range. Pure.
@@ -648,6 +747,10 @@ module.exports = {
   LOCATION_INFO,
   UNITS,
   UNIT_BY_ID,
+  NAV_PREFIX,
+  SHORT_LABELS,
+  MENU_CATEGORIES,
+  CATEGORY_BY_ID,
   MENU_TRIGGERS,
   CANCEL_TRIGGERS,
   YES_TOKENS,
@@ -667,4 +770,7 @@ module.exports = {
   resolveUnitId,
   resolveDepartmentKey,
   resolveFaqAnswer,
+  buildMainMenuList,
+  buildCategoryList,
+  parseNav,
 };

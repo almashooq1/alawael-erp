@@ -119,13 +119,21 @@ function result(reply, nextFlowState, sideEffect = null, handled = true) {
   return { reply, nextFlowState, sideEffect, handled };
 }
 
+// W1381: the main-menu result carries `menu: true` so the dispatcher can render
+// it as a native interactive WhatsApp list (when interactive mode is enabled)
+// instead of the numbered-text fallback. The text reply is always present so
+// non-interactive clients still work.
+function menuResult(ctx) {
+  return { reply: renderWelcome(ctx), nextFlowState: { ...IDLE }, sideEffect: null, handled: true, menu: true };
+}
+
 /**
  * Enter a unit from idle: zero-step units finalize immediately (and emit any
  * side effect); multi-step units start collecting at step 0.
  */
 function enterUnit(unitId, ctx) {
   const unit = reg.UNIT_BY_ID[unitId];
-  if (!unit) return result(renderWelcome(ctx), { ...IDLE });
+  if (!unit) return menuResult(ctx);
 
   if (!unit.steps.length) {
     // Static / zero-step unit (info, notifications): reply + back to idle.
@@ -203,12 +211,12 @@ function handleTurn(flowState, rawText, ctx = {}) {
       }
       return result(stepPrompt(unit, flowState.step), flowState);
     }
-    return result(renderWelcome(ctx), { ...IDLE });
+    return menuResult(ctx);
   }
 
   // Menu trigger ALWAYS resets to the main menu, even mid-flow.
   if (reg.isMenuTrigger(text)) {
-    return result(renderWelcome(ctx), { ...IDLE });
+    return menuResult(ctx);
   }
 
   // ─── Idle: route to a unit or show the menu ──────────────────────────────
@@ -216,7 +224,7 @@ function handleTurn(flowState, rawText, ctx = {}) {
     const unitId = reg.resolveUnitId(text);
     if (unitId) return enterUnit(unitId, ctx);
     // Unrecognized while idle → greet + show the menu (safe default, spec §15).
-    return result(renderWelcome(ctx), { ...IDLE });
+    return menuResult(ctx);
   }
 
   // ─── Active flow ─────────────────────────────────────────────────────────

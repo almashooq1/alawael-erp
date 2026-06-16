@@ -44,9 +44,19 @@ function transition(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
+// W1227 deflake pattern — poll until the async bus → subscriber → create
+// chain materialises `expected` rows, instead of a fixed sleep that loses
+// the race under CI load.
+async function waitForRows(filter, expected, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  let rows = [];
+  for (;;) {
+    rows = await CareTimeline.find(filter).lean();
+    if (rows.length >= expected || Date.now() > deadline) return rows;
+    await new Promise(r => setTimeout(r, 25));
+  }
 }
+
 
 describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline linkage', () => {
   test('records an administrative row when a workflow transition is logged', async () => {
@@ -55,9 +65,7 @@ describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline
     const doc = await WorkflowTransitionLog.create(
       transition(beneficiaryId, { branchId, fromPhase: 'referral', toPhase: 'intake' })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('workflow_transition_recorded');
@@ -73,9 +81,7 @@ describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline
   test('maps a failed transition to a warning row', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await WorkflowTransitionLog.create(transition(beneficiaryId, { status: 'failed' }));
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].severity).toBe('warning');
   });
@@ -88,9 +94,8 @@ describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline
     await WorkflowTransitionLog.create(
       transition(beneficiaryId, { fromPhase: 'triage', toPhase: 'initial_assessment' })
     );
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(2);
+    const rows = await waitForRows({ beneficiaryId }, 2);
+    expect(rows).toHaveLength(2);
   });
 
   test('records distinct transitions for distinct beneficiaries', async () => {
@@ -98,9 +103,7 @@ describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline
     const b2 = new mongoose.Types.ObjectId();
     await WorkflowTransitionLog.create(transition(b1));
     await WorkflowTransitionLog.create(transition(b2));
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId: b1 })).toBe(1);
-    expect(await CareTimeline.countDocuments({ beneficiaryId: b2 })).toBe(1);
+    expect(await waitForRows({ beneficiaryId: b1 }, 1)).toHaveLength(1);
+    expect(await waitForRows({ beneficiaryId: b2 }, 1)).toHaveLength(1);
   });
 });

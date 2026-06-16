@@ -46,6 +46,26 @@ const thumbsDir = path.join(uploadsDir, 'thumbnails');
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
+/**
+ * W1387: delete a file from disk ONLY if it resolves STRICTLY inside the
+ * media uploads root (the same `+ path.sep` boundary the serve handlers use
+ * — W454 /file, W455 /:id/download). Both `media.filePath` and thumbnail
+ * `t.path` legitimately live under `uploadsDir` (thumbsDir is a subdir of it),
+ * so this never blocks a real deletion. It DOES neutralize a tampered/migrated
+ * stored path pointing at a prefix-shared sibling (`<root>-evil`) or an
+ * absolute out-of-root location, preventing arbitrary out-of-root file
+ * deletion via the permanent-delete + empty-trash surfaces. Returns true if
+ * the file was unlinked, false if it was skipped (outside-root or missing).
+ */
+const safeUnlinkInsideMedia = targetPath => {
+  if (!targetPath) return false;
+  const resolved = path.resolve(targetPath);
+  if (!resolved.startsWith(path.resolve(uploadsDir) + path.sep)) return false;
+  if (!fs.existsSync(resolved)) return false;
+  fs.unlinkSync(resolved);
+  return true;
+};
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
   filename: (_req, file, cb) => {
@@ -699,15 +719,11 @@ router.delete('/:id/permanent', authenticate, requireBranchAccess, async (req, r
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ success: false, message: 'الوسيط غير موجود' });
 
-    // Remove file from disk
-    if (media.filePath && fs.existsSync(media.filePath)) {
-      fs.unlinkSync(media.filePath);
-    }
-    // Remove thumbnails
+    // Remove file from disk (W1387: only if strictly inside the media root)
+    safeUnlinkInsideMedia(media.filePath);
+    // Remove thumbnails (W1387: same in-root boundary)
     if (media.thumbnails?.length) {
-      media.thumbnails.forEach(t => {
-        if (t.path && fs.existsSync(t.path)) fs.unlinkSync(t.path);
-      });
+      media.thumbnails.forEach(t => safeUnlinkInsideMedia(t.path));
     }
 
     await Media.findByIdAndDelete(req.params.id);
@@ -1182,13 +1198,10 @@ router.post('/trash/empty', authenticate, requireBranchAccess, async (req, res) 
   try {
     const trashed = await Media.find({ status: 'محذوف' });
 
-    // Remove files from disk
+    // Remove files from disk (W1387: only paths strictly inside the media root)
     for (const m of trashed) {
-      if (m.filePath && fs.existsSync(m.filePath)) fs.unlinkSync(m.filePath);
-      if (m.thumbnails)
-        m.thumbnails.forEach(t => {
-          if (t.path && fs.existsSync(t.path)) fs.unlinkSync(t.path);
-        });
+      safeUnlinkInsideMedia(m.filePath);
+      if (m.thumbnails) m.thumbnails.forEach(t => safeUnlinkInsideMedia(t.path));
     }
 
     const result = await Media.deleteMany({ status: 'محذوف' });

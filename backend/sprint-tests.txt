@@ -1047,3 +1047,4 @@ __tests__/launch-readiness-wave1286.test.js
 __tests__/whatsapp-bot-data-lookup-wave1372.test.js
 __tests__/whatsapp-bot-flow-menu-wave1372.test.js
 __tests__/launch-readiness-service-wave1375.test.js
+__tests__/alerts-email-notify-wave1244.test.js

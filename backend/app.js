@@ -1492,10 +1492,36 @@ try {
 
     const intervalMs = Number(process.env['ALERTS_ENGINE_INTERVAL_MS']) || undefined;
 
+    // W1244 — email channel for high/critical raises. The dispatcher has
+    // carried channel/recipient plumbing since Wave 9 but nothing was ever
+    // injected, so the notification half of the engine was dormant. With
+    // prod SMTP live (W1242) this closes the loop. Master switch
+    // ALERTS_EMAIL_ENABLED (default OFF) + OPS_ALERT_EMAIL recipient;
+    // engine dedup guarantees ONE email per raise, not per 5-min tick.
+    let emailNotify = null;
+    const alertsEmailEnabled =
+      String(process.env['ALERTS_EMAIL_ENABLED'] || '').toLowerCase() === 'true';
+    if (alertsEmailEnabled) {
+      const { buildEmailNotify } = require('./alerts/email-notify');
+      emailNotify = buildEmailNotify({
+        opsEmail: process.env['OPS_ALERT_EMAIL'],
+        minSeverity: process.env['ALERTS_EMAIL_MIN_SEVERITY'] || 'high',
+        logger,
+      });
+      if (!emailNotify) {
+        logger.warn(
+          '[SmartAlerts] ALERTS_EMAIL_ENABLED=true but OPS_ALERT_EMAIL is not a valid inbox — email channel skipped'
+        );
+      }
+    }
+
     const stack = buildAlertsStack({
       models: liveModels,
       kpiHistoryStore: sharedHistoryStore,
       ...(intervalMs ? { intervalMs } : {}),
+      ...(emailNotify
+        ? { channels: emailNotify.channels, recipients: emailNotify.recipients }
+        : {}),
       logger,
     });
     stack.scheduler.start(stack.ctxFactory);
@@ -1503,7 +1529,8 @@ try {
     logger.info(
       `[SmartAlerts] ✓ engine started — ${stack.rules.length} rules, ` +
         `kpiHistoryStore=${sharedHistoryStore ? 'on' : 'off'}, ` +
-        `interval=${intervalMs || '5min'}`
+        `interval=${intervalMs || '5min'}, ` +
+        `email=${emailNotify ? `on→${process.env['OPS_ALERT_EMAIL']}` : 'off'}`
     );
   } else if (!alertsEnabled) {
     logger.info('[SmartAlerts] engine disabled — set ALERTS_ENGINE_ENABLED=true to activate');

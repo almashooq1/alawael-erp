@@ -1665,3 +1665,4 @@ __tests__/media-file-serve-traversal-behavioral-wave1379.test.js
 __tests__/files-upload-destination-boundary-behavioral-wave1380.test.js
 __tests__/documents-download-path-boundary-behavioral-wave1381.test.js
 __tests__/medical-files-view-traversal-behavioral-wave1382.test.js
+__tests__/medical-files-download-traversal-behavioral-wave1383.test.js

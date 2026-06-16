@@ -107,6 +107,32 @@ const BLOCKED_MIMES = [
  * Express middleware: validates uploaded file(s) after multer processes them.
  * Use AFTER multer middleware in the chain.
  */
+
+/**
+ * Get the first 16 magic bytes of an uploaded file, transparently supporting
+ * BOTH multer storage engines:
+ *   - diskStorage  -> file.path is set, read the head off disk.
+ *   - memoryStorage -> file.buffer is set, slice the head in-memory.
+ * Buffer support is purely additive: disk-storage callers (file.buffer absent)
+ * keep the exact prior behaviour.
+ */
+const getMagicBytes = async file => {
+  if (file.buffer && Buffer.isBuffer(file.buffer)) {
+    return file.buffer.slice(0, 16);
+  }
+  return readMagicBytes(file.path);
+};
+
+/** Best-effort removal of a rejected disk-stored upload (no-op for memory storage). */
+const removeUploadedFile = file => {
+  if (!file || !file.path) return; // memoryStorage keeps nothing on disk
+  try {
+    fs.unlinkSync(file.path);
+  } catch {
+    /* ignore */
+  }
+};
+
 const validateUploadedFile = async (req, res, next) => {
   const files = [];
   if (req.file) files.push(req.file);
@@ -115,12 +141,8 @@ const validateUploadedFile = async (req, res, next) => {
   for (const file of files) {
     // Block dangerous MIME types
     if (BLOCKED_MIMES.includes(file.mimetype)) {
-      // Delete the uploaded file
-      try {
-        fs.unlinkSync(file.path);
-      } catch {
-        /* ignore */
-      }
+      // Delete the uploaded file (no-op for memory storage)
+      removeUploadedFile(file);
       return res.status(400).json({
         success: false,
         message: `نوع الملف ${file.mimetype} غير مسموح به لأسباب أمنية`,
@@ -131,7 +153,7 @@ const validateUploadedFile = async (req, res, next) => {
     if (TEXT_MIMES.includes(file.mimetype)) continue;
 
     try {
-      const buffer = await readMagicBytes(file.path);
+      const buffer = await getMagicBytes(file);
       const detectedMimes = detectMimeFromMagic(buffer);
 
       // If we can detect the type, verify it's compatible
@@ -148,12 +170,8 @@ const validateUploadedFile = async (req, res, next) => {
           detected: detectedMimes,
           filename: file.originalname,
         });
-        // Delete the suspicious file
-        try {
-          fs.unlinkSync(file.path);
-        } catch {
-          /* ignore */
-        }
+        // Delete the suspicious file (no-op for memory storage)
+        removeUploadedFile(file);
         return res.status(400).json({
           success: false,
           message: 'محتوى الملف لا يتطابق مع نوعه المُعلن',
@@ -173,4 +191,5 @@ module.exports = {
   BLOCKED_MIMES,
   detectMimeFromMagic,
   readMagicBytes,
+  getMagicBytes,
 };

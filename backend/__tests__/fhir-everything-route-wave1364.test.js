@@ -108,6 +108,22 @@ describe('W1364 — FHIR GET /Patient/:id/$everything (flag+consent+branch gated
     expect(routeSrc).not.toMatch(/entityName:\s*['"]TransitionPlan['"]/);
   });
 
+  test('W1369: compartment EXCLUDES name-bridged clinical models (semantic-distortion guard)', () => {
+    // The MAPPERS keys are Assessment / Session / PlanOfCare. The live clinical
+    // models registered under DIFFERENT names — ClinicalAssessment,
+    // ClinicalSession, UnifiedCarePlan — must NOT be admitted to the compartment
+    // by their own names: there is no MAPPERS entry for them, so a naive add
+    // would either contribute nothing (best case) or, if force-bridged to a
+    // same-shape mapper, ship a structurally-valid but clinically-WRONG FHIR
+    // resource to NPHIES that the bundle validator cannot catch (it only screens
+    // structure, not semantics). Admitting them requires a deliberate name-bridge
+    // + shape-by-shape human verification, NOT a mechanical wire-up. This guard
+    // fails CI if any of them is silently added to PATIENT_COMPARTMENT.
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]ClinicalAssessment['"]/);
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]ClinicalSession['"]/);
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]UnifiedCarePlan['"]/);
+  });
+
   test('models are resolved defensively (unregistered → contributes nothing)', () => {
     expect(routeSrc).toMatch(/function\s+tryModel\(/);
     expect(routeSrc).toMatch(/PATIENT_COMPARTMENT/);

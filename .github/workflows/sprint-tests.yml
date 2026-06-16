@@ -1755,6 +1755,9 @@ on:
       - 'backend/__tests__/smoke-clinical-spine-wave1285.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/launch-readiness-wave1286.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-data-lookup-wave1372.test.js'
+      - 'backend/__tests__/whatsapp-bot-flow-menu-wave1372.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3488,6 +3491,9 @@ on:
       - 'backend/__tests__/smoke-clinical-spine-wave1285.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/launch-readiness-wave1286.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-data-lookup-wave1372.test.js'
+      - 'backend/__tests__/whatsapp-bot-flow-menu-wave1372.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -174,6 +174,40 @@ async function enforceBeneficiaryBranch(req, beneficiaryId) {
 }
 
 /**
+ * Denied-flag wrapper around `enforceBeneficiaryBranch` for routes written in the
+ * `const denied = await assertBeneficiaryInScope(req, benId, res); if (denied) return;`
+ * style (vs. a throw). Returns `true` (after writing the appropriate status to
+ * `res`) when the caller may NOT touch this beneficiary; returns `false` when
+ * allowed. When `res` is omitted it re-throws, so a try/catch caller still works.
+ *
+ * W1378: 20 route files imported this exact name from this module before it was
+ * ever exported — every guarded write threw `assertBeneficiaryInScope is not a
+ * function` (HTTP 500). It stayed silent in pre-adoption prod because no write
+ * path (open-episode, schedule-session, care-plan, EMR, referral, …) had been
+ * exercised; surfaced during the GO-LIVE daily-workflow walk (episode create →
+ * 500). Adding the function with the callers' contract fixes all 20 at once.
+ *
+ * @param {object} req
+ * @param {string|ObjectId} beneficiaryId
+ * @param {object} [res] Express response — written to on denial when present.
+ * @returns {Promise<boolean>} true = denied (caller should return), false = allowed
+ */
+async function assertBeneficiaryInScope(req, beneficiaryId, res) {
+  try {
+    await enforceBeneficiaryBranch(req, beneficiaryId);
+    return false; // allowed
+  } catch (err) {
+    if (!res || typeof res.status !== 'function') throw err;
+    const status = err.status || 403;
+    res.status(status).json({
+      success: false,
+      message: err.message || 'الوصول غير مسموح لهذا المستفيد',
+    });
+    return true; // denied — caller returns
+  }
+}
+
+/**
  * Enforce cross-branch isolation on an EMPLOYEE-keyed route (the HR analogue of
  * `enforceBeneficiaryBranch`). HR transactional records (attendance, payroll,
  * loans, …) are keyed by `employeeId`, and `Employee` carries `branch_id`, so a
@@ -498,6 +532,7 @@ module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
   enforceBeneficiaryBranch,
+  assertBeneficiaryInScope,
   enforceEmployeeBranch,
   loadBeneficiaryAndAssertBranch,
   assertBranchIdsAllowed,

@@ -1554,6 +1554,7 @@ __tests__/weighted-progress-link-index-wave243.test.js
 __tests__/whatsapp-activation-phase-a.test.js
 __tests__/whatsapp-autoreply-phase-c.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
+__tests__/whatsapp-bot-data-lookup-wave1366.test.js
 __tests__/whatsapp-bot-flow-menu-wave1366.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js

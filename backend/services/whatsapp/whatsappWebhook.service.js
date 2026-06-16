@@ -357,7 +357,38 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       });
 
       if (plan && plan.handled) {
-        const sent = await whatsappService.sendText(fromPhone, plan.reply).catch(err => {
+        // W1366 Wave 2: for read-only lookup side effects (attendance / session
+        // report / billing), attempt a GUARDIAN-VERIFIED live answer — env-gated
+        // SEPARATELY via ENABLE_WHATSAPP_BOT_LIVE_DATA (default OFF). On success
+        // the real data REPLACES the generic "we'll get back to you" closing and
+        // escalation is suppressed. On any failure (not authorized / ambiguous /
+        // no data / model missing) we keep the closing and escalate to staff.
+        let replyToSend = plan.reply;
+        let suppressEscalation = false;
+        if (process.env.ENABLE_WHATSAPP_BOT_LIVE_DATA === 'true' && plan.sideEffect) {
+          try {
+            const botData = require('./whatsappBotData.service');
+            if (botData.isLookupKind(plan.sideEffect.kind)) {
+              const ans = await botData.answerLookup(
+                plan.sideEffect.kind,
+                fromPhone,
+                plan.sideEffect.collected
+              );
+              if (ans && ans.ok && ans.text) {
+                replyToSend = ans.text;
+                suppressEscalation = true;
+              } else {
+                logger.info(
+                  `[WhatsApp BotData] lookup not delivered (${ans?.reason}) → escalating`
+                );
+              }
+            }
+          } catch (err) {
+            logger.warn(`[WhatsApp BotData] answerLookup error, escalating: ${err.message}`);
+          }
+        }
+
+        const sent = await whatsappService.sendText(fromPhone, replyToSend).catch(err => {
           logger.warn(`[WhatsApp BotMenu] send failed: ${err.message}`);
           return null;
         });
@@ -374,7 +405,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
             messages: {
               direction: 'outgoing',
               type: 'text',
-              text: plan.reply,
+              text: replyToSend,
               providerMessageId: sent.messageId,
               timestamp: new Date(),
               isAutoReply: true,
@@ -386,15 +417,15 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           logger.warn(`[WhatsApp BotMenu] state persist failed: ${err.message}`)
         );
 
-        // A completed flow that produced a side effect → flag for staff + notify.
-        if (plan.sideEffect) {
+        // A completed flow whose side effect was NOT served live → flag staff.
+        if (plan.sideEffect && !suppressEscalation) {
           await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect);
         }
 
         logger.info(
           `[WhatsApp BotMenu] handled inbound from ${fromPhone} | ` +
             `nextUnit=${plan.nextFlowState?.unit || 'idle'} | ` +
-            `sideEffect=${plan.sideEffect?.kind || 'none'}`
+            `sideEffect=${plan.sideEffect?.kind || 'none'} | liveData=${suppressEscalation}`
         );
         return; // bot owns this turn; skip the stateless auto-reply path
       }

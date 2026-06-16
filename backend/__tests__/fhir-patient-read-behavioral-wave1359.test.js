@@ -170,4 +170,22 @@ describe('W1359 — FHIR GET /Patient/:id flag-ON behavioral (consent gate + hap
       .expect('Content-Type', /application\/fhir\+json/);
     expect(res.body.resourceType).toBe('OperationOutcome');
   });
+
+  // W1363 — close the last untested gate branch: malformed :id is rejected at
+  // the input-validation gate (mongoose.isValidObjectId) BEFORE any DB lookup,
+  // so a bad id can never reach the consent/branch gates or touch the database.
+  it('6. malformed (non-ObjectId) id → 400 (input gate, no DB lookup)', async () => {
+    const res = await request(app)
+      .get('/fhir/Patient/not-a-valid-objectid')
+      .expect(400)
+      .expect('Content-Type', /application\/fhir\+json/);
+    expect(res.body.resourceType).toBe('OperationOutcome');
+    expect(Array.isArray(res.body.issue)).toBe(true);
+    expect(res.body.issue.length).toBeGreaterThan(0);
+    // The OperationOutcome serializer normalises the code to a FHIR R4
+    // issue-type value — assert it is a non-empty string (exact mapping is the
+    // serializer's concern, covered by the fhir-operation-outcome self-tests).
+    expect(typeof res.body.issue[0].code).toBe('string');
+    expect(res.body.issue[0].code.length).toBeGreaterThan(0);
+  });
 });

@@ -90,4 +90,43 @@ describe('W1207 successionReadinessService.candidatesForRole', () => {
       expect(typeof d.candidates[0].score).toBe('number');
     });
   });
+
+  // W1227 REGRESSION GUARD — the original single-candidate test above could never
+  // catch a broken sort (a 1-element array is trivially ordered). The service
+  // emits FLAT candidates ({...r}, score at top level) while rankCandidates was
+  // written for the nested {readiness:{score}} shape, so it sorted by `undefined`
+  // → DB-insertion order, and "ranked candidates" was a silent no-op in prod.
+  // This asserts a genuine 3-way ordering with the input deliberately NOT in
+  // score order, so any sort that ignores the flat score fails here.
+  test('ranks MULTIPLE candidates by score descending (guards the W1227 flat-shape no-op)', () => {
+    // high → talent 100 + competency 100% + long tenure; low → talent 0 + no
+    // coverage + fresh hire. Keys ordered low,high,mid on purpose (≠ score order).
+    const people = {
+      e_low: { emp: { _id: 'e_low', name: 'منخفض', hire_date: new Date() }, tr: { performanceBand: 1, potentialBand: 1, box: 1 }, comps: [{ competencyKey: 'k', currentLevel: 1 }] },
+      e_high: { emp: { _id: 'e_high', name: 'عالٍ', hire_date: new Date('2018-01-01') }, tr: { performanceBand: 3, potentialBand: 3, box: 9 }, comps: [{ competencyKey: 'k', currentLevel: 4 }] },
+      e_mid: { emp: { _id: 'e_mid', name: 'متوسّط', hire_date: new Date('2023-06-01') }, tr: { performanceBand: 2, potentialBand: 2, box: 5 }, comps: [{ competencyKey: 'k', currentLevel: 2 }] },
+    };
+    const reqs = [{ competencyKey: 'k', competencyNameAr: 'ك', requiredLevel: 4, criticality: 'core' }];
+    jest.spyOn(mongoose, 'model').mockImplementation((name) => {
+      if (name === 'Employee') {
+        return {
+          find: () => ({ select: () => ({ limit: () => lean(Object.keys(people).map((_id) => ({ _id }))) }) }),
+          findById: (id) => selectLean(people[id] ? people[id].emp : null),
+        };
+      }
+      if (name === 'TalentReview') return { findOne: (q) => sortSelectLean(people[q.employeeId] ? people[q.employeeId].tr : null) };
+      if (name === 'RoleCompetencyRequirement') return { find: () => lean(reqs) };
+      if (name === 'EmployeeCompetency') return { find: (q) => selectLean(people[q.employeeId] ? people[q.employeeId].comps : []) };
+      throw new Error(`unexpected model ${name}`);
+    });
+    return svc.candidatesForRole({ branchId: 'b1', targetJobTitle: 'Senior' }).then((d) => {
+      expect(d.assessed).toBe(3);
+      // exact ranking: most-ready first regardless of the input order
+      expect(d.candidates.map((c) => c.employeeId)).toEqual(['e_high', 'e_mid', 'e_low']);
+      // and the scores are monotonically non-increasing
+      const scores = d.candidates.map((c) => c.score);
+      expect(scores[0]).toBeGreaterThan(scores[2]);
+      for (let i = 1; i < scores.length; i += 1) expect(scores[i - 1]).toBeGreaterThanOrEqual(scores[i]);
+    });
+  });
 });

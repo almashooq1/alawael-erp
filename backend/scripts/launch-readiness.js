@@ -74,7 +74,9 @@ async function main() {
     ? PASS('goal bank seeded (R4 pathway bundles need it)', `${goalbank} goals`)
     : NOTYET('goal bank seeded', `${goalbank} goals`, 'npm run seed:goal-bank');
 
-  const icf = await countSafe('icfcodes');
+  // W1287 — ICFCodeReference → mongoose default plural 'icfcodereferences'
+  // (the earlier 'icfcodes' guess was a false-negative: prod has 105 codes).
+  const icf = await countSafe('icfcodereferences');
   icf > 0
     ? PASS('ICF codes seeded', `${icf} codes`)
     : INFO('ICF codes seeded', `${icf == null ? 'collection absent' : icf} codes`, 'npm run seed:icf-codes');
@@ -99,7 +101,9 @@ async function main() {
   // ── 4. Session write/read split RESOLVED (Definition #6, W1240) ──
   // The UI writes ClinicalSession; analytics read TherapySession. If any
   // ClinicalSession exists, at least one must have a TherapySession projection.
-  const clinSessions = await countSafe('clinicalsessions');
+  // W1287 — ClinicalSession declares collection:'clinical_sessions' (explicit,
+  // underscored) — NOT the mongoose default 'clinicalsessions'.
+  const clinSessions = await countSafe('clinical_sessions');
   if (!clinSessions) {
     INFO('session projection (W1240)', 'no ClinicalSessions yet — nothing to project', null);
   } else {

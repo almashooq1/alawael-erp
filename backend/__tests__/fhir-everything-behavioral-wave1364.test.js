@@ -44,6 +44,8 @@ let Consent;
 let EpisodeOfCare;
 let SeizureEvent;
 let ProstheticOrthoticOrder;
+let CaregiverSupportProgram;
+let RespiteBooking;
 
 const oid = () => new mongoose.Types.ObjectId();
 
@@ -105,6 +107,30 @@ async function seedProsthetic(beneficiaryId, overrides = {}) {
   });
 }
 
+async function seedCaregiverProgram(beneficiaryId, overrides = {}) {
+  await CaregiverSupportProgram.collection.insertOne({
+    beneficiaryId,
+    programType: 'training',
+    status: 'enrolled',
+    enrolledAt: new Date('2024-01-01T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
+async function seedRespiteBooking(beneficiaryId, overrides = {}) {
+  await RespiteBooking.collection.insertOne({
+    beneficiaryId,
+    bookingType: 'day',
+    status: 'approved',
+    startAt: new Date('2024-03-01T08:00:00.000Z'),
+    endAt: new Date('2024-03-01T16:00:00.000Z'),
+    requestedAt: new Date('2024-02-20T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1364-fhir-everything' } });
   await mongoose.connect(mongod.getUri());
@@ -119,6 +145,12 @@ beforeAll(async () => {
   if (ProstheticOrthoticOrder && ProstheticOrthoticOrder.default) {
     ProstheticOrthoticOrder = ProstheticOrthoticOrder.default;
   }
+  CaregiverSupportProgram = require('../models/CaregiverSupportProgram');
+  if (CaregiverSupportProgram && CaregiverSupportProgram.default) {
+    CaregiverSupportProgram = CaregiverSupportProgram.default;
+  }
+  RespiteBooking = require('../models/RespiteBooking');
+  if (RespiteBooking && RespiteBooking.default) RespiteBooking = RespiteBooking.default;
 
   process.env.ENABLE_FHIR_PHI_EXPORT = 'true';
   delete require.cache[require.resolve('../routes/fhir.routes')];
@@ -140,6 +172,8 @@ beforeEach(async () => {
   await EpisodeOfCare.collection.deleteMany({});
   await SeizureEvent.collection.deleteMany({});
   await ProstheticOrthoticOrder.collection.deleteMany({});
+  await CaregiverSupportProgram.collection.deleteMany({});
+  await RespiteBooking.collection.deleteMany({});
 });
 
 describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () => {
@@ -203,6 +237,43 @@ describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () =>
     const deviceRequests = types.filter(t => t === 'DeviceRequest');
     // Exactly the one valid order survives; the un-projectable one is dropped.
     expect(deviceRequests).toHaveLength(1);
+  });
+
+  it('1d. W1366 expansion pulls a CaregiverSupportProgram (CarePlan) into the Bundle', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    await seedCaregiverProgram(id);
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    // CaregiverSupportProgram maps to a FHIR CarePlan (a 3rd resource family
+    // beyond the Observation/DeviceRequest already proven above).
+    expect(types).toContain('CarePlan');
+  });
+
+  it('1e. W1366 expansion pulls a RespiteBooking (Appointment) into the Bundle', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    await seedRespiteBooking(id);
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    // RespiteBooking maps to a FHIR Appointment (a 4th resource family).
+    expect(types).toContain('Appointment');
   });
 
   it('2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks PHI)', async () => {

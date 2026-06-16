@@ -43,14 +43,19 @@ const DANGEROUS_MIME_LITERALS = ["'image/svg+xml'", '"image/svg+xml"'];
 // Ratchet DOWN only — never add. Remediating a file removes it from here.
 //
 // NOTE (W1356 accuracy): this guard tracks the UPLOAD-side validator only.
-// Of the two baselined routes, `documents.routes.js` is ALSO mitigated at the
-// SERVE side (W462: its /preview + /download force Content-Disposition:
-// attachment + sandbox CSP for svg/html), as is files.routes.js (W463). The
-// genuinely-exposed route is `uploads.routes.js` — served by nginx statically
-// (/uploads/*), so no Node disposition guard applies. Both stay baselined here
-// because wiring the upload-side validator is still the canonical defense; the
-// serve-side guard is a separate, complementary layer. See THREAT_MODEL §4 #6.
-const KNOWN_UNVALIDATED_SVG_UPLOAD_ROUTES = new Set(['documents.routes.js', 'uploads.routes.js']);
+// W1370 remediated `uploads.routes.js` — the genuinely-exposed route (served by
+// nginx statically at /uploads/*, so no Node serve-side disposition guard
+// applies): `image/svg+xml` was dropped from its ALLOWED_MIMES allowlist, so the
+// multer fileFilter now rejects svg outright (memory-storage route, so the
+// disk-path `validateUploadedFile` could not be wired; allowlist removal is the
+// correct contained fix). It is therefore REMOVED from this baseline.
+// `documents.routes.js` remains baselined: it is a broad clinical-document
+// allowlist (also accepts text/html + an extension-fallback that admits svg/html)
+// AND is already mitigated at the SERVE side (W462: /preview + /download force
+// Content-Disposition: attachment + sandbox CSP for svg/html). Fully removing
+// svg/html there is a broader product decision, so it stays a documented
+// residual risk (#6). See THREAT_MODEL §4 #6.
+const KNOWN_UNVALIDATED_SVG_UPLOAD_ROUTES = new Set(['documents.routes.js']);
 
 /** Recursively collect *.js files under a directory. */
 function collectJsFiles(dir) {

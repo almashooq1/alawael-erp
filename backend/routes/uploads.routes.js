@@ -12,7 +12,10 @@
  *
  * Constraints:
  *   - 8 MB max per file
- *   - allowed mime: image/jpeg|png|gif|webp|svg+xml | application/pdf
+ *   - allowed mime: image/jpeg|png|gif|webp | application/pdf
+ *     (image/svg+xml is intentionally NOT allowed — files are served publicly
+ *      same-origin by nginx at /uploads/*, so an SVG carrying <script> would be
+ *      a stored-XSS vector; W1370 closed this. Use PNG/WEBP for vector-like art.)
  *   - bucket must be a slug (no slashes)
  *   - filenames are content-hashed: <sha1>.<ext> so duplicates dedupe
  */
@@ -36,7 +39,9 @@ const ALLOWED_MIMES = new Set([
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
+  // SVG (image/svg+xml) intentionally excluded — stored-XSS via same-origin
+  // nginx static serving of /uploads/* (W1370). Do NOT re-add without a
+  // serve-side Content-Disposition:attachment + sandbox-CSP mitigation.
   'application/pdf',
 ]);
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -64,7 +69,6 @@ function extFor(mime, originalName) {
     'image/png': '.png',
     'image/gif': '.gif',
     'image/webp': '.webp',
-    'image/svg+xml': '.svg',
     'application/pdf': '.pdf',
   };
   if (map[mime]) return map[mime];

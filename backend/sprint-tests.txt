@@ -1642,3 +1642,4 @@ __tests__/fhir-reference-integrity-wave1347.test.js
 __tests__/fhir-capability-statement-wave1348.test.js
 __tests__/k6-gov-integrations-load-profile-wave1350.test.js
 __tests__/project-stats-doc-drift-wave1351.test.js
+__tests__/check-env-script.test.js

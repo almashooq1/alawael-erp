@@ -109,6 +109,28 @@ const strictOverrides = Joi.object({
   .options({ abortEarly: false });
 
 /**
+ * The security-critical env keys that the strict schema requires in
+ * production / CI. Derived from `strictOverrides` so this list can never
+ * drift from the schema it documents. Consumed by the boot validator, the
+ * `check-env` preflight, and (future) the `.env.example` drift guard.
+ * @type {string[]}
+ */
+const STRICT_REQUIRED_KEYS = Object.keys(strictOverrides.describe().keys);
+
+/**
+ * Pure: given an env object, return the strict-required keys that are missing
+ * or blank. No IO, no throw — safe to call from a preflight before boot.
+ * @param {Record<string, string|undefined>} [env=process.env]
+ * @returns {string[]} missing key names (subset of STRICT_REQUIRED_KEYS)
+ */
+function findMissingStrictEnv(env = process.env) {
+  return STRICT_REQUIRED_KEYS.filter(k => {
+    const v = env[k];
+    return v === undefined || v === null || String(v).trim() === '';
+  });
+}
+
+/**
  * Validate process.env and return the validated (with defaults) values.
  * Logs warnings in development, throws in production.
  *
@@ -151,4 +173,4 @@ function validateEnv() {
   return value;
 }
 
-module.exports = { validateEnv };
+module.exports = { validateEnv, findMissingStrictEnv, STRICT_REQUIRED_KEYS };

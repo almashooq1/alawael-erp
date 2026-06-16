@@ -130,6 +130,13 @@ flowchart LR
 > `MONGODB_URI` + `JWT_SECRET` فقط كقيم قابلة للإسناد. عند تحرّر الملف من
 > الجلسة الموازية: أضِف الثلاثة مع تلميحات التوليد (`openssl rand -base64 64`)
 > ثم احرسها بتأكيد يطابق مفاتيح `strictOverrides` مقابل `.env.example`.
+>
+> **W1354:** أُضيف preflight تنفيذي `npm run env:check`
+> (`backend/scripts/check-env.js`) يسرد في تمريرة واحدة كل مفتاح حرج ناقص/فارغ
+> مع تلميح توليده ويخرج بـ exit 1 — بدل انهيار الإقلاع على أول مفتاح. قائمة
+> المفاتيح المطلوبة مُصدَّرة من `config/validateEnv.js` (`STRICT_REQUIRED_KEYS`،
+> مُشتقّة من مخطّط Joi الصارم) فلا تنجرف أبداً عمّا يفرضه مُتحقِّق الإقلاع. حارس
+> ذاتي `__tests__/check-env-script.test.js` (4 تأكيدات، sprint).
 
 ---
 

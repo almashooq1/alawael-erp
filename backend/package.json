@@ -276,6 +276,7 @@
     "stats:json": "node scripts/project-stats.js --json",
     "stats:check": "node scripts/project-stats.js --check",
     "stats:write": "node scripts/project-stats.js --write",
+    "env:check": "node scripts/check-env.js",
     "cleanup": "node scripts/cleanup.js",
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js",

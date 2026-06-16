@@ -66,6 +66,36 @@ describe('W1364 — FHIR GET /Patient/:id/$everything (flag+consent+branch gated
     expect(routeSrc).toMatch(/entityName:\s*['"]Beneficiary['"]/);
   });
 
+  test('compartment registry (W1365) lists the audited beneficiary-keyed resources', () => {
+    // The frozen PATIENT_COMPARTMENT registry drives the multi-resource export.
+    expect(routeSrc).toMatch(/const\s+PATIENT_COMPARTMENT\s*=\s*Object\.freeze\(\[/);
+    for (const entity of [
+      'EpisodeOfCare',
+      'SeizureEvent',
+      'BehaviorIncident',
+      'AdaptiveSportsProgram',
+      'CaregiverSupportProgram',
+      'RespiteBooking',
+    ]) {
+      expect(routeSrc).toMatch(
+        new RegExp(`entityName:\\s*['"]${entity}['"],\\s*beneficiaryField:`)
+      );
+    }
+  });
+
+  test('compartment EXCLUDES confidentiality-sensitive + nested-key records', () => {
+    // SafeguardingConcern (confidential, subjectBeneficiaryId) and AssistiveDevice
+    // (beneficiaryId nested in loans[]) are deliberately not admitted — adding
+    // them is a product/privacy decision, not a mechanical wire-up.
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]SafeguardingConcern['"]/);
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]AssistiveDevice['"]/);
+  });
+
+  test('models are resolved defensively (unregistered → contributes nothing)', () => {
+    expect(routeSrc).toMatch(/function\s+tryModel\(/);
+    expect(routeSrc).toMatch(/PATIENT_COMPARTMENT/);
+  });
+
   test('file stays GET-only (no write verbs)', () => {
     expect(routeSrc).not.toMatch(/router\.(post|put|patch|delete)\(/);
   });

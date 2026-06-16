@@ -32,18 +32,27 @@
  *   before any PHI can leave — the product/consent decision stays with the
  *   operator, this only wires the mechanism.
  *
- * PHI export — GET /Patient/:id/$everything (W1364):
+ * PHI export — GET /Patient/:id/$everything (W1364, compartment W1365):
  *   The FHIR R4 patient-compartment operation. Returns a searchset Bundle of
- *   the Patient plus every EpisodeOfCare in the beneficiary's compartment (the
+ *   the Patient plus every resource in the beneficiary's compartment (the
  *   platform's canonical unifying core). It is PHI-exposing and multi-resource,
  *   so it ships behind the SAME three gates as GET /Patient/:id — identical
  *   default-OFF feature flag, branch isolation, and data_sharing consent — so
  *   production behavior is unchanged until an operator deliberately opts in.
  *   The Bundle is structurally validated (toValidatedFhirBundle, W1346) before
  *   it is returned; a malformed compartment yields 422 + OperationOutcome, not
- *   a partial leak. Additional compartment resource types (assessments,
- *   sessions, care-plans) are a follow-up once each canonical-shape↔mapper
- *   mapping is verified — deliberately scoped to the verified Episode core here.
+ *   a partial leak.
+ *
+ *   The compartment is a frozen, audited registry (PATIENT_COMPARTMENT below).
+ *   Every entry is admitted only after verifying ALL of: (a) a single Mongoose
+ *   registration under the EXACT mapper-key name (no W340 dual-registration
+ *   ambiguity), (b) a top-level beneficiaryId field, and (c) a pure FHIR mapper
+ *   round-trip-tested against that canonical schema. Confidentiality-sensitive
+ *   records (e.g. SafeguardingConcern) and nested-key records (AssistiveDevice,
+ *   keyed inside loans[]) are deliberately EXCLUDED — admitting them is a
+ *   product/privacy decision, not a mechanical wire-up. Each model is resolved
+ *   defensively (tryModel): an unregistered model contributes zero entries
+ *   rather than throwing, keeping the export robust across deployments.
  */
 
 const mongoose = require('mongoose');
@@ -149,19 +158,38 @@ router.get('/Patient/:id', async (req, res) => {
 });
 
 /**
- * Resolve the EpisodeOfCare model if it is registered, else null. The model is
- * registered by the episodes domain bootstrap in a live process; treating an
- * unregistered model as "no episodes" keeps $everything robust rather than
- * throwing a MissingSchemaError.
+ * Resolve a registered Mongoose model by name, or null when it is not yet
+ * registered in this process. Domain models are registered by their domain
+ * bootstrap in a live process; treating an unregistered model as "contributes
+ * nothing" keeps $everything robust rather than throwing MissingSchemaError.
+ * @param {string} name
  * @returns {import('mongoose').Model<any>|null}
  */
-function tryEpisodeModel() {
+function tryModel(name) {
   try {
-    return mongoose.model('EpisodeOfCare');
+    return mongoose.model(name);
   } catch (_e) {
     return null;
   }
 }
+
+/**
+ * Audited FHIR patient-compartment registry (W1365). Each entry's entityName
+ * is BOTH the registered Mongoose model name AND the FHIR mapper key — verified
+ * 1:1. beneficiaryField is the top-level path linking the record to the
+ * beneficiary. See the module header for the admission criteria. Add an entry
+ * only after verifying single-registration + top-level beneficiary key + a
+ * round-trip-tested mapper; never admit confidentiality-sensitive records.
+ * @type {ReadonlyArray<{ entityName: string, beneficiaryField: string }>}
+ */
+const PATIENT_COMPARTMENT = Object.freeze([
+  Object.freeze({ entityName: 'EpisodeOfCare', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'SeizureEvent', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'BehaviorIncident', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'AdaptiveSportsProgram', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'CaregiverSupportProgram', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'RespiteBooking', beneficiaryField: 'beneficiaryId' }),
+]);
 
 /**
  * GET /Patient/:id/$everything — FHIR R4 patient-compartment export.
@@ -209,13 +237,14 @@ router.get('/Patient/:id/\\$everything', async (req, res) => {
       );
     }
 
-    // Compartment — Patient + every EpisodeOfCare (the canonical unifying core).
+    // Compartment — Patient + every audited resource keyed to the beneficiary.
     const entries = [{ entityName: 'Beneficiary', record: beneficiary }];
-    const EpisodeOfCare = tryEpisodeModel();
-    if (EpisodeOfCare) {
-      const episodes = await EpisodeOfCare.find({ beneficiaryId: id }).lean();
-      for (const episode of episodes) {
-        entries.push({ entityName: 'EpisodeOfCare', record: episode });
+    for (const { entityName, beneficiaryField } of PATIENT_COMPARTMENT) {
+      const Model = tryModel(entityName);
+      if (!Model) continue;
+      const records = await Model.find({ [beneficiaryField]: id }).lean();
+      for (const record of records) {
+        entries.push({ entityName, record });
       }
     }
 

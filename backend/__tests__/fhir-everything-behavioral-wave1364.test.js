@@ -42,6 +42,7 @@ let app;
 let Beneficiary;
 let Consent;
 let EpisodeOfCare;
+let SeizureEvent;
 
 const oid = () => new mongoose.Types.ObjectId();
 
@@ -80,6 +81,19 @@ async function seedEpisode(beneficiaryId, overrides = {}) {
   });
 }
 
+async function seedSeizure(beneficiaryId, overrides = {}) {
+  await SeizureEvent.collection.insertOne({
+    beneficiaryId,
+    type: 'focal',
+    date: new Date('2024-02-01T10:00:00.000Z'),
+    startTime: new Date('2024-02-01T10:00:00.000Z'),
+    durationSeconds: 90,
+    status: 'recorded',
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1364-fhir-everything' } });
   await mongoose.connect(mongod.getUri());
@@ -88,6 +102,8 @@ beforeAll(async () => {
   if (Beneficiary && Beneficiary.default) Beneficiary = Beneficiary.default;
   ({ Consent } = require('../models/Consent'));
   ({ EpisodeOfCare } = require('../domains/episodes/models/EpisodeOfCare'));
+  SeizureEvent = require('../models/SeizureEvent');
+  if (SeizureEvent && SeizureEvent.default) SeizureEvent = SeizureEvent.default;
 
   process.env.ENABLE_FHIR_PHI_EXPORT = 'true';
   delete require.cache[require.resolve('../routes/fhir.routes')];
@@ -107,6 +123,7 @@ beforeEach(async () => {
   await Beneficiary.collection.deleteMany({});
   await Consent.collection.deleteMany({});
   await EpisodeOfCare.collection.deleteMany({});
+  await SeizureEvent.collection.deleteMany({});
 });
 
 describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () => {
@@ -129,6 +146,24 @@ describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () =>
     const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
     expect(types).toContain('Patient');
     expect(types).toContain('EpisodeOfCare');
+  });
+
+  it('1b. compartment registry pulls a SeizureEvent into the Bundle', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    await seedSeizure(id);
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    // SeizureEvent maps to a FHIR Observation (per the W13xx mapper layer).
+    expect(types).toContain('Observation');
   });
 
   it('2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks PHI)', async () => {

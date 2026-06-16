@@ -2434,6 +2434,8 @@ on:
       - 'backend/__tests__/files-download-disposition-behavioral-wave1375.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/files-download-path-boundary-behavioral-wave1376.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/media-download-path-boundary-behavioral-wave1377.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4846,6 +4848,8 @@ on:
       - 'backend/__tests__/files-download-disposition-behavioral-wave1375.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/files-download-path-boundary-behavioral-wave1376.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/media-download-path-boundary-behavioral-wave1377.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

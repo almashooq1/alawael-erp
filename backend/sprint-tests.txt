@@ -1646,6 +1646,7 @@ __tests__/k6-gov-integrations-load-profile-wave1350.test.js
 __tests__/project-stats-doc-drift-wave1351.test.js
 __tests__/check-env-script.test.js
 __tests__/upload-svg-xss-guard-wave1355.test.js
+__tests__/uploads-route-svg-rejection-behavioral-wave1372.test.js
 __tests__/upload-validator-memory-storage-wave1371.test.js
 __tests__/fhir-metadata-route-wave1357.test.js
 __tests__/fhir-patient-read-route-wave1358.test.js

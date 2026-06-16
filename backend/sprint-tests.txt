@@ -1647,3 +1647,4 @@ __tests__/upload-svg-xss-guard-wave1355.test.js
 __tests__/fhir-metadata-route-wave1357.test.js
 __tests__/fhir-patient-read-route-wave1358.test.js
 __tests__/fhir-patient-read-behavioral-wave1359.test.js
+__tests__/env-example-strict-keys-drift-wave1360.test.js

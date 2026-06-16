@@ -46,6 +46,10 @@ let SeizureEvent;
 let ProstheticOrthoticOrder;
 let CaregiverSupportProgram;
 let RespiteBooking;
+let BeneficiaryDietPrescription;
+let InstrumentalSwallowStudy;
+let SpasticityInjection;
+let ARVRSession;
 
 const oid = () => new mongoose.Types.ObjectId();
 
@@ -131,6 +135,50 @@ async function seedRespiteBooking(beneficiaryId, overrides = {}) {
   });
 }
 
+async function seedDietPrescription(beneficiaryId, overrides = {}) {
+  await BeneficiaryDietPrescription.collection.insertOne({
+    beneficiaryId,
+    status: 'active',
+    // NutritionOrder.dateTime is mandatory (1..1) -> prescribedAt required.
+    prescribedAt: new Date('2024-01-10T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
+async function seedSwallowStudy(beneficiaryId, overrides = {}) {
+  await InstrumentalSwallowStudy.collection.insertOne({
+    beneficiaryId,
+    studyType: 'VFSS',
+    status: 'completed',
+    performedDate: new Date('2024-02-05T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
+async function seedSpasticityInjection(beneficiaryId, overrides = {}) {
+  await SpasticityInjection.collection.insertOne({
+    beneficiaryId,
+    agent: 'botulinum_toxin',
+    status: 'completed',
+    procedureDate: new Date('2024-02-08T00:00:00.000Z'),
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
+async function seedArvrSession(beneficiaryId, overrides = {}) {
+  await ARVRSession.collection.insertOne({
+    beneficiaryId,
+    status: 'completed',
+    sessionDate: new Date('2024-02-12T00:00:00.000Z'),
+    durationMinutes: 30,
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1364-fhir-everything' } });
   await mongoose.connect(mongod.getUri());
@@ -151,6 +199,20 @@ beforeAll(async () => {
   }
   RespiteBooking = require('../models/RespiteBooking');
   if (RespiteBooking && RespiteBooking.default) RespiteBooking = RespiteBooking.default;
+  BeneficiaryDietPrescription = require('../models/BeneficiaryDietPrescription');
+  if (BeneficiaryDietPrescription && BeneficiaryDietPrescription.default) {
+    BeneficiaryDietPrescription = BeneficiaryDietPrescription.default;
+  }
+  InstrumentalSwallowStudy = require('../models/InstrumentalSwallowStudy');
+  if (InstrumentalSwallowStudy && InstrumentalSwallowStudy.default) {
+    InstrumentalSwallowStudy = InstrumentalSwallowStudy.default;
+  }
+  SpasticityInjection = require('../models/SpasticityInjection');
+  if (SpasticityInjection && SpasticityInjection.default) {
+    SpasticityInjection = SpasticityInjection.default;
+  }
+  ARVRSession = require('../domains/ar-vr/models/ARVRSession');
+  if (ARVRSession && ARVRSession.default) ARVRSession = ARVRSession.default;
 
   process.env.ENABLE_FHIR_PHI_EXPORT = 'true';
   delete require.cache[require.resolve('../routes/fhir.routes')];
@@ -174,6 +236,10 @@ beforeEach(async () => {
   await ProstheticOrthoticOrder.collection.deleteMany({});
   await CaregiverSupportProgram.collection.deleteMany({});
   await RespiteBooking.collection.deleteMany({});
+  await BeneficiaryDietPrescription.collection.deleteMany({});
+  await InstrumentalSwallowStudy.collection.deleteMany({});
+  await SpasticityInjection.collection.deleteMany({});
+  await ARVRSession.collection.deleteMany({});
 });
 
 describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () => {
@@ -274,6 +340,31 @@ describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () =>
     expect(types).toContain('Patient');
     // RespiteBooking maps to a FHIR Appointment (a 4th resource family).
     expect(types).toContain('Appointment');
+  });
+
+  it('1f. compartment yields every remaining FHIR family (NutritionOrder + DiagnosticReport + Procedure + Encounter)', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    await seedDietPrescription(id); // -> NutritionOrder
+    await seedSwallowStudy(id); // -> DiagnosticReport
+    await seedSpasticityInjection(id); // -> Procedure
+    await seedArvrSession(id); // -> Encounter
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    // With 1b-1f covered, every distinct FHIR resource family the compartment
+    // produces is now proven to flow end-to-end through the live route.
+    expect(types).toContain('NutritionOrder');
+    expect(types).toContain('DiagnosticReport');
+    expect(types).toContain('Procedure');
+    expect(types).toContain('Encounter');
   });
 
   it('2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks PHI)', async () => {

@@ -20,7 +20,12 @@ const fs = require('fs');
 const path = require('path');
 
 const BACKEND = path.join(__dirname, '..');
-const SRC = fs.readFileSync(path.join(BACKEND, 'scripts', 'launch-readiness.js'), 'utf8');
+// W1375 — the check logic moved from the CLI script into the shared
+// services/launchReadiness.service.js (consumed by CLI + HTTP route). The
+// content assertions below now target the service (one source of truth);
+// npm-wiring assertions still target package.json.
+const SRC = fs.readFileSync(path.join(BACKEND, 'services', 'launchReadiness.service.js'), 'utf8');
+const CLI = fs.readFileSync(path.join(BACKEND, 'scripts', 'launch-readiness.js'), 'utf8');
 const PKG = JSON.parse(fs.readFileSync(path.join(BACKEND, 'package.json'), 'utf8'));
 
 describe('W1286 launch-readiness — read-only safety', () => {
@@ -30,7 +35,7 @@ describe('W1286 launch-readiness — read-only safety', () => {
 
   test('reads via countDocuments only', () => {
     expect(SRC).toMatch(/countDocuments\(/);
-    expect(SRC).toMatch(/function countSafe/);
+    expect(SRC).toMatch(/countSafe\(/);
   });
 
   // W1287 — collection names must match the REAL mongoose collection of each
@@ -62,10 +67,10 @@ describe('W1286 launch-readiness — checklist coverage', () => {
 });
 
 describe('W1286 launch-readiness — verdict semantics', () => {
-  test('GO iff zero NOT-YET; exit 0 on GO else 1', () => {
+  test('GO iff zero NOT-YET (service); CLI exits 0 on GO else 1', () => {
     expect(SRC).toMatch(/const go = blocking\.length === 0/);
     expect(SRC).toMatch(/blocking = checks\.filter\(\(c\) => c\.status === 'NOT-YET'\)/);
-    expect(SRC).toMatch(/process\.exit\(go \? 0 : 1\)/);
+    expect(CLI).toMatch(/process\.exit\(go \? 0 : 1\)/);
   });
 
   test('owner-gated items use INFO with their fix hint (mail + demo-data)', () => {
@@ -91,8 +96,8 @@ describe('W1286 launch-readiness — wiring', () => {
     expect(PKG.scripts['launch:readiness:json']).toBe('node scripts/launch-readiness.js --json');
   });
 
-  test('points operators to the active smokes', () => {
-    expect(SRC).toMatch(/smoke:launch-spine/);
-    expect(SRC).toMatch(/smoke:clinical-spine/);
+  test('CLI points operators to the active smokes', () => {
+    expect(CLI).toMatch(/smoke:launch-spine/);
+    expect(CLI).toMatch(/smoke:clinical-spine/);
   });
 });

@@ -33,6 +33,7 @@ module.exports = function registerFeatureRoutes(
   const pathwayBundlesRoutes = safeRequire('../routes/pathway-bundles.routes');
   const nextBestActionRoutes = safeRequire('../routes/next-best-action.routes');
   const outcomesRollupRoutes = safeRequire('../routes/outcomes-rollup.routes');
+  const launchReadinessRoutes = safeRequire('../routes/launch-readiness.routes');
   const emailTemplatesRoutes = safeRequire('../routes/email-templates.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
   const beneficiaryDayAttendanceRoutes = safeRequire('../routes/beneficiary-day-attendance.routes');
@@ -155,6 +156,9 @@ module.exports = function registerFeatureRoutes(
   // aggregation goal → beneficiary → program(domain) → branch → center.
   // Center tier is cross-branch-roles-only (restricted callers get 403).
   dualMountAuth(app, 'outcomes-rollup', outcomesRollupRoutes, authenticate);
+  // W1375: read-only launch-readiness verdict (shared evaluator) for the
+  // web-admin /launch-readiness operator screen.
+  dualMountAuth(app, 'launch-readiness', launchReadinessRoutes, authenticate);
   // Wave 1242: professional bilingual email-template catalogue — registry-driven
   // RTL layout renderer + preview + admin test-send (converges the 55 scattered
   // inline-HTML email call sites onto one contract-validated formatting layer).

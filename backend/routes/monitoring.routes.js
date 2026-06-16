@@ -86,12 +86,47 @@ router.get('/metrics', async (req, res) => {
   }
 });
 
-// GET /endpoints
+// Walk the live Express router stack and collect registered {methods, path}.
+// Read-only introspection — handles Express 4 (app._router) and 5 (app.router)
+// and recurses one level into mounted sub-routers. Nested mount prefixes are
+// not regexp-resolved (fragile across versions), so sub-router paths are relative.
+function collectEndpoints(app) {
+  const out = [];
+  const root = (app && (app.router || app._router)) || null;
+  const baseStack = root && Array.isArray(root.stack) ? root.stack : [];
+  const walk = layers => {
+    for (const layer of layers) {
+      if (layer && layer.route && layer.route.path) {
+        const methods = Object.keys(layer.route.methods || {})
+          .filter(m => layer.route.methods[m])
+          .map(m => m.toUpperCase());
+        const paths = Array.isArray(layer.route.path) ? layer.route.path : [layer.route.path];
+        for (const p of paths) out.push({ methods, path: p });
+      } else if (
+        layer &&
+        layer.name === 'router' &&
+        layer.handle &&
+        Array.isArray(layer.handle.stack)
+      ) {
+        walk(layer.handle.stack);
+      }
+    }
+  };
+  walk(baseStack);
+  return out;
+}
+
+// GET /endpoints — live introspection of the mounted Express route table
 router.get('/endpoints', async (req, res) => {
   try {
+    const endpoints = collectEndpoints(req.app);
     res.json({
       success: true,
-      data: { totalEndpoints: 0, note: 'Endpoint discovery not implemented' },
+      data: {
+        totalEndpoints: endpoints.length,
+        endpoints: endpoints.slice(0, 1000),
+        truncated: endpoints.length > 1000,
+      },
     });
   } catch (err) {
     safeError(res, err, 'Monitoring endpoints error');

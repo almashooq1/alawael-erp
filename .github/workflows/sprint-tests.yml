@@ -1751,6 +1751,9 @@ on:
       - 'backend/__tests__/parent-v2-unified-plan-wave1273.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-registry-bridge-wave1270.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-data-lookup-wave1366.test.js'
+      - 'backend/__tests__/whatsapp-bot-flow-menu-wave1366.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3480,6 +3483,9 @@ on:
       - 'backend/__tests__/parent-v2-unified-plan-wave1273.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/email-registry-bridge-wave1270.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-data-lookup-wave1366.test.js'
+      - 'backend/__tests__/whatsapp-bot-flow-menu-wave1366.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

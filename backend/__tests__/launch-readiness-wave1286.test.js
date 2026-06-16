@@ -32,6 +32,16 @@ describe('W1286 launch-readiness — read-only safety', () => {
     expect(SRC).toMatch(/countDocuments\(/);
     expect(SRC).toMatch(/function countSafe/);
   });
+
+  // W1287 — collection names must match the REAL mongoose collection of each
+  // model, or a check silently false-negatives (prod had 105 ICF codes the
+  // checker reported as 0; ClinicalSession is collection:'clinical_sessions').
+  test('queries the correct (model-true) collection names', () => {
+    expect(SRC).toContain("countSafe('icfcodereferences')"); // ICFCodeReference → default plural
+    expect(SRC).toContain("countSafe('clinical_sessions')"); // explicit collection in the schema
+    expect(SRC).not.toMatch(/countSafe\('icfcodes'\)/); // the W1286 false-negative name
+    expect(SRC).not.toMatch(/countSafe\('clinicalsessions'\)/); // wrong default plural
+  });
 });
 
 describe('W1286 launch-readiness — checklist coverage', () => {

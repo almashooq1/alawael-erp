@@ -102,12 +102,23 @@ const DEPT_KEY_TO_SPECIALTY = Object.freeze({
 });
 
 // ─── Lazy + defensive model loaders ──────────────────────────────────────────
+// Prefer the registered model (works once the app has booted). The require
+// fallback must handle BOTH export shapes in this codebase: a direct model
+// export (FinanceInvoice / FamilyMember / …) AND a named-export module — e.g.
+// domains/sessions/models/ClinicalSession exports { ClinicalSession, schema },
+// NOT the model itself. Returning the bare module there would hand `.find` a
+// non-model and silently break the lookup, so we unwrap the named export.
 function loadModel(registeredName, requirePath) {
   try {
     return mongoose.model(registeredName);
   } catch {
     try {
-      return require(requirePath);
+      const mod = require(requirePath);
+      if (mod && typeof mod.find === 'function') return mod; // direct model export
+      if (mod && mod[registeredName] && typeof mod[registeredName].find === 'function') {
+        return mod[registeredName]; // named export, e.g. { ClinicalSession }
+      }
+      return null;
     } catch (err) {
       logger.warn(`[WhatsApp BotData] model ${registeredName} unavailable: ${err.message}`);
       return null;
@@ -136,6 +147,24 @@ const getInvoiceModel = () => loadModel('FinanceInvoice', '../../models/finance/
 function isAuthorizedMember(m) {
   if (!m) return false;
   return !!((m.portalAccess && m.portalAccess.enabled) || m.isLegalGuardian || m.isPrimaryContact);
+}
+
+/**
+ * Build an Arabic-first display name from a Beneficiary doc. The canonical
+ * Beneficiary schema stores names at the TOP level (firstName / lastName +
+ * Arabic variants + fullNameArabic) — NOT under `personalInfo` (verified
+ * against the registered schema; the legacy `populate('personalInfo.firstName
+ * …')` in whatsapp.routes is a latent no-op). Pure + testable.
+ */
+function beneficiaryDisplayName(b) {
+  if (!b) return '';
+  return (
+    b.fullNameArabic ||
+    [b.firstName_ar, b.lastName_ar].filter(Boolean).join(' ').trim() ||
+    [b.firstName, b.lastName].filter(Boolean).join(' ').trim() ||
+    b.name ||
+    ''
+  ).trim();
 }
 
 /**
@@ -339,12 +368,12 @@ async function resolveAuthorizedBeneficiary(phone, typedName) {
   if (!authorizedIds.length) return { ok: false, reason: 'not_authorized' };
 
   const bens = await Beneficiary.find({ _id: { $in: authorizedIds } })
-    .select('personalInfo.firstName personalInfo.lastName fileNumber')
+    .select('firstName lastName firstName_ar lastName_ar fullNameArabic name')
     .lean()
     .catch(() => []);
   const candidates = (bens || []).map(b => ({
     beneficiaryId: String(b._id),
-    name: `${b.personalInfo?.firstName || ''} ${b.personalInfo?.lastName || ''}`.trim(),
+    name: beneficiaryDisplayName(b),
   }));
 
   const sel = selectBeneficiary(candidates, typedName);
@@ -457,6 +486,7 @@ module.exports = {
   getBilling,
   // pure helpers (exported for unit tests)
   isAuthorizedMember,
+  beneficiaryDisplayName,
   selectBeneficiary,
   formatAttendance,
   formatSessionReports,

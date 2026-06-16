@@ -22,6 +22,18 @@ describe('W1366 Wave 2 — authorization gate', () => {
     expect(svc.isAuthorizedMember(null)).toBe(false);
   });
 
+  test('beneficiaryDisplayName: Arabic-first, top-level fields (NOT personalInfo.*)', () => {
+    expect(svc.beneficiaryDisplayName({ fullNameArabic: 'سارة أحمد' })).toBe('سارة أحمد');
+    expect(svc.beneficiaryDisplayName({ firstName_ar: 'سارة', lastName_ar: 'أحمد' })).toBe(
+      'سارة أحمد'
+    );
+    expect(svc.beneficiaryDisplayName({ firstName: 'Sara', lastName: 'Ahmed' })).toBe('Sara Ahmed');
+    expect(svc.beneficiaryDisplayName({ name: 'سارة' })).toBe('سارة');
+    // personalInfo is NOT a real schema path — must NOT be read
+    expect(svc.beneficiaryDisplayName({ personalInfo: { firstName: 'سارة' } })).toBe('');
+    expect(svc.beneficiaryDisplayName(null)).toBe('');
+  });
+
   test('selectBeneficiary: zero candidates → not_authorized (never guesses)', () => {
     expect(svc.selectBeneficiary([], 'سارة')).toEqual({ ok: false, reason: 'not_authorized' });
   });

@@ -1044,3 +1044,5 @@ __tests__/parent-v2-unified-plan-wave1273.test.js
 __tests__/email-registry-bridge-wave1270.test.js
 __tests__/smoke-clinical-spine-wave1285.test.js
 __tests__/launch-readiness-wave1286.test.js
+__tests__/whatsapp-bot-data-lookup-wave1372.test.js
+__tests__/whatsapp-bot-flow-menu-wave1372.test.js

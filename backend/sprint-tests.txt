@@ -1042,3 +1042,4 @@ __tests__/center-ops-wave1269.test.js
 __tests__/portal-plan-mapper-wave1272.test.js
 __tests__/parent-v2-unified-plan-wave1273.test.js
 __tests__/email-registry-bridge-wave1270.test.js
+__tests__/smoke-clinical-spine-wave1285.test.js

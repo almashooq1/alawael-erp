@@ -31,6 +31,7 @@
     "seed:rag-policies": "node scripts/seed-rag-policies.js",
     "smoke:careplan": "node scripts/smoke-careplan-chain.js",
     "smoke:launch-spine": "node scripts/smoke-launch-spine.js",
+    "smoke:clinical-spine": "node scripts/smoke-clinical-spine.js",
     "seed:rag-policies:dry": "node scripts/seed-rag-policies.js --dry-run",
     "seed:rag-policies:list": "node scripts/seed-rag-policies.js --list",
     "seed:cbahi": "node scripts/seed-cbahi-attestations.js",

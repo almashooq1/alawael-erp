@@ -298,3 +298,6 @@ backend/fix_duplicate_models.js
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+
+# session report artifacts
+*.docx

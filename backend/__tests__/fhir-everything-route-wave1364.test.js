@@ -66,16 +66,29 @@ describe('W1364 — FHIR GET /Patient/:id/$everything (flag+consent+branch gated
     expect(routeSrc).toMatch(/entityName:\s*['"]Beneficiary['"]/);
   });
 
-  test('compartment registry (W1365) lists the audited beneficiary-keyed resources', () => {
+  test('compartment registry (W1365/W1366) lists the audited beneficiary-keyed resources', () => {
     // The frozen PATIENT_COMPARTMENT registry drives the multi-resource export.
     expect(routeSrc).toMatch(/const\s+PATIENT_COMPARTMENT\s*=\s*Object\.freeze\(\[/);
     for (const entity of [
+      // W1365 baseline
       'EpisodeOfCare',
       'SeizureEvent',
       'BehaviorIncident',
       'AdaptiveSportsProgram',
       'CaregiverSupportProgram',
       'RespiteBooking',
+      // W1366 expansion
+      'BeneficiaryDietPrescription',
+      'SensoryDietProgram',
+      'CommunicationAidProfile',
+      'ProstheticOrthoticOrder',
+      'InstrumentalSwallowStudy',
+      'SpasticityInjection',
+      'ARVRSession',
+      'DttSession',
+      'CreativeArtsTherapySession',
+      'AdjunctTherapySession',
+      'SeatAllocation',
     ]) {
       expect(routeSrc).toMatch(
         new RegExp(`entityName:\\s*['"]${entity}['"],\\s*beneficiaryField:`)
@@ -83,17 +96,29 @@ describe('W1364 — FHIR GET /Patient/:id/$everything (flag+consent+branch gated
     }
   });
 
-  test('compartment EXCLUDES confidentiality-sensitive + nested-key records', () => {
-    // SafeguardingConcern (confidential, subjectBeneficiaryId) and AssistiveDevice
-    // (beneficiaryId nested in loans[]) are deliberately not admitted — adding
-    // them is a product/privacy decision, not a mechanical wire-up.
+  test('compartment EXCLUDES confidentiality-sensitive + nested-key + dual-registered records', () => {
+    // SafeguardingConcern (confidential, subjectBeneficiaryId), AssistiveDevice
+    // (beneficiaryId nested in loans[]), GroupTherapySession (subject is a Group,
+    // not a single beneficiary) and TransitionPlan (W340 dual-registration) are
+    // deliberately not admitted — adding them is a product/privacy/cleanup
+    // decision, not a mechanical wire-up.
     expect(routeSrc).not.toMatch(/entityName:\s*['"]SafeguardingConcern['"]/);
     expect(routeSrc).not.toMatch(/entityName:\s*['"]AssistiveDevice['"]/);
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]GroupTherapySession['"]/);
+    expect(routeSrc).not.toMatch(/entityName:\s*['"]TransitionPlan['"]/);
   });
 
   test('models are resolved defensively (unregistered → contributes nothing)', () => {
     expect(routeSrc).toMatch(/function\s+tryModel\(/);
     expect(routeSrc).toMatch(/PATIENT_COMPARTMENT/);
+  });
+
+  test('per-record mapper resilience (W1366): un-projectable record is omitted, not fatal', () => {
+    // Each record is screened through its mapper in a try/catch; a single
+    // record a mapper cannot project is skipped (continue), never failing the
+    // whole compartment export.
+    expect(routeSrc).toMatch(/const\s+mapper\s*=\s*MAPPERS\[entityName\]/);
+    expect(routeSrc).toMatch(/catch\s*\(_mapErr\)\s*\{\s*continue;/);
   });
 
   test('file stays GET-only (no write verbs)', () => {

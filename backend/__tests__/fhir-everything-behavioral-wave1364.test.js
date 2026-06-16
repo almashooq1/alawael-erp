@@ -43,6 +43,7 @@ let Beneficiary;
 let Consent;
 let EpisodeOfCare;
 let SeizureEvent;
+let ProstheticOrthoticOrder;
 
 const oid = () => new mongoose.Types.ObjectId();
 
@@ -94,6 +95,16 @@ async function seedSeizure(beneficiaryId, overrides = {}) {
   });
 }
 
+async function seedProsthetic(beneficiaryId, overrides = {}) {
+  await ProstheticOrthoticOrder.collection.insertOne({
+    beneficiaryId,
+    deviceCategory: 'ankle_foot_orthosis',
+    stage: 'prescribed',
+    createdAt: new Date(),
+    ...overrides,
+  });
+}
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1364-fhir-everything' } });
   await mongoose.connect(mongod.getUri());
@@ -104,6 +115,10 @@ beforeAll(async () => {
   ({ EpisodeOfCare } = require('../domains/episodes/models/EpisodeOfCare'));
   SeizureEvent = require('../models/SeizureEvent');
   if (SeizureEvent && SeizureEvent.default) SeizureEvent = SeizureEvent.default;
+  ProstheticOrthoticOrder = require('../models/ProstheticOrthoticOrder');
+  if (ProstheticOrthoticOrder && ProstheticOrthoticOrder.default) {
+    ProstheticOrthoticOrder = ProstheticOrthoticOrder.default;
+  }
 
   process.env.ENABLE_FHIR_PHI_EXPORT = 'true';
   delete require.cache[require.resolve('../routes/fhir.routes')];
@@ -124,6 +139,7 @@ beforeEach(async () => {
   await Consent.collection.deleteMany({});
   await EpisodeOfCare.collection.deleteMany({});
   await SeizureEvent.collection.deleteMany({});
+  await ProstheticOrthoticOrder.collection.deleteMany({});
 });
 
 describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () => {
@@ -164,6 +180,29 @@ describe('W1364 — FHIR GET /Patient/:id/$everything flag-ON behavioral', () =>
     expect(types).toContain('Patient');
     // SeizureEvent maps to a FHIR Observation (per the W13xx mapper layer).
     expect(types).toContain('Observation');
+  });
+
+  it('1c. W1366 expansion pulls a ProstheticOrthoticOrder (DeviceRequest); an un-projectable record is omitted, not fatal', async () => {
+    const id = oid();
+    await seedBeneficiary(id);
+    await seedConsent(id);
+    // One valid order (maps cleanly) + one missing the mapper-required
+    // deviceCategory (the mapper throws → W1366 per-record resilience omits it).
+    await seedProsthetic(id);
+    await seedProsthetic(id, { deviceCategory: undefined });
+
+    const res = await request(app)
+      .get(`/fhir/Patient/${id}/$everything`)
+      .expect(200)
+      .expect('Content-Type', /application\/fhir\+json/);
+
+    expect(res.body.resourceType).toBe('Bundle');
+    const types = res.body.entry.map(e => e.resource && e.resource.resourceType);
+    expect(types).toContain('Patient');
+    // ProstheticOrthoticOrder maps to a FHIR DeviceRequest.
+    const deviceRequests = types.filter(t => t === 'DeviceRequest');
+    // Exactly the one valid order survives; the un-projectable one is dropped.
+    expect(deviceRequests).toHaveLength(1);
   });
 
   it('2. NO consent → 403 forbidden OperationOutcome (gate 3 blocks PHI)', async () => {

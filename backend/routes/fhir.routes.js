@@ -32,7 +32,7 @@
  *   before any PHI can leave — the product/consent decision stays with the
  *   operator, this only wires the mechanism.
  *
- * PHI export — GET /Patient/:id/$everything (W1364, compartment W1365):
+ * PHI export — GET /Patient/:id/$everything (W1364, compartment W1365/W1366):
  *   The FHIR R4 patient-compartment operation. Returns a searchset Bundle of
  *   the Patient plus every resource in the beneficiary's compartment (the
  *   platform's canonical unifying core). It is PHI-exposing and multi-resource,
@@ -65,6 +65,7 @@ const {
   toValidatedFhir,
   toValidatedFhirBundle,
   buildOperationOutcome,
+  MAPPERS,
 } = require('../intelligence/fhir');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 
@@ -174,12 +175,15 @@ function tryModel(name) {
 }
 
 /**
- * Audited FHIR patient-compartment registry (W1365). Each entry's entityName
- * is BOTH the registered Mongoose model name AND the FHIR mapper key — verified
- * 1:1. beneficiaryField is the top-level path linking the record to the
- * beneficiary. See the module header for the admission criteria. Add an entry
- * only after verifying single-registration + top-level beneficiary key + a
- * round-trip-tested mapper; never admit confidentiality-sensitive records.
+ * Audited FHIR patient-compartment registry (W1365, expanded W1366). Each
+ * entry's entityName is BOTH the registered Mongoose model name AND the FHIR
+ * mapper key — verified 1:1. beneficiaryField is the top-level path linking the
+ * record to the beneficiary. See the module header for the admission criteria.
+ * Add an entry only after verifying single-registration + top-level beneficiary
+ * key + a round-trip-tested mapper; never admit confidentiality-sensitive
+ * records. The $everything handler additionally screens every record through
+ * its mapper (W1366) so a single un-projectable document is omitted rather than
+ * failing the whole export.
  * @type {ReadonlyArray<{ entityName: string, beneficiaryField: string }>}
  */
 const PATIENT_COMPARTMENT = Object.freeze([
@@ -189,6 +193,19 @@ const PATIENT_COMPARTMENT = Object.freeze([
   Object.freeze({ entityName: 'AdaptiveSportsProgram', beneficiaryField: 'beneficiaryId' }),
   Object.freeze({ entityName: 'CaregiverSupportProgram', beneficiaryField: 'beneficiaryId' }),
   Object.freeze({ entityName: 'RespiteBooking', beneficiaryField: 'beneficiaryId' }),
+  // W1366 — additive expansion. Each verified: single registration under the
+  // EXACT mapper-key name + top-level beneficiaryId + round-trip-tested mapper.
+  Object.freeze({ entityName: 'BeneficiaryDietPrescription', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'SensoryDietProgram', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'CommunicationAidProfile', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'ProstheticOrthoticOrder', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'InstrumentalSwallowStudy', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'SpasticityInjection', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'ARVRSession', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'DttSession', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'CreativeArtsTherapySession', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'AdjunctTherapySession', beneficiaryField: 'beneficiaryId' }),
+  Object.freeze({ entityName: 'SeatAllocation', beneficiaryField: 'beneficiaryId' }),
 ]);
 
 /**
@@ -242,8 +259,20 @@ router.get('/Patient/:id/\\$everything', async (req, res) => {
     for (const { entityName, beneficiaryField } of PATIENT_COMPARTMENT) {
       const Model = tryModel(entityName);
       if (!Model) continue;
+      const mapper = MAPPERS[entityName];
+      if (typeof mapper !== 'function') continue;
       const records = await Model.find({ [beneficiaryField]: id }).lean();
       for (const record of records) {
+        // Per-record resilience (W1366): a single record a mapper cannot
+        // project (missing a mapper-required field on a real-world document)
+        // is OMITTED, never fatal to the whole export. toValidatedFhirBundle
+        // re-runs the pure mapper below; pre-verifying here guarantees it
+        // will not throw on an already-screened record.
+        try {
+          mapper(record);
+        } catch (_mapErr) {
+          continue;
+        }
         entries.push({ entityName, record });
       }
     }

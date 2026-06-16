@@ -2440,6 +2440,8 @@ on:
       - 'backend/__tests__/documents-preview-path-boundary-behavioral-wave1378.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/media-file-serve-traversal-behavioral-wave1379.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/files-upload-destination-boundary-behavioral-wave1380.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4858,6 +4860,8 @@ on:
       - 'backend/__tests__/documents-preview-path-boundary-behavioral-wave1378.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/media-file-serve-traversal-behavioral-wave1379.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/files-upload-destination-boundary-behavioral-wave1380.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

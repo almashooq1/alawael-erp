@@ -41,12 +41,14 @@ const ENV_EXAMPLE = path.join(__dirname, '..', '.env.example');
 
 /**
  * Strict-required keys NOT yet documented as assignable in .env.example.
- * BASELINE (2026-06-16): the 3 keys the W1353 threat-modeling pass surfaced.
- * Ratchet DOWN only — never add to this set to silence a new gap; instead add
- * the key to .env.example. Remove an entry here in the SAME commit that adds it
- * to .env.example.
+ * BASELINE (2026-06-16): EMPTIED by W1362 — all 3 keys (JWT_REFRESH_SECRET,
+ * ENCRYPTION_KEY, SESSION_SECRET) were added to .env.example, closing the gap.
+ * The guard now holds the gap closed: any strict key dropped from .env.example
+ * (or a NEW strict key added to validateEnv without a template entry) fails the
+ * containment test below. Ratchet DOWN only — never add to this set to silence
+ * a new gap; instead add the key to .env.example.
  */
-const KNOWN_MISSING_BASELINE = new Set(['JWT_REFRESH_SECRET', 'ENCRYPTION_KEY', 'SESSION_SECRET']);
+const KNOWN_MISSING_BASELINE = new Set([]);
 
 /**
  * Collect the assignable keys from a .env file's text — lines of the shape

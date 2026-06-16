@@ -41,9 +41,9 @@ describe('domains/care-plans/models/UnifiedCarePlan.js', () => {
     expect(source).toMatch(/index/);
   });
 
-  test('has npm dependencies (1)', () => {
+  test('has npm dependencies (2)', () => {
     const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
-    expect(npms.length).toBe(1);
+    expect(npms.length).toBe(2);
   });
 
   test('has module.exports', () => {

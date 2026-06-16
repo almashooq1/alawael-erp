@@ -11,6 +11,9 @@
 const express = require('express');
 const router = express.Router();
 const _mongoose = require('mongoose');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 const _logger = require('../../utils/logger');
 
 // الخدمات
@@ -19,6 +22,10 @@ const versioningService = require('../../services/documents/documentVersioning.s
 const templatesEngine = require('../../services/documents/documentTemplates.engine');
 const auditService = require('../../services/documents/documentAudit.service');
 const bulkService = require('../../services/documents/documentBulk.service');
+const { emailManager } = require('../../services/email');
+const { whatsappService } = require('../../services/whatsapp');
+const idempotency = require('../../middleware/idempotency.middleware');
+const mutationIdAdapter = require('../../middleware/mutationIdAdapter.middleware');
 const safeError = require('../../utils/safeError');
 
 // Authentication middleware
@@ -36,6 +43,130 @@ try {
 // ─── Helper ─────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const getUserId = req => req.user?.userId || req.user?.id || req.user?._id;
+const toArray = value => (Array.isArray(value) ? value : value ? [value] : []);
+
+function buildPdfFromText({ title, text, options = {} }) {
+  return new Promise((resolve, reject) => {
+    try {
+      const logoPath = path.join(__dirname, '../../assets/logo.png');
+      const includeLogo = options.includeLogo !== false;
+      const footerText = options.footerText || 'Al-Awael Rehab Platform';
+      const includeGeneratedDateInFooter = options.includeGeneratedDateInFooter !== false;
+      const singlePage = options.singlePage !== false;
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 48,
+        info: { Title: title || 'Document', Author: 'Al-Awael ERP' },
+        bufferPages: true,
+      });
+      const chunks = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      const safeTitle = title || 'Generated Document';
+      const safeText = text || '';
+      const hasArabic = /[\u0600-\u06FF]/.test(`${safeTitle} ${safeText}`);
+      const textAlign = hasArabic ? 'right' : 'left';
+      const pageWidth = doc.page.width;
+      const pageHeight = doc.page.height;
+      const { left, right, top, bottom } = doc.page.margins;
+
+      // Header (logo + title/meta)
+      if (includeLogo && fs.existsSync(logoPath)) {
+        try {
+          const logoWidth = 96;
+          const logoHeight = 40;
+          doc.image(logoPath, pageWidth - right - logoWidth, top, {
+            width: logoWidth,
+            height: logoHeight,
+            fit: [logoWidth, logoHeight],
+          });
+        } catch {
+          // Non-fatal: keep PDF generation working even if logo asset is invalid.
+        }
+      }
+
+      doc
+        .fontSize(16)
+        .fillColor('black')
+        .text(safeTitle, left, top + 4, {
+          width: pageWidth - left - right - 110,
+          align: textAlign,
+        });
+      doc
+        .fontSize(10)
+        .fillColor('gray')
+        .text(`Generated at: ${new Date().toISOString()}`, left, top + 28, {
+          width: pageWidth - left - right - 110,
+          align: textAlign,
+        });
+
+      const dividerY = top + 56;
+      doc
+        .moveTo(left, dividerY)
+        .lineTo(pageWidth - right, dividerY)
+        .lineWidth(1)
+        .strokeColor('#D9D9D9')
+        .stroke();
+
+      // Body area: forced to a single page by default (truncate with ellipsis)
+      const bodyTop = dividerY + 12;
+      const footerY = pageHeight - bottom + 6;
+      const bodyHeight = pageHeight - bodyTop - bottom - 16;
+      const bodyWidth = pageWidth - left - right;
+      const bodyOptions = {
+        width: bodyWidth,
+        align: textAlign,
+        lineGap: 3,
+      };
+
+      // Auto-fit font size to maximize readability while preserving one-page layout.
+      let chosenFontSize = 11;
+      for (const size of [11, 10.5, 10, 9.5, 9, 8.5, 8]) {
+        doc.fontSize(size);
+        const h = doc.heightOfString(safeText, bodyOptions);
+        if (h <= bodyHeight) {
+          chosenFontSize = size;
+          break;
+        }
+        chosenFontSize = size;
+      }
+
+      doc
+        .fillColor('black')
+        .fontSize(chosenFontSize)
+        .text(safeText, left, bodyTop, {
+          ...bodyOptions,
+          ...(singlePage ? { height: bodyHeight, ellipsis: true } : {}),
+        });
+
+      // Footer
+      doc
+        .moveTo(left, pageHeight - bottom)
+        .lineTo(pageWidth - right, pageHeight - bottom)
+        .lineWidth(1)
+        .strokeColor('#E5E7EB')
+        .stroke();
+
+      const footerParts = [footerText];
+      if (includeGeneratedDateInFooter) {
+        footerParts.push(new Date().toLocaleString('ar-SA'));
+      }
+      doc
+        .fontSize(9)
+        .fillColor('#6B7280')
+        .text(footerParts.join(' | '), left, footerY, {
+          width: pageWidth - left - right,
+          align: textAlign,
+        });
+
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
 
 // ══════════════════════════════════════════════════════════
 //  █  التوقيع الرقمي — Digital Signatures
@@ -370,6 +501,11 @@ router.delete(
 router.post(
   '/templates/:templateId/generate',
   authenticateToken,
+  mutationIdAdapter,
+  idempotency({
+    scope: req => `uid:${getUserId(req) || 'anon'}`,
+    requireSameBody: true,
+  }),
   asyncHandler(async (req, res) => {
     const userId = getUserId(req);
     const { variables, createDocument, documentTitle } = req.body;
@@ -392,6 +528,271 @@ router.post(
     }
 
     res.json(result);
+  })
+);
+
+/**
+ * POST /templates/:templateId/deliver
+ * إنشاء المحتوى من القالب + إرسال عبر البريد/الواتساب
+ */
+router.post(
+  '/templates/:templateId/deliver',
+  authenticateToken,
+  mutationIdAdapter,
+  idempotency({
+    scope: req => `uid:${getUserId(req) || 'anon'}`,
+    requireSameBody: true,
+  }),
+  asyncHandler(async (req, res) => {
+    const userId = getUserId(req);
+    const {
+      variables,
+      createDocument,
+      documentTitle,
+      delivery = {},
+      metadata = {},
+    } = req.body || {};
+
+    const generated = await templatesEngine.generateFromTemplate(
+      req.params.templateId,
+      variables || {},
+      userId,
+      { createDocument, documentTitle }
+    );
+
+    if (!generated?.success) {
+      return res.status(400).json(generated);
+    }
+
+    const channels = {
+      email: { success: false, skipped: true, reason: 'not_requested' },
+      whatsapp: { success: false, skipped: true, reason: 'not_requested' },
+    };
+
+    // Email delivery
+    if (delivery.email) {
+      try {
+        const recipients = toArray(delivery.email.to).filter(Boolean);
+        if (!recipients.length) {
+          channels.email = {
+            success: false,
+            skipped: true,
+            reason: 'missing_recipient',
+          };
+        } else {
+          const subject =
+            delivery.email.subject ||
+            `مستند: ${generated.templateName || 'Template'}${documentTitle ? ` - ${documentTitle}` : ''}`;
+          const bodyText =
+            delivery.email.message ||
+            `تم إنشاء مستند جديد من القالب "${generated.templateName}" بتاريخ ${new Date().toLocaleString('ar-SA')}.`;
+
+          const attachments = [];
+          if (delivery.email.attachGeneratedFile !== false && generated.generatedContent) {
+            const baseName = (documentTitle || generated.templateName || 'document').replace(
+              /[\\/:*?"<>|]/g,
+              '_'
+            );
+            const preferPdf = delivery.email.preferPdfAttachment !== false;
+            if (preferPdf) {
+              try {
+                const pdfBuffer = await buildPdfFromText({
+                  title: documentTitle || generated.templateName,
+                  text: String(generated.generatedContent),
+                  options: delivery.email.pdfOptions || {},
+                });
+                attachments.push({
+                  filename: `${baseName}.pdf`,
+                  content: pdfBuffer,
+                  contentType: 'application/pdf',
+                });
+              } catch {
+                attachments.push({
+                  filename: `${baseName}.txt`,
+                  content: Buffer.from(String(generated.generatedContent), 'utf8'),
+                  contentType: 'text/plain; charset=utf-8',
+                });
+              }
+            } else {
+              attachments.push({
+                filename: `${baseName}.txt`,
+                content: Buffer.from(String(generated.generatedContent), 'utf8'),
+                contentType: 'text/plain; charset=utf-8',
+              });
+            }
+          }
+
+          const emailResult = await emailManager.send({
+            to: recipients,
+            subject,
+            text: bodyText,
+            html: `<div dir="rtl" style="font-family:Arial,sans-serif"><h3>${subject}</h3><p>${bodyText}</p></div>`,
+            attachments,
+            metadata: {
+              ...metadata,
+              templateId: req.params.templateId,
+              templateName: generated.templateName,
+              documentId: generated.documentId,
+              source: 'documents-pro-extended:template-deliver',
+            },
+            userId,
+            category: 'system',
+          });
+
+          channels.email = {
+            success: !!emailResult?.success,
+            status: emailResult?.status,
+            providerMessageId: emailResult?.messageId || emailResult?.emailId || null,
+            error: emailResult?.error || null,
+            recipients,
+          };
+        }
+      } catch (err) {
+        channels.email = {
+          success: false,
+          skipped: false,
+          reason: 'send_exception',
+          error: err?.message || 'email_send_failed',
+        };
+      }
+    }
+
+    // WhatsApp delivery
+    if (delivery.whatsapp) {
+      try {
+        channels.whatsapp = { success: false, skipped: false };
+        const to = delivery.whatsapp.to;
+        if (!to) {
+          channels.whatsapp = {
+            success: false,
+            skipped: true,
+            reason: 'missing_recipient',
+          };
+        } else {
+          const mode = delivery.whatsapp.mode || 'text';
+          let waResult;
+          if (mode === 'template') {
+            if (!delivery.whatsapp.templateName) {
+              channels.whatsapp = {
+                success: false,
+                skipped: true,
+                reason: 'missing_template_name',
+              };
+            } else {
+              waResult = await whatsappService.sendTemplate(
+                to,
+                delivery.whatsapp.templateName,
+                delivery.whatsapp.language || 'ar',
+                delivery.whatsapp.components || []
+              );
+            }
+          } else if (mode === 'document') {
+            if (!delivery.whatsapp.documentUrl) {
+              const fallbackToText = delivery.whatsapp.fallbackToText !== false;
+              if (!fallbackToText) {
+                channels.whatsapp = {
+                  success: false,
+                  skipped: true,
+                  reason: 'missing_document_url',
+                };
+              } else {
+                waResult = await whatsappService.sendText(
+                  to,
+                  delivery.whatsapp.message ||
+                    `تم إنشاء المستند "${generated.templateName}" ولكن لا يوجد رابط ملف للإرسال كوثيقة.`,
+                  {
+                    reportId: generated.documentId,
+                    previewUrl: !!delivery.whatsapp.previewUrl,
+                  }
+                );
+              }
+            } else {
+              waResult = await whatsappService.sendDocument(
+                to,
+                delivery.whatsapp.documentUrl,
+                delivery.whatsapp.caption || generated.templateName || 'Document',
+                {
+                  filename:
+                    delivery.whatsapp.filename || `${generated.templateName || 'document'}.pdf`,
+                  reportId: generated.documentId,
+                }
+              );
+            }
+          } else {
+            waResult = await whatsappService.sendText(
+              to,
+              delivery.whatsapp.message ||
+                generated.generatedContent ||
+                `تم إنشاء المستند: ${generated.templateName}`,
+              {
+                reportId: generated.documentId,
+                previewUrl: !!delivery.whatsapp.previewUrl,
+              }
+            );
+          }
+
+          if (!channels.whatsapp.reason) {
+            channels.whatsapp = {
+              success: !!waResult?.success,
+              providerMessageId: waResult?.messageId || waResult?.messages?.[0]?.id || null,
+              error: waResult?.error || null,
+              to,
+              mode,
+            };
+          }
+        }
+      } catch (err) {
+        channels.whatsapp = {
+          success: false,
+          skipped: false,
+          reason: 'send_exception',
+          error: err?.message || 'whatsapp_send_failed',
+        };
+      }
+    }
+
+    const attemptedChannels = ['email', 'whatsapp'].filter(ch => !!delivery[ch]);
+    const summary = {
+      attempted: attemptedChannels.length,
+      succeeded: attemptedChannels.filter(ch => channels[ch]?.success).length,
+      failed: attemptedChannels.filter(ch => !channels[ch]?.success && !channels[ch]?.skipped)
+        .length,
+      skipped: attemptedChannels.filter(ch => channels[ch]?.skipped).length,
+    };
+    summary.status =
+      summary.attempted === 0
+        ? 'generated_only'
+        : summary.succeeded === summary.attempted
+          ? 'delivered'
+          : summary.succeeded > 0
+            ? 'partial'
+            : 'failed';
+
+    if (generated.success) {
+      try {
+        auditService.log({
+          documentId: generated.documentId,
+          action: 'template_deliver',
+          userId,
+          userName: req.user?.name,
+          details: {
+            description: `إنشاء وإرسال من قالب: ${generated.templateName}`,
+            email: channels.email,
+            whatsapp: channels.whatsapp,
+            summary,
+          },
+        });
+      } catch {
+        // Non-fatal: delivery response shouldn't fail if audit logging fails.
+      }
+    }
+
+    return res.json({
+      success: true,
+      generated,
+      delivery: channels,
+      deliverySummary: summary,
+    });
   })
 );
 

@@ -15,6 +15,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  Button,
 } from '@mui/material';
 import {
   Memory as CpuIcon,
@@ -49,6 +50,13 @@ import {
 import apiClient from '../../services/api.client';
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { getOpsCounters, clearOpsCounters, getOpsTrendByCategory } from '../../utils/opsTelemetry';
+
+const TELEMETRY_WINDOWS = {
+  '15m': 15 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+};
 
 /* ───────── formatUptime ───────── */
 const formatUptime = seconds => {
@@ -104,6 +112,9 @@ const MonitoringDashboard = () => {
   const [cacheStats, setCacheStats] = useState(null);
   const [queryStats, setQueryStats] = useState(null);
   const [realtimeStats, setRealtimeStats] = useState(null);
+  const [hqOpsCounters, setHqOpsCounters] = useState([]);
+  const [hqOpsTrend, setHqOpsTrend] = useState([]);
+  const [hqTelemetryWindow, setHqTelemetryWindow] = useState('24h');
   const [timeSeriesData, setTimeSeriesData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -122,6 +133,14 @@ const MonitoringDashboard = () => {
       setCacheStats(cacheJson?.data || cacheJson);
       setQueryStats(queryJson?.data || queryJson);
       setRealtimeStats(realtimeJson?.data || realtimeJson);
+      const windowMs = TELEMETRY_WINDOWS[hqTelemetryWindow] || TELEMETRY_WINDOWS['24h'];
+      const threshold = Date.now() - windowMs;
+      setHqOpsCounters(
+        getOpsCounters('hq.')
+          .filter(item => item.lastAt >= threshold)
+          .slice(0, 6)
+      );
+      setHqOpsTrend(getOpsTrendByCategory('hq.', windowMs, 12));
       setIsDemo(false);
 
       const point = {
@@ -174,6 +193,14 @@ const MonitoringDashboard = () => {
         avgTime: Math.floor(8 + Math.random() * 15),
       });
       setRealtimeStats({ connections: { activeConnections: Math.floor(3 + Math.random() * 10) } });
+      const windowMs = TELEMETRY_WINDOWS[hqTelemetryWindow] || TELEMETRY_WINDOWS['24h'];
+      const threshold = Date.now() - windowMs;
+      setHqOpsCounters(
+        getOpsCounters('hq.')
+          .filter(item => item.lastAt >= threshold)
+          .slice(0, 6)
+      );
+      setHqOpsTrend(getOpsTrendByCategory('hq.', windowMs, 12));
 
       const point = {
         time: new Date().toLocaleTimeString(),
@@ -185,7 +212,7 @@ const MonitoringDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [showSnackbar]);
+  }, [showSnackbar, hqTelemetryWindow]);
 
   useEffect(() => {
     fetchStats();
@@ -419,6 +446,161 @@ const MonitoringDashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* ─── HQ Dashboard Ops Telemetry ─── */}
+      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+        مؤشرات تشغيل لوحة المقر الرئيسي
+      </Typography>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          mb: 3,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            flexWrap: 'wrap',
+            mb: 2,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+            <Typography variant="caption" color="text.secondary">
+              الفترة:
+            </Typography>
+            {[
+              { key: '15m', label: 'آخر 15 دقيقة' },
+              { key: '1h', label: 'آخر ساعة' },
+              { key: '24h', label: 'آخر 24 ساعة' },
+            ].map(option => (
+              <Chip
+                key={option.key}
+                label={option.label}
+                size="small"
+                clickable
+                onClick={() => setHqTelemetryWindow(option.key)}
+                color={hqTelemetryWindow === option.key ? 'primary' : 'default'}
+                variant={hqTelemetryWindow === option.key ? 'filled' : 'outlined'}
+              />
+            ))}
+          </Box>
+
+          <Button
+            size="small"
+            color="error"
+            variant="outlined"
+            onClick={() => {
+              clearOpsCounters('hq.');
+              setHqOpsCounters([]);
+              setHqOpsTrend(
+                getOpsTrendByCategory(
+                  'hq.',
+                  TELEMETRY_WINDOWS[hqTelemetryWindow] || TELEMETRY_WINDOWS['24h'],
+                  12
+                )
+              );
+              showSnackbar('تمت إعادة تعيين عدادات تشغيل HQ', 'success');
+            }}
+          >
+            إعادة تعيين العدادات
+          </Button>
+        </Box>
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.default',
+          }}
+        >
+          <Typography variant="body2" fontWeight={700} sx={{ mb: 1.5 }}>
+            اتجاه أحداث HQ حسب النوع (ضمن الفترة المختارة)
+          </Typography>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={hqOpsTrend}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="slot" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="auth"
+                stroke={chartColors.red || '#e53935'}
+                strokeWidth={2.2}
+                dot={{ r: 2 }}
+                name="مشاكل المصادقة"
+              />
+              <Line
+                type="monotone"
+                dataKey="partial"
+                stroke={chartColors.orange || '#fb8c00'}
+                strokeWidth={2}
+                dot={{ r: 2 }}
+                name="أعطال جزئية"
+              />
+              <Line
+                type="monotone"
+                dataKey="other"
+                stroke={chartColors.violet}
+                strokeWidth={2}
+                dot={{ r: 2 }}
+                name="أحداث أخرى"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Paper>
+
+        {hqOpsCounters.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            لا توجد أحداث تشغيلية مسجلة ضمن الفترة المحددة.
+          </Typography>
+        ) : (
+          <Grid container spacing={2}>
+            {hqOpsCounters.map(item => (
+              <Grid item xs={12} sm={6} md={4} key={item.key}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: surfaceColors.blueSurface,
+                    height: '100%',
+                  }}
+                >
+                  <CardContent sx={{ pb: '16px !important' }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'block', mb: 0.5 }}
+                    >
+                      {item.key}
+                    </Typography>
+                    <Typography variant="h5" fontWeight={700} sx={{ mb: 0.8 }}>
+                      {item.count}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      آخر تحديث: {item.lastAt ? new Date(item.lastAt).toLocaleString('ar-SA') : '—'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Paper>
 
       {/* ─── Errors + Cache Summary ─── */}
       <Grid container spacing={3}>

@@ -14,7 +14,7 @@
  * API:    GET /api/branch-management/hq/dashboard
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -36,7 +36,7 @@ import {
   Skeleton,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getToken } from '../utils/tokenStorage';
+import apiClient from '../services/api.client';
 
 /* ── New Premium Components ───────────────────────────── */
 import LiveMetricsTicker from 'components/dashboard/LiveMetricsTicker';
@@ -62,19 +62,46 @@ import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
 import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
+import { logOpsEvent } from '../utils/opsTelemetry';
 
 /* ─────────────────────────────────────────────────────── */
-const API_BASE = '/api/branch-management';
+const API_PATHS = {
+  dashboard: '/branch-management/hq/dashboard',
+  alerts: '/branch-management/hq/alerts',
+  financials: '/branch-management/hq/financials',
+};
 
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${getToken() || ''}`,
-});
+const unwrapResponse = payload => payload?.data || payload;
 
-const apiFetch = async url => {
-  const res = await fetch(url, { headers: authHeaders() });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+const parseApiError = err => {
+  const status = err?.status || err?.response?.status || null;
+  const backendMessage =
+    (typeof err?.data === 'object' && err?.data?.message) ||
+    err?.response?.data?.message ||
+    err?.message;
+
+  if (status === 401) {
+    return {
+      status,
+      message: 'انتهت جلسة الدخول أو لم يعد المستخدم مصرحاً. الرجاء تسجيل الدخول مجدداً.',
+    };
+  }
+  if (status === 403) {
+    return {
+      status,
+      message: 'ليس لديك صلاحية للوصول إلى لوحة المقر الرئيسي.',
+    };
+  }
+
+  return {
+    status,
+    message: backendMessage || 'تعذر تحميل بيانات لوحة القيادة حالياً. حاول مرة أخرى بعد قليل.',
+  };
+};
+
+const apiFetch = async path => {
+  const res = await apiClient.get(path);
+  return unwrapResponse(res);
 };
 
 const BRANCH_REGIONS = {
@@ -561,6 +588,7 @@ const AlertRow = ({ alert, index, isDark: _isDark }) => {
 const HQDashboard = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const telemetryCooldownRef = useRef({});
 
   /* State */
   const [dashboard, setDashboard] = useState(null);
@@ -568,11 +596,32 @@ const HQDashboard = () => {
   const [financials, setFinancials] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [errorStatus, setErrorStatus] = useState(null);
+  const [nonBlockingWarning, setNonBlockingWarning] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [filterRegion, setFilterRegion] = useState('all');
   const [cmdOpen, setCmdOpen] = useState(false);
   const [metric, setMetric] = useState('capacity_utilization');
+
+  const emitTelemetry = useCallback((key, message, level = 'warning', context = {}) => {
+    const now = Date.now();
+    const lastEmittedAt = telemetryCooldownRef.current[key] || 0;
+    const cooldownMs = 60 * 1000;
+    if (now - lastEmittedAt < cooldownMs) return;
+
+    telemetryCooldownRef.current[key] = now;
+    logOpsEvent({
+      key: `hq.${key}`,
+      sentryMessage: `[HQDashboard] ${message}`,
+      sentryLevel: level,
+      sentryContext: context,
+      counterMeta: {
+        page: 'HQDashboard',
+        ...(context || {}),
+      },
+    });
+  }, []);
 
   /* ── Keyboard shortcut for CMD+K ──── */
   useEffect(() => {
@@ -587,26 +636,96 @@ const HQDashboard = () => {
   }, []);
 
   /* ── Data loading ────────────────── */
-  const loadData = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true);
-    else setRefreshing(true);
-    setError(null);
-    try {
-      const [dashRes, alertsRes, finRes] = await Promise.all([
-        apiFetch(`${API_BASE}/hq/dashboard`),
-        apiFetch(`${API_BASE}/hq/alerts`),
-        apiFetch(`${API_BASE}/hq/financials`),
-      ]);
-      setDashboard(dashRes.data || dashRes);
-      setAlerts(alertsRes.data?.alerts || alertsRes.alerts || []);
-      setFinancials(finRes.data || finRes);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const loadData = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      else setRefreshing(true);
+      setError(null);
+      setErrorStatus(null);
+      setNonBlockingWarning('');
+      try {
+        const [dashRes, alertsRes, finRes] = await Promise.allSettled([
+          apiFetch(API_PATHS.dashboard),
+          apiFetch(API_PATHS.alerts),
+          apiFetch(API_PATHS.financials),
+        ]);
+
+        if (dashRes.status === 'rejected') {
+          throw dashRes.reason;
+        }
+
+        const warnings = [];
+
+        setDashboard(dashRes.value || null);
+
+        if (alertsRes.status === 'fulfilled') {
+          const alertsPayload = alertsRes.value || {};
+          setAlerts(alertsPayload.alerts || []);
+        } else {
+          setAlerts([]);
+          warnings.push('تعذر تحميل التنبيهات حالياً');
+          emitTelemetry(
+            'alerts-partial-failure',
+            'alerts endpoint failed while dashboard stayed available',
+            'warning',
+            {
+              page: 'HQDashboard',
+              endpoint: API_PATHS.alerts,
+              error: alertsRes.reason?.message || 'unknown_error',
+            }
+          );
+        }
+
+        if (finRes.status === 'fulfilled') {
+          setFinancials(finRes.value || null);
+        } else {
+          setFinancials(null);
+          warnings.push('تعذر تحميل الملخص المالي حالياً');
+          emitTelemetry(
+            'financials-partial-failure',
+            'financials endpoint failed while dashboard stayed available',
+            'warning',
+            {
+              page: 'HQDashboard',
+              endpoint: API_PATHS.financials,
+              error: finRes.reason?.message || 'unknown_error',
+            }
+          );
+        }
+
+        if (warnings.length > 0) {
+          setNonBlockingWarning(warnings.join(' · '));
+        }
+      } catch (err) {
+        const parsed = parseApiError(err);
+        setError(parsed.message);
+        setErrorStatus(parsed.status);
+
+        const telemetryKey =
+          parsed.status === 401
+            ? 'dashboard-auth-401'
+            : parsed.status === 403
+              ? 'dashboard-auth-403'
+              : 'dashboard-load-error';
+        const telemetryMessage =
+          parsed.status === 401
+            ? 'dashboard unauthorized (session expired or invalid token)'
+            : parsed.status === 403
+              ? 'dashboard forbidden (missing HQ role/permission)'
+              : 'dashboard data load failed';
+
+        emitTelemetry(telemetryKey, telemetryMessage, parsed.status >= 500 ? 'error' : 'warning', {
+          page: 'HQDashboard',
+          status: parsed.status,
+          error: err?.message || 'unknown_error',
+        });
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [emitTelemetry]
+  );
 
   useEffect(() => {
     loadData();
@@ -709,6 +828,37 @@ const HQDashboard = () => {
             <RefreshRoundedIcon sx={{ fontSize: 18 }} />
             <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>إعادة المحاولة</Typography>
           </Box>
+
+          {errorStatus === 401 && (
+            <Box
+              component={motion.div}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                const returnTo = `${window.location.pathname}${window.location.search || ''}`;
+                window.location.assign(
+                  `/login?reason=session-expired&returnTo=${encodeURIComponent(returnTo)}`
+                );
+              }}
+              sx={{
+                mt: 1.2,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                px: 3,
+                py: 1,
+                borderRadius: '12px',
+                background: 'transparent',
+                cursor: 'pointer',
+                color: '#667eea',
+                border: '1px solid rgba(102,126,234,0.35)',
+              }}
+            >
+              <Typography sx={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                تسجيل الدخول مرة أخرى
+              </Typography>
+            </Box>
+          )}
         </motion.div>
       </Box>
     );
@@ -813,6 +963,27 @@ const HQDashboard = () => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {nonBlockingWarning ? (
+              <Chip
+                label={nonBlockingWarning}
+                size="small"
+                sx={{
+                  height: 28,
+                  fontWeight: 700,
+                  fontSize: '0.68rem',
+                  background: 'rgba(255,152,0,0.12)',
+                  border: '1px solid rgba(255,152,0,0.35)',
+                  color: '#ef6c00',
+                  maxWidth: { xs: 170, md: 320 },
+                  '& .MuiChip-label': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              />
+            ) : null}
+
             {criticalAlerts.length > 0 && (
               <Chip
                 icon={<ErrorRoundedIcon sx={{ fontSize: '14px !important' }} />}

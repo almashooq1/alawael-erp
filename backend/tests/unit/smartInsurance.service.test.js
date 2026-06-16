@@ -43,6 +43,15 @@ jest.mock('../../models/InsuranceClaim', () => ({
   find: (...a) => mockClaimFind(...a),
 }));
 
+jest.mock('../../models/SmartInsuranceClaim', () => ({
+  create: (...a) => mockClaimCreate(...a),
+  findById: (...a) => mockClaimFindById(...a),
+  findByIdAndUpdate: (...a) => mockClaimFindByIdAndUpdate(...a),
+  aggregate: (...a) => mockClaimAggregate(...a),
+  countDocuments: (...a) => mockClaimCountDocuments(...a),
+  find: (...a) => mockClaimFind(...a),
+}));
+
 jest.mock('../../models/PriorAuthorization', () => ({
   create: (...a) => mockAuthCreate(...a),
   findById: (...a) => mockAuthFindById(...a),

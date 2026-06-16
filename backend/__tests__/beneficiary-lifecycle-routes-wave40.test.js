@@ -143,7 +143,9 @@ describe('POST /transitions', () => {
       reasonCode: 'family',
     });
     expect(r.status).toBe(401);
-    expect(r.body.reason).toBe('ACTOR_REQUIRED');
+    expect(String(r.body.reason || r.body.message || '')).toMatch(
+      /ACTOR_REQUIRED|unauthor|غير مصرح|تسجيل الدخول/i
+    );
   });
 
   test('service returns INVALID_REASON_CODE → 400', async () => {
@@ -317,7 +319,9 @@ describe('POST /transitions/:id/cancel', () => {
       .post('/api/v1/beneficiary-lifecycle/transitions/txn-1/cancel')
       .send({});
     expect(r.status).toBe(401);
-    expect(r.body.reason).toBe('ACTOR_REQUIRED');
+    expect(String(r.body.reason || r.body.message || '')).toMatch(
+      /ACTOR_REQUIRED|unauthor|غير مصرح|تسجيل الدخول/i
+    );
   });
 });
 

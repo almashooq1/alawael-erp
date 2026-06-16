@@ -32,6 +32,29 @@ const { createRetentionService } = require('../services/care/retention.service')
 function makeModel(prefix) {
   const docs = [];
   let n = 0;
+  const getByPath = (obj, p) =>
+    String(p || '')
+      .split('.')
+      .reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
+  const setByPath = (obj, p, value) => {
+    const parts = String(p || '').split('.');
+    let ref = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const k = parts[i];
+      if (ref[k] == null || typeof ref[k] !== 'object') ref[k] = {};
+      ref = ref[k];
+    }
+    ref[parts[parts.length - 1]] = value;
+  };
+  const unsetByPath = (obj, p) => {
+    const parts = String(p || '').split('.');
+    let ref = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      ref = ref?.[parts[i]];
+      if (!ref) return;
+    }
+    delete ref[parts[parts.length - 1]];
+  };
   function shape(data) {
     const doc = {
       _id: `${prefix}-${++n}`,
@@ -68,6 +91,33 @@ function makeModel(prefix) {
   return {
     docs,
     findById: async id => docs.find(d => d._id === id) || null,
+    findOneAndUpdate: async (filter, update = {}) => {
+      const row = docs.find(d => {
+        for (const [k, v] of Object.entries(filter || {})) {
+          const current = getByPath(d, k);
+          if (v == null) {
+            if (current != null) return false;
+            continue;
+          }
+          if (typeof v === 'object' && v && !Array.isArray(v) && !(v instanceof Date)) {
+            if (v.$ne !== undefined && current === v.$ne) return false;
+            if (v.$eq !== undefined && current !== v.$eq) return false;
+            if (v.$in && !v.$in.includes(current)) return false;
+            continue;
+          }
+          if (current !== v) return false;
+        }
+        return true;
+      });
+      if (!row) return null;
+      if (update.$set) {
+        for (const [k, v] of Object.entries(update.$set)) setByPath(row, k, v);
+      }
+      if (update.$unset) {
+        for (const k of Object.keys(update.$unset)) unsetByPath(row, k);
+      }
+      return row;
+    },
     create: async data => {
       const d = shape({
         ...data,

@@ -9,6 +9,8 @@
 
 /* ── mocks ──────────────────────────────────────────────────────────── */
 const mockRouter = {
+  use: jest.fn(),
+  param: jest.fn(),
   get: jest.fn(),
   post: jest.fn(),
   patch: jest.fn(),

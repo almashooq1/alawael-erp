@@ -77,7 +77,7 @@ class InMemoryIdempotencyStore {
 let activeStore = new InMemoryIdempotencyStore();
 
 // Monotonic counters keyed by route+outcome. Middleware bumps these.
-// Outcome ∈ { hit, miss, pending_reject, invalid_key }.
+// Outcome ∈ { hit, miss, pending_reject, invalid_key, payload_mismatch }.
 const counters = new Map();
 function _bump(route, outcome) {
   const key = `${route || 'unknown'}|${outcome}`;

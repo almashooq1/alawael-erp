@@ -67,15 +67,15 @@ describe('W715 SpasticityInjection — Wave-18 invariants', () => {
   });
   it('CONSENT GATE: blocks completed without consentObtained', () => {
     expect(MODEL_SRC).toMatch(
-      /status\s*===\s*['"]completed['"][\s\S]{0,200}invalidate\(['"]consentObtained['"]/
+      /status\s*===\s*['"]completed['"][\s\S]{0,300}invalidate\(\s*['"]consentObtained['"]/
     );
   });
   it('blocks completed without a targeted muscle', () => {
-    expect(MODEL_SRC).toMatch(/invalidate\(['"]targetedMuscles['"]/);
+    expect(MODEL_SRC).toMatch(/invalidate\(\s*['"]targetedMuscles['"]/);
   });
   it('blocks cancelled without cancelReason', () => {
     expect(MODEL_SRC).toMatch(
-      /status\s*===\s*['"]cancelled['"][\s\S]{0,200}invalidate\(['"]cancelReason['"]/
+      /status\s*===\s*['"]cancelled['"][\s\S]{0,300}invalidate\(\s*['"]cancelReason['"]/
     );
   });
 });

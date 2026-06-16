@@ -8,7 +8,7 @@
  *   • park() bumps DLQ parked
  *   • replay success bumps DLQ replay_success AND resolved
  *   • replay failure bumps DLQ replay_fail and leaves status=parked
- *   • idempotency hit/miss/pending_reject are all counted by route
+ *   • idempotency hit/miss/pending_reject/payload_mismatch are all counted by route
  *   • snapshotCounters returns rows with the expected labels
  */
 
@@ -77,7 +77,7 @@ describe('Idempotency counters', () => {
   function buildApp() {
     const app = express();
     app.use(express.json());
-    app.use(idempotency());
+    app.use(idempotency({ requireSameBody: true }));
     app.post('/r', (_req, res) => res.status(201).json({ ok: true }));
     return app;
   }
@@ -100,6 +100,16 @@ describe('Idempotency counters', () => {
     const rows = idemStore.snapshotCounters();
     const routeRows = rows.filter(r => r.route.endsWith('/r'));
     expect(routeRows.some(r => r.outcome === 'invalid_key')).toBe(true);
+  });
+
+  it('records payload_mismatch when same key is reused with different body', async () => {
+    const app = buildApp();
+    const key = 'idem-mismatch-key-aaaa';
+    await request(app).post('/r').set('Idempotency-Key', key).send({ v: 1 }).expect(201);
+    await request(app).post('/r').set('Idempotency-Key', key).send({ v: 2 }).expect(409);
+    const rows = idemStore.snapshotCounters();
+    const routeRows = rows.filter(r => r.route.endsWith('/r'));
+    expect(routeRows.some(r => r.outcome === 'payload_mismatch')).toBe(true);
   });
 });
 
@@ -130,6 +140,24 @@ describe('metrics route emits new counters', () => {
     const res = await request(app).get('/metrics').expect(200);
     expect(res.text).toMatch(
       /integration_dlq_events_total\{integration="zatca",outcome="parked"\} 1/
+    );
+  });
+
+  it('includes idempotency payload_mismatch outcome in metrics output', async () => {
+    const app = express();
+    app.use(express.json());
+    app.use(idempotency({ requireSameBody: true }));
+    app.post('/r', (_req, res) => res.status(201).json({ ok: true }));
+    const key = 'idem-metrics-out-key-aaaa';
+    await request(app).post('/r').set('Idempotency-Key', key).send({ a: 1 }).expect(201);
+    await request(app).post('/r').set('Idempotency-Key', key).send({ a: 2 }).expect(409);
+
+    const metricsApp = express();
+    metricsApp.use('/metrics', route);
+    const res = await request(metricsApp).get('/metrics').expect(200);
+
+    expect(res.text).toMatch(
+      /idempotency_events_total\{route="POST \/r",outcome="payload_mismatch"\} 1/
     );
   });
 });

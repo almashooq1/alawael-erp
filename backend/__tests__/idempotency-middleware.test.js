@@ -25,10 +25,10 @@ const {
   getStore,
 } = require('../infrastructure/idempotencyStore');
 
-function buildApp({ scope, handler } = {}) {
+function buildApp({ scope, handler, requireSameBody = false } = {}) {
   const app = express();
   app.use(express.json());
-  app.use(idempotency({ scope }));
+  app.use(idempotency({ scope, requireSameBody }));
   app.get('/resource', (_req, res) => res.json({ ok: true, get: true }));
   app.post(
     '/resource',
@@ -153,5 +153,27 @@ describe('idempotency middleware', () => {
       .expect(201);
     expect(calls).toBe(2);
     expect(getStore()._size()).toBe(2);
+  });
+
+  it('rejects same key reused with different payload when requireSameBody=true', async () => {
+    let calls = 0;
+    const app = buildApp({
+      requireSameBody: true,
+      handler: (_req, res) => {
+        calls++;
+        res.status(201).json({ n: calls });
+      },
+    });
+
+    const key = 'same-key-different-body-aaaa';
+    await request(app).post('/resource').set('Idempotency-Key', key).send({ x: 1 }).expect(201);
+    const second = await request(app)
+      .post('/resource')
+      .set('Idempotency-Key', key)
+      .send({ x: 2 })
+      .expect(409);
+
+    expect(second.body.error).toBe('IDEMPOTENCY_KEY_PAYLOAD_MISMATCH');
+    expect(calls).toBe(1);
   });
 });

@@ -285,7 +285,7 @@ describe('SessionsService', () => {
       expect(CS.findByIdAndUpdate).toHaveBeenCalledWith(
         'ses001',
         { $set: { status: 'confirmed' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       expect(result).toBe(updated);
     });
@@ -346,17 +346,17 @@ describe('SessionsService', () => {
       });
     });
 
-    it('emits session:completed event with goal progress count', async () => {
+    it('emits session.completed canonical event', async () => {
       CS.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makeSession({ _id: 'ses001' })));
 
       const events = [];
-      service.on('session:completed', e => events.push(e));
+      service.on('session.completed', e => events.push(e));
 
       await service.completeSession('ses001', {
         goalProgress: [{ goalId: 'g1' }, { goalId: 'g2' }],
       });
 
-      expect(events[0]).toMatchObject({ sessionId: 'ses001', goalProgressCount: 2 });
+      expect(events[0]).toMatchObject({ sessionId: 'ses001', sessionType: 'individual' });
     });
   });
 

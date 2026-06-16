@@ -22,9 +22,23 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const { getStore, DEFAULT_TTL_MS, recordOutcome } = require('../infrastructure/idempotencyStore');
 
 const DEFAULT_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+function stableStringify(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  const keys = Object.keys(value).sort();
+  return `{${keys.map(k => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
+}
+
+function fingerprintRequestBody(body) {
+  const payload = stableStringify(body);
+  return crypto.createHash('sha256').update(payload).digest('hex');
+}
 
 function idempotency(options = {}) {
   const methods = options.methods
@@ -32,6 +46,7 @@ function idempotency(options = {}) {
     : DEFAULT_METHODS;
   const ttlMs = options.ttlMs || DEFAULT_TTL_MS;
   const scope = typeof options.scope === 'function' ? options.scope : null;
+  const requireSameBody = options.requireSameBody === true;
 
   return async function idempotencyMiddleware(req, res, next) {
     if (!methods.has(req.method)) return next();
@@ -49,11 +64,24 @@ function idempotency(options = {}) {
 
     const namespace = scope ? scope(req) : 'global';
     const key = `${namespace}:${req.method}:${req.baseUrl || ''}${req.path}:${rawKey}`;
+    const requestFingerprint = requireSameBody ? fingerprintRequestBody(req.body || null) : null;
     const store = getStore();
 
     try {
       const cached = await store.get(key);
       if (cached) {
+        if (
+          requireSameBody &&
+          cached.requestFingerprint &&
+          requestFingerprint &&
+          cached.requestFingerprint !== requestFingerprint
+        ) {
+          recordOutcome(routeLabel, 'payload_mismatch');
+          return res.status(409).json({
+            error: 'IDEMPOTENCY_KEY_PAYLOAD_MISMATCH',
+            message: 'This Idempotency-Key was already used with a different request payload',
+          });
+        }
         recordOutcome(routeLabel, 'hit');
         res.setHeader('Idempotent-Replay', 'true');
         if (cached.headers && typeof cached.headers === 'object') {
@@ -78,6 +106,18 @@ function idempotency(options = {}) {
         // Rare race: reserve saw a completed entry right after we did not — refetch
         const fresh = await store.get(key);
         if (fresh) {
+          if (
+            requireSameBody &&
+            fresh.requestFingerprint &&
+            requestFingerprint &&
+            fresh.requestFingerprint !== requestFingerprint
+          ) {
+            recordOutcome(routeLabel, 'payload_mismatch');
+            return res.status(409).json({
+              error: 'IDEMPOTENCY_KEY_PAYLOAD_MISMATCH',
+              message: 'This Idempotency-Key was already used with a different request payload',
+            });
+          }
           res.setHeader('Idempotent-Replay', 'true');
           return res.status(fresh.status).json(fresh.body);
         }
@@ -104,7 +144,17 @@ function idempotency(options = {}) {
             if (typeof v === 'string' || typeof v === 'number') headersSnapshot[h] = v;
           }
           store
-            .put(key, { status, body, headers: headersSnapshot, completedAt: Date.now() }, ttlMs)
+            .put(
+              key,
+              {
+                status,
+                body,
+                headers: headersSnapshot,
+                completedAt: Date.now(),
+                requestFingerprint,
+              },
+              ttlMs
+            )
             .catch(() => {
               /* storage failure must not break the response */
             });

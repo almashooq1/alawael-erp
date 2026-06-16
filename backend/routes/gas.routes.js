@@ -50,7 +50,7 @@ router.get('/_health', (_req, res) => {
       wave: 'W264',
       surface: 'gas',
       endpoints: 13,
-      services: ['gas.service (W264)'],
+      services: ['GasService (W264)'],
     },
   });
 });

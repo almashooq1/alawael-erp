@@ -15,6 +15,7 @@ jest.mock('../../middleware/auth', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -26,6 +27,7 @@ jest.mock('../../utils/safeError', () =>
 );
 
 const makeChain = val => {
+  const p = Promise.resolve(val);
   const c = {
     sort: jest.fn(),
     skip: jest.fn(),
@@ -33,6 +35,8 @@ const makeChain = val => {
     populate: jest.fn(),
     select: jest.fn(),
     lean: jest.fn().mockResolvedValue(val),
+    then: (onFulfilled, onRejected) => p.then(onFulfilled, onRejected),
+    catch: onRejected => p.catch(onRejected),
   };
   c.sort.mockReturnValue(c);
   c.skip.mockReturnValue(c);
@@ -56,11 +60,14 @@ jest.mock('../../models/Complaint', () => {
     this.save = mockSave;
   });
   MockComplaint.find = (...args) => mockFind(...args);
+  MockComplaint.findOne = (...args) => mockFindById(...args);
   MockComplaint.findById = (...args) => mockFindById(...args);
   MockComplaint.countDocuments = (...args) => mockCountDocuments(...args);
   MockComplaint.aggregate = (...args) => mockAggregate(...args);
   MockComplaint.findByIdAndUpdate = (...args) => mockFindByIdAndUpdate(...args);
+  MockComplaint.findOneAndUpdate = (...args) => mockFindByIdAndUpdate(...args);
   MockComplaint.findByIdAndDelete = (...args) => mockFindByIdAndDelete(...args);
+  MockComplaint.findOneAndDelete = (...args) => mockFindByIdAndDelete(...args);
   return MockComplaint;
 });
 

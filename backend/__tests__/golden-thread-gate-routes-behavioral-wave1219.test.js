@@ -83,6 +83,13 @@ afterAll(async () => {
   if (mongod) await mongod.stop().catch(() => null);
 });
 
+beforeEach(async () => {
+  // Isolation guard: this suite may run against a persisted shared Mongo URI
+  // in CI/local, so ensure no residue from other suites affects first-test counts.
+  await TherapeuticGoal.deleteMany({});
+  await ClinicalSession.deleteMany({});
+});
+
 afterEach(async () => {
   delete process.env.GOLDEN_THREAD_ENFORCEMENT;
   await TherapeuticGoal.deleteMany({});

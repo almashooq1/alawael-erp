@@ -150,7 +150,7 @@ describe('WebhookService', () => {
       expect(Webhook.findByIdAndUpdate).toHaveBeenCalledWith(
         id,
         expect.objectContaining({ name: 'Updated' }),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
   });

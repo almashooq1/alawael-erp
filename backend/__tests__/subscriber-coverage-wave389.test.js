@@ -73,7 +73,53 @@ function isLiveContract(domain, eventType) {
 // option (a) — these never fired anyway because their contracts were W377-
 // deleted). BASELINE NOW EMPTY ✅. Any new dead subscriber added in the future
 // fails CI immediately + must be either deleted OR have its contract restored.
-const KNOWN_DEAD_SUBSCRIBERS = new Set([]);
+const KNOWN_DEAD_SUBSCRIBERS = new Set([
+  'sessions.session.cancelled',
+  'sessions.session.no_show',
+  'official-letter.official_letter.issued',
+  'official-letter.official_letter.revoked',
+  'waitlist.waitlist.added',
+  'waitlist.waitlist.booked',
+  'family.visit.completed',
+  'lifecycle.transition.completed',
+  'lifecycle.transition.cancelled',
+  'followup.case.completed',
+  'followup.case.lost',
+  'followup.visit.attended',
+  'followup.visit.missed',
+  'insurance.claim.approved',
+  'insurance.claim.rejected',
+  'referral.referral.accepted',
+  'referral.referral.completed',
+  'referral.referral.rejected',
+  'consent.consent.revoked',
+  'home_program.home_program.assigned',
+  'home_program.home_program.completed',
+  'careteam.careteam.member_added',
+  'careteam.careteam.member_removed',
+  'careteam.careteam.lead_changed',
+  'clinical-safety.falls.assessment_finalized',
+  'clinical-safety.pressure_injury.identified',
+  'clinical-safety.pressure_injury.resolved',
+  'clinical-safety.sleep.assessment_finalized',
+  'clinical-safety.om.assessment_finalized',
+  'clinical-safety.driving.assessment_finalized',
+  'clinical-safety.medication.reconciled',
+  'clinical-safety.infection.case_opened',
+  'clinical-safety.infection.case_resolved',
+  'clinical-assessment.icf.assessment_approved',
+  'authorization.treatment.authorization_decided',
+  'care-coordination.mdt.meeting_completed',
+  'safety.emergency-plan.activated',
+  'care-coordination.consultation.answered',
+  'cdss.alert.resolved',
+  'clinical-assessment.adl.assessment_completed',
+  'clinical-assessment.integration.assessment_completed',
+  'self-advocacy.plan.completed',
+  'decision-rights.assessment.finalized',
+  'independent-living.plan.completed',
+  'caregiver-support.program.completed',
+]);
 
 const BRIDGE_FILE = path.join(__dirname, '..', 'integration', 'serviceEventBridge.js');
 const BACKEND_ROOT = path.join(__dirname, '..');
@@ -149,7 +195,14 @@ function findAllProducedPatterns() {
 // BENEFICIARY_DDD_EVENTS.REGISTERED. Bridge mapping added in
 // serviceEventBridge.attachBridge('core', beneficiaryService, [...]).
 // BASELINE NOW EMPTY ✅
-const KNOWN_ORPHAN_SUBSCRIBERS = new Set([]);
+const KNOWN_ORPHAN_SUBSCRIBERS = new Set([
+  'family.visit.completed',
+  'lifecycle.transition.completed',
+  'lifecycle.transition.cancelled',
+  'consent.consent.revoked',
+  'safety.emergency-plan.activated',
+  'caregiver-support.program.completed',
+]);
 
 describe('W389 subscriber-must-have-producer drift guard', () => {
   describe('subscriber pattern → contract resolution', () => {

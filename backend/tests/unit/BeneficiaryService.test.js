@@ -270,7 +270,7 @@ describe('BeneficiaryService', () => {
         lean: jest.fn().mockResolvedValue(null),
       });
 
-      const ben = { _id: 'ben1', branch: 'b1' };
+      const ben = { _id: 'ben1', branchId: 'b1' };
       try {
         await svc.initiateTransfer(ben, 'b1', new Date(), 'test', 'u1');
         throw new Error('should have thrown');
@@ -300,7 +300,7 @@ describe('BeneficiaryService', () => {
       };
 
       const r = await svc.completeTransfer(transfer, 'u1', 'JED');
-      expect(r.branch).toBe('b2');
+      expect(r.branchId).toBe('b2');
       expect(r.fileNumber).toMatch(/^BR-JED-/);
       expect(transfer.status).toBe('completed');
     });

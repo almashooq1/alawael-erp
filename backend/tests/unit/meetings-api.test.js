@@ -15,6 +15,7 @@ jest.mock('../../middleware/auth', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -25,6 +26,7 @@ jest.mock('../../utils/safeError', () =>
 );
 
 const makeChain = val => {
+  const p = Promise.resolve(val);
   const c = {
     sort: jest.fn(),
     skip: jest.fn(),
@@ -32,6 +34,8 @@ const makeChain = val => {
     populate: jest.fn(),
     select: jest.fn(),
     lean: jest.fn().mockResolvedValue(val),
+    then: (onFulfilled, onRejected) => p.then(onFulfilled, onRejected),
+    catch: onRejected => p.catch(onRejected),
   };
   c.sort.mockReturnValue(c);
   c.skip.mockReturnValue(c);
@@ -57,11 +61,14 @@ jest.mock('../../models/Meeting', () => {
     this.save = jest.fn().mockResolvedValue(this);
   });
   M.find = (...a) => mockFind(...a);
+  M.findOne = (...a) => mockFindById(...a);
   M.findById = (...a) => mockFindById(...a);
   M.countDocuments = (...a) => mockCountDocuments(...a);
   M.create = (...a) => mockCreate(...a);
   M.findByIdAndUpdate = (...a) => mockFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockFindByIdAndDelete(...a);
+  M.findOneAndDelete = (...a) => mockFindByIdAndDelete(...a);
   M.aggregate = (...a) => mockAggregate(...a);
   return M;
 });

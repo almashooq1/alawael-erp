@@ -38,6 +38,7 @@ describe('integrationHealthAggregator', () => {
     expect(snap.dlq.totals.parked).toBe(0);
     expect(snap.idempotency.totals.hit).toBe(0);
     expect(snap.idempotency.totals.miss).toBe(0);
+    expect(snap.idempotency.totals.payload_mismatch).toBe(0);
     expect(snap.headline.dlqReplaySuccessRate).toBeNull();
     expect(snap.headline.idempotencyHitRate).toBeNull();
   });
@@ -113,6 +114,24 @@ describe('integrationHealthAggregator', () => {
     expect(snap.idempotency.totals.hit + snap.idempotency.totals.miss).toBe(4);
     expect(snap.headline.idempotencyHitRate).toBeCloseTo(2 / 4, 2);
     expect(snap.idempotency.topRoutes[0].route).toMatch(/\/a$/);
+    expect(typeof snap.idempotency.topRoutes[0].payload_mismatch).toBe('number');
+  });
+
+  it('rolls up payload_mismatch in idempotency totals', async () => {
+    const app = express();
+    app.use(express.json());
+    app.use(idempotency({ requireSameBody: true }));
+    app.post('/m', (_req, res) => res.status(201).json({ ok: true }));
+
+    const key = 'agg-mismatch-key-aaaa';
+    await request(app).post('/m').set('Idempotency-Key', key).send({ x: 1 });
+    await request(app).post('/m').set('Idempotency-Key', key).send({ x: 2 });
+
+    const snap = buildSnapshot();
+    expect(snap.idempotency.totals.payload_mismatch).toBe(1);
+    const mRoute = snap.idempotency.topRoutes.find(r => /\/m$/.test(r.route));
+    expect(mRoute).toBeTruthy();
+    expect(mRoute.payload_mismatch).toBe(1);
   });
 
   it('durationMs is recorded and generatedAt is ISO', () => {

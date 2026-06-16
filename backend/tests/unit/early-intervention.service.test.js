@@ -228,7 +228,7 @@ describe('Children CRUD', () => {
       expect(mockModels.EarlyInterventionChild.findByIdAndUpdate).toHaveBeenCalledWith(
         'c1',
         expect.objectContaining({ firstName: 'Updated', updatedBy: 'u1' }),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -434,7 +434,7 @@ describe('Screenings CRUD', () => {
       expect(mockModels.DevelopmentalScreening.findByIdAndUpdate).toHaveBeenCalledWith(
         's1',
         expect.objectContaining({ updatedBy: 'u1' }),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -873,7 +873,7 @@ describe('IFSP Plans', () => {
       expect(mockModels.IFSP.findByIdAndUpdate).toHaveBeenCalledWith(
         'i1',
         expect.objectContaining({ updatedBy: 'u1' }),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -1133,7 +1133,7 @@ describe('Referrals', () => {
       expect(mockModels.EarlyReferral.findByIdAndUpdate).toHaveBeenCalledWith(
         'r1',
         expect.objectContaining({ updatedBy: 'u1' }),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 

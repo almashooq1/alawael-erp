@@ -17,6 +17,7 @@ jest.mock('../../middleware/auth', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -27,6 +28,7 @@ jest.mock('../../utils/safeError', () =>
 );
 
 const makeChain = val => {
+  const p = Promise.resolve(val);
   const c = {
     sort: jest.fn(),
     skip: jest.fn(),
@@ -34,6 +36,8 @@ const makeChain = val => {
     populate: jest.fn(),
     select: jest.fn(),
     lean: jest.fn().mockResolvedValue(val),
+    then: (onFulfilled, onRejected) => p.then(onFulfilled, onRejected),
+    catch: onRejected => p.catch(onRejected),
   };
   c.sort.mockReturnValue(c);
   c.skip.mockReturnValue(c);
@@ -66,10 +70,13 @@ jest.mock('../../models/Room', () => {
     this.save = mockRoomSave;
   });
   M.find = (...a) => mockRoomFind(...a);
+  M.findOne = (...a) => mockRoomFindById(...a);
   M.findById = (...a) => mockRoomFindById(...a);
   M.countDocuments = (...a) => mockRoomCount(...a);
   M.findByIdAndUpdate = (...a) => mockRoomFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockRoomFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockRoomFindByIdAndDelete(...a);
+  M.findOneAndDelete = (...a) => mockRoomFindByIdAndDelete(...a);
   return M;
 });
 
@@ -79,10 +86,11 @@ jest.mock('../../models/RoomBooking', () => {
     this.save = mockBookingSave;
   });
   M.find = (...a) => mockBookingFind(...a);
+  M.findOne = jest.fn().mockResolvedValue(null); // no conflicts by default
   M.findById = (...a) => mockBookingFindById(...a);
   M.countDocuments = (...a) => mockBookingCount(...a);
-  M.findOne = jest.fn().mockResolvedValue(null); // no conflicts by default
   M.findByIdAndUpdate = (...a) => mockBookingFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockBookingFindByIdAndUpdate(...a);
   return M;
 });
 
@@ -140,6 +148,7 @@ describe('POST /facilities/rooms', () => {
       name: 'قاعة الاجتماعات',
       capacity: 20,
       type: 'meeting',
+      branchId: '507f1f77bcf86cd799439011',
     });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);

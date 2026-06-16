@@ -106,7 +106,7 @@ function buildSnapshot({ now = Date.now() } = {}) {
   }
 
   // ── Idempotency snapshot ──────────────────────────────────────────────
-  let idemTotals = { hit: 0, miss: 0, pending_reject: 0, invalid_key: 0 };
+  let idemTotals = { hit: 0, miss: 0, pending_reject: 0, invalid_key: 0, payload_mismatch: 0 };
   let idemRoutes = [];
   try {
     const idem = require('../infrastructure/idempotencyStore');
@@ -116,6 +116,7 @@ function buildSnapshot({ now = Date.now() } = {}) {
       miss: _sumCounters(rows, 'miss'),
       pending_reject: _sumCounters(rows, 'pending_reject'),
       invalid_key: _sumCounters(rows, 'invalid_key'),
+      payload_mismatch: _sumCounters(rows, 'payload_mismatch'),
     };
     // Roll up per-route for the top 10 most-active routes
     const byRoute = new Map();
@@ -127,6 +128,7 @@ function buildSnapshot({ now = Date.now() } = {}) {
           miss: 0,
           pending_reject: 0,
           invalid_key: 0,
+          payload_mismatch: 0,
         });
       const bucket = byRoute.get(r.route);
       if (r.outcome in bucket) bucket[r.outcome] = r.value;

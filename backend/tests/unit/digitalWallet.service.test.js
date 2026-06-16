@@ -356,7 +356,7 @@ describe('DigitalWalletService', () => {
           $or: expect.any(Array),
         }),
         { $inc: { usedCount: 1 } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       expect(mockCouponUsage.create).toHaveBeenCalled();
     });
@@ -401,7 +401,7 @@ describe('DigitalWalletService', () => {
       expect(mockDigitalWallet.findByIdAndUpdate).toHaveBeenCalledWith(
         wallet._id,
         expect.objectContaining({ $inc: { loyaltyPoints: 5 } }),
-        expect.objectContaining({ new: true })
+        expect.objectContaining({ returnDocument: 'after' })
       );
       // Impl mutates wallet.loyaltyPoints from the atomic post-state.
       expect(wallet.loyaltyPoints).toBe(15);
@@ -429,7 +429,7 @@ describe('DigitalWalletService', () => {
       expect(mockDigitalWallet.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: 'w1', loyaltyPoints: { $gte: 100 } },
         expect.objectContaining({ $inc: { loyaltyPoints: -100 } }),
-        expect.objectContaining({ new: true })
+        expect.objectContaining({ returnDocument: 'after' })
       );
       expect(mockLoyaltyPointsTransaction.create).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'redeem', points: 100, balanceAfter: 100 })
@@ -534,7 +534,7 @@ describe('DigitalWalletService', () => {
       expect(mockDigitalWallet.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: 'w1', loyaltyPoints: { $gte: 20 } },
         expect.objectContaining({ $inc: { loyaltyPoints: -20 } }),
-        expect.objectContaining({ new: true })
+        expect.objectContaining({ returnDocument: 'after' })
       );
     });
 

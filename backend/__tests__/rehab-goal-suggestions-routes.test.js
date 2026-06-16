@@ -10,6 +10,13 @@
 const express = require('express');
 const request = require('supertest');
 
+jest.mock('../middleware/auth', () => ({
+  authenticate: (req, _res, next) => {
+    req.user = { _id: 'u1', id: 'u1', role: 'therapist' };
+    next();
+  },
+}));
+
 const { createRehabGoalSuggestionsRouter } = require('../routes/rehab-goal-suggestions.routes');
 
 function buildApp() {

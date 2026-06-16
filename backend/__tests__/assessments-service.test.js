@@ -247,7 +247,7 @@ describe('AssessmentsService', () => {
       expect(CA.findByIdAndUpdate).toHaveBeenCalledWith(
         'asmnt001',
         { $set: { tool: 'Denver-II' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       expect(result).toBe(updated);
     });
@@ -301,7 +301,7 @@ describe('AssessmentsService', () => {
             duration: 60,
           }),
         },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       expect(result).toBe(completed);
     });
@@ -326,17 +326,17 @@ describe('AssessmentsService', () => {
       });
     });
 
-    it('emits assessment:completed event with score', async () => {
+    it('emits assessment.completed event with score', async () => {
       const completed = makeAssessment({ status: 'completed', score: 82, tool: 'CARS2' });
       CA.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(completed));
 
       const events = [];
-      service.on('assessment:completed', e => events.push(e));
+      service.on('assessment.completed', e => events.push(e));
 
       await service.completeAssessment('asmnt001', { score: 82 });
 
       expect(events).toHaveLength(1);
-      expect(events[0]).toMatchObject({ tool: 'CARS2', score: 82 });
+      expect(events[0]).toMatchObject({ type: 'CARS2', overallScore: 82 });
     });
   });
 

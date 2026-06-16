@@ -15,6 +15,7 @@ jest.mock('../../middleware/auth.middleware', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 jest.mock('../../utils/sanitize', () => ({ escapeRegex: jest.fn(s => s) }));
@@ -46,6 +47,7 @@ const mockGuardianCount = jest.fn().mockResolvedValue(0);
 const mockGuardianSave = jest.fn().mockResolvedValue({});
 const mockGuardianCreate = jest.fn().mockResolvedValue({ _id: 'g1' });
 const mockGuardianFindByIdAndUpdate = jest.fn(() => makeChain(null));
+const mockGuardianFindOneAndUpdate = jest.fn(() => makeChain(null));
 const mockGuardianFindByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'g1' });
 
 jest.mock('../../models/Guardian', () => {
@@ -59,6 +61,7 @@ jest.mock('../../models/Guardian', () => {
   M.countDocuments = (...a) => mockGuardianCount(...a);
   M.create = (...a) => mockGuardianCreate(...a);
   M.findByIdAndUpdate = (...a) => mockGuardianFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockGuardianFindOneAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockGuardianFindByIdAndDelete(...a);
   return M;
 });
@@ -161,7 +164,7 @@ describe('POST /guardians', () => {
 
 describe('PUT /guardians/:id', () => {
   test('returns 404 when guardian not found', async () => {
-    mockGuardianFindByIdAndUpdate.mockReturnValue(makeChain(null));
+    mockGuardianFindById.mockReturnValue(makeChain(null));
     const res = await request(makeApp())
       .put('/api/guardians/507f1f77bcf86cd799439011')
       .send({ phone: '+966509999999' });
@@ -170,7 +173,8 @@ describe('PUT /guardians/:id', () => {
 
   test('updates guardian successfully', async () => {
     const updated = { _id: 'g1', firstName_ar: 'Updated', phone: '+966509999999' };
-    mockGuardianFindByIdAndUpdate.mockReturnValue(makeChain(updated));
+    mockGuardianFindById.mockReturnValue(makeChain({ _id: 'g1' }));
+    mockGuardianFindOneAndUpdate.mockReturnValue(makeChain(updated));
     const res = await request(makeApp())
       .put('/api/guardians/507f1f77bcf86cd799439011')
       .send({ phone: '+966509999999' });
@@ -188,6 +192,7 @@ describe('DELETE /guardians/:id', () => {
 
   test('soft-deletes guardian', async () => {
     mockGuardianFindById.mockReturnValue(makeChain({ _id: 'g1' }));
+    mockGuardianFindOneAndUpdate.mockReturnValue(makeChain({ _id: 'g1', isActive: false }));
     const res = await request(makeApp()).delete('/api/guardians/507f1f77bcf86cd799439011');
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);

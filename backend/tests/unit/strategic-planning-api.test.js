@@ -16,6 +16,7 @@ jest.mock('../../middleware/auth', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -70,10 +71,13 @@ jest.mock('../../models/StrategicGoal', () => {
     this.save = mockGoalSave;
   });
   M.find = (...a) => mockGoalFind(...a);
+  M.findOne = (...a) => mockGoalFindById(...a);
   M.findById = (...a) => mockGoalFindById(...a);
   M.countDocuments = (...a) => mockGoalCount(...a);
   M.findByIdAndUpdate = (...a) => mockGoalUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockGoalUpdate(...a);
   M.findByIdAndDelete = (...a) => mockGoalDelete(...a);
+  M.findOneAndDelete = (...a) => mockGoalDelete(...a);
   return M;
 });
 
@@ -83,8 +87,11 @@ jest.mock('../../models/StrategicInitiative', () => {
     this.save = mockInitSave;
   });
   M.find = (...a) => mockInitFind(...a);
+  M.findOne = (...a) => mockInitFind(...a);
   M.countDocuments = (...a) => mockInitCount(...a);
   M.findByIdAndUpdate = (...a) => mockInitUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockInitUpdate(...a);
+  M.findOneAndDelete = jest.fn().mockResolvedValue({ _id: 'i1' });
   return M;
 });
 
@@ -94,8 +101,11 @@ jest.mock('../../models/StrategicKPI', () => {
     this.save = mockKpiSave;
   });
   M.find = (...a) => mockKpiFind(...a);
+  M.findOne = (...a) => mockKpiFind(...a);
   M.countDocuments = (...a) => mockKpiCount(...a);
   M.findByIdAndUpdate = (...a) => mockKpiUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockKpiUpdate(...a);
+  M.findOneAndDelete = jest.fn().mockResolvedValue({ _id: 'k1' });
   M.aggregate = (...a) => mockKpiAggregate(...a);
   return M;
 });
@@ -197,9 +207,13 @@ describe('GET /strategic-planning/initiatives', () => {
 
 describe('POST /strategic-planning/initiatives', () => {
   test('creates initiative', async () => {
+    const goalId = '507f1f77bcf86cd799439011';
+    mockGoalFindById.mockReturnValue(
+      makeChain({ _id: goalId, branchId: '507f1f77bcf86cd799439012' })
+    );
     const res = await request(makeApp()).post('/api/strategic-planning/initiatives').send({
       title: 'مبادرة تطوير المنظومة التقنية',
-      goalId: 'g1',
+      goalId,
       budget: 50000,
       startDate: '2026-01-01',
     });

@@ -286,7 +286,7 @@ router.get('/', async (req, res) => {
     metric(
       lines,
       'idempotency_events_total',
-      'Monotonic counter of idempotency middleware outcomes per route (hit/miss/pending_reject/invalid_key).',
+      'Monotonic counter of idempotency middleware outcomes per route (hit/miss/pending_reject/invalid_key/payload_mismatch).',
       'counter',
       idemRows.map(r => ({ labels: { route: r.route, outcome: r.outcome }, value: r.value }))
     );

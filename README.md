@@ -22,16 +22,21 @@
 
 ## Documentation
 
-| Document                                                | Description                                                                                                                           |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| [blueprint/README.md](docs/blueprint/README.md)         | 🎯 **Unified Platform Blueprint** — ERP+EMR+CRM+Rehab vision, 14 bounded contexts, canonical data model, 6-level RBAC, phased roadmap |
-| [MODULES.md](docs/MODULES.md)                           | 🗺️ **خريطة الوحدات** — 211 mount points + 48 direct frontend pages (re-counted 2026-05-26; was 127+80 in v3.2.0)                      |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md)                 | System architecture, design decisions, module breakdown                                                                               |
-| [architecture/decisions/](docs/architecture/decisions/) | Architecture Decision Records (ADRs 001–031; 8 still-blocked, 23 accepted/superseded)                                                 |
-| [DEVELOPMENT.md](docs/DEVELOPMENT.md)                   | Developer setup guide, code standards, git workflow                                                                                   |
-| [CONTRIBUTING.md](CONTRIBUTING.md)                      | Contribution guidelines and PR process                                                                                                |
-| [SECURITY.md](SECURITY.md)                              | Vulnerability disclosure policy + PDPL compliance posture + scope                                                                     |
-| [CHANGELOG.md](CHANGELOG.md)                            | Full release history                                                                                                                  |
+| Document                                                   | Description                                                                                                                           |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [blueprint/README.md](docs/blueprint/README.md)            | 🎯 **Unified Platform Blueprint** — ERP+EMR+CRM+Rehab vision, 14 bounded contexts, canonical data model, 6-level RBAC, phased roadmap |
+| [MODULES.md](docs/MODULES.md)                              | 🗺️ **خريطة الوحدات** — 211 mount points + 48 direct frontend pages (re-counted 2026-05-26; was 127+80 in v3.2.0)                      |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md)                    | System architecture, design decisions, module breakdown                                                                               |
+| [architecture/decisions/](docs/architecture/decisions/)    | Architecture Decision Records (ADRs 001–031; 8 still-blocked, 23 accepted/superseded)                                                 |
+| [DEVELOPMENT.md](docs/DEVELOPMENT.md)                      | Developer setup guide, code standards, git workflow                                                                                   |
+| [PROJECT_ORGANIZATION.md](PROJECT_ORGANIZATION.md)         | High-level structure map for the repo, backend, docs, waves, and operating conventions                                                |
+| [docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md) | Central index for onboarding, operations, and architecture documents                                                                  |
+| [docs/QUICKSTART_AR.md](docs/QUICKSTART_AR.md)             | Arabic quickstart for new contributors                                                                                                |
+| [docs/DAILY_OPERATIONS.md](docs/DAILY_OPERATIONS.md)       | Daily developer workflow, quality gates, and troubleshooting                                                                          |
+| [docs/BACKEND_STRUCTURE.md](docs/BACKEND_STRUCTURE.md)     | Backend-specific organization map and responsibilities                                                                                |
+| [CONTRIBUTING.md](CONTRIBUTING.md)                         | Contribution guidelines and PR process                                                                                                |
+| [SECURITY.md](SECURITY.md)                                 | Vulnerability disclosure policy + PDPL compliance posture + scope                                                                     |
+| [CHANGELOG.md](CHANGELOG.md)                               | Full release history                                                                                                                  |
 
 ### Ops & Saudi gov integrations (4.0.x)
 

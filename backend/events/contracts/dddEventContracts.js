@@ -226,6 +226,7 @@ const CARE_PLAN_EVENTS = {
     payload: {
       planId: 'string',
       beneficiaryId: 'string',
+      episodeId: 'string',
       achievementRate: 'number',
     },
     delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],

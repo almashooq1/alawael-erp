@@ -37,6 +37,8 @@
     "seed:cbahi": "node scripts/seed-cbahi-attestations.js",
     "seed:cbahi:list": "node scripts/seed-cbahi-attestations.js --list",
     "seed:cbahi:dry": "node scripts/seed-cbahi-attestations.js --dry-run",
+    "launch:readiness": "node scripts/launch-readiness.js",
+    "launch:readiness:json": "node scripts/launch-readiness.js --json",
     "provision:staff": "node scripts/provision-launch-staff.js",
     "provision:staff:dry": "node scripts/provision-launch-staff.js --dry-run",
     "provision:staff:list": "node scripts/provision-launch-staff.js --list",

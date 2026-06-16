@@ -124,6 +124,7 @@ module.exports = function registerFeatureRoutes(
   const cdssRoutes = safeRequire('../routes/cdss.routes');
   const elearningEnhancedRoutes = safeRequire('../routes/elearning-enhanced.routes');
   const setupRoutes = safeRequire('../routes/setup.routes');
+  const fhirRoutes = safeRequire('../routes/fhir.routes'); // W1357
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── الميزات الناقصة المضافة — Missing Features ──────────────────────────
@@ -610,6 +611,15 @@ module.exports = function registerFeatureRoutes(
   } catch (e) {
     logger.warn(`Break-glass routes not mounted: ${e.message}`);
   }
+
+  // ── FHIR R4 interoperability — first consumer of intelligence/fhir (W1357) ──
+  // GET /metadata → FHIR R4 CapabilityStatement (server conformance, NO PHI).
+  // Auth-gated (no new anonymous surface). PHI-exposing FHIR export endpoints
+  // (Patient/:id, $everything) deferred as a product/consent decision.
+  dualMountAuth(app, 'fhir', fhirRoutes);
+  logger.info(
+    '✅ FHIR routes mounted: /api/(v1/)fhir/metadata (R4 CapabilityStatement, read-only)'
+  );
 
   logger.info('[Features] All prompt feature modules mounted successfully');
 };

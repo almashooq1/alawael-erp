@@ -627,19 +627,36 @@ const BOT_SIDE_EFFECT_REASON = Object.freeze({
   lookup_billing: 'استعلام فواتير عبر بوت الواتساب',
   create_complaint: 'شكوى جديدة عبر بوت الواتساب',
   callback_request: 'طلب تواصل بشري عبر بوت الواتساب',
+  // W1380 — new service units
+  submit_satisfaction: 'تقييم رضا جديد عبر بوت الواتساب',
+  emergency_escalation: '🚨 بلاغ عاجل عبر بوت الواتساب',
+});
+
+// W1380 — per-kind notification priority. Emergency is urgent (on-call); a
+// satisfaction survey is low-priority feedback; complaint is high; the rest
+// medium. Kept as a small map so adding a kind is a one-line change.
+const BOT_SIDE_EFFECT_PRIORITY = Object.freeze({
+  emergency_escalation: 'urgent',
+  create_complaint: 'high',
+  submit_satisfaction: 'low',
 });
 
 async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect) {
   const reason = BOT_SIDE_EFFECT_REASON[sideEffect.kind] || `بوت الواتساب: ${sideEffect.kind}`;
+  const priority = BOT_SIDE_EFFECT_PRIORITY[sideEffect.kind] || 'medium';
+  // Emergencies jump straight to the 'escalated' state + critical urgency so
+  // they surface at the top of the staff queue; everything else is pending_review.
+  const isEmergency = sideEffect.kind === 'emergency_escalation';
   try {
     await Conversation.updateOne(
       { _id: conv._id },
       {
         $set: {
           requiresHumanReview: true,
-          status: 'pending_review',
+          status: isEmergency ? 'escalated' : 'pending_review',
           escalationReason: reason,
           escalatedAt: new Date(),
+          ...(isEmergency ? { urgencyLevel: 'critical' } : {}),
         },
       }
     );
@@ -653,7 +670,7 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
         title: `🤖 بوت واتساب — ${reason} (${senderName})`,
         body: JSON.stringify(sideEffect.collected || {}).slice(0, 500),
         type: 'alert',
-        priority: sideEffect.kind === 'create_complaint' ? 'high' : 'medium',
+        priority,
         category: 'whatsapp_bot_request',
         channels: ['inApp'],
         metadata: {

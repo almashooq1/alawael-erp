@@ -67,6 +67,9 @@ const SIDE_EFFECT = Object.freeze({
   LOOKUP_BILLING: 'lookup_billing', // unit 7 (escalates in v1)
   CREATE_COMPLAINT: 'create_complaint', // unit 9
   CALLBACK_REQUEST: 'callback_request', // unit 10
+  // W1380 — new service units
+  SUBMIT_SATISFACTION: 'submit_satisfaction', // unit 13 (NPS / feedback)
+  EMERGENCY_ESCALATION: 'emergency_escalation', // unit 14 (urgent fast-track)
 });
 
 // ─── Conversation phases inside an active flow ───────────────────────────────
@@ -143,6 +146,67 @@ const HOME_EXERCISES = Object.freeze({
     '3) تجاهل منظّم للسلوك البسيط مع تعزيز البديل المناسب.',
   ].join('\n'),
 });
+
+// ─── W1380: FAQ content (unit 11) ────────────────────────────────────────────
+// Keyed 1..6 to match the topic list shown in the unit's intro. The service's
+// finalize maps the chosen number to its answer (`resolveFaqAnswer`).
+const FAQ_ANSWERS = Object.freeze({
+  1: [
+    '🕐 *أوقات العمل*',
+    'الأحد إلى الخميس: 7:30 صباحاً – 2:30 ظهراً.',
+    '(قد تختلف الأوقات حسب الفرع — للتأكيد تواصل مع الاستقبال.)',
+  ].join('\n'),
+  2: [
+    '💳 *الرسوم والاشتراك*',
+    'تختلف الرسوم حسب البرنامج وعدد الجلسات والباقة.',
+    'لمعرفة التفاصيل تواصل مع قسم القبول، أو اختر "الرسوم والفواتير" من القائمة للاستعلام عن حسابك.',
+  ].join('\n'),
+  3: [
+    '🎒 *ماذا أحضر في أول زيارة؟*',
+    '• الهوية الوطنية للمستفيد وولي الأمر.',
+    '• التقارير الطبية وتقارير الأخصائيين السابقة (إن وُجدت).',
+    '• أي وصفات أو أدوية حالية.',
+  ].join('\n'),
+  4: [
+    '👥 *الأعمار والفئات المقبولة*',
+    'نستقبل ذوي الإعاقة ضمن: التوحد، الإعاقة الذهنية، الحركية، صعوبات التعلم،',
+    'اضطرابات النطق، وتأخر النمو. لتأكيد البرنامج المناسب لعمر طفلك تواصل مع الاستقبال.',
+  ].join('\n'),
+  5: [
+    '📝 *خطوات التسجيل*',
+    '1) تعبئة طلب التسجيل (اختر "التسجيل الأولي" من القائمة).',
+    '2) موعد تقييم أولي.',
+    '3) وضع خطة فردية للمستفيد.',
+    '4) بدء الجلسات والمتابعة الدورية.',
+  ].join('\n'),
+  6: [
+    '🚌 *خدمة النقل / المواصلات*',
+    'متوفرة حسب توافر الباصات في فرعك.',
+    'للاستفسار عن المسارات والمواعيد تواصل مع الاستقبال.',
+  ].join('\n'),
+});
+
+const FAQ_INTRO = [
+  '❓ *الأسئلة الشائعة* — اختر سؤالاً بكتابة رقمه:',
+  '1) أوقات العمل',
+  '2) الرسوم وآلية الاشتراك',
+  '3) ماذا أحضر في أول زيارة؟',
+  '4) الأعمار والفئات المقبولة',
+  '5) خطوات التسجيل',
+  '6) خدمة النقل / المواصلات',
+].join('\n');
+
+// ─── W1380: Location & directions (unit 12) ──────────────────────────────────
+// Address + maps link are CENTER-CONFIGURABLE placeholders; replace with the
+// branch's real values (or wire from BranchSetting) before launch.
+const LOCATION_INFO = [
+  `📍 *موقع ${CENTER.nameAr} – ${CENTER.cityAr}*`,
+  'العنوان: [يُضاف العنوان التفصيلي للفرع].',
+  '🗺️ خرائط جوجل: [يُضاف رابط الموقع هنا]',
+  '🕐 أوقات العمل: الأحد–الخميس 7:30ص – 2:30م.',
+  '🅿️ يتوفر موقف سيارات.',
+  'للمساعدة في الوصول تواصل مع الاستقبال.',
+].join('\n');
 
 // ─── Unit / menu definitions ─────────────────────────────────────────────────
 // Order here IS the menu numbering 1..10. `steps[i].key` is the field name
@@ -300,6 +364,54 @@ const UNITS = Object.freeze([
     closing:
       'تم تحويل طلبك لأحد الزملاء المختصين ✅\nسيتم التواصل معك في أقرب وقت خلال أوقات العمل.',
   },
+  // ── W1380: new service units ──────────────────────────────────────────────
+  // 11 — FAQ (single-step topic picker; finalize maps the number → answer)
+  {
+    id: 'faq',
+    label: 'الأسئلة الشائعة',
+    intro: FAQ_INTRO,
+    steps: [{ key: 'faqTopic', prompt: 'اكتب رقم السؤال (1-6):' }],
+    confirm: false,
+    sideEffect: SIDE_EFFECT.NONE,
+    finalize: collected => resolveFaqAnswer(collected && collected.faqTopic),
+  },
+  // 12 — LOCATION & directions (static, zero steps)
+  {
+    id: 'location',
+    label: 'الموقع والاتجاهات',
+    steps: [],
+    confirm: false,
+    sideEffect: SIDE_EFFECT.NONE,
+    finalize: () => LOCATION_INFO,
+  },
+  // 13 — SATISFACTION survey (NPS-style; no confirm — collect then thank)
+  {
+    id: 'satisfaction',
+    label: 'تقييم الخدمة (استبيان رضا)',
+    intro: 'يسعدنا رأيك لتطوير خدماتنا 🌟',
+    steps: [
+      { key: 'rating', prompt: 'قيّم خدمتنا من 1 (غير راضٍ) إلى 5 (راضٍ جداً):' },
+      { key: 'liked', prompt: 'ما الذي أعجبك؟ (أو اكتب "-"):', optional: true },
+      { key: 'improve', prompt: 'ما الذي تقترح تحسينه؟ (أو اكتب "-"):', optional: true },
+    ],
+    confirm: false,
+    sideEffect: SIDE_EFFECT.SUBMIT_SATISFACTION,
+    closing: 'شكراً جزيلاً لتقييمك! 🌟 رأيك يساعدنا على تقديم أفضل رعاية لأبنائنا.',
+  },
+  // 14 — EMERGENCY fast-track (no confirm — never delay an urgent report)
+  {
+    id: 'emergency',
+    label: '🚨 بلاغ عاجل',
+    intro:
+      '🚨 إن كانت حالة طبية طارئة فاتصل فوراً بالإسعاف 997 أو توجّه لأقرب طوارئ.\nلإبلاغ فريقنا بشكل عاجل أجب على التالي:',
+    steps: [
+      { key: 'beneficiaryName', prompt: 'اسم المستفيد:' },
+      { key: 'description', prompt: 'صف الحالة العاجلة باختصار:' },
+    ],
+    confirm: false,
+    sideEffect: SIDE_EFFECT.EMERGENCY_ESCALATION,
+    closing: 'تم إبلاغ فريقنا بشكل عاجل وسيتواصل معك في أسرع وقت 🚑\n📞 للطوارئ الطبية: 997.',
+  },
 ]);
 
 // Fast lookup: unit id → unit object.
@@ -389,6 +501,11 @@ const UNIT_KEYWORDS = Object.freeze({
   notifications: ['اشعارات', 'تنبيهات', 'notifications', 'alerts'],
   complaint: ['شكوى', 'شكاوى', 'ملاحظة', 'مشكلة', 'اعتراض', 'complaint'],
   human: ['موظف', 'انسان', 'بشري', 'اخصائي', 'تكلم مع', 'human', 'agent', 'representative'],
+  // W1380 — new service units
+  faq: ['اسئلة شائعة', 'سؤال', 'استفسار عام', 'faq', 'questions'],
+  location: ['موقع', 'العنوان', 'عنوانكم', 'وين انتم', 'كيف اوصل', 'الاتجاهات', 'خريطة', 'location', 'address', 'directions', 'map'],
+  satisfaction: ['تقييم', 'قيم', 'رضا', 'استبيان', 'رايي', 'رأيي', 'feedback', 'satisfaction', 'survey', 'rating'],
+  emergency: ['طارئ', 'طوارئ', 'عاجل', 'بلاغ عاجل', 'مستعجل', 'emergency', 'urgent'],
 });
 
 // ─── Pure helpers ────────────────────────────────────────────────────────────
@@ -463,17 +580,32 @@ function isSkip(text) {
 }
 
 /**
- * Parse a main-menu selection. Accepts a bare number 1..10 (ASCII or
- * Arabic-Indic), optionally wrapped in the numbered-emoji or punctuation a user
- * might copy ("1️⃣", "٢-", "رقم 3"). Returns the 1-based index or null.
+ * Parse a main-menu selection. Accepts a message that is essentially a single
+ * number 1..UNITS.length (ASCII or Arabic-Indic), optionally wrapped in a
+ * numbered-emoji or light punctuation/label ("1️⃣", "٢-", "رقم 3", "14."). The
+ * anchored single-group pattern deliberately REJECTS multi-number strings like a
+ * date "2026-06-20" or a time "10:30" so they aren't misread as a selection.
+ * Returns the 1-based index or null.
  */
 function parseMenuSelection(text) {
   if (!text) return null;
   const ascii = toAsciiDigits(String(text)).trim();
-  const m = ascii.match(/(?:^|[^\d])(10|[1-9])(?:[^\d]|$)/);
+  const m = ascii.match(/^\D*?(\d{1,2})\D*$/);
   if (!m) return null;
   const n = parseInt(m[1], 10);
   return n >= 1 && n <= UNITS.length ? n : null;
+}
+
+/**
+ * Resolve a FAQ topic answer (unit 11) from the user's typed number. Returns the
+ * matching answer, or a graceful fallback when the number is out of range. Pure.
+ */
+function resolveFaqAnswer(topicText) {
+  const ascii = toAsciiDigits(String(topicText == null ? '' : topicText)).trim();
+  const m = ascii.match(/(\d{1,2})/);
+  const n = m ? parseInt(m[1], 10) : NaN;
+  if (FAQ_ANSWERS[n]) return FAQ_ANSWERS[n];
+  return 'لم أتعرّف على رقم السؤال. الأرقام المتاحة من 1 إلى 6 — أو اكتب "موظف" للمساعدة.';
 }
 
 /**
@@ -511,6 +643,9 @@ module.exports = {
   INFO_TEXT,
   NOTIFICATIONS_INFO,
   HOME_EXERCISES,
+  FAQ_ANSWERS,
+  FAQ_INTRO,
+  LOCATION_INFO,
   UNITS,
   UNIT_BY_ID,
   MENU_TRIGGERS,
@@ -531,4 +666,5 @@ module.exports = {
   parseMenuSelection,
   resolveUnitId,
   resolveDepartmentKey,
+  resolveFaqAnswer,
 };

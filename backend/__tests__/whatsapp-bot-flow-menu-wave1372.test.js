@@ -35,8 +35,8 @@ function walk(turns, ctx = {}) {
 // 1. STATIC — registry shape
 // ════════════════════════════════════════════════════════════════════════════
 describe('W1372 static — registry shape', () => {
-  test('exactly 10 units in menu order with ids + labels', () => {
-    expect(reg.UNITS).toHaveLength(10);
+  test('14 units in menu order with ids + labels (10 base + W1380 service units)', () => {
+    expect(reg.UNITS).toHaveLength(14);
     const ids = reg.UNITS.map(u => u.id);
     expect(ids).toEqual([
       'info',
@@ -49,6 +49,10 @@ describe('W1372 static — registry shape', () => {
       'notifications',
       'complaint',
       'human',
+      'faq',
+      'location',
+      'satisfaction',
+      'emergency',
     ]);
     for (const u of reg.UNITS) {
       expect(typeof u.label).toBe('string');
@@ -148,10 +152,11 @@ describe('W1372 static — helpers', () => {
 
   test('parseMenuSelection rejects out-of-range + non-numeric', () => {
     expect(reg.parseMenuSelection('0')).toBeNull();
-    expect(reg.parseMenuSelection('11')).toBeNull();
+    expect(reg.parseMenuSelection('15')).toBeNull(); // 14 units now; 15 is out of range
     expect(reg.parseMenuSelection('99')).toBeNull();
     expect(reg.parseMenuSelection('مرحبا')).toBeNull();
     expect(reg.parseMenuSelection('')).toBeNull();
+    expect(reg.parseMenuSelection('2026-06-20')).toBeNull(); // multi-number → not a selection
   });
 
   test('resolveUnitId routes free text + numbers to units', () => {

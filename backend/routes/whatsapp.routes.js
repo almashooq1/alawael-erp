@@ -44,7 +44,10 @@
 'use strict';
 
 const express = require('express');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const {
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
@@ -218,7 +221,8 @@ router.get(
     if (requiresReview === 'true') filter.requiresHumanReview = true;
     if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
     if (assignedTo) filter.assignedTo = assignedTo;
-    if (req.user?.organizationId) filter.organizationId = req.user.organizationId;
+    const branchScope = effectiveBranchScope(req); // W1407: branch isolation (was never-set organizationId)
+    if (branchScope) filter.branchId = branchScope;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
@@ -243,7 +247,7 @@ router.get(
   '/conversations/pending-review',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    const data = await Conversation.findPendingReview(req.user?.organizationId);
+    const data = await Conversation.findPendingReview(effectiveBranchScope(req));
     res.json({ success: true, data, total: data.length });
   })
 );
@@ -254,7 +258,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const conv = await Conversation.findOne(
-      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId)
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
     )
       .populate('beneficiaryId', 'personalInfo fileNumber')
       .populate('familyMemberId', 'firstName lastName relationship contactInfo')
@@ -290,7 +294,7 @@ router.post(
     const Conversation = getConversationModel();
     const staffId = req.user?._id || req.user?.id;
     const data = await Conversation.findOneAndUpdate(
-      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
       {
         status: 'resolved',
         requiresHumanReview: false,
@@ -312,7 +316,7 @@ router.post(
     const Conversation = getConversationModel();
     validate(['staffId'], req.body);
     const data = await Conversation.findOneAndUpdate(
-      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
       { assignedTo: req.body.staffId, status: 'pending_review' },
       { returnDocument: 'after' }
     ).lean();
@@ -327,7 +331,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     await Conversation.updateOne(
-      Conversation.byIdScopedFilter(req.params.id, req.user?.organizationId),
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
       { unreadCount: 0 }
     );
     res.json({ success: true });
@@ -689,7 +693,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const conv = await Conversation.findOne(
-      Conversation.byIdScopedFilter(req.params.conversationId, req.user?.organizationId)
+      Conversation.byIdScopedFilter(req.params.conversationId, effectiveBranchScope(req))
     )
       .select('messages')
       .lean();
@@ -852,11 +856,11 @@ router.get(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const { startDate, endDate } = req.query;
-    const orgId = req.user?.organizationId;
+    const branchScope = effectiveBranchScope(req); // W1407: branch isolation
 
-    const filters = Conversation.queueCountFilters(orgId);
+    const filters = Conversation.queueCountFilters(branchScope);
     const [analytics, pendingReview, critical] = await Promise.all([
-      Conversation.getAnalytics(orgId, startDate, endDate),
+      Conversation.getAnalytics(branchScope, startDate, endDate),
       Conversation.countDocuments(filters.pendingReview),
       Conversation.countDocuments(filters.critical),
     ]);

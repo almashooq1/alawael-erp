@@ -40,6 +40,12 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const Document = require('../models/Document');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+// W1390: magic-bytes content validation (buffer-aware since W1371) — defends
+// against MIME spoofing on the upload surface even though the broad clinical
+// allowlist remains unchanged by product decision (svg/html served as
+// attachment+sandbox via W462). The validator is additive: only rejects when
+// the file's actual bytes contradict its declared MIME type.
+const { validateUploadedFile } = require('../utils/uploadValidator');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Storage configuration
@@ -339,7 +345,11 @@ router.post(
     }
 
     const url = String(fileUrl).trim();
-    const baseName = url.split(/[\\/?#]/).filter(Boolean).pop() || 'document';
+    const baseName =
+      url
+        .split(/[\\/?#]/)
+        .filter(Boolean)
+        .pop() || 'document';
     // JWT carries `id` (not `_id`); the existing /upload handler's req.user._id
     // is itself buggy — read both here so uploadedBy is actually populated.
     const actorId = req.user.id || req.user._id;
@@ -378,6 +388,7 @@ router.post(
 router.post(
   '/upload',
   upload.single('file'),
+  validateUploadedFile, // W1390: magic-bytes MIME check (buffer-aware from W1371)
   wrap(async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'الملف مطلوب' });

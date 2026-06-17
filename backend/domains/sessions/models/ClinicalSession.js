@@ -345,7 +345,7 @@ clinicalSessionSchema.post('save', function emitSessionCompleted(doc) {
   if (!doc.$__sessionCompleted || !doc.beneficiaryId) return;
   try {
     const { integrationBus } = require('../../../integration/systemIntegrationBus');
-    integrationBus.publish('sessions', 'sessions.session.completed', {
+    integrationBus.publish('sessions', 'session.completed', {
       sessionId: String(doc._id),
       beneficiaryId: String(doc.beneficiaryId),
       ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),

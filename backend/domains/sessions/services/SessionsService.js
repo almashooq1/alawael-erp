@@ -247,7 +247,7 @@ class SessionsService extends BaseService {
     // ClinicalSession W1379 model hook does not fire here — no double-emit.
     try {
       const { integrationBus } = require('../../../integration/systemIntegrationBus');
-      integrationBus.publish('sessions', 'sessions.session.completed', {
+      integrationBus.publish('sessions', 'session.completed', {
         sessionId: String(session._id),
         beneficiaryId: session.beneficiaryId ? String(session.beneficiaryId) : null,
         ...(session.episodeId ? { episodeId: String(session.episodeId) } : {}),

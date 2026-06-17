@@ -122,7 +122,7 @@ services:
         max-file: "3"
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:3000/ || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:80/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3

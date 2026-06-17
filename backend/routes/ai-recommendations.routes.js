@@ -61,6 +61,24 @@ router.get('/health', (_req, res) => {
 router.use(authenticate);
 router.use(attachMfaActor);
 
+// W1409 — close the :id cross-branch IDOR. GET /:id (full bundle +
+// explainability) and GET /:id/audit (state-transition trail) returned ANY
+// branch's AiRecommendationBundle to ANY MFA-tier-1 caller — requireMfaTier
+// gates the action, never the branch. Populate req.branchScope + assert branch
+// ownership on the :id param before the handlers run. Non-ObjectId ids (e.g.
+// the /metrics literal sibling) fall through unchanged.
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedResourceParam } = require('../middleware/assertBranchMatch');
+router.use(requireBranchAccess);
+router.param(
+  'id',
+  branchScopedResourceParam({
+    modelName: 'AiRecommendationBundle',
+    label: 'recommendation bundle',
+    loadModel: () => require('../models/AiRecommendationBundle'),
+  })
+);
+
 // ── Supervisor queue ──────────────────────────────────────────────────
 router.get('/pending', requireMfaTier(1), async (req, res) => {
   try {

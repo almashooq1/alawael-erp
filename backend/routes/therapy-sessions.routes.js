@@ -26,8 +26,32 @@ const mongoose = require('mongoose');
 const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
+  branchScopedResourceParam,
 } = require('../middleware/assertBranchMatch');
+// W1409 — populate req.branchScope so the W269 guards below actually FIRE.
+// This router is mounted via safeMount (which injects NO middleware) and never
+// self-applied requireBranchAccess, so req.branchScope was undefined here —
+// which made the W1148 :beneficiaryId guard a SILENT NO-OP (every
+// assertBranchMatch/branchScoped* check returns early when req.branchScope is
+// absent). Cross-branch roles and (by default) branchless users fail OPEN
+// inside requireBranchAccess, so this only ACTIVATES isolation for
+// branch-assigned staff — no regression for admins or unscoped callers.
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+router.use(requireBranchAccess);
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1409 — close the :id / :sessionId cross-branch IDOR on ClinicalSession.
+// GET/POST /:sessionId/documentation (SOAP notes read+write), DELETE /:id, and
+// every CRUD/transition handler keyed on :id loaded a session by id with NO
+// per-document branch ownership check. This param guard loads the
+// ClinicalSession and asserts branch match BEFORE any such handler runs
+// (no-op for cross-branch/unscoped callers; 404 on foreign branch).
+const scopedSession = branchScopedResourceParam({
+  modelName: 'ClinicalSession',
+  label: 'session',
+  loadModel: () => require('../domains/sessions/models/ClinicalSession'),
+});
+router.param('id', scopedSession);
+router.param('sessionId', scopedSession);
 router.use(bodyScopedBeneficiaryGuard);
 
 // ── Service (lazy, so missing model doesn't crash app boot) ─────────────────

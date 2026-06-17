@@ -1,0 +1,193 @@
+{
+  "metrics": {
+    "data_received": {
+      "rate": 12424.305399615821,
+      "count": 1928852
+    },
+    "health_latency": {
+      "max": 79.1579,
+      "p(90)": 3.8993400000000005,
+      "p(95)": 6.228759999999995,
+      "avg": 3.2598363809523825,
+      "min": 1.2249,
+      "med": 2.3229,
+      "thresholds": {
+        "p(95)<200": false,
+        "p(99)<400": false
+      }
+    },
+    "http_req_duration": {
+      "avg": 3.1180487619047623,
+      "min": 1.069,
+      "med": 2.3531,
+      "max": 79.1579,
+      "p(90)": 3.93731,
+      "p(95)": 5.253739999999997
+    },
+    "vus_max": {
+      "value": 8,
+      "min": 8,
+      "max": 8
+    },
+    "http_req_sending": {
+      "med": 0,
+      "max": 1.0041,
+      "p(90)": 0,
+      "p(95)": 0,
+      "avg": 0.013775333333333332,
+      "min": 0
+    },
+    "vus": {
+      "value": 2,
+      "min": 1,
+      "max": 8
+    },
+    "http_req_tls_handshaking": {
+      "p(95)": 0,
+      "avg": 0,
+      "min": 0,
+      "med": 0,
+      "max": 0,
+      "p(90)": 0
+    },
+    "http_req_blocked": {
+      "avg": 0.010884666666666667,
+      "min": 0,
+      "med": 0,
+      "max": 2.1444,
+      "p(90)": 0,
+      "p(95)": 0
+    },
+    "iteration_duration": {
+      "avg": 1007.1039898661567,
+      "min": 1003.5476,
+      "med": 1005.6703,
+      "max": 1117.6136,
+      "p(90)": 1008.96956,
+      "p(95)": 1013.21838
+    },
+    "http_req_receiving": {
+      "avg": 0.06537457142857139,
+      "min": 0,
+      "med": 0,
+      "max": 2.7082,
+      "p(90)": 0.5060100000000001,
+      "p(95)": 0.534615
+    },
+    "http_req_failed": {
+      "passes": 0,
+      "fails": 1050,
+      "thresholds": {
+        "rate<0.01": false
+      },
+      "value": 0
+    },
+    "group_duration": {
+      "p(90)": 4.26845,
+      "p(95)": 5.664954999999998,
+      "avg": 3.280478761904763,
+      "min": 1.069,
+      "med": 2.526,
+      "max": 79.1579
+    },
+    "checks": {
+      "passes": 1050,
+      "fails": 0,
+      "value": 1
+    },
+    "readiness_latency": {
+      "med": 2.4366,
+      "max": 38.1902,
+      "p(90)": 3.964280000000001,
+      "p(95)": 4.989859999999995,
+      "avg": 2.9762611428571417,
+      "min": 1.069,
+      "thresholds": {
+        "p(95)<800": false,
+        "p(99)<1500": false
+      }
+    },
+    "auth_read_failed": {
+      "fails": 0,
+      "passes": 0,
+      "thresholds": {
+        "rate<0.02": false
+      },
+      "value": 0
+    },
+    "http_reqs": {
+      "count": 1050,
+      "rate": 6.763360107253751
+    },
+    "data_sent": {
+      "count": 81375,
+      "rate": 524.1604083121657
+    },
+    "http_req_connecting": {
+      "avg": 0.005883047619047619,
+      "min": 0,
+      "med": 0,
+      "max": 2.1444,
+      "p(90)": 0,
+      "p(95)": 0
+    },
+    "iterations": {
+      "count": 523,
+      "rate": 3.368797462946392
+    },
+    "http_req_duration{expected_response:true}": {
+      "avg": 3.1180487619047623,
+      "min": 1.069,
+      "med": 2.3531,
+      "max": 79.1579,
+      "p(90)": 3.93731,
+      "p(95)": 5.253739999999997
+    },
+    "http_req_waiting": {
+      "p(90)": 3.8105,
+      "p(95)": 5.1841949999999954,
+      "avg": 3.0388988571428586,
+      "min": 0.6967,
+      "med": 2.28415,
+      "max": 79.1579
+    }
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": {
+      "liveness": {
+        "path": "::liveness",
+        "id": "fa2a10ba0b8152a6901e9f2bda44523b",
+        "groups": {},
+        "checks": {
+          "health 200": {
+            "passes": 525,
+            "fails": 0,
+            "name": "health 200",
+            "path": "::liveness::health 200",
+            "id": "51a426a80423813bd22d65f6de635aeb"
+          }
+        },
+        "name": "liveness"
+      },
+      "readiness": {
+        "id": "6e1ff8a95eb5b473cc94f8709093b0df",
+        "groups": {},
+        "checks": {
+          "readiness 2xx/503": {
+            "id": "b35b4dd290255a08d778211b45475b3a",
+            "passes": 525,
+            "fails": 0,
+            "name": "readiness 2xx/503",
+            "path": "::readiness::readiness 2xx/503"
+          }
+        },
+        "name": "readiness",
+        "path": "::readiness"
+      }
+    },
+    "checks": {},
+    "name": ""
+  }
+}

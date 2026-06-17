@@ -29,6 +29,29 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | Phase-7 IAM stack (roles/scope/SoD/audit) | [phase-7-iam.md](phase-7-iam.md)                         |
 | Phase-13 QMS & compliance vault           | [phase-13-qms-compliance.md](phase-13-qms-compliance.md) |
 
+### Go-live readiness bundle
+
+| Artifact                                            | Doc                                                                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Deployment plan (W1404)                             | [go-live-deployment-plan-w1404.md](go-live-deployment-plan-w1404.md)                                                                 |
+| Staging readiness report                            | [staging-readiness-report-w1405.md](staging-readiness-report-w1405.md)                                                               |
+| Night maintenance plan                              | [night-maintenance-plan-w1405.md](night-maintenance-plan-w1405.md)                                                                   |
+| Final go-live report (W1405)                        | [go-live-final-report-w1405.md](go-live-final-report-w1405.md)                                                                       |
+| Executive summary (Arabic)                          | [go-live-executive-summary-w1405-ar.md](go-live-executive-summary-w1405-ar.md)                                                       |
+| Communication templates                             | [go-live-communication-templates-w1405.md](go-live-communication-templates-w1405.md)                                                 |
+| Production secrets checklist                        | [production-secrets-cutover-checklist-w1406.md](production-secrets-cutover-checklist-w1406.md)                                       |
+| Production cutover run sheet                        | [production-secrets-cutover-runsheet-w1406.md](production-secrets-cutover-runsheet-w1406.md)                                         |
+| Production run sheet (1-page)                       | [production-secrets-cutover-runsheet-w1406-onepage.md](production-secrets-cutover-runsheet-w1406-onepage.md)                         |
+| Production run sheet (1-page, AR)                   | [production-secrets-cutover-runsheet-w1406-onepage-ar.md](production-secrets-cutover-runsheet-w1406-onepage-ar.md)                   |
+| Production print pack (EN+AR)                       | [production-secrets-cutover-print-pack-w1406.md](production-secrets-cutover-print-pack-w1406.md)                                     |
+| Production signature log (CAB)                      | [production-secrets-cutover-signature-log-w1406.md](production-secrets-cutover-signature-log-w1406.md)                               |
+| **Rollback** — detailed runsheet                    | [production-secrets-cutover-rollback-runsheet-w1406.md](production-secrets-cutover-rollback-runsheet-w1406.md)                       |
+| **Rollback** — 1-page (EN)                          | [production-secrets-cutover-rollback-runsheet-w1406-onepage.md](production-secrets-cutover-rollback-runsheet-w1406-onepage.md)       |
+| **Rollback** — 1-page (AR)                          | [production-secrets-cutover-rollback-runsheet-w1406-onepage-ar.md](production-secrets-cutover-rollback-runsheet-w1406-onepage-ar.md) |
+| **Post-Cutover** — 24h + 7d verification            | [production-secrets-cutover-post-verification-w1406.md](production-secrets-cutover-post-verification-w1406.md)                       |
+| **Executive Summary** (index + FAQ)                 | [production-secrets-cutover-summary-w1406.md](production-secrets-cutover-summary-w1406.md)                                           |
+| **Execution Record** (FINAL — completed 2026-06-17) | [w1406-execution-record-2026-06-17.md](w1406-execution-record-2026-06-17.md)                                                         |
+
 ## How to use
 
 1. PagerDuty / Slack → you see an alert firing.

@@ -66,11 +66,18 @@ const CRITICAL_COLLECTIONS = [
 function parseMongoUri(uri) {
   try {
     const url = new URL(uri);
+    const user = url.username ? encodeURIComponent(decodeURIComponent(url.username)) : '';
+    const pass = url.password ? encodeURIComponent(decodeURIComponent(url.password)) : '';
+    const auth = user ? `${user}:${pass}@` : '';
+    const params = new URLSearchParams(url.searchParams);
+    if (!params.get('authSource') && user) params.set('authSource', 'admin');
+    if (!params.get('authMechanism') && user) params.set('authMechanism', 'SCRAM-SHA-256');
+    const authQuery = params.toString();
     return {
       host: url.hostname,
       port: url.port || '27017',
-      base: `${url.protocol}//${url.username ? `${url.username}:${url.password}@` : ''}${url.host}`,
-      authQuery: url.search || '',
+      base: `${url.protocol}//${auth}${url.host}`,
+      authQuery: authQuery ? `?${authQuery}` : '',
     };
   } catch {
     return { host: 'localhost', port: '27017', base: 'mongodb://localhost:27017', authQuery: '' };
@@ -84,6 +91,191 @@ function checkTool(name) {
   } catch {
     return false;
   }
+}
+
+function getMongoAdminCreds(sourceUri) {
+  const envUser = process.env.MONGO_ROOT_USER;
+  const envPass = process.env.MONGO_ROOT_PASSWORD;
+  if (envUser && envPass) return { user: envUser, pass: envPass };
+
+  try {
+    const url = new URL(sourceUri);
+    const user = decodeURIComponent(url.username || '');
+    const pass = decodeURIComponent(url.password || '');
+    if (user && pass) return { user, pass };
+  } catch {
+    // ignore
+  }
+
+  return { user: null, pass: null };
+}
+
+function parseNumericOutput(stdout) {
+  const lines = (stdout || '')
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const n = Number(lines[i]);
+    if (Number.isFinite(n)) return n;
+  }
+  return -1;
+}
+
+async function restoreViaDocker(backup, sandboxDb, sourceUri, archivePath) {
+  if (!checkTool('docker')) throw new Error('docker_not_installed_for_dr_fallback');
+
+  const container = process.env.DR_MONGO_CONTAINER || 'alawael-mongodb';
+  const tmpRoot = `/tmp/dr-verify-${Date.now()}`;
+  const creds = getMongoAdminCreds(sourceUri);
+  if (!creds.user || !creds.pass) {
+    throw new Error('mongo_admin_credentials_not_found_for_docker_fallback');
+  }
+
+  try {
+    await execFileAsync('docker', [
+      'exec',
+      container,
+      'sh',
+      '-lc',
+      `rm -rf '${tmpRoot}' && mkdir -p '${tmpRoot}'`,
+    ]);
+
+    if (backup.kind === 'archive' || backup.kind === 'archive-encrypted') {
+      const archiveInContainer = `${tmpRoot}/backup.gz`;
+      await execFileAsync('docker', ['cp', archivePath, `${container}:${archiveInContainer}`]);
+
+      const sourceDb = (() => {
+        try {
+          return new URL(sourceUri).pathname.replace('/', '') || 'alawael-erp';
+        } catch {
+          return 'alawael-erp';
+        }
+      })();
+
+      await execFileAsync('docker', [
+        'exec',
+        container,
+        'mongorestore',
+        '--host',
+        'localhost',
+        '--port',
+        '27017',
+        '--username',
+        creds.user,
+        '--password',
+        creds.pass,
+        '--authenticationDatabase',
+        'admin',
+        '--archive=' + archiveInContainer,
+        '--gzip',
+        '--nsFrom=' + sourceDb + '.*',
+        '--nsTo=' + sandboxDb + '.*',
+        '--drop',
+      ]);
+      return;
+    }
+
+    const hostDumpDir = backup.path;
+    const hostDumpBase = path.basename(hostDumpDir);
+    await execFileAsync('docker', ['cp', hostDumpDir, `${container}:${tmpRoot}`]);
+    const containerDumpDir = `${tmpRoot}/${hostDumpBase}`;
+
+    const entries = fs
+      .readdirSync(hostDumpDir, { withFileTypes: true })
+      .filter(e => e.isDirectory());
+    if (entries.length !== 1) {
+      throw new Error(
+        `dump_layout_unexpected: expected exactly 1 db subdirectory in ${hostDumpDir}, found ${entries.length}`
+      );
+    }
+
+    const dumpDbName = entries[0].name;
+    await execFileAsync('docker', [
+      'exec',
+      container,
+      'mongorestore',
+      '--host',
+      'localhost',
+      '--port',
+      '27017',
+      '--username',
+      creds.user,
+      '--password',
+      creds.pass,
+      '--authenticationDatabase',
+      'admin',
+      '--dir=' + containerDumpDir,
+      '--gzip',
+      '--nsInclude=' + dumpDbName + '.*',
+      '--nsFrom=' + dumpDbName + '.*',
+      '--nsTo=' + sandboxDb + '.*',
+      '--drop',
+    ]);
+  } finally {
+    await execFileAsync('docker', ['exec', container, 'sh', '-lc', `rm -rf '${tmpRoot}'`]).catch(
+      () => {}
+    );
+  }
+}
+
+async function verifyCountsViaDocker(sandboxDb) {
+  if (!checkTool('docker')) throw new Error('docker_not_installed_for_dr_fallback');
+  const sourceUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
+  const creds = getMongoAdminCreds(sourceUri);
+  if (!creds.user || !creds.pass) {
+    throw new Error('mongo_admin_credentials_not_found_for_docker_fallback');
+  }
+
+  const container = process.env.DR_MONGO_CONTAINER || 'alawael-mongodb';
+  const checks = [];
+  for (const col of CRITICAL_COLLECTIONS) {
+    const js = `db.getSiblingDB('${sandboxDb}').getCollection('${col.name}').countDocuments({})`;
+    const out = await execFileAsync('docker', [
+      'exec',
+      container,
+      'mongosh',
+      '--quiet',
+      '--username',
+      creds.user,
+      '--password',
+      creds.pass,
+      '--authenticationDatabase',
+      'admin',
+      '--eval',
+      js,
+    ]);
+    const count = parseNumericOutput(out.stdout);
+    const ok = count >= col.min;
+    checks.push({ collection: col.name, count, min: col.min, ok });
+  }
+  return checks;
+}
+
+async function dropSandboxViaDocker(sandboxDb) {
+  if (!checkTool('docker')) throw new Error('docker_not_installed_for_dr_fallback');
+  const sourceUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
+  const creds = getMongoAdminCreds(sourceUri);
+  if (!creds.user || !creds.pass) {
+    throw new Error('mongo_admin_credentials_not_found_for_docker_fallback');
+  }
+
+  const container = process.env.DR_MONGO_CONTAINER || 'alawael-mongodb';
+  const js = `db.getSiblingDB('${sandboxDb}').dropDatabase()`;
+  await execFileAsync('docker', [
+    'exec',
+    container,
+    'mongosh',
+    '--quiet',
+    '--username',
+    creds.user,
+    '--password',
+    creds.pass,
+    '--authenticationDatabase',
+    'admin',
+    '--eval',
+    js,
+  ]);
 }
 
 function findLatestBackup() {
@@ -230,6 +422,13 @@ async function restoreToSandbox(backup, sandboxDb) {
       ];
       await execFileAsync('mongorestore', args);
     }
+  } catch (err) {
+    logger.warn('[dr-verify] host mongorestore failed; trying docker fallback', {
+      error: err.message,
+      backup: backup.path,
+      sandboxDb,
+    });
+    await restoreViaDocker(backup, sandboxDb, sourceUri, archivePath);
   } finally {
     cleanup();
   }
@@ -242,25 +441,33 @@ async function verifyCounts(sandboxDb) {
   const parsed = parseMongoUri(sourceUri);
   const targetUri = `${parsed.base}/${sandboxDb}${parsed.authQuery}`;
 
-  const conn = await mongoose
-    .createConnection(targetUri, {
-      serverSelectionTimeoutMS: 15000,
-    })
-    .asPromise();
-
   try {
-    const checks = [];
-    for (const col of CRITICAL_COLLECTIONS) {
-      const count = await conn.db
-        .collection(col.name)
-        .countDocuments()
-        .catch(() => -1);
-      const ok = count >= col.min;
-      checks.push({ collection: col.name, count, min: col.min, ok });
+    const conn = await mongoose
+      .createConnection(targetUri, {
+        serverSelectionTimeoutMS: 15000,
+      })
+      .asPromise();
+
+    try {
+      const checks = [];
+      for (const col of CRITICAL_COLLECTIONS) {
+        const count = await conn.db
+          .collection(col.name)
+          .countDocuments()
+          .catch(() => -1);
+        const ok = count >= col.min;
+        checks.push({ collection: col.name, count, min: col.min, ok });
+      }
+      return checks;
+    } finally {
+      await conn.close().catch(() => {});
     }
-    return checks;
-  } finally {
-    await conn.close().catch(() => {});
+  } catch (err) {
+    logger.warn('[dr-verify] host verify counts failed; trying docker fallback', {
+      error: err.message,
+      sandboxDb,
+    });
+    return verifyCountsViaDocker(sandboxDb);
   }
 }
 
@@ -270,11 +477,19 @@ async function dropSandbox(sandboxDb) {
   const parsed = parseMongoUri(sourceUri);
   const targetUri = `${parsed.base}/${sandboxDb}${parsed.authQuery}`;
 
-  const conn = await mongoose.createConnection(targetUri).asPromise();
   try {
-    await conn.dropDatabase();
-  } finally {
-    await conn.close().catch(() => {});
+    const conn = await mongoose.createConnection(targetUri).asPromise();
+    try {
+      await conn.dropDatabase();
+    } finally {
+      await conn.close().catch(() => {});
+    }
+  } catch (err) {
+    logger.warn('[dr-verify] host drop sandbox failed; trying docker fallback', {
+      error: err.message,
+      sandboxDb,
+    });
+    await dropSandboxViaDocker(sandboxDb);
   }
 }
 

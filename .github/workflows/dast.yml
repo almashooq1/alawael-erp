@@ -1,0 +1,101 @@
+# ════════════════════════════════════════════════════════════════════
+#  DAST — OWASP ZAP baseline scan for the staging / production target.
+#  Runs manually and weekly so the security program has a live dynamic
+#  check in CI, complementing CodeQL + gitleaks.
+#
+#  Target URL is provided via workflow_dispatch input or repository/
+#  environment variable `DAST_TARGET_URL`. The job fails fast if no URL
+#  is configured so the scan never silently points at nowhere.
+# ════════════════════════════════════════════════════════════════════
+name: "DAST (OWASP ZAP)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Public staging URL to scan"
+        required: false
+        type: string
+      allow_production:
+        description: "Set true to allow production-like targets (manual override only)"
+        required: false
+        default: false
+        type: boolean
+      scan_name:
+        description: "Optional label for the artifact/report"
+        required: false
+        default: "zap-baseline"
+        type: string
+  schedule:
+    # Weekly dynamic scan of the configured target.
+    - cron: '17 3 * * 1'
+
+concurrency:
+  group: dast-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  zap-baseline:
+    name: "🔍 OWASP ZAP Baseline"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Resolve target URL
+        shell: bash
+        env:
+          TARGET_URL: ${{ github.event.inputs.target_url || vars.DAST_TARGET_URL || secrets.DAST_TARGET_URL }}
+          ALLOW_PRODUCTION: ${{ github.event.inputs.allow_production || 'false' }}
+        run: |
+          if [ -z "$TARGET_URL" ]; then
+            echo "❌ DAST target URL is not configured. Set vars.DAST_TARGET_URL, secrets.DAST_TARGET_URL, or pass workflow_dispatch.target_url."
+            exit 1
+          fi
+
+          TARGET_URL_LC="$(echo "$TARGET_URL" | tr '[:upper:]' '[:lower:]')"
+          if [ "$ALLOW_PRODUCTION" != "true" ]; then
+            if [[ "$TARGET_URL_LC" == *"prod"* || "$TARGET_URL_LC" == *"production"* ]]; then
+              echo "❌ Refusing production-like DAST target by default. Use workflow_dispatch.allow_production=true for explicit override."
+              exit 1
+            fi
+          fi
+
+          echo "target_url=$TARGET_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run OWASP ZAP baseline scan
+        shell: bash
+        env:
+          TARGET_URL: ${{ github.event.inputs.target_url || vars.DAST_TARGET_URL || secrets.DAST_TARGET_URL }}
+          SCAN_NAME: ${{ github.event.inputs.scan_name || 'zap-baseline' }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$TARGET_URL" ]; then
+            echo "❌ DAST target URL is missing."
+            exit 1
+          fi
+
+          REPORT_DIR="${GITHUB_WORKSPACE}/dast-report"
+          mkdir -p "$REPORT_DIR"
+
+          docker run --rm \
+            -v "$REPORT_DIR:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t "$TARGET_URL" \
+            -r "$SCAN_NAME.html"
+
+      - name: Upload DAST report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-report-${{ github.run_id }}
+          path: dast-report/
+          retention-days: 30
+          if-no-files-found: warn
+

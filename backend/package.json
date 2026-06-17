@@ -240,6 +240,7 @@
     "sync:sprint-paths": "node scripts/sync-sprint-tests-paths.js",
     "check:sprint-paths": "node scripts/sync-sprint-tests-paths.js --check",
     "check:routes-load": "node scripts/scan-route-files.js",
+    "check:phantom-imports": "node scripts/check-phantom-imports.js",
     "check:gitignored-sources": "node scripts/check-gitignored-sources.js",
     "check:hook-style": "node scripts/check-mongoose-hook-style.js",
     "check:duplicate-schema-index": "node scripts/check-duplicate-schema-index.js",

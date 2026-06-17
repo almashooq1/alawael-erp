@@ -42,6 +42,23 @@ const safeError = require('../utils/safeError');
 const uploadDir = path.join(__dirname, '../uploads/referrals');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+/**
+ * W1388: delete a referral document file ONLY if it resolves strictly inside
+ * the referral uploads root. This matches the sibling media/files hardening
+ * pattern (path.resolve(target).startsWith(path.resolve(uploadDir) + path.sep))
+ * and prevents tampered/migrated filePath values from deleting a prefix-shared
+ * sibling or any other out-of-root file. Legitimate referral uploads already
+ * live under uploadDir, so real deletions remain unchanged.
+ */
+const safeUnlinkInsideReferral = targetPath => {
+  if (!targetPath) return false;
+  const resolved = path.resolve(targetPath);
+  if (!resolved.startsWith(path.resolve(uploadDir) + path.sep)) return false;
+  if (!fs.existsSync(resolved)) return false;
+  fs.unlinkSync(resolved);
+  return true;
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -551,10 +568,8 @@ router.delete(
       const doc = await ReferralDocument.findById(req.params.docId);
       if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
-      // Delete file from disk
-      if (doc.filePath && fs.existsSync(doc.filePath)) {
-        fs.unlinkSync(doc.filePath);
-      }
+      // Delete file from disk only if it is strictly inside the referral root.
+      safeUnlinkInsideReferral(doc.filePath);
 
       await doc.deleteOne();
       res.json({ success: true, message: 'تم حذف المستند' });

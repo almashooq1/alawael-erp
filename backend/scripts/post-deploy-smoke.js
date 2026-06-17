@@ -154,6 +154,17 @@ const PROBES = [
   mountedRoute('phase30-hr-workflow-config', '/api/v1/hr/workflow/config'),
   mountedRoute('phase30-hr-scheduler-status', '/api/v1/hr/workflow/scheduler/status'),
 
+  // ── Blueprint-43 + launch-readiness surfaces (shipped 2026-06-11→16) ──
+  // The session's golden-thread / intelligence / launch-enablement routes.
+  // Each is one _registry.js entry away from a silent 404 — and unlike most,
+  // these back live web-admin screens (a 404 here = a blank operator page).
+  // All are auth-gated read surfaces → 401/403 unauth is mounted-evidence.
+  mountedRoute('w1206-next-best-action', '/api/v1/next-best-action/catalogue'),
+  mountedRoute('w1205-pathway-bundles', '/api/v1/pathway-bundles'),
+  mountedRoute('w1214-outcomes-rollup', '/api/v1/outcomes-rollup/center'),
+  mountedRoute('w1242-email-templates', '/api/v1/email-templates'),
+  mountedRoute('w1375-launch-readiness', '/api/v1/launch-readiness'),
+
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {
     name: 'integration-health-aggregator',

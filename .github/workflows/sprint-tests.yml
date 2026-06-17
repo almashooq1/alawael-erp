@@ -2460,6 +2460,8 @@ on:
       - 'backend/__tests__/referral-document-delete-unlink-boundary-behavioral-wave1388.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/uploads-delete-path-boundary-behavioral-wave1389.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dr-verify-workflow-wave1391.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4898,6 +4900,8 @@ on:
       - 'backend/__tests__/referral-document-delete-unlink-boundary-behavioral-wave1388.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/uploads-delete-path-boundary-behavioral-wave1389.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dr-verify-workflow-wave1391.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

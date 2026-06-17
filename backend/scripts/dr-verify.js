@@ -508,11 +508,6 @@ async function runVerification({ dryRun = false } = {}) {
     error: null,
   };
 
-  if (!checkTool('mongorestore')) {
-    report.error = 'mongorestore_not_installed';
-    return report;
-  }
-
   const latest = findLatestBackup();
   if (!latest) {
     report.error = 'no_backup_found';
@@ -534,6 +529,12 @@ async function runVerification({ dryRun = false } = {}) {
 
   if (dryRun) {
     report.success = true;
+    report.durationMs = Date.now() - startedAt;
+    return report;
+  }
+
+  if (!checkTool('mongorestore')) {
+    report.error = 'mongorestore_not_installed';
     report.durationMs = Date.now() - startedAt;
     return report;
   }
@@ -597,7 +598,7 @@ async function main() {
     console.log('');
   }
 
-  if (!report.success) {
+  if (!report.success && !dryRun) {
     await sendOpsAlert({
       kind: 'dr_verification_failed',
       severity: 'critical',
@@ -612,6 +613,10 @@ async function main() {
       metadata: report,
     }).catch(e => logger.error('[dr-verify] alert dispatch failed', { error: e.message }));
 
+    process.exit(1);
+  }
+
+  if (!report.success && dryRun) {
     process.exit(1);
   }
 }

@@ -1671,3 +1671,4 @@ __tests__/medical-files-delete-traversal-behavioral-wave1385.test.js
 __tests__/files-hard-delete-unlink-boundary-behavioral-wave1386.test.js
 __tests__/media-permanent-delete-unlink-boundary-behavioral-wave1387.test.js
 __tests__/referral-document-delete-unlink-boundary-behavioral-wave1388.test.js
+__tests__/uploads-delete-path-boundary-behavioral-wave1389.test.js

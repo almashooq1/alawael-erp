@@ -145,6 +145,14 @@ router.delete('/:bucket/:filename', (req, res) => {
     const filename = String(req.params.filename || '').replace(/[^a-zA-Z0-9._-]/g, '');
     if (!filename) return res.status(400).json({ ok: false, error: 'INVALID_FILENAME' });
     const fullPath = path.join(ROOT, bucket, filename);
+    // W1389: path-boundary check — safeBucket + filename sanitisation already
+    // prevent the most obvious traversal, but an unexpected ROOT configuration
+    // (e.g. symlink, injected env) could still produce a path that escapes the
+    // intended root.  Resolve + assert strictly inside ROOT before unlinking
+    // (same `+ path.sep` pattern used by W453-W455/W1386-W1388 siblings).
+    if (!path.resolve(fullPath).startsWith(path.resolve(ROOT) + path.sep)) {
+      return res.status(400).json({ ok: false, error: 'INVALID_PATH' });
+    }
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     }

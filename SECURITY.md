@@ -51,6 +51,46 @@ This system handles Saudi PII under PDPL. Relevant controls:
 
 If your finding involves PII handling or audit-trail integrity, please flag it explicitly so we can route the response through the DPO.
 
+## Dynamic security scanning (DAST)
+
+OWASP ZAP baseline scans run via `.github/workflows/dast.yml`:
+
+- **Scheduled**: Weekly at 03:17 UTC (Mon).
+- **Manual trigger**: Via `workflow_dispatch` with optional `target_url` input.
+
+### Target URL policy
+
+DAST scans **production-like targets by default** when run without explicit override:
+
+| Scenario                         | Action                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| Weekly cron (no input)           | Uses `vars.DAST_TARGET_URL` or `secrets.DAST_TARGET_URL` — staging only ✅             |
+| Manual trigger with `target_url` | Accepts the URL as-is **unless** it looks like production (`*prod*` or `*production*`) |
+| URL looks like production        | **REJECTED** unless `workflow_dispatch.allow_production=true` is set 🚫                |
+| URL is missing entirely          | **REJECTED** with fail-fast message — no silent scan against a dangling target         |
+
+**Rationale:** The `allow_production=true` override requires a human to explicitly opt in to scanning production, preventing accidental dynamic testing against live data.
+
+### Setup
+
+1. Store your staging URL in a repository variable or secret:
+
+   - `Settings → Secrets and variables → Actions → New repository variable`
+   - Name: `DAST_TARGET_URL`
+   - Value: `https://staging.yourdomain.com` (must be publicly reachable)
+
+2. To scan manually:
+
+   - Go to `Actions → DAST (OWASP ZAP) → Run workflow`
+   - Leave `target_url` blank (uses the configured default) or enter a specific staging URL.
+   - Leave `allow_production` unchecked.
+
+3. To scan production (approval required):
+   - Set `allow_production` to `true` in the workflow UI.
+   - This requires a human confirmation in the Actions log.
+
+Reports are uploaded as artifacts and retained for 30 days.
+
 ## Security-relevant CI gates
 
 - `sprint-tests.yml` runs the [`admin-routes-auth-wiring`](backend/__tests__/admin-routes-auth-wiring.test.js) drift check on every push — every admin handler must be wrapped in `authenticateToken` and a role-restricting middleware. A copy-paste regression that bypasses either fails the build before merge.

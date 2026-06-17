@@ -1,0 +1,37 @@
+# Gitleaks configuration — Al-Awael ERP
+#
+# Secret-scanning config used by the CI security job and local pre-commit runs.
+# We extend the upstream default ruleset (covers AWS keys, JWTs, private keys,
+# generic high-entropy tokens, etc.) and add a focused global allowlist so the
+# scanner does not flag *non-secrets*: env TEMPLATES, test/fixture data, and
+# archived code. Keeping the allowlist narrow is itself a control — broad
+# allowlists silently disable scanning.
+#
+# Guarded by: backend/__tests__/security-compliance-audit-wave1393.test.js
+# Docs:       docs/wiki/SECURITY_COMPLIANCE_AUDIT_AND_VALIDATION.md
+
+title = "Al-Awael ERP gitleaks config"
+
+[extend]
+# Inherit all upstream gitleaks rules (do not silently weaken detection).
+useDefault = true
+
+[allowlist]
+description = "Templates, tests/fixtures, and archived code are not live secrets"
+
+# Paths that must NOT be treated as sources of real secrets. Kept deliberately
+# tight: only .env *example/template* files, the test trees, and archived code.
+paths = [
+  '''.*\.env\.example$''',
+  '''.*\.env\.minimum\.example$''',
+  '''.*/__tests__/.*''',
+  '''.*/tests/.*''',
+  '''_archived/.*''',
+]
+
+# Common placeholder tokens used in templates/fixtures — never real material.
+regexes = [
+  '''CHANGE_ME[A-Z0-9_]*''',
+  '''your[-_]?(secret|token|key|password)[-_]?here''',
+  '''example\.com''',
+]

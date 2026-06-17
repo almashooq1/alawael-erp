@@ -275,29 +275,56 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: null });
     const session = await S.findById(req.params.sessionId)
-      .select('notes soapNotes documentation')
+      .select('subjective objective assessment plan soapNotes notes documentation documentedAt')
       .lean();
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
     res.json({
       success: true,
-      data: session.soapNotes || session.documentation || session.notes || null,
+      data: {
+        subjective: session.subjective ?? null,
+        objective: session.objective ?? null,
+        assessment: session.assessment ?? null,
+        plan: session.plan ?? null,
+        soapNotes: session.soapNotes ?? session.documentation ?? session.notes ?? null,
+        documentedAt: session.documentedAt ?? null,
+      },
     });
   })
 );
 
 // POST /therapy-sessions/:sessionId/documentation — save SOAP notes
+// W1380: ClinicalSession stores SOAP as four top-level String fields
+// (subjective/objective/assessment/plan) + a combined `soapNotes`. The route
+// previously assigned the WHOLE request object to the String soapNotes field
+// → Mongoose CastError (400 INVALID_ID) → SOAP could never be saved. Map each
+// field explicitly instead.
 router.post(
   '/:sessionId/documentation',
   asyncHandler(async (req, res) => {
     const S = Session();
     if (!S) return res.status(503).json({ success: false, message: 'Model unavailable' });
+    const body = req.body || {};
+    const $set = { documentedAt: new Date() };
+    for (const f of ['subjective', 'objective', 'assessment', 'plan', 'soapNotes']) {
+      if (body[f] !== undefined && body[f] !== null) $set[f] = String(body[f]);
+    }
     const session = await S.findByIdAndUpdate(
       req.params.sessionId,
-      { $set: { soapNotes: req.body, documentedAt: new Date() } },
+      { $set },
       { returnDocument: 'after' }
     ).lean();
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
-    res.json({ success: true, data: session.soapNotes });
+    res.json({
+      success: true,
+      data: {
+        subjective: session.subjective ?? null,
+        objective: session.objective ?? null,
+        assessment: session.assessment ?? null,
+        plan: session.plan ?? null,
+        soapNotes: session.soapNotes ?? null,
+        documentedAt: session.documentedAt ?? null,
+      },
+    });
   })
 );
 

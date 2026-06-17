@@ -177,9 +177,16 @@ __pycache__/
 
 # ───────────────────────────────────────────────────────────────
 # 11. Temp Scripts & Debug (ops/ directory)
-# Contains VPS deploy/debug scripts with credentials
+# Contains VPS deploy/debug scripts with credentials — keep ignored.
+# EXCEPTION: monitoring infrastructure-as-code (Prometheus / AlertManager /
+# Grafana provisioning) IS committed — the W1404/W1405 deploy gate requires
+# these files in git. Negations below re-include exactly those, nothing else.
 # ───────────────────────────────────────────────────────────────
-ops/
+ops/*
+!ops/prometheus.yml
+!ops/alerting-rules.yml
+!ops/alertmanager.yml
+!ops/grafana/
 _*.py
 !**/__init__.py
 _*.js

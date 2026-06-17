@@ -1053,3 +1053,4 @@ __tests__/whatsapp-bot-interactive-menu-wave1381.test.js
 __tests__/whatsapp-bot-intelligence-wave1382.test.js
 __tests__/whatsapp-bot-bilingual-wave1383.test.js
 __tests__/assert-beneficiary-in-scope-wave1378.test.js
+__tests__/post-deploy-probes-blueprint43-wave1390.test.js

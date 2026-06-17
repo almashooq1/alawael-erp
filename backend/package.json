@@ -91,6 +91,7 @@
     "verify:supply-chain-staging:json": "node scripts/verify-supply-chain-staging.js --json",
     "backfill:complaint-branchid": "node scripts/backfill-complaint-branchid.js",
     "backfill:whatsapp-conversation-branchid": "node scripts/backfill-whatsapp-conversation-branchid.js",
+    "backfill:whatsapp-group-branchid": "node scripts/backfill-whatsapp-group-branchid.js",
     "backfill:referral-branchid": "node scripts/backfill-referral-branchid.js",
     "backfill:rehabplan-branchid": "node scripts/backfill-rehabplan-branchid.js",
     "backfill:referralticket-branchid": "node scripts/backfill-referralticket-branchid.js",

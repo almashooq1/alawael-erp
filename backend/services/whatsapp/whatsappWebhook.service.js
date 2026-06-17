@@ -684,9 +684,36 @@ async function dispatchBotPlan({
     logger.warn(`[WhatsApp BotMenu] state persist failed: ${err.message}`)
   );
 
-  // (4) escalate any side effect not already served live
+  // (4) W1384: turn the side effect into a real DB record (env-gated), then
+  // escalate. A created record id is attached to the staff notification so it's
+  // click-through trackable; record creation failing falls back to plain
+  // escalation (the record service returns ok:false, never throws).
   if (plan.sideEffect && !suppressEscalation) {
-    await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect);
+    let recordId = null;
+    if (process.env.ENABLE_WHATSAPP_BOT_RECORDS === 'true') {
+      try {
+        const botRecords = require('./whatsappBotRecords.service');
+        if (botRecords.mapsToRecord(plan.sideEffect.kind)) {
+          const r = await botRecords.createRecordFor(plan.sideEffect, {
+            phone: fromPhone,
+            senderName,
+          });
+          if (r && r.ok) {
+            recordId = r.recordId;
+            logger.info(
+              `[WhatsApp BotRecords] created ${r.model} ${r.recordId} for ${plan.sideEffect.kind}`
+            );
+          } else {
+            logger.info(
+              `[WhatsApp BotRecords] no record (${r && r.reason}) for ${plan.sideEffect.kind}`
+            );
+          }
+        }
+      } catch (err) {
+        logger.warn(`[WhatsApp BotRecords] error: ${err.message}`);
+      }
+    }
+    await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect, recordId);
   }
 
   logger.info(
@@ -737,7 +764,7 @@ const BOT_SIDE_EFFECT_PRIORITY = Object.freeze({
   submit_satisfaction: 'low',
 });
 
-async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect) {
+async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect, recordId = null) {
   const reason = BOT_SIDE_EFFECT_REASON[sideEffect.kind] || `بوت الواتساب: ${sideEffect.kind}`;
   const priority = BOT_SIDE_EFFECT_PRIORITY[sideEffect.kind] || 'medium';
   // Emergencies jump straight to the 'escalated' state + critical urgency so
@@ -763,7 +790,7 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
     const notifService = require('../notifications/notification-enhanced.service');
     if (notifService?.send) {
       await notifService.send({
-        title: `🤖 بوت واتساب — ${reason} (${senderName})`,
+        title: `🤖 بوت واتساب — ${reason}${recordId ? ' 📄' : ''} (${senderName})`,
         body: JSON.stringify(sideEffect.collected || {}).slice(0, 500),
         type: 'alert',
         priority,
@@ -774,6 +801,7 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
           conversationId: conv?._id,
           sideEffectKind: sideEffect.kind,
           collected: sideEffect.collected || {},
+          ...(recordId ? { recordId } : {}),
         },
       });
     }

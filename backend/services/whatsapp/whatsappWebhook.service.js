@@ -716,6 +716,23 @@ async function dispatchBotPlan({
     await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect, recordId);
   }
 
+  // (5) W1408: link the event to the beneficiary's unified-core CareTimeline
+  // (only fires for beneficiary-attributable kinds with a resolvable guardian;
+  // a direct addEvent call — see whatsappBotTimeline.service. Never throws).
+  if (plan.sideEffect) {
+    try {
+      const botTimeline = require('./whatsappBotTimeline.service');
+      const t = await botTimeline.recordBotTimelineEvent(plan.sideEffect, fromPhone, senderName);
+      if (t && t.ok) {
+        logger.info(
+          `[WhatsApp BotTimeline] linked ${plan.sideEffect.kind} → CareTimeline ${t.eventId}`
+        );
+      }
+    } catch (err) {
+      logger.warn(`[WhatsApp BotTimeline] error: ${err.message}`);
+    }
+  }
+
   logger.info(
     `[WhatsApp BotMenu] handled inbound from ${fromPhone} | ` +
       `nextUnit=${plan.nextFlowState?.unit || 'idle'} | sideEffect=${plan.sideEffect?.kind || 'none'} | ` +

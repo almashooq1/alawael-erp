@@ -32,6 +32,7 @@ import {
   Assessment as AssessmentIcon,
 } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
+import { kpiService } from 'services/kpiService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -52,10 +53,21 @@ const RANK_COLORS = {
   مقبول: '#ef4444',
 };
 
+const DEFAULT_KPIS = {
+  sessionsCompleted: { current: 0, target: 100, unit: 'جلسة' },
+  patientSatisfaction: { current: 0, target: 100, unit: '%' },
+  goalsAchieved: { current: 0, target: 100, unit: '%' },
+  documentationRate: { current: 0, target: 100, unit: '%' },
+  attendanceRate: { current: 0, target: 100, unit: '%' },
+  referralResponseTime: { current: 0, target: 24, unit: 'ساعة' },
+};
+
 const TherapistPerformanceKPIs = () => {
   const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [kpiData, setKpiData] = useState(null);
+  const [registryKPIs, setRegistryKPIs] = useState([]);
+  const [registryLoading, setRegistryLoading] = useState(false);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -70,6 +82,7 @@ const TherapistPerformanceKPIs = () => {
 
   useEffect(() => {
     fetchKPIs();
+    fetchRegistryKPIs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -84,6 +97,32 @@ const TherapistPerformanceKPIs = () => {
       showSnackbar('خطأ في تحميل مؤشرات الأداء', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRegistryKPIs = async () => {
+    try {
+      setRegistryLoading(true);
+      const [registry, computed] = await Promise.all([
+        kpiService.getRegistryKPIs('clinical_director'),
+        kpiService.getComputedDashboard(null, 'monthly'),
+      ]);
+      const valuesById = new Map();
+      if (computed?.data?.heroKpis) {
+        for (const h of computed.data.heroKpis) valuesById.set(h.id, h.value);
+      } else if (computed?.data?.values) {
+        for (const [k, v] of Object.entries(computed.data.values)) valuesById.set(k, v);
+      }
+      const enriched = (registry.data || []).map(k => ({
+        ...k,
+        currentValue: valuesById.get(k.id) ?? null,
+      }));
+      setRegistryKPIs(enriched);
+    } catch (err) {
+      logger.error('fetchRegistryKPIs error:', err);
+      showSnackbar('خطأ في تحميل مؤشرات الأداء من السجل', 'error');
+    } finally {
+      setRegistryLoading(false);
     }
   };
 
@@ -140,7 +179,7 @@ const TherapistPerformanceKPIs = () => {
     return Math.min(100, Math.round((current / target) * 100));
   };
 
-  const kpis = kpiData?.kpis || {};
+  const kpis = kpiData?.kpis || DEFAULT_KPIS;
   const customKPIs = kpiData?.customKPIs || [];
   const monthlyTrend = kpiData?.monthlyTrend || [];
   const overallScore = kpiData?.overallScore || 0;
@@ -314,6 +353,74 @@ const TherapistPerformanceKPIs = () => {
               );
             })}
           </Grid>
+
+          {/* Registry KPIs */}
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            مؤشرات الأداء من سجل KPI
+          </Typography>
+          {registryLoading ? (
+            <Typography textAlign="center" color="text.secondary" py={2}>
+              جاري تحميل مؤشرات السجل...
+            </Typography>
+          ) : registryKPIs.length === 0 ? (
+            <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 2, bgcolor: '#f8fafc', mb: 3 }}>
+              <AssessmentIcon sx={{ fontSize: 40, color: '#0891b2', opacity: 0.4, mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                لا توجد مؤشرات مسجلة متاحة
+              </Typography>
+            </Paper>
+          ) : (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {registryKPIs.slice(0, 6).map(kpi => {
+                const current = kpi.currentValue ?? '-';
+                const target = kpi.target ?? 0;
+                const unit = kpi.unit === 'percent' ? '%' : kpi.unit || '';
+                const progress =
+                  typeof current === 'number' && target
+                    ? Math.min(100, Math.round((current / target) * 100))
+                    : 0;
+                const isOnTarget = progress >= 80;
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={kpi.id}>
+                    <Card sx={{ borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <AssessmentIcon sx={{ color: '#0891b2' }} />
+                          <Typography variant="body2" fontWeight={700}>
+                            {kpi.nameAr || kpi.nameEn || kpi.id}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="h4"
+                          fontWeight={800}
+                          color={isOnTarget ? '#22c55e' : '#0891b2'}
+                        >
+                          {typeof current === 'number' ? `${current}${unit}` : current}
+                        </Typography>
+                        {typeof current === 'number' && target > 0 && (
+                          <>
+                            <LinearProgress
+                              variant="determinate"
+                              value={progress}
+                              sx={{ height: 6, borderRadius: 3, mt: 1, bgcolor: '#f3f4f6' }}
+                            />
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ mt: 0.5, display: 'block' }}
+                            >
+                              الهدف: {target}
+                              {unit} ({progress}%)
+                            </Typography>
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
 
           {/* Monthly Trend */}
           {monthlyTrend.length > 0 && (

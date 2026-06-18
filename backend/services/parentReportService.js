@@ -245,6 +245,23 @@ function renderPdf(data) {
   });
 }
 
+/**
+ * KPI-facing parent-portal activation summary.
+ * `parents` = users with the parent/guardian role; `activations` = those who
+ * have logged in at least once or completed onboarding.
+ */
+function activationSummary(parents = [], activations = []) {
+  const total = parents.length;
+  const activated =
+    activations.length || parents.filter(p => p.lastLoginAt || p.activatedAt || p.isActive).length;
+  const activatedPct = total > 0 ? Math.round((activated / total) * 1000) / 10 : null;
+  return {
+    total,
+    activated,
+    activatedPct,
+  };
+}
+
 module.exports = {
   attendanceRate,
   goalProgress,
@@ -252,4 +269,5 @@ module.exports = {
   displayName,
   assembleReport,
   renderPdf,
+  activationSummary,
 };

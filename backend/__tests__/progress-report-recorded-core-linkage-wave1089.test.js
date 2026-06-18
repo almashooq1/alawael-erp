@@ -27,9 +27,15 @@ let mongoServer;
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create({
-    instance: { dbName: 'w1089-progress-report' },
+    instance: {
+      dbName: 'w1089-progress-report',
+      launchTimeout: 60000,
+    },
   });
-  await mongoose.connect(mongoServer.getUri());
+  await mongoose.connect(mongoServer.getUri(), {
+    serverSelectionTimeoutMS: 60000,
+    connectTimeoutMS: 60000,
+  });
   initializeDDDSubscribers(integrationBus);
 });
 
@@ -39,6 +45,9 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
+  // If setup failed (or connection is closed), skip cleanup to avoid
+  // noisy buffered-operation timeouts masking the real failure.
+  if (mongoose.connection.readyState !== 1) return;
   await BeneficiaryProgress.deleteMany({});
   await CareTimeline.deleteMany({});
 });

@@ -253,6 +253,36 @@ function detectCashflowRisk(invoices, now = new Date()) {
   };
 }
 
+/**
+ * Back-test forecast accuracy for the most recently completed month.
+ * Compares the trailing-average forecast produced at the start of last month
+ * against the actual paid amount for that month.
+ */
+function backtestAccuracy(invoices, now = new Date()) {
+  const history = monthlyHistory(invoices, now);
+  if (history.length < 2) {
+    return { lastMonthAccuracyPct: null, reason: 'insufficient_history' };
+  }
+  const lastMonth = history[history.length - 1];
+  const priorMonths = history.slice(0, -1);
+  if (priorMonths.length === 0) {
+    return { lastMonthAccuracyPct: null, reason: 'insufficient_history' };
+  }
+  const forecast = priorMonths.reduce((sum, m) => sum + m.paid, 0) / priorMonths.length;
+  const actual = lastMonth.paid;
+  if (!actual || forecast <= 0) {
+    return { lastMonthAccuracyPct: null, reason: 'no_actual_or_forecast' };
+  }
+  const error = Math.abs(actual - forecast) / actual;
+  const accuracy = Math.max(0, Math.round((1 - error) * 1000) / 10);
+  return {
+    lastMonthAccuracyPct: accuracy,
+    forecast,
+    actual,
+    month: lastMonth.month,
+  };
+}
+
 function monthlyHistory(invoices, now = new Date()) {
   const cutoff = new Date(now);
   cutoff.setMonth(cutoff.getMonth() - 12);
@@ -286,4 +316,5 @@ module.exports = {
   projectMonths,
   detectCashflowRisk,
   monthlyHistory,
+  backtestAccuracy,
 };

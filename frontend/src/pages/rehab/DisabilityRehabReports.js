@@ -64,24 +64,37 @@ export default function DisabilityRehabReports() {
         rehabReportService.getPerformance(),
         rehabProgramService.getAll(),
       ]);
-      setStats(st || rehabReportService.getMockDashboard());
-      setPerformance(perf || rehabReportService.getMockPerformance());
-      setPrograms(pr?.programs || pr?.data || rehabProgramService.getMockPrograms());
-    } catch {
-      setStats(rehabReportService.getMockDashboard());
-      setPerformance(rehabReportService.getMockPerformance());
-      setPrograms(rehabProgramService.getMockPrograms());
+      setStats(st ?? null);
+      setPerformance(perf ?? null);
+      setPrograms(pr?.programs || pr?.data || []);
+    } catch (err) {
+      showSnackbar(err?.message || 'خطأ في تحميل تقارير التأهيل', 'error');
+      setStats(null);
+      setPerformance(null);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showSnackbar]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const s = stats || rehabReportService.getMockDashboard();
-  const p = performance || rehabReportService.getMockPerformance();
+  const s = stats || {
+    activeBeneficiaries: 0,
+    activePrograms: 0,
+    avgImprovement: 0,
+    goalAchievementRate: 0,
+    sessionCompletionRate: 0,
+    satisfactionRate: 0,
+    monthlyTrend: [],
+    disabilityDistribution: [],
+  };
+  const p = performance || {
+    therapistPerformance: [],
+    programEffectiveness: [],
+  };
 
   if (loading)
     return (

@@ -39,14 +39,22 @@ import CctvCamerasScreen from '../screens/cctv/CctvCamerasScreen';
 import CctvCameraDetailScreen from '../screens/cctv/CctvCameraDetailScreen';
 import CctvAlertsScreen from '../screens/cctv/CctvAlertsScreen';
 
+import AssessmentListScreen from '../screens/assessments/AssessmentListScreen';
+import AssessmentDetailScreen from '../screens/assessments/AssessmentDetailScreen';
+import RehabMetricsScreen from '../screens/rehab/RehabMetricsScreen';
+
 type ParentTabsParamList = {
   MyChildren: undefined;
+  Assessments: undefined;
+  RehabMetrics: undefined;
   Telehealth: undefined;
   ChatList: undefined;
 };
 
 type TherapistTabsParamList = {
   Workbench: undefined;
+  Assessments: undefined;
+  RehabMetrics: undefined;
   Telehealth: undefined;
   ChatList: undefined;
 };
@@ -65,6 +73,7 @@ type RootParamList = {
   CctvCameras: { branchCode: string };
   CctvCameraDetail: { cameraId: string };
   CctvAlerts: undefined;
+  AssessmentDetail: { scaleKey: string };
 };
 
 type SessionUser = { id: string; email: string; role: string; name?: string };
@@ -108,6 +117,10 @@ function ParentTabs({ navigation }: any) {
       }}
     >
       <ParentTab.Screen name="MyChildren" component={MyChildrenScreen as any} options={{ tabBarLabel: 'أطفالي' }} />
+      <ParentTab.Screen name="Assessments" options={{ tabBarLabel: 'مقاييس' }}>
+        {() => <AssessmentListScreen navigation={navigation} />}
+      </ParentTab.Screen>
+      <ParentTab.Screen name="RehabMetrics" component={RehabMetricsScreen as any} options={{ tabBarLabel: 'مقاييس التأهيل' }} />
       <ParentTab.Screen name="Telehealth" component={TelehealthScreen as any} options={{ tabBarLabel: 'جلسات الفيديو' }} />
       <ParentTab.Screen name="ChatList" options={{ tabBarLabel: 'الرسائل' }}>
         {() => <ChatListScreen onOpenConversation={id => navigation.navigate('ChatThread', { conversationId: id })} />}
@@ -126,6 +139,10 @@ function TherapistTabs({ navigation }: any) {
       }}
     >
       <TherapistTab.Screen name="Workbench" component={TherapistWorkbenchScreen as any} options={{ tabBarLabel: 'منصّتي' }} />
+      <TherapistTab.Screen name="Assessments" options={{ tabBarLabel: 'مقاييس' }}>
+        {() => <AssessmentListScreen navigation={navigation} />}
+      </TherapistTab.Screen>
+      <TherapistTab.Screen name="RehabMetrics" component={RehabMetricsScreen as any} options={{ tabBarLabel: 'مقاييس التأهيل' }} />
       <TherapistTab.Screen name="Telehealth" component={TelehealthScreen as any} options={{ tabBarLabel: 'جلسات الفيديو' }} />
       <TherapistTab.Screen name="ChatList" options={{ tabBarLabel: 'الرسائل' }}>
         {() => <ChatListScreen onOpenConversation={id => navigation.navigate('ChatThread', { conversationId: id })} />}
@@ -219,6 +236,7 @@ export default function SprintAppNavigator({
       <RootStack.Screen name="CctvCameras" component={CctvCamerasScreen} />
       <RootStack.Screen name="CctvCameraDetail" component={CctvCameraDetailScreen} />
       <RootStack.Screen name="CctvAlerts" component={CctvAlertsScreen} />
+      <RootStack.Screen name="AssessmentDetail" component={AssessmentDetailScreen as any} />
       <RootStack.Screen
         name="ChatThread"
         options={{

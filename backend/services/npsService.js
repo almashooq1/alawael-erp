@@ -157,6 +157,34 @@ const STOP_WORDS = new Set([
   'no',
 ]);
 
+/**
+ * KPI-facing latest NPS score from the most recent period/campaign.
+ * If records carry a `periodKey` or `date`, the latest group is used;
+ * otherwise all records are treated as one campaign.
+ */
+function latestScore(records) {
+  if (!Array.isArray(records) || records.length === 0) {
+    return { score: null, sample: 0, verdict: 'insufficient' };
+  }
+  const sorted = [...records].sort((a, b) => {
+    const da = new Date(a.date || a.periodKey || 0).getTime();
+    const db = new Date(b.date || b.periodKey || 0).getTime();
+    return db - da;
+  });
+  const latestPeriod = sorted[0].periodKey || sorted[0].date?.slice(0, 7) || 'latest';
+  const latestRecords = sorted.filter(r => {
+    const rp = r.periodKey || r.date?.slice(0, 7) || 'latest';
+    return rp === latestPeriod;
+  });
+  const s = summarize(latestRecords);
+  return {
+    score: s.nps,
+    sample: s.sample,
+    verdict: s.verdict,
+    period: latestPeriod,
+  };
+}
+
 function topThemes(comments, n = 10) {
   const freq = new Map();
   for (const c of comments) {
@@ -181,4 +209,5 @@ module.exports = {
   summarize,
   trendByPeriod,
   topThemes,
+  latestScore,
 };

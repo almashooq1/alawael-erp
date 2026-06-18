@@ -461,14 +461,16 @@ class UnifiedAssessmentService {
     const percentage = Math.round((totalScore / scale.maxScore) * 100);
 
     // تحديد مستوى التفسير
-    const thresholds = Object.keys(scale.interpretation)
-      .map(Number)
-      .sort((a, b) => b - a);
     let interpretationLabel = '';
-    for (const threshold of thresholds) {
-      if (percentage >= threshold) {
-        interpretationLabel = scale.interpretation[threshold];
-        break;
+    if (scale.interpretation) {
+      const thresholds = Object.keys(scale.interpretation)
+        .map(Number)
+        .sort((a, b) => b - a);
+      for (const threshold of thresholds) {
+        if (percentage >= threshold) {
+          interpretationLabel = scale.interpretation[threshold];
+          break;
+        }
       }
     }
 

@@ -906,6 +906,55 @@ const _ACTIVATION = {
     ageRange: { min: 18, max: 120, unit: 'years' },
     targetPopulation: ['adults'],
   },
+  'VB-MAPP': {
+    category: 'developmental',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 18, max: 216, unit: 'months' },
+    targetPopulation: ['children', 'autism', 'language_delay'],
+  },
+  'ABLLS-R': {
+    category: 'developmental',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 24, max: 216, unit: 'months' },
+    targetPopulation: ['children', 'autism', 'language_delay'],
+  },
+  'BAYLEY-4': {
+    category: 'developmental',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 16, max: 42, unit: 'months' },
+    targetPopulation: ['children'],
+  },
+  'WHODAS-36': {
+    category: 'functional',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 18, max: 120, unit: 'years' },
+    targetPopulation: ['adults'],
+  },
+  'ABAS-3': {
+    category: 'adaptive',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 12, max: 216, unit: 'months' },
+    targetPopulation: ['children', 'adolescents', 'adults'],
+  },
+  GAS: {
+    category: 'outcome',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 6, max: 120, unit: 'years' },
+    targetPopulation: ['children', 'adolescents', 'adults'],
+  },
+  COPM: {
+    category: 'functional',
+    purpose: 'outcome',
+    interpretationStyle: 'tier',
+    ageRange: { min: 6, max: 120, unit: 'years' },
+    targetPopulation: ['children', 'adolescents', 'adults'],
+  },
 };
 
 // codes derived but kept draft (context-triggered — see header note)

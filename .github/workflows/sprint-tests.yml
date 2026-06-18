@@ -1868,6 +1868,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3714,6 +3716,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

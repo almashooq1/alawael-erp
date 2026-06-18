@@ -27,10 +27,12 @@ const router = express.Router();
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const {
   branchFilter,
-  effectiveBranchScope,
   requireBranchAccess,
 } = require('../middleware/branchScope.middleware');
-const { assertBranchMatch } = require('../middleware/assertBranchMatch');
+// W1384: effectiveBranchScope is exported by assertBranchMatch, NOT
+// branchScope.middleware — importing it from the latter yielded undefined and
+// 500'd at every call site (W1378 class).
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 const storyBuilder = require('../intelligence/story-builder.lib');
 const variantBuilder = require('../intelligence/story-surface-variant-builder.lib');

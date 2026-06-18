@@ -101,7 +101,11 @@ describe('W1409 — GET /:sessionId/documentation cross-branch isolation', () =>
     const res = await request(buildApp()).get(`/api/v1/therapy-sessions/${sid}/documentation`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data).toMatchObject({ subjective: 'own note' });
+    // Post-W1380 the GET surfaces top-level SOAP fields + the combined `soapNotes`
+    // object. seedSession() stores the note nested under soapNotes, so assert
+    // there. (The IDOR-relevant check is that own-branch reads go THROUGH the
+    // guard — status 200, not 403/404.)
+    expect(res.body.data.soapNotes).toMatchObject({ subjective: 'own note' });
   });
 });
 

@@ -45,13 +45,13 @@ npm run quality:push
 
 Run `npm run env:check` to verify all security-critical keys are set:
 
-| Key                  | Enforced In    | Status |
-| -------------------- | -------------- | ------ |
-| `MONGODB_URI`        | Production, CI | ◯      |
-| `JWT_SECRET`         | Production, CI | ◯      |
-| `JWT_REFRESH_SECRET` | Production, CI | ◯      |
-| `ENCRYPTION_KEY`     | Production, CI | ◯      |
-| `SESSION_SECRET`     | Production, CI | ◯      |
+| Key | Enforced In | Status |
+| --- | --- | --- |
+| `MONGODB_URI` | Production, CI | ◯ |
+| `JWT_SECRET` | Production, CI | ◯ |
+| `JWT_REFRESH_SECRET` | Production, CI | ◯ |
+| `ENCRYPTION_KEY` | Production, CI | ◯ |
+| `SESSION_SECRET` | Production, CI | ◯ |
 
 **Exit code:**
 

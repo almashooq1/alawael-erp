@@ -43,10 +43,21 @@ const memberSchema = new mongoose.Schema(
 
 const whatsappContactGroupSchema = new mongoose.Schema(
   {
-    /** Owning tenant — required for cross-branch isolation. */
+    /** Legacy tenant field — never set on this branch-scoped platform (kept for
+     *  back-compat; superseded by `branchId` for isolation as of W1412). */
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Organization',
+      index: true,
+      default: null,
+    },
+
+    /** Owning branch — the real cross-tenant isolation key (W1412). Derived
+     *  from the creating user's branch; null = visible only to cross-branch
+     *  roles (fail-closed). */
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
       index: true,
       default: null,
     },
@@ -81,6 +92,7 @@ whatsappContactGroupSchema.index(
   }
 );
 whatsappContactGroupSchema.index({ organizationId: 1, isDeleted: 1, updatedAt: -1 });
+whatsappContactGroupSchema.index({ branchId: 1, isDeleted: 1, updatedAt: -1 }); // W1412 branch-scoped list
 
 whatsappContactGroupSchema.virtual('memberCount').get(function () {
   return Array.isArray(this.members) ? this.members.length : 0;
@@ -135,9 +147,9 @@ function dedupeMembers(members) {
  * @param {string} [orgId]
  * @returns {object}
  */
-function groupScopedFilter(id, orgId) {
+function groupScopedFilter(id, branchScope) {
   const filter = { _id: id, isDeleted: false };
-  if (orgId) filter.organizationId = orgId;
+  if (branchScope) filter.branchId = branchScope; // W1412: branch isolation (was never-set organizationId)
   return filter;
 }
 
@@ -147,9 +159,9 @@ function groupScopedFilter(id, orgId) {
  * @param {{ search?: string, tag?: string }} [opts]
  * @returns {object}
  */
-function listScopedFilter(orgId, opts = {}) {
+function listScopedFilter(branchScope, opts = {}) {
   const filter = { isDeleted: false };
-  if (orgId) filter.organizationId = orgId;
+  if (branchScope) filter.branchId = branchScope; // W1412: branch isolation (was never-set organizationId)
   if (opts.search) filter.name = { $regex: String(opts.search).trim(), $options: 'i' };
   if (opts.tag) filter.tags = opts.tag;
   return filter;

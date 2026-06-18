@@ -69,37 +69,42 @@ describe('W746 WhatsAppContactGroup — dedupeMembers', () => {
   });
 });
 
-describe('W746 WhatsAppContactGroup — groupScopedFilter (W269 isolation)', () => {
-  it('always pins isDeleted:false and adds organizationId when present', () => {
-    expect(Group.groupScopedFilter('g1', 'org9')).toEqual({
+describe('W746/W1412 WhatsAppContactGroup — groupScopedFilter (branch isolation)', () => {
+  it('always pins isDeleted:false and adds branchId when a branch scope is present', () => {
+    expect(Group.groupScopedFilter('g1', 'branch9')).toEqual({
       _id: 'g1',
       isDeleted: false,
-      organizationId: 'org9',
+      branchId: 'branch9',
     });
   });
 
-  it('omits organizationId for cross-branch (no-org) callers', () => {
+  it('omits branchId for cross-branch (no-scope) callers', () => {
     expect(Group.groupScopedFilter('g1')).toEqual({ _id: 'g1', isDeleted: false });
+  });
+
+  it('never scopes by the never-set organizationId field', () => {
+    expect(Group.groupScopedFilter('g1', 'branch9')).not.toHaveProperty('organizationId');
   });
 });
 
-describe('W746 WhatsAppContactGroup — listScopedFilter', () => {
-  it('pins isDeleted:false and scopes to org', () => {
-    expect(Group.listScopedFilter('org9')).toEqual({ isDeleted: false, organizationId: 'org9' });
+describe('W746/W1412 WhatsAppContactGroup — listScopedFilter (branch isolation)', () => {
+  it('pins isDeleted:false and scopes to branchId', () => {
+    expect(Group.listScopedFilter('branch9')).toEqual({ isDeleted: false, branchId: 'branch9' });
+    expect(Group.listScopedFilter('branch9')).not.toHaveProperty('organizationId');
   });
 
   it('adds case-insensitive name regex when search supplied', () => {
-    const f = Group.listScopedFilter('org9', { search: ' نطق ' });
+    const f = Group.listScopedFilter('branch9', { search: ' نطق ' });
     expect(f.name).toEqual({ $regex: 'نطق', $options: 'i' });
   });
 
   it('filters by tag when supplied', () => {
-    expect(Group.listScopedFilter('org9', { tag: 'VIP' }).tags).toBe('VIP');
+    expect(Group.listScopedFilter('branch9', { tag: 'VIP' }).tags).toBe('VIP');
   });
 
   it('returns a fresh object each call (no shared mutation)', () => {
-    const a = Group.listScopedFilter('org9');
-    const b = Group.listScopedFilter('org9');
+    const a = Group.listScopedFilter('branch9');
+    const b = Group.listScopedFilter('branch9');
     expect(a).not.toBe(b);
   });
 });

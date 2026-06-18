@@ -927,3 +927,7 @@ __tests__/whatsapp-bot-core-linkage-wave1408.test.js
 __tests__/clinical-session-path-wave1379.test.js
 __tests__/session-completed-bus-wave1381.test.js
 __tests__/phantom-imports-fixes-wave1384.test.js
+__tests__/compa-ratio-lib-wave1385.test.js
+__tests__/job-band-mapping-behavioral-wave1385.test.js
+__tests__/compa-ratio-service-behavioral-wave1385.test.js
+__tests__/pay-equity-compa-ratio-routes-wave1385.test.js

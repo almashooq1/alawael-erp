@@ -52,6 +52,17 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | **Executive Summary** (index + FAQ)                 | [production-secrets-cutover-summary-w1406.md](production-secrets-cutover-summary-w1406.md)                                           |
 | **Execution Record** (FINAL — completed 2026-06-17) | [w1406-execution-record-2026-06-17.md](w1406-execution-record-2026-06-17.md)                                                         |
 
+## Deployment & environment readiness
+
+| Topic                                   | Runbook                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------- |
+| **Environment setup** (minimal + full)  | [environment-setup.md](environment-setup.md)                               |
+| **Env preflight** (`npm run env:check`) | [env-preflight-check.md](env-preflight-check.md)                           |
+| **Pre-deployment checklist**            | [pre-deployment-checklist.md](pre-deployment-checklist.md)                 |
+| **Go-live checklist**                   | [go-live-checklist.md](go-live-checklist.md)                               |
+| **Performance / load testing** (k6)     | [performance-load-testing.md](performance-load-testing.md)                 |
+| **Go-live final report** (draft)        | [go-live-final-report-w1405-draft.md](go-live-final-report-w1405-draft.md) |
+
 ## How to use
 
 1. PagerDuty / Slack → you see an alert firing.

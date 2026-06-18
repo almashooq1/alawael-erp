@@ -139,6 +139,7 @@ const whatsappConversationSchema = new mongoose.Schema(
     branchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Branch',
+      index: true, // W1407: tenant-isolation scoping field (see byIdScopedFilter)
     },
 
     // Conversation state
@@ -215,6 +216,7 @@ whatsappConversationSchema.index({ requiresHumanReview: 1, status: 1, lastMessag
 whatsappConversationSchema.index({ urgencyLevel: 1, status: 1 });
 whatsappConversationSchema.index({ urgencyRank: -1, lastMessageAt: -1 });
 whatsappConversationSchema.index({ organizationId: 1, lastMessageAt: -1 });
+whatsappConversationSchema.index({ branchId: 1, lastMessageAt: -1 }); // W1407 branch-scoped list
 whatsappConversationSchema.index({ assignedTo: 1, status: 1 });
 
 // ─── Virtuals ─────────────────────────────────────────────────────────────────
@@ -249,26 +251,29 @@ function sortPendingReview(rows) {
   });
 }
 
-// Filters for the dashboard queue-count tiles. Org-scoped so multi-tenant
-// deployments don't over-count across organizations (the sibling analytics
-// aggregation is already org-scoped — these must match). Pure + unit-testable.
-function queueCountFilters(orgId) {
+// Filters for the dashboard queue-count tiles. BRANCH-scoped (W1407) so a
+// branch-restricted user's tiles don't count other branches' conversations
+// (the sibling analytics aggregation is branch-scoped too — these must match).
+// `branchScope` = effectiveBranchScope(req): a branchId for restricted users,
+// null/undefined for cross-branch roles (→ no filter = see all). Pure + testable.
+function queueCountFilters(branchScope) {
   const base = { status: { $ne: 'resolved' }, isDeleted: false };
-  if (orgId) base.organizationId = orgId;
+  if (branchScope) base.branchId = branchScope;
   return {
     pendingReview: { ...base, requiresHumanReview: true },
     critical: { ...base, urgencyLevel: 'critical' },
   };
 }
 
-// Query filter for a by-ID lookup that also enforces org isolation. Path-based
-// `/conversations/:id` routes would otherwise let a foreign-org staff member
-// read/resolve/assign another tenant's conversation (W269 doctrine). Returning
-// the org in the filter means a cross-org id simply yields a clean 404 (no
-// existence leak). Pure + unit-testable.
-function byIdScopedFilter(id, orgId) {
+// Query filter for a by-ID lookup that also enforces BRANCH isolation (W1407).
+// Path-based `/conversations/:id` routes would otherwise let a branch-restricted
+// staff member read/resolve/assign another branch's conversation (W269 doctrine).
+// Putting branchId in the filter means a foreign-branch id simply yields a clean
+// 404 (no existence leak). `branchScope` null/undefined → no constraint (cross-
+// branch role). Pure + unit-testable.
+function byIdScopedFilter(id, branchScope) {
   const filter = { _id: id };
-  if (orgId) filter.organizationId = orgId;
+  if (branchScope) filter.branchId = branchScope;
   return filter;
 }
 
@@ -290,9 +295,9 @@ whatsappConversationSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone, isDeleted: false });
 };
 
-whatsappConversationSchema.statics.findPendingReview = function (orgId) {
+whatsappConversationSchema.statics.findPendingReview = function (branchScope) {
   const q = { requiresHumanReview: true, status: { $ne: 'resolved' }, isDeleted: false };
-  if (orgId) q.organizationId = orgId;
+  if (branchScope) q.branchId = branchScope;
   return this.find(q)
     .populate('beneficiaryId', 'personalInfo.firstName personalInfo.lastName fileNumber')
     .populate('familyMemberId', 'firstName lastName relationship')
@@ -300,9 +305,9 @@ whatsappConversationSchema.statics.findPendingReview = function (orgId) {
     .then(sortPendingReview);
 };
 
-whatsappConversationSchema.statics.getAnalytics = function (orgId, startDate, endDate) {
+whatsappConversationSchema.statics.getAnalytics = function (branchScope, startDate, endDate) {
   const match = { isDeleted: false };
-  if (orgId) match.organizationId = new mongoose.Types.ObjectId(orgId);
+  if (branchScope) match.branchId = new mongoose.Types.ObjectId(branchScope);
   if (startDate || endDate) {
     match.lastMessageAt = {};
     if (startDate) match.lastMessageAt.$gte = new Date(startDate);

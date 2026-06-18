@@ -41,6 +41,14 @@ function getFamilyMemberModel() {
   }
 }
 
+function getBeneficiaryModel() {
+  try {
+    return mongoose.model('Beneficiary');
+  } catch {
+    return null;
+  }
+}
+
 function getConsentModel() {
   try {
     return require('../../models/WhatsAppConsent');
@@ -258,6 +266,23 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     beneficiaryId = familyMember?.beneficiaryId || null;
   }
 
+  // W1407: derive the conversation's branchId from the matched beneficiary so it
+  // is tenant-scoped. Unmatched inbound (no beneficiary) leaves branchId null —
+  // such conversations are visible only to cross-branch roles (fail-closed for
+  // branch-restricted users), never leaked across branches.
+  let branchId = null;
+  if (beneficiaryId) {
+    const Beneficiary = getBeneficiaryModel();
+    if (Beneficiary) {
+      try {
+        const ben = await Beneficiary.findById(beneficiaryId).select('branchId').lean();
+        branchId = ben?.branchId || null;
+      } catch (err) {
+        logger.warn(`[WhatsApp] branch derivation failed: ${err.message}`);
+      }
+    }
+  }
+
   // Record consent — first-time inbound = implicit opt-in, every inbound
   // extends the 24-hour customer-service window. Never throws.
   const Consent = getConsentModel();
@@ -292,6 +317,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           phone: fromPhone,
           senderName,
           beneficiaryId,
+          branchId, // W1407: tenant scope derived from the matched beneficiary
           familyMemberId: familyMember?._id || null,
           createdAt: new Date(),
         },
@@ -714,6 +740,23 @@ async function dispatchBotPlan({
       }
     }
     await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect, recordId);
+  }
+
+  // (5) W1408: link the event to the beneficiary's unified-core CareTimeline
+  // (only fires for beneficiary-attributable kinds with a resolvable guardian;
+  // a direct addEvent call — see whatsappBotTimeline.service. Never throws).
+  if (plan.sideEffect) {
+    try {
+      const botTimeline = require('./whatsappBotTimeline.service');
+      const t = await botTimeline.recordBotTimelineEvent(plan.sideEffect, fromPhone, senderName);
+      if (t && t.ok) {
+        logger.info(
+          `[WhatsApp BotTimeline] linked ${plan.sideEffect.kind} → CareTimeline ${t.eventId}`
+        );
+      }
+    } catch (err) {
+      logger.warn(`[WhatsApp BotTimeline] error: ${err.message}`);
+    }
   }
 
   logger.info(

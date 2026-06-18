@@ -873,6 +873,7 @@ __tests__/whatsapp-autoreply-template-gate-wave738.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js
 __tests__/whatsapp-canonical-consolidation-wave725.test.js
+__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js
 __tests__/whatsapp-contact-group-add-wave756.test.js
 __tests__/whatsapp-contact-group-csv-import-wave751.test.js
 __tests__/whatsapp-contact-group-csv-wave750.test.js
@@ -887,6 +888,7 @@ __tests__/whatsapp-contact-group-search-wave753.test.js
 __tests__/whatsapp-contact-group-sort-wave760.test.js
 __tests__/whatsapp-contact-group-stats-wave749.test.js
 __tests__/whatsapp-contact-group-wave746.test.js
+__tests__/whatsapp-group-branch-isolation-wave1412.test.js
 __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-event-bindings-wave727.test.js
 __tests__/whatsapp-group-broadcast-wave748.test.js
@@ -919,3 +921,10 @@ __tests__/go-live-deployment-readiness-wave1404.test.js
 __tests__/monitoring-infrastructure-wave1405.test.js
 __tests__/whatsapp-bot-records-wave1384.test.js
 __tests__/dead-scope-axis-read-filter-wave1408.test.js
+__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js
+__tests__/ai-recommendations-branch-isolation-wave1409.test.js
+__tests__/alerts-workflow-branch-isolation-wave1409.test.js
+__tests__/whatsapp-bot-core-linkage-wave1408.test.js
+__tests__/clinical-session-path-wave1379.test.js
+__tests__/session-completed-bus-wave1381.test.js
+__tests__/phantom-imports-fixes-wave1384.test.js

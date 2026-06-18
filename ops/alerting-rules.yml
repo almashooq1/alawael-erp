@@ -1,0 +1,214 @@
+# Alerting Rules for Al-Awael ERP
+# تنبيهات مراقبة نظام الأوائل
+
+groups:
+  - name: alawael.alerts
+    interval: 30s
+    rules:
+      # ─── API Performance ──────────────────────────────────────────
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency detected"
+          description: "p95 latency > 1s for {{ $labels.endpoint }}"
+          action: "Check slow queries, database load"
+
+      - alert: CriticalAPILatency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: API latency extremely high"
+          description: "p99 latency > 3s"
+          action: "Page on-call immediately; check database"
+
+      # ─── Error Rates ──────────────────────────────────────────────
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate (>1%)"
+          description: "5xx errors: {{ $value | humanizePercentage }}"
+          action: "Check application logs"
+
+      - alert: CriticalErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: 5%+ error rate"
+          description: "Possible data corruption or system failure"
+          action: "Initiate rollback procedure"
+
+      # ─── Database Connectivity ────────────────────────────────────
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB connection lost"
+          description: "Cannot connect to MongoDB"
+          action: "Check MongoDB service; restart if needed"
+
+      - alert: MongoDBHighConnections
+        expr: mongodb_connections_current > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB connection pool near limit"
+          description: "Current connections: {{ $value }}/100"
+          action: "Check for connection leaks; increase pool size if needed"
+
+      # ─── Redis Cache ──────────────────────────────────────────────
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis connection lost"
+          description: "Cannot connect to Redis cache"
+          action: "Restart Redis; check credentials"
+
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory >90% full"
+          description: "Memory usage: {{ $value | humanizePercentage }}"
+          action: "Check cache hit rate; increase max-memory if needed"
+
+      # ─── System Resources ────────────────────────────────────────
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU usage >80%"
+          description: "Backend process CPU: {{ $value | humanizePercentage }}"
+          action: "Check for slow queries; monitor load"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1e9 > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Process memory >900MB"
+          description: "Memory usage: {{ $value | humanize }}B"
+          action: "Check for memory leaks; restart if needed"
+
+      - alert: LowDiskSpace
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / 1e9 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space <10GB"
+          description: "Available space: {{ $value | humanize }}B"
+          action: "Cleanup old logs and backups"
+
+      - alert: CriticalDiskSpace
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / 1e9 < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Disk space <1GB"
+          description: "Immediate cleanup required"
+          action: "Delete logs/backups immediately to free space"
+
+      # ─── Backup System ────────────────────────────────────────────
+      - alert: BackupFailed
+        expr: time() - backup_last_successful_timestamp > 86400
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database backup failed"
+          description: "No successful backup in 24 hours"
+          action: "Check backup logs; manual backup may be needed"
+
+      - alert: BackupStorageLow
+        expr: backup_storage_available_bytes / 1e9 < 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup storage <5GB"
+          description: "Available backup storage: {{ $value | humanize }}B"
+          action: "Archive old backups to S3"
+
+      # ─── Integration Health ────────────────────────────────────────
+      - alert: NPHIESServiceDown
+        expr: nphies_health_check == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NPHIES integration service down"
+          description: "Cannot reach NPHIES endpoints"
+          action: "Check network; verify API credentials"
+
+      - alert: HighNPHIESLatency
+        expr: histogram_quantile(0.95, nphies_request_duration_seconds_bucket) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NPHIES API latency high"
+          description: "p95 latency: {{ $value }}s"
+          action: "Check NPHIES service; monitor queue"
+
+      - alert: ZATCAServiceDown
+        expr: zatca_health_check == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ZATCA e-invoicing service down"
+          description: "Cannot reach ZATCA endpoints"
+          action: "Check network; verify HMAC key"
+
+      # ─── Sweeper Tasks ────────────────────────────────────────────
+      - alert: BackupSweepFailed
+        expr: rate(sweeper_backup_errors_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup sweeper task failed"
+          description: "Backup automation encountered errors"
+          action: "Check sweeper logs"
+
+      - alert: CareplanSweepFailed
+        expr: rate(sweeper_careplan_errors_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Care-plan sweeper task failed"
+          description: "Plateau detection errors"
+          action: "Check database integrity"
+
+      # ─── Health Check ─────────────────────────────────────────────
+      - alert: HealthCheckFailing
+        expr: health_check_failed_total > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Health check endpoint failing"
+          description: "Backend health check reported failure"
+          action: "Page on-call; check application status"

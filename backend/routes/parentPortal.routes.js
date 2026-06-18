@@ -124,7 +124,7 @@ router.post('/auth/send-otp', parentOtpSendLimiter, async (req, res) => {
       });
     }
 
-    const { ParentOTP } = require('../models/ParentPortal');
+    const { ParentOtp: ParentOTP } = require('../models/ParentPortal');
 
     // Rate limiting: لا أكثر من 5 طلبات في الساعة
     const recentCount = await ParentOTP.countDocuments({
@@ -180,7 +180,7 @@ router.post('/auth/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
       return res.status(422).json({ success: false, message: 'رقم الهاتف والرمز مطلوبان' });
     }
 
-    const { ParentOTP, ParentDevice } = require('../models/ParentPortal');
+    const { ParentOtp: ParentOTP, ParentDevice } = require('../models/ParentPortal');
 
     const otpRecord = await ParentOTP.findOne({
       phone,

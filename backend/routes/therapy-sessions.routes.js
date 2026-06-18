@@ -26,8 +26,32 @@ const mongoose = require('mongoose');
 const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
+  branchScopedResourceParam,
 } = require('../middleware/assertBranchMatch');
+// W1409 — populate req.branchScope so the W269 guards below actually FIRE.
+// This router is mounted via safeMount (which injects NO middleware) and never
+// self-applied requireBranchAccess, so req.branchScope was undefined here —
+// which made the W1148 :beneficiaryId guard a SILENT NO-OP (every
+// assertBranchMatch/branchScoped* check returns early when req.branchScope is
+// absent). Cross-branch roles and (by default) branchless users fail OPEN
+// inside requireBranchAccess, so this only ACTIVATES isolation for
+// branch-assigned staff — no regression for admins or unscoped callers.
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+router.use(requireBranchAccess);
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W1409 — close the :id / :sessionId cross-branch IDOR on ClinicalSession.
+// GET/POST /:sessionId/documentation (SOAP notes read+write), DELETE /:id, and
+// every CRUD/transition handler keyed on :id loaded a session by id with NO
+// per-document branch ownership check. This param guard loads the
+// ClinicalSession and asserts branch match BEFORE any such handler runs
+// (no-op for cross-branch/unscoped callers; 404 on foreign branch).
+const scopedSession = branchScopedResourceParam({
+  modelName: 'ClinicalSession',
+  label: 'session',
+  loadModel: () => require('../domains/sessions/models/ClinicalSession'),
+});
+router.param('id', scopedSession);
+router.param('sessionId', scopedSession);
 router.use(bodyScopedBeneficiaryGuard);
 
 // ── Service (lazy, so missing model doesn't crash app boot) ─────────────────
@@ -275,29 +299,56 @@ router.get(
     const S = Session();
     if (!S) return res.json({ success: true, data: null });
     const session = await S.findById(req.params.sessionId)
-      .select('notes soapNotes documentation')
+      .select('subjective objective assessment plan soapNotes notes documentation documentedAt')
       .lean();
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
     res.json({
       success: true,
-      data: session.soapNotes || session.documentation || session.notes || null,
+      data: {
+        subjective: session.subjective ?? null,
+        objective: session.objective ?? null,
+        assessment: session.assessment ?? null,
+        plan: session.plan ?? null,
+        soapNotes: session.soapNotes ?? session.documentation ?? session.notes ?? null,
+        documentedAt: session.documentedAt ?? null,
+      },
     });
   })
 );
 
 // POST /therapy-sessions/:sessionId/documentation — save SOAP notes
+// W1380: ClinicalSession stores SOAP as four top-level String fields
+// (subjective/objective/assessment/plan) + a combined `soapNotes`. The route
+// previously assigned the WHOLE request object to the String soapNotes field
+// → Mongoose CastError (400 INVALID_ID) → SOAP could never be saved. Map each
+// field explicitly instead.
 router.post(
   '/:sessionId/documentation',
   asyncHandler(async (req, res) => {
     const S = Session();
     if (!S) return res.status(503).json({ success: false, message: 'Model unavailable' });
+    const body = req.body || {};
+    const $set = { documentedAt: new Date() };
+    for (const f of ['subjective', 'objective', 'assessment', 'plan', 'soapNotes']) {
+      if (body[f] !== undefined && body[f] !== null) $set[f] = String(body[f]);
+    }
     const session = await S.findByIdAndUpdate(
       req.params.sessionId,
-      { $set: { soapNotes: req.body, documentedAt: new Date() } },
+      { $set },
       { returnDocument: 'after' }
     ).lean();
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
-    res.json({ success: true, data: session.soapNotes });
+    res.json({
+      success: true,
+      data: {
+        subjective: session.subjective ?? null,
+        objective: session.objective ?? null,
+        assessment: session.assessment ?? null,
+        plan: session.plan ?? null,
+        soapNotes: session.soapNotes ?? null,
+        documentedAt: session.documentedAt ?? null,
+      },
+    });
   })
 );
 

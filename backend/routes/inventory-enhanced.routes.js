@@ -5,7 +5,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/inventory/inventory-enhanced.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
-const { escapeRegex } = require('../utils/escapeRegex');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, requireBranchAccess, async (req, res) => {

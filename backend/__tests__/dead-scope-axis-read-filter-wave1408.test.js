@@ -87,8 +87,12 @@ const EXCLUDED_DIRS = new Set([
  * The ratchet only cares about the COUNT; the doc carries the reasoning.
  */
 const BASELINE = Object.freeze({
-  // LIVE-LEAK — W1407 (filed, owner's coordinated fix pending). Burn DOWN.
-  'routes/whatsapp.routes.js': 30,
+  // BENIGN (was LIVE-LEAK 30) — W1407 CLOSED by W1411 (#536, conversations) +
+  // W1412 (#537, contact groups): both now scope by branchId via
+  // effectiveBranchScope, deployed + verified live on prod. Burned 30 -> 1; the
+  // remaining 1 is a DLQ-ctx metadata stamp (organizationId on the dead-letter
+  // payload), not a read-isolation predicate.
+  'routes/whatsapp.routes.js': 1,
 
   // DORMANT — vehicles/index.js never required from app.js (dead at runtime).
   // Must be fixed BEFORE any ADR-030 decision wires vehicles/ live.
@@ -217,12 +221,12 @@ describe('dead scope axis read-filter guard (W1408)', () => {
     expect(actual).toEqual(BASELINE);
   });
 
-  it('the W1407 live-leak surface (whatsapp) is the largest and tracked for burn-down', () => {
-    // Documents intent: whatsapp is the one LIVE exploitable instance. When the
-    // owner's coordinated branchId fix lands, this count drops and the
-    // ratchet-down assertion above forces the baseline update.
-    expect(BASELINE['routes/whatsapp.routes.js']).toBeGreaterThanOrEqual(1);
-    const maxFile = Object.entries(BASELINE).sort((a, b) => b[1] - a[1])[0][0];
-    expect(maxFile).toBe('routes/whatsapp.routes.js');
+  it('the W1407 whatsapp live-leak surface has been burned down (closed by W1411/W1412)', () => {
+    // whatsapp was the one LIVE exploitable instance (conversations + contact
+    // groups scoped by the never-set organizationId → fail-open). W1411 (#536)
+    // + W1412 (#537) closed it by scoping on branchId via effectiveBranchScope
+    // (deployed + verified live on prod), burning the count 30 -> 1. The lone
+    // remainder is a DLQ-ctx metadata stamp, not a read-isolation predicate.
+    expect(BASELINE['routes/whatsapp.routes.js']).toBeLessThanOrEqual(2);
   });
 });

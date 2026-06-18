@@ -51,6 +51,8 @@ const FLAGGED_ROLES = [
   'compliance_officer',
   'cfo',
 ];
+// Editing the job→band config (org-global reference data) — HR/admin only.
+const CONFIG_ROLES = ['admin', 'superadmin', 'super_admin', 'hr_director', 'hr_manager'];
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
@@ -65,6 +67,9 @@ function parseOpts(req) {
 function mapErr(res, err, ctx) {
   if (err && err.code === 'MODEL_UNAVAILABLE') {
     return res.status(503).json({ success: false, error: err.message });
+  }
+  if (err && err.code === 'VALIDATION') {
+    return res.status(400).json({ success: false, error: err.message });
   }
   return safeError(res, err, ctx);
 }
@@ -148,6 +153,61 @@ router.get('/trends', requireRole(READ_ROLES), async (req, res) => {
     res.json({ success: true, data: { count: series.length, series } });
   } catch (err) {
     mapErr(res, err, 'pay-equity:trends');
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// compa-ratio (W1385) — salary vs the midpoint of the band the ROLE maps to.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** GET /compa-ratio — aggregate compa-ratio distribution (no identities). */
+router.get('/compa-ratio', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    const department = req.query.department ? String(req.query.department) : null;
+    const branchId = effectiveBranchScope(req); // W269 — own branch, or null for HQ
+    const data = await svc.compaRatioAnalysis({ branchId, department });
+    res.json({ success: true, data });
+  } catch (err) {
+    mapErr(res, err, 'pay-equity:compa-ratio');
+  }
+});
+
+/** GET /below-band — employees paid below their band (identities) — stricter role. */
+router.get('/below-band', requireRole(FLAGGED_ROLES), async (req, res) => {
+  try {
+    const department = req.query.department ? String(req.query.department) : null;
+    const branchId = effectiveBranchScope(req);
+    const items = await svc.belowBandEmployees({ branchId, department, belowThreshold: req.query.belowThreshold });
+    res.json({ success: true, data: { count: items.length, items } });
+  } catch (err) {
+    mapErr(res, err, 'pay-equity:below-band');
+  }
+});
+
+/** GET /band-mappings — list the job→band config (org-global reference). */
+router.get('/band-mappings', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    const items = await svc.listJobBandMappings();
+    res.json({ success: true, data: { count: items.length, items } });
+  } catch (err) {
+    mapErr(res, err, 'pay-equity:band-mappings:list');
+  }
+});
+
+/** POST /band-mappings — create/update a job→band mapping (HR/admin config). */
+router.post('/band-mappings', requireRole(CONFIG_ROLES), async (req, res) => {
+  try {
+    const actor = req.user || {};
+    const doc = await svc.upsertJobBandMapping({
+      jobTitle: req.body && req.body.jobTitle,
+      bandCode: req.body && req.body.bandCode,
+      active: req.body && req.body.active !== undefined ? !!req.body.active : true,
+      note: req.body && req.body.note ? String(req.body.note) : null,
+      createdBy: actor.id || actor._id || actor.userId || null,
+    });
+    res.status(201).json({ success: true, data: doc });
+  } catch (err) {
+    mapErr(res, err, 'pay-equity:band-mappings:upsert');
   }
 });
 

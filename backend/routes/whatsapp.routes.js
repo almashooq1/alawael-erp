@@ -955,9 +955,9 @@ router.get(
   '/contact-groups',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const { search, tag, page = 1, limit = 50 } = req.query;
-    const filter = Group.listScopedFilter(orgId, { search, tag });
+    const filter = Group.listScopedFilter(branchScope, { search, tag });
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -982,14 +982,14 @@ router.post(
   asyncHandler(async (req, res) => {
     validate(['name'], req.body);
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const actorId = req.user?.userId || req.user?.id || null;
     const members = Group.dedupeMembers(req.body.members).map(m => ({
       ...m,
       addedBy: actorId,
     }));
     const doc = await Group.create({
-      organizationId: orgId,
+      branchId: branchScope, // W1412: tenant scope from the creating user's branch
       name: String(req.body.name).trim(),
       description: req.body.description || null,
       tags: Array.isArray(req.body.tags) ? req.body.tags : [],
@@ -1013,8 +1013,8 @@ router.get(
   '/contact-groups/stats',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const filter = Group.listScopedFilter(orgId, {});
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const filter = Group.listScopedFilter(branchScope, {});
     const groups = await Group.find(filter).select('name tags members').lean();
     res.json({ success: true, data: Group.summarizeGroups(groups) });
   })
@@ -1025,8 +1025,8 @@ router.get(
   '/contact-groups/:id',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     res.json({ success: true, data: { ...doc, memberCount: (doc.members || []).length } });
   })
@@ -1037,14 +1037,14 @@ router.patch(
   '/contact-groups/:id',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const update = {};
     if (req.body.name != null) update.name = String(req.body.name).trim();
     if (req.body.description !== undefined) update.description = req.body.description || null;
     if (Array.isArray(req.body.tags)) update.tags = req.body.tags;
     if (req.body.color !== undefined) update.color = req.body.color || null;
     const doc = await Group.findOneAndUpdate(
-      Group.groupScopedFilter(req.params.id, orgId),
+      Group.groupScopedFilter(req.params.id, branchScope),
       { $set: update },
       { new: true }
     );
@@ -1058,9 +1058,9 @@ router.delete(
   '/contact-groups/:id',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const doc = await Group.findOneAndUpdate(
-      Group.groupScopedFilter(req.params.id, orgId),
+      Group.groupScopedFilter(req.params.id, branchScope),
       { $set: { isDeleted: true, deletedAt: new Date() } },
       { new: true }
     );
@@ -1074,7 +1074,7 @@ router.post(
   '/contact-groups/:id/members',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const actorId = req.user?.userId || req.user?.id || null;
     const incoming = Array.isArray(req.body.members)
       ? req.body.members
@@ -1085,7 +1085,7 @@ router.post(
     if (!additions.length) {
       return res.status(400).json({ success: false, message: 'No valid members supplied' });
     }
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     // Merge existing + incoming, dedupe by phone (last-wins).
     doc.members = Group.dedupeMembers([
@@ -1102,9 +1102,9 @@ router.delete(
   '/contact-groups/:id/members/:phone',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const target = Group.normalizePhone(req.params.phone);
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     const before = (doc.members || []).length;
     doc.members = (doc.members || []).filter(m => Group.normalizePhone(m.phone) !== target);
@@ -1128,8 +1128,8 @@ router.get(
   '/contact-groups/:id/broadcast-preview',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const Consent = getConsentModel();
@@ -1174,8 +1174,8 @@ router.get(
   '/contact-groups/:id/members.csv',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     const safeName = String(doc.name || 'group').replace(/[^a-zA-Z0-9_-]+/g, '_');
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -1195,8 +1195,8 @@ router.get(
   '/contact-groups/:id/members/search',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId))
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope))
       .select('name members')
       .lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
@@ -1229,14 +1229,14 @@ router.post(
   '/contact-groups/:id/members/import-csv',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const actorId = req.user?.userId || req.user?.id || null;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     const parsed = Group.parseCsvMembers(req.body && req.body.csv);
     if (!parsed.length) {
       return res.status(400).json({ success: false, message: 'No valid members found in CSV' });
     }
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const diff = Group.diffMembers(doc.members || [], parsed);
@@ -1284,7 +1284,7 @@ router.post(
   '/contact-groups/:id/merge',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const actorId = req.user?.userId || req.user?.id || null;
     const sourceId = req.body && req.body.sourceId;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
@@ -1295,8 +1295,8 @@ router.post(
       return res.status(400).json({ success: false, message: 'Cannot merge a group into itself' });
     }
     const [target, source] = await Promise.all([
-      Group.findOne(Group.groupScopedFilter(req.params.id, orgId)),
-      Group.findOne(Group.groupScopedFilter(sourceId, orgId)).lean(),
+      Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)),
+      Group.findOne(Group.groupScopedFilter(sourceId, branchScope)).lean(),
     ]);
     if (!target) return res.status(404).json({ success: false, message: 'Group not found' });
     if (!source) {
@@ -1345,13 +1345,13 @@ router.post(
   '/contact-groups/:id/members/bulk-remove',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const phones = req.body && req.body.phones;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     if (!Array.isArray(phones) || phones.length === 0) {
       return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
     }
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const result = Group.removeMembers(doc.members || [], phones);
@@ -1393,14 +1393,14 @@ router.post(
   '/contact-groups/:id/members/bulk-add',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const actorId = req.user?._id || null;
     const phones = req.body && req.body.phones;
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
     if (!Array.isArray(phones) || phones.length === 0) {
       return res.status(400).json({ success: false, message: 'phones must be a non-empty array' });
     }
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const result = Group.addMembers(doc.members || [], phones);
@@ -1443,9 +1443,9 @@ router.post(
   '/contact-groups/:id/members/dedupe',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const dryRun = req.query.dryRun === 'true' || (req.body && req.body.dryRun === true);
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const result = Group.dedupeReport(doc.members || []);
@@ -1485,9 +1485,9 @@ router.patch(
   '/contact-groups/:id/members/:phone',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
     const displayName = req.body ? req.body.displayName : null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId));
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope));
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const result = Group.renameMember(doc.members || [], req.params.phone, displayName);
@@ -1514,8 +1514,8 @@ router.get(
   '/contact-groups/:id/members/:phone',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const member = Group.findMember(doc.members || [], req.params.phone);
@@ -1535,8 +1535,8 @@ router.get(
   '/contact-groups/:id/members',
   asyncHandler(async (req, res) => {
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const sort = req.query.sort === 'name' ? 'name' : 'phone';
@@ -1582,8 +1582,8 @@ router.post(
     }
 
     const Group = getContactGroupModel();
-    const orgId = req.user?.organizationId || null;
-    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, orgId)).lean();
+    const branchScope = effectiveBranchScope(req); // W1412: branch isolation (was never-set organizationId)
+    const doc = await Group.findOne(Group.groupScopedFilter(req.params.id, branchScope)).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
 
     const Consent = getConsentModel();

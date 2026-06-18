@@ -339,7 +339,7 @@
     "rate-limit-redis": "^4.3.1",
     "socket.io": "^4.7.2",
     "speakeasy": "^2.0.0",
-    "stripe": "^22.2.0",
+    "stripe": "^22.2.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.13.0",

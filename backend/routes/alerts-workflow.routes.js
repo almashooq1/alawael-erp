@@ -36,6 +36,9 @@
 
 const express = require('express');
 const safeError = require('../utils/safeError');
+// W1409 — branch-isolation for the :id-keyed Alert actions (see factory body).
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedResourceParam } = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   NOT_FOUND: 404,
@@ -135,6 +138,23 @@ function createAlertsWorkflowRouter({
   }
 
   const router = express.Router();
+
+  // W1409 — close the :id cross-branch IDOR. Every action below is keyed on
+  // req.params.id (acknowledge/assign/snooze/mute/resolve/comments WRITES +
+  // GET /:id/timeline READ) and previously acted on any branch's Alert with no
+  // ownership check. requireBranchAccess populates req.branchScope; the param
+  // guard loads the Alert and asserts branch match before any handler runs.
+  // Fails OPEN for cross-branch roles + (default) branchless users, so it only
+  // activates isolation for branch-assigned staff — no regression.
+  router.use(requireBranchAccess);
+  router.param(
+    'id',
+    branchScopedResourceParam({
+      modelName: 'Alert',
+      label: 'alert',
+      loadModel: () => require('../alerts/alert.model').model,
+    })
+  );
 
   // POST /:id/acknowledge — stops escalation, keeps alert OPEN.
   router.post('/:id/acknowledge', async (req, res) => {

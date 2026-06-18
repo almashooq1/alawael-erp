@@ -1886,6 +1886,8 @@ on:
       - 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
       - 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
       - 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3750,6 +3752,8 @@ on:
       - 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
       - 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
       - 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

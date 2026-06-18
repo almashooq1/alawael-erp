@@ -920,6 +920,7 @@ __tests__/performance-load-testing-wave1403.test.js
 __tests__/go-live-deployment-readiness-wave1404.test.js
 __tests__/monitoring-infrastructure-wave1405.test.js
 __tests__/whatsapp-bot-records-wave1384.test.js
+__tests__/dead-scope-axis-read-filter-wave1408.test.js
 __tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js
 __tests__/ai-recommendations-branch-isolation-wave1409.test.js
 __tests__/alerts-workflow-branch-isolation-wave1409.test.js

@@ -300,7 +300,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.101.0",
-    "@aws-sdk/client-s3": "3.1066.0",
+    "@aws-sdk/client-s3": "3.1071.0",
     "@sendgrid/mail": "^8.1.6",
     "archiver": "7.0.1",
     "axios": "^1.17.0",

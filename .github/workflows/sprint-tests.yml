@@ -1874,6 +1874,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3726,6 +3728,8 @@ on:
       - 'backend/__tests__/session-completed-bus-wave1381.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
       - 'backend/package.json'

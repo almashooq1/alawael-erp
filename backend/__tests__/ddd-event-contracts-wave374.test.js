@@ -164,6 +164,14 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'corrective-action', // W1134 — beneficiary corrective action opened → core timeline
   'beneficiary-transfer', // W1135 — beneficiary branch transfer completed → core timeline
   'complaint', // W1136 — beneficiary-linked complaint resolved → core timeline
+  'clinical-safety', // W1201 — falls/pressure-injury/infection surveillance
+  'clinical-assessment', // W1202 — ADL/integration/ICF assessment approvals
+  'self-advocacy', // W1203 — self-advocacy plan completed
+  'independent-living', // W1204 — independent-living plan completed
+  'decision-rights', // W1205 — decision-rights capacity assessment finalized
+  'authorization', // W1206 — treatment authorization decided
+  'care-coordination', // W1207 — MDT meeting / consultation answered
+  'cdss', // W1208 — CDSS alert resolved
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -302,6 +310,22 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'corrective_action', // W1134 — corrective_action.opened (CorrectiveAction)
     'transfer', // W1135 — transfer.completed (BeneficiaryTransfer)
     'complaint', // W1136 — complaint.resolved (Complaint)
+    'emergency_plan', // W1201 — emergency_plan.activated (EmergencyPlan)
+    'falls', // W1201 — falls.assessment_finalized (FallsRiskAssessment)
+    'pressure_injury', // W1201 — pressure_injury.identified / .resolved
+    'sleep', // W1201 — sleep.assessment_finalized
+    'om', // W1201 — om.assessment_finalized (OrientationMobilityAssessment)
+    'driving', // W1201 — driving.assessment_finalized (DrivingAssessment)
+    'infection', // W1201 — infection.case_opened / .case_resolved
+    'adl', // W1202 — adl.assessment_completed
+    'integration', // W1202 — integration.assessment_completed
+    'icf', // W1202 — icf.assessment_approved
+    'self_advocacy', // W1203 — self_advocacy.plan_completed
+    'independent_living', // W1204 — independent_living.plan_completed
+    'treatment', // W1206 — treatment.authorization_decided
+    'mdt', // W1207 — mdt.meeting_completed
+    'consultation', // W1207 — consultation.answered
+    'alert', // W1208 — alert.resolved (CdssAlert)
   ])
 );
 

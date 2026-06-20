@@ -1,6 +1,7 @@
 __tests__/aac-foundation-wave263.test.js
 __tests__/aac-pecs-phase-advanced-core-linkage-wave1063.test.js
 __tests__/absence-detection-sweeper-wave402.test.js
+__tests__/access-console-wave1420.test.js
 __tests__/access-grant-model-canonical-wave599.test.js
 __tests__/access-review-attestation-behavioral-wave38.test.js
 __tests__/access-review-wave38.test.js

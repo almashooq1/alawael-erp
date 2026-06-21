@@ -9,6 +9,7 @@
  * keeps their setup. Fully keyboard-accessible + RTL + ARIA.
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { isEn, tr } from '../../data/landingContentActive';
 
 const STORAGE_KEY = 'alawael-a11y-prefs';
 const FONT_MIN = -2; // 86%
@@ -156,8 +157,8 @@ export default function AccessibilityWidget() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="a11y-panel"
-        aria-label="خيارات إمكانية الوصول"
-        title="إمكانية الوصول"
+        aria-label={tr('خيارات إمكانية الوصول', 'Accessibility options')}
+        title={tr('إمكانية الوصول', 'Accessibility')}
         className={`fixed top-1/2 -translate-y-1/2 start-0 z-[70] flex h-14 w-12 items-center justify-center rounded-e-2xl bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-xl shadow-primary-900/30 transition-all duration-300 hover:w-14 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 ${
           anyActive ? 'ring-2 ring-accent-400' : ''
         }`}
@@ -179,8 +180,8 @@ export default function AccessibilityWidget() {
         id="a11y-panel"
         role="dialog"
         aria-modal="true"
-        aria-label="إعدادات إمكانية الوصول"
-        dir="rtl"
+        aria-label={tr('إعدادات إمكانية الوصول', 'Accessibility settings')}
+        dir={isEn ? 'ltr' : 'rtl'}
         className={`fixed top-1/2 z-[72] w-[19rem] max-w-[88vw] -translate-y-1/2 rounded-3xl border border-gray-100 bg-white p-5 shadow-2xl transition-all duration-300 start-3 ${
           open ? 'pointer-events-auto opacity-100 translate-x-0' : 'pointer-events-none opacity-0 -translate-x-6'
         }`}
@@ -190,12 +191,12 @@ export default function AccessibilityWidget() {
             <span className="text-primary-600" aria-hidden="true">
               <IconA11y />
             </span>
-            إمكانية الوصول
+            {tr('إمكانية الوصول', 'Accessibility')}
           </h3>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="إغلاق"
+            aria-label={tr('إغلاق', 'Close')}
             className="rounded-xl p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
           >
             <IconClose />
@@ -205,7 +206,7 @@ export default function AccessibilityWidget() {
         {/* Font size */}
         <div className="mb-4 rounded-2xl bg-gray-50 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-700">حجم الخط</span>
+            <span className="text-xs font-bold text-gray-700">{tr('حجم الخط', 'Font size')}</span>
             <span className="text-xs font-bold text-primary-700">{fontPct}%</span>
           </div>
           <div className="flex items-center gap-2">
@@ -213,19 +214,19 @@ export default function AccessibilityWidget() {
               type="button"
               onClick={() => update({ font: Math.max(FONT_MIN, (prefs.font || 0) - 1) })}
               disabled={prefs.font <= FONT_MIN}
-              aria-label="تصغير الخط"
+              aria-label={tr('تصغير الخط', 'Decrease font size')}
               className="flex h-9 flex-1 items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-lg font-bold text-gray-700 hover:border-primary-300 disabled:opacity-40"
             >
-              أ−
+              {tr('أ−', 'A−')}
             </button>
             <button
               type="button"
               onClick={() => update({ font: Math.min(FONT_MAX, (prefs.font || 0) + 1) })}
               disabled={prefs.font >= FONT_MAX}
-              aria-label="تكبير الخط"
+              aria-label={tr('تكبير الخط', 'Increase font size')}
               className="flex h-9 flex-1 items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-xl font-bold text-gray-700 hover:border-primary-300 disabled:opacity-40"
             >
-              أ+
+              {tr('أ+', 'A+')}
             </button>
           </div>
         </div>
@@ -236,31 +237,31 @@ export default function AccessibilityWidget() {
             active={prefs.links}
             onClick={() => update({ links: !prefs.links })}
             icon="🔗"
-            label="إبراز الروابط"
+            label={tr('إبراز الروابط', 'Highlight links')}
           />
           <Toggle
             active={prefs.readable}
             onClick={() => update({ readable: !prefs.readable })}
             icon="📖"
-            label="خط سهل القراءة"
+            label={tr('خط سهل القراءة', 'Readable font')}
           />
           <Toggle
             active={prefs.noAnim}
             onClick={() => update({ noAnim: !prefs.noAnim })}
             icon="⏸️"
-            label="إيقاف الحركة"
+            label={tr('إيقاف الحركة', 'Stop animations')}
           />
           <Toggle
             active={prefs.bigCursor}
             onClick={() => update({ bigCursor: !prefs.bigCursor })}
             icon="🖱️"
-            label="مؤشر كبير"
+            label={tr('مؤشر كبير', 'Large cursor')}
           />
           <Toggle
             active={prefs.dark}
             onClick={() => update({ dark: !prefs.dark })}
             icon="🌙"
-            label="الوضع الليلي"
+            label={tr('الوضع الليلي', 'Dark mode')}
           />
         </div>
 
@@ -271,11 +272,11 @@ export default function AccessibilityWidget() {
           disabled={!anyActive}
           className="mt-4 w-full rounded-xl border-2 border-gray-200 bg-white py-2.5 text-sm font-bold text-gray-600 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
         >
-          إعادة ضبط الكل
+          {tr('إعادة ضبط الكل', 'Reset all')}
         </button>
 
         <p className="mt-3 text-center text-[11px] leading-relaxed text-gray-400">
-          تُحفظ تفضيلاتك على هذا الجهاز
+          {tr('تُحفظ تفضيلاتك على هذا الجهاز', 'Your preferences are saved on this device')}
         </p>
       </div>
     </>

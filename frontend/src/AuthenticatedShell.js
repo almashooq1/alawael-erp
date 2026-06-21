@@ -130,6 +130,8 @@ import Home from './pages/common/Home';
 import NotFound from './pages/common/NotFound';
 import EntityFormPage from './pages/common/EntityFormPage';
 import CREATE_FORMS from './pages/createForms/registry';
+import EntityDetailPage from './pages/common/EntityDetailPage';
+import DETAIL_VIEWS from './pages/createForms/detailViews';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));
@@ -387,6 +389,11 @@ export default function AuthenticatedShell() {
                       Static paths outrank module :id routes in React Router v6. */}
                   {Object.entries(CREATE_FORMS).map(([p, cfg]) => (
                     <Route key={p} path={p} element={<EntityFormPage config={cfg} />} />
+                  ))}
+
+                  {/* Read-only detail views — replaces dead row/view :id 404s. */}
+                  {Object.entries(DETAIL_VIEWS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<EntityDetailPage config={cfg} />} />
                   ))}
 
                   {/* Domain Route Modules */}

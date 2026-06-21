@@ -30,7 +30,10 @@ module.exports = async () => {
   try {
     const { MongoMemoryServer } = require('mongodb-memory-server');
     const mongod = await MongoMemoryServer.create({
-      instance: { dbName: 'alawael-test' },
+      instance: {
+        dbName: 'alawael-test',
+      },
+      binary: { checkMD5: false },
     });
     const uri = mongod.getUri();
 

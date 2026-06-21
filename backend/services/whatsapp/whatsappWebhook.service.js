@@ -772,6 +772,13 @@ async function dispatchBotPlan({
     const botFlow = require('../../intelligence/whatsapp-bot-flow.service');
     const ev = botFlow.deriveBotEvent(plan, priorState);
     logger.info(`[WhatsApp BotAnalytics] event=${ev.event} unit=${ev.unit || '-'}`);
+    // W1419: persist the per-unit usage funnel (entered/completed) for admin
+    // review — best-effort, env-gated; enter/complete are the only counted events.
+    if (ev.unit && process.env.ENABLE_WHATSAPP_BOT_INSIGHTS === 'true') {
+      require('./whatsappBotInsights.service')
+        .recordUnitEvent(ev.unit, ev.event)
+        .catch(err => logger.warn(`[WhatsApp BotInsights] usage failed: ${err.message}`));
+    }
   } catch (_e) {
     /* analytics is best-effort */
   }

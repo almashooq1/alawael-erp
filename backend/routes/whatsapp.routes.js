@@ -892,6 +892,21 @@ router.get(
   })
 );
 
+/**
+ * GET /bot/usage — W1419 bot usage funnel. Per-unit entered / completed counts +
+ * completion rate, most-used first. Admin-gated aggregate (non-PID) telemetry —
+ * shows which units users engage and where flows are abandoned.
+ */
+router.get(
+  '/bot/usage',
+  authorize('admin', 'super_admin', 'manager'),
+  asyncHandler(async (req, res) => {
+    const insights = require('../services/whatsapp/whatsappBotInsights.service');
+    const data = await insights.usageSummary();
+    res.json({ success: true, data, total: data.length });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // CONSENT — opt-in / opt-out tracking (Meta policy + PDPL Art.13)
 // ═══════════════════════════════════════════════════════════════════════════

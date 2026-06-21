@@ -89,4 +89,60 @@ async function topUnmatched(limit = 50) {
   return Model.find({}).sort({ count: -1, lastSeen: -1 }).limit(lim).lean();
 }
 
-module.exports = { shouldRecord, recordUnmatched, topUnmatched, TRIVIAL };
+function getUsageModel() {
+  try {
+    return require('../../models/WhatsAppBotUnitUsage');
+  } catch {
+    return null;
+  }
+}
+
+const USAGE_EVENTS = Object.freeze({ enter: 'entered', complete: 'completed' });
+
+/**
+ * Record one unit usage event (W1419). Maps a deriveBotEvent `event` to a
+ * per-unit counter (enter→entered, complete→completed); other events are no-ops.
+ * Best-effort; upserts + increments. Pure-ish (DB only via the lazy model).
+ * @param {string} unitId registry unit id
+ * @param {string} event deriveBotEvent event ('enter' | 'complete' | ...)
+ * @returns {Promise<{ok:boolean, field?:string, reason?:string}>}
+ */
+async function recordUnitEvent(unitId, event) {
+  const field = USAGE_EVENTS[event];
+  if (!unitId || !field) return { ok: false, reason: 'ignored' };
+  const Model = getUsageModel();
+  if (!Model) return { ok: false, reason: 'model_unavailable' };
+  await Model.updateOne(
+    { unitId },
+    { $inc: { [field]: 1 }, $set: { lastUsed: new Date() } },
+    { upsert: true }
+  );
+  return { ok: true, field };
+}
+
+/**
+ * Per-unit usage funnel (entered / completed + completion rate), most-used first.
+ * @returns {Promise<Array<{unitId:string, entered:number, completed:number, completionRate:number}>>}
+ */
+async function usageSummary() {
+  const Model = getUsageModel();
+  if (!Model) return [];
+  const rows = await Model.find({}).sort({ entered: -1 }).lean();
+  return rows.map(r => ({
+    unitId: r.unitId,
+    entered: r.entered || 0,
+    completed: r.completed || 0,
+    completionRate: r.entered ? Math.round((100 * (r.completed || 0)) / r.entered) : 0,
+    lastUsed: r.lastUsed,
+  }));
+}
+
+module.exports = {
+  shouldRecord,
+  recordUnmatched,
+  topUnmatched,
+  recordUnitEvent,
+  usageSummary,
+  USAGE_EVENTS,
+  TRIVIAL,
+};

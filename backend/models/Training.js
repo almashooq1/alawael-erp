@@ -93,8 +93,8 @@ const TrainingCourse =
 const TrainingSession =
   mongoose.models.TrainingSession || mongoose.model('TrainingSession', trainingSessionSchema);
 // TrainingPlan is canonical in models/HR/TrainingPlan.js — re-export it so the
-// route's require('../models/Training').TrainingPlan keeps working, WITHOUT a
-// second mongoose.model('TrainingPlan', …) registration (W340 duplicate guard).
+// route's require('../models/Training').TrainingPlan keeps working, without a
+// second registration of that model name (W340 / model-collisions guard).
 const TrainingPlan = require('./HR/TrainingPlan');
 
 module.exports = { TrainingCourse, TrainingSession, TrainingPlan };

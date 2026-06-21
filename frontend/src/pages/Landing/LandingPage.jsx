@@ -5,13 +5,15 @@
  * live in src/data/landingContent.js. Edit that file to change copy;
  * this component only owns layout + motion.
  */
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import content, { activeLang, isEn, tr } from '../../data/landingContentActive';
 import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesContent';
 import jobs from '../../data/careersContent';
-import AccessibilityWidget from './AccessibilityWidget';
-import ContactSpeedDial from './ContactSpeedDial';
+// DEV 3 — code-split the non-critical, below-the-fold floating widgets so they
+// no longer ship in the initial landing bundle (each emits its own chunk).
+const AccessibilityWidget = React.lazy(() => import('./AccessibilityWidget'));
+const ContactSpeedDial = React.lazy(() => import('./ContactSpeedDial'));
 import { openWhatsApp } from '../../data/whatsappLink';
 
 /* ══════════════════════ helpers ══════════════════════ */
@@ -1464,6 +1466,49 @@ function Hero() {
         <svg viewBox="0 0 1440 120" fill="none" className="w-full" preserveAspectRatio="none">
           <path d="M0 120V80c120-30 240-50 480-40s360 30 480 20 240-20 480-30v90H0z" fill="white" />
         </svg>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Accreditation Strip (DEV 1) ══════════════════════ */
+// Slim, on-brand credibility strip surfaced HIGH — immediately after the Hero —
+// so accreditations are visible before the user scrolls. Reuses content.awards.items.
+function AccreditationStrip() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  const items = content.awards.items;
+  return (
+    <section
+      ref={ref}
+      aria-label={tr('الاعتمادات', 'Accreditations')}
+      className="relative bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 py-5"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
+        >
+          <span className="flex-shrink-0 inline-flex items-center gap-2 text-xs font-bold tracking-wide text-primary-700 dark:text-primary-300 uppercase">
+            <span className="inline-flex w-6 h-6 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/40 text-primary-600 dark:text-primary-300">
+              <Icon name="badge-check" className="w-4 h-4" />
+            </span>
+            {tr('معتمدون وموثوقون من', 'Accredited & trusted by')}
+          </span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {items.map(it => (
+              <span
+                key={it.name}
+                title={it.detail}
+                className="inline-flex items-center gap-2 rounded-full bg-gray-50 dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-800 dark:text-gray-100 hover:ring-primary-300 hover:bg-white dark:hover:bg-gray-700/60 transition-all duration-300"
+              >
+                <span className="text-primary-600 dark:text-primary-300">
+                  <Icon name={it.iconKey} className="w-4 h-4" />
+                </span>
+                {it.name}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -3450,51 +3495,91 @@ function Stories() {
           {s.items.map((story, i) => (
             <article
               key={story.name}
-              className={`relative rounded-3xl overflow-hidden bg-white ring-1 ring-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              className={`relative rounded-3xl overflow-hidden bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
               style={{ transitionDelay: `${i * 120}ms` }}
             >
               <div className={`h-2 bg-gradient-to-l ${story.color}`} />
               <div className="p-7">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
+                {/* Header — photo-ready avatar + name + condition + age */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl font-bold text-gray-900">{story.name}</span>
-                      <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">{story.name}</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                         {story.age} {tr('سنوات', 'years')}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600">{story.condition}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{story.condition}</div>
                   </div>
-                  <div
-                    className={`flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${story.color} text-white flex items-center justify-center font-bold text-xl shadow-md`}
-                  >
-                    {story.name.charAt(0)}
-                  </div>
-                </div>
-
-                <div className="space-y-4 mb-5">
-                  <div className="p-3 rounded-xl bg-red-50 border-r-4 border-red-400">
-                    <div className="text-xs font-bold text-red-700 mb-1">{tr('قبل 🕰️', 'Before 🕰️')}</div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{story.before}</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-green-50 border-r-4 border-green-500">
-                    <div className="text-xs font-bold text-green-700 mb-1">{tr('بعد ✨', 'After ✨')}</div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{story.after}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div>
+                  {story.image || story.photo ? (
+                    <img
+                      src={story.image || story.photo}
+                      alt={story.name}
+                      loading="lazy"
+                      className="flex-shrink-0 w-14 h-14 rounded-2xl object-cover shadow-md ring-2 ring-white dark:ring-gray-800"
+                    />
+                  ) : (
                     <div
-                      className={`text-2xl font-bold bg-gradient-to-l ${story.color} bg-clip-text text-transparent`}
+                      className={`flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${story.color} text-white flex items-center justify-center font-bold text-xl shadow-md`}
                     >
-                      {story.metric.isText ? story.metric.value : `+${story.metric.value}`}
+                      {story.name.charAt(0)}
                     </div>
-                    <div className="text-[11px] text-gray-600">{story.metric.label}</div>
+                  )}
+                </div>
+
+                {/* Header chips — condition + duration + program */}
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/40 rounded-full px-2.5 py-1">
+                    <Icon name="clock" className="w-3.5 h-3.5" />
+                    {story.duration}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 rounded-full px-2.5 py-1">
+                    <Icon name="sparkles" className="w-3.5 h-3.5" />
+                    {story.program}
+                  </span>
+                </div>
+
+                {/* Before → After transition */}
+                <div className="mb-5">
+                  <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/40 p-3">
+                    <div className="text-[11px] font-bold text-red-700 dark:text-red-300 mb-1 uppercase tracking-wide">
+                      {tr('قبل', 'Before')}
+                    </div>
+                    <p className="text-sm text-red-900/80 dark:text-red-100/80 leading-relaxed">{story.before}</p>
+                  </div>
+
+                  {/* Arrow / transition marker */}
+                  <div className="flex justify-center -my-2.5 relative z-10">
+                    <span className="inline-flex w-9 h-9 items-center justify-center rounded-full bg-white dark:bg-gray-800 ring-1 ring-green-200 dark:ring-green-800 text-green-600 dark:text-green-400 shadow-sm">
+                      <Icon name="arrow-trending-up" className="w-5 h-5" />
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl bg-green-50 dark:bg-green-900/25 border border-green-500/60 dark:border-green-700 p-3">
+                    <div className="text-[11px] font-bold text-green-700 dark:text-green-300 mb-1 uppercase tracking-wide">
+                      {tr('بعد', 'After')}
+                    </div>
+                    <p className="text-sm text-green-900/85 dark:text-green-100/85 leading-relaxed">{story.after}</p>
+                  </div>
+                </div>
+
+                {/* Prominent metric chip */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div
+                    className={`inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-br ${story.color} text-white px-4 py-2.5 shadow-md`}
+                  >
+                    <span className="text-2xl font-extrabold leading-none">
+                      {story.metric.isText ? story.metric.value : `+${story.metric.value}`}
+                    </span>
+                    <span className="text-[11px] font-semibold leading-tight max-w-[6rem] text-white/90">
+                      {story.metric.label}
+                    </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-semibold text-gray-700">{story.duration}</div>
-                    <div className="text-[11px] text-gray-600">{story.program}</div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400">{tr('النتيجة', 'Outcome')}</div>
+                    <div className="text-xs font-semibold text-green-700 dark:text-green-400">
+                      {tr('تحسّن ملموس', 'Real progress')}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4244,6 +4329,88 @@ function Contact() {
   );
 }
 
+/* ══════════════════════ Assessment Band (DEV 4) ══════════════════════ */
+// Full-width, high-conversion CTA band (navy→green) placed mid-page after the
+// success stories — distinct from the centered pre-footer CTA card. Three actions:
+// book (booking modal), WhatsApp, and a direct call.
+function AssessmentBand() {
+  const booking = useBooking();
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.15);
+  const ap = content.appointment;
+  const phone = content.contact.mainPhone;
+  return (
+    <section
+      ref={ref}
+      aria-label={tr('احجز تقييماً مجانياً', 'Book a free assessment')}
+      className="relative overflow-hidden bg-gradient-to-l from-primary-800 via-primary-700 to-green-700 py-16 sm:py-20"
+    >
+      <div
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+          backgroundSize: '26px 26px',
+        }}
+      />
+      <div className="absolute -top-16 right-0 w-72 h-72 bg-accent-400/15 rounded-full blur-[90px]" />
+      <div className="absolute -bottom-16 left-0 w-72 h-72 bg-green-300/15 rounded-full blur-[90px]" />
+
+      <div
+        className={`relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+      >
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/20 px-4 py-1.5 text-xs font-bold text-white/90 backdrop-blur-sm mb-5">
+          <Icon name="clock" className="w-4 h-4" />
+          {tr('نرد خلال 24 ساعة', 'We reply within 24 hours')}
+        </span>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+          {content.cta.title || tr('ابدأ رحلة طفلك اليوم', "Start your child's journey today")}
+        </h2>
+        <p className="text-lg text-white/85 max-w-2xl mx-auto mb-9 leading-relaxed">
+          {tr('زيارة تقييم مجانية — نرد خلال 24 ساعة', 'Free assessment visit — we reply within 24 hours')}
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={booking.open}
+            className="inline-flex items-center gap-2.5 px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-accent-900/20 hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <Icon name="check" className="w-5 h-5" />
+            {tr('احجز تقييماً', 'Book an assessment')}
+          </button>
+          <button
+            type="button"
+            onClick={() => openWhatsApp(ap.whatsappNumber, ap.whatsappTemplate)}
+            className="inline-flex items-center gap-2.5 px-8 py-4 bg-white text-green-700 rounded-2xl font-bold text-lg shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            {tr('واتساب', 'WhatsApp')}
+          </button>
+          <a
+            href={`tel:${phone}`}
+            className="inline-flex items-center gap-2.5 px-8 py-4 border-2 border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+              />
+            </svg>
+            {tr('اتصل بنا', 'Call us')}
+          </a>
+        </div>
+
+        <p className="mt-7 text-sm text-white/70">
+          {tr('بدون أي رسوم — استشارة أولية وخطة تأهيل مبدئية', 'No fees — initial consultation and a starter rehabilitation plan')}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ CTA ══════════════════════ */
 function CTA() {
   const booking = useBooking();
@@ -4604,6 +4771,7 @@ export default function LandingPage() {
         <Navbar />
         <main id="main">
           <Hero />
+          <AccreditationStrip />
           <TrustedBy />
           <Awards />
           <About />
@@ -4618,6 +4786,7 @@ export default function LandingPage() {
           <Comparison />
           <Team />
           <Stories />
+          <AssessmentBand />
           <Stats />
           <Testimonials />
           <FAQ />
@@ -4629,8 +4798,11 @@ export default function LandingPage() {
         </main>
         <Footer />
         <BackToTop />
-        <ContactSpeedDial onBook={() => setBookingOpen(true)} />
-        <AccessibilityWidget />
+        {/* DEV 3 — lazily-loaded floating widgets; null fallback keeps layout stable */}
+        <Suspense fallback={null}>
+          <ContactSpeedDial onBook={() => setBookingOpen(true)} />
+          <AccessibilityWidget />
+        </Suspense>
         <MobileActionBar />
         <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
       </div>

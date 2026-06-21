@@ -872,6 +872,7 @@ __tests__/wbci-trigger-engine-wave471.test.js
 __tests__/weighted-progress-link-index-wave243.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
 __tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js
+__tests__/whatsapp-appsecret-proof-wave1425.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js
 __tests__/whatsapp-canonical-consolidation-wave725.test.js

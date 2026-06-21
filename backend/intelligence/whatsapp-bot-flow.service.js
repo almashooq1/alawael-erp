@@ -287,6 +287,24 @@ function handleTurn(flowState, rawText, ctx = {}) {
   // ─── Active flow ─────────────────────────────────────────────────────────
   const unit = reg.UNIT_BY_ID[flowState.unit];
 
+  // W1423 — step BACK one question (or, from the confirm summary, edit the last
+  // answer) without losing the rest of the collected data. Checked BEFORE cancel
+  // so "رجوع خطوة" steps back while a bare "رجوع" still cancels.
+  if (reg.isBackTrigger(text)) {
+    const prev =
+      flowState.phase === reg.PHASE.CONFIRMING
+        ? Math.max(0, unit.steps.length - 1)
+        : Math.max(0, (flowState.step || 0) - 1);
+    const ack = i18n.normLang(lang) === 'en' ? '↩️ Back one step.' : '↩️ رجعنا خطوة. عدِّل إجابتك:';
+    return result(`${ack}\n\n${stepPrompt(unit, prev, lang)}`, {
+      unit: unit.id,
+      step: prev,
+      collected: flowState.collected || {},
+      phase: reg.PHASE.COLLECTING,
+      lang,
+    });
+  }
+
   // Abort words (distinct from "إلغاء" so unit-3 action answers survive).
   if (reg.isCancelTrigger(text)) {
     return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });

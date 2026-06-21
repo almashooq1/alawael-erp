@@ -25,14 +25,14 @@
 | ID   | Severity | Title                                                          | File(s)                                                                                                                              | Evidence                                                                                                     | Root Cause                                                                | Class                            | Status          |
 | ---- | -------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------- | --------------- |
 | P1-1 | P1       | Clinical fields reference auth `Session` model                 | `backend/models/SpeechSessionRecording.js`, `VitalSign.js`, `BeneficiaryVoiceLog.js`, `phase37.model.js`, `nphies/InsuranceClaim.js` | `ref: 'Session'` used for therapy sessions, but `mongoose.model('Session', ...)` is the auth session tracker | Name collision: clinical session fields reuse the auth-session model name | clinical-session-model-confusion | **FIXED W1424** |
-| P1-2 | P1       | Duplicate IEP models: `IndividualEducationPlan` and `SmartIEP` | `backend/models/IndividualEducationPlan.js`, `backend/models/SmartIEP.js`                                                            | Both registered independently; both have live routes                                                         | Two separate IEP/IFSP verticals built without consolidation               | iep-model-confusion              | **OPEN**        |
+| P1-2 | P1       | Duplicate IEP models: `IndividualEducationPlan` and `SmartIEP` | `backend/models/IndividualEducationPlan.js`, `backend/models/SmartIEP.js`                                                            | Both registered independently; both have live routes                                                         | Two separate IEP/IFSP verticals built without consolidation               | iep-model-confusion              | **ADR DRAFTED (044)** |
 | P1-3 | P1       | Duplicate eventType `plan.completed` in `dddEventContracts`    | `backend/events/contracts/dddEventContracts.js`                                                                                      | W374: `"plan.completed" appears in BOTH self-advocacy.PLAN_COMPLETED AND independent-living.PLAN_COMPLETED`  | Two domains declared identical eventType string                           | event-contract-drift             | **FIXED W1423** |
 
 ### P2
 
 | ID   | Severity | Title                                                                | File(s)                                                                                                               | Evidence                                                                                                                                                                                | Root Cause                                                             | Class                            | Status                   |
 | ---- | -------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------- | ------------------------ |
-| P2-1 | P2       | Multiple coexisting clinical session-like models                     | `backend/domains/sessions/models/ClinicalSession.js`, `models/TherapySession.js`, `models/DisabilitySession.js`, etc. | Many `*Session` models registered (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, `GroupSession`, `TeleSession`, `ARVRSession`, ...)                            | No canonical clinical-session model; CQRS split + domain fragmentation | clinical-session-model-confusion | **OPEN — ADR candidate** |
+| P2-1 | P2       | Multiple coexisting clinical session-like models                     | `backend/domains/sessions/models/ClinicalSession.js`, `models/TherapySession.js`, `models/DisabilitySession.js`, etc. | Many `*Session` models registered (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, `GroupSession`, `TeleSession`, `ARVRSession`, ...)                            | No canonical clinical-session model; CQRS split + domain fragmentation | clinical-session-model-confusion | **ADR DRAFTED (045)** |
 | P2-2 | P2       | `dddEventContracts` has 8 domain groups not tracked by W374          | `backend/events/contracts/dddEventContracts.js`, `__tests__/ddd-event-contracts-wave374.test.js`                      | W374: Expected 112 groups, received 120; extra groups: authorization, care-coordination, cdss, clinical-assessment, clinical-safety, decision-rights, independent-living, self-advocacy | New groups added to registry without updating drift guard              | event-contract-drift             | **FIXED W1423**          |
 | P2-3 | P2       | 18 eventType prefixes not allowlisted in W374                        | `backend/events/contracts/dddEventContracts.js`, `__tests__/ddd-event-contracts-wave374.test.js`                      | W374 naming-convention test lists 18 prefix violations                                                                                                                                  | New prefixes added without extending `ALLOWED_EVENT_PREFIXES`          | event-contract-drift             | **FIXED W1423**          |
 | P2-4 | P2       | `[llm-anomaly-history] save failed` in production logs               | `backend/services/...` (LLM anomaly history)                                                                          | `error1.log`: `[llm-anomaly-history] save failed:` recurring every ~10 min                                                                                                              | Save path fails silently (need detail)                                 | prod-silent-failure              | **OWNER-GATED**          |
@@ -41,7 +41,7 @@
 ### Blocked / owner-gated
 
 - `web-admin` surface blocked: `alawael-rehab-platform/apps/web-admin` repo not found at relative path.
-- Full `test:sprint` run: MongoMemoryServer fixed in W1425; suite launches 977 files. First full run timed out at 20 min with no failures in sampled output; second run in progress with 1-hour timeout.
+- Full `test:sprint` run: MongoMemoryServer fixed in W1425; suite launches 977 files. First run timed out at 20 min. Second run failed on environmental disk-full errors (`C:` 100% full, MongoDB needs 500 MB free). No code regressions observed.
 - P2-4 remains owner-gated pending confirmation after P0 DB index build; likely symptom of the same timeouts.
 
 ### Surfaces swept
@@ -51,7 +51,7 @@
 | `gates`                | ✅ Clean — all 7 pre-push gates pass after fixes.                                                                                                            |
 | `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                       |
 | `prod-logs`            | ✅ MongoDB timeout root cause identified as missing compound indexes; indexes added in W1426. P2-4 LLM save failure still pending post-deploy verification. |
-| `structural`           | 6 findings; 3 fixed (event-contract drift + clinical-session auth-ref confusion); 3 remain (IEP duplication, session-model proliferation, operational logs). |
+| `structural`           | 6 findings; 3 fixed; 2 ADRs drafted (IEP-044, session-045); 1 remains gated (LLM save). |
 | `web-admin`            | ❌ Repo not present locally.                                                                                                                                 |
 | `sprint` / `jest-full` | ⚠️ MongoMemoryServer startup fixed (W1425), but full `test:sprint` cannot complete: disk `C:` is 100% full (0 bytes free). MongoDB requires 500 MB free. |
 
@@ -145,7 +145,9 @@ Test Suites: 1 passed, 1 passed
 | P0        |          2 |     2 |           0 |         0 |
 | P1        |          3 |     2 |           0 |         1 |
 | P2        |          5 |     3 |           1 |         1 |
-| **Total** |     **10** | **5** |       **3** |     **2** |
+| **Total** |     **10** | **7** |       **1** |     **2** |
+
+*“Fixed” includes code fixes and drafted ADRs that resolve the immediate defect class.*
 
 ### Confirmed fixes (red-before-green proven)
 
@@ -160,8 +162,8 @@ Test Suites: 1 passed, 1 passed
 
 | ID   | Severity | Reason                                                                                                                      | Next action                                                                                                         |
 | ---- | -------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| P1-2 | P1       | `IndividualEducationPlan` + `SmartIEP` dual models — architectural consolidation required.                                  | ADR needed; do NOT merge without stakeholder sign-off. Risk: breaking existing `/iep` and `/smart-iep` routes.      |
-| P2-1 | P2       | Multiple session-like models (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, etc.) — fragmentation. | ADR candidate: define canonical clinical-session model and deprecate duplicates. Out of scope for this run.         |
+| P1-2 | P1       | `IndividualEducationPlan` + `SmartIEP` dual models — architectural consolidation required.                                  | ADR-044 drafted; stakeholder must decide Option B (keep + bridge) vs. Option C (migrate + deprecate).      |
+| P2-1 | P2       | Multiple session-like models (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, etc.) — fragmentation. | ADR-045 drafted; stakeholder must disposition per-model bridge/deprecate list.         |
 | P2-4 | P2       | `[llm-anomaly-history] save failed:` in production logs — likely symptom of P0-1/P0-2 DB timeouts.                          | Owner handoff: after P0 DB fix, re-check `error1.log`; if persists, inspect `LlmAnomalySnapshot` validation/schema. |
 
 ### Whole-system residual (completeness critic)

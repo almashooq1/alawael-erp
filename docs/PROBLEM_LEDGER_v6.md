@@ -177,7 +177,8 @@ Test Suites: 1 passed, 1 passed
    - `new-admin-routes.api.test.js` MMS cleanup failure on Windows — fixed with force-stop + swallowed cleanup errors; 145/145 pass individually.
    - Chunk 1 exposed 3 more failures, all fixed and verified individually.
    - Chunk 2: 196/196 suites pass, 3022/3022 tests pass.
-   - Chunk 3: running.
+   - Chunk 3: 196/196 suites pass, 5508/5508 tests pass.
+   - Chunk 4: running.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 

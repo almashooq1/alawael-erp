@@ -53,7 +53,7 @@
 | `prod-logs`            | ✅ MongoDB timeout root cause identified as missing compound indexes; indexes added in W1426. P2-4 LLM save failure still pending post-deploy verification. |
 | `structural`           | 6 findings; 3 fixed (event-contract drift + clinical-session auth-ref confusion); 3 remain (IEP duplication, session-model proliferation, operational logs). |
 | `web-admin`            | ❌ Repo not present locally.                                                                                                                                 |
-| `sprint` / `jest-full` | ✅ MongoMemoryServer startup fixed (W1425); `test:sprint` running. Full result pending 1-hour run completion.                                                |
+| `sprint` / `jest-full` | ⚠️ MongoMemoryServer startup fixed (W1425), but full `test:sprint` cannot complete: disk `C:` is 100% full (0 bytes free). MongoDB requires 500 MB free. |
 
 ---
 
@@ -167,8 +167,8 @@ Test Suites: 1 passed, 1 passed
 ### Whole-system residual (completeness critic)
 
 1. **MongoDB buffering timeouts** root cause addressed at schema level in W1426 (compound indexes added). Production build + verification still required.
-2. **MongoMemoryServer environment blocker FIXED** in W1425; `test:sprint` now launches 977 suites. Full suite run exceeded 20 min in this environment before finishing; partial run showed zero failures in sampled suites.
-3. **Primary journey smoke test** still pending a full sprint run in an environment with adequate time/resources.
+2. **MongoMemoryServer startup FIXED** in W1425, but full `test:sprint` still cannot complete because disk `C:` is 100% full (0 bytes available). MongoDB refuses index creation with `< 500 MB` free. The failures seen are environmental, not code regressions.
+3. **Primary journey smoke test** blocked by zero disk space; needs environment cleanup before any full test run.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 

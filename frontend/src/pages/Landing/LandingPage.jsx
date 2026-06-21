@@ -2194,11 +2194,20 @@ function Team() {
               className={`group relative p-7 rounded-3xl bg-gradient-to-br from-white to-gray-50 ring-1 ring-gray-100 hover:ring-primary-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
               style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <div
-                className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-105 transition-transform`}
-              >
-                <Icon name={member.iconKey} className="w-10 h-10" />
-              </div>
+              {member.photo || member.src ? (
+                <img
+                  src={member.photo || member.src}
+                  alt={member.name}
+                  loading="lazy"
+                  className="w-20 h-20 rounded-2xl object-cover mb-4 shadow-lg group-hover:scale-105 transition-transform"
+                />
+              ) : (
+                <div
+                  className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-105 transition-transform`}
+                >
+                  <Icon name={member.iconKey} className="w-10 h-10" />
+                </div>
+              )}
               <h3 className="text-lg font-bold text-gray-900 mb-1">{member.name}</h3>
               <p className="text-sm text-primary-700 font-semibold mb-1">{member.role}</p>
               <p className="text-xs text-gray-600 mb-3" dir="ltr">
@@ -2642,71 +2651,132 @@ function Select({ label, required, options, value, onChange }) {
    ContactSpeedDial.jsx) — its render lives in the main page now. */
 
 /* ══════════════════════ SEO JSON-LD ══════════════════════ */
+/**
+ * Emits a single rich JSON-LD `@graph` (schema.org) built entirely from
+ * `content.*` so the public page is discoverable by Google rich results:
+ *   - MedicalOrganization (the center) with address / sameAs / aggregateRating
+ *   - one MedicalClinic per branch, parented to the org
+ *   - FAQPage from content.faq
+ *   - WebSite node
+ * All values are read from content (Arabic-first); nothing is hardcoded.
+ */
 function SeoJsonLd() {
-  const jsonLd = useMemo(() => {
+  const graph = useMemo(() => {
+    const SCHEMA = 'https://schema.org';
+    const siteUrl = content.contact.website || 'https://awael.sa';
+    const orgId = `${siteUrl}#organization`;
+    const websiteId = `${siteUrl}#website`;
+    const locality = tr('الرياض', 'Riyadh');
+
+    // Resolve logo to an absolute URL when running in the browser.
+    const logoUrl =
+      typeof window !== 'undefined'
+        ? new URL(content.brand.logoSrc, window.location.origin).toString()
+        : content.brand.logoSrc;
+
+    // Keep only "real" social links — drop bare placeholders like
+    // "https://twitter.com/" that carry no handle/path.
+    const sameAs = (content.contact.social || [])
+      .map(s => (s && typeof s.url === 'string' ? s.url.trim() : ''))
+      .filter(url => {
+        if (!url) return false;
+        try {
+          const u = new URL(url);
+          // A real profile has a non-empty path beyond "/".
+          return u.pathname.replace(/\/+$/, '').length > 0;
+        } catch {
+          return false;
+        }
+      });
+
+    const makeAddress = streetAddress => ({
+      '@type': 'PostalAddress',
+      streetAddress,
+      addressLocality: locality,
+      addressRegion: locality,
+      addressCountry: 'SA',
+    });
+
+    // ── 1. Organization (the center) ──
     const org = {
-      '@context': 'https://schema.org',
-      '@type': content.seo.organizationType,
+      '@type': [content.seo.organizationType, 'MedicalBusiness'],
+      '@id': orgId,
       name: content.brand.nameArFull,
       alternateName: content.brand.nameEnFull,
-      url: content.contact.website || 'https://awael.sa',
-      logo:
-        typeof window !== 'undefined'
-          ? new URL(content.brand.logoSrc, window.location.origin).toString()
-          : content.brand.logoSrc,
+      url: siteUrl,
+      logo: logoUrl,
+      image: logoUrl,
       description: content.seo.description,
       foundingDate: `${content.brand.foundedGregorian}`,
       telephone: content.contact.mainPhone,
       email: content.contact.email,
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: content.contact.mainAddress,
-        addressLocality: tr('الرياض', 'Riyadh'),
-        addressCountry: 'SA',
-      },
-      sameAs: content.contact.social.map(s => s.url),
+      address: makeAddress(content.contact.mainAddress),
+      areaServed: { '@type': 'City', name: locality },
+      medicalSpecialty: 'Rehabilitation',
     };
-    const branches = content.branches.items.map(b => ({
-      '@context': 'https://schema.org',
-      '@type': 'LocalBusiness',
+    if (sameAs.length) org.sameAs = sameAs;
+
+    // ── 3. AggregateRating on the org (from testimonials) ──
+    const reviews = (content.testimonials || []).filter(
+      r => typeof r.rating === 'number' && r.rating > 0
+    );
+    if (reviews.length) {
+      const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+      const avg = Math.round((sum / reviews.length) * 10) / 10; // 1-decimal
+      org.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: `${avg}`,
+        reviewCount: `${reviews.length}`,
+        bestRating: '5',
+        worstRating: '1',
+      };
+    }
+
+    // ── 2. One MedicalClinic per branch ──
+    const branches = (content.branches.items || []).map((b, i) => ({
+      '@type': 'MedicalClinic',
+      '@id': `${siteUrl}#branch-${i + 1}`,
       name: `${content.brand.nameArFull} — ${b.name}`,
       telephone: b.phone,
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: b.address,
-        addressLocality: tr('الرياض', 'Riyadh'),
-        addressCountry: 'SA',
-      },
-      parentOrganization: { '@type': content.seo.organizationType, name: content.brand.nameArFull },
+      address: makeAddress(b.address),
+      medicalSpecialty: 'Rehabilitation',
+      parentOrganization: { '@id': orgId },
     }));
+
+    // ── 4. FAQPage ──
     const faq = {
-      '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: content.faq.map(f => ({
+      '@id': `${siteUrl}#faq`,
+      mainEntity: (content.faq || []).map(f => ({
         '@type': 'Question',
         name: f.q,
         acceptedAnswer: { '@type': 'Answer', text: f.a },
       })),
     };
-    return [org, ...branches, faq];
+
+    // ── 5. WebSite ──
+    const website = {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      url: siteUrl,
+      name: content.brand.nameArFull,
+      inLanguage: isEn ? 'en' : 'ar',
+      publisher: { '@id': orgId },
+    };
+
+    return {
+      '@context': SCHEMA,
+      '@graph': [org, ...branches, faq, website],
+    };
   }, []);
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(jsonLd);
-    script.setAttribute('data-landing-seo', '1');
-    document.head.appendChild(script);
-    return () => {
-      try {
-        document.head.removeChild(script);
-      } catch {
-        /* already removed */
-      }
-    };
-  }, [jsonLd]);
-
-  return null;
+  return (
+    <script
+      type="application/ld+json"
+      data-landing-seo="1"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
+    />
+  );
 }
 
 /* ══════════════════════ Careers teaser ══════════════════════ */
@@ -3236,16 +3306,27 @@ function Gallery() {
               style={{ transitionDelay: `${i * 50}ms` }}
               aria-label={item.caption}
             >
-              <div
-                className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                  backgroundSize: '24px 24px',
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center text-7xl drop-shadow-lg">
-                {item.icon}
-              </div>
+              {item.src || item.image || item.photo ? (
+                <img
+                  src={item.src || item.image || item.photo}
+                  alt={item.caption}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <>
+                  <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                      backgroundSize: '24px 24px',
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center text-7xl drop-shadow-lg">
+                    {item.icon}
+                  </div>
+                </>
+              )}
               <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-right">
                 <div className="text-sm font-bold">{item.caption}</div>
               </div>
@@ -3283,16 +3364,26 @@ function Gallery() {
           <div
             className={`relative w-full max-w-4xl aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${lightbox.gradient} shadow-2xl`}
           >
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '32px 32px',
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center text-[20rem] drop-shadow-2xl">
-              {lightbox.icon}
-            </div>
+            {lightbox.src || lightbox.image || lightbox.photo ? (
+              <img
+                src={lightbox.src || lightbox.image || lightbox.photo}
+                alt={lightbox.caption}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                    backgroundSize: '32px 32px',
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center text-[20rem] drop-shadow-2xl">
+                  {lightbox.icon}
+                </div>
+              </>
+            )}
             <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white text-right">
               <div className="text-2xl font-bold">{lightbox.caption}</div>
             </div>

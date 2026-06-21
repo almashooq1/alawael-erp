@@ -20,31 +20,33 @@ html {
 body {
   direction: rtl;
   overflow-x: hidden;
+  /* Alawael brand font — Tajawal first, Cairo fallback. */
+  font-family: 'Tajawal', 'Cairo', system-ui, sans-serif;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* ═══ Selection ═══ */
+/* ═══ Selection — brand orange wash on navy text ═══ */
 ::selection {
-  background-color: rgba(46, 125, 50, 0.15);
-  color: #1B5E20;
+  background-color: rgba(243, 146, 32, 0.20);
+  color: #0A1E3A;
 }
 
 ::-moz-selection {
-  background-color: rgba(46, 125, 50, 0.15);
-  color: #1B5E20;
+  background-color: rgba(243, 146, 32, 0.20);
+  color: #0A1E3A;
 }
 
-/* ═══ Focus Visible ═══ */
+/* ═══ Focus Visible — brand orange ring (matches design-system --c-focus) ═══ */
 :focus-visible {
-  outline: 2px solid rgba(46, 125, 50, 0.5);
+  outline: 2px solid rgba(243, 146, 32, 0.6);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* ═══ Custom Scrollbar ═══ */
+/* ═══ Custom Scrollbar — brand navy ═══ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -53,20 +55,20 @@ code {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(46, 125, 50, 0.2);
+  background: rgba(27, 74, 138, 0.2);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(46, 125, 50, 0.35);
+  background: rgba(27, 74, 138, 0.35);
   background-clip: content-box;
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(46, 125, 50, 0.2) transparent;
+  scrollbar-color: rgba(27, 74, 138, 0.2) transparent;
 }
 
 /* ═══ Smooth image loading ═══ */
@@ -80,7 +82,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 30px #fafafa inset !important;
   -webkit-text-fill-color: #1a1a1a !important;
-  caret-color: #1B5E20;
+  caret-color: #1B4A8A;
   transition: background-color 5000s ease-in-out 0s;
 }
 

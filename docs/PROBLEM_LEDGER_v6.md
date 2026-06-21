@@ -165,12 +165,14 @@ Test Suites: 1 passed, 1 passed
 | P1-2 | P1       | `IndividualEducationPlan` + `SmartIEP` dual models — architectural consolidation required.                                  | ADR-044 drafted; stakeholder must decide Option B (keep + bridge) vs. Option C (migrate + deprecate).      |
 | P2-1 | P2       | Multiple session-like models (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, etc.) — fragmentation. | ADR-045 drafted; stakeholder must disposition per-model bridge/deprecate list.         |
 | P2-4 | P2       | `[llm-anomaly-history] save failed:` in production logs — likely symptom of P0-1/P0-2 DB timeouts.                          | Owner handoff: after P0 DB fix, re-check `error1.log`; if persists, inspect `LlmAnomalySnapshot` validation/schema. |
+| W987 | P1       | Missing `followup.case.completed` / `followup.case.lost` timeline subscribers (placeholders in `dddCrossModuleSubscribers.js`). | Fixed in commit `f4c2193ea` — restored subscriber bodies from `.bak`. Test `postrehab-case-core-linkage-wave987` passes. |
+| W979 | P1       | Missing `waitlist.waitlist.added` / `waitlist.waitlist.booked` timeline subscribers.                                         | Fixed in commit `f4c2193ea` — restored subscriber bodies. Test `waitlist-core-linkage-wave979` passes. |
 
 ### Whole-system residual (completeness critic)
 
 1. **MongoDB buffering timeouts** root cause addressed at schema level in W1426 (compound indexes added). Production build + verification still required.
 2. **MongoMemoryServer startup FIXED** in W1425. Disk `C:` recovered to ~36 GB free (2026-06-21 09:15 local); full `test:sprint` is now running in background (`bash-w6zvvmzl`).
-3. **Primary journey smoke test** unblocked by disk recovery; awaiting `test:sprint` completion.
+3. **Primary journey smoke test** unblocked by disk recovery. First full `test:sprint` run (2 h) progressed through most suites but timed out. It exposed 2 failing linkage tests caused by missing DDD timeline subscribers; those subscribers have been restored and the tests now pass.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 

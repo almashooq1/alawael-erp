@@ -1692,11 +1692,11 @@ function WhyUs() {
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-5 leading-tight">
               لماذا تختار
-              <span className="text-primary-600"> نظام الأوائل؟</span>
+              <span className="text-primary-600"> مراكز الأوائل؟</span>
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-10">
-              نوفّر لك حلاً تقنياً متكاملاً يجمع بين البساطة والقوة، مع دعم فني متواصل ومعايير أمان
-              عالمية.
+              خبرة تتجاوز 25 عاماً، وفريق متعدّد التخصصات، وخطة تأهيل فردية لكل طفل — في
+              بيئة آمنة وداعمة تضع راحة عائلتك وتقدّم ابنك أولاً.
             </p>
 
             {/* Features grid */}
@@ -1738,20 +1738,20 @@ function WhyUs() {
                   <div className="w-20 h-20 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center animate-pulse-soft">
                     <span className="text-4xl font-bold text-accent-400">أ</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">نظام واحد متكامل</h3>
+                  <h3 className="text-2xl font-bold text-white">رعاية متكاملة في مكان واحد</h3>
                   <p className="text-white/80 text-sm max-w-xs mx-auto">
-                    كل ما تحتاجه لإدارة مركزك في منصة واحدة
+                    تقييم وتأهيل ومتابعة لطفلك تحت سقف واحد، مع فريق مختص لكل حالة
                   </p>
 
                   {/* Module badges */}
                   <div className="flex flex-wrap justify-center gap-3 pt-4">
                     {[
-                      'التأهيل',
-                      'التعليم',
-                      'الموارد البشرية',
-                      'المالية',
-                      'التقارير',
-                      'المخازن',
+                      'التدخّل المبكر',
+                      'تأهيل التوحد',
+                      'النطق واللغة',
+                      'العلاج الوظيفي',
+                      'تعديل السلوك',
+                      'الدمج الاجتماعي',
                     ].map(m => (
                       <span
                         key={m}
@@ -1778,7 +1778,7 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
                     <Icon name="check" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">99.9% مدة التشغيل</span>
+                  <span className="text-sm font-bold text-gray-800">+25 سنة خبرة</span>
                 </div>
               </div>
 
@@ -1788,7 +1788,7 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">
                     <Icon name="user-group" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">+2500 مستخدم</span>
+                  <span className="text-sm font-bold text-gray-800">+8000 مستفيد</span>
                 </div>
               </div>
             </div>
@@ -1912,13 +1912,13 @@ function Testimonials() {
                 d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
               />
             </svg>
-            آراء العملاء
+            آراء أولياء الأمور
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             ماذا يقولون عنا
           </h2>
           <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-            تجارب حقيقية من مستخدمي النظام
+            تجارب حقيقية من أولياء أمور أبنائنا
           </p>
         </div>
 
@@ -2012,7 +2012,7 @@ function FAQ() {
             أسئلة متكررة
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            إجابات على أكثر الأسئلة شيوعاً حول نظام الأوائل
+            إجابات على أكثر الأسئلة شيوعاً حول مراكز الأوائل
           </p>
         </div>
 

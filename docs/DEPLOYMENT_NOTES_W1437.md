@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-21T23:25:00+03:00  
+> Updated: 2026-06-22T00:20:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -16,11 +16,8 @@ This release contains:
 
 ## Prerequisites before deploy
 
-1. **Resolve merge conflicts with `main`**.  
-   PR #579 is currently in `DIRTY` merge state because `main` has advanced with PRs #580, #581, #582.
-
-   - Option A: `git rebase origin/main` on the feature branch, resolve conflicts, force-push.
-   - Option B: `git merge origin/main` into the feature branch, resolve conflicts, push.
+1. **Resolve merge conflicts with `main`** ✅ DONE.  
+   PR #579 is now `MERGEABLE`. Conflicts with `origin/main` (PRs #580–#586) were resolved by merging `origin/main` into the feature branch in commits `7f2b26176` and `4dcb891a1`. The merge required `CHECK_WAVE_SKIP=1` for the wave-collision gate because the push range included `origin/main` commits whose wave numbers already exist on `main`.
 
 2. **Run the NphiesClaim backfill migration** in production **before** deploying the new application code:
 

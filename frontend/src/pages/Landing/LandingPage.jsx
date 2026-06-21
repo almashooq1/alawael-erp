@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import content from '../../data/landingContent';
 import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesContent';
 import jobs from '../../data/careersContent';
+import AccessibilityWidget from './AccessibilityWidget';
 
 /* ══════════════════════ helpers ══════════════════════ */
 function useOnScreen(ref, threshold = 0.15) {
@@ -4456,6 +4457,7 @@ export default function LandingPage() {
         <Footer />
         <BackToTop />
         <WhatsAppFab />
+        <AccessibilityWidget />
         <MobileActionBar />
         <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
       </div>

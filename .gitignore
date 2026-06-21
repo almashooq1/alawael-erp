@@ -157,6 +157,7 @@ jest-*.json
 test_*.txt
 test-results*.txt
 backend/.test-mongo-uri
+backend/.test-mongo-dbpath
 
 # ───────────────────────────────────────────────────────────────
 # 10. Uploads & Misc

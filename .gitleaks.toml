@@ -1,0 +1,13 @@
+# Al-Awael ERP gitleaks configuration
+# Allowlist: templates, fixtures, tests, and archived artifacts only.
+
+title = "Al-Awael ERP gitleaks config"
+
+[allowlist]
+description = "Permitted non-secret-bearing paths"
+paths = [
+  '.*\.env\.example$',
+  '.*/__tests__/.*',
+  '.*/tests/.*',
+  '_archived/.*',
+]

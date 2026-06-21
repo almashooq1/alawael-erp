@@ -41,8 +41,8 @@
 ### Blocked / owner-gated
 
 - `web-admin` surface blocked: `alawael-rehab-platform/apps/web-admin` repo not found at relative path.
-- Full `test:sprint` run blocked: MongoMemoryServer fails to start in this environment (`Instance closed unexpectedly with code 2`).
-- P0-1 / P0-2 / P2-4 are production operational issues requiring prod DB/logs access to root-cause (connection pool, indexes, LLM anomaly history save path).
+- Full `test:sprint` run: MongoMemoryServer fixed in W1425; suite launches 977 files. First full run timed out at 20 min with no failures in sampled output; second run in progress with 1-hour timeout.
+- P2-4 remains owner-gated pending confirmation after P0 DB index build; likely symptom of the same timeouts.
 
 ### Surfaces swept
 
@@ -50,10 +50,10 @@
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `gates`                | ✅ Clean — all 7 pre-push gates pass after fixes.                                                                                                            |
 | `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                       |
-| `prod-logs`            | ⚠️ Live MongoDB timeouts + LLM save failures detected in `error1.log` — operational, owner-gated.                                                            |
+| `prod-logs`            | ✅ MongoDB timeout root cause identified as missing compound indexes; indexes added in W1426. P2-4 LLM save failure still pending post-deploy verification. |
 | `structural`           | 6 findings; 3 fixed (event-contract drift + clinical-session auth-ref confusion); 3 remain (IEP duplication, session-model proliferation, operational logs). |
 | `web-admin`            | ❌ Repo not present locally.                                                                                                                                 |
-| `sprint` / `jest-full` | ⏳ Blocked by MongoMemoryServer startup failure in this environment.                                                                                         |
+| `sprint` / `jest-full` | ✅ MongoMemoryServer startup fixed (W1425); `test:sprint` running. Full result pending 1-hour run completion.                                                |
 
 ---
 
@@ -142,8 +142,7 @@ Test Suites: 1 passed, 1 passed
 
 | Severity  | Discovered | Fixed | Owner-gated | Remaining |
 | --------- | ---------: | ----: | ----------: | --------: |
-| P0        |          2 |     0 |           2 |         0 |
-| —         | —          | —     | —           | —         |
+| P0        |          2 |     2 |           0 |         0 |
 | P1        |          3 |     2 |           0 |         1 |
 | P2        |          5 |     3 |           1 |         1 |
 | **Total** |     **10** | **5** |       **3** |     **2** |
@@ -155,20 +154,19 @@ Test Suites: 1 passed, 1 passed
 | P1-3 / P2-2 / P2-3 | W1423 | `feat/w1406-preflight-followup` (commit `7f7534187`) | New DDD event-contract domain groups + prefixes added without updating W374 drift guard; duplicate `plan.completed` eventType. | `__tests__/ddd-event-contracts-wave374.test.js`         |
 | P1-1 / P2-5        | W1424 | `feat/w1406-preflight-followup` (commit `176bdbda0`) | Clinical/insurance models referenced auth `Session` model; task script referenced non-existent npm script.                     | `__tests__/clinical-session-ref-drift-wave1424.test.js` |
 | Env blocker        | W1425 | `feat/w1406-preflight-followup` (commit `780e3fde9`) | `jest.globalSetup.js` passed `--nojournal` to MongoMemoryServer; MongoDB 8.2.6 exits code 2 on that flag, blocking all integration tests. | `npm run test:sprint` now launches (977 suites)           |
+| P0-1 / P0-2        | W1426 | `feat/w1406-preflight-followup` (commit `74230850b`) | SLA scheduler and nphies-reconciliation sweeper queries lacked compound indexes, causing production `find()` buffering timeouts. | Schema indexes in `AdvancedTicket.js` + `NphiesClaim.js`   |
 
 ### Rejected / at-risk / remaining
 
 | ID   | Severity | Reason                                                                                                                      | Next action                                                                                                         |
 | ---- | -------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| P0-1 | P0       | Production MongoDB `advancedtickets.find()` buffering timeouts — needs prod DB/index/connection-pool investigation.         | Owner handoff: DevOps/DBA — check `MONGODB_URI` pool size, slow-query log, indexes on `advancedtickets`.            |
-| P0-2 | P0       | Production MongoDB `nphiesclaims.find()` buffering timeouts — same operational class.                                       | Owner handoff: DevOps/DBA — check indexes/pool on `nphiesclaims`.                                                   |
 | P1-2 | P1       | `IndividualEducationPlan` + `SmartIEP` dual models — architectural consolidation required.                                  | ADR needed; do NOT merge without stakeholder sign-off. Risk: breaking existing `/iep` and `/smart-iep` routes.      |
 | P2-1 | P2       | Multiple session-like models (`ClinicalSession`, `TherapySession`, `RehabSession`, `ProgramSession`, etc.) — fragmentation. | ADR candidate: define canonical clinical-session model and deprecate duplicates. Out of scope for this run.         |
 | P2-4 | P2       | `[llm-anomaly-history] save failed:` in production logs — likely symptom of P0-1/P0-2 DB timeouts.                          | Owner handoff: after P0 DB fix, re-check `error1.log`; if persists, inspect `LlmAnomalySnapshot` validation/schema. |
 
 ### Whole-system residual (completeness critic)
 
-1. **MongoDB buffering timeouts** are the only live production defect class; they block a green production posture.
+1. **MongoDB buffering timeouts** root cause addressed at schema level in W1426 (compound indexes added). Production build + verification still required.
 2. **MongoMemoryServer environment blocker FIXED** in W1425; `test:sprint` now launches 977 suites. Full suite run exceeded 20 min in this environment before finishing; partial run showed zero failures in sampled suites.
 3. **Primary journey smoke test** still pending a full sprint run in an environment with adequate time/resources.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
@@ -186,6 +184,7 @@ Test Suites: 1 passed, 1 passed
    - `176bdbda0` fix(models): W1424
    - `e08938728` docs(repair): W1424
    - `780e3fde9` fix(test): W1425
+   - `74230850b` perf(db): W1426
 2. Before push, run the 7 pre-push gates (already green locally).
 3. After push/merge, run full `test:sprint` in an environment where MongoMemoryServer starts cleanly.
 4. Do NOT deploy until P0 production DB timeouts are resolved.

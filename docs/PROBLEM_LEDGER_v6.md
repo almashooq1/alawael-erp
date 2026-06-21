@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-22T00:55:00+03:00  
+> Updated: 2026-06-22T01:10:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -245,7 +245,7 @@ These files were not part of the W1436/W1437 scope and are pre-existing infrastr
 - **Merge state**: Conflicts with `origin/main` (PRs #580-#588) were resolved before merge via merge commits `7f2b26176`, `4dcb891a1`, `b40c2f993`, and post-merge rebase around `76ab95e87` (#588).
 - **Wave-collision note**: The merge commits required `CHECK_WAVE_SKIP=1` because the push range included `origin/main` commits whose wave numbers already exist on `main`; these are not new branch-local collisions.
 - **Post-merge hotfix**: `W1444` fixed `backend/scripts/migrate-nphies-claim-updatedAt.js` to use the native collection driver (`NphiesClaim.collection.updateMany`) because Mongoose rejected the aggregation-pipeline update without `updatePipeline: true`. Verified locally against MongoMemoryServer.
-- **Action required**: Before deploying, run `backend/scripts/migrate-nphies-claim-updatedAt.js` in production and monitor `error1.log` for P0-1/P0-2/P2-4 verification.
+- **Action required**: Before deploying, run `backend/scripts/migrate-nphies-claim-updatedAt.js` in production and monitor `error1.log` for P0-1/P0-2/P2-4 verification. See `docs/DEPLOYMENT_NOTES_W1437.md` for the final pre-deployment checklist.
 - **Checks**: Local pre-push hooks pass. Full `test:sprint` has the W1399/W1405 caveats above.
 
 ### Dependency audit (follow-up)

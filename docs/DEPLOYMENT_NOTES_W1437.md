@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T00:55:00+03:00  
+> Updated: 2026-06-22T01:10:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -88,19 +88,84 @@ This release contains:
   - Frontend: React 18→19, Vite 6→8, Jest 29→30, Babel 7→8.
   - Mobile: Expo 49→56, React Native 0.72→0.86, navigation ecosystem 6→7.
 
+## Final pre-deployment checklist
+
+Use this list in the deployment channel / runbook before cutting the release.
+
+### 1. Code readiness
+
+- [x] PR #579 merged to `main` (squash merge `009c676bd`).
+- [x] Post-merge hotfix W1444 applied (`migrate-nphies-claim-updatedAt.js` uses native collection driver).
+- [x] Latest `main` pulled locally (`git pull origin main`).
+- [x] Pre-push gates pass on `main`:
+  - [x] `check:sprint-paths`
+  - [x] `check:routes-load`
+  - [x] `check:gitignored-sources`
+  - [x] `check:hook-style`
+  - [x] `check:phantom-writes`
+  - [x] `check:route-shadowing`
+  - [x] frontend / supply-chain / mobile lint
+- [x] Focused regression tests pass (W1436/W1437 + W1399).
+
+### 2. Infrastructure readiness
+
+- [ ] Production MongoDB backup completed in last 24h.
+- [ ] `MONGODB_URI` points to production cluster.
+- [ ] `NODE_ENV=production` set for the migration run.
+- [ ] Rollback plan documented and on-call engineer notified.
+
+### 3. Database migration (run BEFORE deploying app code)
+
+```bash
+cd /opt/alawael-erp   # or your deployment root
+git pull origin main
+NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedAt.js
+```
+
+Expected output:
+
+```
+[migrate-nphies-claim-updatedAt] done { matched: <N>, modified: <N> }
+```
+
+- [ ] Migration executed successfully.
+- [ ] Production compound indexes verified (or rely on Mongoose `autoIndex`):
+  ```js
+  db.advancedtickets.createIndex({ status: 1, 'sla.firstResponseAt': 1, 'sla.isBreached': 1, createdAt: -1 });
+  db.nphiesclaims.createIndex({ 'nphies.submission.status': 1, 'nphies.submission.updatedAt': 1, 'nphies.submission.submittedAt': 1 });
+  ```
+
+### 4. Deploy
+
+- [ ] Backend services deployed from `main`.
+- [ ] Frontend build deployed.
+- [ ] Mobile build deployed (if applicable).
+- [ ] Application starts without boot errors.
+
+### 5. Post-deploy verification (30 min)
+
+Watch `error1.log` for these messages. They should **stop** after deploy:
+
+- [ ] `Operation advancedtickets.find() buffering timed out after 10000ms` (P0-1)
+- [ ] `Operation nphiesclaims.find() buffering timed out after 10000ms` (P0-2)
+- [ ] `[llm-anomaly-history] save failed:` (P2-4)
+
+Also verify:
+
+- [ ] NPHIES reconciliation sweeper is transitioning old `PENDING_REVIEW` claims.
+- [ ] SLA scheduler (`checkResolutionBreaches`, `assignMissingSlaDeadlines`, `getSlaStats`) completes without timeout errors.
+
 ## Known risks / follow-up work
 
-- **Merge conflicts**: Must be resolved before merge.
 - **Dependency updates**: Major bumps are intentionally deferred to a dedicated dependency wave to keep this release focused.
 - **W1405 monitoring files**: Missing Grafana dashboard and AlertManager rules are pre-existing drift; either create the files or update the guard in a monitoring wave.
 - **web-admin repo**: Not present locally; not validated in this release.
 - **IEP/session model fragmentation**: ADR-044 and ADR-045 still pending stakeholder decision.
 
-## Sign-off checklist
+## Sign-off
 
-- [ ] Merge conflicts with `main` resolved.
-- [ ] `test:sprint` green.
-- [ ] `backend/scripts/migrate-nphies-claim-updatedAt.js` executed in production.
-- [ ] Production DB indexes verified.
-- [ ] Deploy completed.
-- [ ] `error1.log` monitored for 30 min post-deploy.
+| Role | Name | Sign-off | Date |
+| ---- | ---- | -------- | ---- |
+| Release owner | | | |
+| DevOps/DBA | | | |
+| On-call engineer | | | |

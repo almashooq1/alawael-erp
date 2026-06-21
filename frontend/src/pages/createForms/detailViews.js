@@ -31,6 +31,7 @@ const DETAIL_VIEWS = {
   'recruitment/applicants/:id': { getBase: '/recruitment/applicants', backTo: '/recruitment', title: 'تفاصيل المتقدّم' },
   'warehouse/items/:id': { getBase: '/warehouse/items', backTo: '/warehouse', title: 'تفاصيل صنف المستودع' },
   'independent-living/beneficiaries/:id': { getBase: '/independent-living/beneficiaries', backTo: '/independent-living', title: 'تفاصيل مستفيد الاستقلالية' },
+  'hse/incidents/:id': { getBase: '/hse/incidents', backTo: '/hse', title: 'تفاصيل حادثة السلامة' },
 };
 
 export default DETAIL_VIEWS;

@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-21T20:58:00+03:00  
+> Updated: 2026-06-21T22:39:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -47,15 +47,15 @@
 
 ### Surfaces swept
 
-| Surface                | Result                                                                                                                                                                                               |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                                                                     |
-| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                                                               |
-| `prod-logs`            | ✅ P0-1/P0-2 DB timeout root causes fixed in W1437 (reachable indexes + schema-backed updatedAt). Run migration before deploy. P2-4 root cause addressed; W1436 diagnostics remain for verification. |
-| `structural`           | 6 findings; 4 fixed (including P0 timeouts + LLM save root cause); 2 ADRs drafted (IEP-044, session-045).                                                                                            |
-| `web-admin`            | ❌ Repo not present locally.                                                                                                                                                                         |
-| `sprint` / `jest-full` | ⚠️ MongoMemoryServer startup fixed (W1425), but full `test:sprint` cannot complete: disk `C:` is 100% full (0 bytes free). MongoDB requires 500 MB free.                                             |
-| `npm-audit`            | ✅ 0 vulnerabilities in backend, frontend, mobile, supply-chain-management (frontend/backend), services (root/queue-worker/cctv-edge-gateway) after W1433 dependency overrides.                      |
+| Surface                | Result                                                                                                                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                                                                                  |
+| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                                                                            |
+| `prod-logs`            | ✅ P0-1/P0-2 DB timeout root causes fixed in W1437 (reachable indexes + schema-backed updatedAt). Run migration before deploy. P2-4 root cause addressed; W1436 diagnostics remain for verification.              |
+| `structural`           | 6 findings; 4 fixed (including P0 timeouts + LLM save root cause); 2 ADRs drafted (IEP-044, session-045).                                                                                                         |
+| `web-admin`            | ❌ Repo not present locally.                                                                                                                                                                                      |
+| `sprint` / `jest-full` | ✅ Disk recovered (~34 GB free). Focused regression tests pass (51 tests). Full `test:sprint` running in background (`bash-x6858g82`) — pending completion. Previous chunked run (Chunks 1–5) all passed.         |
+| `npm-audit`            | ✅ 0 vulnerabilities after W1433 overrides. ⚠️ `npm outdated` reports many non-vulnerable updates available across root/backend/frontend/mobile (major + minor); not a blocker, tracked for next dependency wave. |
 
 ---
 
@@ -226,9 +226,28 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 
+### PR status
+
+- **PR #579**: OPEN — title updated to "W1427-W1437 + pending modules: Repair-all-defects, DB timeout fixes, and working-tree cleanup".
+- **Merge state**: `DIRTY` — `main` has advanced with commits #580, #581, #582 since the feature branch was cut. Attempting `git merge origin/main` produced ~24 conflicts in workflow files, package.json, new backend modules, docs, and sprint gates.
+- **Action required**: Resolve merge conflicts with `main` before PR can be merged. Options: rebase + force-push, or merge `main` into the feature branch and resolve conflicts.
+- **Checks**: No GitHub Actions checks reported yet (local pre-push hooks pass).
+
+### Dependency audit (follow-up)
+
+`npm outdated --depth=0` highlights available updates. Notable non-vulnerable bumps:
+
+- **Root**: eslint 10.1→10.5, mongodb-memory-server 11.0→11.2, stripe 20.4→22.2, tailwindcss 4.2→4.3, etc.
+- **Backend**: mongoose 9.6→9.7, axios 1.17→1.18, prettier 3.8.3→3.8.4, express 4.22→5.2 (major), firebase-admin 13→14 (major), helmet 7→8 (major), etc.
+- **Frontend**: MUI 9.0→9.1, tailwindcss 4.3→4.3.1, axios 1.17→1.18, eslint minor bumps.
+- **Mobile**: expo/navigation/react-native ecosystem has major version updates; requires coordinated upgrade.
+
+**Decision**: Leave dependency updates for a dedicated wave to avoid destabilizing this PR. `npm audit` is still clean.
+
 ### Owner handoff
 
 - **DevOps/DBA / repo owner**: Run `backend/scripts/migrate-nphies-claim-updatedAt.js` in production before deploying W1437; monitor `error1.log` for P0-1/P0-2/P2-4 verification.
+- **Merge owner / tech lead**: Resolve PR #579 merge conflicts with `main` before merge.
 - **Clinical architect / product owner**: P1-2, P2-1 (IEP and session-model consolidation ADRs).
 
 ### Integration plan

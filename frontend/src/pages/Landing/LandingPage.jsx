@@ -1325,55 +1325,70 @@ function Hero() {
             className={`hidden lg:flex justify-center transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}
           >
             <div className="relative animate-float">
-              {/* Main glass card */}
-              <div className="w-[400px] h-[420px] rounded-3xl bg-white/[0.07] backdrop-blur-xl border border-white/[0.15] shadow-2xl shadow-black/20 p-7 flex flex-col">
-                {/* Browser dots */}
-                <div className="flex items-center gap-2 mb-5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                  <div className="w-3 h-3 rounded-full bg-accent-400/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-400/80" />
-                  <div className="flex-1 h-6 rounded-full bg-white/10 mx-3" />
-                </div>
-
-                {/* Mock header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="h-5 bg-white/20 rounded w-28" />
-                  <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-white/10" />
-                    <div className="w-8 h-8 rounded-lg bg-white/10" />
-                  </div>
-                </div>
-
-                {/* KPI row */}
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[
-                    { bg: 'bg-green-400/20', bar: 'bg-green-400', w: '75%' },
-                    { bg: 'bg-accent-400/20', bar: 'bg-accent-400', w: '60%' },
-                    { bg: 'bg-primary-400/20', bar: 'bg-primary-400', w: '85%' },
-                  ].map((k, i) => (
-                    <div key={i} className={`rounded-xl p-3 ${k.bg}`}>
-                      <div className="h-3 bg-white/20 rounded w-2/3 mb-2" />
-                      <div className="h-5 bg-white/30 rounded w-1/2 mb-2" />
-                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className={`h-full ${k.bar} rounded-full`} style={{ width: k.w }} />
-                      </div>
+              {/* Main visual — a warm, on-brand CARE scene (photo-ready).
+                  Set content.hero.image to a real photo URL to swap in a
+                  real photograph; otherwise a branded care panel shows. */}
+              <div className="w-[400px] h-[420px] rounded-3xl overflow-hidden border border-white/[0.15] shadow-2xl shadow-black/20 relative bg-gradient-to-br from-primary-700 via-primary-600 to-green-600">
+                {content.hero.image ? (
+                  <img
+                    src={content.hero.image}
+                    alt={tr('أطفال مراكز الأوائل أثناء التأهيل', 'Children at Alawael Centers during rehabilitation')}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
+                    {/* soft dot texture */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 opacity-10"
+                      style={{
+                        backgroundImage:
+                          'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+                        backgroundSize: '22px 22px',
+                      }}
+                    />
+                    {/* caring hands / heart mark */}
+                    <div className="relative w-28 h-28 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center animate-pulse-soft">
+                      <svg
+                        className="w-14 h-14 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                        />
+                      </svg>
                     </div>
-                  ))}
-                </div>
-
-                {/* Chart area */}
-                <div className="flex-1 bg-white/5 rounded-xl p-4">
-                  <div className="h-3 bg-white/15 rounded w-20 mb-3" />
-                  <div className="flex items-end gap-2 h-full pb-2">
-                    {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85].map((h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t bg-gradient-to-t from-primary-400/40 to-green-400/40 transition-all duration-700 hover:from-primary-400/70 hover:to-green-400/70"
-                        style={{ height: `${h}%` }}
-                      />
-                    ))}
+                    <h3 className="relative mt-6 text-2xl font-bold leading-snug text-white">
+                      {tr('عناية خاصة بقدرات خاصة', 'Special care for special abilities')}
+                    </h3>
+                    <p className="relative mt-2 max-w-[16rem] text-sm leading-relaxed text-white/85">
+                      {tr(
+                        'بيئة آمنة وفريق مختص يضع خطة تأهيل فردية لكل طفل',
+                        'A safe environment and a specialist team with an individual plan for every child'
+                      )}
+                    </p>
+                    <div className="relative mt-5 flex flex-wrap justify-center gap-2">
+                      {[
+                        tr('تدخّل مبكر', 'Early intervention'),
+                        tr('تأهيل التوحد', 'Autism therapy'),
+                        tr('نطق ولغة', 'Speech & language'),
+                      ].map((chip) => (
+                        <span
+                          key={chip}
+                          className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold text-white/90"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Floating notification card - top right */}

@@ -294,6 +294,7 @@ router.post('/:id/submit', claimIdempotency, requireRole(WRITE_ROLES), async (re
     claim.nphies.submission = {
       status: result.status,
       submittedAt: new Date(),
+      updatedBy: req.user?.id || 'manual',
       claimReference: result.claimReference,
       reason: result.reason,
       message: result.message,

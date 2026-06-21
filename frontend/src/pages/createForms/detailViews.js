@@ -27,6 +27,10 @@ const DETAIL_VIEWS = {
   'supply-chain/orders/:id': { getBase: '/supply-chain/orders', backTo: '/supply-chain', title: 'تفاصيل أمر الشراء' },
   'volunteers/:id': { getBase: '/volunteers', backTo: '/volunteers', title: 'تفاصيل المتطوع' },
   'waitlist/entries/:id': { getBase: '/waitlist', backTo: '/waitlist', title: 'تفاصيل طلب قائمة الانتظار' },
+  'mhpss/cases/:id': { getBase: '/mhpss/cases', backTo: '/mhpss', title: 'تفاصيل الحالة النفسية' },
+  'recruitment/applicants/:id': { getBase: '/recruitment/applicants', backTo: '/recruitment', title: 'تفاصيل المتقدّم' },
+  'warehouse/items/:id': { getBase: '/warehouse/items', backTo: '/warehouse', title: 'تفاصيل صنف المستودع' },
+  'independent-living/beneficiaries/:id': { getBase: '/independent-living/beneficiaries', backTo: '/independent-living', title: 'تفاصيل مستفيد الاستقلالية' },
 };
 
 export default DETAIL_VIEWS;

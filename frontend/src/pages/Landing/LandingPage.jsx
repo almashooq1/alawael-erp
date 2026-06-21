@@ -705,7 +705,11 @@ const icons = {
       stroke="currentColor"
       strokeWidth={1.5}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+      />
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -2200,7 +2204,8 @@ function BookingModal({ open, onClose }) {
   useEffect(() => {
     if (!open) return;
     // Remember what was focused, then move focus into the dialog.
-    previouslyFocusedRef.current = typeof document !== 'undefined' ? document.activeElement : null;
+    previouslyFocusedRef.current =
+      typeof document !== 'undefined' ? document.activeElement : null;
     const onKey = e => {
       if (e.key === 'Escape') onClose();
     };
@@ -3150,7 +3155,8 @@ function Gallery() {
   const isOpenLightbox = Boolean(lightbox);
   useEffect(() => {
     if (!isOpenLightbox) return;
-    galleryPrevFocusRef.current = typeof document !== 'undefined' ? document.activeElement : null;
+    galleryPrevFocusRef.current =
+      typeof document !== 'undefined' ? document.activeElement : null;
     const focusTimer = setTimeout(() => {
       lightboxCloseRef.current?.focus();
     }, 0);

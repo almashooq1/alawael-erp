@@ -143,6 +143,7 @@ Test Suites: 1 passed, 1 passed
 | Severity  | Discovered | Fixed | Owner-gated | Remaining |
 | --------- | ---------: | ----: | ----------: | --------: |
 | P0        |          2 |     0 |           2 |         0 |
+| —         | —          | —     | —           | —         |
 | P1        |          3 |     2 |           0 |         1 |
 | P2        |          5 |     3 |           1 |         1 |
 | **Total** |     **10** | **5** |       **3** |     **2** |
@@ -153,6 +154,7 @@ Test Suites: 1 passed, 1 passed
 | ------------------ | ----- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
 | P1-3 / P2-2 / P2-3 | W1423 | `feat/w1406-preflight-followup` (commit `7f7534187`) | New DDD event-contract domain groups + prefixes added without updating W374 drift guard; duplicate `plan.completed` eventType. | `__tests__/ddd-event-contracts-wave374.test.js`         |
 | P1-1 / P2-5        | W1424 | `feat/w1406-preflight-followup` (commit `176bdbda0`) | Clinical/insurance models referenced auth `Session` model; task script referenced non-existent npm script.                     | `__tests__/clinical-session-ref-drift-wave1424.test.js` |
+| Env blocker        | W1425 | `feat/w1406-preflight-followup` (commit `780e3fde9`) | `jest.globalSetup.js` passed `--nojournal` to MongoMemoryServer; MongoDB 8.2.6 exits code 2 on that flag, blocking all integration tests. | `npm run test:sprint` now launches (977 suites)           |
 
 ### Rejected / at-risk / remaining
 
@@ -167,8 +169,8 @@ Test Suites: 1 passed, 1 passed
 ### Whole-system residual (completeness critic)
 
 1. **MongoDB buffering timeouts** are the only live production defect class; they block a green production posture.
-2. **Primary journey smoke test** (`beneficiary→session→attendance→invoice→report`) could not be run because `MongoMemoryServer` fails to start in this environment.
-3. **Full sprint gate** (`npm run test:sprint`) could not be completed for the same MongoDB reason.
+2. **MongoMemoryServer environment blocker FIXED** in W1425; `test:sprint` now launches 977 suites. Full suite run exceeded 20 min in this environment before finishing; partial run showed zero failures in sampled suites.
+3. **Primary journey smoke test** still pending a full sprint run in an environment with adequate time/resources.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 
@@ -183,6 +185,7 @@ Test Suites: 1 passed, 1 passed
    - `7f7534187` fix(events): W1423
    - `176bdbda0` fix(models): W1424
    - `e08938728` docs(repair): W1424
+   - `780e3fde9` fix(test): W1425
 2. Before push, run the 7 pre-push gates (already green locally).
 3. After push/merge, run full `test:sprint` in an environment where MongoMemoryServer starts cleanly.
 4. Do NOT deploy until P0 production DB timeouts are resolved.

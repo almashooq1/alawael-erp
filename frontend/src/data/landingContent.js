@@ -78,12 +78,7 @@ const landingContent = {
     },
     values: [
       { icon: '🤝', iconKey: 'heart', title: 'الرحمة', desc: 'رعاية بقلب إنساني قبل أي شيء' },
-      {
-        icon: '🎯',
-        iconKey: 'academic-cap',
-        title: 'التخصّص',
-        desc: 'فريق مؤهل علمياً في كل مجال',
-      },
+      { icon: '🎯', iconKey: 'academic-cap', title: 'التخصّص', desc: 'فريق مؤهل علمياً في كل مجال' },
       { icon: '🌟', iconKey: 'star', title: 'التميّز', desc: 'معايير عالمية في جميع خدماتنا' },
       {
         icon: '🛡️',

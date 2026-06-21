@@ -169,8 +169,8 @@ Test Suites: 1 passed, 1 passed
 ### Whole-system residual (completeness critic)
 
 1. **MongoDB buffering timeouts** root cause addressed at schema level in W1426 (compound indexes added). Production build + verification still required.
-2. **MongoMemoryServer startup FIXED** in W1425, but full `test:sprint` still cannot complete because disk `C:` is 100% full (0 bytes available). MongoDB refuses index creation with `< 500 MB` free. The failures seen are environmental, not code regressions.
-3. **Primary journey smoke test** blocked by zero disk space; needs environment cleanup before any full test run.
+2. **MongoMemoryServer startup FIXED** in W1425. Disk `C:` recovered to ~36 GB free (2026-06-21 09:15 local); full `test:sprint` is now running in background (`bash-w6zvvmzl`).
+3. **Primary journey smoke test** unblocked by disk recovery; awaiting `test:sprint` completion.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 
@@ -184,12 +184,18 @@ Test Suites: 1 passed, 1 passed
 1. Merge order: already sequential on `feat/w1406-preflight-followup`:
    - `7f7534187` fix(events): W1423
    - `176bdbda0` fix(models): W1424
-   - `e08938728` docs(repair): W1424
+   - `d1e9aac5e` docs(repair): W1424
+   - `646c9dd23` docs(repair): W1425
+   - `71c3444d6` docs(repair): W1426
+   - `a5480f547` docs(repair): W1426
+   - `b21aaea57` docs(adr): W1426
+   - `a8b5e1b53` docs(repair): W1426
+   - `958d18c96` docs(repair): W1426
    - `780e3fde9` fix(test): W1425
    - `74230850b` perf(db): W1426
 2. Before push, run the 7 pre-push gates (already green locally).
 3. After push/merge, run full `test:sprint` in an environment where MongoMemoryServer starts cleanly.
-4. Review commits `999129918` and `6ad46c9f0` — they are unrelated frontend landing-page re-skins that were already staged and got swept into this branch by the commit sequence; verify they are intentional before push.
+4. **Unrelated frontend commits kept on branch** — `999129918` and `6ad46c9f0` are pre-existing frontend landing-page re-skins. They were left in place and flagged for manual review before push; reverting them now would risk conflicts and they are outside the repair scope.
 5. Do NOT deploy until P0 production DB timeouts are resolved.
 
 ### ADRs to write

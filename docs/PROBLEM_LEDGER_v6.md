@@ -187,7 +187,8 @@ Test Suites: 1 passed, 1 passed
    - `74230850b` perf(db): W1426
 2. Before push, run the 7 pre-push gates (already green locally).
 3. After push/merge, run full `test:sprint` in an environment where MongoMemoryServer starts cleanly.
-4. Do NOT deploy until P0 production DB timeouts are resolved.
+4. Review commit `999129918` — it is an unrelated frontend landing-page re-skin that was already staged and got swept into this branch by the commit sequence; verify it is intentional before push.
+5. Do NOT deploy until P0 production DB timeouts are resolved.
 
 ### ADRs to write
 

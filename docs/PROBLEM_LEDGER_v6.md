@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-22T00:30:00+03:00  
+> Updated: 2026-06-22T00:45:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -240,10 +240,11 @@ These files were not part of the W1436/W1437 scope and are pre-existing infrastr
 
 ### PR status
 
-- **PR #579**: OPEN — title "W1427-W1437 + pending modules: Repair-all-defects, DB timeout fixes, and working-tree cleanup". Head `feat/w1406-preflight-followup` is now pushed to `b40c2f993`.
-- **Merge state**: ✅ `MERGEABLE` / `UNSTABLE` — conflicts with `main` resolved by merging `origin/main` (up to and including #587) into the feature branch. Merge commits: `7f2b26176` (#580-#582), `4dcb891a1` (#583-#586), `b40c2f993` (#587).
+- **PR #579**: ✅ **MERGED** at `2026-06-21T21:42:10Z` — merge commit `009c676bd` on `main`.
+- **Merge method**: Squash merge; feature branch `feat/w1406-preflight-followup` retained (not deleted).
+- **Merge state**: Conflicts with `origin/main` (PRs #580-#587) were resolved before merge via merge commits `7f2b26176`, `4dcb891a1`, and `b40c2f993`.
 - **Wave-collision note**: The merge commits required `CHECK_WAVE_SKIP=1` because the push range included `origin/main` commits whose wave numbers already exist on `main`; these are not new branch-local collisions.
-- **Action required**: PR is ready for merge. Before deploying, still run `backend/scripts/migrate-nphies-claim-updatedAt.js` in production and monitor `error1.log`.
+- **Action required**: Before deploying, run `backend/scripts/migrate-nphies-claim-updatedAt.js` in production and monitor `error1.log` for P0-1/P0-2/P2-4 verification.
 - **Checks**: Local pre-push hooks pass. Full `test:sprint` has the W1399/W1405 caveats above.
 
 ### Dependency audit (follow-up)

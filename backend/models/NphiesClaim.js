@@ -94,5 +94,11 @@ const NphiesClaimSchema = new mongoose.Schema(
 
 NphiesClaimSchema.index({ beneficiary: 1, status: 1 });
 NphiesClaimSchema.index({ 'nphies.submission.status': 1, serviceDate: -1 });
+// W1426 — cover nphies-reconciliation sweeper query that was timing out in production
+NphiesClaimSchema.index({
+  'nphies.submission.status': 1,
+  'nphies.submission.updatedAt': 1,
+  'nphies.submission.submittedAt': 1,
+});
 
 module.exports = mongoose.models.NphiesClaim || mongoose.model('NphiesClaim', NphiesClaimSchema);

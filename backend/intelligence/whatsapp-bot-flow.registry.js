@@ -524,7 +524,7 @@ const SKIP_TOKENS = Object.freeze(['-', '—', 'تخطي', 'تخطى', 'skip', '
 const UNIT_KEYWORDS = Object.freeze({
   info: ['معلومات', 'خدماتكم', 'وش تقدمون', 'وش خدماتكم', 'عن المركز', 'الفئات', 'services'],
   register: ['تسجيل', 'ملف جديد', 'مستفيد جديد', 'اسجل', 'التحاق', 'register', 'enroll'],
-  appointment: ['موعد', 'احجز', 'حجز', 'تقييم', 'appointment', 'booking'],
+  appointment: ['موعد', 'مواعيد', 'احجز', 'حجز', 'تقييم', 'appointment', 'booking'],
   attendance: ['حضور', 'انصراف', 'حضوره', 'غياب', 'attendance'],
   session_reports: [
     'تقرير الجلسة',
@@ -587,6 +587,8 @@ function normalize(s) {
     .replace(/[ً-ْ]/g, '') // harakat
     .replace(/ـ/g, '') // tatweel
     .replace(/[أإآٱ]/g, 'ا') // أ إ آ ٱ → ا
+    .replace(/ؤ/g, 'و') // W1416: ؤ → و (مسؤول/مسئول variance)
+    .replace(/ئ/g, 'ي') // W1416: ئ → ي
     .replace(/ى/g, 'ي') // ى → ي
     .replace(/ة/g, 'ه') // ة → ه
     .replace(/[٠-٩۰-۹]/g, '') // (already folded; safety)
@@ -708,22 +710,97 @@ function resolveFaqAnswer(topicText) {
 }
 
 /**
- * Score a message against every unit's keyword catalogue (W1382 — smarter NLU).
- * Each matched keyword contributes its length (longer keyword = stronger, more
- * specific signal), so the BEST-matching unit wins rather than the first one in
- * iteration order. Returns `{ unitId, score }` for the top match, or null.
+ * Strip ONE leading definite article / conjunction-preposition so an inflected
+ * surface form reduces toward its stem for the fuzzy fallback (W1416). Very
+ * conservative — only the highest-frequency, lowest-ambiguity prefixes, and only
+ * when ≥3 chars remain (never over-strips a short word into noise). Pure. EXACT
+ * substring matching is unaffected; this only feeds the typo-tolerant fallback.
+ * @param {string} tok normalized token
+ * @returns {string}
+ */
+function lightStem(tok) {
+  if (!tok) return tok;
+  const art = tok.match(/^(?:وال|بال|فال|كال|لل|ال)(.{3,})$/); // article (± leading particle)
+  if (art) return art[1];
+  const part = tok.match(/^[وفبكل](.{3,})$/); // single leading particle و/ف/ب/ك/ل
+  return part ? part[1] : tok;
+}
+
+/**
+ * True when Levenshtein(a, b) ≤ 1 — catches a single inserted / deleted /
+ * substituted letter, the dominant single-char Arabic typo class that
+ * normalization cannot fold (e.g. "حضوور"→"حضور", "تسجل"→"تسجيل"). Early-exits;
+ * pure. A length gap > 1 returns false immediately.
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function editDistanceLE1(a, b) {
+  if (a === b) return true;
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  if (la === lb) {
+    let diffs = 0;
+    for (let i = 0; i < la; i++) {
+      if (a[i] !== b[i] && ++diffs > 1) return false;
+    }
+    return diffs === 1;
+  }
+  // off-by-one length: align the shorter inside the longer allowing one skip.
+  const s = la < lb ? a : b;
+  const l = la < lb ? b : a;
+  let i = 0;
+  let j = 0;
+  let skipped = false;
+  while (i < s.length && j < l.length) {
+    if (s[i] === l[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (skipped) return false;
+    skipped = true;
+    j++; // consume the extra char in the longer string
+  }
+  return true;
+}
+
+/**
+ * Score a message against every unit's keyword catalogue (W1382 + W1416 smarter
+ * NLU). An EXACT substring match scores the keyword's length (strongest, precise
+ * signal). When a single-word keyword (≥4 chars) has NO exact hit, a typo-tolerant
+ * fallback adds HALF weight if any lightly-stemmed message token equals it or is
+ * within one edit — so real-world typos / prefixed forms still route, while exact
+ * matches always dominate. Returns `{ unitId, score }` for the top match, or null.
  */
 function scoreUnits(text) {
   const n = normalize(text);
   if (!n) return null;
+  const tokens = n.split(' ').map(lightStem).filter(t => t.length >= 3);
   let best = null;
   for (const [unitId, keywords] of Object.entries(UNIT_KEYWORDS)) {
     let score = 0;
     for (const kw of keywords) {
       const nk = normalize(kw);
       if (!nk) continue;
-      const hit = nk.length <= 2 ? n === nk : n.includes(nk);
-      if (hit) score += nk.length;
+      if (nk.length <= 2) {
+        if (n === nk) score += nk.length;
+        continue;
+      }
+      if (n.includes(nk)) {
+        score += nk.length; // exact substring — strongest signal
+        continue;
+      }
+      // W1416 typo / inflection fallback: single-word keywords only, half weight.
+      if (nk.length >= 4 && !nk.includes(' ')) {
+        for (const t of tokens) {
+          if (t === nk || editDistanceLE1(t, nk)) {
+            score += Math.ceil(nk.length / 2);
+            break;
+          }
+        }
+      }
     }
     if (score > 0 && (!best || score > best.score)) best = { unitId, score };
   }
@@ -790,6 +867,8 @@ module.exports = {
   parseMenuSelection,
   resolveUnitId,
   scoreUnits,
+  lightStem,
+  editDistanceLE1,
   resolveDepartmentKey,
   resolveFaqAnswer,
   buildMainMenuList,

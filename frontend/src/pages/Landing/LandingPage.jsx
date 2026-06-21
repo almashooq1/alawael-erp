@@ -7,7 +7,7 @@
  */
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import content from '../../data/landingContent';
+import content, { activeLang, isEn, tr } from '../../data/landingContentActive';
 import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesContent';
 import jobs from '../../data/careersContent';
 import AccessibilityWidget from './AccessibilityWidget';
@@ -114,6 +114,17 @@ function smoothScrollTo(id) {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+/* Language switch helper — persists choice + reloads so module-level
+   content derivations re-evaluate against the new language. */
+function switchLang() {
+  try {
+    localStorage.setItem('alawael-lang', isEn ? 'ar' : 'en');
+  } catch {
+    /* ignore */
+  }
+  window.location.reload();
+}
+
 /* ══════════════════════ Floating Particles ══════════════════════ */
 function FloatingParticles({ count = 30, color = 'white' }) {
   const particles = useMemo(
@@ -186,7 +197,7 @@ function BackToTop() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       className={`fixed bottom-8 left-8 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 text-white shadow-xl shadow-primary-600/30 flex items-center justify-center transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-      aria-label="العودة للأعلى"
+      aria-label={tr('العودة للأعلى', 'Back to top')}
     >
       <svg
         className="w-5 h-5"
@@ -874,12 +885,12 @@ function Navbar() {
   // Shorter subset of nav shown in the compact top bar (full list lives in footer + mobile menu).
   const navLinks = useMemo(
     () => [
-      ['الرئيسية', 'hero'],
-      ['من نحن', 'about'],
-      ['خدماتنا', 'services'],
-      ['برامجنا', 'programs'],
-      ['فروعنا', 'branches'],
-      ['تواصل معنا', 'contact'],
+      [tr('الرئيسية', 'Home'), 'hero'],
+      [tr('من نحن', 'About'), 'about'],
+      [tr('خدماتنا', 'Services'), 'services'],
+      [tr('برامجنا', 'Programs'), 'programs'],
+      [tr('فروعنا', 'Branches'), 'branches'],
+      [tr('تواصل معنا', 'Contact'), 'contact'],
     ],
     []
   );
@@ -974,18 +985,26 @@ function Navbar() {
               </a>
             ))}
             <div className="w-px h-6 bg-gray-300/30 mx-3" />
+            <button
+              type="button"
+              onClick={switchLang}
+              aria-label="Switch language"
+              className={`px-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${scrolled ? 'text-primary-700 hover:bg-primary-50' : 'text-white/90 hover:bg-white/10'}`}
+            >
+              {isEn ? 'عربي' : 'EN'}
+            </button>
             <Link
               to="/login"
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${scrolled ? 'text-primary-700 hover:bg-primary-50' : 'text-white/90 hover:bg-white/10'}`}
             >
-              تسجيل الدخول
+              {tr('تسجيل الدخول', 'Log in')}
             </Link>
             <button
               type="button"
               onClick={() => booking.open()}
               className="group relative px-7 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-300 overflow-hidden bg-gradient-to-l from-accent-500 to-accent-600 shadow-lg shadow-accent-500/30 hover:shadow-xl hover:shadow-accent-500/40 hover:-translate-y-0.5"
             >
-              <span className="relative z-10">احجز زيارة تقييم</span>
+              <span className="relative z-10">{tr('احجز زيارة تقييم', 'Book an Assessment')}</span>
               <div className="absolute inset-0 bg-gradient-to-l from-accent-600 to-accent-700 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
           </div>
@@ -995,7 +1014,7 @@ function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
-            aria-label={isOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-label={isOpen ? tr('إغلاق القائمة', 'Close menu') : tr('فتح القائمة', 'Open menu')}
             className={`lg:hidden p-2.5 rounded-xl transition-all duration-300 ${scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}
           >
             <svg
@@ -1038,7 +1057,7 @@ function Navbar() {
               }}
               className="w-full py-3 mt-4 rounded-xl bg-gradient-to-l from-accent-500 to-accent-600 text-white text-center font-bold shadow-lg shadow-accent-500/30 transition-all"
             >
-              احجز زيارة تقييم
+              {tr('احجز زيارة تقييم', 'Book an Assessment')}
             </button>
             <div className="flex gap-3 mt-3">
               <Link
@@ -1046,16 +1065,24 @@ function Navbar() {
                 onClick={() => setIsOpen(false)}
                 className="flex-1 py-3 rounded-xl border-2 border-primary-200 text-primary-700 text-center font-bold hover:bg-primary-50 transition-colors"
               >
-                حساب جديد
+                {tr('حساب جديد', 'New Account')}
               </Link>
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-700 text-center font-bold hover:bg-gray-50 transition-colors"
               >
-                دخول
+                {tr('دخول', 'Log in')}
               </Link>
             </div>
+            <button
+              type="button"
+              onClick={switchLang}
+              aria-label="Switch language"
+              className="w-full py-3 mt-3 rounded-xl border-2 border-gray-200 text-gray-700 text-center font-bold hover:bg-gray-50 transition-colors"
+            >
+              {isEn ? 'العربية' : 'English'}
+            </button>
           </div>
         </div>
       </div>
@@ -1195,7 +1222,7 @@ function Hero() {
                 onClick={booking.open}
                 className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-2xl shadow-black/15 hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
               >
-                <span className="relative z-10">احجز زيارة تقييم</span>
+                <span className="relative z-10">{tr('احجز زيارة تقييم', 'Book an Assessment')}</span>
                 <svg
                   className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1.5 transition-transform duration-300"
                   fill="none"
@@ -1253,7 +1280,7 @@ function Hero() {
                     d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                   />
                 </svg>
-                تأسس عام {content.brand.foundedHijri} هـ
+                {tr(`تأسس عام ${content.brand.foundedHijri} هـ`, `Est. ${content.brand.foundedGregorian}`)}
               </div>
               <div className="h-4 w-px bg-white/20" />
               <div className="flex items-center gap-2 text-white/80 text-sm">
@@ -1270,7 +1297,7 @@ function Hero() {
                     d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3"
                   />
                 </svg>
-                {content.branches.items.length} فروع في الرياض
+                {tr(`${content.branches.items.length} فروع في الرياض`, `${content.branches.items.length} branches in Riyadh`)}
               </div>
               <div className="h-4 w-px bg-white/20" />
               <div className="flex items-center gap-2 text-white/80 text-sm">
@@ -1287,7 +1314,7 @@ function Hero() {
                     d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                +400 متخصص
+                {tr('+400 متخصص', '+400 specialists')}
               </div>
             </div>
           </div>
@@ -1370,8 +1397,8 @@ function Hero() {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-600">مستفيدين اليوم</div>
-                    <div className="text-lg font-bold text-gray-800">٢٤٧</div>
+                    <div className="text-[11px] text-gray-600">{tr('مستفيدين اليوم', 'Beneficiaries today')}</div>
+                    <div className="text-lg font-bold text-gray-800">{tr('٢٤٧', '247')}</div>
                   </div>
                 </div>
               </div>
@@ -1386,8 +1413,8 @@ function Hero() {
                     <Icon name="chart-bar" className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-600">نسبة التحسن</div>
-                    <div className="text-lg font-bold text-primary-700">٩٢٪</div>
+                    <div className="text-[11px] text-gray-600">{tr('نسبة التحسن', 'Improvement rate')}</div>
+                    <div className="text-lg font-bold text-primary-700">{tr('٩٢٪', '92%')}</div>
                   </div>
                 </div>
               </div>
@@ -1437,7 +1464,7 @@ function TrustedBy() {
           className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <p className="text-sm font-semibold text-gray-600 uppercase tracking-widest">
-            متوافق مع معايير ومتطلبات
+            {tr('متوافق مع معايير ومتطلبات', 'Compliant with the standards and requirements of')}
           </p>
         </div>
         {/* Marquee ticker */}
@@ -1523,13 +1550,16 @@ function Services() {
                 d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
               />
             </svg>
-            خدماتنا
+            {tr('خدماتنا', 'Our Services')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
-            خدماتنا التأهيلية المتخصصة
+            {tr('خدماتنا التأهيلية المتخصصة', 'Our Specialized Rehabilitation Services')}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            6 أقسام علاجية متكاملة تعمل بتناغم لخدمة كل مستفيد وفق خطّة فردية
+            {tr(
+              '6 أقسام علاجية متكاملة تعمل بتناغم لخدمة كل مستفيد وفق خطّة فردية',
+              'Six integrated therapy departments working in harmony to serve every beneficiary with an individual plan'
+            )}
           </p>
         </div>
 
@@ -1558,7 +1588,7 @@ function Services() {
 
               {/* Arrow link */}
               <div className="mt-6 flex items-center gap-2 text-sm font-medium text-primary-600 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                <span>اعرف المزيد</span>
+                <span>{tr('اعرف المزيد', 'Learn more')}</span>
                 <svg
                   className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform"
                   fill="none"
@@ -1609,7 +1639,7 @@ function HowItWorks() {
                 d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
               />
             </svg>
-            كيف يعمل
+            {tr('كيف يعمل', 'How It Works')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             {content.howItWorks.title}
@@ -1690,15 +1720,17 @@ function WhyUs() {
                   d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
                 />
               </svg>
-              لماذا نحن
+              {tr('لماذا نحن', 'Why Us')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-5 leading-tight">
-              لماذا تختار
-              <span className="text-primary-600"> مراكز الأوائل؟</span>
+              {tr('لماذا تختار', 'Why choose')}
+              <span className="text-primary-600"> {tr('مراكز الأوائل؟', 'Alawael Centers?')}</span>
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-10">
-              خبرة تتجاوز 25 عاماً، وفريق متعدّد التخصصات، وخطة تأهيل فردية لكل طفل — في
-              بيئة آمنة وداعمة تضع راحة عائلتك وتقدّم ابنك أولاً.
+              {tr(
+                'خبرة تتجاوز 25 عاماً، وفريق متعدّد التخصصات، وخطة تأهيل فردية لكل طفل — في بيئة آمنة وداعمة تضع راحة عائلتك وتقدّم ابنك أولاً.',
+                'Over 25 years of experience, a multidisciplinary team, and an individual rehabilitation plan for every child — in a safe, supportive environment that puts your family’s comfort and your child’s progress first.'
+              )}
             </p>
 
             {/* Features grid */}
@@ -1738,22 +1770,25 @@ function WhyUs() {
                 <div className="relative text-center space-y-6">
                   {/* Central icon */}
                   <div className="w-20 h-20 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center animate-pulse-soft">
-                    <span className="text-4xl font-bold text-accent-400">أ</span>
+                    <span className="text-4xl font-bold text-accent-400">{tr('أ', 'A')}</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">رعاية متكاملة في مكان واحد</h3>
+                  <h3 className="text-2xl font-bold text-white">{tr('رعاية متكاملة في مكان واحد', 'Integrated Care Under One Roof')}</h3>
                   <p className="text-white/80 text-sm max-w-xs mx-auto">
-                    تقييم وتأهيل ومتابعة لطفلك تحت سقف واحد، مع فريق مختص لكل حالة
+                    {tr(
+                      'تقييم وتأهيل ومتابعة لطفلك تحت سقف واحد، مع فريق مختص لكل حالة',
+                      'Assessment, rehabilitation, and follow-up for your child under one roof, with a dedicated specialist team for every case'
+                    )}
                   </p>
 
                   {/* Module badges */}
                   <div className="flex flex-wrap justify-center gap-3 pt-4">
                     {[
-                      'التدخّل المبكر',
-                      'تأهيل التوحد',
-                      'النطق واللغة',
-                      'العلاج الوظيفي',
-                      'تعديل السلوك',
-                      'الدمج الاجتماعي',
+                      tr('التدخّل المبكر', 'Early Intervention'),
+                      tr('تأهيل التوحد', 'Autism Rehabilitation'),
+                      tr('النطق واللغة', 'Speech & Language'),
+                      tr('العلاج الوظيفي', 'Occupational Therapy'),
+                      tr('تعديل السلوك', 'Behavior Modification'),
+                      tr('الدمج الاجتماعي', 'Social Inclusion'),
                     ].map(m => (
                       <span
                         key={m}
@@ -1780,7 +1815,7 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
                     <Icon name="check" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">+25 سنة خبرة</span>
+                  <span className="text-sm font-bold text-gray-800">{tr('+25 سنة خبرة', '+25 years experience')}</span>
                 </div>
               </div>
 
@@ -1790,7 +1825,7 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">
                     <Icon name="user-group" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">+8000 مستفيد</span>
+                  <span className="text-sm font-bold text-gray-800">{tr('+8000 مستفيد', '+8000 beneficiaries')}</span>
                 </div>
               </div>
             </div>
@@ -1841,13 +1876,16 @@ function Stats() {
                 d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
               />
             </svg>
-            إنجازاتنا
+            {tr('إنجازاتنا', 'Our Achievements')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-5">
-            أرقام نفخر بها
+            {tr('أرقام نفخر بها', 'Numbers We Are Proud Of')}
           </h2>
           <p className="text-lg text-white/65 max-w-xl mx-auto leading-relaxed">
-            نتائج حقيقية تعكس التزامنا بتقديم أفضل خدمات الرعاية والتأهيل
+            {tr(
+              'نتائج حقيقية تعكس التزامنا بتقديم أفضل خدمات الرعاية والتأهيل',
+              'Real results that reflect our commitment to delivering the best care and rehabilitation services'
+            )}
           </p>
         </div>
 
@@ -1914,13 +1952,13 @@ function Testimonials() {
                 d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
               />
             </svg>
-            آراء أولياء الأمور
+            {tr('آراء أولياء الأمور', 'Parent Testimonials')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
-            ماذا يقولون عنا
+            {tr('ماذا يقولون عنا', 'What They Say About Us')}
           </h2>
           <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-            تجارب حقيقية من أولياء أمور أبنائنا
+            {tr('تجارب حقيقية من أولياء أمور أبنائنا', 'Real experiences from the parents of our children')}
           </p>
         </div>
 
@@ -1970,7 +2008,7 @@ function Testimonials() {
               key={i}
               onClick={() => setActive(i)}
               className={`transition-all duration-500 rounded-full ${active === i ? 'w-10 h-3 bg-primary-600' : 'w-3 h-3 bg-gray-300 hover:bg-primary-300'}`}
-              aria-label={`شهادة ${t.name}`}
+              aria-label={tr(`شهادة ${t.name}`, `Testimonial from ${t.name}`)}
             />
           ))}
         </div>
@@ -2008,13 +2046,13 @@ function FAQ() {
                 d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
               />
             </svg>
-            الأسئلة الشائعة
+            {tr('الأسئلة الشائعة', 'FAQ')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
-            أسئلة متكررة
+            {tr('أسئلة متكررة', 'Frequently Asked Questions')}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            إجابات على أكثر الأسئلة شيوعاً حول مراكز الأوائل
+            {tr('إجابات على أكثر الأسئلة شيوعاً حول مراكز الأوائل', 'Answers to the most common questions about Alawael Centers')}
           </p>
         </div>
 
@@ -2095,7 +2133,7 @@ function PlatformFeatures() {
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-400/15 text-accent-300 text-xs font-bold tracking-wider uppercase mb-4 ring-1 ring-accent-400/20">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-pulse" />
-            منصّة رقمية
+            {tr('منصّة رقمية', 'Digital Platform')}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">{pf.title}</h2>
           <p className="text-lg text-white/70 max-w-3xl mx-auto leading-relaxed">{pf.subtitle}</p>
@@ -2142,7 +2180,7 @@ function Team() {
           className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent-50 text-accent-700 text-xs font-bold tracking-wider uppercase mb-4">
-            فريقنا
+            {tr('فريقنا', 'Our Team')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{t.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t.subtitle}</p>
@@ -2254,27 +2292,27 @@ function BookingModal({ open, onClose }) {
         const data = await resp.json().catch(() => ({}));
         serverConfirmation = data.confirmationNumber || '';
       } else if (resp.status === 429) {
-        setApiError('تجاوزت عدد الطلبات المسموح. حاول بعد قليل.');
+        setApiError(tr('تجاوزت عدد الطلبات المسموح. حاول بعد قليل.', 'You have exceeded the allowed number of requests. Please try again shortly.'));
       } else {
         const data = await resp.json().catch(() => ({}));
-        setApiError(data.message || 'تعذّر إرسال الطلب للخادم — سنحاول واتساب.');
+        setApiError(data.message || tr('تعذّر إرسال الطلب للخادم — سنحاول واتساب.', 'Could not send the request to the server — we will try WhatsApp.'));
       }
     } catch (err) {
       // Network failure — fall through to WhatsApp as a fallback channel.
-      setApiError('تعذّر الاتصال بالخادم — سنرسل طلبك عبر واتساب.');
+      setApiError(tr('تعذّر الاتصال بالخادم — سنرسل طلبك عبر واتساب.', 'Could not reach the server — we will send your request via WhatsApp.'));
     }
 
     // 2) Open WhatsApp with pre-filled message (works even if API failed).
     const lines = [
-      `اسم ولي الأمر: ${form.parentName}`,
-      `رقم الجوال: ${form.parentPhone}`,
-      `اسم الطفل: ${form.childName}`,
-      `عمر الطفل: ${form.childAge} سنوات`,
-      `نوع الحالة: ${form.conditionType}`,
-      `الفرع المفضّل: ${form.branchPreference}`,
-      `الفترة المفضّلة: ${form.preferredTime}`,
-      form.notes ? `ملاحظات: ${form.notes}` : '',
-      serverConfirmation ? `رقم التأكيد: ${serverConfirmation}` : '',
+      `${tr('اسم ولي الأمر', 'Parent name')}: ${form.parentName}`,
+      `${tr('رقم الجوال', 'Mobile number')}: ${form.parentPhone}`,
+      `${tr('اسم الطفل', 'Child name')}: ${form.childName}`,
+      `${tr('عمر الطفل', 'Child age')}: ${form.childAge} ${tr('سنوات', 'years')}`,
+      `${tr('نوع الحالة', 'Condition type')}: ${form.conditionType}`,
+      `${tr('الفرع المفضّل', 'Preferred branch')}: ${form.branchPreference}`,
+      `${tr('الفترة المفضّلة', 'Preferred time')}: ${form.preferredTime}`,
+      form.notes ? `${tr('ملاحظات', 'Notes')}: ${form.notes}` : '',
+      serverConfirmation ? `${tr('رقم التأكيد', 'Confirmation number')}: ${serverConfirmation}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -2306,7 +2344,7 @@ function BookingModal({ open, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="booking-title"
-      aria-label="نموذج حجز زيارة تقييم"
+      aria-label={tr('نموذج حجز زيارة تقييم', 'Assessment booking form')}
     >
       <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
@@ -2314,7 +2352,7 @@ function BookingModal({ open, onClose }) {
           <button
             ref={closeBtnRef}
             onClick={onClose}
-            aria-label="إغلاق"
+            aria-label={tr('إغلاق', 'Close')}
             className="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
           >
             <svg
@@ -2346,10 +2384,10 @@ function BookingModal({ open, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">تم استلام طلبك بنجاح</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{tr('تم استلام طلبك بنجاح', 'Your request was received successfully')}</h3>
             {confirmationNumber ? (
               <div className="mb-4">
-                <p className="text-gray-600 mb-2">رقم التأكيد الخاص بك:</p>
+                <p className="text-gray-600 mb-2">{tr('رقم التأكيد الخاص بك:', 'Your confirmation number:')}</p>
                 <code
                   className="inline-block px-4 py-2 rounded-xl bg-green-50 text-green-700 font-bold text-lg tracking-wider border border-green-200"
                   dir="ltr"
@@ -2359,8 +2397,10 @@ function BookingModal({ open, onClose }) {
               </div>
             ) : null}
             <p className="text-gray-600 mb-6 max-w-md">
-              سيتواصل معك فريق الاستقبال خلال 24 ساعة. فتحنا لك أيضاً محادثة واتساب إن أردت التواصل
-              فوراً.
+              {tr(
+                'سيتواصل معك فريق الاستقبال خلال 24 ساعة. فتحنا لك أيضاً محادثة واتساب إن أردت التواصل فوراً.',
+                'Our reception team will contact you within 24 hours. We have also opened a WhatsApp chat in case you would like to reach us right away.'
+              )}
             </p>
             <button
               onClick={() => {
@@ -2382,7 +2422,7 @@ function BookingModal({ open, onClose }) {
               }}
               className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
             >
-              إغلاق
+              {tr('إغلاق', 'Close')}
             </button>
           </div>
         ) : (
@@ -2449,7 +2489,7 @@ function BookingModal({ open, onClose }) {
                 value={form.notes}
                 onChange={e => update('notes', e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all resize-none text-sm"
-                placeholder="أي تفاصيل تساعدنا في تجهيز الزيارة..."
+                placeholder={tr('أي تفاصيل تساعدنا في تجهيز الزيارة...', 'Any details that help us prepare for the visit...')}
               />
             </div>
 
@@ -2497,7 +2537,7 @@ function BookingModal({ open, onClose }) {
                         strokeLinecap="round"
                       />
                     </svg>
-                    جارٍ الإرسال...
+                    {tr('جارٍ الإرسال...', 'Sending...')}
                   </>
                 ) : (
                   <>
@@ -2514,7 +2554,7 @@ function BookingModal({ open, onClose }) {
                         d="M3 3h18M3 8h18M3 13h18M3 18h12"
                       />
                     </svg>
-                    أرسل طلب الحجز
+                    {tr('أرسل طلب الحجز', 'Send Booking Request')}
                   </>
                 )}
               </button>
@@ -2535,12 +2575,14 @@ function BookingModal({ open, onClose }) {
                     d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
                   />
                 </svg>
-                اتصل الآن
+                {tr('اتصل الآن', 'Call Now')}
               </a>
             </div>
             <p className="text-xs text-gray-600 text-center mt-4">
-              سيتم إرسال طلبك لخادمنا المحلي + فتح واتساب كقناة تواصل سريعة. نلتزم بسرية بياناتكم
-              وفق نظام حماية البيانات الشخصية (PDPL).
+              {tr(
+                'سيتم إرسال طلبك لخادمنا المحلي + فتح واتساب كقناة تواصل سريعة. نلتزم بسرية بياناتكم وفق نظام حماية البيانات الشخصية (PDPL).',
+                'Your request will be sent to our local server and WhatsApp will open as a quick contact channel. We keep your data confidential in compliance with the Personal Data Protection Law (PDPL).'
+              )}
             </p>
           </form>
         )}
@@ -2583,7 +2625,7 @@ function Select({ label, required, options, value, onChange }) {
         className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all text-sm bg-white"
       >
         <option value="" disabled>
-          اختر...
+          {tr('اختر...', 'Select...')}
         </option>
         {options.map(o => (
           <option key={o} value={o}>
@@ -2619,7 +2661,7 @@ function SeoJsonLd() {
       address: {
         '@type': 'PostalAddress',
         streetAddress: content.contact.mainAddress,
-        addressLocality: 'الرياض',
+        addressLocality: tr('الرياض', 'Riyadh'),
         addressCountry: 'SA',
       },
       sameAs: content.contact.social.map(s => s.url),
@@ -2632,7 +2674,7 @@ function SeoJsonLd() {
       address: {
         '@type': 'PostalAddress',
         streetAddress: b.address,
-        addressLocality: 'الرياض',
+        addressLocality: tr('الرياض', 'Riyadh'),
         addressCountry: 'SA',
       },
       parentOrganization: { '@type': content.seo.organizationType, name: content.brand.nameArFull },
@@ -2684,21 +2726,23 @@ function CareersTeaser() {
         >
           <div>
             <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
-              انضم إلينا
+              {tr('انضم إلينا', 'Join Us')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              نحن نبحث عن المميّزين
+              {tr('نحن نبحث عن المميّزين', 'We Are Looking for Exceptional People')}
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
-              فريق الأوائل يتوسّع باستمرار. إذا كنت شغوفاً بخدمة ذوي الاحتياجات الخاصة — نحن نقدّم
-              لك بيئة داعمة، تدريباً مستمراً، ومسار تطوّر مهني واضح.
+              {tr(
+                'فريق الأوائل يتوسّع باستمرار. إذا كنت شغوفاً بخدمة ذوي الاحتياجات الخاصة — نحن نقدّم لك بيئة داعمة، تدريباً مستمراً، ومسار تطوّر مهني واضح.',
+                'The Alawael team is always growing. If you are passionate about serving people with special needs, we offer you a supportive environment, ongoing training, and a clear career development path.'
+              )}
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/careers"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/25 hover:-translate-y-0.5 transition-all"
               >
-                عرض كل الوظائف ({jobs.length})
+                {tr('عرض كل الوظائف', 'View all jobs')} ({jobs.length})
                 <svg
                   className="w-4 h-4 rotate-180"
                   fill="none"
@@ -2735,7 +2779,7 @@ function CareersTeaser() {
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-accent-100 text-accent-800 text-[11px] font-bold flex-shrink-0">
-                  ⭐ مميّزة
+                  {tr('⭐ مميّزة', '⭐ Featured')}
                 </span>
               </Link>
             ))}
@@ -2762,18 +2806,21 @@ function ArticlesTeaser() {
         >
           <div>
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-3">
-              مقالات وتوعية
+              {tr('مقالات وتوعية', 'Articles & Awareness')}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">مكتبة المعرفة</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{tr('مكتبة المعرفة', 'Knowledge Library')}</h2>
             <p className="text-gray-600 max-w-2xl">
-              مقالات من فريق الأوائل — معلومات علمية وتجارب ملهمة تدعمك في رحلة التأهيل.
+              {tr(
+                'مقالات من فريق الأوائل — معلومات علمية وتجارب ملهمة تدعمك في رحلة التأهيل.',
+                'Articles from the Alawael team — scientific information and inspiring experiences to support you on the rehabilitation journey.'
+              )}
             </p>
           </div>
           <Link
             to="/articles"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-primary-50 text-primary-700 font-semibold text-sm ring-1 ring-primary-200 hover:ring-primary-300 transition-all"
           >
-            عرض كل المقالات
+            {tr('عرض كل المقالات', 'View all articles')}
             <svg
               className="w-4 h-4"
               fill="none"
@@ -2836,7 +2883,7 @@ function ArticlesTeaser() {
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      {a.readMinutes} دقائق
+                      {a.readMinutes} {tr('دقائق', 'min read')}
                     </span>
                   </div>
                 </div>
@@ -2949,7 +2996,7 @@ function Quiz() {
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-4 ring-1 ring-primary-100">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
-            تقييم مجاني · دقيقتان
+            {tr('تقييم مجاني · دقيقتان', 'Free assessment · 2 minutes')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">{q.title}</h2>
           <p className="text-lg text-gray-600 leading-relaxed">{q.subtitle}</p>
@@ -2971,9 +3018,12 @@ function Quiz() {
                 <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary-500 to-green-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/25">
                   <Icon name="magnifying-glass" className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">تقييم سريع بدون تسجيل</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{tr('تقييم سريع بدون تسجيل', 'Quick Assessment — No Sign-up')}</h3>
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  ستحصل فوراً على توصية ببرنامج مناسب + إمكانية حجز زيارة تقييم تفصيلية.
+                  {tr(
+                    'ستحصل فوراً على توصية ببرنامج مناسب + إمكانية حجز زيارة تقييم تفصيلية.',
+                    'You will instantly get a recommendation for a suitable program, plus the option to book a detailed assessment visit.'
+                  )}
                 </p>
                 <button
                   type="button"
@@ -3006,7 +3056,7 @@ function Quiz() {
                   <div>
                     <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
                       <span className="font-semibold">
-                        سؤال {step + 1} من {totalSteps}
+                        {tr(`سؤال ${step + 1} من ${totalSteps}`, `Question ${step + 1} of ${totalSteps}`)}
                       </span>
                       {step > 0 && (
                         <button
@@ -3048,7 +3098,7 @@ function Quiz() {
                 >
                   <Icon name={recommendation.iconKey} className="w-12 h-12" />
                 </div>
-                <div className="text-sm font-semibold text-primary-700 mb-2">توصيتنا لطفلك</div>
+                <div className="text-sm font-semibold text-primary-700 mb-2">{tr('توصيتنا لطفلك', 'Our recommendation for your child')}</div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                   {recommendation.title}
                 </h3>
@@ -3085,8 +3135,10 @@ function Quiz() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-600 mt-6 max-w-md mx-auto">
-                  هذه التوصية استرشادية — الخطة النهائية تُبنى بعد تقييم وجاهي مع فريق متعدد
-                  التخصصات.
+                  {tr(
+                    'هذه التوصية استرشادية — الخطة النهائية تُبنى بعد تقييم وجاهي مع فريق متعدد التخصصات.',
+                    'This recommendation is indicative — the final plan is built after an in-person assessment with a multidisciplinary team.'
+                  )}
                 </p>
               </div>
             )}
@@ -3151,7 +3203,7 @@ function Gallery() {
           className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-4">
-            معرض الصور
+            {tr('معرض الصور', 'Photo Gallery')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{g.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{g.subtitle}</p>
@@ -3222,7 +3274,7 @@ function Gallery() {
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="معرض الصور"
+          aria-label={tr('معرض الصور', 'Photo Gallery')}
         >
           <div
             className="absolute inset-0 bg-black/85 backdrop-blur-sm"
@@ -3248,7 +3300,7 @@ function Gallery() {
           <button
             ref={lightboxCloseRef}
             onClick={() => setLightbox(null)}
-            aria-label="إغلاق"
+            aria-label={tr('إغلاق', 'Close')}
             className="absolute top-6 left-6 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors"
           >
             <svg
@@ -3283,7 +3335,7 @@ function Stories() {
           className={`text-center mb-14 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
-            قصص نجاح
+            {tr('قصص نجاح', 'Success Stories')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{s.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{s.subtitle}</p>
@@ -3304,7 +3356,7 @@ function Stories() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xl font-bold text-gray-900">{story.name}</span>
                       <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
-                        {story.age} سنوات
+                        {story.age} {tr('سنوات', 'years')}
                       </span>
                     </div>
                     <div className="text-xs text-gray-600">{story.condition}</div>
@@ -3318,11 +3370,11 @@ function Stories() {
 
                 <div className="space-y-4 mb-5">
                   <div className="p-3 rounded-xl bg-red-50 border-r-4 border-red-400">
-                    <div className="text-xs font-bold text-red-700 mb-1">قبل 🕰️</div>
+                    <div className="text-xs font-bold text-red-700 mb-1">{tr('قبل 🕰️', 'Before 🕰️')}</div>
                     <p className="text-sm text-gray-700 leading-relaxed">{story.before}</p>
                   </div>
                   <div className="p-3 rounded-xl bg-green-50 border-r-4 border-green-500">
-                    <div className="text-xs font-bold text-green-700 mb-1">بعد ✨</div>
+                    <div className="text-xs font-bold text-green-700 mb-1">{tr('بعد ✨', 'After ✨')}</div>
                     <p className="text-sm text-gray-700 leading-relaxed">{story.after}</p>
                   </div>
                 </div>
@@ -3363,7 +3415,7 @@ function Comparison() {
           className={`text-center mb-12 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
-            مقارنة
+            {tr('مقارنة', 'Comparison')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{c.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{c.subtitle}</p>
@@ -3374,7 +3426,7 @@ function Comparison() {
           className={`rounded-3xl overflow-hidden shadow-xl ring-1 ring-gray-200 bg-white transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <div className="grid grid-cols-[2fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr]">
-            <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">الميزة</div>
+            <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">{tr('الميزة', 'Feature')}</div>
             <div className="p-5 bg-gradient-to-br from-primary-600 to-green-600 text-white text-center">
               <div className="text-xs opacity-90">{c.weLabel}</div>
               <div className="flex justify-center mt-1">
@@ -3440,7 +3492,10 @@ function Comparison() {
         </div>
 
         <p className="text-center text-xs text-gray-600 mt-6 max-w-lg mx-auto">
-          المقارنة تعكس ملامح السوق الشائعة — قد تختلف المراكز الأخرى في بعض التفاصيل.
+          {tr(
+            'المقارنة تعكس ملامح السوق الشائعة — قد تختلف المراكز الأخرى في بعض التفاصيل.',
+            'This comparison reflects common market characteristics — other centers may differ in some details.'
+          )}
         </p>
       </div>
     </section>
@@ -3575,7 +3630,7 @@ function Newsletter() {
                 {status === 'loading'
                   ? n.ctaSubmitting
                   : status === 'success'
-                    ? '✓ تم'
+                    ? tr('✓ تم', '✓ Done')
                     : n.ctaSubmit}
               </button>
               {message && (
@@ -3586,7 +3641,10 @@ function Newsletter() {
                 </div>
               )}
               <p className="text-[11px] text-gray-600 text-center">
-                بالاشتراك، أنت توافق على استلام بريد دوري. يمكنك إلغاء الاشتراك في أي وقت.
+                {tr(
+                  'بالاشتراك، أنت توافق على استلام بريد دوري. يمكنك إلغاء الاشتراك في أي وقت.',
+                  'By subscribing, you agree to receive a periodic newsletter. You can unsubscribe at any time.'
+                )}
               </p>
             </div>
           </form>
@@ -3696,7 +3754,7 @@ function Programs() {
           className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent-50 text-accent-700 text-xs font-bold tracking-wider uppercase mb-4">
-            برامج تأهيلية
+            {tr('برامج تأهيلية', 'Rehabilitation Programs')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{p.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{p.subtitle}</p>
@@ -3749,7 +3807,7 @@ function Branches() {
           className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-4">
-            فروعنا
+            {tr('فروعنا', 'Our Branches')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{b.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{b.subtitle}</p>
@@ -3785,20 +3843,20 @@ function Branches() {
                 {/* Embedded, lazy-loaded location map for this branch */}
                 <iframe
                   loading="lazy"
-                  title={`خريطة ${branch.name}`}
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(branch.district + '، الرياض')}&output=embed`}
+                  title={tr(`خريطة ${branch.name}`, `Map of ${branch.name}`)}
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(branch.district + tr('، الرياض', ', Riyadh'))}&output=embed`}
                   className="w-full h-40 rounded-xl border-0 mb-3"
                 />
                 {/* Directions CTA — opens turn-by-turn navigation to the branch */}
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(branch.address || branch.district + '، الرياض')}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(branch.address || branch.district + tr('، الرياض', ', Riyadh'))}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`الحصول على الاتجاهات إلى ${branch.name}`}
+                  aria-label={tr(`الحصول على الاتجاهات إلى ${branch.name}`, `Get directions to ${branch.name}`)}
                   className="mb-3 inline-flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-primary-900/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                 >
                   <Icon name="map-pin" className="w-4 h-4" />
-                  الاتجاهات
+                  {tr('الاتجاهات', 'Directions')}
                 </a>
                 <div className="space-y-2.5 text-sm">
                   <div className="flex items-start gap-2 text-gray-600">
@@ -3869,7 +3927,7 @@ function Branches() {
                         d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                       />
                     </svg>
-                    فتح على الخريطة
+                    {tr('فتح على الخريطة', 'Open in Maps')}
                   </a>
                 </div>
               </div>
@@ -3909,7 +3967,7 @@ function MobileActionBar() {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className="text-[11px] font-bold">احجز زيارة</span>
+          <span className="text-[11px] font-bold">{tr('احجز زيارة', 'Book')}</span>
         </button>
         <a
           href={`tel:${content.contact.mainPhone}`}
@@ -3928,7 +3986,7 @@ function MobileActionBar() {
               d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
             />
           </svg>
-          <span className="text-[11px] font-bold">اتصل</span>
+          <span className="text-[11px] font-bold">{tr('اتصل', 'Call')}</span>
         </a>
         <a
           href={whatsappUrl}
@@ -3939,7 +3997,7 @@ function MobileActionBar() {
           <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
           </svg>
-          <span className="text-[11px] font-bold">واتساب</span>
+          <span className="text-[11px] font-bold">{tr('واتساب', 'WhatsApp')}</span>
         </a>
       </div>
     </div>
@@ -3962,7 +4020,7 @@ function Contact() {
           className={`text-center mb-14 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
-            تواصل
+            {tr('تواصل', 'Contact')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{c.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{c.subtitle}</p>
@@ -3989,8 +4047,8 @@ function Contact() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">اتصل بنا</h3>
-            <p className="text-sm text-gray-600 mb-3">للاستفسار وحجز موعد تقييم</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('اتصل بنا', 'Call Us')}</h3>
+            <p className="text-sm text-gray-600 mb-3">{tr('للاستفسار وحجز موعد تقييم', 'For inquiries and to book an assessment appointment')}</p>
             <div className="text-xl font-bold text-primary-700" dir="ltr">
               {c.mainPhoneDisplay}
             </div>
@@ -4015,8 +4073,8 @@ function Contact() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">البريد الإلكتروني</h3>
-            <p className="text-sm text-gray-600 mb-3">للاستفسارات الرسمية والتقارير</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('البريد الإلكتروني', 'Email')}</h3>
+            <p className="text-sm text-gray-600 mb-3">{tr('للاستفسارات الرسمية والتقارير', 'For official inquiries and reports')}</p>
             <div className="text-lg font-bold text-accent-700" dir="ltr">
               {c.email}
             </div>
@@ -4045,8 +4103,8 @@ function Contact() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">العنوان الرئيسي</h3>
-            <p className="text-sm text-gray-600 mb-3">مقر الإدارة العامة</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('العنوان الرئيسي', 'Main Address')}</h3>
+            <p className="text-sm text-gray-600 mb-3">{tr('مقر الإدارة العامة', 'Head office')}</p>
             <p className="text-sm text-gray-700 leading-relaxed">{c.mainAddress}</p>
           </div>
         </div>
@@ -4068,7 +4126,7 @@ function Contact() {
                 d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="font-semibold">أوقات العمل:</span>
+            <span className="font-semibold">{tr('أوقات العمل:', 'Working hours:')}</span>
             <span>{c.workingHours}</span>
           </div>
         </div>
@@ -4281,7 +4339,7 @@ function Footer() {
 
             {/* Contact column */}
             <div>
-              <h4 className="font-bold text-lg mb-5">تواصل معنا</h4>
+              <h4 className="font-bold text-lg mb-5">{tr('تواصل معنا', 'Contact Us')}</h4>
               <ul className="space-y-4 text-gray-400 text-sm">
                 <li className="flex items-center gap-3 group">
                   <div className="w-9 h-9 rounded-lg bg-gray-800 group-hover:bg-primary-600/20 flex items-center justify-center shrink-0 transition-colors">
@@ -4365,10 +4423,10 @@ function Footer() {
             <p>{copyright}</p>
             <div className="flex items-center gap-6">
               <a href="/privacy" className="hover:text-white transition-colors">
-                سياسة الخصوصية
+                {tr('سياسة الخصوصية', 'Privacy Policy')}
               </a>
               <a href="/terms" className="hover:text-white transition-colors">
-                الشروط والأحكام
+                {tr('الشروط والأحكام', 'Terms & Conditions')}
               </a>
             </div>
           </div>
@@ -4385,6 +4443,12 @@ export const useBooking = () => React.useContext(BookingContext);
 
 export default function LandingPage() {
   const [bookingOpen, setBookingOpen] = useState(false);
+
+  // Set the document language + direction for the active language on mount.
+  useEffect(() => {
+    document.documentElement.lang = activeLang;
+    document.documentElement.dir = isEn ? 'ltr' : 'rtl';
+  }, []);
 
   useEffect(() => {
     document.title = `${content.brand.nameArFull} — ${content.brand.tagline}`;
@@ -4417,14 +4481,14 @@ export default function LandingPage() {
     <BookingContext.Provider value={bookingApi}>
       <div
         id="tailwind-scope"
-        dir="rtl"
+        dir={isEn ? 'ltr' : 'rtl'}
         className="font-cairo antialiased text-gray-900 overflow-x-hidden"
       >
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] focus:rounded-lg focus:bg-primary-700 focus:px-4 focus:py-2 focus:text-white"
         >
-          تخطّ إلى المحتوى
+          {tr('تخطّ إلى المحتوى', 'Skip to content')}
         </a>
         <SeoJsonLd />
         <ScrollProgress />

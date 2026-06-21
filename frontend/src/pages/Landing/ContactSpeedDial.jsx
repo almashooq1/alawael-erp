@@ -12,7 +12,7 @@
  * with smooth open/close motion. Closes on outside click + Escape.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import content from '../../data/landingContent';
+import content, { isEn, tr } from '../../data/landingContentActive';
 
 /* Inline SVG icons (Heroicons-outline style, currentColor) */
 function IconCalendar() {
@@ -141,7 +141,7 @@ export default function ContactSpeedDial({ onBook }) {
   return (
     <div
       ref={rootRef}
-      dir="rtl"
+      dir={isEn ? 'ltr' : 'rtl'}
       className="fixed bottom-6 left-6 z-40 hidden flex-col items-end gap-3 sm:flex"
     >
       {/* Actions stack — top to bottom: book, call, directions, whatsapp */}
@@ -150,7 +150,7 @@ export default function ContactSpeedDial({ onBook }) {
           as="button"
           type="button"
           onClick={handleBook}
-          label="احجز تقييم"
+          label={tr('احجز تقييم', 'Book Assessment')}
           icon={<IconCalendar />}
           colorClass="bg-gradient-to-br from-accent-500 to-accent-700"
           delay={90}
@@ -160,7 +160,7 @@ export default function ContactSpeedDial({ onBook }) {
           as="a"
           href={`tel:${c.mainPhone}`}
           onClick={() => setOpen(false)}
-          label="اتصل بنا"
+          label={tr('اتصل بنا', 'Call Us')}
           icon={<IconPhone />}
           colorClass="bg-gradient-to-br from-primary-600 to-primary-800"
           delay={60}
@@ -172,7 +172,7 @@ export default function ContactSpeedDial({ onBook }) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => setOpen(false)}
-          label="الاتجاهات"
+          label={tr('الاتجاهات', 'Directions')}
           icon={<IconMapPin />}
           colorClass="bg-gradient-to-br from-green-600 to-green-800"
           delay={30}
@@ -184,7 +184,7 @@ export default function ContactSpeedDial({ onBook }) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => setOpen(false)}
-          label="واتساب"
+          label={tr('واتساب', 'WhatsApp')}
           icon={<IconWhatsApp />}
           colorClass="bg-[#25D366]"
           delay={0}
@@ -197,8 +197,8 @@ export default function ContactSpeedDial({ onBook }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label={open ? 'إغلاق قائمة التواصل' : 'تواصل معنا'}
-        title="تواصل معنا"
+        aria-label={open ? tr('إغلاق قائمة التواصل', 'Close contact menu') : tr('تواصل معنا', 'Contact us')}
+        title={tr('تواصل معنا', 'Contact us')}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-2xl shadow-primary-900/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-primary-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
       >
         <span

@@ -86,6 +86,16 @@ router.get('/incidents', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
+router.get('/incidents/:id', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const doc = await SafetyIncident.findById(req.params.id).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
+    res.json({ success: true, data: doc });
+  } catch (error) {
+    safeError(res, error, 'hse');
+  }
+});
+
 router.post(
   '/incidents',
   authenticate,

@@ -95,6 +95,7 @@ const DETAIL_VIEWS = {
     backTo: '/independent-living',
     title: 'تفاصيل مستفيد الاستقلالية',
   },
+  'hse/incidents/:id': { getBase: '/hse/incidents', backTo: '/hse', title: 'تفاصيل حادثة السلامة' },
 };
 
 export default DETAIL_VIEWS;

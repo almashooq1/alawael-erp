@@ -546,6 +546,7 @@ __tests__/mudad-wps-orchestrator-wave282.test.js
 __tests__/new-admin-routes.api.test.js
 __tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js
 __tests__/nitaqat-contract-branch-isolation-wave1159.test.js
+__tests__/nphies-claim-model-behavioral-wave1437.test.js
 __tests__/no-audit-write-in-transaction-wave936.test.js
 __tests__/no-beneficiary-eager-fetch.test.js
 __tests__/no-broken-req-branchid-wave269h.test.js

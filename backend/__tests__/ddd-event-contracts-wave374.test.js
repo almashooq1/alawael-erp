@@ -178,6 +178,7 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'insurance', // W994 — insurance claim approved/rejected → timeline
   'home_program', // W1003 — home program assigned/completed → timeline
   'followup', // W987/W992 — post-rehab case/visit outcomes → timeline
+  'referral', // W997 — therapy/FHIR referral accepted/completed/rejected → timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are

@@ -1870,6 +1870,8 @@ on:
       - 'backend/__tests__/access-console-wave1420.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3718,6 +3720,8 @@ on:
       - 'backend/__tests__/access-console-wave1420.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

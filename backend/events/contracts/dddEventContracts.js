@@ -3531,6 +3531,56 @@ const FOLLOWUP_EVENTS = Object.freeze({
   },
 });
 
+const REFERRAL_OUTCOME_EVENTS = Object.freeze({
+  ACCEPTED: {
+    domain: 'referral',
+    eventType: 'referral.accepted',
+    version: 1,
+    description: 'تم قبول إحالة — Referral accepted',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  COMPLETED: {
+    domain: 'referral',
+    eventType: 'referral.completed',
+    version: 1,
+    description: 'تم إكمال إحالة — Referral completed',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  REJECTED: {
+    domain: 'referral',
+    eventType: 'referral.rejected',
+    version: 1,
+    description: 'تم رفض إحالة — Referral rejected',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -3658,6 +3708,7 @@ const DDD_CONTRACTS = {
   insurance: INSURANCE_OUTCOME_EVENTS,
   home_program: HOME_PROGRAM_EVENTS,
   followup: FOLLOWUP_EVENTS,
+  referral: REFERRAL_OUTCOME_EVENTS,
 };
 
 /**
@@ -3797,6 +3848,7 @@ module.exports = {
   INSURANCE_OUTCOME_EVENTS,
   HOME_PROGRAM_EVENTS,
   FOLLOWUP_EVENTS,
+  REFERRAL_OUTCOME_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

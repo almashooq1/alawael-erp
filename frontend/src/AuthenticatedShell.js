@@ -132,6 +132,7 @@ import EntityFormPage from './pages/common/EntityFormPage';
 import CREATE_FORMS from './pages/createForms/registry';
 import EntityDetailPage from './pages/common/EntityDetailPage';
 import DETAIL_VIEWS from './pages/createForms/detailViews';
+import EDIT_FORMS from './pages/createForms/editForms';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));
@@ -394,6 +395,11 @@ export default function AuthenticatedShell() {
                   {/* Read-only detail views — replaces dead row/view :id 404s. */}
                   {Object.entries(DETAIL_VIEWS).map(([p, cfg]) => (
                     <Route key={p} path={p} element={<EntityDetailPage config={cfg} />} />
+                  ))}
+
+                  {/* Edit forms — replaces dead edit :id 404s (GET prefill + PUT). */}
+                  {Object.entries(EDIT_FORMS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<EntityFormPage config={cfg} />} />
                   ))}
 
                   {/* Domain Route Modules */}

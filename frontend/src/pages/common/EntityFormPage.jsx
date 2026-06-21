@@ -64,6 +64,33 @@ export default function EntityFormPage({ config }) {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
   const [done, setDone] = useState(false);
+  const [optionsMap, setOptionsMap] = useState({});
+
+  // Fetch options for any entity-select fields (ref pickers)
+  useEffect(() => {
+    const dynamic = (cfg.fields || []).filter((f) => f.type === 'entity-select' && f.optionsEndpoint);
+    if (!dynamic.length) return undefined;
+    let alive = true;
+    (async () => {
+      const map = {};
+      await Promise.all(dynamic.map(async (f) => {
+        try {
+          const r = await apiClient.get(f.optionsEndpoint, { params: { limit: 500 } });
+          const d = r?.data;
+          const arr = Array.isArray(d) ? d : (d?.data || d?.items || d?.results || d?.docs || []);
+          const labels = Array.isArray(f.optionLabel) ? f.optionLabel : [f.optionLabel || 'name'];
+          map[f.name] = (Array.isArray(arr) ? arr : [])
+            .map((o) => ({
+              value: o[f.optionValue || '_id'],
+              label: labels.map((k) => o[k]).find(Boolean) || o.name || o.title || String(o[f.optionValue || '_id']),
+            }))
+            .filter((o) => o.value);
+        } catch { map[f.name] = []; }
+      }));
+      if (alive) setOptionsMap(map);
+    })();
+    return () => { alive = false; };
+  }, [cfg.fields]);
 
   // EDIT: load the record + prefill (+ derive fields if none given)
   useEffect(() => {
@@ -197,10 +224,13 @@ export default function EntityFormPage({ config }) {
                     />
                   );
                 }
-                if (f.type === 'select') {
+                if (f.type === 'select' || f.type === 'entity-select') {
+                  const opts = f.type === 'entity-select' ? (optionsMap[f.name] || []) : (f.options || []);
+                  const help = f.type === 'entity-select' && !opts.length
+                    ? 'جارٍ تحميل الخيارات…' : (errors[f.name] || f.help || '');
                   return (
-                    <TextField {...common} select onChange={(e) => setField(f.name, e.target.value)}>
-                      {(f.options || []).map((o) => (
+                    <TextField {...common} select helperText={help} onChange={(e) => setField(f.name, e.target.value)}>
+                      {opts.map((o) => (
                         <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
                       ))}
                     </TextField>

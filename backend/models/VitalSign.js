@@ -55,7 +55,7 @@ const VitalSignSchema = new mongoose.Schema(
     },
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Session',
+      ref: 'ClinicalSession',
     },
     notes: {
       type: String,

@@ -43,7 +43,7 @@ const recordingSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', index: true },
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClinicalSession', index: true },
     therapistId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
 

@@ -1,6 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
+> Updated: 2026-06-21T23:25:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -36,9 +37,19 @@ This release contains:
    db.nphiesclaims.createIndex({ 'nphies.submission.status': 1, 'nphies.submission.updatedAt': 1, 'nphies.submission.submittedAt': 1 });
    ```
 
+## Test status
+
+- **Focused regression tests**: ✅ 51/51 pass.
+- **Pre-push gates**: ✅ All 7 backend gates pass (sprint-paths sync, route-load smoke, gitignored-sources, hook-style, wave-collision, phantom-writes, route-shadowing, lint).
+- **Full `test:sprint`**: ⚠️ Completed in ~46 min with `968 passed, 10 failed` suites and `16403 passed, 1 skipped, 22 failed` tests.
+  - 8 failures are **transient** (suites pass when run individually; likely MongoMemoryServer / babel cache / resource contention under full load).
+  - 2 failures are **consistent**:
+    - **W1399** — pre-deployment checklist table regex was too strict; fixed locally and verified.
+    - **W1405** — missing monitoring files (`ops/grafana/provisioning/dashboards/alawael-dashboard.json`, `ops/alerting-rules.yml`, etc.) are pre-existing infrastructure drift, not introduced by this release.
+
 ## Deployment steps
 
-1. Ensure CI / `test:sprint` is green.
+1. Resolve merge conflicts with `main` and ensure CI is green.
 2. Merge PR #579 to `main` after conflicts are resolved.
 3. Deploy backend services.
 4. Deploy frontend build.
@@ -67,10 +78,23 @@ This release contains:
 - Re-deploy the previous release.
 - Note: reverting the W1437 code without rolling back the migration is safe; old code will ignore the new `updatedAt` field.
 
+## Dependency audit
+
+`npm outdated` was re-run across root/backend/frontend/mobile/services. No security vulnerabilities (`npm audit` clean). Available updates fall into two buckets:
+
+- **Safe patch/minor bumps** (can be applied in a quick follow-up PR):
+  - Backend: `axios` 1.17→1.18, `mongoose` 9.6→9.7, `joi` 18.2.1→18.2.3, `csv-stringify` 6.7→6.8, `prettier` 3.8.3→3.8.4, `stripe` 22.2.0→22.2.2, `uuid` 14.0.0→14.0.1.
+  - Root/frontend/supply-chain/mobile: assorted minor bumps (MUI 9.0→9.1, tailwindcss 4.2→4.3.1, @sentry/react, @typescript-eslint/parser, etc.).
+- **Major bumps deferred** to a dedicated dependency wave due to breaking-change risk:
+  - Backend: Express 4→5, Firebase Admin 13→14, Helmet 7→8, archiver 7→8, dotenv 16→17, pdfkit 0.18→0.19, puppeteer 24→25, rate-limit-redis 4→5, zod 3→4.
+  - Frontend: React 18→19, Vite 6→8, Jest 29→30, Babel 7→8.
+  - Mobile: Expo 49→56, React Native 0.72→0.86, navigation ecosystem 6→7.
+
 ## Known risks / follow-up work
 
 - **Merge conflicts**: Must be resolved before merge.
-- **Dependency updates**: `npm outdated` reports many available updates (including major versions like Express 5, React 19, Expo 56). These are intentionally deferred to a dedicated dependency wave to keep this release focused. `npm audit` remains clean.
+- **Dependency updates**: Major bumps are intentionally deferred to a dedicated dependency wave to keep this release focused.
+- **W1405 monitoring files**: Missing Grafana dashboard and AlertManager rules are pre-existing drift; either create the files or update the guard in a monitoring wave.
 - **web-admin repo**: Not present locally; not validated in this release.
 - **IEP/session model fragmentation**: ADR-044 and ADR-045 still pending stakeholder decision.
 

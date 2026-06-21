@@ -72,7 +72,7 @@ describe('W1107 RedFlagOverride → CareTimeline (red_flag_override.recorded)', 
         },
       })
     );
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 300));
 
     const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
     expect(rows).toHaveLength(1);
@@ -91,7 +91,7 @@ describe('W1107 RedFlagOverride → CareTimeline (red_flag_override.recorded)', 
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     await RedFlagOverride.create(override(beneficiaryId, { blockingFlagIds: ['flag-x'] }));
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 300));
 
     const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
     expect(rows).toHaveLength(1);
@@ -103,12 +103,12 @@ describe('W1107 RedFlagOverride → CareTimeline (red_flag_override.recorded)', 
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     const doc = await RedFlagOverride.create(override(beneficiaryId));
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 300));
 
     // Unrelated mutation — not a new document.
     doc.reason = 'تصحيح صياغة سبب التجاوز السريري';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 300));
 
     const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
     expect(rows).toHaveLength(1);

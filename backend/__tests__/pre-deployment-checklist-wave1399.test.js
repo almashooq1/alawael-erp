@@ -215,7 +215,7 @@ describe('W1399 — Pre-Deployment Checklist runbook documentation', () => {
     expect(checklist).toMatch(/```bash[\s\S]+npm run/);
 
     // Must use tables for environment variables
-    expect(checklist).toMatch(/\| Key \|/);
+    expect(checklist).toMatch(/\|\s*Key\s*\|/);
 
     // Must use checkboxes for production/staging steps (with or without dash)
     expect(checklist).toMatch(/-?\s*\[\s?\]\s.*-?\s*\[\s?x?\]/s);

@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-21T22:39:00+03:00  
+> Updated: 2026-06-21T23:25:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -41,21 +41,21 @@
 ### Blocked / owner-gated
 
 - `web-admin` surface blocked: `alawael-rehab-platform/apps/web-admin` repo not found at relative path.
-- Full `test:sprint` run: MongoMemoryServer fixed in W1425; suite launches 977 files. First run timed out at 20 min. Second run failed on environmental disk-full errors (`C:` 100% full, MongoDB needs 500 MB free). No code regressions observed.
+- Full `test:sprint` run: MongoMemoryServer fixed in W1425. The 2026-06-21 run finished in ~46 min with 10 failed suites / 22 failed tests. 8 failures are transient (pass individually); 2 are consistent: W1399 checklist-table regex (fixed) and W1405 missing monitoring dashboard/rules files (pre-existing).
 - P0-1/P0-2 production MongoDB timeouts fixed at code level in W1437. Production verification pending: run `backend/scripts/migrate-nphies-claim-updatedAt.js` before deploy, then monitor `error1.log`.
 - P2-4 root cause (P0 DB timeouts) addressed in W1437; structured diagnostics from W1436 remain in place for verification.
 
 ### Surfaces swept
 
-| Surface                | Result                                                                                                                                                                                                            |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                                                                                  |
-| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                                                                            |
-| `prod-logs`            | ✅ P0-1/P0-2 DB timeout root causes fixed in W1437 (reachable indexes + schema-backed updatedAt). Run migration before deploy. P2-4 root cause addressed; W1436 diagnostics remain for verification.              |
-| `structural`           | 6 findings; 4 fixed (including P0 timeouts + LLM save root cause); 2 ADRs drafted (IEP-044, session-045).                                                                                                         |
-| `web-admin`            | ❌ Repo not present locally.                                                                                                                                                                                      |
-| `sprint` / `jest-full` | ✅ Disk recovered (~34 GB free). Focused regression tests pass (51 tests). Full `test:sprint` running in background (`bash-x6858g82`) — pending completion. Previous chunked run (Chunks 1–5) all passed.         |
-| `npm-audit`            | ✅ 0 vulnerabilities after W1433 overrides. ⚠️ `npm outdated` reports many non-vulnerable updates available across root/backend/frontend/mobile (major + minor); not a blocker, tracked for next dependency wave. |
+| Surface                | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                                                                                                                                                                                                                                                                                                                                                                          |
+| `prod-logs`            | ✅ P0-1/P0-2 DB timeout root causes fixed in W1437 (reachable indexes + schema-backed updatedAt). Run migration before deploy. P2-4 root cause addressed; W1436 diagnostics remain for verification.                                                                                                                                                                                                                                                                                                            |
+| `structural`           | 6 findings; 4 fixed (including P0 timeouts + LLM save root cause); 2 ADRs drafted (IEP-044, session-045).                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `web-admin`            | ❌ Repo not present locally.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `sprint` / `jest-full` | ⚠️ Full `test:sprint` finished in ~46 min: `968 passed, 10 failed suites; 16403 passed, 1 skipped, 22 failed tests`. 8 failures are transient (pass individually, likely MMS/babel cache/resource contention); 2 consistent: W1399 pre-deployment checklist table regex (fixed locally) and W1405 missing monitoring dashboard/rules files (pre-existing infra drift). Focused regression tests pass (51 tests). Previous chunked run (Chunks 1–5) all passed.                                                  |
+| `npm-audit`            | ✅ 0 vulnerabilities after W1433 overrides. ⚠️ `npm outdated` reports available updates across root/backend/frontend/mobile/services. Safe patch/minor bumps identified (e.g. backend `axios` 1.17→1.18, `mongoose` 9.6→9.7, `joi` 18.2→18.2.3, `prettier` 3.8.3→3.8.4, `stripe` 22.2→22.2.2, `uuid` 14.0→14.0.1, `csv-stringify` 6.7→6.8). Major bumps (Express 4→5, Firebase Admin 13→14, Helmet 7→8, mobile Expo/navigation ecosystem) deferred to dedicated dependency wave to avoid destabilizing this PR. |
 
 ---
 
@@ -197,6 +197,18 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
 
 **Guard:** `__tests__/ticket-sla-scheduler-wave1437.test.js`, `__tests__/nphies-claim-model-behavioral-wave1437.test.js`, `__tests__/nphies-reconciliation-service.test.js`.
 
+### W1399 / W1405 — Full sprint test caveats (post-run)
+
+**W1399:** `__tests__/pre-deployment-checklist-wave1399.test.js` failed because the table-format regex `/\| Key \|/` was too strict for the existing markdown table (`| Key                  |`). Relaxed the regex to `/\|\s*Key\s*\|/` so standard markdown table spacing is accepted. Test now passes individually.
+
+**W1405:** `__tests__/monitoring-infrastructure-wave1405.test.js` fails because expected files are missing:
+
+- `ops/grafana/provisioning/dashboards/alawael-dashboard.json`
+- `ops/alerting-rules.yml`
+- Additional required monitoring files listed in the test.
+
+These files were not part of the W1436/W1437 scope and are pre-existing infrastructure drift. They should be created in a dedicated monitoring/observability wave or removed from the guard if they are no longer required.
+
 ### Rejected / at-risk / remaining
 
 | ID    | Severity | Reason                                                                                                                                                              | Next action                                                                                                                                                                             |
@@ -212,7 +224,7 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
 ### Whole-system residual (completeness critic)
 
 1. **MongoDB buffering timeouts** root cause fully addressed in W1437: SLA scheduler now uses index-friendly `$in` queries; `NphiesClaim.nphies.submission.updatedAt` is schema-backed and maintained by a pre-save hook; reconciliation sweeper no longer relies on `$exists:false`. Production migration (`backend/scripts/migrate-nphies-claim-updatedAt.js`) + verification still required before deploy.
-2. **MongoMemoryServer startup FIXED** in W1425. Disk `C:` recovered to ~36 GB free (2026-06-21 09:15 local); full `test:sprint` is now running in background (`bash-w6zvvmzl`).
+2. **MongoMemoryServer startup FIXED** in W1425. Disk `C:` recovered to ~34 GB free (2026-06-21 23:15 local); full `test:sprint` completed (`bash-x6858g82`, 46 min) with the W1399/W1405 caveats above.
 3. **Primary journey smoke test** unblocked by disk recovery. Full `test:sprint` runs keep hitting infrastructure limits (2 h timeout, then 20 min heartbeat loss). They exposed:
    - W979/W987 missing DDD timeline subscribers — fixed and verified.
    - `new-admin-routes.api.test.js` MMS cleanup failure on Windows — fixed with force-stop + swallowed cleanup errors; 145/145 pass individually.
@@ -228,19 +240,20 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
 
 ### PR status
 
-- **PR #579**: OPEN — title updated to "W1427-W1437 + pending modules: Repair-all-defects, DB timeout fixes, and working-tree cleanup".
-- **Merge state**: `DIRTY` — `main` has advanced with commits #580, #581, #582 since the feature branch was cut. Attempting `git merge origin/main` produced ~24 conflicts in workflow files, package.json, new backend modules, docs, and sprint gates.
-- **Action required**: Resolve merge conflicts with `main` before PR can be merged. Options: rebase + force-push, or merge `main` into the feature branch and resolve conflicts.
-- **Checks**: No GitHub Actions checks reported yet (local pre-push hooks pass).
+- **PR #579**: OPEN — title "W1427-W1437 + pending modules: Repair-all-defects, DB timeout fixes, and working-tree cleanup". Head `feat/w1406-preflight-followup` is now pushed to `11d31f574` (`b54ec50b9..11d31f574`).
+- **Merge state**: `DIRTY` / `CONFLICTING` — `main` has advanced with commits #580, #581, #582 since the feature branch was cut. `git merge origin/main` would produce conflicts in workflow files (e.g. `.github/workflows/load-testing.yml`), package.json, new backend modules, docs, and sprint gates.
+- **Action required**: Resolve merge conflicts with `main` before PR can be merged. Recommended: merge `origin/main` into the feature branch, resolve conflicts, and push (preserves PR history). Alternative: rebase + force-push.
+- **Checks**: No GitHub Actions checks reported yet. Local pre-push hooks pass. Full `test:sprint` has the W1399/W1405 caveats above.
 
 ### Dependency audit (follow-up)
 
 `npm outdated --depth=0` highlights available updates. Notable non-vulnerable bumps:
 
-- **Root**: eslint 10.1→10.5, mongodb-memory-server 11.0→11.2, stripe 20.4→22.2, tailwindcss 4.2→4.3, etc.
-- **Backend**: mongoose 9.6→9.7, axios 1.17→1.18, prettier 3.8.3→3.8.4, express 4.22→5.2 (major), firebase-admin 13→14 (major), helmet 7→8 (major), etc.
-- **Frontend**: MUI 9.0→9.1, tailwindcss 4.3→4.3.1, axios 1.17→1.18, eslint minor bumps.
+- **Root**: eslint 10.1→10.5, mongodb-memory-server 11.0→11.2, stripe 20.4→22.2, tailwindcss 4.2→4.3, i18next 25→26, twilio 5→6, uuid 13→14, etc.
+- **Backend**: mongoose 9.6→9.7, axios 1.17→1.18, joi 18.2.1→18.2.3, csv-stringify 6.7→6.8, prettier 3.8.3→3.8.4, stripe 22.2.0→22.2.2, uuid 14.0.0→14.0.1; major: express 4.22→5.2, firebase-admin 13→14, helmet 7→8, archiver 7→8, dotenv 16→17, pdfkit 0.18→0.19, puppeteer 24→25, rate-limit-redis 4→5, zod 3→4.
+- **Frontend**: MUI 9.0→9.1, tailwindcss 4.3→4.3.1, axios 1.17→1.18, @sentry/react 10.57→10.59, @typescript-eslint/parser 8.60→8.61; major: React 18→19, Vite 6→8, jest 29→30, Babel 7→8.
 - **Mobile**: expo/navigation/react-native ecosystem has major version updates; requires coordinated upgrade.
+- **Services**: `services/queue-worker`: bullmq 5.78→5.79, sharp 0.35.1→0.35.2; `services/file-processor` and `services/report-worker` sharp already bumped to 0.35.1 by recent Dependabot commits on main.
 
 **Decision**: Leave dependency updates for a dedicated wave to avoid destabilizing this PR. `npm audit` is still clean.
 

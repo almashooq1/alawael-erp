@@ -311,6 +311,15 @@ const RAW = {
       { name: 'content', label: 'نص الرسالة', type: 'textarea', required: true } ],
   },
 
+  // ── HR — performance evaluation (employee picker) ─────────────────────────
+  'performance/new': {
+    title: 'إنشاء تقييم أداء', endpoint: '/hr/performance/evaluations', method: 'post', backTo: '/performance', successMsg: 'تم إنشاء التقييم بنجاح ✓',
+    fields: [
+      { name: 'employeeId', label: 'الموظف', type: 'entity-select', required: true, optionsEndpoint: '/hr/employees', optionValue: '_id', optionLabel: ['fullName', 'name_ar', 'nameAr', 'name', 'employeeName'] },
+      { name: 'evaluationPeriod', label: 'فترة التقييم (مثال: 2026-Q1)', type: 'text', required: true },
+      { name: 'hrNotes', label: 'ملاحظات الموارد البشرية', type: 'textarea' } ],
+  },
+
   // ── Services / misc ──────────────────────────────────────────────────────
   'helpdesk/new': {
     title: 'إضافة تذكرة دعم', endpoint: '/helpdesk/tickets', method: 'post', backTo: '/helpdesk', successMsg: 'تمت الإضافة بنجاح ✓',

@@ -146,7 +146,7 @@ EmergencyPlanSchema.post('save', function (doc) {
     if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
       return;
     Promise.resolve(
-      integrationBus.publish('safety', 'emergency-plan.activated', {
+      integrationBus.publish('safety', 'emergency_plan.activated', {
         emergencyPlanId: String(doc._id),
         beneficiaryId: String(doc.beneficiaryId),
         conditionTypes: Array.isArray(doc.knownConditions)

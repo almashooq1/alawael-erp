@@ -29,6 +29,15 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | Phase-7 IAM stack (roles/scope/SoD/audit) | [phase-7-iam.md](phase-7-iam.md)                         |
 | Phase-13 QMS & compliance vault           | [phase-13-qms-compliance.md](phase-13-qms-compliance.md) |
 
+### Operations runbooks
+
+| Workflow                    | Runbook                                                    |
+| --------------------------- | ---------------------------------------------------------- |
+| Environment setup           | [environment-setup.md](environment-setup.md)               |
+| Environment preflight check | [env-preflight-check.md](env-preflight-check.md)           |
+| Pre-deployment checklist    | [pre-deployment-checklist.md](pre-deployment-checklist.md) |
+| Performance / load testing  | [performance-load-testing.md](performance-load-testing.md) |
+
 ### Go-live readiness bundle
 
 | Artifact                                            | Doc                                                                                                                                  |
@@ -37,6 +46,7 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | Staging readiness report                            | [staging-readiness-report-w1405.md](staging-readiness-report-w1405.md)                                                               |
 | Night maintenance plan                              | [night-maintenance-plan-w1405.md](night-maintenance-plan-w1405.md)                                                                   |
 | Final go-live report (W1405)                        | [go-live-final-report-w1405.md](go-live-final-report-w1405.md)                                                                       |
+| Final go-live report — draft (W1405)                | [go-live-final-report-w1405-draft.md](go-live-final-report-w1405-draft.md)                                                           |
 | Executive summary (Arabic)                          | [go-live-executive-summary-w1405-ar.md](go-live-executive-summary-w1405-ar.md)                                                       |
 | Communication templates                             | [go-live-communication-templates-w1405.md](go-live-communication-templates-w1405.md)                                                 |
 | Production secrets checklist                        | [production-secrets-cutover-checklist-w1406.md](production-secrets-cutover-checklist-w1406.md)                                       |

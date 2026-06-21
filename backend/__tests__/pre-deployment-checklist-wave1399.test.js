@@ -218,6 +218,6 @@ describe('W1399 — Pre-Deployment Checklist runbook documentation', () => {
     expect(checklist).toMatch(/\| Key \|/);
 
     // Must use checkboxes for production/staging steps (with or without dash)
-    expect(checklist).toMatch(/\-?\s*\[\s?\]\s.*\-?\s*\[\s?x?\]/s);
+    expect(checklist).toMatch(/-?\s*\[\s?\]\s.*-?\s*\[\s?x?\]/s);
   });
 });

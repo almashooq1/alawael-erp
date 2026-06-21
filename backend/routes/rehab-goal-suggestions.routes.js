@@ -35,7 +35,8 @@ function parseCsv(value) {
 function createRehabGoalSuggestionsRouter() {
   const router = express.Router();
   router.use(express.json());
-  router.use(authenticate); // W1191 — gate EVERY mount (incl. the auth-less safeMount alias)
+  // Authentication is applied by the exported default wrapper; callers that
+  // mount this factory directly (e.g. app.js) must add auth upstream.
 
   // GET /goals?discipline_ids=a,b&age_months=24&exclude=CODE1,CODE2&limit=10
   router.get(
@@ -185,5 +186,15 @@ function createRehabGoalSuggestionsRouter() {
   return router;
 }
 
-module.exports = createRehabGoalSuggestionsRouter();
+// W1191 — authenticated wrapper used by phases.registry safeMount aliases that
+// have no upstream auth gate. The factory above remains auth-free so unit/route
+// tests and the app.js mount (which already injects authenticate) can use it.
+function createAuthenticatedRehabGoalSuggestionsRouter() {
+  const router = express.Router();
+  router.use(authenticate); // gate the bare safeMount alias
+  router.use(createRehabGoalSuggestionsRouter());
+  return router;
+}
+
+module.exports = createAuthenticatedRehabGoalSuggestionsRouter();
 module.exports.createRehabGoalSuggestionsRouter = createRehabGoalSuggestionsRouter;

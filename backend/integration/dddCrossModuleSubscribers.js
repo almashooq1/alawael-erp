@@ -4513,7 +4513,7 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // Self-advocacy training plan completed
   subscribers.push({
     name: 'self-advocacy:plan_completed → timeline:record',
-    pattern: 'self-advocacy.plan.completed',
+    pattern: 'self-advocacy.self_advocacy.plan_completed',
     handler: async event => {
       try {
         const mongoose = require('mongoose');
@@ -4563,7 +4563,7 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // Independent-living plan completed
   subscribers.push({
     name: 'independent-living:plan_completed → timeline:record',
-    pattern: 'independent-living.plan.completed',
+    pattern: 'independent-living.independent_living.plan_completed',
     handler: async event => {
       try {
         const mongoose = require('mongoose');
@@ -4940,38 +4940,6 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // ── W997: referral outcomes → unified-core timeline ─────────────────
   // TherapyReferral and FHIR portal Referral share the `referral` domain.
   // Accepted/completed/rejected outcomes land on the timeline.
-
-  function referralSeverity(status) {
-    if (status === 'accepted' || status === 'completed') return 'success';
-    if (status === 'rejected' || status === 'declined') return 'warning';
-    return 'info';
-  }
-
-  // Referral outcome (accepted / completed / rejected / declined)
-  subscribers.push({
-    name: 'referral:outcome → timeline:record',
-    pattern: 'referral.referral.*',
-    handler: async event => {
-      try {
-        const mongoose = require('mongoose');
-        const CareTimeline = mongoose.models.CareTimeline;
-        if (CareTimeline && event.payload.beneficiaryId) {
-          const status = event.payload.status;
-          await CareTimeline.create({
-            beneficiaryId: event.payload.beneficiaryId,
-            eventType: 'referral',
-            category: 'clinical',
-            severity: referralSeverity(status),
-            title: `Referral ${status || 'updated'}`,
-            title_ar: 'تم تحديث الإحالة',
-            metadata: event.payload,
-          });
-        }
-      } catch (err) {
-        logger.error(`[DDD-CrossModule] Referral outcome timeline failed: ${err.message}`);
-      }
-    },
-  });
 
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;

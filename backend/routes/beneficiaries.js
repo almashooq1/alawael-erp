@@ -36,10 +36,21 @@ const CATEGORY_LABELS = {
 };
 
 const STATUS_LABELS = {
+  // Canonical lifecycle states (W0-LifecycleAlign)
+  draft: 'مسودة',
+  waitlisted: 'قائمة الانتظار',
   active: 'نشط',
+  suspended: 'معلق',
+  'transferred-pending': 'نقل قيد التنفيذ',
+  transferred: 'محوّل',
+  discharged: 'متخرج',
+  deceased: 'متوفى',
+  archived: 'مؤرشف',
+  'deletion-pending': 'حذف قيد المراجعة',
+  deleted: 'محذوف',
+  // Legacy aliases
   inactive: 'غير نشط',
   pending: 'قيد الانتظار',
-  transferred: 'محوّل',
   graduated: 'متخرج',
 };
 
@@ -749,7 +760,7 @@ router.delete('/:id', validateObjectId('id'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     }
 
-    await beneficiary.archive(reason || 'تم الحذف من قبل المشرف');
+    await beneficiary.archive(reason || 'تم الحذف من قبل المشرف', req.user?._id);
 
     logger.info(`Beneficiary archived: ${beneficiary._id} — reason: ${reason}`);
 
@@ -773,7 +784,7 @@ router.patch('/:id/restore', validateObjectId('id'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     }
 
-    await beneficiary.unarchive();
+    await beneficiary.unarchive(req.user?._id);
 
     res.json({
       success: true,
@@ -788,32 +799,19 @@ router.patch('/:id/restore', validateObjectId('id'), async (req, res) => {
 /**
  * PATCH /api/beneficiaries/:id/status
  * Update beneficiary status
+ *
+ * W0-LifecycleAlign: هذا المسار أُغلق عمدًا. جميع تغييرات الحالة يجب أن تمر
+ * عبر محرك دورة الحياة الموحد `/api/v1/beneficiary-lifecycle/transitions`
+ * لضمان الموافقات، MFA/Nafath، الأسباب، والتدقيق.
  */
 router.patch('/:id/status', validateObjectId('id'), async (req, res) => {
-  try {
-    const { status } = req.body;
-    if (!status) {
-      return res.status(400).json({ success: false, message: 'الحالة مطلوبة' });
-    }
-
-    const beneficiary = await Beneficiary.findOneAndUpdate(
-      { _id: req.params.id, ...branchFilter(req) },
-      { status, lastModifiedBy: req.user?._id },
-      { returnDocument: 'after' }
-    );
-
-    if (!beneficiary) {
-      return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
-    }
-
-    res.json({
-      success: true,
-      message: 'تم تحديث حالة المستفيد',
-      data: { id: beneficiary._id, status: beneficiary.status },
-    });
-  } catch (error) {
-    safeError(res, error, 'Beneficiary status update error');
-  }
+  return res.status(410).json({
+    success: false,
+    message: 'تم إيقاف تحديث الحالة المباشر. استخدم /api/v1/beneficiary-lifecycle/transitions',
+    reason: 'LIFECYCLE_CHOKEPOINT_REQUIRED',
+    alternativeEndpoint: '/api/v1/beneficiary-lifecycle/transitions',
+    documentation: 'docs/blueprint/beneficiary-lifecycle-integrated-plan.md',
+  });
 });
 
 /**
@@ -837,34 +835,31 @@ router.post('/bulk-action', async (req, res) => {
     let result;
     switch (action) {
       case 'delete':
+        // W0-LifecycleAlign: bulk delete still allowed, but now uses the canonical
+        // lifecycle 'archived' state instead of the legacy 'inactive' alias.
         result = await Beneficiary.updateMany(
           { _id: { $in: ids }, ...scope },
           {
             isArchived: true,
             archivedDate: new Date(),
             archivedReason: data?.reason || 'حذف جماعي',
-            status: 'inactive',
+            status: 'archived',
+            lastLifecycleAt: new Date(),
           }
         );
         break;
       case 'activate':
-        result = await Beneficiary.updateMany(
-          { _id: { $in: ids }, ...scope },
-          { status: 'active' }
-        );
-        break;
       case 'deactivate':
-        result = await Beneficiary.updateMany(
-          { _id: { $in: ids }, ...scope },
-          { status: 'inactive' }
-        );
-        break;
       case 'update-status':
-        result = await Beneficiary.updateMany(
-          { _id: { $in: ids }, ...scope },
-          { status: data?.status || 'active' }
-        );
-        break;
+        // W0-LifecycleAlign: direct bulk status mutation bypasses the lifecycle
+        // workflow (approvals, MFA, Nafath, reason codes, audit). Use the
+        // lifecycle API instead.
+        return res.status(410).json({
+          success: false,
+          message: `العملية الجماعية "${action}" غير مسموح بها. استخدم /api/v1/beneficiary-lifecycle/transitions`,
+          reason: 'LIFECYCLE_CHOKEPOINT_REQUIRED',
+          alternativeEndpoint: '/api/v1/beneficiary-lifecycle/transitions',
+        });
       default:
         return res.status(400).json({ success: false, message: `عملية غير معروفة: ${action}` });
     }

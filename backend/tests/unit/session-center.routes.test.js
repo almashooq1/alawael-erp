@@ -14,6 +14,7 @@ const mockRouter = {
   patch: jest.fn(),
   delete: jest.fn(),
   put: jest.fn(),
+  param: jest.fn(),
 };
 
 jest.mock('express', () => ({

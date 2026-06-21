@@ -49,6 +49,7 @@ import {
   TrendingUp,
   Description,
   History,
+  Loop,
 } from '@mui/icons-material';
 import {
   LineChart,
@@ -63,6 +64,7 @@ import {
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
 import beneficiaryService from '../../services/beneficiaryService';
+import BeneficiaryLifecyclePanel from './BeneficiaryLifecyclePanel';
 import logger from '../../utils/logger';
 import { formatDate as _fmtDate } from 'utils/dateUtils';
 
@@ -435,6 +437,7 @@ export default function BeneficiaryProfilePage() {
           <Tab icon={<TrendingUp />} label="التقدم والأداء" iconPosition="start" />
           <Tab icon={<LocalHospital />} label="طبي وتعليمي" iconPosition="start" />
           <Tab icon={<Description />} label="مستندات" iconPosition="start" />
+          <Tab icon={<Loop />} label="دورة الحياة" iconPosition="start" />
         </Tabs>
       </Paper>
 
@@ -1422,6 +1425,18 @@ export default function BeneficiaryProfilePage() {
             </Box>
           )}
         </Paper>
+      </TabPanel>
+
+      {/* Tab 4: Lifecycle */}
+      <TabPanel value={tab} index={4}>
+        <BeneficiaryLifecyclePanel
+          beneficiaryId={id}
+          status={b.status}
+          branchId={b.branchId}
+          onStatusChange={newStatus => {
+            if (newStatus) setBeneficiary(prev => ({ ...prev, status: newStatus }));
+          }}
+        />
       </TabPanel>
     </Container>
   );

@@ -98,15 +98,15 @@ find frontend/src/__tests__ -name "*.test.js" | wc -l       # ← 1303
 
 `.husky/pre-push` runs 7 static drift checks (the heavy `quality:push` moved to CI 2026-05-30; `RUN_HEAVY_GATE=1 git push` runs it locally). Each was extracted from a real silent-break that cost ~24h of CI red OR a recurring per-session cleanup tax. Combined runtime <20s; failure messages include the one-command fix. Order in the hook (independent, sequential):
 
-| #   | Script                                                                              | Bug class caught                                                                                   | Historical incident                                                                                                                                                                                |
-| --- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `npm run check:sprint-paths` (`backend/scripts/sync-sprint-tests-paths.js --check`) | `sprint-tests.txt` ↔ `.github/workflows/sprint-tests.yml` `paths:` trigger out of sync            | W269d-g + W269h + W440 (3× before gate); validated by catching W412 + W413 in Cycle 12 push window                                                                                                 |
-| 2   | `npm run check:routes-load` (`backend/scripts/scan-route-files.js`)                 | `routes/**/*.routes.js` files that throw on `require()` (TDZ class)                                | W441 — 8 files moved `router.use(guard)` above the guard's import; broke 100+ admin routes silently                                                                                                |
-| 3   | `npm run check:gitignored-sources` (`backend/scripts/check-gitignored-sources.js`)  | Tracked source files matching `.gitignore` rules — silent on local FS, deleted on `git clean -fdx` | `intelligence/canonical/_primitives.js` matched `_*.js`, 22 schemas broke CI                                                                                                                       |
-| 4   | `npm run check:hook-style` (`backend/scripts/check-mongoose-hook-style.js`)         | Mixed async/callback dispatch on same `pre()`/`post()` event in a Mongoose schema                  | W465→W483 Complaint.js — Kareem routed via Promise adapter when ANY hook async, leaving `next` undefined for callback siblings → TypeError on every `.save()`; caught parent-portal-v2 CI red ~24h |
-| 5   | `npm run check:wave-collision` (`backend/scripts/check-wave-collision.js`)          | Wave-number collisions across the `66666/` ↔ `alawael-rehab-platform/` repo pair                  | W381+W383+W384 (clinical-services vs event-bus bridge), W442 (3×), W443-W445, W503-W508 (6 in one security sweep) — each collision = ~30 min after-the-fact untangle. Bypass: `CHECK_WAVE_SKIP=1`  |
+| #   | Script                                                                                   | Bug class caught                                                                                                                                                                                                  | Historical incident                                                                                                                                                                                                                                                                                                                                                         |
+| --- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `npm run check:sprint-paths` (`backend/scripts/sync-sprint-tests-paths.js --check`)      | `sprint-tests.txt` ↔ `.github/workflows/sprint-tests.yml` `paths:` trigger out of sync                                                                                                                           | W269d-g + W269h + W440 (3× before gate); validated by catching W412 + W413 in Cycle 12 push window                                                                                                                                                                                                                                                                          |
+| 2   | `npm run check:routes-load` (`backend/scripts/scan-route-files.js`)                      | `routes/**/*.routes.js` files that throw on `require()` (TDZ class)                                                                                                                                               | W441 — 8 files moved `router.use(guard)` above the guard's import; broke 100+ admin routes silently                                                                                                                                                                                                                                                                         |
+| 3   | `npm run check:gitignored-sources` (`backend/scripts/check-gitignored-sources.js`)       | Tracked source files matching `.gitignore` rules — silent on local FS, deleted on `git clean -fdx`                                                                                                                | `intelligence/canonical/_primitives.js` matched `_*.js`, 22 schemas broke CI                                                                                                                                                                                                                                                                                                |
+| 4   | `npm run check:hook-style` (`backend/scripts/check-mongoose-hook-style.js`)              | Mixed async/callback dispatch on same `pre()`/`post()` event in a Mongoose schema                                                                                                                                 | W465→W483 Complaint.js — Kareem routed via Promise adapter when ANY hook async, leaving `next` undefined for callback siblings → TypeError on every `.save()`; caught parent-portal-v2 CI red ~24h                                                                                                                                                                          |
+| 5   | `npm run check:wave-collision` (`backend/scripts/check-wave-collision.js`)               | Wave-number collisions across the `66666/` ↔ `alawael-rehab-platform/` repo pair                                                                                                                                 | W381+W383+W384 (clinical-services vs event-bus bridge), W442 (3×), W443-W445, W503-W508 (6 in one security sweep) — each collision = ~30 min after-the-fact untangle. Bypass: `CHECK_WAVE_SKIP=1`                                                                                                                                                                           |
 | 6   | `npm run check:phantom-writes` (`backend/scripts/check-phantom-schema-writes.js`, W1217) | `Model.create({...})` writing keys the schema never declares (strict mode drops SILENTLY) **or** omitting REQUIRED-no-default keys (throws on every call). Alias/hook-generated/array-typed/ambiguous-base aware. | W1189→W1216 burn-down: **14 LIVE surfaces** had thrown-or-returned-empty since shipping (forms approval chains, insurance eligibility/priorAuth/claims, guardian portal, employee leaves, smart documents, budgets, notifications ×2, risk register, waitlist conversion, transfers, admin users). Triage doctrine: `docs/architecture/PHANTOM_WRITES_TRIAGE_2026-06-11.md` |
-| 7   | `npm run check:route-shadowing` (W531)                                              | Literal Express route declared AFTER a same-shape `:param` sibling (unreachable; param casts the literal → 500)        | 72 pre-existing across ~30 files at gate creation; biometric/branch fixed, rest baselined ratchet-down |
+| 7   | `npm run check:route-shadowing` (W531)                                                   | Literal Express route declared AFTER a same-shape `:param` sibling (unreachable; param casts the literal → 500)                                                                                                   | 72 pre-existing across ~30 files at gate creation; biometric/branch fixed, rest baselined ratchet-down                                                                                                                                                                                                                                                                      |
 
 **Auto-fix recipes** (when a gate fails at push time):
 
@@ -525,3 +525,50 @@ Hard collisions on **W511 / W514 / W517 / W518**: parallel agent claimed each mi
   - ~~`POST /invoices/:id/pay` demo placeholder~~ — closed by **W278b** (commit `e86560f8e`): now invokes `paymentGatewayService.initiatePayment` with HyperPay as Saudi default (provider priority: `?gateway=X` query → `PAYMENT_GATEWAY_DEFAULT` env → 'hyperpay' fallback). 502 (not 500) on gateway throw so offline queue retries. Anti-regression sentinel asserts `#demo-payment-gateway` never returns to source.
   - ~~`GET /messages/threads` hardcoded stub~~ — closed by **W276c** (commit `4aadfe1bc`): rewrote `messaging.service.getThreads/getThread/addMessageToThread` to delegate to existing `Conversation` + `Message` Mongoose statics (model is `Conversation`, NOT `MessageThread` as the original TODO claimed). Discriminated `{ok:true,thread,messages}` / `{ok:false,reason}` return shape → routes map to 404/403/400/500. Anti-stub-regression sentinel asserts `getThreads` never returns literal `'thread-001'` again.
     Other `res.status(501)` occurrences in routes are graceful "model not available" fallbacks (defensive code for optional dependencies), NOT stale TODOs.
+
+## Autonomous Repair v5 — 2026-06-20
+
+A full-stack repair pass was run against `66666/backend` + `alawael-rehab-platform/apps/web-admin`. Invariants enforced: no repo merge, no new feature surface, every fix proven by running.
+
+### Fixed
+
+1. **P0 — `npm run test:sprint` `spawn ENAMETOOLONG` on Windows**
+
+   - File: `backend/scripts/run-sprint.js`
+   - Root cause: runner passed 975 test paths via argv; Windows `CreateProcessW` argv ceiling (~32 KB) exceeded.
+   - Fix: generate a temporary Jest config that overrides `testMatch` with the absolute paths, spawn Jest once with `--config <temp-config>`. See ADR-021 (`docs/architecture/decisions/021-sprint-runner-temp-config.md`).
+
+2. **P1 — CI path-trigger drift**
+
+   - Files: `backend/sprint-tests.txt`, `.github/workflows/sprint-tests.yml`
+   - Root cause: two wave0 tests added to sprint enumeration but not to workflow `paths:` triggers.
+   - Fix: `node backend/scripts/sync-sprint-tests-paths.js` auto-appended missing entries to both `push:` and `pull_request:` blocks.
+
+3. **P2 — Dormant-module baseline drift**
+
+   - File: `backend/scripts/check-dormant-modules.js`
+   - Root cause: `services/isolationForest.service.js` now wired by `financeAnomaly.service.js` + `operationsAnomaly.service.js` (stale baseline); `services/financeAnomaly.service.js` and `services/beneficiaryEquityEngine.service.js` are legitimate CLI-only / test-only modules not yet auto-loaded.
+   - Fix: ratcheted baseline — removed stale entry, added two new entries with disposition comments.
+
+4. **P2 — Lint warnings (pre-existing + introduced)**
+   - Files: `backend/scripts/run-sprint.js`, `backend/scripts/check-env.js`, `backend/routes/clinical-legacy-adapter.routes.js`
+   - Fix: removed unused imports/variables so `npm run lint` passes with `--max-warnings=0`.
+
+### Verified green
+
+- Backend 7 gates: `check:sprint-paths`, `check:routes-load`, `check:phantom-writes`, `check:route-shadowing`, `check:wave-collision`, `check:hook-style`, `check:gitignored-sources`
+- Backend lint: `npm run lint` (max-warnings=0)
+- Backend duplication: `npm run lint:duplication`
+- Backend preflight: `npm run preflight`
+- web-admin static: `npm run typecheck` + `npm run lint` (in `alawael-rehab-platform/apps/web-admin`)
+
+### Scoped out / not defects
+
+- `66666/frontend` is the legacy React app (per repo doctrine above) and was intentionally **not** modified; any issues there belong to the dead UI surface.
+- Historical `[ROUTE FAIL]` entries in `logs/error.log` (2026-05-15) are stale — all 13 route files now export valid Express Routers and `require('./app')` boots cleanly.
+
+### Deliverables
+
+- `docs/PROBLEM_LEDGER_v5.md` — initial + final burned ledger
+- `docs/architecture/decisions/021-sprint-runner-temp-config.md`
+- Updated `CLAUDE.md` (this section)

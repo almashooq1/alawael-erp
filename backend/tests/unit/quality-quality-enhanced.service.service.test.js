@@ -140,7 +140,7 @@ describe('QualityEnhancedService', () => {
           rootCause: 'root cause',
           status: 'action_plan',
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -151,7 +151,7 @@ describe('QualityEnhancedService', () => {
       expect(mockIncident.findByIdAndUpdate).toHaveBeenCalledWith(
         'inc1',
         expect.objectContaining({ rootCause: 'fish cause' }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -169,7 +169,7 @@ describe('QualityEnhancedService', () => {
           closureNotes: 'resolved ok',
           closedBy: 'mgr1',
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -211,7 +211,7 @@ describe('QualityEnhancedService', () => {
       expect(mockComplaint.findByIdAndUpdate).toHaveBeenCalledWith(
         'cmp1',
         expect.objectContaining({ resolution: 'fixed', status: 'resolved', satisfactionRating: 5 }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -354,7 +354,7 @@ describe('QualityEnhancedService', () => {
           overallComplianceRate: 40,
           status: 'completed',
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -365,7 +365,7 @@ describe('QualityEnhancedService', () => {
       expect(mockAudit.findByIdAndUpdate).toHaveBeenCalledWith(
         'aud1',
         expect.objectContaining({ overallComplianceRate: 100 }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -425,7 +425,7 @@ describe('QualityEnhancedService', () => {
       expect(mockImprovementProject.findByIdAndUpdate).toHaveBeenCalledWith(
         'imp1',
         expect.objectContaining({ currentPhase: 'do', doPhase: { task: 'implement' } }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -436,7 +436,7 @@ describe('QualityEnhancedService', () => {
       expect(mockImprovementProject.findByIdAndUpdate).toHaveBeenCalledWith(
         'imp1',
         expect.objectContaining({ status: 'completed', actualEndDate: expect.any(Date) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });

@@ -4,12 +4,6 @@
 
 'use strict';
 
-function monthsBetween(a, b) {
-  const da = new Date(a);
-  const db = new Date(b);
-  return (db.getFullYear() - da.getFullYear()) * 12 + (db.getMonth() - da.getMonth());
-}
-
 function buildAttritionRolling(employees = [], _opts = {}) {
   const now = new Date();
   const twelveMonthsAgo = new Date(now);

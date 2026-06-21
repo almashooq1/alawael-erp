@@ -72,14 +72,31 @@ function buildService({ wireAppointment, wireEpisode }) {
     : null;
   const episodeModel = wireEpisode ? { updateMany: async () => ({ modifiedCount: 1 }) } : null;
 
+  // Fully wired notification path so notification ops do not self-skip in these
+  // observability tests (which are focused on data-handler self-skips).
+  const beneficiaryModel = {
+    findById: () => ({
+      select: () => ({
+        lean: async () => ({
+          _id: 'ben-587',
+          firstName: 'Test',
+          contactInfo: { primaryPhone: '966500000000' },
+        }),
+      }),
+    }),
+  };
+  const notifier = async () => ({ success: true });
+
   const handlers = createBeneficiaryLifecycleSideEffectHandlers({
     appointmentModel,
     episodeModel,
+    beneficiaryModel,
+    notifier,
     now: () => FIXED_NOW,
   });
 
   const svc = createBeneficiaryLifecycleService({
-    transitionLog: { findById: async (id) => (stored && stored._id === id ? stored : null) },
+    transitionLog: { findById: async id => (stored && stored._id === id ? stored : null) },
     beneficiaryModel: { updateOne: async () => ({}) },
     sideEffectHandlers: handlers,
     auditLogger: {
@@ -87,7 +104,7 @@ function buildService({ wireAppointment, wireEpisode }) {
         auditCalls.push({ action, meta: metadata });
       },
     },
-    logger: { warn: (msg) => warnings.push(msg), info: () => {} },
+    logger: { warn: msg => warnings.push(msg), info: () => {} },
     now: () => FIXED_NOW,
   });
 
@@ -95,7 +112,7 @@ function buildService({ wireAppointment, wireEpisode }) {
 }
 
 function byOp(audit) {
-  return Object.fromEntries(audit.map((row) => [row.operation, row]));
+  return Object.fromEntries(audit.map(row => [row.operation, row]));
 }
 
 describe('W587 self-skip observability — partially wired service', () => {
@@ -140,13 +157,13 @@ describe('W587 self-skip observability — partially wired service', () => {
 
   test('a warning is emitted naming the self-skipped op + reason', () => {
     const hit = warnings.find(
-      (w) => w.includes('end-active-schedules') && w.includes('appointment-model-unavailable')
+      w => w.includes('end-active-schedules') && w.includes('appointment-model-unavailable')
     );
     expect(hit).toBeTruthy();
   });
 
   test('executed-audit summary carries sideEffectsSelfSkipped:1', () => {
-    const exec = auditCalls.find((c) => c.action === 'beneficiary.lifecycle.transition.executed');
+    const exec = auditCalls.find(c => c.action === 'beneficiary.lifecycle.transition.executed');
     expect(exec).toBeTruthy();
     expect(exec.meta.sideEffectsSelfSkipped).toBe(1);
     expect(exec.meta.sideEffectsFailed).toBe(0);
@@ -161,11 +178,9 @@ describe('W587 fully-wired service reports zero self-skips', () => {
       actor: ACTOR,
     });
     expect(res.ok).toBe(true);
-    const anySelfSkip = res.sideEffectsAudit.some((r) => r.selfSkipped);
+    const anySelfSkip = res.sideEffectsAudit.some(r => r.selfSkipped);
     expect(anySelfSkip).toBe(false);
-    const exec = ctx.auditCalls.find(
-      (c) => c.action === 'beneficiary.lifecycle.transition.executed'
-    );
+    const exec = ctx.auditCalls.find(c => c.action === 'beneficiary.lifecycle.transition.executed');
     expect(exec.meta.sideEffectsSelfSkipped).toBe(0);
   });
 });

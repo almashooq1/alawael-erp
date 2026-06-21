@@ -11,13 +11,11 @@
  *   5) topFactors are the highest-contribution items, capped at 5
  */
 
+const { SOURCE_WEIGHTS, TIERS_AR, tierFromScore } = require('../intelligence/risk/registry');
+
 describe('Wave 286 — Unified Risk Orchestrator', () => {
   describe('registry pure functions', () => {
-    const {
-      tierFromScore,
-      weightedComposite,
-      SOURCE_WEIGHTS,
-    } = require('../intelligence/risk/registry');
+    const { weightedComposite } = require('../intelligence/risk/registry');
 
     test('tierFromScore boundaries match RiskScoringService thresholds', () => {
       expect(tierFromScore(0)).toBe('low');
@@ -53,8 +51,15 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
         dropout: 0,
         cdss: 0,
       });
-      // 100 * 0.40 + 0 * (0.25+0.20+0.15) = 40
-      expect(all.score).toBe(40);
+      // clinical is renormalised over the four provided sources
+      const expected = Math.round(
+        (100 * SOURCE_WEIGHTS.clinical) /
+          (SOURCE_WEIGHTS.clinical +
+            SOURCE_WEIGHTS.psych_flags +
+            SOURCE_WEIGHTS.dropout +
+            SOURCE_WEIGHTS.cdss)
+      );
+      expect(all.score).toBe(expected);
       expect(all.sourceCount).toBe(4);
     });
   });
@@ -115,6 +120,16 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
           throw new Error('simulated cdss boom');
         },
       }));
+      jest.doMock('../intelligence/risk/sources/behavioral-escalation.source', () => ({
+        SOURCE_NAME: 'behavioral_escalation',
+        fetch: async () => ({
+          source: 'behavioral_escalation',
+          available: false,
+          reason: 'SOURCE_UNAVAILABLE',
+          score: null,
+          factors: [],
+        }),
+      }));
       ({ getBeneficiaryRiskProfile } = require('../intelligence/risk'));
     });
 
@@ -123,6 +138,7 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
       jest.dontMock('../intelligence/risk/sources/psych-flags.source');
       jest.dontMock('../intelligence/risk/sources/dropout.source');
       jest.dontMock('../intelligence/risk/sources/cdss.source');
+      jest.dontMock('../intelligence/risk/sources/behavioral-escalation.source');
     });
 
     test('rejects when beneficiaryId missing', async () => {
@@ -139,12 +155,14 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
       expect(profile.beneficiaryId).toBe('507f1f77bcf86cd799439011');
       expect(profile.reason).toBe('RISK_SCORE_COMPUTED');
 
-      // clinical (80) + psych_flags (65) → renormalised
-      // 80*(0.40/0.65) + 65*(0.25/0.65) ≈ 49.23 + 25.00 ≈ 74.23 → 74
-      expect(profile.overallScore).toBeGreaterThan(70);
-      expect(profile.overallScore).toBeLessThan(80);
-      expect(profile.overallTier).toBe('high');
-      expect(profile.overallTierAr).toBe('مرتفع');
+      // clinical (80) + psych_flags (65) → renormalised using current registry weights
+      const expectedScore = Math.round(
+        (80 * SOURCE_WEIGHTS.clinical + 65 * SOURCE_WEIGHTS.psych_flags) /
+          (SOURCE_WEIGHTS.clinical + SOURCE_WEIGHTS.psych_flags)
+      );
+      expect(profile.overallScore).toBe(expectedScore);
+      expect(profile.overallTier).toBe(tierFromScore(expectedScore));
+      expect(profile.overallTierAr).toBe(TIERS_AR[profile.overallTier]);
 
       // Per-source bookkeeping
       expect(profile.sources.clinical.available).toBe(true);
@@ -215,6 +233,16 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
         SOURCE_NAME: 'cdss',
         fetch: async () => ({
           source: 'cdss',
+          available: false,
+          reason: 'SOURCE_UNAVAILABLE',
+          score: null,
+          factors: [],
+        }),
+      }));
+      jest.doMock('../intelligence/risk/sources/behavioral-escalation.source', () => ({
+        SOURCE_NAME: 'behavioral_escalation',
+        fetch: async () => ({
+          source: 'behavioral_escalation',
           available: false,
           reason: 'SOURCE_UNAVAILABLE',
           score: null,

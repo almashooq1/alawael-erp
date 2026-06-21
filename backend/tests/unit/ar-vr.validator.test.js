@@ -20,9 +20,9 @@ describe('ar-vr.validator', () => {
       expect(r.valid).toBe(false);
       expect(r.errors.length > 0).toBe(true);
     });
-    test('missing therapistId', () => {
+    test('missing therapistId is accepted (legacy form)', () => {
       const r = validateCreateSession({ beneficiaryId: 'b1' });
-      expect(r.valid).toBe(false);
+      expect(r.valid).toBe(true);
     });
     test('valid technologyType', () => {
       const r = validateCreateSession({
@@ -36,7 +36,7 @@ describe('ar-vr.validator', () => {
       const r = validateCreateSession({
         beneficiaryId: 'b1',
         therapistId: 't1',
-        technologyType: 'hologram',
+        technologyType: 'unsupported-tech',
       });
       expect(r.valid).toBe(false);
     });

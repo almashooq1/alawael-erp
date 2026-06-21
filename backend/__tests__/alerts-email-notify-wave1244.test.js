@@ -25,7 +25,6 @@ const { buildEmailNotify, SEVERITY_RANK } = require('../alerts/email-notify');
 jest.mock('../services/email', () => ({
   emailManager: { sendAlert: jest.fn(async () => ({ success: true })) },
 }));
-// eslint-disable-next-line node/no-missing-require
 const { emailManager } = require('../services/email');
 
 afterEach(() => jest.clearAllMocks());
@@ -145,9 +144,7 @@ describe('W1244 static guard — app.js wiring', () => {
   test('engine block injects the email channel under ALERTS_EMAIL_ENABLED', () => {
     expect(appSrc).toMatch(/ALERTS_EMAIL_ENABLED/);
     expect(appSrc).toMatch(/require\('\.\/alerts\/email-notify'\)/);
-    expect(appSrc).toMatch(
-      /channels: emailNotify\.channels, recipients: emailNotify\.recipients/
-    );
+    expect(appSrc).toMatch(/channels: emailNotify\.channels, recipients: emailNotify\.recipients/);
   });
 
   test('boot log reports the email channel state', () => {

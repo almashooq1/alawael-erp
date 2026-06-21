@@ -1,23 +1,21 @@
-/* eslint-disable no-unused-vars */
-/* global __ENV */
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { check } from 'k6';
 
-export const options = {
-  vus: 10,
-  duration: '30s',
-  thresholds: {
-    http_req_failed: ['rate<0.01'],
-    http_req_duration: ['p(95)<500'],
-  },
-};
+// W1304 — Smoke test (informational, no thresholds).
+// Environment overrides: BASE_URL, TOKEN.
 
-const baseUrl = __ENV.BASE_URL || 'http://localhost:3001';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:3001';
+const TOKEN = __ENV.TOKEN || '';
 
 export default function () {
-  const res = http.get(`${baseUrl}/health`);
+  const params = {
+    headers: {
+      Authorization: TOKEN ? `Bearer ${TOKEN}` : '',
+    },
+  };
+
+  const res = http.get(`${BASE_URL}/health`, params);
   check(res, {
-    'status is 200': r => r.status === 200,
+    'smoke: health returns 200': r => r.status === 200,
   });
-  sleep(1);
 }

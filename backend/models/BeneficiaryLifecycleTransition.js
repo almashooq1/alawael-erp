@@ -114,6 +114,7 @@ const BeneficiaryLifecycleTransitionSchema = new mongoose.Schema(
     failedAt: { type: Date, default: null },
     correlationId: { type: String, default: null, maxlength: 100, index: true },
     sideEffectsAudit: { type: [SideEffectAuditSchema], default: () => [] },
+    compensationEffectsAudit: { type: [SideEffectAuditSchema], default: () => [] },
     anchorTxId: { type: String, default: null, maxlength: 200 },
     // Wave 91 — null for LOW/MEDIUM transitions, populated for HIGH/CRITICAL
     // via evidence-snapshot.lib at request time.

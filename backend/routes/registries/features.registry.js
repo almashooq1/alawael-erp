@@ -379,7 +379,7 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'communication/notifications', notificationEnhancedRoutes);
   dualMount(app, 'branches-enhanced', branchEnhancedRoutes);
   dualMount(app, 'inventory-enhanced', inventoryEnhancedRoutes);
-  // W783 — web-admin INV_BASE is /api/v1/inventory (not inventory-enhanced).
+  // W783 web-admin compatibility alias: /api/v1/inventory/* and /api/inventory/*
   dualMount(app, 'inventory', inventoryEnhancedRoutes);
   dualMount(app, 'quality-enhanced', qualityEnhancedRoutes);
   logger.info(
@@ -613,6 +613,24 @@ module.exports = function registerFeatureRoutes(
     logger.info('✅ Break-glass routes mounted (real audited engine): /api/(v1/)break-glass');
   } catch (e) {
     logger.warn(`Break-glass routes not mounted: ${e.message}`);
+  }
+
+  // ── Access-control console — READ-ONLY IAM surface (W1420) ───────────
+  // Serializes the canonical authority (permissions.registry + can.js +
+  // role-archetype.map) for web-admin /admin/access-control: role explorer,
+  // permission catalog, full archetype×permission matrix, and a "can this role
+  // do X, and why?" simulator. NO mutating endpoints — grants are config, not
+  // runtime-mutable by design. Every allow/deny routes through can.js (one PDP).
+  try {
+    const {
+      buildRouter: buildAccessConsoleRouter,
+    } = require('../../authorization/access-console/access-console.routes');
+    // UserModel is resolved lazily inside the router via mongoose.model('User')
+    // (registered at boot) — avoids a brittle cross-base safeRequire path.
+    dualMountAuth(app, 'access-control', buildAccessConsoleRouter({}));
+    logger.info('✅ Access-control console mounted (read-only IAM): /api/(v1/)access-control');
+  } catch (e) {
+    logger.warn(`Access-control console not mounted: ${e.message}`);
   }
 
   logger.info('[Features] All prompt feature modules mounted successfully');

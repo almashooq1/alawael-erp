@@ -83,6 +83,11 @@ afterAll(async () => {
   if (mongod) await mongod.stop().catch(() => null);
 });
 
+beforeEach(async () => {
+  await TherapeuticGoal.deleteMany({});
+  await ClinicalSession.deleteMany({});
+});
+
 afterEach(async () => {
   delete process.env.GOLDEN_THREAD_ENFORCEMENT;
   await TherapeuticGoal.deleteMany({});

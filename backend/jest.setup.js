@@ -56,6 +56,15 @@ jest.mock('mongoose', () => {
     toString() {
       return this._id;
     }
+    toHexString() {
+      return this._id;
+    }
+    toJSON() {
+      return this._id;
+    }
+    equals(other) {
+      return this._id === String(other ?? '');
+    }
     [Symbol.toStringTag] = 'ObjectId';
   }
   MockObjectId.isValid = id => /^[a-f\d]{24}$/i.test(String(id ?? ''));
@@ -544,3 +553,29 @@ expect.extend({
     };
   },
 });
+
+// ─── Real-mongoose connection defaults for integration tests ────────────────
+// Tests that call jest.unmock('mongoose') share a single MongoMemoryServer.
+// Patch the real connect() to cap selection/connect timeouts and retry
+// transient failures so a briefly overloaded shared server doesn't fail tests.
+const RealMongoose = jest.requireActual('mongoose');
+const _realConnect = RealMongoose.connect.bind(RealMongoose);
+RealMongoose.connect = async function connect(uri, options) {
+  const opts = {
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 5000,
+    ...options,
+  };
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await _realConnect(uri, opts);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastErr;
+};

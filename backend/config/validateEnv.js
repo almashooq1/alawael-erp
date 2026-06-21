@@ -151,4 +151,12 @@ function validateEnv() {
   return value;
 }
 
-module.exports = { validateEnv };
+const STRICT_REQUIRED_KEYS = Object.freeze([
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'JWT_REFRESH_SECRET',
+  'ENCRYPTION_KEY',
+  'SESSION_SECRET',
+]);
+
+module.exports = { validateEnv, STRICT_REQUIRED_KEYS };

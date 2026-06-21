@@ -68,8 +68,8 @@ describe('Waves 4 + 5 + 7 — engine → briefing pipeline', () => {
       logger: { warn() {}, info() {}, error() {} },
     });
 
-    // Stack must register all 19 rules.
-    expect(stack.engine.rules.size).toBe(19);
+    // Stack must register all shipped rules (34 as of W1197).
+    expect(stack.engine.rules.size).toBe(34);
 
     // ── Step 2: Engine evaluates → Wave-5 rule fires ──────────────
     const tickResult = await stack.engine.runAll(stack.ctxFactory());

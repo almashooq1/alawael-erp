@@ -178,6 +178,22 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W520 SMS notification channel skipped:', smsErr.message);
     }
 
+    // Phase C — beneficiary lifecycle auto-transition notifications.
+    // Subscribes to `beneficiary.lifecycle.auto_requested` and fans out
+    // in-app + email notifications to branch supervisors/therapists.
+    try {
+      const {
+        wireBeneficiaryLifecycleAutoTransitionNotify,
+      } = require('../services/beneficiary-lifecycle-auto-transition-notify.service');
+      wireBeneficiaryLifecycleAutoTransitionNotify({ integrationBus, logger });
+      logger.info('[Integration] ✓ Beneficiary lifecycle auto-transition notify wired');
+    } catch (lifecycleNotifyErr) {
+      logger.warn(
+        '[Integration] Beneficiary lifecycle auto-transition notify skipped:',
+        lifecycleNotifyErr.message
+      );
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

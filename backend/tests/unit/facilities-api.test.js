@@ -16,7 +16,11 @@ jest.mock('../../middleware/auth', () => ({
   authorize: () => (_req, _res, next) => next(),
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
-  requireBranchAccess: (_req, _res, next) => next(),
+  requireBranchAccess: (req, _res, next) => {
+    req.branchScope = { branchId: 'b1', restricted: false, allBranches: false };
+    next();
+  },
+  branchFilter: () => ({ branchId: 'b1' }),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -67,9 +71,12 @@ jest.mock('../../models/Room', () => {
   });
   M.find = (...a) => mockRoomFind(...a);
   M.findById = (...a) => mockRoomFindById(...a);
+  M.findOne = (...a) => mockRoomFindById(...a);
   M.countDocuments = (...a) => mockRoomCount(...a);
   M.findByIdAndUpdate = (...a) => mockRoomFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockRoomFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockRoomFindByIdAndDelete(...a);
+  M.findOneAndDelete = (...a) => mockRoomFindByIdAndDelete(...a);
   return M;
 });
 
@@ -156,6 +163,7 @@ describe('GET /facilities/bookings', () => {
 
 describe('POST /facilities/bookings', () => {
   test('creates booking', async () => {
+    mockRoomFindById.mockReturnValue(makeChain({ _id: '507f1f77bcf86cd799439011' }));
     const res = await request(makeApp())
       .post('/api/facilities/bookings')
       .send({

@@ -103,7 +103,15 @@ describe('W562 — fresh beneficiary', () => {
     const out = await svc.recommendForBeneficiary(ben._id, { now: REF_DATE });
 
     const codes = out.recommendations.map(r => r.measureCode).sort();
-    expect(codes).toEqual(['CARS-2', 'M-CHAT-R', 'PEDSQL']);
+    expect(codes).toEqual([
+      'ABAS-3',
+      'ABLLS-R',
+      'BAYLEY-4',
+      'CARS-2',
+      'M-CHAT-R',
+      'PEDSQL',
+      'VB-MAPP',
+    ]);
     for (const r of out.recommendations) {
       expect(r.reassessment.status).toBe('never');
       expect(r.administrable).toBe(true);
@@ -111,7 +119,7 @@ describe('W562 — fresh beneficiary', () => {
       expect(r.reasons_ar.length).toBeGreaterThan(0);
     }
     expect(out.beneficiary.ageMonths).toBe(24);
-    expect(out.counts.high).toBe(3);
+    expect(out.counts.high).toBe(7);
   });
 });
 

@@ -361,12 +361,36 @@ const beneficiarySchema = new mongoose.Schema(
 
     // ── Status & Lifecycle ─────────────────────────────────
     // الحالة — lowercase فقط (ACTIVE/INACTIVE أُزيلت لتجنب التعارض)
-    // W581: 'waitlisted' أُضيفت لمواءمة state machine لدورة حياة المستفيد.
+    // W581: 'waitlisted' / 'deceased' أُضيفا.
+    // W0-LifecycleAlign: جميع حالات LIFECYCLE_STATES مدعومة، مع الحفاظ على
+    // الحالات القديمة (inactive/pending/graduated) للتوافق مع البيانات
+    // التاريخية إلى حين تشغيل migration script.
     status: {
       type: String,
-      enum: ['active', 'inactive', 'pending', 'waitlisted', 'transferred', 'deceased', 'graduated'],
+      enum: [
+        // Canonical lifecycle states (beneficiary-lifecycle.registry.js)
+        'draft',
+        'waitlisted',
+        'active',
+        'suspended',
+        'transferred-pending',
+        'transferred',
+        'discharged',
+        'deceased',
+        'archived',
+        'deletion-pending',
+        'deleted',
+        // Legacy aliases — kept for backward compatibility until migration
+        'inactive',
+        'pending',
+        'graduated',
+      ],
       default: 'active',
     },
+    // W0-LifecycleAlign: تواريخ/أسباب رئيسية لدورة الحياة
+    lastLifecycleAt: { type: Date },
+    statusReason: { type: String },
+    statusReasonCode: { type: String },
     registrationDate: { type: Date, default: Date.now, index: true },
     joinDate: { type: Date },
 
@@ -400,6 +424,9 @@ const beneficiarySchema = new mongoose.Schema(
     lastModifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     generalNotes: String,
     casesCount: { type: Number, default: 0 },
+    // W0-LifecycleAlign: isArchived أصبح virtual مشتق من status === 'archived' أو
+    // الحالة القديمة 'inactive'. الحقل المادي يُحتفظ به للتوافق مع الفهارس
+    // والاستعلامات القديمة ويُحدّث تلقائيًا عبر pre-save hook.
     isArchived: { type: Boolean, default: false, index: true },
     archivedDate: Date,
     archivedReason: String,
@@ -424,6 +451,23 @@ beneficiarySchema.index({ 'disability.type': 1 });
 // فهرس مركّب للفرع — ضروري لعزل بيانات الفروع (multi-tenant)
 beneficiarySchema.index({ branchId: 1, status: 1 });
 beneficiarySchema.index({ branchId: 1, isArchived: 1 });
+
+// ─── Lifecycle Alignment Helpers (W0-LifecycleAlign) ───────────────────────
+
+/**
+ * تعيين الحالات القديمة إلى الحالة الرسمية في state machine.
+ * يستخدم للقراءة الموحدة في التقارير والواجهات إلى حين migration.
+ */
+const LEGACY_STATUS_MAP = Object.freeze({
+  inactive: 'archived',
+  pending: 'draft',
+  graduated: 'discharged',
+});
+
+function normalizeLifecycleState(status) {
+  if (!status) return 'active';
+  return LEGACY_STATUS_MAP[status] || status;
+}
 
 // ─── Virtuals ───────────────────────────────────────────────────────────────
 
@@ -478,6 +522,16 @@ beneficiarySchema.virtual('primaryGuardian').get(function () {
   );
 });
 
+// W0-LifecycleAlign: الحالة الرسمية الموحدة للمستفيد (بدون aliasات قديمة)
+beneficiarySchema.virtual('lifecycleState').get(function () {
+  return normalizeLifecycleState(this.status);
+});
+
+// W0-LifecycleAlign: هل المستفيد في حالة أرشفة فعلية؟
+beneficiarySchema.virtual('isArchivedComputed').get(function () {
+  return this.lifecycleState === 'archived' || this.lifecycleState === 'deleted';
+});
+
 // ─── Pre-save Middleware ────────────────────────────────────────────────────
 
 beneficiarySchema.pre('save', async function () {
@@ -493,6 +547,10 @@ beneficiarySchema.pre('save', async function () {
   if (!this.fullNameArabic && this.firstName) {
     this.fullNameArabic = this.name;
   }
+
+  // W0-LifecycleAlign: keep legacy isArchived flag in sync with lifecycle state
+  const archivedStates = new Set(['archived', 'inactive', 'deleted', 'deletion-pending']);
+  this.isArchived = archivedStates.has(this.status);
 
   // Auto-populate category from disability.type
   if (this.disability && this.disability.type && !this.category) {
@@ -543,19 +601,23 @@ beneficiarySchema.methods.isInsuranceValid = function () {
   return new Date(this.insuranceInfo.coverageEndDate) > new Date();
 };
 
-beneficiarySchema.methods.archive = function (reason) {
+beneficiarySchema.methods.archive = function (reason, userId = null) {
   this.isArchived = true;
   this.archivedDate = new Date();
   this.archivedReason = reason;
-  this.status = 'inactive';
+  this.status = 'archived';
+  this.lastLifecycleAt = new Date();
+  if (userId) this.lastModifiedBy = userId;
   return this.save();
 };
 
-beneficiarySchema.methods.unarchive = function () {
+beneficiarySchema.methods.unarchive = function (userId = null) {
   this.isArchived = false;
   this.archivedDate = null;
   this.archivedReason = null;
   this.status = 'active';
+  this.lastLifecycleAt = new Date();
+  if (userId) this.lastModifiedBy = userId;
   return this.save();
 };
 
@@ -613,16 +675,40 @@ beneficiarySchema.statics.advancedSearch = function (filters) {
 };
 
 beneficiarySchema.statics.getStatistics = async function () {
+  // W0-LifecycleAlign: دعم الحالات الجديدة + الحالات القديمة (legacy aliases).
+  const isArchivedMatch = {
+    $or: [
+      { isArchived: { $ne: true } },
+      { status: { $nin: ['archived', 'inactive', 'deleted', 'deletion-pending'] } },
+    ],
+  };
   const [counts, byCategory, byStatus] = await Promise.all([
     this.aggregate([
-      { $match: { isArchived: { $ne: true } } },
+      { $match: isArchivedMatch },
       {
         $group: {
           _id: null,
           total: { $sum: 1 },
           active: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
-          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
-          inactive: { $sum: { $cond: [{ $eq: ['$status', 'inactive'] }, 1, 0] } },
+          pending: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['pending', 'draft']] }, 1, 0],
+            },
+          },
+          waitlisted: { $sum: { $cond: [{ $eq: ['$status', 'waitlisted'] }, 1, 0] } },
+          suspended: { $sum: { $cond: [{ $eq: ['$status', 'suspended'] }, 1, 0] } },
+          discharged: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['discharged', 'graduated']] }, 1, 0],
+            },
+          },
+          transferred: { $sum: { $cond: [{ $eq: ['$status', 'transferred'] }, 1, 0] } },
+          deceased: { $sum: { $cond: [{ $eq: ['$status', 'deceased'] }, 1, 0] } },
+          archived: {
+            $sum: {
+              $cond: [{ $in: ['$status', ['archived', 'inactive']] }, 1, 0],
+            },
+          },
           avgProgress: { $avg: '$progress' },
           avgSessions: { $avg: '$sessions' },
         },
@@ -642,7 +728,12 @@ beneficiarySchema.statics.getStatistics = async function () {
     total: 0,
     active: 0,
     pending: 0,
-    inactive: 0,
+    waitlisted: 0,
+    suspended: 0,
+    discharged: 0,
+    transferred: 0,
+    deceased: 0,
+    archived: 0,
     avgProgress: 0,
     avgSessions: 0,
   };
@@ -651,7 +742,7 @@ beneficiarySchema.statics.getStatistics = async function () {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const newThisMonth = await this.countDocuments({
-    isArchived: { $ne: true },
+    status: { $nin: ['archived', 'inactive', 'deleted', 'deletion-pending'] },
     createdAt: { $gte: monthStart },
   });
 
@@ -664,7 +755,10 @@ beneficiarySchema.statics.getStatistics = async function () {
     completionRate:
       stats.total > 0
         ? Math.round(
-            ((await this.countDocuments({ isArchived: { $ne: true }, progress: { $gte: 80 } })) /
+            ((await this.countDocuments({
+              status: { $nin: ['archived', 'inactive', 'deleted', 'deletion-pending'] },
+              progress: { $gte: 80 },
+            })) /
               stats.total) *
               100
           )

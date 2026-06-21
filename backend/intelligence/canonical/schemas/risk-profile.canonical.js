@@ -18,7 +18,13 @@ const { z, ObjectIdLike, IsoDateLoose } = require('../_primitives');
 
 const RiskTier = z.enum(['low', 'moderate', 'high', 'critical']);
 
-const RiskSourceName = z.enum(['clinical', 'psych_flags', 'dropout', 'cdss']);
+const RiskSourceName = z.enum([
+  'clinical',
+  'psych_flags',
+  'dropout',
+  'cdss',
+  'behavioral_escalation',
+]);
 
 /**
  * One explainable factor — every score must decompose into factors,

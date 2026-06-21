@@ -61,10 +61,24 @@ const OP = Object.freeze({
   END_ACTIVE_SCHEDULES: 'end-active-schedules',
   CLOSE_OPEN_EPISODES: 'close-open-episodes',
   RELEASE_CARE_TEAM: 'release-care-team',
+  PAUSE_SCHEDULE: 'pause-schedule',
+  RESUME_SCHEDULE: 'resume-schedule',
+  RESTORE_CANCELLED_APPOINTMENTS: 'restore-cancelled-appointments',
+  REOPEN_CLOSED_EPISODES: 'reopen-closed-episodes',
+  REACTIVATE_CARE_TEAM: 'reactivate-care-team',
+  ROLLBACK_TRANSFER_DESTINATION: 'rollback-transfer-destination',
 });
 
 /** Appointment statuses that represent a still-actionable future booking. */
 const CANCELLABLE_APPOINTMENT_STATUSES = Object.freeze([
+  'PENDING',
+  'CONFIRMED',
+  'CHECKED_IN',
+  'RESCHEDULED',
+]);
+
+/** Appointment statuses that can be paused and later resumed. */
+const PAUSABLE_APPOINTMENT_STATUSES = Object.freeze([
   'PENDING',
   'CONFIRMED',
   'CHECKED_IN',
@@ -120,6 +134,7 @@ function allRegistryOps() {
   const set = new Set();
   for (const t of reg.TRANSITIONS) {
     for (const op of t.sideEffects || []) set.add(op);
+    for (const op of t.compensatingOps || []) set.add(op);
   }
   return [...set];
 }
@@ -140,6 +155,9 @@ function modifiedCount(res) {
  * @param {object} deps
  *   - appointmentModel  Mongoose model (Appointment) — optional
  *   - episodeModel      Mongoose model (EpisodeOfCare) — optional
+ *   - beneficiaryModel  Mongoose model (Beneficiary) — optional (for notifications + rollback)
+ *   - transferModel     Mongoose model (BeneficiaryTransfer) — optional
+ *   - notifier          async fn({ to, body, subject, priority, beneficiaryId }) — optional
  *   - eventSink         { emit(event, payload) } OR (event, payload) => void — optional
  *   - now               () => Date
  *   - logger            console-compatible
@@ -148,6 +166,10 @@ function modifiedCount(res) {
 function createBeneficiaryLifecycleSideEffectHandlers({
   appointmentModel = null,
   episodeModel = null,
+  beneficiaryModel = null,
+  transferModel = null,
+  guardianModel = null,
+  notifier = null,
   eventSink = null,
   now = () => new Date(),
   logger = console,
@@ -169,6 +191,14 @@ function createBeneficiaryLifecycleSideEffectHandlers({
     }
   }
 
+  function lifecycleTag(ctx, extra = {}) {
+    return {
+      transitionId: ctx.transitionId || null,
+      correlationId: ctx.correlationId || null,
+      ...extra,
+    };
+  }
+
   // ── Real data handler: cancel future appointments ──────────────────────
   async function endActiveSchedules(ctx) {
     if (!appointmentModel || typeof appointmentModel.updateMany !== 'function') {
@@ -179,13 +209,16 @@ function createBeneficiaryLifecycleSideEffectHandlers({
         reason: 'appointment-model-unavailable',
       };
     }
+    // Wave 656 — tag each cancellation with the transition that caused it so
+    // `reverseTransition` can restore only the appointments it cancelled.
+    const tag = lifecycleTag(ctx, { cancelledAt: now(), originalStatus: '$status' });
     const res = await appointmentModel.updateMany(
       {
         beneficiary: ctx.beneficiaryId,
         status: { $in: CANCELLABLE_APPOINTMENT_STATUSES },
         date: { $gte: now() },
       },
-      { $set: { status: 'CANCELLED' } }
+      [{ $set: { status: 'CANCELLED', lifecycleCancellationTag: tag } }]
     );
     return {
       name: OP.END_ACTIVE_SCHEDULES,
@@ -210,12 +243,22 @@ function createBeneficiaryLifecycleSideEffectHandlers({
     // transition audit + the beneficiary's `deceased` status.
     const dischargeReason =
       ctx.toState === reg.LIFECYCLE_STATES.DECEASED ? 'medical_reason' : 'other';
+    const tag = lifecycleTag(ctx, { closedAt: now(), originalStatus: '$status' });
     const res = await episodeModel.updateMany(
       {
         beneficiaryId: ctx.beneficiaryId,
         status: { $in: OPEN_EPISODE_STATUSES },
       },
-      { $set: { status: 'completed', actualEndDate: now(), dischargeReason } }
+      [
+        {
+          $set: {
+            status: 'completed',
+            actualEndDate: now(),
+            dischargeReason,
+            lifecycleClosureTag: tag,
+          },
+        },
+      ]
     );
     return {
       name: OP.CLOSE_OPEN_EPISODES,
@@ -238,9 +281,16 @@ function createBeneficiaryLifecycleSideEffectHandlers({
     // is no standalone CareTeam model). Releasing = flipping every still-active
     // member to isActive:false + stamping removedAt, via a positional
     // arrayFilter so only the active members are touched.
+    const tag = lifecycleTag(ctx, { releasedAt: now() });
     const res = await episodeModel.updateMany(
       { beneficiaryId: ctx.beneficiaryId, 'careTeam.isActive': true },
-      { $set: { 'careTeam.$[m].isActive': false, 'careTeam.$[m].removedAt': now() } },
+      {
+        $set: {
+          'careTeam.$[m].isActive': false,
+          'careTeam.$[m].removedAt': now(),
+          'careTeam.$[m].lifecycleReleaseTag': tag,
+        },
+      },
       { arrayFilters: [{ 'm.isActive': true }] }
     );
     return {
@@ -249,6 +299,412 @@ function createBeneficiaryLifecycleSideEffectHandlers({
       releasedFromEpisodes: modifiedCount(res),
     };
   }
+
+  // ── Compensation handler: restore appointments cancelled by a transition ─
+  async function restoreCancelledAppointments(ctx) {
+    if (!appointmentModel || typeof appointmentModel.updateMany !== 'function') {
+      return {
+        name: OP.RESTORE_CANCELLED_APPOINTMENTS,
+        category: 'data',
+        skipped: true,
+        reason: 'appointment-model-unavailable',
+      };
+    }
+    const res = await appointmentModel.updateMany(
+      {
+        beneficiary: ctx.beneficiaryId,
+        'lifecycleCancellationTag.transitionId': ctx.transitionId,
+        'lifecycleCancellationTag.correlationId': ctx.correlationId,
+      },
+      [
+        {
+          $set: {
+            status: { $ifNull: ['$lifecycleCancellationTag.originalStatus', 'CONFIRMED'] },
+            lifecycleCancellationTag: null,
+          },
+        },
+      ]
+    );
+    return {
+      name: OP.RESTORE_CANCELLED_APPOINTMENTS,
+      category: 'data',
+      restoredAppointments: modifiedCount(res),
+    };
+  }
+
+  // ── Compensation handler: reopen episodes closed by a transition ─────────
+  async function reopenClosedEpisodes(ctx) {
+    if (!episodeModel || typeof episodeModel.updateMany !== 'function') {
+      return {
+        name: OP.REOPEN_CLOSED_EPISODES,
+        category: 'data',
+        skipped: true,
+        reason: 'episode-model-unavailable',
+      };
+    }
+    const res = await episodeModel.updateMany(
+      {
+        beneficiaryId: ctx.beneficiaryId,
+        'lifecycleClosureTag.transitionId': ctx.transitionId,
+        'lifecycleClosureTag.correlationId': ctx.correlationId,
+      },
+      [
+        {
+          $set: {
+            status: { $ifNull: ['$lifecycleClosureTag.originalStatus', 'active'] },
+            actualEndDate: null,
+            dischargeReason: null,
+            lifecycleClosureTag: null,
+          },
+        },
+      ]
+    );
+    return {
+      name: OP.REOPEN_CLOSED_EPISODES,
+      category: 'data',
+      reopenedEpisodes: modifiedCount(res),
+    };
+  }
+
+  // ── Compensation handler: reactivate care-team members released by a transition
+  async function reactivateCareTeam(ctx) {
+    if (!episodeModel || typeof episodeModel.updateMany !== 'function') {
+      return {
+        name: OP.REACTIVATE_CARE_TEAM,
+        category: 'data',
+        skipped: true,
+        reason: 'episode-model-unavailable',
+      };
+    }
+    const res = await episodeModel.updateMany(
+      {
+        beneficiaryId: ctx.beneficiaryId,
+        'careTeam.lifecycleReleaseTag.transitionId': ctx.transitionId,
+        'careTeam.lifecycleReleaseTag.correlationId': ctx.correlationId,
+      },
+      {
+        $set: {
+          'careTeam.$[m].isActive': true,
+          'careTeam.$[m].removedAt': null,
+          'careTeam.$[m].lifecycleReleaseTag': null,
+        },
+      },
+      {
+        arrayFilters: [
+          {
+            'm.lifecycleReleaseTag.transitionId': ctx.transitionId,
+            'm.lifecycleReleaseTag.correlationId': ctx.correlationId,
+          },
+        ],
+      }
+    );
+    return {
+      name: OP.REACTIVATE_CARE_TEAM,
+      category: 'data',
+      reactivatedFromEpisodes: modifiedCount(res),
+    };
+  }
+
+  // ── Compensation handler: rollback a completed transfer ──────────────────
+  async function rollbackTransferDestination(ctx) {
+    if (
+      !beneficiaryModel ||
+      typeof beneficiaryModel.updateOne !== 'function' ||
+      !transferModel ||
+      typeof transferModel.findOne !== 'function'
+    ) {
+      return {
+        name: OP.ROLLBACK_TRANSFER_DESTINATION,
+        category: 'data',
+        skipped: true,
+        reason: 'models-unavailable',
+      };
+    }
+
+    const transfer = await transferModel
+      .findOne({
+        beneficiary: ctx.beneficiaryId,
+        toBranch: ctx.destinationBranchId,
+        status: 'completed',
+      })
+      .sort({ completedAt: -1 });
+
+    if (!transfer) {
+      return {
+        name: OP.ROLLBACK_TRANSFER_DESTINATION,
+        category: 'data',
+        skipped: true,
+        reason: 'completed-transfer-not-found',
+      };
+    }
+
+    const snapshot =
+      transfer.transferNotes && typeof transfer.transferNotes === 'object'
+        ? transfer.transferNotes.rollbackSnapshot || {}
+        : {};
+    const originalBranchId = snapshot.originalBranchId || ctx.sourceBranchId;
+    const originalFileNumber = snapshot.originalFileNumber || null;
+    const originalStatus = snapshot.originalStatus || ctx.fromState;
+
+    if (!originalBranchId) {
+      return {
+        name: OP.ROLLBACK_TRANSFER_DESTINATION,
+        category: 'data',
+        skipped: true,
+        reason: 'snapshot-missing-original-branch',
+      };
+    }
+
+    const beneficiaryUpdate = {
+      branchId: originalBranchId,
+      status: originalStatus,
+      lastLifecycleAt: now(),
+    };
+    if (originalFileNumber) {
+      beneficiaryUpdate.fileNumber = originalFileNumber;
+    }
+
+    await beneficiaryModel.updateOne({ _id: ctx.beneficiaryId }, { $set: beneficiaryUpdate });
+
+    transfer.status = 'reversed';
+    const nextNotes =
+      transfer.transferNotes && typeof transfer.transferNotes === 'object'
+        ? { ...transfer.transferNotes }
+        : {};
+    nextNotes.rollbackSnapshot = {
+      ...snapshot,
+      rolledBackAt: now(),
+    };
+    transfer.transferNotes = nextNotes;
+    await transfer.save();
+
+    return {
+      name: OP.ROLLBACK_TRANSFER_DESTINATION,
+      category: 'data',
+      rolledBackTransfers: 1,
+      handledStatus: true,
+    };
+  }
+
+  // ── Real data handler: pause future schedules on suspend ─────────────────
+  async function pauseSchedule(ctx) {
+    if (!appointmentModel || typeof appointmentModel.updateMany !== 'function') {
+      return {
+        name: OP.PAUSE_SCHEDULE,
+        category: 'data',
+        skipped: true,
+        reason: 'appointment-model-unavailable',
+      };
+    }
+    const res = await appointmentModel.updateMany(
+      {
+        beneficiary: ctx.beneficiaryId,
+        status: { $in: PAUSABLE_APPOINTMENT_STATUSES },
+        date: { $gte: now() },
+      },
+      { $set: { status: 'PAUSED', pausedAt: now(), pausedReason: 'beneficiary-suspended' } }
+    );
+    return {
+      name: OP.PAUSE_SCHEDULE,
+      category: 'data',
+      pausedAppointments: modifiedCount(res),
+    };
+  }
+
+  // ── Real data handler: resume paused schedules on reactivate ─────────────
+  async function resumeSchedule(ctx) {
+    if (!appointmentModel || typeof appointmentModel.updateMany !== 'function') {
+      return {
+        name: OP.RESUME_SCHEDULE,
+        category: 'data',
+        skipped: true,
+        reason: 'appointment-model-unavailable',
+      };
+    }
+    const res = await appointmentModel.updateMany(
+      {
+        beneficiary: ctx.beneficiaryId,
+        status: 'PAUSED',
+      },
+      { $set: { status: 'CONFIRMED', resumedAt: now() } }
+    );
+    return {
+      name: OP.RESUME_SCHEDULE,
+      category: 'data',
+      resumedAppointments: modifiedCount(res),
+    };
+  }
+
+  // ── Real notification handlers ───────────────────────────────────────────
+  async function fetchBeneficiaryContact(id) {
+    if (!beneficiaryModel || typeof beneficiaryModel.findById !== 'function') return null;
+    try {
+      return await beneficiaryModel
+        .findById(id)
+        .select(
+          'firstName fullNameArabic contactInfo.primaryPhone contactInfo.email notificationPreference'
+        )
+        .lean();
+    } catch (err) {
+      logger.warn && logger.warn(`[lifecycle.side_effect] contact lookup failed: ${err.message}`);
+      return null;
+    }
+  }
+
+  function beneficiaryFirstName(b) {
+    return b?.firstName || b?.fullNameArabic || 'المستفيد';
+  }
+
+  async function notifyFamilyInApp(ctx, { subject, body, templateKey }) {
+    if (!guardianModel || typeof guardianModel.find !== 'function') return null;
+    try {
+      const guardians = await guardianModel
+        .find({
+          beneficiaries: ctx.beneficiaryId,
+          accountStatus: 'verified',
+          deletedAt: null,
+        })
+        .select('userId')
+        .lean();
+      const recipients = (guardians || []).map(g => g.userId).filter(Boolean);
+      if (recipients.length === 0) return { sent: false, reason: 'no-verified-guardian-users' };
+      const results = [];
+      for (const userId of recipients) {
+        const r = await notifier({
+          channels: ['in-app'],
+          recipientId: String(userId),
+          subject,
+          body,
+          priority: 'high',
+          templateKey,
+          beneficiaryId: ctx.beneficiaryId,
+        });
+        results.push(r);
+      }
+      return { sent: results.some(r => r.success), recipients: recipients.map(String), results };
+    } catch (err) {
+      logger.warn &&
+        logger.warn(`[lifecycle.side_effect] in-app family notification failed: ${err.message}`);
+      return { sent: false, error: err.message };
+    }
+  }
+
+  async function sendFamilyNotification(ctx, { op, templateKey, subject, bodyBuilder }) {
+    if (typeof notifier !== 'function') {
+      return { name: op, category: 'notification', skipped: true, reason: 'notifier-unavailable' };
+    }
+    const b = await fetchBeneficiaryContact(ctx.beneficiaryId);
+    if (!b) {
+      return { name: op, category: 'notification', skipped: true, reason: 'beneficiary-not-found' };
+    }
+    const phone = b.contactInfo?.primaryPhone;
+    const email = b.contactInfo?.email;
+    const to = phone || email;
+    if (!to) {
+      return { name: op, category: 'notification', skipped: true, reason: 'no-contact' };
+    }
+    const firstName = beneficiaryFirstName(b);
+    const body = bodyBuilder(firstName);
+    let externalResult;
+    try {
+      externalResult = await notifier({
+        to,
+        subject,
+        body,
+        priority: 'high',
+        templateKey,
+        beneficiaryId: ctx.beneficiaryId,
+      });
+    } catch (err) {
+      logger.warn && logger.warn(`[lifecycle.side_effect] notification failed: ${err.message}`);
+      externalResult = { success: false, error: err.message };
+    }
+    const externalSuccess =
+      externalResult && typeof externalResult === 'object'
+        ? externalResult.success !== false && !externalResult.error
+        : !externalResult?.error;
+    const inApp = await notifyFamilyInApp(ctx, { subject, body, templateKey });
+    return {
+      name: op,
+      category: 'notification',
+      sent: externalSuccess || !!inApp?.sent,
+      channel: phone && externalSuccess ? 'sms' : email && externalSuccess ? 'email' : undefined,
+      external: { success: externalSuccess },
+      inApp,
+    };
+  }
+
+  const notificationHandlers = {
+    'notify-family-welcome': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-welcome',
+        templateKey: 'beneficiary.lifecycle.welcome',
+        subject: 'تم قبول المستفيد',
+        bodyBuilder: name => `مرحباً، تم قبول ${name} في البرنامج. نتمنى لكم رحلة علاجية موفقة.`,
+      }),
+    'notify-family-waitlisted': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-waitlisted',
+        templateKey: 'beneficiary.lifecycle.waitlisted',
+        subject: 'إدراج في قائمة الانتظار',
+        bodyBuilder: name =>
+          `تم إدراج ${name} في قائمة الانتظار. سنتواصل معكم فور توفر مقعد مناسب.`,
+      }),
+    'notify-family-waitlist-cancelled': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-waitlist-cancelled',
+        templateKey: 'beneficiary.lifecycle.waitlist-cancelled',
+        subject: 'إلغاء قائمة الانتظار',
+        bodyBuilder: name => `تم إلغاء إدراج ${name} من قائمة الانتظار.`,
+      }),
+    'notify-family-suspension': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-suspension',
+        templateKey: 'beneficiary.lifecycle.suspension',
+        subject: 'تعليق ملف المستفيد',
+        bodyBuilder: name =>
+          `نود إبلاغكم بتعليق ملف ${name} مؤقتاً. سيتم التواصل لتحديد موعد الاستئناف.`,
+      }),
+    'notify-family-resumption': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-resumption',
+        templateKey: 'beneficiary.lifecycle.resumption',
+        subject: 'إعادة تفعيل ملف المستفيد',
+        bodyBuilder: name => `تم إعادة تفعيل ملف ${name}. نرحب بعودتكم.`,
+      }),
+    'notify-family-discharge': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-discharge',
+        templateKey: 'beneficiary.lifecycle.discharge',
+        subject: 'تخرج المستفيد',
+        bodyBuilder: name =>
+          `نهنئكم بتخرج ${name} من البرنامج. نتمنى لكم التوفيق والاستمرار في التقدم.`,
+      }),
+    'notify-family-condolence': ctx =>
+      sendFamilyNotification(ctx, {
+        op: 'notify-family-condolence',
+        templateKey: 'beneficiary.lifecycle.condolence',
+        subject: 'تعزية',
+        bodyBuilder: name =>
+          `نتقدم بأحر التعازي والمواساة لوفاة ${name}. نسأل الله أن يلهمكم الصبر والسلوان.`,
+      }),
+    'notify-team': ctx => {
+      const op = 'notify-team';
+      // Team notification is intentionally a deferred event until a team-routing
+      // registry exists. We still emit the event for downstream consumers.
+      const emitted = emit({
+        op,
+        category: 'notification',
+        beneficiaryId: ctx.beneficiaryId ? String(ctx.beneficiaryId) : null,
+        sourceBranchId: ctx.sourceBranchId ? String(ctx.sourceBranchId) : null,
+        transitionId: ctx.transitionId,
+        fromState: ctx.fromState,
+        toState: ctx.toState,
+        at: now().toISOString(),
+      });
+      return { name: op, category: 'notification', deferred: true, emitted };
+    },
+  };
 
   /** Build a deferred handler that records intent + emits an event. */
   function deferredHandler(op, category) {
@@ -284,6 +740,13 @@ function createBeneficiaryLifecycleSideEffectHandlers({
     [OP.END_ACTIVE_SCHEDULES]: endActiveSchedules,
     [OP.CLOSE_OPEN_EPISODES]: closeOpenEpisodes,
     [OP.RELEASE_CARE_TEAM]: releaseCareTeam,
+    [OP.PAUSE_SCHEDULE]: pauseSchedule,
+    [OP.RESUME_SCHEDULE]: resumeSchedule,
+    [OP.RESTORE_CANCELLED_APPOINTMENTS]: restoreCancelledAppointments,
+    [OP.REOPEN_CLOSED_EPISODES]: reopenClosedEpisodes,
+    [OP.REACTIVATE_CARE_TEAM]: reactivateCareTeam,
+    [OP.ROLLBACK_TRANSFER_DESTINATION]: rollbackTransferDestination,
+    ...notificationHandlers,
   };
 
   for (const op of allRegistryOps()) {
@@ -348,6 +811,12 @@ function summarizeSideEffectResults(results) {
     cancelledAppointments: 0,
     closedEpisodes: 0,
     releasedFromEpisodes: 0,
+    pausedAppointments: 0,
+    resumedAppointments: 0,
+    restoredAppointments: 0,
+    reopenedEpisodes: 0,
+    reactivatedFromEpisodes: 0,
+    rolledBackTransfers: 0,
     total: 0,
   };
   let deferred = 0;
@@ -380,10 +849,22 @@ function summarizeSideEffectResults(results) {
       const c = addNum(r.cancelledAppointments);
       const e = addNum(r.closedEpisodes);
       const t = addNum(r.releasedFromEpisodes);
+      const p = addNum(r.pausedAppointments);
+      const u = addNum(r.resumedAppointments);
+      const ra = addNum(r.restoredAppointments);
+      const ro = addNum(r.reopenedEpisodes);
+      const rc = addNum(r.reactivatedFromEpisodes);
+      const rb = addNum(r.rolledBackTransfers);
       dataMutations.cancelledAppointments += c;
       dataMutations.closedEpisodes += e;
       dataMutations.releasedFromEpisodes += t;
-      dataMutations.total += c + e + t;
+      dataMutations.pausedAppointments += p;
+      dataMutations.resumedAppointments += u;
+      dataMutations.restoredAppointments += ra;
+      dataMutations.reopenedEpisodes += ro;
+      dataMutations.reactivatedFromEpisodes += rc;
+      dataMutations.rolledBackTransfers += rb;
+      dataMutations.total += c + e + t + p + u + ra + ro + rc + rb;
     }
   }
 

@@ -59,9 +59,7 @@ const sensitivityGrade = require('./sensitivity-grade.lib');
 const evidenceSnapshot = require('./evidence-snapshot.lib');
 // Wave 596 — actionable summary reducer over the dispatched side-effect
 // results. Pure + total; used to enrich the execute audit and return.
-const {
-  summarizeSideEffectResults,
-} = require('./beneficiary-lifecycle-side-effects.service');
+const { summarizeSideEffectResults } = require('./beneficiary-lifecycle-side-effects.service');
 const MFA_FRESHNESS_MIN = Object.freeze({
   2: Math.round(sensitivityGrade.SENSITIVITY_GRADES.HIGH.mfaFreshnessMs / 60_000),
   3: Math.round(sensitivityGrade.SENSITIVITY_GRADES.CRITICAL.mfaFreshnessMs / 60_000),
@@ -686,10 +684,70 @@ function createBeneficiaryLifecycleService({
     if (reason) {
       record.metadata = { ...(record.metadata || {}), reversalReason: reason };
     }
+
+    // Wave 656 — run compensating ops for reversible transitions before saving
+    // the reversed record, so any failure is still stamped on the audit trail.
+    const compensationOps = reg.getCompensatingOps(record.transitionId);
+    const compensationEffectsAudit = [];
+    const compensationCtx = {
+      beneficiaryId: record.beneficiaryId,
+      sourceBranchId: record.sourceBranchId,
+      destinationBranchId: record.destinationBranchId,
+      transitionId: record.transitionId,
+      fromState: record.fromState,
+      toState: record.toState,
+      correlationId: record.correlationId,
+      metadata: record.metadata,
+      actor,
+    };
+    for (const op of compensationOps) {
+      const handler = sideEffectHandlers[op];
+      if (!handler) {
+        compensationEffectsAudit.push({
+          operation: op,
+          status: 'skipped',
+          completedAt: now(),
+          metadata: { reason: 'no handler wired' },
+        });
+        continue;
+      }
+      try {
+        const result = await handler(compensationCtx);
+        const selfSkipped = Boolean(result && result.skipped);
+        if (selfSkipped) {
+          logger.warn &&
+            logger.warn(
+              `[lifecycle] compensation ${op} self-skipped: ${result.reason || 'unknown reason'}`
+            );
+        }
+        compensationEffectsAudit.push({
+          operation: op,
+          status: 'ok',
+          selfSkipped,
+          completedAt: now(),
+          metadata: result || null,
+        });
+      } catch (err) {
+        compensationEffectsAudit.push({
+          operation: op,
+          status: 'failed',
+          completedAt: now(),
+          error: err.message,
+        });
+        logger.warn && logger.warn(`[lifecycle] compensation ${op} failed: ${err.message}`);
+      }
+    }
+    record.compensationEffectsAudit = compensationEffectsAudit;
+
     await record.save();
 
-    // Flip beneficiary status back
-    if (beneficiaryModel) {
+    // Flip beneficiary status back, unless a compensation handler already
+    // restored the original status (e.g. transfer rollback restores the
+    // pre-transfer branch, file number, and status from a snapshot).
+    const statusHandled = compensationEffectsAudit.some(
+      row => row.status === 'ok' && row.metadata && row.metadata.handledStatus === true
+    );
+    if (beneficiaryModel && !statusHandled) {
       try {
         await beneficiaryModel.updateOne(
           { _id: record.beneficiaryId },
@@ -700,13 +758,36 @@ function createBeneficiaryLifecycleService({
       }
     }
 
+    const compensationEffectsSummary = summarizeSideEffectResults(
+      compensationEffectsAudit.map(s => ({
+        ...(s.metadata && typeof s.metadata === 'object' ? s.metadata : {}),
+        status: s.status,
+      }))
+    );
+
+    if (compensationEffectsSummary.health && !compensationEffectsSummary.health.clean) {
+      const h = compensationEffectsSummary.health;
+      logger.warn &&
+        logger.warn(
+          `[lifecycle] degraded compensation for transition ${record.transitionId} ` +
+            `(beneficiary ${record.beneficiaryId}): failedRatio=${h.failedRatio} ` +
+            `skippedRatio=${h.skippedRatio} mutated=${h.mutated}`
+        );
+    }
+
     await _audit('beneficiary.lifecycle.transition.reversed', actor, {
       transitionRecordId: record._id,
       transitionId: record.transitionId,
       reason,
+      compensationEffectsSummary,
     });
 
-    return { ok: true, transitionRecord: record };
+    return {
+      ok: true,
+      transitionRecord: record,
+      compensationEffectsAudit,
+      compensationEffectsSummary,
+    };
   }
 
   // ─── Read helpers ──────────────────────────────────────────

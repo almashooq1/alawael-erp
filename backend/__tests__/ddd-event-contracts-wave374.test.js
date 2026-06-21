@@ -172,6 +172,12 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'authorization', // W1206 — treatment authorization decided
   'care-coordination', // W1207 — MDT meeting / consultation answered
   'cdss', // W1208 — CDSS alert resolved
+  'official-letter', // W1224 — official letter issued/revoked → timeline
+  'careteam', // W1005 — care-team mutations → timeline
+  'waitlist', // W979 — waitlist added/booked → timeline
+  'insurance', // W994 — insurance claim approved/rejected → timeline
+  'home_program', // W1003 — home program assigned/completed → timeline
+  'followup', // W987/W992 — post-rehab case/visit outcomes → timeline
 ]);
 
 // Allowed `eventType` prefixes. Most match W354 TIER domain names; a few are
@@ -326,6 +332,13 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'mdt', // W1207 — mdt.meeting_completed
     'consultation', // W1207 — consultation.answered
     'alert', // W1208 — alert.resolved (CdssAlert)
+    'official_letter', // W1224 — official_letter.issued / .revoked
+    'careteam', // W1005 — careteam.member_added / .member_removed / .lead_changed
+    'waitlist', // W979 — waitlist.added / .booked
+    'claim', // W994 — claim.approved / .rejected (insurance domain)
+    'home_program', // W1003 — home_program.assigned / .completed
+    'case', // W987 — case.completed / .lost (followup domain)
+    'visit', // W992 — visit.attended / .missed (followup domain)
   ])
 );
 

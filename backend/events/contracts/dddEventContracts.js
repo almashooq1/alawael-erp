@@ -257,6 +257,42 @@ const SESSION_EVENTS = {
     priority: PRIORITY.NORMAL,
     consumers: ['timeline', 'goals', 'dashboards', 'reports', 'ai-recommendations'],
   },
+
+  // W974 — session lifecycle reaches the unified timeline: cancelled / no-show.
+  CANCELLED: {
+    domain: 'sessions',
+    eventType: 'session.cancelled',
+    version: 1,
+    description: 'تم إلغاء جلسة — Session cancelled',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      therapistId: 'string',
+      sessionType: 'string',
+      reason: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  NO_SHOW: {
+    domain: 'sessions',
+    eventType: 'session.no_show',
+    version: 1,
+    description: 'تغيّب المستفيد عن جلسة — Session no-show',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      therapistId: 'string',
+      sessionType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations', 'notification'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -3228,6 +3264,273 @@ const CLINICAL_SAFETY_EVENTS = Object.freeze({
   },
 });
 
+// ── W974/W1430 restored cross-domain contracts ───────────────────────────────
+// These contracts back the timeline subscribers restored in W1430 and whose
+// producers already exist in the codebase (OfficialLetter, EpisodeOfCare,
+// Waitlist, InsuranceClaim, FamilyHomeProgram/HomeAssignment, PostRehabCase,
+// FollowUpVisit, and the bridged SessionService cancel/no-show events).
+
+const OFFICIAL_LETTER_EVENTS = Object.freeze({
+  ISSUED: {
+    domain: 'official-letter',
+    eventType: 'official_letter.issued',
+    version: 1,
+    description: 'تم إصدار خطاب رسمي — Official letter issued',
+    payload: {
+      letterId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      letterType: 'string',
+      issuedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  REVOKED: {
+    domain: 'official-letter',
+    eventType: 'official_letter.revoked',
+    version: 1,
+    description: 'تم إلغاء خطاب رسمي — Official letter revoked',
+    payload: {
+      letterId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      letterType: 'string',
+      revokedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const CARETEAM_EVENTS = Object.freeze({
+  MEMBER_ADDED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_added',
+    version: 1,
+    description: 'تم إضافة عضو لفريق الرعاية — Care-team member added',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+      role: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  MEMBER_REMOVED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_removed',
+    version: 1,
+    description: 'تمت إزالة عضو من فريق الرعاية — Care-team member removed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+      role: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  LEAD_CHANGED: {
+    domain: 'careteam',
+    eventType: 'careteam.lead_changed',
+    version: 1,
+    description: 'تم تغيير قائد فريق الرعاية — Care-team lead changed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      previousLeadId: 'string',
+      newLeadId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const WAITLIST_EVENTS = Object.freeze({
+  ADDED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.added',
+    version: 1,
+    description: 'تمت إضافة متقدم جديد لقائمة الانتظار — Waitlist entry added',
+    payload: {
+      waitlistEntryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      applicantName: 'string',
+      addedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  BOOKED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.booked',
+    version: 1,
+    description: 'تم حجز موعد لمتقدم من قائمة الانتظار — Waitlist entry booked',
+    payload: {
+      waitlistEntryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      appointmentId: 'string',
+      bookedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const INSURANCE_OUTCOME_EVENTS = Object.freeze({
+  CLAIM_APPROVED: {
+    domain: 'insurance',
+    eventType: 'claim.approved',
+    version: 1,
+    description: 'تمت الموافقة على مطالبة تأمين — Insurance claim approved',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      claimNumber: 'string',
+      approvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  CLAIM_REJECTED: {
+    domain: 'insurance',
+    eventType: 'claim.rejected',
+    version: 1,
+    description: 'تم رفض مطالبة تأمين — Insurance claim rejected',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      claimNumber: 'string',
+      reason: 'string',
+      rejectedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
+const HOME_PROGRAM_EVENTS = Object.freeze({
+  ASSIGNED: {
+    domain: 'home_program',
+    eventType: 'home_program.assigned',
+    version: 1,
+    description: 'تم تكليف برنامج منزلي — Home program assigned',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+      assignedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  COMPLETED: {
+    domain: 'home_program',
+    eventType: 'home_program.completed',
+    version: 1,
+    description: 'تم إكمال برنامج منزلي — Home program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const FOLLOWUP_EVENTS = Object.freeze({
+  CASE_COMPLETED: {
+    domain: 'followup',
+    eventType: 'case.completed',
+    version: 1,
+    description: 'تم إغلاق حالة متابعة ما بعد التأهيل — Post-rehab case completed',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  CASE_LOST: {
+    domain: 'followup',
+    eventType: 'case.lost',
+    version: 1,
+    description: 'فُقدت حالة متابعة ما بعد التأهيل — Post-rehab case lost',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      lostAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+
+  VISIT_ATTENDED: {
+    domain: 'followup',
+    eventType: 'visit.attended',
+    version: 1,
+    description: 'تم حضور زيارة متابعة — Post-rehab follow-up visit attended',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      attendedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  VISIT_MISSED: {
+    domain: 'followup',
+    eventType: 'visit.missed',
+    version: 1,
+    description: 'تم تفويت زيارة متابعة — Post-rehab follow-up visit missed',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      missedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -3349,6 +3652,12 @@ const DDD_CONTRACTS = {
   authorization: AUTHORIZATION_EVENTS,
   'care-coordination': CARE_COORDINATION_EVENTS,
   cdss: CDSS_EVENTS,
+  'official-letter': OFFICIAL_LETTER_EVENTS,
+  careteam: CARETEAM_EVENTS,
+  waitlist: WAITLIST_EVENTS,
+  insurance: INSURANCE_OUTCOME_EVENTS,
+  home_program: HOME_PROGRAM_EVENTS,
+  followup: FOLLOWUP_EVENTS,
 };
 
 /**
@@ -3482,6 +3791,12 @@ module.exports = {
   AUTHORIZATION_EVENTS,
   CARE_COORDINATION_EVENTS,
   CDSS_EVENTS,
+  OFFICIAL_LETTER_EVENTS,
+  CARETEAM_EVENTS,
+  WAITLIST_EVENTS,
+  INSURANCE_OUTCOME_EVENTS,
+  HOME_PROGRAM_EVENTS,
+  FOLLOWUP_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

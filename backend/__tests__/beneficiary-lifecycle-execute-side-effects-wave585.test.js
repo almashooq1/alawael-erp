@@ -173,19 +173,22 @@ describe('W585 executeTransition — real side-effect handlers run with status:o
 
     it('deferred ops record status ok + metadata.deferred true (no silent skip)', () => {
       const idx = byOp(result.sideEffectsAudit);
-      for (const op of [
-        'generate-closure-report',
-        'notify-family-condolence',
-        'notify-regulator-if-required',
-      ]) {
+      for (const op of ['generate-closure-report', 'notify-regulator-if-required']) {
         expect(idx[op].status).toBe('ok');
         expect(idx[op].metadata.deferred).toBe(true);
       }
     });
 
+    it('family notification op now uses real handler when configured', () => {
+      const idx = byOp(result.sideEffectsAudit);
+      expect(idx['notify-family-condolence'].status).toBe('ok');
+      expect(idx['notify-family-condolence'].metadata.skipped).toBe(true);
+      expect(idx['notify-family-condolence'].metadata.reason).toBe('notifier-unavailable');
+    });
+
     it('each deferred op emitted an event through the sink', () => {
-      // 3 deferred ops above each call emit() once.
-      expect(h.events).toHaveLength(3);
+      // 2 deferred ops above each call emit() once.
+      expect(h.events).toHaveLength(2);
       for (const e of h.events) {
         expect(e.event).toBe('beneficiary.lifecycle.side_effect');
       }

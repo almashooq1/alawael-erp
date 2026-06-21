@@ -23,6 +23,7 @@ pnpm-lock.yaml
 !**/.env.*.example
 !.env.example
 !.env.production.template
+!backend/.env.production.template
 
 # Legacy explicit entries (kept for safety)
 .env.local

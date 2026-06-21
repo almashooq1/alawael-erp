@@ -49,16 +49,21 @@ describe('W252 — registry picks up new modules', () => {
     // below (BARTHEL, KATZ, LAWTON, PHQ-9, GAD-7, WHO-5, GCS, MAS, … — all
     // with item banks) plus the IQ scales (SB5, WECHSLER, WHODAS-12).
     expect(codes).toEqual([
+      'ABAS-3',
+      'ABLLS-R',
       'BARTHEL',
+      'BAYLEY-4',
       'BERG',
       'CARS-2',
       'CFCS',
+      'COPM',
       'CSI',
       'EDACS',
       'FIM',
       'FLACC',
       'FTS5',
       'GAD-7',
+      'GAS',
       'GCS',
       'GMFCS',
       'KATZ',
@@ -78,11 +83,13 @@ describe('W252 — registry picks up new modules', () => {
       'SDQ',
       'TINETTI',
       'TUG',
+      'VB-MAPP',
       'VINELAND-3',
       'WECHSLER',
       'WEEFIM',
       'WHO-5',
       'WHODAS-12',
+      'WHODAS-36',
     ]);
   });
 });

@@ -52,6 +52,7 @@ const DOMAINS = Object.freeze([
   'gov-integrations',
   'analytics',
   'supply',
+  'compliance',
 ]);
 
 const UNITS = Object.freeze([
@@ -1002,7 +1003,7 @@ const KPIS = Object.freeze([
       method: 'patientSafetyIncidentsPer1000Sessions',
       path: 'incidentsPer1000Sessions',
     },
-    owner: 'quality_officer',
+    owner: 'quality_coordinator',
     compliance: ['CBAHI'],
     frequency: 'monthly',
   },

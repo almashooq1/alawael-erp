@@ -637,7 +637,11 @@ const EMAIL_TEMPLATES = Object.freeze({
       alertType: T({ required: true, labelAr: 'نوع التنبيه', sample: 'PLATEAU_DETECTED' }),
       severity: T({ required: false, labelAr: 'الخطورة', sample: 'متوسطة' }),
       reason: T({ required: false, labelAr: 'السبب', sample: 'إعادة توزيع الحالات' }),
-      inboxUrl: T({ required: false, labelAr: 'الرابط', sample: 'https://alaweal.org/smart-inbox' }),
+      inboxUrl: T({
+        required: false,
+        labelAr: 'الرابط',
+        sample: 'https://alaweal.org/smart-inbox',
+      }),
     }),
   }),
 
@@ -668,6 +672,52 @@ const EMAIL_TEMPLATES = Object.freeze({
       }),
       issuer: T({ required: false, labelAr: 'الجهة', sample: 'الموارد البشرية' }),
       effectiveDate: T({ required: false, labelAr: 'السريان', sample: '1 يوليو 2026' }),
+    }),
+  }),
+
+  BENEFICIARY_AUTO_TRANSITION_REQUESTED: T({
+    key: 'BENEFICIARY_AUTO_TRANSITION_REQUESTED',
+    category: 'system',
+    titleAr: 'طلب انتقال تلقائي للمستفيد',
+    subjectAr: 'انتقال تلقائي مقترح: {{beneficiaryName}} — {{transitionId}}',
+    subjectEn: 'Auto-transition requested — {{beneficiaryName}}',
+    preheaderAr: 'درجة الجاهزية {{score}} / الثقة {{confidence}} — يرجى المراجعة',
+    blocks: Object.freeze([
+      T({ type: 'greeting', ar: 'عزيزي المشرف/الأخصائي،' }),
+      T({
+        type: 'paragraph',
+        ar: 'اقترح محرّك Journey Score انتقالاً تلقائياً للمستفيد أدناه. يرجى مراجعة الطلب والموافقة أو رفضه من لوحة الانتقالات.',
+      }),
+      T({
+        type: 'panel',
+        tone: 'info',
+        ar: 'المستفيد: {{beneficiaryName}} — الانتقال المقترح: {{transitionId}}',
+      }),
+      T({
+        type: 'kv',
+        rows: Object.freeze([
+          T({ labelAr: 'الفرع', value: '{{branchName}}' }),
+          T({ labelAr: 'درجة الجاهزية', value: '{{score}}' }),
+          T({ labelAr: 'نسبة الثقة', value: '{{confidence}}' }),
+        ]),
+      }),
+      T({ type: 'cta', labelAr: 'مراجعة الطلب', urlVar: 'reviewUrl' }),
+      T({
+        type: 'paragraph',
+        ar: 'إن كان الانتقال غير ملائم، يمكن رفضه وسيظل المستفيد في حالته الحالية.',
+      }),
+    ]),
+    variables: Object.freeze({
+      beneficiaryName: T({ required: true, labelAr: 'اسم المستفيد', sample: 'محمد العتيبي' }),
+      transitionId: T({ required: true, labelAr: 'الانتقال', sample: 'discharge' }),
+      score: T({ required: true, labelAr: 'درجة الجاهزية', sample: '88' }),
+      confidence: T({ required: true, labelAr: 'نسبة الثقة', sample: '0.92' }),
+      branchName: T({ required: false, labelAr: 'الفرع', sample: 'فرع الرياض' }),
+      reviewUrl: T({
+        required: false,
+        labelAr: 'رابط المراجعة',
+        sample: 'https://alaweal.org/beneficiary-lifecycle/review',
+      }),
     }),
   }),
 

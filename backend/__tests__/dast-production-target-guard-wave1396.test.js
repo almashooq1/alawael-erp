@@ -25,7 +25,7 @@ describe('W1396 — DAST workflow production target safety', () => {
     const yml = fs.readFileSync(WORKFLOW, 'utf8');
 
     expect(yml).toContain(
-      "ALLOW_PRODUCTION: ${{ github.event.inputs.allow_production || 'false' }}"
+      "ALLOW_PRODUCTION: ${{ github.event.inputs.allow_production || 'false' }}" // eslint-disable-line no-template-curly-in-string
     );
     expect(yml).toContain('TARGET_URL_LC="$(echo "$TARGET_URL" | tr');
     expect(yml).toMatch(/if \[ "\$ALLOW_PRODUCTION" != "true" \]/);

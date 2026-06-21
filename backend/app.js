@@ -108,8 +108,11 @@ setupAdminEndpoints(app, { isProd });
 // ═══════════════════════════════════════════════════════════════════════════
 // 4. ROUTE MOUNTING (centralised in routes/_registry.js)
 // ═══════════════════════════════════════════════════════════════════════════
-// Stubs FIRST so they win over conflicting catch-alls (e.g. the notifications
-// router's `:id` handler that otherwise swallows `/notifications/unread-count`).
+// Legacy clinical adapters BEFORE stubs so real data wins over stub catch-alls.
+// (e.g. /api/v1/measures, /api/v1/outcomes used by the web-admin frontend).
+app.use('/api/v1', require('./routes/clinical-legacy-adapter.routes'));
+
+// Stubs come after adapters so they only catch routes not yet implemented.
 app.use('/api/v1', require('./routes/stub-missing.routes'));
 try {
   mountAllRoutes(app, { authRateLimiter });
@@ -2051,6 +2054,14 @@ require('./startup/mfaChallengeBootstrap').wireMfaChallenge(app, { logger });
 // Identical behaviour: same service construction with enforceMfa:true (W95), same
 // /api/v1/beneficiary-lifecycle mount with layered MFA stack, same app._beneficiaryLifecycleService ref.
 require('./startup/beneficiaryLifecycleBootstrap').wireBeneficiaryLifecycle(app, { logger });
+
+// ─── Beneficiary 360 Phase 4 — Score-Driven Auto-Transition Scheduler ─────────
+// Runs after the lifecycle service is mounted so it can auto-request transitions
+// for high-confidence journey-score recommendations through the single chokepoint.
+require('./startup/beneficiaryJourneyScoreSchedulerBootstrap').wireBeneficiaryJourneyScoreScheduler(
+  app,
+  { logger }
+);
 
 // ─── Access Review (Wave 72+74+80 — closes red-team #12) ─────────────────────
 // Extracted to startup/accessReviewBootstrap.js (W277 / Pass 4 of app.js refactor).

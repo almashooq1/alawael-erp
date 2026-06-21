@@ -66,6 +66,9 @@ const appointmentSchema = new mongoose.Schema(
     room: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapyRoom' },
     location: { type: String },
 
+    // Lifecycle transition tag (Wave 656/Phase E)
+    lifecycleCancellationTag: { type: mongoose.Schema.Types.Mixed, default: null },
+
     // Status workflow
     status: {
       type: String,
@@ -78,6 +81,7 @@ const appointmentSchema = new mongoose.Schema(
         'CANCELLED', // Cancelled
         'NO_SHOW', // Patient didn't show up
         'RESCHEDULED', // Moved to new time
+        'PAUSED', // Temporarily paused due to beneficiary lifecycle suspension
       ],
       default: 'PENDING',
     },

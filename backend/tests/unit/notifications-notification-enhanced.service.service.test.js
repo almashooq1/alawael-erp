@@ -334,7 +334,7 @@ describe('NotificationEnhancedService', () => {
       expect(mockTemplate.findByIdAndUpdate).toHaveBeenCalledWith(
         'tmpl1',
         { isActive: false, updatedBy: 'admin' },
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -365,7 +365,7 @@ describe('NotificationEnhancedService', () => {
       expect(mockPreference.findOneAndUpdate).toHaveBeenCalledWith(
         { userId: 'u1', category: 'alerts' },
         { channelSms: false },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
       expect(result).toEqual({ userId: 'u1' });
     });
@@ -379,7 +379,7 @@ describe('NotificationEnhancedService', () => {
       expect(mockEscalation.findByIdAndUpdate).toHaveBeenCalledWith(
         'esc1',
         expect.objectContaining({ status: 'acknowledged' }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -392,7 +392,7 @@ describe('NotificationEnhancedService', () => {
       expect(mockEscalation.findByIdAndUpdate).toHaveBeenCalledWith(
         'esc1',
         expect.objectContaining({ status: 'resolved', resolutionNotes: 'all fixed' }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -417,7 +417,7 @@ describe('NotificationEnhancedService', () => {
       expect(mockBroadcast.findByIdAndUpdate).toHaveBeenCalledWith(
         'bc1',
         expect.objectContaining({ status: 'approved', approvedBy: 'mgr1' }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });

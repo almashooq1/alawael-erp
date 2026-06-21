@@ -1409,6 +1409,16 @@ describe('getStatistics()', () => {
    15. Approve / Reject
    ══════════════════════════════════════════════════════════════════════ */
 describe('Approve / Reject', () => {
+  beforeEach(() => {
+    // Re-process tests earlier in the file mutate doc-301; reset to completed
+    // so the non-review-needed assertions remain deterministic.
+    const doc = service.documents.get('doc-301');
+    if (doc) {
+      doc.status = 'completed';
+      service.documents.set('doc-301', doc);
+    }
+  });
+
   describe('approveDocument()', () => {
     it('returns null for non-existent doc', () => {
       expect(service.approveDocument('doc-9999', 'u1')).toBeNull();

@@ -1,183 +1,76 @@
-name: Performance Load Testing (W1401)
+# W1401 — Performance load testing workflow
+# See docs/runbooks/performance-load-testing.md
+name: load-testing
 
 on:
   workflow_dispatch:
     inputs:
       target_env:
-        description: 'Target environment (local/staging/production)'
+        description: 'Target environment'
         required: true
         default: 'staging'
         type: choice
         options:
           - local
           - staging
-          - production
+          # production DISABLED — never run synthetic load against production
       peak_vus:
-        description: 'Peak virtual users for load profile'
-        required: false
-        default: '100'
+        description: 'Peak virtual users'
+        required: true
+        default: '50'
       peak_duration:
-        description: 'Peak duration (e.g., 2m, 5m)'
-        required: false
-        default: '2m'
+        description: 'Peak duration'
+        required: true
+        default: '1m'
       run_gov_tests:
-        description: 'Run government integration load tests (requires TOKEN)'
-        required: false
+        description: 'Run government integration tests'
+        required: true
+        default: true
         type: boolean
-        default: false
   schedule:
-    # Weekly staging performance baseline (Tuesday 03:00 UTC)
-    - cron: '0 3 * * 2'
-
-permissions:
-  contents: read
-  actions: read
+    - cron: '0 2 * * 0' # Weekly Sunday 02:00 UTC
 
 jobs:
   load-testing:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: production  # Use prod secrets for protection
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'backend/package-lock.json'
-
-      - name: Install k6
-        run: |
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
-          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6-stable.list
-          sudo apt-get update
-          sudo apt-get install -y k6
-
       - name: Resolve target URL
-        id: resolve_url
+        id: resolve
         run: |
-          TARGET_ENV="${{ github.event.inputs.target_env || 'staging' }}"
-
-          case "$TARGET_ENV" in
-            local)
-              BASE_URL="http://localhost:3001"
-              REQUIRES_TOKEN="false"
-              ;;
-            staging)
-              BASE_URL="${{ secrets.STAGING_API_URL }}"
-              REQUIRES_TOKEN="true"
-              ;;
-            production)
-              echo "❌ Load testing against production is DISABLED by policy."
-              echo "   Use staging or local environments only."
-              exit 1
-              ;;
-            *)
-              echo "❌ Unknown environment: $TARGET_ENV"
-              exit 1
-              ;;
-          esac
-
-          if [ -z "$BASE_URL" ]; then
-            echo "❌ BASE_URL not configured for $TARGET_ENV"
+          if [ "${{ github.event.inputs.target_env }}" = "production" ]; then
+            echo "Production load testing is DISABLED"
             exit 1
           fi
-
-          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
-          echo "requires_token=$REQUIRES_TOKEN" >> "$GITHUB_OUTPUT"
-          echo "target_env=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event.inputs.target_env }}" = "staging" ]; then
+            echo "url=https://staging-api.example.com" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=http://localhost:3001" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Validate environment readiness
         run: |
-          BASE_URL="${{ steps.resolve_url.outputs.base_url }}"
-          echo "🔍 Checking health endpoint..."
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/health" 2>/dev/null || echo "000")
+          curl -sf "${{ steps.resolve.outputs.url }}/health" || exit 1
 
-          if [ "$HEALTH_STATUS" != "200" ]; then
-            echo "❌ Health check failed (HTTP $HEALTH_STATUS). Target may be offline."
-            exit 1
-          fi
-          echo "✅ Health check passed"
-
-      - name: Run baseline load test (liveness + readiness)
-        env:
-          BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
-          PEAK_VUS: ${{ github.event.inputs.peak_vus || '100' }}
-          PEAK_DURATION: ${{ github.event.inputs.peak_duration || '2m' }}
+      - name: Run smoke test
         run: |
           cd backend
-          echo "📊 Running load test profile..."
-          echo "   Env: ${{ steps.resolve_url.outputs.target_env }}"
-          echo "   Target: $BASE_URL"
-          echo "   Peak VUs: $PEAK_VUS"
-          echo "   Peak Duration: $PEAK_DURATION"
+          BASE_URL="${{ steps.resolve.outputs.url }}" npm run test:load:smoke
 
-          if ! npm run test:load; then
-            echo "❌ Load test failed (SLO breach or connection error)"
-            exit 1
-          fi
-          echo "✅ Load test passed"
-
-      - name: Run government integration load test (W1350)
-        if: ${{ github.event.inputs.run_gov_tests == 'true' || github.event_name == 'schedule' }}
-        env:
-          BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
-          TOKEN: ${{ secrets.LOAD_TEST_AUTH_TOKEN }}
-          PEAK_VUS: ${{ github.event.inputs.peak_vus || '50' }}
-          PEAK_DURATION: ${{ github.event.inputs.peak_duration || '2m' }}
+      - name: Run baseline load test
         run: |
           cd backend
+          BASE_URL="${{ steps.resolve.outputs.url }}" PEAK_VUS="${{ github.event.inputs.peak_vus }}" PEAK_DURATION="${{ github.event.inputs.peak_duration }}" npm run test:load
 
-          if [ -z "$TOKEN" ]; then
-            echo "⚠️  LOAD_TEST_AUTH_TOKEN not set. Skipping gov integration tests."
-            echo "   Set this secret to enable: https://docs/runbooks/performance-load-testing.md#authentication"
-            exit 0
-          fi
-
-          echo "📊 Running government integration load test..."
-          echo "   Target: $BASE_URL"
-          echo "   Peak VUs: $PEAK_VUS"
-          echo "   Providers: NPHIES, GOSI"
-
-          if ! npm run test:load:gov; then
-            echo "❌ Government integration load test failed (SLO breach or auth error)"
-            exit 1
-          fi
-          echo "✅ Government integration test passed"
-
-      - name: Run smoke test (sanity check)
-        if: success()
-        env:
-          BASE_URL: ${{ steps.resolve_url.outputs.base_url }}
+      - name: Run government integration load test
+        if: ${{ github.event.inputs.run_gov_tests != 'false' }}
         run: |
           cd backend
-          echo "🔍 Running smoke test (sanity check)..."
-          if ! npm run test:load:smoke; then
-            echo "⚠️  Smoke test warning (non-fatal)"
-          fi
-          echo "✅ Smoke test complete"
+          BASE_URL="${{ steps.resolve.outputs.url }}" npm run test:load:gov
 
-      - name: Publish results
-        if: always()
-        run: |
-          echo "## 📊 Load Testing Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Environment | ${{ steps.resolve_url.outputs.target_env }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Base URL | ${{ steps.resolve_url.outputs.base_url }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Peak VUs | ${{ github.event.inputs.peak_vus || 'default (100)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Peak Duration | ${{ github.event.inputs.peak_duration || 'default (2m)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Gov Tests | ${{ github.event.inputs.run_gov_tests || 'false' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📖 [View Load Testing Guide](https://docs/runbooks/performance-load-testing.md)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Fail if tests failed
+      - name: Open runbook
         if: failure()
         run: |
-          echo "❌ Load testing failed. Check logs above for details."
-          exit 1
+          echo "See docs/runbooks/performance-load-testing.md for troubleshooting"

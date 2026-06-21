@@ -154,7 +154,7 @@ describe('Research Service', () => {
       expect(ResearchStudy.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { $set: { title: 'Updated' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       expect(result.title).toBe('Updated');
     });
@@ -168,7 +168,7 @@ describe('Research Service', () => {
       expect(ResearchStudy.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { isActive: false },
-        { new: true }
+        { returnDocument: 'after' }
       );
       expect(result.isActive).toBe(false);
     });
@@ -230,7 +230,7 @@ describe('Research Service', () => {
       expect(OutcomeMeasure.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { $set: { name: 'BI v2' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -311,7 +311,7 @@ describe('Research Service', () => {
       expect(AnonymizedDataset.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { $set: { status: 'anonymized' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -340,7 +340,7 @@ describe('Research Service', () => {
             }),
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
   });
@@ -395,7 +395,7 @@ describe('Research Service', () => {
       expect(ProgramEffectiveness.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { $set: { status: 'reviewed' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 
@@ -449,7 +449,7 @@ describe('Research Service', () => {
       expect(BenchmarkingReport.findByIdAndUpdate).toHaveBeenCalledWith(
         fakeId,
         { $set: { status: 'final' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     });
 

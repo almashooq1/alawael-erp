@@ -29,12 +29,12 @@ describe('students/student-service.js', () => {
     expect(source).toMatch(/mongoose\.model\s*\(/);
   });
 
-  test('has required fields', () => {
-    expect(source).toMatch(/required\s*:\s*true/);
+  test('imports StudentSchema from sibling file', () => {
+    expect(source).toMatch(/StudentSchema/);
   });
 
-  test('defines indexes', () => {
-    expect(source).toMatch(/index/);
+  test('imports studentConfig from sibling file', () => {
+    expect(source).toMatch(/studentConfig/);
   });
 
   test('has npm dependencies (2)', () => {
@@ -42,9 +42,9 @@ describe('students/student-service.js', () => {
     expect(npms.length).toBe(2);
   });
 
-  test('has local dependencies (1)', () => {
+  test('has local dependencies (3)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(1);
+    expect(locals.length).toBe(3);
   });
 
   test('has module.exports', () => {

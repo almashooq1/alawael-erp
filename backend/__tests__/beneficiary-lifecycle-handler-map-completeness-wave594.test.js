@@ -36,9 +36,22 @@ const {
 } = require('../intelligence/beneficiary-lifecycle-side-effects.service');
 
 const REAL_DATA_OPS = Object.freeze(Object.values(OP));
+const REAL_NOTIFICATION_OPS = Object.freeze([
+  'notify-family-welcome',
+  'notify-family-waitlisted',
+  'notify-family-waitlist-cancelled',
+  'notify-family-suspension',
+  'notify-family-resumption',
+  'notify-family-discharge',
+  'notify-family-condolence',
+]);
 const SELF_SKIP_REASONS = Object.freeze([
   'appointment-model-unavailable',
   'episode-model-unavailable',
+  'models-unavailable',
+  'notifier-unavailable',
+  'beneficiary-not-found',
+  'no-contact',
 ]);
 
 /** Build a map with no models + no eventSink → real ops self-skip, deferred run. */
@@ -64,7 +77,7 @@ describe('W594 — handler map is registry-complete and correctly partitioned', 
     }
   });
 
-  test('the three real ops resolve to category:data self-skipping handlers', async () => {
+  test('the nine real data ops resolve to category:data self-skipping handlers', async () => {
     const handlers = buildMap();
     for (const op of REAL_DATA_OPS) {
       const result = await handlers[op](CTX);
@@ -75,9 +88,21 @@ describe('W594 — handler map is registry-complete and correctly partitioned', 
     }
   });
 
+  test('the seven real notification ops resolve to category:notification self-skipping handlers', async () => {
+    const handlers = buildMap();
+    for (const op of REAL_NOTIFICATION_OPS) {
+      const result = await handlers[op](CTX);
+      expect(result.name).toBe(op);
+      expect(result.category).toBe('notification');
+      expect(result.skipped).toBe(true);
+      expect(SELF_SKIP_REASONS).toContain(result.reason);
+    }
+  });
+
   test('every non-real op is a deferred handler tagged with classifyOp category', async () => {
     const handlers = buildMap();
-    const deferred = allRegistryOps().filter((op) => !REAL_DATA_OPS.includes(op));
+    const realOps = new Set([...REAL_DATA_OPS, ...REAL_NOTIFICATION_OPS]);
+    const deferred = allRegistryOps().filter(op => !realOps.has(op));
     expect(deferred.length).toBeGreaterThan(0);
     for (const op of deferred) {
       const result = await handlers[op](CTX);
@@ -91,23 +116,28 @@ describe('W594 — handler map is registry-complete and correctly partitioned', 
 
   test('partition is exact — no op is both real and deferred, none is neither', async () => {
     const handlers = buildMap();
+    const realOps = new Set([...REAL_DATA_OPS, ...REAL_NOTIFICATION_OPS]);
     for (const op of allRegistryOps()) {
       const result = await handlers[op](CTX);
-      const isReal = result.category === 'data';
       const isDeferred = result.deferred === true;
+      const isReal = !isDeferred;
       // exactly one of the two roles, never both, never neither
       expect(isReal !== isDeferred).toBe(true);
       expect(isReal && isDeferred).toBe(false);
+      if (realOps.has(op)) {
+        expect(isReal).toBe(true);
+      }
     }
   });
 
   test('real and deferred op sets are disjoint and together cover the registry', () => {
     const all = allRegistryOps();
-    const realInRegistry = all.filter((op) => REAL_DATA_OPS.includes(op));
-    const deferred = all.filter((op) => !REAL_DATA_OPS.includes(op));
+    const realOps = new Set([...REAL_DATA_OPS, ...REAL_NOTIFICATION_OPS]);
+    const realInRegistry = all.filter(op => realOps.has(op));
+    const deferred = all.filter(op => !realOps.has(op));
     expect(realInRegistry.length + deferred.length).toBe(all.length);
     for (const op of realInRegistry) expect(deferred).not.toContain(op);
-    // all three real ops are actually declared in the registry
-    expect(realInRegistry.sort()).toEqual([...REAL_DATA_OPS].sort());
+    // all real ops are actually declared in the registry
+    expect(realInRegistry.sort()).toEqual([...realOps].sort());
   });
 });

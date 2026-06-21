@@ -251,7 +251,7 @@ describe('ICFAssessmentService', () => {
       expect(ICFAssessment.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: 'a1', isDeleted: false },
         { isDeleted: true, isActive: false, updatedBy: 'u1' },
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 

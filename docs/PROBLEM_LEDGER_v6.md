@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-21T18:55:00+03:00  
+> Updated: 2026-06-21T19:10:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -183,6 +183,7 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
    - Chunk 3: 196/196 suites pass, 5508/5508 tests pass.
    - Chunk 4: 196/196 suites pass, 2447/2448 tests pass (1 skipped).
    - Chunk 5: 191/191 suites pass, 2726/2726 tests pass.
+   - Chunk 5 re-verified after W1433 dependency audit fixes: 191/191 suites pass, 2726/2726 tests pass.
    - **Full `test:sprint` chunked run: all 5 chunks pass** (Chunk 1 per prior fix verification; Chunks 2–5 verified in this session).
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.

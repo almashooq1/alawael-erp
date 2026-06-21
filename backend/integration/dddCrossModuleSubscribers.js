@@ -213,12 +213,61 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // ─── Sessions → Timeline: Session cancelled (W974) ──────────────────
   // SessionService.cancelSession emits the canonical `session.cancelled`
   // (was ad-hoc `sessionCancelled`, never bridged), enriched with
-
+  // beneficiaryId + episodeId so the cancellation lands on the timeline.
+  subscribers.push({
+    name: 'sessions:cancelled → timeline:record',
+    pattern: 'sessions.session.cancelled',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          const reason = event.payload.reason;
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'session_cancelled',
+            category: 'clinical',
+            severity: 'warning',
+            title: 'Session cancelled',
+            title_ar: reason ? `إلغاء الجلسة (${reason})` : 'إلغاء الجلسة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Session cancel timeline failed: ${err.message}`);
+      }
+    },
+  });
 
   // ─── Sessions → Timeline: Session no-show (W974) ────────────────────
   // SessionService.markNoShow emits the canonical `session.no_show` (was
   // ad-hoc `sessionNoShow`, never bridged), enriched with the links so a
-
+  // missed appointment is visible on the unified timeline.
+  subscribers.push({
+    name: 'sessions:no_show → timeline:record',
+    pattern: 'sessions.session.no_show',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'session_no_show',
+            category: 'clinical',
+            severity: 'warning',
+            title: 'Session no-show',
+            title_ar: 'تغيّب عن الجلسة',
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Session no-show timeline failed: ${err.message}`);
+      }
+    },
+  });
 
   // ─── Goals → Timeline: Goal created (W939) ──────────────────
   // GoalService.afterCreate emits `goal.created` (normalized from the dead
@@ -3288,10 +3337,6 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  
-
-  
-
   subscribers.push({
     name: 'insurance-policy:activated → timeline:record',
     pattern: 'insurance-policy.insurance_policy.activated',
@@ -3877,10 +3922,8 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   });
 
   // ─── Waitlist → Timeline: Added (W979) ────────────────────────────
-  
 
   // ─── Waitlist → Timeline: Booked = admission (W979) ───────────────
-  
 
   // ─── Core → Timeline: Beneficiary status changed (W982) ───────────
   subscribers.push({
@@ -3920,72 +3963,40 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   });
 
   // ─── Family → Timeline: Visit completed (W985, engagement) ────────
-  
 
   // ─── Lifecycle → Timeline: transition plan completed (W986) ───────
-  
 
   // ─── Lifecycle → Timeline: transition plan cancelled (W986) ───────
-  
 
   // ─── Follow-up → Timeline: post-rehab case completed (W987) ───────
-  
 
   // ─── Follow-up → Timeline: lost to follow-up (W987, disengagement) ─
-  
 
   // ─── Follow-up → Timeline: visit attended (W992, engagement) ──────
-  
 
   // ─── Follow-up → Timeline: visit missed (W992, disengagement) ─────
-  
 
   // ─── Insurance → Timeline: claim approved (W994, care funded) ─────
-  
 
   // ─── Insurance → Timeline: claim rejected (W994, funding denied) ──
-  
 
   // ─── Referral → Timeline: accepted (W997, shared across 4 subsystems) ─
-  
 
   // ─── Referral → Timeline: completed (W997) ────────────────────────
-  
 
   // ─── Referral → Timeline: rejected/declined (W997, warning) ───────
-  
 
   // ─── Consent → Timeline: revoked (W1002, withdrawal — warning) ─────
-  
 
   // ─── Home program → Timeline: assigned (W1003) ────────────────────
-  
 
   // ─── Home program → Timeline: completed (W1003) ───────────────────
-  
 
   // ─── Care-team → Timeline: member added (W1005) ───────────────────
-  
 
   // ─── Care-team → Timeline: member removed (W1005) ─────────────────
-  
 
   // ─── Care-team → Timeline: lead changed (W1005) ───────────────────
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
 
   // ── W1075: deferred clinical-island events → unified-core timeline ───
   // The remaining per-beneficiary lifecycle islands (ICF, treatment
@@ -4394,9 +4405,55 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   // administrative/warning row. Employee letters are filtered out by the
   // producer, but the subscriber defensively ignores missing beneficiaryId.
 
+  subscribers.push({
+    name: 'official-letter:issued → timeline:record',
+    pattern: 'official-letter.official_letter.issued',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'official_letter_issued',
+            category: 'administrative',
+            severity: 'success',
+            title: `Official letter issued ${event.payload.refNumber || ''}`.trim(),
+            title_ar: `إصدار خطاب رسمي ${event.payload.refNumber || ''}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Official letter issued timeline failed: ${err.message}`);
+      }
+    },
+  });
 
-
-
+  subscribers.push({
+    name: 'official-letter:revoked → timeline:record',
+    pattern: 'official-letter.official_letter.revoked',
+    handler: async event => {
+      try {
+        const mongoose = require('mongoose');
+        const CareTimeline = mongoose.models.CareTimeline;
+        if (CareTimeline && event.payload.beneficiaryId) {
+          await CareTimeline.create({
+            beneficiaryId: event.payload.beneficiaryId,
+            episodeId: event.payload.episodeId,
+            eventType: 'official_letter_revoked',
+            category: 'administrative',
+            severity: 'warning',
+            title: `Official letter revoked ${event.payload.refNumber || ''}`.trim(),
+            title_ar: `سحب خطاب رسمي ${event.payload.refNumber || ''}`.trim(),
+            metadata: event.payload,
+          });
+        }
+      } catch (err) {
+        logger.error(`[DDD-CrossModule] Official letter revoked timeline failed: ${err.message}`);
+      }
+    },
+  });
 
   // ── W1120: residual assessment/plan islands → unified-core timeline ─
   // ADL, integration, self-advocacy, decision-rights, and independent-living

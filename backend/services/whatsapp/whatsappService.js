@@ -41,12 +41,26 @@ function cfg() {
 function request(method, path, body = null, token = null) {
   return new Promise((resolve, reject) => {
     const payload = body ? JSON.stringify(body) : null;
+    const accessToken = token || cfg().token;
+    // When the Meta app has "Require app secret" enabled (default for new apps),
+    // EVERY server-side Graph call must carry appsecret_proof = HMAC-SHA256 of the
+    // access token keyed by the app secret — otherwise Meta rejects with
+    // "API calls from the server require an appsecret_proof argument" (code 100),
+    // so every send/template/media call fails. Append it when an app secret is
+    // configured (WHATSAPP_WEBHOOK_SECRET). Harmless when the toggle is off, and
+    // Meta recommends it regardless. W1425 — found live during activation.
+    let apiPath = `/v21.0${path}`;
+    const appSecret = cfg().webhookSecret;
+    if (appSecret && accessToken) {
+      const proof = require('crypto').createHmac('sha256', appSecret).update(accessToken).digest('hex');
+      apiPath += (apiPath.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
+    }
     const options = {
       hostname: 'graph.facebook.com',
-      path: `/v21.0${path}`,
+      path: apiPath,
       method,
       headers: {
-        Authorization: `Bearer ${token || cfg().token}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
       },

@@ -60,10 +60,10 @@ const strengthLabels = ['', 'ضعيفة جداً', 'ضعيفة', 'متوسطة',
 const strengthColors = [
   'bg-gray-200',
   'bg-red-500',
-  'bg-orange-400',
-  'bg-yellow-400',
-  'bg-emerald-400',
-  'bg-emerald-600',
+  'bg-accent-400',
+  'bg-accent-400',
+  'bg-green-400',
+  'bg-green-600',
 ];
 
 /* ───── Roles ───── */
@@ -73,21 +73,21 @@ const ROLES = [
     label: 'مستفيد',
     desc: 'حساب مستفيد للوصول لبرامج التأهيل',
     icon: '🎓',
-    color: 'from-emerald-400 to-green-500',
+    color: 'from-green-400 to-green-500',
   },
   {
     value: 'guardian',
     label: 'ولي أمر',
     desc: 'متابعة تقدم المستفيد والتقارير',
     icon: '👨‍👩‍👦',
-    color: 'from-blue-400 to-indigo-500',
+    color: 'from-primary-400 to-primary-500',
   },
   {
     value: 'staff',
     label: 'موظف',
     desc: 'حساب موظف للإدارة والخدمات',
     icon: '💼',
-    color: 'from-amber-400 to-orange-500',
+    color: 'from-accent-400 to-accent-500',
   },
 ];
 
@@ -184,13 +184,13 @@ export default function RegisterPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(21,128,61,0.06),transparent)]" />
           <div className="relative text-center animate-fade-in-up">
-            <div className="bg-white rounded-[2rem] shadow-2xl shadow-emerald-500/10 p-14 max-w-md mx-4 border border-emerald-100/50">
+            <div className="bg-white rounded-[2rem] shadow-2xl shadow-green-500/10 p-14 max-w-md mx-4 border border-green-100/50">
               {/* Success checkmark */}
               <div className="relative w-24 h-24 mx-auto mb-8">
-                <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl animate-pulse" />
-                <div className="relative w-full h-full bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-full flex items-center justify-center border-2 border-emerald-200">
+                <div className="absolute inset-0 bg-green-400/20 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-full flex items-center justify-center border-2 border-green-200">
                   <svg
-                    className="w-12 h-12 text-emerald-600"
+                    className="w-12 h-12 text-green-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -206,7 +206,7 @@ export default function RegisterPage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">تم إنشاء الحساب بنجاح!</h2>
               <p className="text-gray-500 mb-8">سيتم تحويلك لصفحة تسجيل الدخول خلال لحظات...</p>
-              <div className="w-16 h-1 bg-gradient-to-l from-primary-500 to-emerald-500 rounded-full mx-auto animate-pulse" />
+              <div className="w-16 h-1 bg-gradient-to-l from-primary-500 to-green-500 rounded-full mx-auto animate-pulse" />
             </div>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function RegisterPage() {
             {/* Bottom security */}
             <div className="mt-12 flex items-center justify-center gap-2 text-white/35 text-xs">
               <svg
-                className="w-4 h-4 text-emerald-400"
+                className="w-4 h-4 text-green-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -598,7 +598,7 @@ export default function RegisterPage() {
                           ))}
                         </div>
                         <p
-                          className={`text-xs font-medium ${strength <= 2 ? 'text-red-500' : strength <= 3 ? 'text-yellow-600' : 'text-emerald-600'}`}
+                          className={`text-xs font-medium ${strength <= 2 ? 'text-red-500' : strength <= 3 ? 'text-accent-600' : 'text-green-600'}`}
                         >
                           قوة كلمة المرور: {strengthLabels[strength]}
                         </p>
@@ -664,10 +664,10 @@ export default function RegisterPage() {
                     ].map((r, i) => (
                       <div key={i} className="flex items-center gap-2.5">
                         <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 ${r.ok ? 'bg-emerald-100' : 'bg-gray-100'}`}
+                          className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 ${r.ok ? 'bg-green-100' : 'bg-gray-100'}`}
                         >
                           <svg
-                            className={`w-3.5 h-3.5 transition-colors ${r.ok ? 'text-emerald-600' : 'text-gray-300'}`}
+                            className={`w-3.5 h-3.5 transition-colors ${r.ok ? 'text-green-600' : 'text-gray-300'}`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -681,7 +681,7 @@ export default function RegisterPage() {
                           </svg>
                         </div>
                         <span
-                          className={`text-xs transition-colors ${r.ok ? 'text-emerald-700 font-medium' : 'text-gray-400'}`}
+                          className={`text-xs transition-colors ${r.ok ? 'text-green-700 font-medium' : 'text-gray-400'}`}
                         >
                           {r.text}
                         </span>

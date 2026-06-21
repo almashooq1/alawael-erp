@@ -239,7 +239,7 @@ export default function LoginPage() {
             className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 bg-white/[0.06] backdrop-blur-md px-6 py-3 rounded-full border border-white/[0.1] transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           >
             <svg
-              className="w-4 h-4 text-emerald-400"
+              className="w-4 h-4 text-green-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -281,10 +281,10 @@ export default function LoginPage() {
 
             {/* Rate limit banner with live countdown */}
             {isRateLimited && (
-              <div className="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm animate-fade-in">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+              <div className="mb-5 flex items-start gap-3 bg-accent-50 border border-accent-200 rounded-2xl p-4 shadow-sm animate-fade-in">
+                <div className="w-9 h-9 rounded-xl bg-accent-100 flex items-center justify-center shrink-0">
                   <svg
-                    className="w-5 h-5 text-amber-600"
+                    className="w-5 h-5 text-accent-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -298,14 +298,14 @@ export default function LoginPage() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-900">
+                  <p className="text-sm font-semibold text-accent-900">
                     تم تجاوز عدد محاولات تسجيل الدخول المسموح بها
                   </p>
-                  <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                  <p className="text-xs text-accent-800 mt-1 leading-relaxed">
                     لأسباب أمنية تم إيقاف المحاولات مؤقتاً من عنوانك. يمكنك المحاولة بعد:{' '}
                     <span className="font-bold tabular-nums">{formatRemaining(remainingSec)}</span>
                   </p>
-                  <p className="text-[11px] text-amber-700 mt-2">
+                  <p className="text-[11px] text-accent-700 mt-2">
                     💡 نصيحة: تأكد من البريد وكلمة المرور قبل المحاولة التالية، أو راجع المسؤول
                     لإعادة تعيين كلمة المرور.
                   </p>
@@ -536,7 +536,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => navigate('/login/nafath')}
-              className="w-full mt-4 flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl bg-gradient-to-l from-green-600 to-emerald-600 text-white font-semibold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+              className="w-full mt-4 flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl bg-gradient-to-l from-green-600 to-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
             >
               <svg
                 className="w-5 h-5"

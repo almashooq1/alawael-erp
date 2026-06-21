@@ -421,9 +421,19 @@ async function markAsRead(messageId) {
  * Call this from GET /api/whatsapp/webhook
  */
 function verifyWebhook(req, res) {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+  // Meta sends the verification params as DOTTED query keys
+  // (hub.mode / hub.verify_token / hub.challenge). Two things break the naive
+  // `req.query['hub.mode']` read: (1) the global request-sanitizer
+  // (middleware/requestValidation.sanitizeInput) rebuilds req.query, and (2) the
+  // qs parser can nest dotted keys (`hub.mode` -> req.query.hub.mode). Together
+  // they made `req.query['hub.mode']` come back undefined, so EVERY Meta
+  // verification handshake 403'd (W1424 — found on prod via the live webhook).
+  // Parse straight from the raw URL (immune to both), with req.query fallbacks.
+  const raw = new URLSearchParams((req.originalUrl || req.url || '').split('?')[1] || '');
+  const q = req.query || {};
+  const mode = raw.get('hub.mode') ?? q['hub.mode'] ?? q.hub?.mode;
+  const token = raw.get('hub.verify_token') ?? q['hub.verify_token'] ?? q.hub?.verify_token;
+  const challenge = raw.get('hub.challenge') ?? q['hub.challenge'] ?? q.hub?.challenge;
 
   // Meta sends hub.verify_token equal to the value we configured in the
   // dashboard. WHATSAPP_VERIFY_TOKEN is the canonical name; we fall back to

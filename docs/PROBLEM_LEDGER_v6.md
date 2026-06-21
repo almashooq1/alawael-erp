@@ -175,10 +175,9 @@ Test Suites: 1 passed, 1 passed
 3. **Primary journey smoke test** unblocked by disk recovery. Full `test:sprint` runs keep hitting infrastructure limits (2 h timeout, then 20 min heartbeat loss). They exposed:
    - W979/W987 missing DDD timeline subscribers — fixed and verified.
    - `new-admin-routes.api.test.js` MMS cleanup failure on Windows — fixed with force-stop + swallowed cleanup errors; 145/145 pass individually.
-   - Chunk 1 exposed 3 more failures, all fixed and verified individually:
-     * `ci-path-triggers-exist` — removed ghost wave1408 path from sprint-tests.yml.
-     * `beneficiary-voice-log-wave460` — updated to expect `ref: 'ClinicalSession'`.
-     * `adjunct-therapy-api-wave699` — same MMS force-stop cleanup fix.
+   - Chunk 1 exposed 3 more failures, all fixed and verified individually.
+   - Chunk 2: 196/196 suites pass, 3022/3022 tests pass.
+   - Chunk 3: running.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 

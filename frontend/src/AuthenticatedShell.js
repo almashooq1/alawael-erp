@@ -527,9 +527,13 @@ export default function AuthenticatedShell() {
                   <Route path="reports-pro" element={<ReportsDashboardPro />} />
                   <Route path="inventory-pro" element={<InventoryDashboardPro />} />
                   <Route path="notifications-pro" element={<NotificationsDashboardPro />} />
+                  {/* Alias: header/sidebar navigate to /notifications */}
+                  <Route path="notifications" element={<NotificationsDashboardPro />} />
                   <Route path="security-pro" element={<SecurityDashboardPro />} />
                   <Route path="analytics-pro" element={<AnalyticsDashboardPro />} />
                   <Route path="settings-pro" element={<SettingsDashboardPro />} />
+                  {/* Alias: header/sidebar settings button + nav navigate to /settings */}
+                  <Route path="settings" element={<SettingsDashboardPro />} />
                   <Route path="therapist-pro" element={<TherapistProDashboard />} />
                   <Route path="kpi-pro" element={<KPIProDashboard />} />
                   <Route path="rehab-pro" element={<RehabProDashboard />} />

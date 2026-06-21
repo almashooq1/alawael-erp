@@ -11,7 +11,10 @@ export default function LegalLayout({ title, subtitle, updated, children }) {
       {/* Header */}
       <header className="bg-primary-700 text-white">
         <div className="max-w-3xl mx-auto px-6 py-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-6 text-sm">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-6 text-sm"
+          >
             <span aria-hidden>→</span>
             <span>العودة للصفحة الرئيسية</span>
           </Link>

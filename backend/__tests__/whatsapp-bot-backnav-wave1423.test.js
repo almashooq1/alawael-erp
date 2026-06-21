@@ -73,8 +73,20 @@ describe('W1423 — back from the confirm summary edits the last answer', () => 
   test('from CONFIRMING, back returns to the last step (collecting) keeping data', () => {
     const unit = reg.UNIT_BY_ID.appointment;
     const last = unit.steps.length - 1;
-    const collected = { action: 'حجز', beneficiaryName: 'سارة', department: 'نطق', preferredDay: 'الأحد', preferredPeriod: 'صباح' };
-    const state = { unit: 'appointment', step: last, collected, phase: reg.PHASE.CONFIRMING, lang: 'ar' };
+    const collected = {
+      action: 'حجز',
+      beneficiaryName: 'سارة',
+      department: 'نطق',
+      preferredDay: 'الأحد',
+      preferredPeriod: 'صباح',
+    };
+    const state = {
+      unit: 'appointment',
+      step: last,
+      collected,
+      phase: reg.PHASE.CONFIRMING,
+      lang: 'ar',
+    };
     const p = flow.handleTurn(state, 'رجوع خطوة', AR);
     expect(p.nextFlowState.phase).toBe(reg.PHASE.COLLECTING);
     expect(p.nextFlowState.step).toBe(last);

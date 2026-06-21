@@ -15,6 +15,7 @@
     "test:watch": "jest --watch --testEnvironment=node"
   },
   "overrides": {
+    "js-yaml": "^4.2.0",
     "tar": ">=7.5.11"
   },
   "dependencies": {

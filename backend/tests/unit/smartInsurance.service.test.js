@@ -34,7 +34,7 @@ jest.mock('../../models/InsurancePolicy', () => ({
   countDocuments: (...a) => mockPolicyCountDocuments(...a),
 }));
 
-jest.mock('../../models/InsuranceClaim', () => ({
+jest.mock('../../models/SmartInsuranceClaim', () => ({
   create: (...a) => mockClaimCreate(...a),
   findById: (...a) => mockClaimFindById(...a),
   findByIdAndUpdate: (...a) => mockClaimFindByIdAndUpdate(...a),

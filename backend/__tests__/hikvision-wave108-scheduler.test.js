@@ -247,7 +247,9 @@ describe('scheduler.runJob — happy path', () => {
     };
     const s = createHikvisionScheduler({ runModel, fraudDetection, logger: SILENT });
     await s.runJob({ jobId: reg.JOB_ID.FRAUD_SCAN_TEMPLATES, args: { since: '2026-01-01' } });
-    expect(fraudDetection.scanTemplates).toHaveBeenCalledWith({ since: '2026-01-01' });
+    expect(fraudDetection.scanTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({ since: '2026-01-01', actor: expect.any(Object) })
+    );
   });
 
   test('trigger + initiator persisted on the run row', async () => {

@@ -1225,7 +1225,9 @@ function Hero() {
                 onClick={booking.open}
                 className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-2xl shadow-black/15 hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
               >
-                <span className="relative z-10">{tr('احجز زيارة تقييم', 'Book an Assessment')}</span>
+                <span className="relative z-10">
+                  {tr('احجز زيارة تقييم', 'Book an Assessment')}
+                </span>
                 <svg
                   className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1.5 transition-transform duration-300"
                   fill="none"
@@ -1283,7 +1285,10 @@ function Hero() {
                     d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                   />
                 </svg>
-                {tr(`تأسس عام ${content.brand.foundedHijri} هـ`, `Est. ${content.brand.foundedGregorian}`)}
+                {tr(
+                  `تأسس عام ${content.brand.foundedHijri} هـ`,
+                  `Est. ${content.brand.foundedGregorian}`
+                )}
               </div>
               <div className="h-4 w-px bg-white/20" />
               <div className="flex items-center gap-2 text-white/80 text-sm">
@@ -1300,7 +1305,10 @@ function Hero() {
                     d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3"
                   />
                 </svg>
-                {tr(`${content.branches.items.length} فروع في الرياض`, `${content.branches.items.length} branches in Riyadh`)}
+                {tr(
+                  `${content.branches.items.length} فروع في الرياض`,
+                  `${content.branches.items.length} branches in Riyadh`
+                )}
               </div>
               <div className="h-4 w-px bg-white/20" />
               <div className="flex items-center gap-2 text-white/80 text-sm">
@@ -1334,7 +1342,10 @@ function Hero() {
                 {content.hero.image ? (
                   <img
                     src={content.hero.image}
-                    alt={tr('أطفال مراكز الأوائل أثناء التأهيل', 'Children at Alawael Centers during rehabilitation')}
+                    alt={tr(
+                      'أطفال مراكز الأوائل أثناء التأهيل',
+                      'Children at Alawael Centers during rehabilitation'
+                    )}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
@@ -1380,7 +1391,7 @@ function Hero() {
                         tr('تدخّل مبكر', 'Early intervention'),
                         tr('تأهيل التوحد', 'Autism therapy'),
                         tr('نطق ولغة', 'Speech & language'),
-                      ].map((chip) => (
+                      ].map(chip => (
                         <span
                           key={chip}
                           className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold text-white/90"
@@ -1415,7 +1426,9 @@ function Hero() {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-600">{tr('مستفيدين اليوم', 'Beneficiaries today')}</div>
+                    <div className="text-[11px] text-gray-600">
+                      {tr('مستفيدين اليوم', 'Beneficiaries today')}
+                    </div>
                     <div className="text-lg font-bold text-gray-800">{tr('٢٤٧', '247')}</div>
                   </div>
                 </div>
@@ -1431,7 +1444,9 @@ function Hero() {
                     <Icon name="chart-bar" className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-600">{tr('نسبة التحسن', 'Improvement rate')}</div>
+                    <div className="text-[11px] text-gray-600">
+                      {tr('نسبة التحسن', 'Improvement rate')}
+                    </div>
                     <div className="text-lg font-bold text-primary-700">{tr('٩٢٪', '92%')}</div>
                   </div>
                 </div>
@@ -1833,7 +1848,9 @@ function WhyUs() {
                   <div className="w-20 h-20 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center animate-pulse-soft">
                     <span className="text-4xl font-bold text-accent-400">{tr('أ', 'A')}</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">{tr('رعاية متكاملة في مكان واحد', 'Integrated Care Under One Roof')}</h3>
+                  <h3 className="text-2xl font-bold text-white">
+                    {tr('رعاية متكاملة في مكان واحد', 'Integrated Care Under One Roof')}
+                  </h3>
                   <p className="text-white/80 text-sm max-w-xs mx-auto">
                     {tr(
                       'تقييم وتأهيل ومتابعة لطفلك تحت سقف واحد، مع فريق مختص لكل حالة',
@@ -1876,7 +1893,9 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
                     <Icon name="check" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">{tr('+25 سنة خبرة', '+25 years experience')}</span>
+                  <span className="text-sm font-bold text-gray-800">
+                    {tr('+25 سنة خبرة', '+25 years experience')}
+                  </span>
                 </div>
               </div>
 
@@ -1886,7 +1905,9 @@ function WhyUs() {
                   <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">
                     <Icon name="user-group" className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-gray-800">{tr('+8000 مستفيد', '+8000 beneficiaries')}</span>
+                  <span className="text-sm font-bold text-gray-800">
+                    {tr('+8000 مستفيد', '+8000 beneficiaries')}
+                  </span>
                 </div>
               </div>
             </div>
@@ -2019,7 +2040,10 @@ function Testimonials() {
             {tr('ماذا يقولون عنا', 'What They Say About Us')}
           </h2>
           <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-            {tr('تجارب حقيقية من أولياء أمور أبنائنا', 'Real experiences from the parents of our children')}
+            {tr(
+              'تجارب حقيقية من أولياء أمور أبنائنا',
+              'Real experiences from the parents of our children'
+            )}
           </p>
         </div>
 
@@ -2113,7 +2137,10 @@ function FAQ() {
             {tr('أسئلة متكررة', 'Frequently Asked Questions')}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            {tr('إجابات على أكثر الأسئلة شيوعاً حول مراكز الأوائل', 'Answers to the most common questions about Alawael Centers')}
+            {tr(
+              'إجابات على أكثر الأسئلة شيوعاً حول مراكز الأوائل',
+              'Answers to the most common questions about Alawael Centers'
+            )}
           </p>
         </div>
 
@@ -2362,14 +2389,30 @@ function BookingModal({ open, onClose }) {
         const data = await resp.json().catch(() => ({}));
         serverConfirmation = data.confirmationNumber || '';
       } else if (resp.status === 429) {
-        setApiError(tr('تجاوزت عدد الطلبات المسموح. حاول بعد قليل.', 'You have exceeded the allowed number of requests. Please try again shortly.'));
+        setApiError(
+          tr(
+            'تجاوزت عدد الطلبات المسموح. حاول بعد قليل.',
+            'You have exceeded the allowed number of requests. Please try again shortly.'
+          )
+        );
       } else {
         const data = await resp.json().catch(() => ({}));
-        setApiError(data.message || tr('تعذّر إرسال الطلب للخادم — سنحاول واتساب.', 'Could not send the request to the server — we will try WhatsApp.'));
+        setApiError(
+          data.message ||
+            tr(
+              'تعذّر إرسال الطلب للخادم — سنحاول واتساب.',
+              'Could not send the request to the server — we will try WhatsApp.'
+            )
+        );
       }
     } catch (err) {
       // Network failure — fall through to WhatsApp as a fallback channel.
-      setApiError(tr('تعذّر الاتصال بالخادم — سنرسل طلبك عبر واتساب.', 'Could not reach the server — we will send your request via WhatsApp.'));
+      setApiError(
+        tr(
+          'تعذّر الاتصال بالخادم — سنرسل طلبك عبر واتساب.',
+          'Could not reach the server — we will send your request via WhatsApp.'
+        )
+      );
     }
 
     // 2) Open WhatsApp with pre-filled message (works even if API failed).
@@ -2382,7 +2425,9 @@ function BookingModal({ open, onClose }) {
       `${tr('الفرع المفضّل', 'Preferred branch')}: ${form.branchPreference}`,
       `${tr('الفترة المفضّلة', 'Preferred time')}: ${form.preferredTime}`,
       form.notes ? `${tr('ملاحظات', 'Notes')}: ${form.notes}` : '',
-      serverConfirmation ? `${tr('رقم التأكيد', 'Confirmation number')}: ${serverConfirmation}` : '',
+      serverConfirmation
+        ? `${tr('رقم التأكيد', 'Confirmation number')}: ${serverConfirmation}`
+        : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -2451,10 +2496,14 @@ function BookingModal({ open, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{tr('تم استلام طلبك بنجاح', 'Your request was received successfully')}</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {tr('تم استلام طلبك بنجاح', 'Your request was received successfully')}
+            </h3>
             {confirmationNumber ? (
               <div className="mb-4">
-                <p className="text-gray-600 mb-2">{tr('رقم التأكيد الخاص بك:', 'Your confirmation number:')}</p>
+                <p className="text-gray-600 mb-2">
+                  {tr('رقم التأكيد الخاص بك:', 'Your confirmation number:')}
+                </p>
                 <code
                   className="inline-block px-4 py-2 rounded-xl bg-green-50 text-green-700 font-bold text-lg tracking-wider border border-green-200"
                   dir="ltr"
@@ -2556,7 +2605,10 @@ function BookingModal({ open, onClose }) {
                 value={form.notes}
                 onChange={e => update('notes', e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all resize-none text-sm"
-                placeholder={tr('أي تفاصيل تساعدنا في تجهيز الزيارة...', 'Any details that help us prepare for the visit...')}
+                placeholder={tr(
+                  'أي تفاصيل تساعدنا في تجهيز الزيارة...',
+                  'Any details that help us prepare for the visit...'
+                )}
               />
             </div>
 
@@ -2936,7 +2988,9 @@ function ArticlesTeaser() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-3">
               {tr('مقالات وتوعية', 'Articles & Awareness')}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{tr('مكتبة المعرفة', 'Knowledge Library')}</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              {tr('مكتبة المعرفة', 'Knowledge Library')}
+            </h2>
             <p className="text-gray-600 max-w-2xl">
               {tr(
                 'مقالات من فريق الأوائل — معلومات علمية وتجارب ملهمة تدعمك في رحلة التأهيل.',
@@ -3146,7 +3200,9 @@ function Quiz() {
                 <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary-500 to-green-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/25">
                   <Icon name="magnifying-glass" className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{tr('تقييم سريع بدون تسجيل', 'Quick Assessment — No Sign-up')}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {tr('تقييم سريع بدون تسجيل', 'Quick Assessment — No Sign-up')}
+                </h3>
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">
                   {tr(
                     'ستحصل فوراً على توصية ببرنامج مناسب + إمكانية حجز زيارة تقييم تفصيلية.',
@@ -3184,7 +3240,10 @@ function Quiz() {
                   <div>
                     <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
                       <span className="font-semibold">
-                        {tr(`سؤال ${step + 1} من ${totalSteps}`, `Question ${step + 1} of ${totalSteps}`)}
+                        {tr(
+                          `سؤال ${step + 1} من ${totalSteps}`,
+                          `Question ${step + 1} of ${totalSteps}`
+                        )}
                       </span>
                       {step > 0 && (
                         <button
@@ -3226,7 +3285,9 @@ function Quiz() {
                 >
                   <Icon name={recommendation.iconKey} className="w-12 h-12" />
                 </div>
-                <div className="text-sm font-semibold text-primary-700 mb-2">{tr('توصيتنا لطفلك', 'Our recommendation for your child')}</div>
+                <div className="text-sm font-semibold text-primary-700 mb-2">
+                  {tr('توصيتنا لطفلك', 'Our recommendation for your child')}
+                </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                   {recommendation.title}
                 </h3>
@@ -3504,12 +3565,16 @@ function Stories() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl font-bold text-gray-900 dark:text-white">{story.name}</span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">
+                        {story.name}
+                      </span>
                       <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                         {story.age} {tr('سنوات', 'years')}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{story.condition}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      {story.condition}
+                    </div>
                   </div>
                   {story.image || story.photo ? (
                     <img
@@ -3545,7 +3610,9 @@ function Stories() {
                     <div className="text-[11px] font-bold text-red-700 dark:text-red-300 mb-1 uppercase tracking-wide">
                       {tr('قبل', 'Before')}
                     </div>
-                    <p className="text-sm text-red-900/80 dark:text-red-100/80 leading-relaxed">{story.before}</p>
+                    <p className="text-sm text-red-900/80 dark:text-red-100/80 leading-relaxed">
+                      {story.before}
+                    </p>
                   </div>
 
                   {/* Arrow / transition marker */}
@@ -3559,7 +3626,9 @@ function Stories() {
                     <div className="text-[11px] font-bold text-green-700 dark:text-green-300 mb-1 uppercase tracking-wide">
                       {tr('بعد', 'After')}
                     </div>
-                    <p className="text-sm text-green-900/85 dark:text-green-100/85 leading-relaxed">{story.after}</p>
+                    <p className="text-sm text-green-900/85 dark:text-green-100/85 leading-relaxed">
+                      {story.after}
+                    </p>
                   </div>
                 </div>
 
@@ -3576,7 +3645,9 @@ function Stories() {
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400">{tr('النتيجة', 'Outcome')}</div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                      {tr('النتيجة', 'Outcome')}
+                    </div>
                     <div className="text-xs font-semibold text-green-700 dark:text-green-400">
                       {tr('تحسّن ملموس', 'Real progress')}
                     </div>
@@ -3615,7 +3686,9 @@ function Comparison() {
           className={`rounded-3xl overflow-hidden shadow-xl ring-1 ring-gray-200 bg-white transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         >
           <div className="grid grid-cols-[2fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr]">
-            <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">{tr('الميزة', 'Feature')}</div>
+            <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">
+              {tr('الميزة', 'Feature')}
+            </div>
             <div className="p-5 bg-gradient-to-br from-primary-600 to-green-600 text-white text-center">
               <div className="text-xs opacity-90">{c.weLabel}</div>
               <div className="flex justify-center mt-1">
@@ -4041,7 +4114,10 @@ function Branches() {
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(branch.address || branch.district + tr('، الرياض', ', Riyadh'))}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={tr(`الحصول على الاتجاهات إلى ${branch.name}`, `Get directions to ${branch.name}`)}
+                  aria-label={tr(
+                    `الحصول على الاتجاهات إلى ${branch.name}`,
+                    `Get directions to ${branch.name}`
+                  )}
                   className="mb-3 inline-flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-primary-900/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                 >
                   <Icon name="map-pin" className="w-4 h-4" />
@@ -4181,7 +4257,7 @@ function MobileActionBar() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => {
+          onClick={e => {
             // Open the WhatsApp app directly (skip the wa.me interstitial)
             e.preventDefault();
             openWhatsApp(ap.whatsappNumber, ap.whatsappTemplate);
@@ -4242,7 +4318,12 @@ function Contact() {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('اتصل بنا', 'Call Us')}</h3>
-            <p className="text-sm text-gray-600 mb-3">{tr('للاستفسار وحجز موعد تقييم', 'For inquiries and to book an assessment appointment')}</p>
+            <p className="text-sm text-gray-600 mb-3">
+              {tr(
+                'للاستفسار وحجز موعد تقييم',
+                'For inquiries and to book an assessment appointment'
+              )}
+            </p>
             <div className="text-xl font-bold text-primary-700" dir="ltr">
               {c.mainPhoneDisplay}
             </div>
@@ -4267,8 +4348,12 @@ function Contact() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('البريد الإلكتروني', 'Email')}</h3>
-            <p className="text-sm text-gray-600 mb-3">{tr('للاستفسارات الرسمية والتقارير', 'For official inquiries and reports')}</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">
+              {tr('البريد الإلكتروني', 'Email')}
+            </h3>
+            <p className="text-sm text-gray-600 mb-3">
+              {tr('للاستفسارات الرسمية والتقارير', 'For official inquiries and reports')}
+            </p>
             <div className="text-lg font-bold text-accent-700" dir="ltr">
               {c.email}
             </div>
@@ -4297,7 +4382,9 @@ function Contact() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{tr('العنوان الرئيسي', 'Main Address')}</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">
+              {tr('العنوان الرئيسي', 'Main Address')}
+            </h3>
             <p className="text-sm text-gray-600 mb-3">{tr('مقر الإدارة العامة', 'Head office')}</p>
             <p className="text-sm text-gray-700 leading-relaxed">{c.mainAddress}</p>
           </div>
@@ -4366,7 +4453,10 @@ function AssessmentBand() {
           {content.cta.title || tr('ابدأ رحلة طفلك اليوم', "Start your child's journey today")}
         </h2>
         <p className="text-lg text-white/85 max-w-2xl mx-auto mb-9 leading-relaxed">
-          {tr('زيارة تقييم مجانية — نرد خلال 24 ساعة', 'Free assessment visit — we reply within 24 hours')}
+          {tr(
+            'زيارة تقييم مجانية — نرد خلال 24 ساعة',
+            'Free assessment visit — we reply within 24 hours'
+          )}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
@@ -4392,7 +4482,14 @@ function AssessmentBand() {
             href={`tel:${phone}`}
             className="inline-flex items-center gap-2.5 px-8 py-4 border-2 border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -4404,7 +4501,10 @@ function AssessmentBand() {
         </div>
 
         <p className="mt-7 text-sm text-white/70">
-          {tr('بدون أي رسوم — استشارة أولية وخطة تأهيل مبدئية', 'No fees — initial consultation and a starter rehabilitation plan')}
+          {tr(
+            'بدون أي رسوم — استشارة أولية وخطة تأهيل مبدئية',
+            'No fees — initial consultation and a starter rehabilitation plan'
+          )}
         </p>
       </div>
     </section>

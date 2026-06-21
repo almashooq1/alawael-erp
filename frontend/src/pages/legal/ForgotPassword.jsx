@@ -8,16 +8,21 @@ import { Link } from 'react-router-dom';
  */
 export default function ForgotPassword() {
   return (
-    <div dir="rtl" className="min-h-screen bg-gray-50 font-[Tajawal,sans-serif] flex items-center justify-center px-6 py-12">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gray-50 font-[Tajawal,sans-serif] flex items-center justify-center px-6 py-12"
+    >
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 text-center">
           <div className="mx-auto mb-5 w-14 h-14 rounded-full bg-primary-50 flex items-center justify-center">
-            <span className="text-2xl" aria-hidden>🔑</span>
+            <span className="text-2xl" aria-hidden>
+              🔑
+            </span>
           </div>
           <h1 className="text-2xl font-bold text-primary-700">استعادة كلمة المرور</h1>
           <p className="mt-3 text-gray-600 leading-relaxed">
-            لأسباب أمنية، تتم إعادة تعيين كلمة المرور بواسطة مشرف المركز. يُرجى التواصل مع
-            الإدارة لإعادة تعيين كلمة المرور الخاصة بحسابك.
+            لأسباب أمنية، تتم إعادة تعيين كلمة المرور بواسطة مشرف المركز. يُرجى التواصل مع الإدارة
+            لإعادة تعيين كلمة المرور الخاصة بحسابك.
           </p>
 
           <div className="mt-6 rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm text-gray-600 text-right space-y-2">
@@ -35,7 +40,10 @@ export default function ForgotPassword() {
           >
             العودة لتسجيل الدخول
           </Link>
-          <Link to="/" className="mt-3 inline-block text-sm text-gray-500 hover:text-primary-700 transition-colors">
+          <Link
+            to="/"
+            className="mt-3 inline-block text-sm text-gray-500 hover:text-primary-700 transition-colors"
+          >
             الصفحة الرئيسية
           </Link>
         </div>

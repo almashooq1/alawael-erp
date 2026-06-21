@@ -42,6 +42,13 @@ const goalSchema = new mongoose.Schema(
     measurement_criteria: { type: String, required: [true, 'معايير القياس مطلوبة'], trim: true },
     measurement_method: { type: String, trim: true },
 
+    // ── ربط الهدف بمقياس نتيجة موحد (Phase 2.2) ───────────────
+    outcome_measure_id: { type: String, trim: true, index: true },
+    outcome_measure_code: { type: String, trim: true },
+    baseline_score: { type: Number, default: null },
+    target_score: { type: Number, default: null },
+    measurement_unit: { type: String, trim: true },
+
     // ── المستويات ────────────────────────────────────────────
     baseline_level: { type: String, required: [true, 'المستوى الأساسي مطلوب'], trim: true },
     baseline_date: { type: Date, default: Date.now },

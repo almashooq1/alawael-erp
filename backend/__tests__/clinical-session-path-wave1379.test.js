@@ -87,7 +87,7 @@ describe('W1379 ClinicalSession → sessions.session.completed producer', () => 
     const events = await captureBus(async () => {
       await ClinicalSession.create(baseSession());
     });
-    expect(events.filter((e) => e.eventType === 'session.completed')).toHaveLength(0);
+    expect(events.filter(e => e.eventType === 'session.completed')).toHaveLength(0);
   });
 
   test('completing a session emits exactly once with the subscriber contract', async () => {
@@ -98,7 +98,7 @@ describe('W1379 ClinicalSession → sessions.session.completed producer', () => 
       s.status = 'completed';
       await s.save();
     });
-    const emitted = events.filter((e) => e.eventType === 'session.completed');
+    const emitted = events.filter(e => e.eventType === 'session.completed');
     expect(emitted).toHaveLength(1);
     const p = emitted[0].payload;
     expect(emitted[0].domain).toBe('sessions');
@@ -114,14 +114,14 @@ describe('W1379 ClinicalSession → sessions.session.completed producer', () => 
       s.notes = 'addendum';
       await s.save();
     });
-    expect(events.filter((e) => e.eventType === 'session.completed')).toHaveLength(0);
+    expect(events.filter(e => e.eventType === 'session.completed')).toHaveLength(0);
   });
 
   test('creating directly as completed emits once', async () => {
     const events = await captureBus(async () => {
       await ClinicalSession.create(baseSession({ status: 'completed' }));
     });
-    expect(events.filter((e) => e.eventType === 'session.completed')).toHaveLength(1);
+    expect(events.filter(e => e.eventType === 'session.completed')).toHaveLength(1);
   });
 });
 
@@ -151,6 +151,8 @@ describe('W1380 SOAP documentation stores four fields (not the object in a Strin
       'utf8'
     );
     expect(src).not.toMatch(/soapNotes:\s*req\.body/);
-    expect(src).toMatch(/for \(const f of \['subjective', 'objective', 'assessment', 'plan', 'soapNotes'\]\)/);
+    expect(src).toMatch(
+      /for \(const f of \['subjective', 'objective', 'assessment', 'plan', 'soapNotes'\]\)/
+    );
   });
 });

@@ -170,7 +170,11 @@ function auditBranchDenial(req, attemptedBranchId, reason) {
  */
 const requireBranchAccess = async (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ success: false, message: 'غير مصرح — يجب تسجيل الدخول' });
+    return res.status(401).json({
+      success: false,
+      reason: 'ACTOR_REQUIRED',
+      message: 'غير مصرح — يجب تسجيل الدخول',
+    });
   }
 
   const role = resolveRole(req.user.role || req.user.roles?.[0]);

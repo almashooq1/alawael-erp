@@ -46,9 +46,9 @@ describe('integration/dddWebhookDispatcher.js', () => {
     expect(npms.length).toBe(5);
   });
 
-  test('has local dependencies (4)', () => {
+  test('has local dependencies (5)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(4);
+    expect(locals.length).toBe(5);
   });
 
   test('has module.exports', () => {

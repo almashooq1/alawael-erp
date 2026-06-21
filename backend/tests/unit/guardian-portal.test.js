@@ -15,6 +15,7 @@ jest.mock('../../middleware/auth.middleware', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 jest.mock('../../utils/sanitize', () => ({ escapeRegex: jest.fn(s => s) }));
@@ -59,7 +60,9 @@ jest.mock('../../models/Guardian', () => {
   M.countDocuments = (...a) => mockGuardianCount(...a);
   M.create = (...a) => mockGuardianCreate(...a);
   M.findByIdAndUpdate = (...a) => mockGuardianFindByIdAndUpdate(...a);
+  M.findOneAndUpdate = (...a) => mockGuardianFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockGuardianFindByIdAndDelete(...a);
+  M.findOneAndDelete = (...a) => mockGuardianFindByIdAndDelete(...a);
   return M;
 });
 
@@ -70,6 +73,7 @@ jest.mock('../../models/Beneficiary', () => ({
   findById: (...a) => mockBeneficiaryFindById(...a),
   find: (...a) => mockBeneficiaryFind(...a),
   countDocuments: (...a) => mockBeneficiaryCount(...a),
+  exists: jest.fn().mockResolvedValue(null),
 }));
 
 function makeApp() {

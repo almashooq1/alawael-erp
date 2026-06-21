@@ -52,7 +52,10 @@ function request(method, path, body = null, token = null) {
     let apiPath = `/v21.0${path}`;
     const appSecret = cfg().webhookSecret;
     if (appSecret && accessToken) {
-      const proof = require('crypto').createHmac('sha256', appSecret).update(accessToken).digest('hex');
+      const proof = require('crypto')
+        .createHmac('sha256', appSecret)
+        .update(accessToken)
+        .digest('hex');
       apiPath += (apiPath.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
     }
     const options = {

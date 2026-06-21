@@ -72,7 +72,13 @@ afterEach(async () => {
 
 async function seedBandAndMapping() {
   await CompensationBand.create({
-    bandCode: 'L3', bandName: 'Level 3', level: 3, minSalary: 8000, midSalary: 10000, maxSalary: 12000, isActive: true,
+    bandCode: 'L3',
+    bandName: 'Level 3',
+    level: 3,
+    minSalary: 8000,
+    midSalary: 10000,
+    maxSalary: 12000,
+    isActive: true,
   });
   await JobBandMapping.create({ jobTitle: 'Therapist', bandCode: 'L3', active: true });
 }
@@ -100,7 +106,13 @@ describe('W1385 compaRatioAnalysis', () => {
 
   test('an inactive band yields no compa-ratio (graceful, never misleading)', async () => {
     await CompensationBand.create({
-      bandCode: 'L3', bandName: 'L3', level: 3, minSalary: 8000, midSalary: 10000, maxSalary: 12000, isActive: false,
+      bandCode: 'L3',
+      bandName: 'L3',
+      level: 3,
+      minSalary: 8000,
+      midSalary: 10000,
+      maxSalary: 12000,
+      isActive: false,
     });
     await JobBandMapping.create({ jobTitle: 'Therapist', bandCode: 'L3', active: true });
     await Employee.collection.insertMany([emp(B1, 'Therapist', 7000)]);
@@ -136,7 +148,7 @@ describe('W1385 belowBandEmployees', () => {
 
     const list = await svc.belowBandEmployees({ branchId: B1 });
     expect(list).toHaveLength(2);
-    expect(list.map((e) => e.name)).toEqual(['B', 'A']); // 0.70 before 0.78
-    expect(list.every((e) => e.compaRatio < 0.8)).toBe(true);
+    expect(list.map(e => e.name)).toEqual(['B', 'A']); // 0.70 before 0.78
+    expect(list.every(e => e.compaRatio < 0.8)).toBe(true);
   });
 });

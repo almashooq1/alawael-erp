@@ -284,6 +284,21 @@ class BeneficiaryService {
     const beneficiary = await Beneficiary.findById(transfer.beneficiary);
     if (!beneficiary) throw new Error('المستفيد غير موجود');
 
+    // Capture rollback snapshot before mutating the beneficiary so reversal
+    // can restore the original branch, file number, and status.
+    const rollbackSnapshot = {
+      originalBranchId: beneficiary.branchId,
+      originalFileNumber: beneficiary.fileNumber,
+      originalStatus: beneficiary.status,
+      rolledBackAt: null,
+    };
+    transfer.transferNotes = {
+      ...(transfer.transferNotes && typeof transfer.transferNotes === 'object'
+        ? transfer.transferNotes
+        : {}),
+      rollbackSnapshot,
+    };
+
     // توليد رقم ملف جديد في الفرع الجديد
     const newFileNumber = await this.generateFileNumber(transfer.toBranch, branchCode);
 

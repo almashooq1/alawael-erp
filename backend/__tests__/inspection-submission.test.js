@@ -195,7 +195,7 @@ describe('InspectionSubmissionService.getDashboard', () => {
       },
       inspector
     );
-    const dash = await svc.getDashboard({});
+    const dash = await svc.getDashboard({ days: 60 });
     expect(dash.total).toBe(2);
     expect(dash.fails).toBe(1);
     expect(dash.failRate).toBe(50);

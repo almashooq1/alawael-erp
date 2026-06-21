@@ -90,7 +90,7 @@ describe('W460 — BeneficiaryVoiceLog model', () => {
     expect(SRC).toMatch(/'plan_adjusted'/);
     expect(SRC).toMatch(/'complaint_opened'/);
     expect(SRC).toMatch(/'advocate_notified'/);
-    expect(SRC).toMatch(/relatedSessionId\s*:[\s\S]+?ref:\s*['"]Session['"]/);
+    expect(SRC).toMatch(/relatedSessionId\s*:[\s\S]+?ref:\s*['"]ClinicalSession['"]/);
     expect(SRC).toMatch(/relatedConsentId\s*:[\s\S]+?ref:\s*['"]Consent['"]/);
     expect(SRC).toMatch(/relatedComplaintId\s*:[\s\S]+?ref:\s*['"]Complaint['"]/);
   });

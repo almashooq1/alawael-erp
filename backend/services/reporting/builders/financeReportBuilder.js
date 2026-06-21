@@ -464,11 +464,118 @@ async function buildAgingReport({ report, periodKey, scopeKey, ctx = {} }) {
   return result;
 }
 
+/**
+ * AR aging + DSO wrapper used by the KPI resolver.
+ * Returns the aging report plus a computed Days Sales Outstanding value.
+ */
+async function buildArAging({ report, periodKey, scopeKey, ctx = {} } = {}) {
+  const aging = await buildAgingReport({ report, periodKey, scopeKey, ctx });
+  const Invoice = ctx.models && (ctx.models.Invoice?.model || ctx.models.Invoice);
+  const scope = parseScopeKey(scopeKey);
+  const branchId = scope && scope.type === 'branch' ? scope.id : null;
+  const filter = { status: { $in: REVENUE_STATUSES } };
+  if (branchId) filter.branchId = branchId;
+  let rows = [];
+  try {
+    const Model = Invoice && (Invoice.model || Invoice);
+    rows = Model ? (await Model.find(filter)) || [] : [];
+  } catch {
+    rows = [];
+  }
+
+  const now = (ctx.clock && ctx.clock.now && ctx.clock.now()) || new Date();
+  let weightedDays = 0;
+  let totalAmount = 0;
+  for (const inv of rows) {
+    if (!inv.issueDate) continue;
+    const amt = toSar(inv.totalAmount || 0);
+    if (amt <= 0) continue;
+    const end = inv.status === 'PAID' && inv.updatedAt ? inv.updatedAt : now;
+    const ds = daysBetween(inv.issueDate, end);
+    if (ds == null) continue;
+    weightedDays += ds * amt;
+    totalAmount += amt;
+  }
+  const dsoDays = totalAmount > 0 ? Math.round((weightedDays / totalAmount) * 10) / 10 : null;
+
+  return {
+    ...aging,
+    dsoDays,
+    summary: {
+      ...aging.summary,
+      headlineMetric:
+        dsoDays != null ? { label: 'dso_days', value: dsoDays } : aging.summary.headlineMetric,
+    },
+  };
+}
+
+/**
+ * Pre-authorization approval rate for insurance KPIs.
+ */
+async function preAuthApprovalRate({ report, periodKey, scopeKey, ctx = {} } = {}) {
+  const range = parsePeriodKey(periodKey);
+  const scope = parseScopeKey(scopeKey);
+  const result = baseResult(
+    report,
+    'finance.pre_auth.approval_rate.pct',
+    periodKey,
+    scopeKey,
+    range
+  );
+  Object.assign(result, {
+    total: 0,
+    approved: 0,
+    rejected: 0,
+    pending: 0,
+    approvalRatePct: null,
+  });
+  if (!range) return degradeOnBadPeriod(result, periodKey);
+
+  const branchId = scope && scope.type === 'branch' ? scope.id : null;
+  const PreAuth = ctx.models && (ctx.models.PreAuth?.model || ctx.models.PreAuth);
+  let rows = [];
+  try {
+    const filter = {
+      requestedAt: { $gte: range.start, $lt: range.end },
+    };
+    if (branchId) filter.branchId = branchId;
+    rows = PreAuth ? (await PreAuth.find(filter)) || [] : [];
+  } catch {
+    rows = [];
+  }
+
+  const approved = rows.filter(r => r.status === 'approved' || r.decision === 'approved').length;
+  const rejected = rows.filter(r => r.status === 'rejected' || r.decision === 'rejected').length;
+  const pending = rows.length - approved - rejected;
+  const decided = approved + rejected;
+
+  result.total = rows.length;
+  result.approved = approved;
+  result.rejected = rejected;
+  result.pending = pending;
+  result.approvalRatePct = decided > 0 ? Math.round((approved / decided) * 1000) / 10 : null;
+  result.branch = await loadBranch(ctx, scope);
+
+  result.summary.items = [
+    `Pre-auth requests: ${result.total}`,
+    `Approved: ${approved}`,
+    `Rejected: ${rejected}`,
+    decided > 0 ? `Approval rate: ${formatPct(result.approvalRatePct / 100)}` : null,
+  ].filter(Boolean);
+  result.summary.headlineMetric =
+    result.approvalRatePct != null
+      ? { label: 'approval_rate', value: `${result.approvalRatePct}%` }
+      : null;
+  return result;
+}
+
 module.exports = {
   buildClaimsPack,
   buildCollectionsPack,
   buildRevenueReview,
   buildAgingReport,
+  buildArAging,
+  preAuthApprovalRate,
   // Exposed for tests:
   rollupClaims,
   rollupCollections,

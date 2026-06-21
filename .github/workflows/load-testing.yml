@@ -1,3 +1,5 @@
+# W1401 — Performance load testing workflow
+# See docs/runbooks/performance-load-testing.md
 name: Performance Load Testing (W1401)
 
 on:

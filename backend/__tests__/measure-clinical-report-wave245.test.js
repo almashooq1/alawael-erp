@@ -57,6 +57,14 @@ beforeAll(async () => {
   clinicalReport = require('../services/measureClinicalReport.service');
   await MeasureApplication.init();
   await MeasureAlert.init();
+
+  // W245 repair: shared MongoMemoryServer DB can carry data from a
+  // previously-run test file in this worker. Scrub the collections we
+  // touch before any assertions rely on an empty baseline.
+  await Measure.deleteMany({});
+  await MeasureApplication.deleteMany({});
+  await MeasureAlert.deleteMany({});
+  await TherapeuticGoal.deleteMany({});
 });
 
 afterAll(async () => {

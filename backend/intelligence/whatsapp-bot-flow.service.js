@@ -127,17 +127,19 @@ function renderClosing(unit, collected, lang) {
     body = reg.resolveFaqAnswer(collected.faqTopic); // Arabic content (translation follow-up)
   } else if (unit.id === 'home_exercises') {
     const key = reg.resolveDepartmentKey(collected.department || '');
-    if (key) body = reg.HOME_EXERCISES[key]; // Arabic content (translation follow-up)
+    if (key)
+      body = reg.HOME_EXERCISES[key]; // Arabic content (translation follow-up)
     else
       body =
         i18n.normLang(lang) === 'en'
-          ? "I couldn't identify the department. Available: occupational / speech / special education / behavior. Try again from the menu or type \"agent\"."
+          ? 'I couldn\'t identify the department. Available: occupational / speech / special education / behavior. Try again from the menu or type "agent".'
           : [
               'لم أتعرّف على القسم المطلوب بدقة. القسم المتاح: وظيفي / نطق / تربية خاصة / سلوك.',
               'يمكنك إعادة المحاولة من القائمة، أو اكتب "موظف" للمساعدة.',
             ].join('\n');
   } else {
-    const fallback = i18n.normLang(lang) === 'en' ? 'Your request was received ✅' : 'تم استلام طلبك بنجاح ✅';
+    const fallback =
+      i18n.normLang(lang) === 'en' ? 'Your request was received ✅' : 'تم استلام طلبك بنجاح ✅';
     body = i18n.unitClosing(unit.id, unit.closing || fallback, lang);
   }
   return `${body}\n\n${i18n.fw('menuHint', lang)}`;
@@ -307,7 +309,10 @@ function handleTurn(flowState, rawText, ctx = {}) {
 
   // Abort words (distinct from "إلغاء" so unit-3 action answers survive).
   if (reg.isCancelTrigger(text)) {
-    return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
+    return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, {
+      ...IDLE,
+      lang,
+    });
   }
 
   if (flowState.phase === reg.PHASE.CONFIRMING) {
@@ -320,7 +325,10 @@ function handleTurn(flowState, rawText, ctx = {}) {
       return result(renderClosing(unit, collected, lang), { ...IDLE, lang }, sideEffect);
     }
     if (reg.isNo(text)) {
-      return result(`${i18n.fw('notSent', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
+      return result(`${i18n.fw('notSent', lang)}\n\n${i18n.fw('menuHint', lang)}`, {
+        ...IDLE,
+        lang,
+      });
     }
     return result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
   }

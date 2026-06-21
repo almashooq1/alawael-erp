@@ -10,7 +10,7 @@ const claimItemSchema = new mongoose.Schema(
   {
     sequence: { type: Number, required: true },
     serviceDate: { type: Date, required: true },
-    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', default: null },
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClinicalSession', default: null },
 
     cptCode: { type: String, required: true },
     cptDescription: { type: String, default: null },

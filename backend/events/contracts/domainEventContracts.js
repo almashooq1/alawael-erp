@@ -306,6 +306,25 @@ const BENEFICIARY_EVENTS = {
     priority: PRIORITY.NORMAL,
     consumers: ['medical', 'notification', 'dashboard'],
   },
+
+  AUTO_TRANSITION_REQUESTED: {
+    domain: 'beneficiary',
+    eventType: 'lifecycle.auto_requested',
+    version: 1,
+    description:
+      'طلب انتقال تلقائي للمستفيد — Auto-transition requested by journey-score scheduler',
+    payload: {
+      beneficiaryId: 'string',
+      branchId: 'string',
+      transitionId: 'string',
+      transitionRecordId: 'string',
+      score: 'number',
+      confidence: 'number',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['notification'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

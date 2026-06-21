@@ -22,7 +22,7 @@ const beneficiaryTransferSchema = new mongoose.Schema(
     transferDate: { type: Date, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
+      enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled', 'reversed'],
       default: 'pending',
     },
     rejectionReason: { type: String, default: null },

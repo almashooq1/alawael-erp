@@ -89,7 +89,9 @@ function buildRouter(deps = {}) {
   router.get('/roles/:role', (req, res) => {
     const detail = lib.roleDetail(req.params.role);
     if (!detail.mapped) {
-      return res.status(404).json({ success: false, error: 'role_not_mapped', role: req.params.role });
+      return res
+        .status(404)
+        .json({ success: false, error: 'role_not_mapped', role: req.params.role });
     }
     return ok(res, detail);
   });
@@ -102,7 +104,9 @@ function buildRouter(deps = {}) {
   router.get('/permissions/:key', (req, res) => {
     const detail = lib.permissionDetail(req.params.key);
     if (!detail) {
-      return res.status(404).json({ success: false, error: 'unknown_permission', key: req.params.key });
+      return res
+        .status(404)
+        .json({ success: false, error: 'unknown_permission', key: req.params.key });
     }
     return ok(res, detail);
   });
@@ -133,10 +137,14 @@ function buildRouter(deps = {}) {
       let user;
       try {
         user = await Model.findById(req.params.id)
-          .select('name fullName email role roles branchId branch_id permissions customPermissions deniedPermissions')
+          .select(
+            'name fullName email role roles branchId branch_id permissions customPermissions deniedPermissions'
+          )
           .lean();
       } catch (e) {
-        return res.status(500).json({ success: false, error: 'user_lookup_failed', message: e.message });
+        return res
+          .status(500)
+          .json({ success: false, error: 'user_lookup_failed', message: e.message });
       }
       if (!user) return res.status(404).json({ success: false, error: 'user_not_found' });
 
@@ -148,7 +156,9 @@ function buildRouter(deps = {}) {
         try {
           assertBranchMatch(req, userBranch, 'user');
         } catch (e) {
-          return res.status(e.statusCode || 403).json({ success: false, error: 'cross_branch_denied' });
+          return res
+            .status(e.statusCode || 403)
+            .json({ success: false, error: 'cross_branch_denied' });
         }
       }
 

@@ -42,6 +42,8 @@ const teamMemberSchema = new mongoose.Schema(
     isPrimary: { type: Boolean, default: false },
     weeklyHours: Number,
     notes: String,
+    // Lifecycle transition tag for care-team release/restore (Wave 656/Phase E)
+    lifecycleReleaseTag: { type: mongoose.Schema.Types.Mixed, default: null },
   },
   { _id: true }
 );
@@ -286,6 +288,9 @@ const episodeOfCareSchema = new mongoose.Schema(
     },
     dischargeSummary: String,
     dischargedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // Lifecycle transition tag for episode close/reopen (Wave 656/Phase E)
+    lifecycleClosureTag: { type: mongoose.Schema.Types.Mixed, default: null },
 
     // ── Referral Context ───────────────────────────────────────────────
     referralSource: {

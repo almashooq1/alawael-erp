@@ -8,11 +8,12 @@
  *   2. recordSnapshot — detector failed → ANOMALY_SCAN_FAILED, not persisted
  *   3. recordSnapshot — null detection rejected without crashing
  *   4. recordSnapshot — model validation rejection surfaces VALIDATION_FAILED
- *   5. listRecent — recent-first order + limit + since/source filters
- *   6. getTrend — gauge semantics (latest snapshot in bucket wins)
- *   7. getTrend — empty range gives all-zero buckets
- *   8. getTrend — clamps hours/bucketMinutes to sane bounds
- *   9. factory guard — snapshotModel required
+ *   5. recordSnapshot — save failure logs structured diagnostics
+ *   6. listRecent — recent-first order + limit + since/source filters
+ *   7. getTrend — gauge semantics (latest snapshot in bucket wins)
+ *   8. getTrend — empty range gives all-zero buckets
+ *   9. getTrend — clamps hours/bucketMinutes to sane bounds
+ *   10. factory guard — snapshotModel required
  */
 
 'use strict';
@@ -34,7 +35,7 @@ function makeClock(initial = 1_700_000_000_000) {
 
 // ─── Mock snapshot model (mirrors Wave 114 mock) ─────────────────
 
-function buildSnapshotModel({ failValidation = false } = {}) {
+function buildSnapshotModel({ failValidation = false, failSave = false } = {}) {
   const store = [];
   let counter = 0;
   function M(data) {
@@ -67,6 +68,12 @@ function buildSnapshotModel({ failValidation = false } = {}) {
       }
     };
     this.save = async () => {
+      if (failSave) {
+        const e = new Error('connection timed out');
+        e.name = 'MongooseError';
+        e.code = 89;
+        throw e;
+      }
       store.push({ ...this });
       return this;
     };
@@ -269,7 +276,45 @@ describe('llm-anomaly-history — validation rejection', () => {
   });
 });
 
-// ─── 4. listRecent ───────────────────────────────────────────────
+// ─── 4. recordSnapshot — save failure diagnostics ────────────────
+
+describe('llm-anomaly-history — save failure', () => {
+  test('returns SAVE_FAILED and logs structured diagnostics', async () => {
+    const Model = buildSnapshotModel({ failSave: true });
+    const logs = [];
+    const logger = {
+      info: () => {},
+      warn: () => {},
+      error: (...args) => logs.push(args),
+    };
+    const s = createLlmAnomalyHistoryService({ snapshotModel: Model, logger });
+    const r = await s.recordSnapshot({
+      detectionResult: {
+        ok: true,
+        items: [
+          { id: 'x:1', kind: ANOMALY_KIND.COST_SPIKE, severity: 'critical' },
+          { id: 'x:2', kind: ANOMALY_KIND.SERVICE_DOWN, severity: 'warning' },
+        ],
+        summary: { total: 2, critical: 1, warning: 1, info: 0 },
+      },
+      source: 'scheduler',
+      durationMs: 42,
+    });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe(REASON.SAVE_FAILED);
+    expect(Model._store).toHaveLength(0);
+    expect(logs).toHaveLength(1);
+    const logLine = logs[0].join(' ');
+    expect(logLine).toContain('[llm-anomaly-history] save failed:');
+    expect(logLine).toContain('connection timed out');
+    expect(logLine).toContain('name=MongooseError');
+    expect(logLine).toContain('code=89');
+    expect(logLine).toContain('source=scheduler');
+    expect(logLine).toContain('total=2');
+  });
+});
+
+// ─── 5. listRecent ───────────────────────────────────────────────
 
 describe('llm-anomaly-history — listRecent', () => {
   test('returns rows in recent-first order + respects limit', async () => {

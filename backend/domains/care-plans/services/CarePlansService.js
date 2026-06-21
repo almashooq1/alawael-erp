@@ -169,6 +169,122 @@ class CarePlansService extends BaseService {
   }
 
   /**
+   * إرسال خطة رعاية للاعتماد (draft → pending_approval)
+   * @param {string} id
+   * @returns {Promise<Object>} الخطة المُرسلة
+   */
+  async submitPlan(id) {
+    const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
+    const plan = await UnifiedCarePlan.findByIdAndUpdate(
+      id,
+      { $set: { status: 'pending_approval' } },
+      { returnDocument: 'after' }
+    ).lean();
+
+    if (!plan) {
+      const err = new Error('خطة الرعاية غير موجودة');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    this.emit('careplan.submitted', {
+      planId: plan._id,
+      beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
+    });
+
+    return plan;
+  }
+
+  /**
+   * إعادة خطة رعاية للمسودة (pending_approval → draft)
+   * @param {string} id
+   * @param {Object} [data] - { reason }
+   * @returns {Promise<Object>} الخطة المُعادة
+   */
+  async rejectPlan(id, _data = {}) {
+    void _data;
+    const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
+    const plan = await UnifiedCarePlan.findByIdAndUpdate(
+      id,
+      { $set: { status: 'draft' } },
+      { returnDocument: 'after' }
+    ).lean();
+
+    if (!plan) {
+      const err = new Error('خطة الرعاية غير موجودة');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    this.emit('careplan.rejected', {
+      planId: plan._id,
+      beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
+    });
+
+    return plan;
+  }
+
+  /**
+   * تعليق خطة رعاية (active → suspended)
+   * @param {string} id
+   * @param {Object} [data] - { reason }
+   * @returns {Promise<Object>} الخطة المعلّقة
+   */
+  async suspendPlan(id, _data = {}) {
+    void _data;
+    const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
+    const plan = await UnifiedCarePlan.findByIdAndUpdate(
+      id,
+      { $set: { status: 'suspended' } },
+      { returnDocument: 'after' }
+    ).lean();
+
+    if (!plan) {
+      const err = new Error('خطة الرعاية غير موجودة');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    this.emit('careplan.suspended', {
+      planId: plan._id,
+      beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
+    });
+
+    return plan;
+  }
+
+  /**
+   * استئناف خطة رعاية (suspended → active)
+   * @param {string} id
+   * @returns {Promise<Object>} الخطة المستأنفة
+   */
+  async resumePlan(id) {
+    const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
+    const plan = await UnifiedCarePlan.findByIdAndUpdate(
+      id,
+      { $set: { status: 'active' } },
+      { returnDocument: 'after' }
+    ).lean();
+
+    if (!plan) {
+      const err = new Error('خطة الرعاية غير موجودة');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    this.emit('careplan.resumed', {
+      planId: plan._id,
+      beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
+    });
+
+    return plan;
+  }
+
+  /**
    * تفعيل خطة رعاية (draft → active)
    * @param {string} id
    * @returns {Promise<Object>} الخطة المفعّلة
@@ -280,16 +396,53 @@ class CarePlansService extends BaseService {
   }
 
   /**
-   * إضافة هدف إلى خطة رعاية
+   * إضافة هدف إلى خطة رعاية (globalGoals)
+   *
+   * Maps the UI payload (carePlanId, assignedToId, domain, nameAr, nameEn,
+   * targetDate, priority, baselineNote) onto the UnifiedCarePlan.goalRefSchema
+   * shape. This preserves the canonical model while the UI finishes its
+   * transition to standalone TherapeuticGoal entities (ADR-040/041).
+   *
    * @param {string} id - معرف الخطة
    * @param {Object} goal - بيانات الهدف
    * @returns {Promise<Object>} الخطة بعد الإضافة
    */
   async addGoal(id, goal) {
     const UnifiedCarePlan = mongoose.model('UnifiedCarePlan');
+
+    const PRIORITY_MAP = {
+      LOW: 'low',
+      MEDIUM: 'medium',
+      HIGH: 'high',
+      CRITICAL: 'high',
+    };
+
+    const TYPE_MAP = {
+      academic: 'academic',
+      behavioral: 'behavioral',
+      communication: 'communication',
+      motor: 'motor',
+      speech: 'speech',
+      social: 'social',
+      life_skill: 'life_skill',
+      cognitive: 'cognitive',
+      sensory: 'sensory',
+      vocational: 'vocational',
+      other: 'other',
+    };
+
+    const mapped = {
+      title: goal.nameEn || goal.nameAr || 'Untitled goal',
+      title_ar: goal.nameAr || undefined,
+      type: TYPE_MAP[goal.domain] || 'other',
+      baseline: goal.baselineNote || undefined,
+      priority: PRIORITY_MAP[goal.priority] || 'medium',
+      notes: goal.targetDate ? `targetDate: ${goal.targetDate}` : undefined,
+    };
+
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
-      { $push: { goals: goal } },
+      { $push: { globalGoals: mapped } },
       { returnDocument: 'after' }
     ).lean();
 

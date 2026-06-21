@@ -64,17 +64,9 @@ const SCAN_DIRS = [
 
 // Tenancy fields that NO middleware populates on this branch-scoped platform.
 // `branchId` is deliberately EXCLUDED — it is the live, canonical axis.
-const DEAD_AXIS_RE =
-  /req\.user\s*\??\.\s*(organizationId|orgId|tenantId|companyId)\b/g;
+const DEAD_AXIS_RE = /req\.user\s*\??\.\s*(organizationId|orgId|tenantId|companyId)\b/g;
 
-const EXCLUDED_DIRS = new Set([
-  '_archived',
-  'node_modules',
-  'coverage',
-  '.git',
-  'logs',
-  'backups',
-]);
+const EXCLUDED_DIRS = new Set(['_archived', 'node_modules', 'coverage', '.git', 'logs', 'backups']);
 
 /**
  * Frozen baseline as of W1408 (2026-06-17). Classification per file lives in
@@ -204,7 +196,9 @@ describe('dead scope axis read-filter guard (W1408)', () => {
       );
     }
     if (changed.length) {
-      problems.push(`COUNT changed in ${changed.length} file(s):\n` + changed.map(c => `  ~ ${c}`).join('\n'));
+      problems.push(
+        `COUNT changed in ${changed.length} file(s):\n` + changed.map(c => `  ~ ${c}`).join('\n')
+      );
     }
     if (removed.length) {
       problems.push(

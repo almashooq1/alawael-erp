@@ -167,6 +167,12 @@ describe('W601 GET /side-effects-summary (branch-level)', () => {
       cancelledAppointments: 12, // 3 + 9
       closedEpisodes: 2,
       releasedFromEpisodes: 1,
+      pausedAppointments: 0,
+      resumedAppointments: 0,
+      restoredAppointments: 0,
+      reopenedEpisodes: 0,
+      reactivatedFromEpisodes: 0,
+      rolledBackTransfers: 0,
       total: 15,
     });
   });

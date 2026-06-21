@@ -69,7 +69,10 @@ describe('W1418 — formatEscalationSummary', () => {
   });
 
   test('no collected fields → an explicit "no details" line (never empty)', () => {
-    const out = formatEscalationSummary({ kind: 'callback', collected: {} }, { reason: 'طلب تواصل' });
+    const out = formatEscalationSummary(
+      { kind: 'callback', collected: {} },
+      { reason: 'طلب تواصل' }
+    );
     expect(out).toContain('📋 طلب تواصل');
     expect(out).toContain('لا توجد تفاصيل');
   });

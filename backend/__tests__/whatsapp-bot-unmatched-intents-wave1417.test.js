@@ -35,7 +35,11 @@ describe('W1417 — shouldRecord (pure)', () => {
 describe('W1417 — service marks unmatched idle free-text (pure)', () => {
   const ctx = { lang: 'ar' };
   test('an idle free-text that matches NO unit is flagged unmatched', () => {
-    const plan = flow.handleTurn({ unit: null, step: 0, phase: 'idle' }, 'هل عندكم سباحه علاجيه', ctx);
+    const plan = flow.handleTurn(
+      { unit: null, step: 0, phase: 'idle' },
+      'هل عندكم سباحه علاجيه',
+      ctx
+    );
     expect(plan.menu).toBe(true);
     expect(plan.unmatched).toBe(true);
     expect(typeof plan.unmatchedText).toBe('string');

@@ -485,11 +485,162 @@ async function buildRedFlagsDigest({ report, periodKey, scopeKey, ctx = {} }) {
   return result;
 }
 
+/**
+ * CAPA (Corrective & Preventive Actions) board — KPI-facing summary
+ * of on-time closure rate for incident actions.
+ */
+async function buildCapaBoard({ report, periodKey, scopeKey, ctx = {} } = {}) {
+  const range = parsePeriodKey(periodKey);
+  const scope = parseScopeKey(scopeKey);
+  const result = baseResult(report, 'quality.capa.ontime_closure.pct', periodKey, scopeKey, range);
+  Object.assign(result, {
+    totalCapa: 0,
+    closedOnTime: 0,
+    closedLate: 0,
+    openCapa: 0,
+    onTimeClosureRate: null,
+  });
+  if (!range) return degradeOnBadPeriod(result, periodKey);
+
+  const branchId = scope && scope.type === 'branch' ? scope.id : null;
+  const Incident = ctx.models && (ctx.models.Incident?.model || ctx.models.Incident);
+  let rows = [];
+  try {
+    const filter = { status: { $in: [...INCIDENT_OPEN_STATUSES, 'closed'] } };
+    if (branchId) filter.branchId = branchId;
+    rows = Incident ? (await Incident.find(filter)) || [] : [];
+  } catch {
+    rows = [];
+  }
+
+  const capaActions = [];
+  for (const incident of rows) {
+    const closedAt = incident.closedAt;
+    for (const action of [
+      ...(incident.correctiveActions || []),
+      ...(incident.preventiveActions || []),
+    ]) {
+      capaActions.push({ ...action, incidentClosedAt: closedAt });
+    }
+  }
+
+  let closedOnTime = 0;
+  let closedLate = 0;
+  let openCapa = 0;
+  for (const a of capaActions) {
+    if (a.status === 'completed' && a.completedAt) {
+      const deadline = a.deadline ? new Date(a.deadline) : null;
+      if (!deadline || new Date(a.completedAt) <= deadline) closedOnTime += 1;
+      else closedLate += 1;
+    } else if (a.status === 'overdue') {
+      closedLate += 1;
+    } else {
+      openCapa += 1;
+    }
+  }
+  const closedTotal = closedOnTime + closedLate;
+  result.totalCapa = capaActions.length;
+  result.closedOnTime = closedOnTime;
+  result.closedLate = closedLate;
+  result.openCapa = openCapa;
+  result.onTimeClosureRate =
+    closedTotal > 0 ? Math.round((closedOnTime / closedTotal) * 1000) / 10 : null;
+  result.branch = await loadBranch(ctx, scope);
+
+  result.summary.items = [
+    `CAPA actions: ${result.totalCapa}`,
+    `Closed on time: ${closedOnTime}`,
+    `Closed late: ${closedLate}`,
+    `Open: ${openCapa}`,
+    result.onTimeClosureRate != null
+      ? `On-time closure: ${formatPct(result.onTimeClosureRate / 100)}`
+      : null,
+  ].filter(Boolean);
+  result.summary.headlineMetric =
+    result.onTimeClosureRate != null
+      ? { label: 'on_time_closure_rate', value: `${result.onTimeClosureRate}%` }
+      : null;
+  return result;
+}
+
+/**
+ * Patient-safety incidents per 1,000 therapy sessions.
+ */
+async function patientSafetyIncidentsPer1000Sessions({
+  report,
+  periodKey,
+  scopeKey,
+  ctx = {},
+} = {}) {
+  const range = parsePeriodKey(periodKey);
+  const scope = parseScopeKey(scopeKey);
+  const result = baseResult(
+    report,
+    'quality.patient_safety.incidents.per_1000_sessions',
+    periodKey,
+    scopeKey,
+    range
+  );
+  Object.assign(result, {
+    incidents: 0,
+    sessions: 0,
+    incidentsPer1000Sessions: null,
+  });
+  if (!range) return degradeOnBadPeriod(result, periodKey);
+
+  const branchId = scope && scope.type === 'branch' ? scope.id : null;
+  const Incident = ctx.models && (ctx.models.Incident?.model || ctx.models.Incident);
+  const TherapySession =
+    ctx.models && (ctx.models.TherapySession?.model || ctx.models.TherapySession);
+
+  let incidentRows = [];
+  try {
+    const filter = {
+      occurredAt: { $gte: range.start, $lt: range.end },
+      category: 'patient_safety',
+    };
+    if (branchId) filter.branchId = branchId;
+    incidentRows = Incident ? (await Incident.find(filter)) || [] : [];
+  } catch {
+    incidentRows = [];
+  }
+
+  let sessionCount = 0;
+  try {
+    const filter = { date: { $gte: range.start, $lt: range.end } };
+    if (branchId) filter.branchId = branchId;
+    sessionCount = TherapySession ? await TherapySession.countDocuments(filter) : 0;
+  } catch {
+    sessionCount = 0;
+  }
+
+  result.incidents = incidentRows.length;
+  result.sessions = sessionCount;
+  result.incidentsPer1000Sessions =
+    sessionCount > 0 ? Math.round((incidentRows.length / sessionCount) * 10000) / 10 : null;
+  result.branch = await loadBranch(ctx, scope);
+
+  result.summary.items = [
+    `Patient safety incidents: ${result.incidents}`,
+    `Sessions: ${result.sessions}`,
+    result.incidentsPer1000Sessions != null
+      ? `Rate: ${result.incidentsPer1000Sessions} per 1,000 sessions`
+      : null,
+  ].filter(Boolean);
+  result.summary.headlineMetric =
+    result.incidentsPer1000Sessions != null
+      ? { label: 'incidents_per_1k_sessions', value: result.incidentsPer1000Sessions }
+      : null;
+  return result;
+}
+
 module.exports = {
   buildIncidentsDigest,
   buildIncidentsPack,
   buildCbahiEvidence,
   buildRedFlagsDigest,
+  buildCapaBoard,
+  patientSafetyIncidentsPer1000Sessions,
   // Exposed for tests:
   rollupIncidents,
   rollupFlags,

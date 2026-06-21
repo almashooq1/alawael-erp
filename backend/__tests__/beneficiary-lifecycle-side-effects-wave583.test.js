@@ -25,11 +25,12 @@ const {
   OP,
 } = require('../intelligence/beneficiary-lifecycle-side-effects.service');
 
-/** Collect every distinct side-effect op straight from the registry. */
+/** Collect every distinct side-effect or compensating op straight from the registry. */
 function registryOpSet() {
   const set = new Set();
   for (const t of reg.TRANSITIONS) {
     for (const op of t.sideEffects || []) set.add(op);
+    for (const op of t.compensatingOps || []) set.add(op);
   }
   return set;
 }
@@ -106,7 +107,7 @@ describe('W583 end-active-schedules handler', () => {
       expect.arrayContaining(['PENDING', 'CONFIRMED', 'CHECKED_IN', 'RESCHEDULED'])
     );
     expect(filter.date.$gte).toEqual(new Date('2026-01-01T00:00:00.000Z'));
-    expect(update.$set.status).toBe('CANCELLED');
+    expect(update[0].$set.status).toBe('CANCELLED');
   });
 
   test('normalizes legacy nModified write result', async () => {
@@ -151,9 +152,9 @@ describe('W583 close-open-episodes handler', () => {
     expect(filter.status.$in).toEqual(
       expect.arrayContaining(['planned', 'active', 'on_hold', 'suspended'])
     );
-    expect(update.$set.status).toBe('completed');
-    expect(update.$set.actualEndDate).toEqual(new Date('2026-02-02T00:00:00.000Z'));
-    expect(update.$set.dischargeReason).toBe('medical_reason');
+    expect(update[0].$set.status).toBe('completed');
+    expect(update[0].$set.actualEndDate).toEqual(new Date('2026-02-02T00:00:00.000Z'));
+    expect(update[0].$set.dischargeReason).toBe('medical_reason');
   });
 
   test('non-deceased close maps to a valid enum reason (other)', async () => {
@@ -166,7 +167,7 @@ describe('W583 close-open-episodes handler', () => {
     };
     const handlers = createBeneficiaryLifecycleSideEffectHandlers({ episodeModel });
     await handlers[OP.CLOSE_OPEN_EPISODES]({ beneficiaryId: 'b9', toState: 'discharged' });
-    expect(calls[0].update.$set.dischargeReason).toBe('other');
+    expect(calls[0].update[0].$set.dischargeReason).toBe('other');
   });
 
   test('self-skips when episode model unavailable', async () => {
@@ -230,7 +231,7 @@ describe('W583 deferred handlers', () => {
     const handlers = createBeneficiaryLifecycleSideEffectHandlers({
       eventSink: (name, payload) => events.push({ name, payload }),
     });
-    const res = await handlers['notify-family-condolence']({
+    const res = await handlers['generate-closure-report']({
       beneficiaryId: 'b1',
       transitionId: 'record_deceased',
       fromState: 'active',
@@ -238,13 +239,13 @@ describe('W583 deferred handlers', () => {
       correlationId: 'corr-1',
     });
     expect(res.deferred).toBe(true);
-    expect(res.category).toBe('notification');
+    expect(res.category).toBe('compliance');
     expect(res.emitted).toBe(true);
     expect(events).toHaveLength(1);
     expect(events[0].name).toBe('beneficiary.lifecycle.side_effect');
     expect(events[0].payload).toMatchObject({
-      op: 'notify-family-condolence',
-      category: 'notification',
+      op: 'generate-closure-report',
+      category: 'compliance',
       beneficiaryId: 'b1',
       transitionId: 'record_deceased',
       toState: 'deceased',

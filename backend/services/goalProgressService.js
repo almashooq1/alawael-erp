@@ -157,6 +157,184 @@ function summarizeByBeneficiary(entries) {
   };
 }
 
+// ─── Phase-2: KPI-facing async rollups over GoalProgressEntry / TherapeuticGoal ───
+
+const mongoose = require('mongoose');
+
+function getModels() {
+  try {
+    return {
+      GoalProgressEntry:
+        mongoose.models.GoalProgressEntry || require('../models/GoalProgressEntry'),
+      TherapeuticGoal:
+        mongoose.models.TherapeuticGoal ||
+        require('../domains/goals/models/TherapeuticGoal').TherapeuticGoal,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function sinceDate(windowDays = 30) {
+  return new Date(Date.now() - Number(windowDays) * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Average of the latest progress entry per goal over the window.
+ * Used by KPI `rehab.outcomes.goal_progress.pct` → averageProgressPct.
+ */
+async function summarize(opts = {}) {
+  const { GoalProgressEntry } = getModels();
+  if (!GoalProgressEntry) return { averageProgressPct: null, goalCount: 0, entriesCount: 0 };
+
+  const query = { recordedAt: { $gte: sinceDate(opts.windowDays ?? 30) } };
+  if (opts.beneficiaryId) query.beneficiaryId = opts.beneficiaryId;
+
+  const entries = await GoalProgressEntry.find(query).lean();
+  const goalMap = groupByGoal(entries);
+  const latestProgress = [];
+  for (const [, items] of goalMap) {
+    const series = trajectory(items);
+    if (series.length) latestProgress.push(series[series.length - 1].progressPercent);
+  }
+
+  const averageProgressPct = latestProgress.length
+    ? Math.round((latestProgress.reduce((a, b) => a + b, 0) / latestProgress.length) * 10) / 10
+    : null;
+
+  return {
+    averageProgressPct,
+    goalCount: goalMap.size,
+    entriesCount: entries.length,
+  };
+}
+
+/**
+ * Percentage of tracked goals marked achieved within the window.
+ * Used by KPI `rehab.goals.achievement_rate.pct` → achievedPct.
+ */
+async function achievementSummary(opts = {}) {
+  const { TherapeuticGoal } = getModels();
+  if (!TherapeuticGoal) return { achievedPct: null, achieved: 0, total: 0 };
+
+  const baseQ = {};
+  if (opts.branchId) baseQ.branchId = opts.branchId;
+  if (opts.beneficiaryId) baseQ.beneficiaryId = opts.beneficiaryId;
+
+  const since = sinceDate(opts.windowDays ?? 90);
+  const [achieved, total] = await Promise.all([
+    TherapeuticGoal.countDocuments({
+      ...baseQ,
+      status: 'achieved',
+      achievedDate: { $gte: since },
+    }),
+    TherapeuticGoal.countDocuments({
+      ...baseQ,
+      status: { $in: ['active', 'achieved', 'partially_achieved', 'not_achieved'] },
+    }),
+  ]);
+
+  return {
+    achievedPct: total > 0 ? Math.round((achieved / total) * 1000) / 10 : null,
+    achieved,
+    total,
+  };
+}
+
+/**
+ * Percentage of goals with no progress entry in `stallDays` (default 21).
+ * Used by KPI `rehab.goals.stalled.pct` → stalledPct.
+ */
+async function trendSummary(opts = {}) {
+  const { GoalProgressEntry } = getModels();
+  if (!GoalProgressEntry) return { stalledPct: null, stalledCount: 0, totalGoals: 0 };
+
+  const query = { recordedAt: { $gte: sinceDate(opts.windowDays ?? 90) } };
+  if (opts.beneficiaryId) query.beneficiaryId = opts.beneficiaryId;
+
+  const entries = await GoalProgressEntry.find(query).lean();
+  const goalMap = groupByGoal(entries);
+  const asOf = new Date();
+  const stallDays = Number(opts.stallDays ?? 21);
+  let stalledCount = 0;
+
+  for (const [, items] of goalMap) {
+    const series = trajectory(items);
+    if (!series.length) continue;
+    const last = series[series.length - 1];
+    const daysSinceLast = Math.round((asOf - last.recordedAt) / 86400000);
+    const v = verdict(series);
+    if (v !== 'achieved' && daysSinceLast >= stallDays) stalledCount += 1;
+  }
+
+  const totalGoals = goalMap.size;
+  return {
+    stalledPct: totalGoals > 0 ? Math.round((stalledCount / totalGoals) * 1000) / 10 : null,
+    stalledCount,
+    totalGoals,
+  };
+}
+
+/**
+ * Mean days from goal startDate to achievedDate for goals closed in the window.
+ * Used by KPI `rehab.goals.velocity.mean_days` → meanDays.
+ */
+async function velocitySummary(opts = {}) {
+  const { TherapeuticGoal } = getModels();
+  if (!TherapeuticGoal) return { meanDays: null, count: 0 };
+
+  const baseQ = {
+    status: 'achieved',
+    achievedDate: { $gte: sinceDate(opts.windowDays ?? 180) },
+  };
+  if (opts.branchId) baseQ.branchId = opts.branchId;
+  if (opts.beneficiaryId) baseQ.beneficiaryId = opts.beneficiaryId;
+
+  const goals = await TherapeuticGoal.find(baseQ, 'startDate achievedDate').lean();
+  const durations = goals
+    .filter(g => g.startDate && g.achievedDate)
+    .map(g => Math.round((new Date(g.achievedDate) - new Date(g.startDate)) / 86400000));
+
+  return {
+    meanDays: durations.length
+      ? Math.round((durations.reduce((a, b) => a + b, 0) / durations.length) * 10) / 10
+      : null,
+    count: durations.length,
+  };
+}
+
+/**
+ * Mean FIM (Functional Independence Measure) delta for goals/outcome entries
+ * that carry a FIM-linked outcomeMeasureCode.
+ */
+async function fimDeltaMean(opts = {}) {
+  const { GoalProgressEntry } = getModels();
+  if (!GoalProgressEntry) return { deltaMean: null, count: 0 };
+
+  const baseQ = { outcomeMeasureCode: { $in: ['FIM', 'fim', 'functionalIndependence'] } };
+  if (opts.branchId) baseQ.branchId = opts.branchId;
+  if (opts.beneficiaryId) baseQ.beneficiaryId = opts.beneficiaryId;
+  if (opts.windowDays) baseQ.recordedAt = { $gte: sinceDate(opts.windowDays) };
+
+  const entries = await GoalProgressEntry.find(baseQ).lean();
+  const byGoal = groupByGoal(entries);
+  const deltas = [];
+  for (const [, items] of byGoal) {
+    const series = trajectory(items);
+    if (series.length >= 2) {
+      const first = series[0].progressPercent;
+      const last = series[series.length - 1].progressPercent;
+      deltas.push(last - first);
+    }
+  }
+  return {
+    deltaMean: deltas.length
+      ? Math.round((deltas.reduce((a, b) => a + b, 0) / deltas.length) * 10) / 10
+      : null,
+    count: deltas.length,
+  };
+}
+
 module.exports = {
   THRESHOLDS,
   trajectory,
@@ -164,4 +342,9 @@ module.exports = {
   detectStalled,
   groupByGoal,
   summarizeByBeneficiary,
+  summarize,
+  achievementSummary,
+  trendSummary,
+  velocitySummary,
+  fimDeltaMean,
 };

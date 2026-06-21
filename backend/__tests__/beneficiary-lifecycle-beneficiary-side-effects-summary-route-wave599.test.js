@@ -20,8 +20,7 @@ const express = require('express');
 const request = require('supertest');
 const createBeneficiaryLifecycleRouter = require('../routes/beneficiary-lifecycle.routes');
 
-const PATH =
-  '/api/v1/beneficiary-lifecycle/beneficiaries/BEN-1/side-effects-summary';
+const PATH = '/api/v1/beneficiary-lifecycle/beneficiaries/BEN-1/side-effects-summary';
 
 // Two transitions in branch-a (one with real data effects, one notify-only)
 // + one transition in branch-b (real data effects) to exercise filtering.
@@ -41,7 +40,12 @@ function historyFixture() {
         {
           operation: 'notify-family',
           status: 'ok',
-          metadata: { name: 'notify-family', category: 'notification', deferred: true, emitted: true },
+          metadata: {
+            name: 'notify-family',
+            category: 'notification',
+            deferred: true,
+            emitted: true,
+          },
         },
       ],
     },
@@ -97,7 +101,13 @@ function makeGovernance(allow = true) {
   return { hasPermission: jest.fn(() => allow) };
 }
 
-function makeApp({ service, governance, userId = 'U-1', role = 'branch_manager', branchScope } = {}) {
+function makeApp({
+  service,
+  governance,
+  userId = 'U-1',
+  role = 'branch_manager',
+  branchScope,
+} = {}) {
   const svc = service || makeService();
   const gov = governance || makeGovernance();
   const app = express();
@@ -148,6 +158,12 @@ describe('W599 GET /beneficiaries/:beneficiaryId/side-effects-summary', () => {
       cancelledAppointments: 12, // 3 + 9
       closedEpisodes: 2,
       releasedFromEpisodes: 1,
+      pausedAppointments: 0,
+      resumedAppointments: 0,
+      restoredAppointments: 0,
+      reopenedEpisodes: 0,
+      reactivatedFromEpisodes: 0,
+      rolledBackTransfers: 0,
       total: 15,
     });
   });

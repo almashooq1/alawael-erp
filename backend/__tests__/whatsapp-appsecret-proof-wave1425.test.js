@@ -41,7 +41,12 @@ describe('W1425 — appsecret_proof on Graph calls', () => {
   const SECRET = 'appsecret456';
   const PID = '999';
   const saved = {};
-  const KEYS = ['WHATSAPP_API_TOKEN', 'WHATSAPP_WEBHOOK_SECRET', 'WHATSAPP_PHONE_ID', 'WHATSAPP_ENABLED'];
+  const KEYS = [
+    'WHATSAPP_API_TOKEN',
+    'WHATSAPP_WEBHOOK_SECRET',
+    'WHATSAPP_PHONE_ID',
+    'WHATSAPP_ENABLED',
+  ];
 
   beforeEach(() => {
     KEYS.forEach(k => (saved[k] = process.env[k]));

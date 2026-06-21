@@ -57,10 +57,12 @@ function createFakeClaimModel(rows) {
         sort: () => chain,
         limit: async n => {
           let matched = rows.filter(r => r.nphies?.submission?.status === 'PENDING_REVIEW');
-          if (q.$or) {
+          const updatedAtLt =
+            q && q['nphies.submission.updatedAt'] && q['nphies.submission.updatedAt'].$lt;
+          if (updatedAtLt) {
             matched = matched.filter(r => {
               const t = r.nphies?.submission?.updatedAt;
-              return !t || t < q.$or[0]['nphies.submission.updatedAt'].$lt;
+              return t && t < updatedAtLt;
             });
           }
           return matched.slice(0, n);

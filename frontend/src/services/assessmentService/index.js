@@ -11,12 +11,8 @@ import logger from 'utils/logger';
 
 import ASSESSMENT_SCALES from './scales';
 import ASSESSMENT_TESTS from './tests';
-import {
-  MOCK_BENEFICIARIES,
-  DISABILITY_TYPES,
-  generateMockScaleResults,
-  generateMockTestResults,
-} from './mockData';
+import { DISABILITY_TYPES } from './mockData';
+import { loadScales } from './scalesLoader';
 
 /* ─────────────────────────── Service methods ─────────────────────────── */
 
@@ -48,11 +44,11 @@ const assessmentService = {
       const response = await apiClient.get('/api/v1/disability/beneficiaries');
       if (response?.data?.length) return response.data;
       if (Array.isArray(response) && response.length) return response;
-      logger.info('Beneficiaries API returned empty — using local data');
-      return MOCK_BENEFICIARIES;
+      logger.info('Beneficiaries API returned empty');
+      return [];
     } catch (err) {
-      logger.warn('Beneficiaries API unavailable — using local data:', err?.message);
-      return MOCK_BENEFICIARIES;
+      logger.warn('Beneficiaries API unavailable:', err?.message);
+      return [];
     }
   },
 
@@ -64,20 +60,17 @@ const assessmentService = {
 
   async getScaleResults(filters = {}) {
     try {
-      const response = await apiClient.get('/api/v1/disability/assessment/scale-results', {
+      return await apiClient.get('/api/v1/disability/assessment/scale-results', {
         params: filters,
       });
-      return response;
     } catch (err) {
-      logger.warn('Scale results API error — using generated data:', err?.message);
-      let results = generateMockScaleResults();
-      if (filters.beneficiaryId) {
-        results = results.filter(r => r.beneficiaryId === filters.beneficiaryId);
-      }
-      if (filters.scaleId) {
-        results = results.filter(r => r.scaleId === filters.scaleId);
-      }
-      return { success: true, data: results, count: results.length, _fromCache: true };
+      logger.warn('Scale results API error:', err?.message);
+      return {
+        success: false,
+        data: [],
+        count: 0,
+        error: err?.message || 'فشل تحميل نتائج المقاييس',
+      };
     }
   },
 
@@ -94,20 +87,17 @@ const assessmentService = {
 
   async getTestResults(filters = {}) {
     try {
-      const response = await apiClient.get('/api/v1/disability/assessment/test-results', {
+      return await apiClient.get('/api/v1/disability/assessment/test-results', {
         params: filters,
       });
-      return response;
     } catch (err) {
-      logger.warn('Test results API error — using generated data:', err?.message);
-      let results = generateMockTestResults();
-      if (filters.beneficiaryId) {
-        results = results.filter(r => r.beneficiaryId === filters.beneficiaryId);
-      }
-      if (filters.testId) {
-        results = results.filter(r => r.testId === filters.testId);
-      }
-      return { success: true, data: results, count: results.length, _fromCache: true };
+      logger.warn('Test results API error:', err?.message);
+      return {
+        success: false,
+        data: [],
+        count: 0,
+        error: err?.message || 'فشل تحميل نتائج الاختبارات',
+      };
     }
   },
 
@@ -124,27 +114,10 @@ const assessmentService = {
 
   async getStatistics() {
     try {
-      const data = await apiClient.get('/api/v1/disability/statistics');
-      return data;
+      return await apiClient.get('/api/v1/disability/statistics');
     } catch (err) {
-      logger.warn('Statistics API unavailable — using cached data:', err?.message);
-      return {
-        success: true,
-        data: {
-          totalAssessments: 14,
-          totalBeneficiaries: 6,
-          scaleAssessments: 8,
-          testAssessments: 6,
-          averageScore: 49.8,
-          completionRate: 88,
-          monthlyTrend: [
-            { month: 'يناير', scales: 3, tests: 2 },
-            { month: 'فبراير', scales: 8, tests: 5 },
-            { month: 'مارس', scales: 10, tests: 7 },
-          ],
-        },
-        _fromCache: true,
-      };
+      logger.warn('Statistics API unavailable:', err?.message);
+      return { success: false, data: null, error: err?.message || 'فشل تحميل الإحصائيات' };
     }
   },
 
@@ -152,10 +125,11 @@ const assessmentService = {
 
   async getAvailableScales() {
     try {
-      const response = await apiClient.get('/api/v1/disability/assessment/scales');
-      return response;
+      const backend = await apiClient.get('/api/v1/disability/assessment/scales');
+      if (backend?.data?.length) return backend;
     } catch (err) {
-      logger.warn('Available scales API error — using static list:', err?.message);
+      logger.warn('Available scales API error:', err?.message);
+      // Static scale definitions are configuration, not generated mock data.
       return {
         success: true,
         data: ASSESSMENT_SCALES.map(s => ({
@@ -165,7 +139,6 @@ const assessmentService = {
           maxScore: s.maxScore,
           domainsCount: s.domains.length,
         })),
-        _fromCache: true,
       };
     }
   },
@@ -177,8 +150,14 @@ const assessmentService = {
     } catch (err) {
       logger.warn('Scale details API error — using static:', err?.message);
       const scale = ASSESSMENT_SCALES.find(s => s.id === scaleKey);
-      return scale ? { success: true, data: scale, _fromCache: true } : null;
+      return scale ? { success: true, data: scale } : null;
     }
+  },
+
+  /* ── Load canonical scale definitions from Backend ── */
+
+  async loadScales() {
+    return loadScales();
   },
 
   /* ── Recommended Scales per Disability Type ── */
@@ -186,7 +165,7 @@ const assessmentService = {
   async getRecommendedScales(disabilityType) {
     try {
       const response = await apiClient.get(
-        `/disability/assessment/recommended-scales/${encodeURIComponent(disabilityType)}`
+        `/api/v1/disability/assessment/recommended-scales/${encodeURIComponent(disabilityType)}`
       );
       return response;
     } catch (err) {
@@ -231,12 +210,12 @@ const assessmentService = {
   async getScaleProgress(beneficiaryId, scaleKey) {
     try {
       const response = await apiClient.get(
-        `/disability/assessment/progress/${beneficiaryId}/${scaleKey}`
+        `/api/v1/disability/assessment/progress/${beneficiaryId}/${scaleKey}`
       );
       return response;
     } catch (err) {
       logger.warn('Progress API error:', err?.message);
-      return { success: true, data: { assessments: [], trend: 'unknown' }, _fromCache: true };
+      return { success: false, data: null, error: err?.message || 'فشل تحميل التقدم' };
     }
   },
 
@@ -422,7 +401,7 @@ const assessmentService = {
   async getComprehensiveProfile(beneficiaryId) {
     try {
       const response = await apiClient.get(
-        `/disability/assessment/comprehensive-profile/${beneficiaryId}`
+        `/api/v1/disability/assessment/comprehensive-profile/${beneficiaryId}`
       );
       return response;
     } catch (err) {
@@ -436,7 +415,7 @@ const assessmentService = {
   async getRehabPriority(beneficiaryId) {
     try {
       const response = await apiClient.get(
-        `/disability/assessment/rehab-priority/${beneficiaryId}`
+        `/api/v1/disability/assessment/rehab-priority/${beneficiaryId}`
       );
       return response;
     } catch (err) {

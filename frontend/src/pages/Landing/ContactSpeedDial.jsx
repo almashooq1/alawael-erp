@@ -18,7 +18,14 @@ import { openWhatsApp } from '../../data/whatsappLink';
 /* Inline SVG icons (Heroicons-outline style, currentColor) */
 function IconCalendar() {
   return (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden="true"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -29,7 +36,14 @@ function IconCalendar() {
 }
 function IconPhone() {
   return (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden="true"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -40,7 +54,14 @@ function IconPhone() {
 }
 function IconMapPin() {
   return (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden="true"
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
       <path
         strokeLinecap="round"
@@ -59,7 +80,14 @@ function IconWhatsApp() {
 }
 function IconChat() {
   return (
-    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+    <svg
+      className="w-7 h-7"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden="true"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -70,7 +98,14 @@ function IconChat() {
 }
 function IconClose() {
   return (
-    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+    <svg
+      className="w-7 h-7"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden="true"
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
@@ -84,7 +119,9 @@ function Action({ as = 'a', label, icon, colorClass, delay, open, ...rest }) {
       {...rest}
       aria-label={label}
       className={`flex items-center justify-end gap-3 transition-all duration-300 ${
-        open ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 translate-y-3'
+        open
+          ? 'pointer-events-auto opacity-100 translate-y-0'
+          : 'pointer-events-none opacity-0 translate-y-3'
       }`}
       style={{ transitionDelay: open ? `${delay}ms` : '0ms' }}
     >
@@ -113,7 +150,7 @@ export default function ContactSpeedDial({ onBook }) {
   // Escape closes the speed-dial
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (e) => {
+    const onKey = e => {
       if (e.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKey);
@@ -123,7 +160,7 @@ export default function ContactSpeedDial({ onBook }) {
   // Outside click closes the speed-dial
   useEffect(() => {
     if (!open) return undefined;
-    const onDown = (e) => {
+    const onDown = e => {
       if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', onDown);
@@ -184,7 +221,7 @@ export default function ContactSpeedDial({ onBook }) {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => {
+          onClick={e => {
             // Open the WhatsApp app directly (skip the wa.me interstitial)
             e.preventDefault();
             setOpen(false);
@@ -201,9 +238,11 @@ export default function ContactSpeedDial({ onBook }) {
       {/* Main FAB — toggles the speed-dial open/closed */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        aria-label={open ? tr('إغلاق قائمة التواصل', 'Close contact menu') : tr('تواصل معنا', 'Contact us')}
+        aria-label={
+          open ? tr('إغلاق قائمة التواصل', 'Close contact menu') : tr('تواصل معنا', 'Contact us')
+        }
         title={tr('تواصل معنا', 'Contact us')}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-2xl shadow-primary-900/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-primary-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
       >

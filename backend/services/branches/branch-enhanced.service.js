@@ -204,8 +204,25 @@ class BranchEnhancedService {
     session.startTransaction();
 
     try {
-      // تحديث الفرع في سجل المستفيد
+      // Capture rollback snapshot before mutating the beneficiary.
       const Beneficiary = require('../../models/Beneficiary');
+      const beneficiary = await Beneficiary.findById(transfer.beneficiary).session(session).lean();
+      if (beneficiary) {
+        transfer.transferNotes = {
+          ...(transfer.transferNotes && typeof transfer.transferNotes === 'object'
+            ? transfer.transferNotes
+            : {}),
+          rollbackSnapshot: {
+            originalBranchId: beneficiary.branchId,
+            originalFileNumber: beneficiary.fileNumber,
+            originalStatus: beneficiary.status,
+            rolledBackAt: null,
+          },
+        };
+        await transfer.save({ session });
+      }
+
+      // تحديث الفرع في سجل المستفيد
       await Beneficiary.findByIdAndUpdate(
         transfer.beneficiary,
         { branchId: transfer.toBranch },

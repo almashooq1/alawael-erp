@@ -183,7 +183,29 @@ router.put(
   })
 );
 
-/* ─── PUT /care-plans/:planId/activate — Activate care plan ───────────── */
+/* ─── POST /care-plans/:planId/submit — Draft → pending approval ──────── */
+router.post(
+  '/:planId/submit',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.submitPlan(req.params.planId);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── POST /care-plans/:planId/approve — Pending approval → active ────── */
+router.post(
+  '/:planId/approve',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.activatePlan(req.params.planId, {
+      actor: req.user ? { id: req.user.id || req.user._id, role: req.user.role } : undefined,
+    });
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── PUT /care-plans/:planId/activate — Activate care plan (canonical) ─ */
 router.put(
   '/:planId/activate',
   requireService,
@@ -197,7 +219,47 @@ router.put(
   })
 );
 
-/* ─── PUT /care-plans/:planId/complete — Complete care plan ───────────── */
+/* ─── POST /care-plans/:planId/reject — Pending approval → draft ──────── */
+router.post(
+  '/:planId/reject',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.rejectPlan(req.params.planId, req.body);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── POST /care-plans/:planId/suspend — Active → suspended ───────────── */
+router.post(
+  '/:planId/suspend',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.suspendPlan(req.params.planId, req.body);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── POST /care-plans/:planId/resume — Suspended → active ────────────── */
+router.post(
+  '/:planId/resume',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.resumePlan(req.params.planId);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── POST /care-plans/:planId/complete — Active → completed ──────────── */
+router.post(
+  '/:planId/complete',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const plan = await carePlansService.completePlan(req.params.planId, req.body);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── PUT /care-plans/:planId/complete — Complete care plan (canonical) ─ */
 router.put(
   '/:planId/complete',
   requireService,
@@ -213,6 +275,20 @@ router.post(
   requireService,
   asyncHandler(async (req, res) => {
     const plan = await carePlansService.addGoal(req.params.planId, req.body);
+    res.json({ success: true, data: plan });
+  })
+);
+
+/* ─── POST /care-plans/goals — Add goal to plan (UI-compat, body carries carePlanId) */
+router.post(
+  '/goals',
+  requireService,
+  asyncHandler(async (req, res) => {
+    const planId = req.body.carePlanId;
+    if (!planId) {
+      return res.status(400).json({ success: false, message: 'carePlanId مطلوب' });
+    }
+    const plan = await carePlansService.addGoal(planId, req.body);
     res.json({ success: true, data: plan });
   })
 );

@@ -116,7 +116,7 @@ const BeneficiaryVoiceLogSchema = new mongoose.Schema(
     actionTakenBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
     // Linkages
-    relatedSessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session' },
+    relatedSessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClinicalSession' },
     relatedConsentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Consent' },
     relatedComplaintId: { type: mongoose.Schema.Types.ObjectId, ref: 'Complaint' },
 

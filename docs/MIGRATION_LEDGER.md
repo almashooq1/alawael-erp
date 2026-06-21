@@ -75,12 +75,38 @@ Concepts that exist in BOTH the live 66666 backend and the frozen V4 skeleton. T
 
 > When you find another overlap, add a row here rather than silently building a second copy.
 
-## 5. What is settled vs open
+## 5. V4 micro-services archival (2026-06)
+
+The frozen V4 NestJS/Prisma skeleton that previously lived under
+`alawael-rehab-platform/services/*` has been physically archived to
+`_archive/services-v4/` and removed from the active workspace build.
+
+| Aspect            | Detail                                                                                                                                                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Date**          | 2026-06                                                                                                                                                                                                                                                       |
+| **Source**        | `alawael-rehab-platform/services/*`                                                                                                                                                                                                                           |
+| **Destination**   | `alawael-rehab-platform/_archive/services-v4/`                                                                                                                                                                                                                |
+| **What moved**    | `services/core` (~134 files), `services/beneficiary`, `services/clinical`, `services/documents`, `services/notifications`, `services/reports`, and the remaining empty-domain stubs.                                                                          |
+| **Rationale**     | The live UI never consumed these services; they defaulted to port 3001 and collided with the live 66666 backend. Keeping them in the active workspace added build time, dependency noise, and the recurring trap of building backend code that nothing calls. |
+| **Verification**  | `pnpm-workspace.yaml` no longer includes `services/*`; `git status` shows the source directories deleted and `_archive/` created. The live build (`pnpm run typecheck`) passes across the remaining 15 packages.                                              |
+| **Reversibility** | Full contents are preserved in `_archive/services-v4/`; restoring a service is a directory move + workspace re-add.                                                                                                                                           |
+
+### Impact on this ledger
+
+- The "frozen" status in §2 is upgraded to **archived**: the code is retained for
+  reference, but it is no longer part of the daily workspace or build.
+- The routing rule in §3 is unchanged: new backend work still goes to
+  `66666/backend`.
+
+## 6. What is settled vs open
 
 - ✅ **Frontend convergence** — `web-admin` is the single go-forward UI; 66666's legacy
   React frontend is dead (maintenance only, do not extend).
 - ✅ **Backend home** — `66666/backend` is the canonical live API; new backend work goes here.
 - ✅ **Repo structure** — stay two repos; do not merge.
-- ⏸️ **V4 micro-services** — frozen, not deleted (a future funded cutover may resurrect it).
+- ✅ **V4 micro-services** — archived under `_archive/services-v4/`; retained for reference
+  but no longer built.
+- ⏸️ **V4 resurrection** — only if a deliberate, gateway-fronted, domain-by-domain cutover
+  is explicitly funded.
 - ❓ **Public/private** — `alawael-erp` is public, `alawael-rehab-platform` is private. A
   hard blocker to any physical merge; unchanged by this decision.

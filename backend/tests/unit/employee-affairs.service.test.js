@@ -351,7 +351,7 @@ describe('updateEmployee', () => {
     expect(mockEmployee.findByIdAndUpdate).toHaveBeenCalledWith(
       'emp1',
       expect.objectContaining({ position: 'test' }),
-      expect.objectContaining({ new: true, runValidators: true })
+      expect.objectContaining({ returnDocument: 'after', runValidators: true })
     );
   });
 
@@ -370,7 +370,7 @@ describe('terminateEmployee', () => {
     expect(mockEmployee.findByIdAndUpdate).toHaveBeenCalledWith(
       'emp1',
       expect.objectContaining({ status: 'terminated', isActive: false }),
-      { new: true }
+      { returnDocument: 'after' }
     );
   });
 
@@ -381,7 +381,7 @@ describe('terminateEmployee', () => {
     expect(mockEmployee.findByIdAndUpdate).toHaveBeenCalledWith(
       'emp1',
       expect.objectContaining({ 'contract.endDate': termDate }),
-      { new: true }
+      { returnDocument: 'after' }
     );
   });
 
@@ -1058,7 +1058,7 @@ describe('setEmployeeGoals', () => {
     expect(mockEmployee.findByIdAndUpdate).toHaveBeenCalledWith(
       'emp1',
       { 'performance.goals': goals },
-      { new: true }
+      { returnDocument: 'after' }
     );
   });
 
@@ -1155,7 +1155,7 @@ describe('renewContract', () => {
         'contract.endDate': '2026-12-31',
         'contract.contractType': 'full-time',
       }),
-      { new: true }
+      { returnDocument: 'after' }
     );
     expect(result).toBe(emp);
   });

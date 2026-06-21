@@ -17,10 +17,23 @@ const svc = require('../services/whatsapp/whatsappService');
 
 function mockRes() {
   const res = { statusCode: null, body: undefined, _type: null };
-  res.status = c => { res.statusCode = c; return res; };
-  res.type = t => { res._type = t; return res; };
-  res.send = b => { res.body = b; return res; };
-  res.sendStatus = c => { res.statusCode = c; res.body = undefined; return res; };
+  res.status = c => {
+    res.statusCode = c;
+    return res;
+  };
+  res.type = t => {
+    res._type = t;
+    return res;
+  };
+  res.send = b => {
+    res.body = b;
+    return res;
+  };
+  res.sendStatus = c => {
+    res.statusCode = c;
+    res.body = undefined;
+    return res;
+  };
   return res;
 }
 
@@ -73,14 +86,20 @@ describe('W1424 — verifyWebhook dotted-param robustness', () => {
   });
 
   test('wrong token → 403', () => {
-    const req = { query: {}, originalUrl: `/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=WRONG&hub.challenge=x` };
+    const req = {
+      query: {},
+      originalUrl: `/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=WRONG&hub.challenge=x`,
+    };
     const res = mockRes();
     svc.verifyWebhook(req, res);
     expect(res.statusCode).toBe(403);
   });
 
   test('missing mode → 403', () => {
-    const req = { query: {}, originalUrl: `/api/whatsapp/webhook?hub.verify_token=${TOKEN}&hub.challenge=x` };
+    const req = {
+      query: {},
+      originalUrl: `/api/whatsapp/webhook?hub.verify_token=${TOKEN}&hub.challenge=x`,
+    };
     const res = mockRes();
     svc.verifyWebhook(req, res);
     expect(res.statusCode).toBe(403);
@@ -88,7 +107,10 @@ describe('W1424 — verifyWebhook dotted-param robustness', () => {
 
   test('challenge echo is sanitized (no HTML/XSS)', () => {
     const evil = encodeURIComponent('<script>alert(1)</script>');
-    const req = { query: {}, originalUrl: `/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=${TOKEN}&hub.challenge=${evil}` };
+    const req = {
+      query: {},
+      originalUrl: `/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=${TOKEN}&hub.challenge=${evil}`,
+    };
     const res = mockRes();
     svc.verifyWebhook(req, res);
     expect(res.statusCode).toBe(200);

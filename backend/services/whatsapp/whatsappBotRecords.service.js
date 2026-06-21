@@ -81,7 +81,8 @@ function loadModel(registeredName, requirePath) {
 }
 const getComplaintModel = () => loadModel('Complaint', '../../models/Complaint');
 const getNpsModel = () => loadModel('NpsResponse', '../../models/NpsResponse');
-const getBookingModel = () => loadModel('PublicBookingRequest', '../../models/PublicBookingRequest');
+const getBookingModel = () =>
+  loadModel('PublicBookingRequest', '../../models/PublicBookingRequest');
 const getFamilyMemberModel = () =>
   loadModel('FamilyMember', '../../domains/family/models/FamilyMember');
 
@@ -144,7 +145,9 @@ function deriveSubject(description) {
   const d = String(description == null ? '' : description).trim();
   if (!d) return 'شكوى عبر بوت واتساب';
   const firstLine = d.split('\n')[0].trim();
-  return (firstLine.length > 80 ? `${firstLine.slice(0, 77)}…` : firstLine) || 'شكوى عبر بوت واتساب';
+  return (
+    (firstLine.length > 80 ? `${firstLine.slice(0, 77)}…` : firstLine) || 'شكوى عبر بوت واتساب'
+  );
 }
 
 /** Build the booking notes blob preserving the raw bot answers. */
@@ -166,7 +169,12 @@ async function resolveGuardian(phone) {
   if (!FamilyMember) return null;
   const norm = whatsappService.normalizePhone(phone);
   const m = await FamilyMember.findOne({
-    $or: [{ phone }, { phone: norm }, { 'contactInfo.phone': phone }, { 'contactInfo.phone': norm }],
+    $or: [
+      { phone },
+      { phone: norm },
+      { 'contactInfo.phone': phone },
+      { 'contactInfo.phone': norm },
+    ],
     isDeleted: { $ne: true },
   })
     .select('_id beneficiaryId branchId')
@@ -202,7 +210,10 @@ async function createSatisfaction(collected, gctx) {
   const Nps = getNpsModel();
   if (!Nps) return { ok: false, reason: 'model_unavailable' };
   const score = npsScoreFromRating(collected.rating);
-  const comment = [collected.liked, collected.improve].map(s => (s || '').trim()).filter(Boolean).join(' | ');
+  const comment = [collected.liked, collected.improve]
+    .map(s => (s || '').trim())
+    .filter(Boolean)
+    .join(' | ');
   const doc = await Nps.create({
     surveyKey: 'whatsapp_satisfaction',
     guardianId: guardian.guardianId,
@@ -254,7 +265,12 @@ async function createRecordFor(sideEffect, ctx = {}) {
     return { ok: false, reason: 'no_record_mapping' };
   }
   const collected = sideEffect.collected || {};
-  const gctx = { phone: ctx.phone, senderName: ctx.senderName, beneficiaryId: null, branchId: null };
+  const gctx = {
+    phone: ctx.phone,
+    senderName: ctx.senderName,
+    beneficiaryId: null,
+    branchId: null,
+  };
   // Best-effort beneficiary/branch context for complaint records.
   if (sideEffect.kind === reg.SIDE_EFFECT.CREATE_COMPLAINT) {
     const g = await resolveGuardian(ctx.phone).catch(() => null);
@@ -264,9 +280,12 @@ async function createRecordFor(sideEffect, ctx = {}) {
     }
   }
   try {
-    if (sideEffect.kind === reg.SIDE_EFFECT.CREATE_COMPLAINT) return await createComplaint(collected, gctx);
-    if (sideEffect.kind === reg.SIDE_EFFECT.SUBMIT_SATISFACTION) return await createSatisfaction(collected, gctx);
-    if (sideEffect.kind === reg.SIDE_EFFECT.CREATE_REGISTRATION) return await createRegistration(collected, gctx);
+    if (sideEffect.kind === reg.SIDE_EFFECT.CREATE_COMPLAINT)
+      return await createComplaint(collected, gctx);
+    if (sideEffect.kind === reg.SIDE_EFFECT.SUBMIT_SATISFACTION)
+      return await createSatisfaction(collected, gctx);
+    if (sideEffect.kind === reg.SIDE_EFFECT.CREATE_REGISTRATION)
+      return await createRegistration(collected, gctx);
     return { ok: false, reason: 'no_record_mapping' };
   } catch (err) {
     logger.warn(`[WhatsApp BotRecords] create ${sideEffect.kind} failed: ${err.message}`);

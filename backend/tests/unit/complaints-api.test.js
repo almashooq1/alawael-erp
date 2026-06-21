@@ -15,6 +15,7 @@ jest.mock('../../middleware/auth', () => ({
 }));
 jest.mock('../../middleware/branchScope.middleware', () => ({
   requireBranchAccess: (_req, _res, next) => next(),
+  branchFilter: () => ({}),
 }));
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
@@ -57,10 +58,13 @@ jest.mock('../../models/Complaint', () => {
   });
   MockComplaint.find = (...args) => mockFind(...args);
   MockComplaint.findById = (...args) => mockFindById(...args);
+  MockComplaint.findOne = (...args) => mockFindById(...args);
   MockComplaint.countDocuments = (...args) => mockCountDocuments(...args);
   MockComplaint.aggregate = (...args) => mockAggregate(...args);
   MockComplaint.findByIdAndUpdate = (...args) => mockFindByIdAndUpdate(...args);
+  MockComplaint.findOneAndUpdate = (...args) => mockFindByIdAndUpdate(...args);
   MockComplaint.findByIdAndDelete = (...args) => mockFindByIdAndDelete(...args);
+  MockComplaint.findOneAndDelete = (...args) => mockFindByIdAndDelete(...args);
   return MockComplaint;
 });
 

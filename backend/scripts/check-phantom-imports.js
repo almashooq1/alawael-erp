@@ -38,12 +38,11 @@ const SCAN_ALL = args.includes('--all');
 // with a comment + reason if a real false positive appears.
 const ALLOWLIST = new Set([]);
 
-const DESTRUCTURE_RE =
-  /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"](\.[^'"]+)['"]\s*\)/g;
+const DESTRUCTURE_RE = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"](\.[^'"]+)['"]\s*\)/g;
 
 function listJsFiles(dir) {
   const out = [];
-  const walk = (d) => {
+  const walk = d => {
     let entries;
     try {
       entries = fs.readdirSync(d, { withFileTypes: true });
@@ -119,8 +118,8 @@ function scanFile(file) {
     if (exp === null) continue;
     const names = rawNames
       .split(',')
-      .map((s) => s.trim().split(':')[0].trim())
-      .filter((s) => s && /^[A-Za-z_$][\w$]*$/.test(s));
+      .map(s => s.trim().split(':')[0].trim())
+      .filter(s => s && /^[A-Za-z_$][\w$]*$/.test(s));
     for (const name of names) {
       if (exp.has(name)) continue;
       // `_`-prefixed names are the codebase's "intentionally unused import"
@@ -163,11 +162,19 @@ function main() {
     );
   } else {
     process.stdout.write(
-      '[FAIL] check:phantom-imports -- ' + all.length + ' phantom import(s) (name not exported by target):\n'
+      '[FAIL] check:phantom-imports -- ' +
+        all.length +
+        ' phantom import(s) (name not exported by target):\n'
     );
     for (const p of all) {
       process.stdout.write(
-        '  ' + p.file + '\n    { ' + p.name + " } from '" + p.importPath + "' -- NOT exported (500 at call time)\n"
+        '  ' +
+          p.file +
+          '\n    { ' +
+          p.name +
+          " } from '" +
+          p.importPath +
+          "' -- NOT exported (500 at call time)\n"
       );
     }
     process.stdout.write('\nFix: export the name from the target module, or correct the import.\n');

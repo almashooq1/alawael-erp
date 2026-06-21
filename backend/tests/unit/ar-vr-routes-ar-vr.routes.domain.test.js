@@ -53,9 +53,9 @@ describe('domains/ar-vr/routes/ar-vr.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (5)', () => {
+  test('has local dependencies (7)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(5);
+    expect(locals.length).toBe(7);
   });
 
   test('has module.exports', () => {

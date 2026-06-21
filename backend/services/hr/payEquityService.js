@@ -193,7 +193,9 @@ async function loadBandLookup() {
     for (const m of maps) titleToBand.set(m.jobTitle, m.bandCode);
   }
   if (CompensationBand) {
-    const bands = await CompensationBand.find({ isActive: true }).select('bandCode midSalary').lean();
+    const bands = await CompensationBand.find({ isActive: true })
+      .select('bandCode midSalary')
+      .lean();
     for (const b of bands) bandToMid.set(b.bandCode, Number(b.midSalary));
   }
   return { titleToBand, bandToMid };
@@ -250,8 +252,10 @@ async function compaRatioAnalysis({ branchId, department = null } = {}) {
 /** Identity-bearing list of employees paid BELOW their band — stricter role. */
 async function belowBandEmployees({ branchId, department = null, belowThreshold } = {}) {
   const { entries } = await computeCompaEntries({ branchId, department });
-  const t = Number.isFinite(Number(belowThreshold)) ? Number(belowThreshold) : compaLib.DEFAULT_BELOW;
-  return entries.filter((e) => e.compaRatio < t).sort((a, b) => a.compaRatio - b.compaRatio);
+  const t = Number.isFinite(Number(belowThreshold))
+    ? Number(belowThreshold)
+    : compaLib.DEFAULT_BELOW;
+  return entries.filter(e => e.compaRatio < t).sort((a, b) => a.compaRatio - b.compaRatio);
 }
 
 /** List the job→band mappings (org-global config). */
@@ -266,7 +270,13 @@ async function listJobBandMappings() {
 }
 
 /** Create or update a job→band mapping (admin/HR config; one band per title). */
-async function upsertJobBandMapping({ jobTitle, bandCode, active = true, note = null, createdBy = null } = {}) {
+async function upsertJobBandMapping({
+  jobTitle,
+  bandCode,
+  active = true,
+  note = null,
+  createdBy = null,
+} = {}) {
   const JobBandMapping = getModel('JobBandMapping');
   if (!JobBandMapping) {
     const e = new Error('JobBandMapping model unavailable');
@@ -282,7 +292,9 @@ async function upsertJobBandMapping({ jobTitle, bandCode, active = true, note = 
   }
   return JobBandMapping.findOneAndUpdate(
     { jobTitle: title },
-    { $set: { bandCode: code, active: !!active, note: note || null, createdBy: createdBy || null } },
+    {
+      $set: { bandCode: code, active: !!active, note: note || null, createdBy: createdBy || null },
+    },
     { new: true, upsert: true, setDefaultsOnInsert: true }
   ).lean();
 }

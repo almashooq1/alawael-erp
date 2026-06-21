@@ -344,7 +344,7 @@ independentLivingPlanSchema.post('save', function (doc) {
     const { integrationBus } = require('../integration/systemIntegrationBus');
     if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiary) return;
     Promise.resolve(
-      integrationBus.publish('independent-living', 'plan.completed', {
+      integrationBus.publish('independent-living', 'independent_living.plan_completed', {
         independentLivingPlanId: String(doc._id),
         beneficiaryId: String(doc.beneficiary),
       })

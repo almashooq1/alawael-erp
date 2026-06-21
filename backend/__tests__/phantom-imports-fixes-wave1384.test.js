@@ -15,7 +15,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const BACKEND = path.resolve(__dirname, '..');
-const read = (p) => fs.readFileSync(path.join(BACKEND, p), 'utf8');
+const read = p => fs.readFileSync(path.join(BACKEND, p), 'utf8');
 
 describe('W1384 — escapeRegex imported as the default export (module.exports = fn)', () => {
   const files = [
@@ -65,9 +65,13 @@ describe('W1384 — effectiveBranchScope imported from assertBranchMatch', () =>
   for (const f of ['routes/stories.routes.js', 'routes/waitlist.routes.js']) {
     test(`${path.basename(f)} imports effectiveBranchScope from assertBranchMatch`, () => {
       const src = read(f);
-      expect(src).toMatch(/effectiveBranchScope.*=\s*require\('\.\.\/middleware\/assertBranchMatch'\)/s);
+      expect(src).toMatch(
+        /effectiveBranchScope.*=\s*require\('\.\.\/middleware\/assertBranchMatch'\)/s
+      );
       // and NOT from branchScope.middleware
-      const bsmBlock = src.match(/\{[^}]*\}\s*=\s*require\('\.\.\/middleware\/branchScope\.middleware'\)/s);
+      const bsmBlock = src.match(
+        /\{[^}]*\}\s*=\s*require\('\.\.\/middleware\/branchScope\.middleware'\)/s
+      );
       if (bsmBlock) expect(bsmBlock[0]).not.toMatch(/effectiveBranchScope/);
     });
   }

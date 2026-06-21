@@ -158,11 +158,11 @@ constraint; adoption is.
 Most of the "verify that…" lines below now have a one-command equivalent. Run
 these (read-only / safe-by-design; all proven LIVE on prod):
 
-| Command | Answers | Covers |
-| --- | --- | --- |
-| `npm run launch:readiness` | **GO / NOT-YET** (read-only: counts + env) | SMTP · branches/users · beneficiary · session-split · seeds · demo-data |
-| `npm run smoke:launch-spine` | data-ENTRY spine (register→session→form, incl. W1240 projection) | Phase-B paths 2–4 |
-| `npm run smoke:clinical-spine` | clinical VALUE-LOOP closes (goal↔measure→thread→NBA→roll-up) | the golden-thread spine |
+| Command                        | Answers                                                          | Covers                                                                  |
+| ------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `npm run launch:readiness`     | **GO / NOT-YET** (read-only: counts + env)                       | SMTP · branches/users · beneficiary · session-split · seeds · demo-data |
+| `npm run smoke:launch-spine`   | data-ENTRY spine (register→session→form, incl. W1240 projection) | Phase-B paths 2–4                                                       |
+| `npm run smoke:clinical-spine` | clinical VALUE-LOOP closes (goal↔measure→thread→NBA→roll-up)    | the golden-thread spine                                                 |
 
 Last live run (prod, 2026-06-16): `launch:readiness` = **✅ GO** — 83 forms /
 8 measures / 72 goal-bank / 105 ICF / 4 branches / 13 users / 18 beneficiaries

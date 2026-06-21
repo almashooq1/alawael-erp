@@ -35,7 +35,9 @@ afterEach(async () => {
 
 describe('W1385 JobBandMapping model', () => {
   test('requires jobTitle + bandCode', async () => {
-    await expect(JobBandMapping.create({ jobTitle: 'Senior Therapist' })).rejects.toThrow(/bandCode/);
+    await expect(JobBandMapping.create({ jobTitle: 'Senior Therapist' })).rejects.toThrow(
+      /bandCode/
+    );
     await expect(JobBandMapping.create({ bandCode: 'L4' })).rejects.toThrow(/jobTitle/);
   });
 
@@ -47,7 +49,9 @@ describe('W1385 JobBandMapping model', () => {
 
   test('one band per job title (unique index)', async () => {
     await JobBandMapping.create({ jobTitle: 'Therapist', bandCode: 'L3' });
-    await expect(JobBandMapping.create({ jobTitle: 'Therapist', bandCode: 'L4' })).rejects.toThrow(/E11000|duplicate/);
+    await expect(JobBandMapping.create({ jobTitle: 'Therapist', bandCode: 'L4' })).rejects.toThrow(
+      /E11000|duplicate/
+    );
   });
 });
 
@@ -55,21 +59,29 @@ describe('W1385 payEquityService.upsertJobBandMapping', () => {
   test('creates then UPDATES the same title (idempotent per title, not duplicated)', async () => {
     const a = await svc.upsertJobBandMapping({ jobTitle: 'Manager', bandCode: 'L5' });
     expect(a.bandCode).toBe('L5');
-    const b = await svc.upsertJobBandMapping({ jobTitle: 'Manager', bandCode: 'L6', note: 'regrade' });
+    const b = await svc.upsertJobBandMapping({
+      jobTitle: 'Manager',
+      bandCode: 'L6',
+      note: 'regrade',
+    });
     expect(b.bandCode).toBe('L6');
     expect(b.note).toBe('regrade');
     expect(await JobBandMapping.countDocuments({ jobTitle: 'Manager' })).toBe(1);
   });
 
   test('rejects missing jobTitle/bandCode with a VALIDATION code', async () => {
-    await expect(svc.upsertJobBandMapping({ jobTitle: '', bandCode: 'L1' })).rejects.toMatchObject({ code: 'VALIDATION' });
-    await expect(svc.upsertJobBandMapping({ jobTitle: 'X', bandCode: '  ' })).rejects.toMatchObject({ code: 'VALIDATION' });
+    await expect(svc.upsertJobBandMapping({ jobTitle: '', bandCode: 'L1' })).rejects.toMatchObject({
+      code: 'VALIDATION',
+    });
+    await expect(svc.upsertJobBandMapping({ jobTitle: 'X', bandCode: '  ' })).rejects.toMatchObject(
+      { code: 'VALIDATION' }
+    );
   });
 
   test('listJobBandMappings returns all, sorted by jobTitle', async () => {
     await svc.upsertJobBandMapping({ jobTitle: 'Zed', bandCode: 'L1' });
     await svc.upsertJobBandMapping({ jobTitle: 'Abe', bandCode: 'L2' });
     const list = await svc.listJobBandMappings();
-    expect(list.map((m) => m.jobTitle)).toEqual(['Abe', 'Zed']);
+    expect(list.map(m => m.jobTitle)).toEqual(['Abe', 'Zed']);
   });
 });

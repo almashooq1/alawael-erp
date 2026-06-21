@@ -175,6 +175,23 @@ function upcomingRenewals(items, days = 30, asOf = new Date()) {
  * average of buckets [1..5] (months 2-6 out). Gated by min-baseline so
  * a tiny clinic doesn't page on 2-vs-3 swings.
  */
+/**
+ * Build an actionable expiry plan from a raw item list.
+ * Returns the same window counts as summarize() plus the urgent watchlist
+ * and a renewal calendar used by the KPI resolver.
+ */
+function buildExpiryPlan(items, asOf = new Date()) {
+  const stats = summarize(items, asOf);
+  const watchlist = radarList(items, asOf, 100);
+  const calendar = upcomingRenewals(items, 90, asOf);
+  return {
+    stats,
+    watchlist,
+    calendar,
+    generatedAt: asOf instanceof Date ? asOf.toISOString() : new Date().toISOString(),
+  };
+}
+
 function detectSurge(items, asOf = new Date()) {
   const asOfMs = asOf.getTime();
   const buckets = [0, 0, 0, 0, 0, 0]; // 6 forward-looking 30-day buckets
@@ -214,4 +231,5 @@ module.exports = {
   byCategory,
   upcomingRenewals,
   detectSurge,
+  buildExpiryPlan,
 };

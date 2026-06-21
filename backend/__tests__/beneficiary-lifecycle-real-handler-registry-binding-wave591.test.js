@@ -46,6 +46,9 @@ describe('W591 real-handler ↔ registry op-name binding', () => {
     ['END_ACTIVE_SCHEDULES', OP.END_ACTIVE_SCHEDULES],
     ['CLOSE_OPEN_EPISODES', OP.CLOSE_OPEN_EPISODES],
     ['RELEASE_CARE_TEAM', OP.RELEASE_CARE_TEAM],
+    ['RESTORE_CANCELLED_APPOINTMENTS', OP.RESTORE_CANCELLED_APPOINTMENTS],
+    ['REOPEN_CLOSED_EPISODES', OP.REOPEN_CLOSED_EPISODES],
+    ['REACTIVATE_CARE_TEAM', OP.REACTIVATE_CARE_TEAM],
   ])(
     'OP.%s (%s) is declared by at least one registry transition — real handler reachable',
     (_name, opValue) => {
@@ -60,7 +63,7 @@ describe('W591 real-handler ↔ registry op-name binding', () => {
     }
   });
 
-  test('the three real ops classify as data, never as a deferred category', () => {
+  test('the real ops classify as data, never as a deferred category', () => {
     // classifyOp is the deferred router; a real op leaking into it would mean
     // the handler-assembly fell back to a deferred no-op for that op.
     for (const opValue of Object.values(OP)) {

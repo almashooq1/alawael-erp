@@ -63,6 +63,32 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
       /* same */
     }
 
+    let notifier = null;
+    try {
+      const unifiedNotifier = require('../services/unifiedNotifier');
+      if (typeof unifiedNotifier.notify === 'function') {
+        notifier = unifiedNotifier.notify;
+      } else if (typeof unifiedNotifier === 'function') {
+        notifier = unifiedNotifier;
+      }
+    } catch {
+      /* notifier optional */
+    }
+
+    let guardianModel = null;
+    try {
+      guardianModel = require('../models/Guardian');
+    } catch {
+      /* guardian model optional — in-app family notifications self-skip if absent */
+    }
+
+    let transferModel = null;
+    try {
+      transferModel = require('../models/BeneficiaryTransfer');
+    } catch {
+      /* transfer model optional — transfer rollback self-skips if absent */
+    }
+
     let auditLogger = null;
     try {
       const { auditLogService } = require('../services/auditLog.service');
@@ -71,6 +97,13 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
       }
     } catch {
       /* audit optional */
+    }
+
+    let bulkJobModel = null;
+    try {
+      bulkJobModel = require('../models/BeneficiaryLifecycleBulkJob');
+    } catch {
+      /* bulk job model optional until Phase D migrations run */
     }
 
     // ── Wave 583 — wire the lifecycle side-effect handlers ────────────────
@@ -107,6 +140,10 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
       lifecycleSideEffectHandlers = createBeneficiaryLifecycleSideEffectHandlers({
         appointmentModel,
         episodeModel,
+        beneficiaryModel,
+        transferModel,
+        guardianModel,
+        notifier,
         // Deferred ops emit a structured `beneficiary.lifecycle.side_effect`
         // event so existing notification / compliance / workflow infra can
         // pick them up. Until a dedicated bus is wired here we log them so the
@@ -148,6 +185,33 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
       }
 
       if (governanceSvc) {
+        // Phase D — start the async bulk lifecycle processor.
+        if (
+          process.env.BENEFICIARY_LIFECYCLE_BULK_PROCESSOR_DISABLED !== 'true' &&
+          bulkJobModel &&
+          process.env.NODE_ENV !== 'test'
+        ) {
+          try {
+            const {
+              BeneficiaryLifecycleBulkProcessor,
+            } = require('../services/beneficiaryLifecycleBulkProcessor');
+            const processor = new BeneficiaryLifecycleBulkProcessor({
+              lifecycleService: lifecycleSvc,
+              bulkJobModel,
+              logger,
+            });
+            processor.start();
+            app._beneficiaryLifecycleBulkProcessor = processor;
+            const { registerShutdownHook } = require('../utils/gracefulShutdown');
+            registerShutdownHook('BeneficiaryLifecycleBulkProcessor', () => processor.stop());
+            logger.info('[BeneficiaryLifecycleBulkProcessor] ✓ started');
+          } catch (procErr) {
+            logger.warn('[BeneficiaryLifecycleBulkProcessor] failed to start:', procErr.message);
+          }
+        } else {
+          logger.info('[BeneficiaryLifecycleBulkProcessor] disabled via env or model unavailable');
+        }
+
         const { authenticate: blAuthMw } = require('../middleware/auth');
         // Wave 95 — Layered MFA enforcement on lifecycle routes:
         //   authenticate → loadMfaActor(mfaSvc) → router → service guard
@@ -170,6 +234,7 @@ function wireBeneficiaryLifecycle(app, deps = {}) {
           createBeneficiaryLifecycleRouter({
             service: lifecycleSvc,
             governance: governanceSvc,
+            bulkJobModel,
             logger,
           })
         );

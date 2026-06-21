@@ -34,6 +34,20 @@ async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   }
 }
 
+async function waitForNoTimeline(query, { timeout = 2000, interval = 25 } = {}) {
+  const start = Date.now();
+
+  while (true) {
+    const count = await CareTimeline.countDocuments(query);
+    if (count === 0 && Date.now() - start > 150) {
+      // Give a small grace window after the row is absent to catch late writers.
+      return true;
+    }
+    if (Date.now() - start > timeout) return count === 0;
+    await new Promise(r => setTimeout(r, interval));
+  }
+}
+
 function baseCard(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -101,10 +115,11 @@ describe('W1070 — registered disability cards reach the unified-core timeline'
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BeneficiaryDisabilityCard.create(baseCard({ beneficiaryId, status: 'expired' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'disability_card_registered' })
-    ).toBe(0);
+    const absent = await waitForNoTimeline({
+      beneficiaryId,
+      eventType: 'disability_card_registered',
+    });
+    expect(absent).toBe(true);
   });
 
   it('re-saving an existing card does not re-fire the event', async () => {
@@ -117,7 +132,8 @@ describe('W1070 — registered disability cards reach the unified-core timeline'
     const again = await BeneficiaryDisabilityCard.findById(card._id);
     again.notes = 'verified';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
+    // Allow a short window for any accidental duplicate event to be written.
+    await new Promise(r => setTimeout(r, 300));
     expect(
       await CareTimeline.countDocuments({ beneficiaryId, eventType: 'disability_card_registered' })
     ).toBe(1);

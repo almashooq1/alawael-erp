@@ -122,6 +122,53 @@ function utilizationRate(stats, capacityMinutes = DEFAULTS.capacityMinutesPerMon
  * @param {string} metric         e.g. 'billableMinutes', 'completionRate'
  * @param {object} [opts]         { limit, asc }
  */
+/**
+ * KPI-facing aggregate utilization across all therapists.
+ */
+function summarize(
+  sessions,
+  attendanceRecords,
+  capacityMinutes = DEFAULTS.capacityMinutesPerMonth
+) {
+  const attByKey = indexAttendance(attendanceRecords);
+  const byTherapist = summarizeByTherapist(sessions, attByKey);
+  const entries = Object.values(byTherapist);
+  if (entries.length === 0) {
+    return {
+      utilizationPct: null,
+      completionRate: null,
+      noShowRate: null,
+      sessionsScheduled: 0,
+      sessionsCompleted: 0,
+      therapistCount: 0,
+    };
+  }
+  const totalBillable = entries.reduce((sum, s) => sum + s.billableMinutes, 0);
+  const totalCapacity = entries.length * capacityMinutes;
+  const avgUtilization =
+    totalCapacity > 0 ? Math.round((totalBillable / totalCapacity) * 1000) / 10 : null;
+  const avgCompletion =
+    entries.length > 0
+      ? Math.round(
+          (entries.reduce((sum, s) => sum + (s.completionRate || 0), 0) / entries.length) * 10
+        ) / 10
+      : null;
+  const avgNoShow =
+    entries.length > 0
+      ? Math.round(
+          (entries.reduce((sum, s) => sum + (s.noShowRate || 0), 0) / entries.length) * 10
+        ) / 10
+      : null;
+  return {
+    utilizationPct: avgUtilization,
+    completionRate: avgCompletion,
+    noShowRate: avgNoShow,
+    sessionsScheduled: entries.reduce((sum, s) => sum + s.sessionsScheduled, 0),
+    sessionsCompleted: entries.reduce((sum, s) => sum + s.sessionsCompleted, 0),
+    therapistCount: entries.length,
+  };
+}
+
 function rankByMetric(byTherapist, metric, { limit = 20, asc = false } = {}) {
   const entries = Object.entries(byTherapist).map(([therapistId, stats]) => ({
     therapistId,
@@ -140,4 +187,5 @@ module.exports = {
   summarizeByTherapist,
   utilizationRate,
   rankByMetric,
+  summarize,
 };

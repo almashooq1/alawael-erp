@@ -257,7 +257,7 @@ describe('BeneficiaryService', () => {
         lean: jest.fn().mockResolvedValue(null),
       });
 
-      const ben = { _id: 'ben1', branch: 'b1', fileNumber: 'BR-1' };
+      const ben = { _id: 'ben1', branchId: 'b1', fileNumber: 'BR-1' };
       const r = await svc.initiateTransfer(ben, 'b2', new Date(), 'test', 'u1');
       expect(mockTransferCreate).toHaveBeenCalled();
       expect(mockTransferUpdateMany).toHaveBeenCalled();
@@ -270,7 +270,7 @@ describe('BeneficiaryService', () => {
         lean: jest.fn().mockResolvedValue(null),
       });
 
-      const ben = { _id: 'ben1', branch: 'b1' };
+      const ben = { _id: 'ben1', branchId: 'b1' };
       try {
         await svc.initiateTransfer(ben, 'b1', new Date(), 'test', 'u1');
         throw new Error('should have thrown');
@@ -287,7 +287,7 @@ describe('BeneficiaryService', () => {
     test('updates beneficiary branch and file number', async () => {
       const mockBen = {
         _id: 'ben1',
-        branch: 'b1',
+        branchId: 'b1',
         fileNumber: 'BR-OLD',
         save: jest.fn().mockResolvedValue(true),
       };
@@ -300,7 +300,7 @@ describe('BeneficiaryService', () => {
       };
 
       const r = await svc.completeTransfer(transfer, 'u1', 'JED');
-      expect(r.branch).toBe('b2');
+      expect(r.branchId).toBe('b2');
       expect(r.fileNumber).toMatch(/^BR-JED-/);
       expect(transfer.status).toBe('completed');
     });

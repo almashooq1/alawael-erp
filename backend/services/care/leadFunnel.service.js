@@ -274,6 +274,34 @@ function createLeadFunnelService({
    * promoting" branch BEFORE createLead fires. On createLead failure,
    * the reservation is rolled back so a retry can claim it.
    */
+  // W441 helpers: real Mongoose models use their native atomic methods;
+  // in-memory test fakes (care-e2e-integration.test.js) do not implement
+  // them, so these wrappers fall back to the same semantics using findById.
+  async function findOneAndUpdate(filter, update, options) {
+    if (typeof inquiryModel.findOneAndUpdate === 'function') {
+      return inquiryModel.findOneAndUpdate(filter, update, options);
+    }
+    const doc = await inquiryModel.findById(filter._id);
+    if (!doc) return null;
+    if (filter.promotedAt !== undefined) {
+      const expected = filter.promotedAt;
+      if (expected == null ? doc.promotedAt != null : doc.promotedAt !== expected) return null;
+    }
+    if (filter.status && filter.status.$ne && doc.status === filter.status.$ne) return null;
+    if (update && update.$set) Object.assign(doc, update.$set);
+    return doc;
+  }
+
+  async function findByIdAndUpdate(id, update) {
+    if (typeof inquiryModel.findByIdAndUpdate === 'function') {
+      return inquiryModel.findByIdAndUpdate(id, update);
+    }
+    const doc = await inquiryModel.findById(id);
+    if (!doc) return null;
+    if (update && update.$set) Object.assign(doc, update.$set);
+    return doc;
+  }
+
   async function promoteInquiry(id, leadOverrides = {}, { actorId = null } = {}) {
     const inq = await inquiryModel.findById(id);
     if (!inq) throw new NotFoundError('Inquiry not found');
@@ -291,7 +319,7 @@ function createLeadFunnelService({
     // 'promoted_to_lead' transition happens after createLead succeeds,
     // preserving the existing transition graph + audit history shape).
     const promoteClaim = now();
-    const claimed = await inquiryModel.findOneAndUpdate(
+    const claimed = await findOneAndUpdate(
       { _id: id, promotedAt: null, status: { $ne: 'promoted_to_lead' } },
       { $set: { promotedAt: promoteClaim } },
       { returnDocument: 'after' }
@@ -324,7 +352,7 @@ function createLeadFunnelService({
       // future retry can re-claim it. If we don't roll back, the
       // inquiry is permanently stuck (promotedAt set, status still
       // non-terminal, no Lead linked).
-      await inquiryModel.findByIdAndUpdate(id, { $set: { promotedAt: null } });
+      await findByIdAndUpdate(id, { $set: { promotedAt: null } });
       throw err;
     }
 

@@ -29,3 +29,9 @@ export * from './cctv';
 
 export { default as nationalAddress } from './nationalAddress';
 export * from './nationalAddress';
+
+export { default as assessments } from './assessments';
+export * from './assessments';
+
+export { default as rehabPrograms } from './rehabPrograms';
+export * from './rehabPrograms';

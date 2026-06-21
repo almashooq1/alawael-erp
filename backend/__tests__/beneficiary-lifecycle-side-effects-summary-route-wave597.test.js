@@ -157,6 +157,12 @@ describe('W597 GET /transitions/:id/side-effects-summary', () => {
       cancelledAppointments: 4,
       closedEpisodes: 2,
       releasedFromEpisodes: 2,
+      pausedAppointments: 0,
+      resumedAppointments: 0,
+      restoredAppointments: 0,
+      reopenedEpisodes: 0,
+      reactivatedFromEpisodes: 0,
+      rolledBackTransfers: 0,
       total: 8,
     });
   });

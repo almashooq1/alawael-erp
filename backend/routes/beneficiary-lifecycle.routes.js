@@ -57,6 +57,7 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/beneficiary-lifecycle.registry');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
@@ -64,12 +65,16 @@ const {
   branchScopedBeneficiaryParam,
   assertBranchMatch,
   effectiveBranchScope,
+  enforceBeneficiaryBranch,
 } = require('../middleware/assertBranchMatch');
 // Wave 597 — actionable roll-up over a transition's persisted side-effect
 // audit rows (W595 reducer, wired live into executeTransition in W596).
 const {
   summarizeSideEffectResults,
 } = require('../intelligence/beneficiary-lifecycle-side-effects.service');
+const {
+  createBeneficiaryJourneyScoreScheduler,
+} = require('../intelligence/beneficiary-journey-score.scheduler');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -135,7 +140,12 @@ function respond(res, result) {
  *   - governance  — Wave-26 governance service (hasPermission)
  *   - logger      — console-compatible
  */
-function createBeneficiaryLifecycleRouter({ service, governance, logger = console } = {}) {
+function createBeneficiaryLifecycleRouter({
+  service,
+  governance,
+  bulkJobModel = null,
+  logger = console,
+} = {}) {
   if (!service || typeof service.requestTransition !== 'function') {
     throw new Error('beneficiary-lifecycle.routes: lifecycle service is required');
   }
@@ -143,6 +153,24 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
     throw new Error('beneficiary-lifecycle.routes: governance service is required');
   }
   void logger;
+
+  async function createBulkJob({ operation, items, actor, req }) {
+    if (!bulkJobModel) {
+      throw Object.assign(new Error('BULK_JOB_MODEL_UNAVAILABLE'), { status: 503 });
+    }
+    const job = await bulkJobModel.create({
+      operation,
+      requestedBy: mongoose.isValidObjectId(actor.userId) ? actor.userId : null,
+      branchScope: req.branchScope || null,
+      actorSnapshot: actor,
+      items,
+      status: 'queued',
+      progress: { total: items.length, processed: 0, successful: 0, failed: 0, percentage: 0 },
+      results: [],
+      errors: [],
+    });
+    return job;
+  }
 
   const router = express.Router();
   // W833: populate req.branchScope. The bootstrap mounts this router as
@@ -210,6 +238,255 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
       return respond(res, result);
     } catch (err) {
       return safeError(res, err, 'lifecycle.transition.request');
+    }
+  });
+
+  // ─── POST /transitions/bulk-request ──────────────────────────
+  router.post('/transitions/bulk-request', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const items = Array.isArray(body.items) ? body.items : [];
+      if (items.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'BULK_ITEMS_REQUIRED',
+          reason: 'BULK_ITEMS_REQUIRED',
+        });
+      }
+      if (items.length > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'BULK_ITEMS_LIMIT_EXCEEDED',
+          reason: 'BULK_ITEMS_LIMIT_EXCEEDED',
+          max: 100,
+        });
+      }
+
+      const transitionIds = new Set();
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item || !item.beneficiaryId || !item.transitionId) {
+          return res.status(400).json({
+            success: false,
+            message: `BULK_ITEM_INVALID at index ${i}`,
+            reason: 'BULK_ITEM_INVALID',
+            index: i,
+          });
+        }
+        if (!reg.findTransition(item.transitionId)) {
+          return res.status(400).json({
+            success: false,
+            message: `TRANSITION_NOT_FOUND at index ${i}: ${item.transitionId}`,
+            reason: 'TRANSITION_NOT_FOUND',
+            index: i,
+          });
+        }
+        transitionIds.add(item.transitionId);
+      }
+
+      for (const transitionId of transitionIds) {
+        if (!ensurePermission(req, res, `beneficiary.lifecycle.${transitionId}.request`)) return;
+      }
+
+      for (const item of items) {
+        await enforceBeneficiaryBranch(req, item.beneficiaryId);
+      }
+
+      const actor = actorFrom(req);
+      const job = await createBulkJob({ operation: 'bulk-request', items, actor, req });
+      return res.status(202).json({
+        success: true,
+        bulkJobId: job._id,
+        status: job.status,
+        total: items.length,
+      });
+    } catch (err) {
+      if (err && err.status === 403) {
+        return res
+          .status(403)
+          .json({ success: false, message: err.message, reason: 'PERMISSION_DENIED' });
+      }
+      if (err && err.status === 404) {
+        return res
+          .status(404)
+          .json({ success: false, message: err.message, reason: 'BENEFICIARY_NOT_FOUND' });
+      }
+      if (err && err.message === 'BULK_JOB_MODEL_UNAVAILABLE') {
+        return res
+          .status(503)
+          .json({ success: false, message: err.message, reason: 'BULK_JOB_MODEL_UNAVAILABLE' });
+      }
+      return safeError(res, err, 'lifecycle.transition.bulk-request');
+    }
+  });
+
+  // ─── POST /transitions/bulk-approve ─────────────────────────
+  router.post('/transitions/bulk-approve', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transition.approve')) return;
+      const body = req.body || {};
+      const items = Array.isArray(body.items) ? body.items : [];
+      if (items.length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'BULK_ITEMS_REQUIRED', reason: 'BULK_ITEMS_REQUIRED' });
+      }
+      if (items.length > 100) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: 'BULK_ITEMS_LIMIT_EXCEEDED',
+            reason: 'BULK_ITEMS_LIMIT_EXCEEDED',
+            max: 100,
+          });
+      }
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item || !item.transitionRecordId) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: `BULK_ITEM_INVALID at index ${i}`,
+              reason: 'BULK_ITEM_INVALID',
+              index: i,
+            });
+        }
+      }
+
+      const actor = actorFrom(req);
+      const job = await createBulkJob({ operation: 'bulk-approve', items, actor, req });
+      return res.status(202).json({
+        success: true,
+        bulkJobId: job._id,
+        status: job.status,
+        total: items.length,
+      });
+    } catch (err) {
+      if (err && err.message === 'BULK_JOB_MODEL_UNAVAILABLE') {
+        return res
+          .status(503)
+          .json({ success: false, message: err.message, reason: 'BULK_JOB_MODEL_UNAVAILABLE' });
+      }
+      return safeError(res, err, 'lifecycle.transition.bulk-approve');
+    }
+  });
+
+  // ─── POST /transitions/bulk-execute ─────────────────────────
+  router.post('/transitions/bulk-execute', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transition.execute')) return;
+      const body = req.body || {};
+      const items = Array.isArray(body.items) ? body.items : [];
+      if (items.length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'BULK_ITEMS_REQUIRED', reason: 'BULK_ITEMS_REQUIRED' });
+      }
+      if (items.length > 100) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: 'BULK_ITEMS_LIMIT_EXCEEDED',
+            reason: 'BULK_ITEMS_LIMIT_EXCEEDED',
+            max: 100,
+          });
+      }
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item || !item.transitionRecordId) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: `BULK_ITEM_INVALID at index ${i}`,
+              reason: 'BULK_ITEM_INVALID',
+              index: i,
+            });
+        }
+      }
+
+      const actor = actorFrom(req);
+      const job = await createBulkJob({ operation: 'bulk-execute', items, actor, req });
+      return res.status(202).json({
+        success: true,
+        bulkJobId: job._id,
+        status: job.status,
+        total: items.length,
+      });
+    } catch (err) {
+      if (err && err.message === 'BULK_JOB_MODEL_UNAVAILABLE') {
+        return res
+          .status(503)
+          .json({ success: false, message: err.message, reason: 'BULK_JOB_MODEL_UNAVAILABLE' });
+      }
+      return safeError(res, err, 'lifecycle.transition.bulk-execute');
+    }
+  });
+
+  // ─── GET /transitions/bulk-jobs/:id ─────────────────────────
+  router.get('/transitions/bulk-jobs/:id', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+      if (!bulkJobModel) {
+        return res
+          .status(503)
+          .json({
+            success: false,
+            message: 'BULK_JOB_MODEL_UNAVAILABLE',
+            reason: 'BULK_JOB_MODEL_UNAVAILABLE',
+          });
+      }
+      const job = await bulkJobModel.findById(req.params.id).lean();
+      if (!job) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'BULK_JOB_NOT_FOUND', reason: 'BULK_JOB_NOT_FOUND' });
+      }
+      return res.status(200).json({ success: true, data: job });
+    } catch (err) {
+      return safeError(res, err, 'lifecycle.transition.bulk-job.get');
+    }
+  });
+
+  // ─── POST /auto-run/preview ─────────────────────────────────
+  // Preview what the score-driven auto-transition scheduler would do without
+  // persisting scores or creating transition records.
+  router.post('/auto-run/preview', async (req, res) => {
+    try {
+      if (!ensurePermission(req, res, 'beneficiary.lifecycle.transitions.read')) return;
+
+      let Beneficiary = null;
+      let BeneficiaryJourneyScore = null;
+      let BeneficiaryLifecycleTransition = null;
+      try {
+        Beneficiary = require('../models/Beneficiary');
+        BeneficiaryJourneyScore = require('../models/BeneficiaryJourneyScore');
+        BeneficiaryLifecycleTransition = require('../models/BeneficiaryLifecycleTransition');
+      } catch (modelErr) {
+        return safeError(res, modelErr, 'lifecycle.auto-run.preview');
+      }
+
+      const scheduler = createBeneficiaryJourneyScoreScheduler({
+        beneficiaryModel: Beneficiary,
+        journeyScoreModel: BeneficiaryJourneyScore,
+        transitionLog: BeneficiaryLifecycleTransition,
+        lifecycleService: service,
+        logger,
+      });
+
+      const body = req.body || {};
+      const summary = await scheduler.runOnce({
+        dryRun: true,
+        limit: Number(body.limit) || 200,
+        minConfidence: typeof body.minConfidence === 'number' ? body.minConfidence : 0.8,
+      });
+
+      return res.status(200).json({ success: true, data: summary });
+    } catch (err) {
+      return safeError(res, err, 'lifecycle.auto-run.preview');
     }
   });
 

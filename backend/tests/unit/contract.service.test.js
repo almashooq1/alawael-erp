@@ -198,7 +198,7 @@ describe('contract.service', () => {
           updatedBy: 'admin1',
           employeeSignedDate: expect.any(Date),
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -208,7 +208,7 @@ describe('contract.service', () => {
       expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
         'c1',
         expect.objectContaining({ qiwaAuthenticationDate: expect.any(Date) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 

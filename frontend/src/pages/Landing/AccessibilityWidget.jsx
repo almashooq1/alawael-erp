@@ -107,8 +107,8 @@ export default function AccessibilityWidget() {
     applyPrefs(p);
   }, []);
 
-  const update = useCallback((patch) => {
-    setPrefs((prev) => {
+  const update = useCallback(patch => {
+    setPrefs(prev => {
       const next = { ...prev, ...patch };
       applyPrefs(next);
       try {
@@ -133,7 +133,7 @@ export default function AccessibilityWidget() {
   // Escape closes the panel
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (e) => {
+    const onKey = e => {
       if (e.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKey);
@@ -154,7 +154,7 @@ export default function AccessibilityWidget() {
       {/* Launcher — side tab on the start (right in RTL) edge, vertically centered */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
         aria-expanded={open}
         aria-controls="a11y-panel"
         aria-label={tr('خيارات إمكانية الوصول', 'Accessibility options')}
@@ -183,7 +183,9 @@ export default function AccessibilityWidget() {
         aria-label={tr('إعدادات إمكانية الوصول', 'Accessibility settings')}
         dir={isEn ? 'ltr' : 'rtl'}
         className={`fixed top-1/2 z-[72] w-[19rem] max-w-[88vw] -translate-y-1/2 rounded-3xl border border-gray-100 bg-white p-5 shadow-2xl transition-all duration-300 start-3 ${
-          open ? 'pointer-events-auto opacity-100 translate-x-0' : 'pointer-events-none opacity-0 -translate-x-6'
+          open
+            ? 'pointer-events-auto opacity-100 translate-x-0'
+            : 'pointer-events-none opacity-0 -translate-x-6'
         }`}
       >
         <div className="mb-4 flex items-center justify-between">

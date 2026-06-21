@@ -401,7 +401,13 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
         const sub = botReg.buildCategoryList(nav.id);
         if (sub) {
           await whatsappService
-            .sendInteractiveList(fromPhone, sub.bodyText, sub.buttonLabel, sub.items, sub.sectionTitle)
+            .sendInteractiveList(
+              fromPhone,
+              sub.bodyText,
+              sub.buttonLabel,
+              sub.items,
+              sub.sectionTitle
+            )
             .catch(err => logger.warn(`[WhatsApp BotMenu] category send failed: ${err.message}`));
           await Conversation.updateOne(
             { _id: conv._id },
@@ -673,7 +679,13 @@ async function dispatchBotPlan({
     const list = botReg.buildMainMenuList(botCtx || {});
     outType = 'interactive';
     sent = await whatsappService
-      .sendInteractiveList(fromPhone, list.bodyText, list.buttonLabel, list.items, list.sectionTitle)
+      .sendInteractiveList(
+        fromPhone,
+        list.bodyText,
+        list.buttonLabel,
+        list.items,
+        list.sectionTitle
+      )
       .catch(err => {
         logger.warn(`[WhatsApp BotMenu] list send failed: ${err.message}`);
         return null;
@@ -823,7 +835,14 @@ const BOT_SIDE_EFFECT_PRIORITY = Object.freeze({
   submit_satisfaction: 'low',
 });
 
-async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect, recordId = null) {
+async function escalateForBot(
+  Conversation,
+  conv,
+  fromPhone,
+  senderName,
+  sideEffect,
+  recordId = null
+) {
   const reason = BOT_SIDE_EFFECT_REASON[sideEffect.kind] || `بوت الواتساب: ${sideEffect.kind}`;
   const priority = BOT_SIDE_EFFECT_PRIORITY[sideEffect.kind] || 'medium';
   // W1418: a human-readable Arabic handoff card for staff (labelled fields)

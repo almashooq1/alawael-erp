@@ -332,7 +332,9 @@ function permissionDetail(key) {
   const granting = Object.entries(reg.ARCHETYPES)
     .map(([code, name]) => {
       const v = reg.can(code, key);
-      return v.allow ? { code, name, labelAr: ARCHETYPE_LABELS_AR[name] || name, scope: v.scope } : null;
+      return v.allow
+        ? { code, name, labelAr: ARCHETYPE_LABELS_AR[name] || name, scope: v.scope }
+        : null;
     })
     .filter(Boolean);
   const denying = Object.entries(reg.ARCHETYPES)

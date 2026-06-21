@@ -9,7 +9,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = fs.readFileSync(path.join(__dirname, '..', 'routes', 'hr', 'pay-equity.routes.js'), 'utf8');
+const SRC = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'hr', 'pay-equity.routes.js'),
+  'utf8'
+);
 
 describe('W1385 pay-equity compa-ratio routes — static drift guard', () => {
   test('declares the 4 new endpoints', () => {

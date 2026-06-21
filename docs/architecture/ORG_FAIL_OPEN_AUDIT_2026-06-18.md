@@ -19,15 +19,15 @@ falls through to an **unscoped (fail-open)** query.
 
 ## Findings
 
-| # | Surface | `organizationId` use | Verdict |
-|---|---------|----------------------|---------|
-| 1 | `routes/whatsapp.routes.js` — `/conversations` (+pending-review, byId read/resolve/assign/mark-read, insights, analytics) | filter on `WhatsAppConversation` (branch-scoped beneficiary **message PII**), open to **any authed user** | 🔴 **REAL LEAK — FIXED** (W1411 #536, live on prod) — now `branchId` via `effectiveBranchScope` |
-| 2 | `routes/whatsapp.routes.js` — contact groups (list/get/create/members/merge) | filter on `WhatsAppContactGroup` (phone-number lists), open to **any authed user** | 🔴 **REAL LEAK — FIXED** (W1412 #537, live on prod) — added `branchId` field + scoping |
-| 3 | `routes/gosi-full.routes.js` → `gosi-full.service.js` `getDashboardSummary`/`getPeriodReport` | `organizationId ? {organization} : {}` on `GOSIContribution` etc. | 🟢 **Not exploitable** — data is **org-partitioned (no `branchId`)**, org-scoping vestigial (single-tenant); routes **role-gated** `admin/hr_manager/hr/finance`. An org-level role seeing the one org's GOSI data is intended. |
-| 4 | `routes/muqeem-full.routes.js` → `muqeem-full.service.js` `getDashboardStats` | `organizationId ? {organization} : {}` on Muqeem models | 🟢 **Not exploitable** — same as GOSI: org-level data, no `branchId`, role-gated. |
-| 5 | `routes/mudad.routes.js` → `mudad.service.js` `getConfig` | `MudadConfig.findOne({organizationId})` | 🟢 **Not exploitable** — single config lookup, single-tenant, role-gated. Returns the one org config. |
-| 6 | `routes/noor.routes.js` → `noorService.getConfig` | `req.user.organizationId \|\| req.user.id` | 🟢 **Not fail-open** — falls back to `req.user.id` (a value that **is** set); never undefined. |
-| 7 | `routes/digital-assessment.routes.js:186` | `organizationId: req.user?.organizationId \|\| undefined` in a **create** payload | 🟢 **Benign** — write-side; the doc also stores the real `branchId: req.user?.branchId`. Reads scope by `branchId`. |
+| #   | Surface                                                                                                                   | `organizationId` use                                                                                      | Verdict                                                                                                                                                                                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `routes/whatsapp.routes.js` — `/conversations` (+pending-review, byId read/resolve/assign/mark-read, insights, analytics) | filter on `WhatsAppConversation` (branch-scoped beneficiary **message PII**), open to **any authed user** | 🔴 **REAL LEAK — FIXED** (W1411 #536, live on prod) — now `branchId` via `effectiveBranchScope`                                                                                                                                 |
+| 2   | `routes/whatsapp.routes.js` — contact groups (list/get/create/members/merge)                                              | filter on `WhatsAppContactGroup` (phone-number lists), open to **any authed user**                        | 🔴 **REAL LEAK — FIXED** (W1412 #537, live on prod) — added `branchId` field + scoping                                                                                                                                          |
+| 3   | `routes/gosi-full.routes.js` → `gosi-full.service.js` `getDashboardSummary`/`getPeriodReport`                             | `organizationId ? {organization} : {}` on `GOSIContribution` etc.                                         | 🟢 **Not exploitable** — data is **org-partitioned (no `branchId`)**, org-scoping vestigial (single-tenant); routes **role-gated** `admin/hr_manager/hr/finance`. An org-level role seeing the one org's GOSI data is intended. |
+| 4   | `routes/muqeem-full.routes.js` → `muqeem-full.service.js` `getDashboardStats`                                             | `organizationId ? {organization} : {}` on Muqeem models                                                   | 🟢 **Not exploitable** — same as GOSI: org-level data, no `branchId`, role-gated.                                                                                                                                               |
+| 5   | `routes/mudad.routes.js` → `mudad.service.js` `getConfig`                                                                 | `MudadConfig.findOne({organizationId})`                                                                   | 🟢 **Not exploitable** — single config lookup, single-tenant, role-gated. Returns the one org config.                                                                                                                           |
+| 6   | `routes/noor.routes.js` → `noorService.getConfig`                                                                         | `req.user.organizationId \|\| req.user.id`                                                                | 🟢 **Not fail-open** — falls back to `req.user.id` (a value that **is** set); never undefined.                                                                                                                                  |
+| 7   | `routes/digital-assessment.routes.js:186`                                                                                 | `organizationId: req.user?.organizationId \|\| undefined` in a **create** payload                         | 🟢 **Benign** — write-side; the doc also stores the real `branchId: req.user?.branchId`. Reads scope by `branchId`.                                                                                                             |
 
 ## Conclusion
 
@@ -46,8 +46,8 @@ These are **acceptable today** but scope by a never-set field, so they are
 fragile. Revisit GOSI/Muqeem/Mudad **if either becomes true**:
 
 1. The deployment goes **multi-organization** (real `Organization` docs created
-   + `req.user.organization*` populated) — then the `{}` fallback would leak
-   across orgs.
+   - `req.user.organization*` populated) — then the `{}` fallback would leak
+     across orgs.
 2. A requirement emerges to **branch-isolate** gov-integration data — then those
    models need a `branchId` field + `effectiveBranchScope` scoping (the W1411
    pattern), not org-scoping.

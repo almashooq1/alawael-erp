@@ -20,6 +20,17 @@ const sendEmail = require('./emailService');
 const sendSMS = require('./smsService');
 const sendPush = require('./pushService');
 
+// Lazy-load the consolidated notification domain so the in-app channel can
+// persist real Notification inbox documents (Phase 3 in-app notifications).
+function getNotificationService() {
+  try {
+    return require('../domains/notifications/services/notificationService');
+  } catch (err) {
+    logger.warn('[unifiedNotifier] notificationService unavailable:', err.message);
+    return null;
+  }
+}
+
 // ── NotificationLog model (created inline if absent) ───────────────────────
 const logSchema = new mongoose.Schema(
   {
@@ -93,13 +104,14 @@ async function sendWhatsApp({ to, body }) {
 /**
  * @param {object} opts
  *   to:          string|{phone,email,token}
- *   channels:    array of 'whatsapp'|'sms'|'email'|'push' (tried in order)
+ *   channels:    array of 'whatsapp'|'sms'|'email'|'push'|'in-app' (tried in order)
  *                OR 'auto' (default): whatsapp→sms→email fallback chain
- *   subject:     string (for email)
+ *   subject:     string (for email / in-app title)
  *   body:        string (required)
  *   priority:    'low'|'normal'|'high'|'urgent'
  *   templateKey: string (for audit/analytics)
  *   beneficiaryId, userId: ObjectId refs
+ *   recipientId: string (User ID) — required for 'in-app' channel
  *   metadata:    any extra data to log
  */
 async function notify(opts) {
@@ -112,6 +124,7 @@ async function notify(opts) {
     templateKey,
     beneficiaryId,
     userId,
+    recipientId,
     metadata,
   } = opts;
 
@@ -140,7 +153,10 @@ async function notify(opts) {
   for (const channel of channelList) {
     const log = await NotificationDeliveryLog.create({
       channel,
-      to: toObj[channel === 'email' ? 'email' : 'phone'] || String(to),
+      to:
+        channel === 'in-app'
+          ? String(recipientId || userId || to || 'in-app')
+          : toObj[channel === 'email' ? 'email' : 'phone'] || String(to),
       subject,
       body,
       priority,
@@ -165,6 +181,27 @@ async function notify(opts) {
         });
       } else if (channel === 'push') {
         result = await sendPush({ to: toObj.token, notification: { title: subject, body } });
+      } else if (channel === 'in-app') {
+        const ns = getNotificationService();
+        const targetRecipient = recipientId || userId;
+        if (!ns || !targetRecipient) {
+          result = {
+            success: false,
+            skipped: true,
+            reason: !ns ? 'in-app-service-unavailable' : 'in-app-recipient-missing',
+          };
+        } else {
+          result = await ns.send({
+            recipientId: String(targetRecipient),
+            senderId: userId ? String(userId) : null,
+            title: subject || 'إشعار',
+            body,
+            priority,
+            channels: ['inApp'],
+            category: 'beneficiary.lifecycle',
+            metadata: { ...metadata, beneficiaryId, templateKey },
+          });
+        }
       } else {
         result = { success: false, error: 'unsupported_channel' };
       }

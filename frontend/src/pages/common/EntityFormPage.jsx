@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Container, Paper, Box, Typography, TextField, MenuItem, Button, Stack,
-  Alert, CircularProgress, Checkbox, FormControlLabel, Divider,
+  Container,
+  Paper,
+  Box,
+  Typography,
+  TextField,
+  MenuItem,
+  Button,
+  Stack,
+  Alert,
+  CircularProgress,
+  Checkbox,
+  FormControlLabel,
+  Divider,
 } from '@mui/material';
 import apiClient from '../../services/api.client';
 
@@ -22,21 +33,32 @@ import apiClient from '../../services/api.client';
  * }
  */
 const SYSTEM_KEYS = new Set([
-  '_id', '__v', 'id', 'createdAt', 'updatedAt', 'branchId', 'createdBy', 'updatedBy', 'deletedAt',
+  '_id',
+  '__v',
+  'id',
+  'createdAt',
+  'updatedAt',
+  'branchId',
+  'createdBy',
+  'updatedBy',
+  'deletedAt',
 ]);
 
 function labelize(key) {
   return String(key)
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function deriveFields(record) {
   return Object.entries(record)
-    .filter(([k, v]) =>
-      !SYSTEM_KEYS.has(k) && !k.startsWith('_') &&
-      (v === null || ['string', 'number', 'boolean'].includes(typeof v)))
+    .filter(
+      ([k, v]) =>
+        !SYSTEM_KEYS.has(k) &&
+        !k.startsWith('_') &&
+        (v === null || ['string', 'number', 'boolean'].includes(typeof v))
+    )
     .map(([k, v]) => {
       let type = 'text';
       if (typeof v === 'boolean') type = 'checkbox';
@@ -56,7 +78,7 @@ export default function EntityFormPage({ config }) {
   const [fields, setFields] = useState(Array.isArray(cfg.fields) ? cfg.fields : []);
   const [values, setValues] = useState(() => {
     const init = {};
-    for (const f of (cfg.fields || [])) init[f.name] = f.type === 'checkbox' ? false : '';
+    for (const f of cfg.fields || []) init[f.name] = f.type === 'checkbox' ? false : '';
     return init;
   });
   const [errors, setErrors] = useState({});
@@ -68,28 +90,38 @@ export default function EntityFormPage({ config }) {
 
   // Fetch options for any entity-select fields (ref pickers)
   useEffect(() => {
-    const dynamic = (cfg.fields || []).filter((f) => f.type === 'entity-select' && f.optionsEndpoint);
+    const dynamic = (cfg.fields || []).filter(f => f.type === 'entity-select' && f.optionsEndpoint);
     if (!dynamic.length) return undefined;
     let alive = true;
     (async () => {
       const map = {};
-      await Promise.all(dynamic.map(async (f) => {
-        try {
-          const r = await apiClient.get(f.optionsEndpoint, { params: { limit: 500 } });
-          const d = r?.data;
-          const arr = Array.isArray(d) ? d : (d?.data || d?.items || d?.results || d?.docs || []);
-          const labels = Array.isArray(f.optionLabel) ? f.optionLabel : [f.optionLabel || 'name'];
-          map[f.name] = (Array.isArray(arr) ? arr : [])
-            .map((o) => ({
-              value: o[f.optionValue || '_id'],
-              label: labels.map((k) => o[k]).find(Boolean) || o.name || o.title || String(o[f.optionValue || '_id']),
-            }))
-            .filter((o) => o.value);
-        } catch { map[f.name] = []; }
-      }));
+      await Promise.all(
+        dynamic.map(async f => {
+          try {
+            const r = await apiClient.get(f.optionsEndpoint, { params: { limit: 500 } });
+            const d = r?.data;
+            const arr = Array.isArray(d) ? d : d?.data || d?.items || d?.results || d?.docs || [];
+            const labels = Array.isArray(f.optionLabel) ? f.optionLabel : [f.optionLabel || 'name'];
+            map[f.name] = (Array.isArray(arr) ? arr : [])
+              .map(o => ({
+                value: o[f.optionValue || '_id'],
+                label:
+                  labels.map(k => o[k]).find(Boolean) ||
+                  o.name ||
+                  o.title ||
+                  String(o[f.optionValue || '_id']),
+              }))
+              .filter(o => o.value);
+          } catch {
+            map[f.name] = [];
+          }
+        })
+      );
       if (alive) setOptionsMap(map);
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [cfg.fields]);
 
   // EDIT: load the record + prefill (+ derive fields if none given)
@@ -101,8 +133,13 @@ export default function EntityFormPage({ config }) {
       try {
         const r = await apiClient.get(`${cfg.getEndpoint}/${id}`);
         const d = r?.data;
-        const rec = d?.data || d?.item || d?.record || (d && typeof d === 'object' && !Array.isArray(d) ? d : {});
-        const useFields = (Array.isArray(cfg.fields) && cfg.fields.length) ? cfg.fields : deriveFields(rec || {});
+        const rec =
+          d?.data ||
+          d?.item ||
+          d?.record ||
+          (d && typeof d === 'object' && !Array.isArray(d) ? d : {});
+        const useFields =
+          Array.isArray(cfg.fields) && cfg.fields.length ? cfg.fields : deriveFields(rec || {});
         const vals = {};
         for (const f of useFields) {
           let v = rec ? rec[f.name] : '';
@@ -110,19 +147,27 @@ export default function EntityFormPage({ config }) {
           else if (f.type === 'date' && typeof v === 'string') v = v.slice(0, 10);
           vals[f.name] = v;
         }
-        if (alive) { setFields(useFields); setValues(vals); }
+        if (alive) {
+          setFields(useFields);
+          setValues(vals);
+        }
       } catch (err) {
-        if (alive) setServerError(err?.response?.status === 404 ? 'السجل غير موجود.' : 'تعذّر تحميل البيانات.');
+        if (alive)
+          setServerError(
+            err?.response?.status === 404 ? 'السجل غير موجود.' : 'تعذّر تحميل البيانات.'
+          );
       } finally {
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [isEdit, cfg.getEndpoint, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setField = (name, val) => {
-    setValues((v) => ({ ...v, [name]: val }));
-    if (errors[name]) setErrors((e) => ({ ...e, [name]: '' }));
+    setValues(v => ({ ...v, [name]: val }));
+    if (errors[name]) setErrors(e => ({ ...e, [name]: '' }));
   };
 
   const validate = () => {
@@ -150,7 +195,7 @@ export default function EntityFormPage({ config }) {
     return out;
   };
 
-  const handleSubmit = async (ev) => {
+  const handleSubmit = async ev => {
     ev.preventDefault();
     setServerError('');
     if (!validate()) return;
@@ -166,7 +211,9 @@ export default function EntityFormPage({ config }) {
       setTimeout(() => navigate(cfg.backTo || -1), 900);
     } catch (err) {
       const msg =
-        err?.response?.data?.message || err?.response?.data?.error || err?.message ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
         'تعذّر الحفظ. حاول مرة أخرى.';
       setServerError(typeof msg === 'string' ? msg : 'تعذّر الحفظ.');
     } finally {
@@ -185,20 +232,32 @@ export default function EntityFormPage({ config }) {
             {cfg.title || defaultTitle}
           </Typography>
           {cfg.subtitle ? (
-            <Typography color="text.secondary" sx={{ mt: 0.5 }}>{cfg.subtitle}</Typography>
+            <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+              {cfg.subtitle}
+            </Typography>
           ) : null}
         </Box>
         <Divider sx={{ my: 2 }} />
 
-        {done ? <Alert severity="success" sx={{ mb: 2 }}>{successText}</Alert> : null}
-        {serverError ? <Alert severity="error" sx={{ mb: 2 }}>{serverError}</Alert> : null}
+        {done ? (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successText}
+          </Alert>
+        ) : null}
+        {serverError ? (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {serverError}
+          </Alert>
+        ) : null}
 
         {loading ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}><CircularProgress /></Box>
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
             <Stack spacing={2.5}>
-              {fields.map((f) => {
+              {fields.map(f => {
                 const common = {
                   key: f.name,
                   fullWidth: true,
@@ -216,7 +275,7 @@ export default function EntityFormPage({ config }) {
                       control={
                         <Checkbox
                           checked={Boolean(values[f.name])}
-                          onChange={(e) => setField(f.name, e.target.checked)}
+                          onChange={e => setField(f.name, e.target.checked)}
                           disabled={submitting || done}
                         />
                       }
@@ -225,13 +284,23 @@ export default function EntityFormPage({ config }) {
                   );
                 }
                 if (f.type === 'select' || f.type === 'entity-select') {
-                  const opts = f.type === 'entity-select' ? (optionsMap[f.name] || []) : (f.options || []);
-                  const help = f.type === 'entity-select' && !opts.length
-                    ? 'جارٍ تحميل الخيارات…' : (errors[f.name] || f.help || '');
+                  const opts =
+                    f.type === 'entity-select' ? optionsMap[f.name] || [] : f.options || [];
+                  const help =
+                    f.type === 'entity-select' && !opts.length
+                      ? 'جارٍ تحميل الخيارات…'
+                      : errors[f.name] || f.help || '';
                   return (
-                    <TextField {...common} select helperText={help} onChange={(e) => setField(f.name, e.target.value)}>
-                      {opts.map((o) => (
-                        <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                    <TextField
+                      {...common}
+                      select
+                      helperText={help}
+                      onChange={e => setField(f.name, e.target.value)}
+                    >
+                      {opts.map(o => (
+                        <MenuItem key={o.value} value={o.value}>
+                          {o.label}
+                        </MenuItem>
                       ))}
                     </TextField>
                   );
@@ -243,8 +312,10 @@ export default function EntityFormPage({ config }) {
                     type={typeMap[f.type] || f.type || 'text'}
                     multiline={f.type === 'textarea'}
                     minRows={f.type === 'textarea' ? 3 : undefined}
-                    InputLabelProps={['date', 'datetime'].includes(f.type) ? { shrink: true } : undefined}
-                    onChange={(e) => setField(f.name, e.target.value)}
+                    InputLabelProps={
+                      ['date', 'datetime'].includes(f.type) ? { shrink: true } : undefined
+                    }
+                    onChange={e => setField(f.name, e.target.value)}
                   />
                 );
               })}
@@ -256,9 +327,13 @@ export default function EntityFormPage({ config }) {
                   disabled={submitting || done}
                   startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
                 >
-                  {submitting ? 'جارٍ الحفظ…' : (isEdit ? 'حفظ التعديلات' : 'حفظ')}
+                  {submitting ? 'جارٍ الحفظ…' : isEdit ? 'حفظ التعديلات' : 'حفظ'}
                 </Button>
-                <Button variant="outlined" onClick={() => navigate(cfg.backTo || -1)} disabled={submitting}>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate(cfg.backTo || -1)}
+                  disabled={submitting}
+                >
                   إلغاء
                 </Button>
               </Stack>

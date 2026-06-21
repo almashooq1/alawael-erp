@@ -135,7 +135,7 @@ SelfAdvocacyTrainingPlanSchema.post('save', function (doc) {
     if (!integrationBus || typeof integrationBus.publish !== 'function' || !doc.beneficiaryId)
       return;
     Promise.resolve(
-      integrationBus.publish('self-advocacy', 'plan.completed', {
+      integrationBus.publish('self-advocacy', 'self_advocacy.plan_completed', {
         selfAdvocacyPlanId: String(doc._id),
         beneficiaryId: String(doc.beneficiaryId),
       })

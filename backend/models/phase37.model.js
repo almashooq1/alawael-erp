@@ -617,7 +617,7 @@ const digitalTherapeuticSchema = new Schema(
       default: 'prescribed',
     },
     discontinuationReason: { type: String },
-    linkedTherapySession: [{ type: Schema.Types.ObjectId, ref: 'Session' }],
+    linkedTherapySession: [{ type: Schema.Types.ObjectId, ref: 'TherapySession' }],
   },
   { timestamps: true, collection: 'digital_therapeutics' }
 );

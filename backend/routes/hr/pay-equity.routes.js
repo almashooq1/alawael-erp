@@ -110,12 +110,10 @@ router.post('/snapshot', requireRole(READ_ROLES), async (req, res) => {
       // a snapshot is a branch-scoped artifact; HQ must name a branch in body
       const bodyBranch = req.body && req.body.branchId;
       if (!bodyBranch) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error: 'branchId required (HQ must specify a branch to snapshot)',
-          });
+        return res.status(400).json({
+          success: false,
+          error: 'branchId required (HQ must specify a branch to snapshot)',
+        });
       }
     }
     const actor = req.user || {};
@@ -177,7 +175,11 @@ router.get('/below-band', requireRole(FLAGGED_ROLES), async (req, res) => {
   try {
     const department = req.query.department ? String(req.query.department) : null;
     const branchId = effectiveBranchScope(req);
-    const items = await svc.belowBandEmployees({ branchId, department, belowThreshold: req.query.belowThreshold });
+    const items = await svc.belowBandEmployees({
+      branchId,
+      department,
+      belowThreshold: req.query.belowThreshold,
+    });
     res.json({ success: true, data: { count: items.length, items } });
   } catch (err) {
     mapErr(res, err, 'pay-equity:below-band');

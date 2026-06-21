@@ -48,7 +48,12 @@ const landingContentEn = {
   hero: {
     badge: 'Licensed by the Ministry of Human Resources and Social Development',
     titleBefore: 'We care for our children with',
-    titleRotating: ['intellectual disability', 'autism spectrum disorder', 'learning difficulties', 'special needs'],
+    titleRotating: [
+      'intellectual disability',
+      'autism spectrum disorder',
+      'learning difficulties',
+      'special needs',
+    ],
     titleAfter: 'with dedication and expertise since 1419 AH',
     subtitle:
       'A leading center for the rehabilitation of children and young people with intellectual disability and autism spectrum disorder in Riyadh — a safe environment, a specialized team, and evidence-based programs for over 25 years.',
@@ -79,14 +84,24 @@ const landingContentEn = {
       text: 'To deliver rehabilitation services to world-class standards, built on carefully studied individual plans that improve our beneficiaries’ quality of life and support their inclusion in society.',
     },
     values: [
-      { icon: '🤝', iconKey: 'heart', title: 'Compassion', desc: 'Care that comes from the heart, first and foremost' },
+      {
+        icon: '🤝',
+        iconKey: 'heart',
+        title: 'Compassion',
+        desc: 'Care that comes from the heart, first and foremost',
+      },
       {
         icon: '🎯',
         iconKey: 'academic-cap',
         title: 'Specialization',
         desc: 'A scientifically qualified team in every field',
       },
-      { icon: '🌟', iconKey: 'star', title: 'Excellence', desc: 'World-class standards across all our services' },
+      {
+        icon: '🌟',
+        iconKey: 'star',
+        title: 'Excellence',
+        desc: 'World-class standards across all our services',
+      },
       {
         icon: '🛡️',
         iconKey: 'shield-check',
@@ -216,7 +231,8 @@ const landingContentEn = {
   /* ── Team (specialist profiles) ── */
   team: {
     title: 'Our Specialist Team',
-    subtitle: 'A select group of specialists holding international certifications in rehabilitation and special education',
+    subtitle:
+      'A select group of specialists holding international certifications in rehabilitation and special education',
     items: [
       {
         name: 'Dr. Sarah Al-Ahmadi',
@@ -278,9 +294,11 @@ const landingContentEn = {
   /* ── Appointment booking ── */
   appointment: {
     title: 'Book a Free Assessment Visit',
-    subtitle: 'One step begins the journey of change for your son or daughter — we respond within 24 hours',
+    subtitle:
+      'One step begins the journey of change for your son or daughter — we respond within 24 hours',
     whatsappNumber: '966535242200', // E.164 without +
-    whatsappTemplate: 'Hello — I would like to book an assessment visit at Alawael Centers. Details: ',
+    whatsappTemplate:
+      'Hello — I would like to book an assessment visit at Alawael Centers. Details: ',
     formFields: {
       parentName: 'Parent’s Name',
       parentPhone: 'Mobile Number',
@@ -301,7 +319,11 @@ const landingContentEn = {
       'Speech and language delay',
       'Not sure — I need an assessment',
     ],
-    timeSlots: ['Morning (7:30 AM - 12:30 PM)', 'Evening (3:00 PM - 8:00 PM)', 'Any time that works'],
+    timeSlots: [
+      'Morning (7:30 AM - 12:30 PM)',
+      'Evening (3:00 PM - 8:00 PM)',
+      'Any time that works',
+    ],
   },
 
   /* ── Self-assessment quiz ── */
@@ -330,7 +352,11 @@ const landingContentEn = {
             label: '6 - 12 years',
             score: { 'autism-rehab': 4, 'speech-lang': 3, occupational: 3, psychological: 3 },
           },
-          { value: '12+', label: 'Older than 12 years', score: { psychological: 4, occupational: 3 } },
+          {
+            value: '12+',
+            label: 'Older than 12 years',
+            score: { psychological: 4, occupational: 3 },
+          },
         ],
       },
       {
@@ -369,7 +395,11 @@ const landingContentEn = {
         id: 'diagnosis',
         label: 'Has your child received a formal diagnosis?',
         options: [
-          { value: 'autism', label: 'Yes — autism spectrum disorder', score: { 'autism-rehab': 6 } },
+          {
+            value: 'autism',
+            label: 'Yes — autism spectrum disorder',
+            score: { 'autism-rehab': 6 },
+          },
           {
             value: 'intellectual',
             label: 'Yes — intellectual disability',
@@ -498,7 +528,8 @@ const landingContentEn = {
   /* ── Photo gallery ── */
   gallery: {
     title: 'A Tour Inside the Center',
-    subtitle: 'Environments designed specifically for our beneficiaries’ comfort and an effective rehabilitation experience',
+    subtitle:
+      'Environments designed specifically for our beneficiaries’ comfort and an effective rehabilitation experience',
     categories: [
       { id: 'all', label: 'All' },
       { id: 'therapy', label: 'Therapy Rooms' },
@@ -630,7 +661,8 @@ const landingContentEn = {
   /* ── Awards / certifications ── */
   awards: {
     title: 'Accreditations & Partnerships',
-    subtitle: 'We take pride in our commitment to the highest local and international quality standards',
+    subtitle:
+      'We take pride in our commitment to the highest local and international quality standards',
     items: [
       {
         name: 'Ministry of Human Resources',
@@ -638,15 +670,30 @@ const landingContentEn = {
         icon: '🏛️',
         iconKey: 'building-library',
       },
-      { name: 'Authority for the Care of Persons with Disabilities', detail: 'Registered member', icon: '💙', iconKey: 'heart' },
+      {
+        name: 'Authority for the Care of Persons with Disabilities',
+        detail: 'Registered member',
+        icon: '💙',
+        iconKey: 'heart',
+      },
       {
         name: 'Saudi Commission for Health Specialties (SCFHS)',
         detail: 'Licensed specialists',
         icon: '⚕️',
         iconKey: 'badge-check',
       },
-      { name: 'ASHA', detail: 'Internationally certified speech therapists', icon: '🎓', iconKey: 'academic-cap' },
-      { name: 'BACB', detail: 'Applied behavior analysts (BCBA)', icon: '📜', iconKey: 'document-text' },
+      {
+        name: 'ASHA',
+        detail: 'Internationally certified speech therapists',
+        icon: '🎓',
+        iconKey: 'academic-cap',
+      },
+      {
+        name: 'BACB',
+        detail: 'Applied behavior analysts (BCBA)',
+        icon: '📜',
+        iconKey: 'document-text',
+      },
       { name: 'CARF', detail: 'Quality-standards compliant', icon: '🌍', iconKey: 'globe' },
     ],
   },
@@ -676,16 +723,52 @@ const landingContentEn = {
     weLabel: 'Alawael Centers',
     otherLabel: 'Other Centers',
     rows: [
-      { feature: '25+ years of experience in the field', us: true, other: 'Often less than 10 years' },
-      { feature: 'A team of 400+ certified specialists', us: true, other: 'Smaller, more general teams' },
-      { feature: 'Two daily sessions (morning + evening)', us: true, other: 'Usually a single session' },
-      { feature: 'Transport service to every district in Riyadh', us: true, other: 'Limited or at extra cost' },
-      { feature: 'Digital parent portal and progress tracking', us: true, other: 'Monthly paper reports' },
-      { feature: 'International goal bank (200+ goals)', us: true, other: 'General, uncalibrated goals' },
-      { feature: '4 specialized branches (for boys and girls)', us: true, other: 'Often one mixed branch' },
+      {
+        feature: '25+ years of experience in the field',
+        us: true,
+        other: 'Often less than 10 years',
+      },
+      {
+        feature: 'A team of 400+ certified specialists',
+        us: true,
+        other: 'Smaller, more general teams',
+      },
+      {
+        feature: 'Two daily sessions (morning + evening)',
+        us: true,
+        other: 'Usually a single session',
+      },
+      {
+        feature: 'Transport service to every district in Riyadh',
+        us: true,
+        other: 'Limited or at extra cost',
+      },
+      {
+        feature: 'Digital parent portal and progress tracking',
+        us: true,
+        other: 'Monthly paper reports',
+      },
+      {
+        feature: 'International goal bank (200+ goals)',
+        us: true,
+        other: 'General, uncalibrated goals',
+      },
+      {
+        feature: '4 specialized branches (for boys and girls)',
+        us: true,
+        other: 'Often one mixed branch',
+      },
       { feature: 'ASHA / BCBA / SCFHS standards', us: true, other: 'Local certifications only' },
-      { feature: 'Early warning system to detect regression', us: true, other: 'General periodic follow-up' },
-      { feature: 'Remote sessions for families who live far away', us: true, other: 'Not available' },
+      {
+        feature: 'Early warning system to detect regression',
+        us: true,
+        other: 'General periodic follow-up',
+      },
+      {
+        feature: 'Remote sessions for families who live far away',
+        us: true,
+        other: 'Not available',
+      },
     ],
   },
 
@@ -711,7 +794,8 @@ const landingContentEn = {
   /* ── Programs (clinical depth details) ── */
   programs: {
     title: 'Our Specialized Programs',
-    subtitle: 'Individual rehabilitation plans designed for each beneficiary in line with international standards',
+    subtitle:
+      'Individual rehabilitation plans designed for each beneficiary in line with international standards',
     items: [
       {
         title: 'Intellectual Disability',

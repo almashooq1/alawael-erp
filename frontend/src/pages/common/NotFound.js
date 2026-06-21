@@ -6,15 +6,22 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // unimplemented route — show an honest "under development" message
 // instead of a bare 404.
 const ACTION_SUFFIXES = [
-  '/new', '/create', '/add', '/edit', '/upload',
-  '/register', '/compose', '/config', '/receive',
+  '/new',
+  '/create',
+  '/add',
+  '/edit',
+  '/upload',
+  '/register',
+  '/compose',
+  '/config',
+  '/receive',
 ];
 
 function NotFound() {
   const navigate = useNavigate();
   const location = useLocation();
   const path = (location?.pathname || '').replace(/\/$/, '');
-  const isAction = ACTION_SUFFIXES.some((s) => path.endsWith(s));
+  const isAction = ACTION_SUFFIXES.some(s => path.endsWith(s));
 
   const title = isAction ? 'قيد التطوير' : '404';
   const heading = isAction ? 'هذه الميزة قيد التطوير' : 'الصفحة غير موجودة';
@@ -27,7 +34,11 @@ function NotFound() {
       <Paper sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3 }}>
         <Typography
           variant="h1"
-          sx={{ fontWeight: 800, color: isAction ? 'warning.main' : 'primary.main', fontSize: { xs: 56, sm: 72 } }}
+          sx={{
+            fontWeight: 800,
+            color: isAction ? 'warning.main' : 'primary.main',
+            fontSize: { xs: 56, sm: 72 },
+          }}
           gutterBottom
         >
           {isAction ? '🛠️' : title}

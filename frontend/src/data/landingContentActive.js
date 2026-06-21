@@ -17,7 +17,8 @@ import en from './landingContentEn';
 
 export function getActiveLang() {
   try {
-    if (typeof window !== 'undefined' && window.localStorage.getItem('alawael-lang') === 'en') return 'en';
+    if (typeof window !== 'undefined' && window.localStorage.getItem('alawael-lang') === 'en')
+      return 'en';
   } catch {
     /* ignore */
   }
@@ -31,8 +32,7 @@ export const tr = (arText, enText) => (isEn ? enText : arText);
 
 // CMS override (injected on window before this module is evaluated; see index.js).
 // MVP: CMS overrides the Arabic content only; English stays static.
-const cmsOverride =
-  (typeof window !== 'undefined' && window.__ALAWAEL_LANDING_CMS__) || null;
+const cmsOverride = (typeof window !== 'undefined' && window.__ALAWAEL_LANDING_CMS__) || null;
 
 function isPlainObject(v) {
   return v && typeof v === 'object' && !Array.isArray(v);

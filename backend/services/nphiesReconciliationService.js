@@ -159,12 +159,12 @@ function createService({ claimModel = DefaultClaim, adapter = defaultAdapter, se
    */
   async function sweep({ batchSize = 25, minAgeMs = 15 * 60 * 1000 } = {}) {
     const cutoff = new Date(Date.now() - minAgeMs);
+    // W1437 — rely on nphies.submission.updatedAt (now schema-backed + defaulted).
+    // Existing documents must be backfilled by scripts/migrate-nphies-claim-updatedAt.js
+    // before this code is deployed, otherwise stale PENDING_REVIEW claims won't be swept.
     const q = {
       'nphies.submission.status': 'PENDING_REVIEW',
-      $or: [
-        { 'nphies.submission.updatedAt': { $lt: cutoff } },
-        { 'nphies.submission.updatedAt': { $exists: false } },
-      ],
+      'nphies.submission.updatedAt': { $lt: cutoff },
     };
     const claims = await claimModel
       .find(q)

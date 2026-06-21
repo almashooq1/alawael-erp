@@ -104,6 +104,14 @@ advancedTicketSchema.index({ assignee: 1, status: 1 });
 advancedTicketSchema.index({ reporter: 1 });
 advancedTicketSchema.index({ category: 1, status: 1 });
 advancedTicketSchema.index({ 'sla.isBreached': 1 });
+// W1426 — cover SLA scheduler queries that were timing out in production
+advancedTicketSchema.index({
+  status: 1,
+  'sla.firstResponseAt': 1,
+  'sla.isBreached': 1,
+  createdAt: -1,
+});
+advancedTicketSchema.index({ status: 1, createdAt: 1 });
 
 module.exports =
   mongoose.models.AdvancedTicket || mongoose.model('AdvancedTicket', advancedTicketSchema);

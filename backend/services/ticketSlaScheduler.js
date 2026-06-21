@@ -14,6 +14,12 @@ let schedulerStarted = false;
 let _slaInterval = null;
 
 // ─── SLA Config الافتراضية (بالساعات) ────────────────────────────────────────
+
+// W1437 — statuses that are still "open" from an SLA perspective.
+// Using $in with this list lets MongoDB use the status-leading compound
+// indexes. $nin ['resolved','closed'] forces a full collection scan.
+const ACTIVE_STATUSES = ['open', 'in_progress', 'waiting_on_customer', 'escalated'];
+
 const SLA_CONFIG = {
   critical: { response: 1, resolution: 4 },
   high: { response: 4, resolution: 24 },
@@ -36,9 +42,9 @@ function calculateSlaDeadlines(priority, createdAt) {
 /**
  * فحص التذاكر التي تجاوزت SLA الاستجابة
  */
-async function checkResponseBreaches() {
+async function checkResponseBreaches({ AdvancedTicket: AdvancedTicketArg } = {}) {
   try {
-    const AdvancedTicket = require('../models/AdvancedTicket');
+    const AdvancedTicket = AdvancedTicketArg || require('../models/AdvancedTicket');
     const now = new Date();
 
     // تذاكر مفتوحة لم تُستجب بعد وتجاوزت وقت SLA
@@ -89,14 +95,14 @@ async function checkResponseBreaches() {
 /**
  * فحص التذاكر التي تجاوزت SLA الحل
  */
-async function checkResolutionBreaches() {
+async function checkResolutionBreaches({ AdvancedTicket: AdvancedTicketArg } = {}) {
   try {
-    const AdvancedTicket = require('../models/AdvancedTicket');
+    const AdvancedTicket = AdvancedTicketArg || require('../models/AdvancedTicket');
     const now = new Date();
 
     // تذاكر لم تُحل بعد
     const openTickets = await AdvancedTicket.find({
-      status: { $nin: ['resolved', 'closed'] },
+      status: { $in: ACTIVE_STATUSES },
     }).populate('assignee', 'name email');
 
     let count = 0;
@@ -214,13 +220,13 @@ async function escalateTicket(ticket, reason) {
 /**
  * تعيين SLA Deadlines لتذاكر لا تملك deadlines
  */
-async function assignMissingSlaDeadlines() {
+async function assignMissingSlaDeadlines({ AdvancedTicket: AdvancedTicketArg } = {}) {
   try {
-    const AdvancedTicket = require('../models/AdvancedTicket');
+    const AdvancedTicket = AdvancedTicketArg || require('../models/AdvancedTicket');
 
     const ticketsWithoutSla = await AdvancedTicket.find({
       $or: [{ 'sla.responseTime': null }, { 'sla.responseTime': { $exists: false } }],
-      status: { $nin: ['resolved', 'closed'] },
+      status: { $in: ACTIVE_STATUSES },
     }).limit(50);
 
     for (const ticket of ticketsWithoutSla) {
@@ -242,19 +248,19 @@ async function assignMissingSlaDeadlines() {
 /**
  * إحصائيات SLA السريعة
  */
-async function getSlaStats() {
+async function getSlaStats({ AdvancedTicket: AdvancedTicketArg } = {}) {
   try {
-    const AdvancedTicket = require('../models/AdvancedTicket');
+    const AdvancedTicket = AdvancedTicketArg || require('../models/AdvancedTicket');
 
     const [total, breached, critical, escalated] = await Promise.all([
-      AdvancedTicket.countDocuments({ status: { $nin: ['resolved', 'closed'] } }),
+      AdvancedTicket.countDocuments({ status: { $in: ACTIVE_STATUSES } }),
       AdvancedTicket.countDocuments({
         'sla.isBreached': true,
-        status: { $nin: ['resolved', 'closed'] },
+        status: { $in: ACTIVE_STATUSES },
       }),
       AdvancedTicket.countDocuments({
         priority: 'critical',
-        status: { $nin: ['resolved', 'closed'] },
+        status: { $in: ACTIVE_STATUSES },
       }),
       AdvancedTicket.countDocuments({ status: 'escalated' }),
     ]);
@@ -361,5 +367,8 @@ module.exports = {
   runSlaChecks,
   calculateSlaDeadlines,
   getSlaStats,
+  checkResponseBreaches,
+  checkResolutionBreaches,
+  assignMissingSlaDeadlines,
   SLA_CONFIG,
 };

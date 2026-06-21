@@ -165,14 +165,19 @@ describe('W553 — registry + engine item-bank surface', () => {
     // The original 8 (W554–W567) plus the W706/W708–W721 clinical-instrument
     // arc — every administrable module here ships a bilingual itemBank.
     expect(codes).toEqual([
+      'ABAS-3',
+      'ABLLS-R',
       'BARTHEL',
+      'BAYLEY-4',
       'CARS-2',
       'CFCS',
+      'COPM',
       'CSI',
       'EDACS',
       'FLACC',
       'FTS5',
       'GAD-7',
+      'GAS',
       'GCS',
       'GMFCS',
       'KATZ',
@@ -190,8 +195,10 @@ describe('W553 — registry + engine item-bank surface', () => {
       'SDQ',
       'TINETTI',
       'TUG',
+      'VB-MAPP',
       'WHO-5',
       'WHODAS-12',
+      'WHODAS-36',
     ]);
   });
 

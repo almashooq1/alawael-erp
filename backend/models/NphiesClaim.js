@@ -72,6 +72,11 @@ const NphiesClaimSchema = new mongoose.Schema(
           index: true,
         },
         submittedAt: Date,
+        // W1437 — track last submission mutation so the reconciliation sweeper
+        // can skip claims that were just updated (instead of scanning all
+        // PENDING_REVIEW claims).
+        updatedAt: { type: Date, default: Date.now },
+        updatedBy: { type: String },
         claimReference: String,
         reason: String,
         message: String,
@@ -94,5 +99,19 @@ const NphiesClaimSchema = new mongoose.Schema(
 
 NphiesClaimSchema.index({ beneficiary: 1, status: 1 });
 NphiesClaimSchema.index({ 'nphies.submission.status': 1, serviceDate: -1 });
+// W1426/W1437 — cover nphies-reconciliation sweeper query that was timing out in production.
+// Status equality + updatedAt range are the filters; submittedAt is the sort key.
+NphiesClaimSchema.index({
+  'nphies.submission.status': 1,
+  'nphies.submission.updatedAt': 1,
+  'nphies.submission.submittedAt': 1,
+});
+
+// W1437 — auto-stamp submission.updatedAt whenever the submission subdoc changes.
+NphiesClaimSchema.pre('save', async function () {
+  if (this.isModified('nphies.submission')) {
+    this.nphies.submission.updatedAt = new Date();
+  }
+});
 
 module.exports = mongoose.models.NphiesClaim || mongoose.model('NphiesClaim', NphiesClaimSchema);

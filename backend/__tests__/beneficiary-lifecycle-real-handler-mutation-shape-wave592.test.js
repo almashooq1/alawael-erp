@@ -92,8 +92,13 @@ describe('W592 — real data handler mutation shape', () => {
       expect(call.filter.date).toEqual({ $gte: FROZEN });
     });
 
-    it('sets status CANCELLED and nothing else', () => {
-      expect(call.update).toEqual({ $set: { status: 'CANCELLED' } });
+    it('uses an aggregation pipeline that sets status CANCELLED and tags the transition', () => {
+      expect(Array.isArray(call.update)).toBe(true);
+      expect(call.update[0].$set.status).toBe('CANCELLED');
+      expect(call.update[0].$set.lifecycleCancellationTag).toMatchObject({
+        transitionId: null,
+        originalStatus: '$status',
+      });
     });
 
     it('returns the cancelled count under the data category', () => {
@@ -116,21 +121,24 @@ describe('W592 — real data handler mutation shape', () => {
         beneficiaryId: BENE,
         toState: reg.LIFECYCLE_STATES.DECEASED,
       });
-      expect(epiCalls[0].update.$set.dischargeReason).toBe('medical_reason');
-      expect(epiCalls[0].update.$set.dischargeReason).not.toBe('deceased');
+      expect(epiCalls[0].update[0].$set.dischargeReason).toBe('medical_reason');
+      expect(epiCalls[0].update[0].$set.dischargeReason).not.toBe('deceased');
     });
 
     it('non-deceased toState → dischargeReason other', async () => {
       const { handlers, epiCalls } = build();
       await handlers[OP.CLOSE_OPEN_EPISODES]({ beneficiaryId: BENE, toState: 'discharged' });
-      expect(epiCalls[0].update.$set.dischargeReason).toBe('other');
+      expect(epiCalls[0].update[0].$set.dischargeReason).toBe('other');
     });
 
-    it('closes to completed + stamps actualEndDate = now', async () => {
+    it('closes to completed + stamps actualEndDate = now + tags the transition', async () => {
       const { handlers, epiCalls } = build();
       await handlers[OP.CLOSE_OPEN_EPISODES]({ beneficiaryId: BENE, toState: 'discharged' });
-      expect(epiCalls[0].update.$set.status).toBe('completed');
-      expect(epiCalls[0].update.$set.actualEndDate).toBe(FROZEN);
+      expect(epiCalls[0].update[0].$set.status).toBe('completed');
+      expect(epiCalls[0].update[0].$set.actualEndDate).toBe(FROZEN);
+      expect(epiCalls[0].update[0].$set.lifecycleClosureTag).toMatchObject({
+        originalStatus: '$status',
+      });
     });
   });
 
@@ -147,9 +155,12 @@ describe('W592 — real data handler mutation shape', () => {
       expect(call.filter['careTeam.isActive']).toBe(true);
     });
 
-    it('flips only active members via positional arrayFilter (never the whole array)', () => {
+    it('flips only active members via positional arrayFilter and tags the transition', () => {
       expect(call.update.$set['careTeam.$[m].isActive']).toBe(false);
       expect(call.update.$set['careTeam.$[m].removedAt']).toBe(FROZEN);
+      expect(call.update.$set['careTeam.$[m].lifecycleReleaseTag']).toMatchObject({
+        transitionId: null,
+      });
       expect(call.options.arrayFilters).toEqual([{ 'm.isActive': true }]);
     });
   });

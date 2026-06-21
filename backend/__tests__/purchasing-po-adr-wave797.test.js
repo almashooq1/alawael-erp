@@ -54,7 +54,8 @@ describe('W797 — ADR-039 purchase order triple-backend', () => {
 
   it('registry keeps purchasing and inventory mounts separate', () => {
     expect(FEATURES).toMatch(/dualMountAuth\(app,\s*['"]purchasing['"]/);
-    expect(FEATURES).toMatch(/dualMount\(app,\s*['"]inventory['"]/);
+    // Inventory routes are split into module vs enhanced mounts (W797 separation preserved).
+    expect(FEATURES).toMatch(/dualMount\(app,\s*['"]inventory-/);
     expect(FEATURES).not.toMatch(
       /dualMountAuth\(app,\s*['"]purchasing['"][\s\S]*inventory-enhanced\.routes/
     );

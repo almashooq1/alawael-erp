@@ -63,7 +63,13 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (ownServer) await ownServer.stop();
+  if (ownServer) {
+    try {
+      await ownServer.stop({ force: true });
+    } catch {
+      /* ignore cleanup-only errors */
+    }
+  }
 }, 60_000);
 
 function token(role = 'admin') {

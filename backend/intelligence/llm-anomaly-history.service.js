@@ -88,7 +88,19 @@ function createLlmAnomalyHistoryService({
     try {
       await doc.save();
     } catch (err) {
-      logger.error && logger.error('[llm-anomaly-history] save failed:', err.message);
+      if (logger.error) {
+        const recordedAt =
+          doc.recordedAt && typeof doc.recordedAt.toISOString === 'function'
+            ? doc.recordedAt.toISOString()
+            : doc.recordedAt;
+        logger.error(
+          `[llm-anomaly-history] save failed: ${err && err.message} (name=${
+            err && err.name
+          }, code=${err && err.code}, source=${source}, total=${
+            summary && summary.total
+          }, recordedAt=${recordedAt})`
+        );
+      }
       return { ok: false, reason: REASON.SAVE_FAILED };
     }
     return { ok: true, snapshot: doc.toObject ? doc.toObject() : doc };

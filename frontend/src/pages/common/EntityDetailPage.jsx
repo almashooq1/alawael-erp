@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Container, Paper, Box, Typography, Button, Stack, Divider,
-  CircularProgress, Alert, Chip,
+  Container,
+  Paper,
+  Box,
+  Typography,
+  Button,
+  Stack,
+  Divider,
+  CircularProgress,
+  Alert,
+  Chip,
 } from '@mui/material';
 import apiClient from '../../services/api.client';
 
@@ -19,7 +27,7 @@ function labelize(key) {
   return String(key)
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function renderValue(v) {
@@ -32,7 +40,11 @@ function renderValue(v) {
     return inner ? String(inner) : '—';
   }
   if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) {
-    try { return new Date(v).toLocaleString('ar-SA'); } catch { return v; }
+    try {
+      return new Date(v).toLocaleString('ar-SA');
+    } catch {
+      return v;
+    }
   }
   return String(v);
 }
@@ -53,23 +65,34 @@ export default function EntityDetailPage({ config }) {
       try {
         const r = await apiClient.get(`${cfg.getBase}/${id}`);
         const d = r?.data;
-        const rec = d?.data || d?.item || d?.record || (d && typeof d === 'object' && !Array.isArray(d) ? d : null);
+        const rec =
+          d?.data ||
+          d?.item ||
+          d?.record ||
+          (d && typeof d === 'object' && !Array.isArray(d) ? d : null);
         if (alive) setRecord(rec || d || null);
       } catch (err) {
         if (alive) {
           const code = err?.response?.status;
-          setError(code === 404 ? 'السجلّ غير موجود.' : (err?.response?.data?.message || 'تعذّر تحميل البيانات.'));
+          setError(
+            code === 404
+              ? 'السجلّ غير موجود.'
+              : err?.response?.data?.message || 'تعذّر تحميل البيانات.'
+          );
         }
       } finally {
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [cfg.getBase, id]);
 
-  const entries = record && typeof record === 'object'
-    ? Object.entries(record).filter(([k]) => !HIDE_KEYS.has(k) && !k.startsWith('_'))
-    : [];
+  const entries =
+    record && typeof record === 'object'
+      ? Object.entries(record).filter(([k]) => !HIDE_KEYS.has(k) && !k.startsWith('_'))
+      : [];
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }} dir="rtl">
@@ -83,17 +106,36 @@ export default function EntityDetailPage({ config }) {
         <Divider sx={{ my: 2 }} />
 
         {loading ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}><CircularProgress /></Box>
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
         ) : error ? (
-          <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
         ) : entries.length === 0 ? (
-          <Alert severity="info" sx={{ mb: 2 }}>لا توجد بيانات لعرضها.</Alert>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            لا توجد بيانات لعرضها.
+          </Alert>
         ) : (
-          <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '200px 1fr' }, rowGap: 1.5, columnGap: 2, m: 0 }}>
+          <Box
+            component="dl"
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '200px 1fr' },
+              rowGap: 1.5,
+              columnGap: 2,
+              m: 0,
+            }}
+          >
             {entries.map(([k, v]) => (
               <React.Fragment key={k}>
-                <Typography component="dt" sx={{ fontWeight: 700, color: 'text.secondary' }}>{labelize(k)}</Typography>
-                <Typography component="dd" sx={{ m: 0 }}>{renderValue(v)}</Typography>
+                <Typography component="dt" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                  {labelize(k)}
+                </Typography>
+                <Typography component="dd" sx={{ m: 0 }}>
+                  {renderValue(v)}
+                </Typography>
               </React.Fragment>
             ))}
           </Box>
@@ -101,7 +143,9 @@ export default function EntityDetailPage({ config }) {
 
         <Divider sx={{ my: 3 }} />
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button variant="outlined" onClick={() => navigate(cfg.backTo || -1)}>رجوع للقائمة</Button>
+          <Button variant="outlined" onClick={() => navigate(cfg.backTo || -1)}>
+            رجوع للقائمة
+          </Button>
         </Stack>
       </Paper>
     </Container>

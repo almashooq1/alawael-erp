@@ -38,6 +38,71 @@ servers:
     description: Production
 
 tags:
+  - name: Auth
+    description: Authentication — login, token refresh, and logout.
+  - name: Activity Library
+    description: Rehabilitation activity catalogue (Phase 27).
+  - name: Appointments
+    description: Appointment booking and lifecycle management.
+  - name: Beneficiaries
+    description: Beneficiary intake, profile, and lifecycle management.
+  - name: Red Flags
+    description: Beneficiary risk flags — evaluation, resolution, and overrides.
+  - name: Consents
+    description: PDPL consent grants, revocation, and tracking per beneficiary.
+  - name: Care Plans
+    description: |
+      Unified care plans (ADR-041 canonical). Covers plan lifecycle
+      (draft → pending approval → active → suspended/completed) and goal
+      attachment. The legacy CarePlanVersion engine is deprecated; these
+      endpoints target UnifiedCarePlan.
+  - name: Therapy Sessions
+    description: |
+      Clinical session scheduling, documentation, and lifecycle. The canonical
+      model is ClinicalSession; reads/writes project into the legacy
+      TherapySession analytics model for downstream dashboards.
+  - name: Documents
+    description: |
+      Document metadata management. The core route supports both multipart
+      uploads (`POST /upload`) and URL-linked metadata records (`POST /`).
+  - name: Assessments
+    description: |
+      Clinical assessment lifecycle: draft → completed → reviewed → archived.
+      Tracks beneficiary, tool, score, interpretation, and per-domain
+      score breakdown.
+  - name: Reports
+    description: |
+      Dashboard-level aggregates. Some endpoints are backed by dedicated
+      aggregations; others fall back to count/list calls when the dedicated
+      endpoint is not implemented on the running backend.
+  - name: Notifications
+    description: |
+      User inbox, unread counts, and bulk read operations.
+  - name: Incidents
+    description: |
+      Clinical quality incident reports (falls, medication errors, etc.)
+      served by the quality-module router.
+  - name: Branches
+    description: |
+      Rehabilitation-center branch network (HQ, main, branch, satellite).
+  - name: Complaints
+    description: |
+      Customer/parent/staff complaints, suggestions, and grievances.
+  - name: Vehicles
+    description: |
+      Transport fleet vehicles (vans, minibuses, buses, wheelchair vans).
+  - name: Invoices
+    description: |
+      Accounting invoices served by the unified finance router.
+  - name: Measures
+    description: |
+      Clinical measures library catalog (read-only list for dropdowns).
+  - name: Measures Outcomes
+    description: |
+      Clinical measures outcome rollups and reports per beneficiary.
+  - name: Purchase Orders
+    description: |
+      Inventory purchase orders (draft → approval → receipt).
   - name: Nafath Signing
     description: Digital signature via Nafath. Separate from the Nafath SSO/login flow.
   - name: Yakeen Verification
@@ -62,6 +127,2726 @@ security:
   - bearerAuth: []
 
 paths:
+  # ─── Auth ────────────────────────────────────────────────────────────────
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate a user
+      description: |
+        Returns an access token, refresh token, and a minimal user object.
+        No authentication is required for this endpoint.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: |
+        Exchanges a valid refresh token for a new access/refresh pair.
+        The old refresh token is blacklisted on the backend.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: Tokens refreshed successfully.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RefreshResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out the current user
+      description: |
+        Blacklists the current access token on the backend. Requires a valid
+        Bearer token; the logout itself is best-effort on the client side.
+      responses:
+        '200':
+          description: Logout acknowledged.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogoutResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Activity Library ────────────────────────────────────────────────────
+  /api/v1/activity-library/activities:
+    get:
+      tags: [Activity Library]
+      summary: List activities with filters and pagination
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, minimum: 1, maximum: 200 }
+        - name: discipline
+          in: query
+          schema: { type: string }
+        - name: domain
+          in: query
+          schema: { type: string }
+        - name: difficulty
+          in: query
+          schema: { type: string }
+        - name: age_months
+          in: query
+          schema: { type: integer }
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated list of activities.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Activity Library]
+      summary: Create a custom activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityCreate' }
+      responses:
+        '201':
+          description: Activity created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/activity-library/activities/disciplines:
+    get:
+      tags: [Activity Library]
+      summary: List disciplines for UI dropdowns
+      responses:
+        '200':
+          description: Discipline options.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DisciplineListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/activity-library/activities/stats:
+    get:
+      tags: [Activity Library]
+      summary: Activity aggregate stats
+      responses:
+        '200':
+          description: Stats by discipline and difficulty.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityStats' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/activity-library/activities/seed:
+    post:
+      tags: [Activity Library]
+      summary: Seed built-in activities
+      responses:
+        '200':
+          description: Seed result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivitySeedResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/activity-library/activities/{id}:
+    get:
+      tags: [Activity Library]
+      summary: Get activity by ID or code
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Activity details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Activity Library]
+      summary: Update an activity
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityUpdate' }
+      responses:
+        '200':
+          description: Activity updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/activity-library/activities/{id}/use:
+    post:
+      tags: [Activity Library]
+      summary: Increment activity usage counter
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Usage counter incremented.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivityUsageEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Appointments ────────────────────────────────────────────────────────
+  /api/v1/appointments:
+    get:
+      tags: [Appointments]
+      summary: List appointments
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: therapistId
+          in: query
+          schema: { type: string }
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Paginated appointment list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Appointments]
+      summary: Book a new appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppointmentCreate' }
+      responses:
+        '201':
+          description: Appointment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/appointments/{id}:
+    get:
+      tags: [Appointments]
+      summary: Get appointment by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Appointment details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/appointments/{id}/reschedule:
+    patch:
+      tags: [Appointments]
+      summary: Reschedule an appointment
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppointmentReschedule' }
+      responses:
+        '200':
+          description: Appointment rescheduled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/appointments/{id}/status:
+    patch:
+      tags: [Appointments]
+      summary: Update appointment status
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppointmentStatusUpdate' }
+      responses:
+        '200':
+          description: Status updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Beneficiaries ───────────────────────────────────────────────────────
+  /api/v1/beneficiaries:
+    get:
+      tags: [Beneficiaries]
+      summary: List beneficiaries
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: disabilityType
+          in: query
+          schema: { type: string }
+        - name: sort
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated beneficiary list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BeneficiaryListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Beneficiaries]
+      summary: Register a new beneficiary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BeneficiaryCreate' }
+      responses:
+        '201':
+          description: Beneficiary created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BeneficiaryEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/beneficiaries/{id}:
+    get:
+      tags: [Beneficiaries]
+      summary: Get beneficiary by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Beneficiary details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BeneficiaryEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Beneficiaries]
+      summary: Update beneficiary profile
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BeneficiaryUpdate' }
+      responses:
+        '200':
+          description: Profile updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BeneficiaryEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Red Flags ───────────────────────────────────────────────────────────
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags:
+    get:
+      tags: [Red Flags]
+      summary: List active red flags for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      responses:
+        '200':
+          description: Active flags and summary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RedFlagsListEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags/evaluate:
+    post:
+      tags: [Red Flags]
+      summary: Evaluate red flags for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RedFlagsEvaluateRequest' }
+      responses:
+        '200':
+          description: Evaluation transitions.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RedFlagsEvaluateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags/{flagId}/resolve:
+    post:
+      tags: [Red Flags]
+      summary: Manually resolve a red flag
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: flagId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResolveFlagRequest' }
+      responses:
+        '200':
+          description: Resolved flag record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResolvedRedFlagEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags/session-start-check:
+    get:
+      tags: [Red Flags]
+      summary: Pre-flight session start guard check
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: emergency
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Session may start.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionStartCheckEnvelope' }
+        '409':
+          description: Blocking flags prevent session start.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionStartCheckEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags/override:
+    post:
+      tags: [Red Flags]
+      summary: Record an emergency override of blocking flags
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecordOverrideRequest' }
+      responses:
+        '201':
+          description: Override recorded.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OverrideRecordEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '501':
+          description: Override logging is not configured.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/red-flags/overrides:
+    get:
+      tags: [Red Flags]
+      summary: List override records for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+      responses:
+        '200':
+          description: Override records.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OverrideRecordsEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '501':
+          description: Override logging is not configured.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/admin/red-flags/dashboard:
+    get:
+      tags: [Red Flags]
+      summary: Cross-beneficiary red flag dashboard
+      responses:
+        '200':
+          description: Aggregate summary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RedFlagAggregateEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Consents ────────────────────────────────────────────────────────────
+  /api/v1/beneficiaries/{beneficiaryId}/consents:
+    get:
+      tags: [Consents]
+      summary: List consent records for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      responses:
+        '200':
+          description: Consent records.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentRecordsEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Consents]
+      summary: Grant a new consent
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GrantConsentRequest' }
+      responses:
+        '201':
+          description: Consent created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentRecordEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/consents/{consentId}/revoke:
+    post:
+      tags: [Consents]
+      summary: Revoke an active consent
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: consentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RevokeConsentRequest' }
+      responses:
+        '200':
+          description: Consent revoked.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentRecordEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Consent already revoked.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/beneficiaries/{beneficiaryId}/consent-tracking:
+    get:
+      tags: [Consents]
+      summary: Get consent tracking state
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      responses:
+        '200':
+          description: Tracking state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentTrackingEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Consents]
+      summary: Toggle consent tracking
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConsentTrackingUpdateRequest' }
+      responses:
+        '200':
+          description: Tracking state updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentTrackingEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Care Plans ──────────────────────────────────────────────────────────
+  /api/v1/care-plans:
+    get:
+      tags: [Care Plans]
+      summary: List care plans
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1 }
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated list of care plans.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Care Plans]
+      summary: Create a care plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanCreate' }
+      responses:
+        '201':
+          description: Care plan created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/care-plans/beneficiary/{beneficiaryId}:
+    get:
+      tags: [Care Plans]
+      summary: List care plans for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      responses:
+        '200':
+          description: List of care plans for the beneficiary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}:
+    get:
+      tags: [Care Plans]
+      summary: Get care plan by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Care plan details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Care Plans]
+      summary: Update a care plan
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanUpdate' }
+      responses:
+        '200':
+          description: Care plan updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/submit:
+    post:
+      tags: [Care Plans]
+      summary: Submit care plan for approval
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Status changed to pending_approval.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/approve:
+    post:
+      tags: [Care Plans]
+      summary: Approve care plan
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Status changed to active.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/reject:
+    post:
+      tags: [Care Plans]
+      summary: Return care plan to draft
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanLifecycleAction' }
+      responses:
+        '200':
+          description: Status changed to draft.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/suspend:
+    post:
+      tags: [Care Plans]
+      summary: Suspend care plan
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanLifecycleAction' }
+      responses:
+        '200':
+          description: Status changed to suspended.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/resume:
+    post:
+      tags: [Care Plans]
+      summary: Resume care plan
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Status changed to active.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/{id}/complete:
+    post:
+      tags: [Care Plans]
+      summary: Complete care plan
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanLifecycleAction' }
+      responses:
+        '200':
+          description: Status changed to completed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/care-plans/goals:
+    post:
+      tags: [Care Plans]
+      summary: Add a goal to a care plan (UI-compat)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarePlanGoalCreate' }
+      responses:
+        '200':
+          description: Goal added.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Therapy Sessions ────────────────────────────────────────────────────
+  /api/v1/sessions:
+    get:
+      tags: [Therapy Sessions]
+      summary: List therapy sessions
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1 }
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: episodeId
+          in: query
+          schema: { type: string }
+        - name: therapistId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Paginated list of sessions.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Therapy Sessions]
+      summary: Schedule a therapy session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SessionCreate' }
+      responses:
+        '201':
+          description: Session scheduled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/sessions/dashboard:
+    get:
+      tags: [Therapy Sessions]
+      summary: Session dashboard summary
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Dashboard counters.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionDashboardEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/sessions/beneficiary/{beneficiaryId}:
+    get:
+      tags: [Therapy Sessions]
+      summary: List sessions for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, minimum: 1 }
+        - name: skip
+          in: query
+          schema: { type: integer, default: 0, minimum: 0 }
+      responses:
+        '200':
+          description: Sessions for the beneficiary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/sessions/therapist/{therapistId}:
+    get:
+      tags: [Therapy Sessions]
+      summary: List sessions for a therapist
+      parameters:
+        - name: therapistId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, minimum: 1 }
+        - name: skip
+          in: query
+          schema: { type: integer, default: 0, minimum: 0 }
+      responses:
+        '200':
+          description: Sessions for the therapist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/sessions/{sessionId}:
+    get:
+      tags: [Therapy Sessions]
+      summary: Get session by ID
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Therapy Sessions]
+      summary: Update a session
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SessionUpdate' }
+      responses:
+        '200':
+          description: Session updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/sessions/{sessionId}/complete:
+    put:
+      tags: [Therapy Sessions]
+      summary: Complete and document a session
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SessionComplete' }
+      responses:
+        '200':
+          description: Session completed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+
+  /api/v1/sessions/{sessionId}/cancel:
+    put:
+      tags: [Therapy Sessions]
+      summary: Cancel a session
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SessionCancel' }
+      responses:
+        '200':
+          description: Session cancelled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Documents ───────────────────────────────────────────────────────────
+  /api/v1/documents:
+    get:
+      tags: [Documents]
+      summary: List documents
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 15, minimum: 1 }
+        - name: entityType
+          in: query
+          schema: { type: string }
+        - name: entityId
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: folder
+          in: query
+          schema: { type: string }
+        - name: sortBy
+          in: query
+          schema: { type: string, default: '-createdAt' }
+        - name: fileType
+          in: query
+          schema: { type: string }
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date-time }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date-time }
+        - name: isArchived
+          in: query
+          schema: { type: boolean }
+        - name: uploadedBy
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated list of documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Documents]
+      summary: Create a document metadata record (URL-linked)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentCreate' }
+      responses:
+        '201':
+          description: Document created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/documents/{id}:
+    get:
+      tags: [Documents]
+      summary: Get document by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Document details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Documents]
+      summary: Update document metadata
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentUpdate' }
+      responses:
+        '200':
+          description: Document updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Documents]
+      summary: Soft-delete a document
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Document deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Assessments ─────────────────────────────────────────────────────────
+  /api/v1/assessments:
+    get:
+      tags: [Assessments]
+      summary: List clinical assessments
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1 }
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: beneficiary
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Paginated list of assessments.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Assessments]
+      summary: Create a clinical assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssessmentCreate' }
+      responses:
+        '201':
+          description: Assessment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/assessments/dashboard:
+    get:
+      tags: [Assessments]
+      summary: Assessment dashboard summary
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Dashboard counters.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentDashboardEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/assessments/beneficiary/{beneficiaryId}:
+    get:
+      tags: [Assessments]
+      summary: List assessments for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, minimum: 1 }
+        - name: skip
+          in: query
+          schema: { type: integer, default: 0, minimum: 0 }
+      responses:
+        '200':
+          description: Assessments for the beneficiary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/assessments/{assessmentId}:
+    get:
+      tags: [Assessments]
+      summary: Get assessment by ID
+      parameters:
+        - $ref: '#/components/parameters/AssessmentId'
+      responses:
+        '200':
+          description: Assessment details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Assessments]
+      summary: Update assessment metadata or status
+      parameters:
+        - $ref: '#/components/parameters/AssessmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssessmentUpdate' }
+      responses:
+        '200':
+          description: Assessment updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/assessments/{assessmentId}/complete:
+    put:
+      tags: [Assessments]
+      summary: Complete an assessment
+      parameters:
+        - $ref: '#/components/parameters/AssessmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssessmentComplete' }
+      responses:
+        '200':
+          description: Assessment completed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Reports ─────────────────────────────────────────────────────────────
+  /api/v1/reports/beneficiaries/summary:
+    get:
+      tags: [Reports]
+      summary: Beneficiary dashboard summary
+      responses:
+        '200':
+          description: Total + byStatus counts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BeneficiarySummaryEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/reports/care-plans/summary:
+    get:
+      tags: [Reports]
+      summary: Care plan dashboard summary
+      responses:
+        '200':
+          description: Total + byStatus counts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarePlanSummaryEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/reports/assessments/summary:
+    get:
+      tags: [Reports]
+      summary: Assessment dashboard summary
+      responses:
+        '200':
+          description: Total + byStatus counts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentSummaryEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/reports/sessions/volume:
+    get:
+      tags: [Reports]
+      summary: Session volume report for a date range
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Total + period + byStatus counts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionVolumeEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/reports/dashboard:
+    get:
+      tags: [Reports]
+      summary: Operational dashboard
+      responses:
+        '200':
+          description: Operational KPIs.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OperationalDashboardEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Notifications ─────────────────────────────────────────────────────────
+  /api/v1/notifications:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: unread
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Paginated notifications.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Unread notification count
+      responses:
+        '200':
+          description: Unread count.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationUnreadCountEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Notification marked as read.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationReadResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      responses:
+        '200':
+          description: All notifications marked as read.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationReadAllResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Incidents ───────────────────────────────────────────────────────────
+  /api/v1/quality-module/incidents:
+    get:
+      tags: [Incidents]
+      summary: List quality incidents
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: incident_type
+          in: query
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated incidents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IncidentListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [Incidents]
+      summary: Create a quality incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncidentCreate' }
+      responses:
+        '201':
+          description: Incident created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IncidentCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/quality-module/incidents/{id}:
+    get:
+      tags: [Incidents]
+      summary: Get a quality incident by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Incident details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IncidentDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      tags: [Incidents]
+      summary: Update incident status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncidentUpdate' }
+      responses:
+        '200':
+          description: Incident updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IncidentUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Branches ──────────────────────────────────────────────────────────────
+  /api/v1/branches:
+    get:
+      tags: [Branches]
+      summary: List branches
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: region
+          in: query
+          schema: { type: string }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+      responses:
+        '200':
+          description: Paginated branches.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BranchListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/branches/{id}:
+    get:
+      tags: [Branches]
+      summary: Get a branch by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Branch details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BranchDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Complaints ────────────────────────────────────────────────────────────
+  /api/v1/complaints:
+    get:
+      tags: [Complaints]
+      summary: List complaints
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: source
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: priority
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated complaints.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComplaintListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [Complaints]
+      summary: Create a complaint
+      description: |
+        The web-admin form posts UPPER source codes and an Arabic category;
+        the backend normalizes these into the model contract before validation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ComplaintCreate' }
+      responses:
+        '201':
+          description: Complaint created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComplaintCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/complaints/{id}:
+    get:
+      tags: [Complaints]
+      summary: Get a complaint by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Complaint details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComplaintDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      tags: [Complaints]
+      summary: Update complaint status and resolution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ComplaintUpdate' }
+      responses:
+        '200':
+          description: Complaint updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComplaintUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Vehicles ──────────────────────────────────────────────────────────────
+  /api/v1/transport-module/vehicles:
+    get:
+      tags: [Vehicles]
+      summary: List fleet vehicles
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: vehicle_type
+          in: query
+          schema: { type: string }
+        - name: branch_id
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated vehicles with fleet stats.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VehicleListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [Vehicles]
+      summary: Create a vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehicleCreate' }
+      responses:
+        '201':
+          description: Vehicle created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VehicleCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/transport-module/vehicles/{id}:
+    get:
+      tags: [Vehicles]
+      summary: Get a vehicle by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Vehicle details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VehicleDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      tags: [Vehicles]
+      summary: Update a vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehicleUpdate' }
+      responses:
+        '200':
+          description: Vehicle updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VehicleUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Invoices ──────────────────────────────────────────────────────────────
+  /api/v1/finance/invoices:
+    get:
+      tags: [Invoices]
+      summary: List accounting invoices
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invoice list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [Invoices]
+      summary: Create an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceCreate' }
+      responses:
+        '201':
+          description: Invoice created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get an invoice by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invoice details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      tags: [Invoices]
+      summary: Update an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceUpdate' }
+      responses:
+        '200':
+          description: Invoice updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Measures ──────────────────────────────────────────────────────────────
+  /api/v1/measures-library:
+    get:
+      tags: [Measures]
+      summary: List clinical measures
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: targetPopulation
+          in: query
+          schema: { type: string }
+        - name: isActive
+          in: query
+          schema: { type: string }
+        - name: sort
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated measures catalog.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasureListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measures-library/suggest:
+    get:
+      tags: [Measures]
+      summary: Suggest measures for a beneficiary
+      parameters:
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: disabilityType
+          in: query
+          schema: { type: string }
+        - name: ageMonths
+          in: query
+          schema: { type: integer }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Suggested measures.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measures-library/{id}:
+    get:
+      tags: [Measures]
+      summary: Get a measure by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Measure detail.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/measures-library/{id}/scoring:
+    get:
+      tags: [Measures]
+      summary: Get measure scoring guide
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Measure scoring guide.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Purchase Orders ───────────────────────────────────────────────────────
+  /api/v1/inventory-module/purchase-orders:
+    get:
+      tags: [Purchase Orders]
+      summary: List purchase orders
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: supplier_id
+          in: query
+          schema: { type: string }
+        - name: branch_id
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Paginated purchase orders.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseOrderListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [Purchase Orders]
+      summary: Create a purchase order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PurchaseOrderCreate' }
+      responses:
+        '201':
+          description: Purchase order created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseOrderCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/inventory-module/purchase-orders/{id}:
+    get:
+      tags: [Purchase Orders]
+      summary: Get a purchase order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Purchase order details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseOrderDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      tags: [Purchase Orders]
+      summary: Update a purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PurchaseOrderUpdate' }
+      responses:
+        '200':
+          description: Purchase order updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseOrderUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── HR Employees ────────────────────────────────────────────────────────────
+  /api/v1/hr/employees:
+    get:
+      tags: [HR Employees]
+      summary: List employees
+      parameters:
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: department
+          in: query
+          schema: { type: string }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: perPage
+          in: query
+          schema: { type: integer, default: 25 }
+      responses:
+        '200':
+          description: Paginated employees.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HREmployeeListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [HR Employees]
+      summary: Create employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HREmployeeCreate' }
+      responses:
+        '201':
+          description: Employee created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HREmployeeCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/hr/employees/{id}:
+    get:
+      tags: [HR Employees]
+      summary: Get employee by ID
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Employee details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HREmployeeDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [HR Employees]
+      summary: Update employee
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HREmployeeUpdate' }
+      responses:
+        '200':
+          description: Employee updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HREmployeeUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Organization / Departments ──────────────────────────────────────────────
+  /api/v1/organization/departments:
+    get:
+      tags: [Organization]
+      summary: List departments
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: parent
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Department list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepartmentListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Organization]
+      summary: Create department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepartmentCreate' }
+      responses:
+        '201':
+          description: Department created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepartmentCreateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/organization/departments/{id}:
+    put:
+      tags: [Organization]
+      summary: Update department
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepartmentUpdate' }
+      responses:
+        '200':
+          description: Department updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepartmentUpdateEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Organization]
+      summary: Delete department
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Department deleted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepartmentSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Finance Statements ───────────────────────────────────────────────────────
+  /api/v1/finance/statements/trial-balance:
+    get:
+      tags: [Finance Statements]
+      summary: Trial balance
+      parameters:
+        - name: asOfDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Trial balance statement.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/profit-and-loss:
+    get:
+      tags: [Finance Statements]
+      summary: Profit and loss
+      parameters:
+        - name: startDate
+          in: query
+          schema: { type: string, format: date }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Profit and loss statement.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/cash-flow:
+    get:
+      tags: [Finance Statements]
+      summary: Cash flow
+      parameters:
+        - name: startDate
+          in: query
+          schema: { type: string, format: date }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cash flow statement.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/budget-vs-actual:
+    get:
+      tags: [Finance Statements]
+      summary: Budget vs actual
+      parameters:
+        - name: fiscalYear
+          in: query
+          schema: { type: integer }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Budget vs actual report.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/aged-receivables:
+    get:
+      tags: [Finance Statements]
+      summary: Aged receivables
+      parameters:
+        - name: asOfDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Aged receivables report.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/aged-payables:
+    get:
+      tags: [Finance Statements]
+      summary: Aged payables
+      parameters:
+        - name: asOfDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Aged payables report.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/ar-ledger:
+    get:
+      tags: [Finance Statements]
+      summary: AR ledger
+      parameters:
+        - name: asOfDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: reconcile
+          in: query
+          schema: { type: string, enum: ['true', 'false'] }
+      responses:
+        '200':
+          description: Accounts receivable ledger.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/ap-ledger:
+    get:
+      tags: [Finance Statements]
+      summary: AP ledger
+      parameters:
+        - name: asOfDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: reconcile
+          in: query
+          schema: { type: string, enum: ['true', 'false'] }
+      responses:
+        '200':
+          description: Accounts payable ledger.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/finance/statements/consolidated-pl:
+    get:
+      tags: [Finance Statements]
+      summary: Consolidated P&L across branches
+      parameters:
+        - name: startDate
+          in: query
+          schema: { type: string, format: date }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date }
+        - name: branchIds
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Consolidated profit and loss.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceStatementEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Clinical Measures ────────────────────────────────────────────────────────
+  /api/v1/measure-categories:
+    get:
+      tags: [Clinical Measures]
+      summary: List measure categories
+      responses:
+        '200':
+          description: Measure categories.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasureCategoriesEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measures:
+    get:
+      tags: [Clinical Measures]
+      summary: List clinical measures
+      parameters:
+        - name: domain
+          in: query
+          schema: { type: string }
+        - name: categoryId
+          in: query
+          schema: { type: string }
+        - name: ageMonths
+          in: query
+          schema: { type: integer }
+        - name: targetPopulation
+          in: query
+          schema: { type: string }
+        - name: informant
+          in: query
+          schema: { type: string }
+        - name: arabicValidated
+          in: query
+          schema: { type: string }
+        - name: licenseRequired
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Clinical measures list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasuresListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measures/{id}:
+    get:
+      tags: [Clinical Measures]
+      summary: Get measure detail
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Measure detail.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasureDetailEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/measures/{id}/items:
+    get:
+      tags: [Clinical Measures]
+      summary: List measure items
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+        - name: subscaleId
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Measure items.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasureItemsEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measures/{id}/cutoffs:
+    get:
+      tags: [Clinical Measures]
+      summary: List measure cutoffs
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Measure cutoffs.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlainArrayResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/measure-recommendations:
+    get:
+      tags: [Clinical Measures]
+      summary: List measure recommendations
+      parameters:
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: maxPriority
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Measure recommendations.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlainArrayResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── Outcomes ─────────────────────────────────────────────────────────────────
+  /api/v1/outcomes:
+    get:
+      tags: [Outcomes]
+      summary: List outcomes
+      parameters:
+        - name: beneficiaryId
+          in: query
+          schema: { type: string }
+        - name: measureId
+          in: query
+          schema: { type: string }
+        - name: isActive
+          in: query
+          schema: { type: string }
+        - name: trend
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Outcomes list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OutcomesListEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Outcomes]
+      summary: Initialize outcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OutcomeCreatePayload' }
+      responses:
+        '201':
+          description: Outcome created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/outcomes/{id}:
+    get:
+      tags: [Outcomes]
+      summary: Get outcome
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Outcome detail.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/outcomes/{id}/timeline:
+    get:
+      tags: [Outcomes]
+      summary: Outcome timeline
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Outcome timeline.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlainArrayResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/outcomes/{id}/target:
+    patch:
+      tags: [Outcomes]
+      summary: Set outcome target
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OutcomeTargetPayload' }
+      responses:
+        '200':
+          description: Outcome target updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/outcomes/{id}/notes:
+    post:
+      tags: [Outcomes]
+      summary: Add outcome note
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OutcomeNotePayload' }
+      responses:
+        '201':
+          description: Note added.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/outcomes/{id}/archive:
+    patch:
+      tags: [Outcomes]
+      summary: Archive outcome
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Outcome archived.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/outcomes/{id}/reactivate:
+    patch:
+      tags: [Outcomes]
+      summary: Reactivate outcome
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Outcome reactivated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Measures Outcomes ───────────────────────────────────────────────────────
+  /api/v1/measures-outcomes/beneficiary/{beneficiaryId}:
+    get:
+      tags: [Measures Outcomes]
+      summary: Per-beneficiary outcome rollup
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+      responses:
+        '200':
+          description: Beneficiary outcome rollup.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/measures-outcomes/clinical-report/{beneficiaryId}:
+    get:
+      tags: [Measures Outcomes]
+      summary: Deep clinical report for a beneficiary
+      parameters:
+        - $ref: '#/components/parameters/BeneficiaryId'
+        - name: includeCorrections
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Clinical report.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Goal Suggestions ─────────────────────────────────────────────────────────
+  /api/v1/goal-suggestions:
+    get:
+      tags: [Goal Suggestions]
+      summary: List goal suggestions
+      parameters:
+        - name: assessmentId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Goal suggestions.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlainArrayResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/goal-suggestions/{id}/accept:
+    post:
+      tags: [Goal Suggestions]
+      summary: Accept goal suggestion
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GoalSuggestionAcceptPayload' }
+      responses:
+        '200':
+          description: Suggestion accepted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenericSuccessEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   # ─── Nafath Signing ──────────────────────────────────────────────────────
   /api/v1/nafath/signing/request:
     post:
@@ -936,6 +3721,24 @@ components:
       required: true
       schema: { type: string }
 
+    BeneficiaryId:
+      name: beneficiaryId
+      in: path
+      required: true
+      schema: { type: string }
+
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: string }
+
+    AssessmentId:
+      name: assessmentId
+      in: path
+      required: true
+      schema: { type: string }
+
   responses:
     BadRequest:
       description: Validation failure.
@@ -949,6 +3752,11 @@ components:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     NotFound:
       description: Resource not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    UnprocessableEntity:
+      description: Business-rule violation (e.g. golden-thread gate).
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -968,6 +3776,1698 @@ components:
         error:   { type: string, example: INVALID_IDEMPOTENCY_KEY }
         code:    { type: string, nullable: true }
         message: { type: string }
+
+    # ─── Auth ───────────────────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: superadmin@alawael.com
+        password:
+          type: string
+          format: password
+          example: Admin@2025!
+
+    UserSummary:
+      type: object
+      properties:
+        id:       { type: string }
+        email:    { type: string, format: email }
+        fullName: { type: string }
+        role:     { type: string }
+
+    LoginResponse:
+      type: object
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:
+          type: object
+          properties:
+            accessToken:  { type: string }
+            refreshToken: { type: string }
+            user:         { $ref: '#/components/schemas/UserSummary' }
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          description: A valid refresh token returned by /auth/login or /auth/refresh.
+
+    RefreshResponse:
+      type: object
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:
+          type: object
+          properties:
+            accessToken:  { type: string }
+            refreshToken: { type: string }
+
+    LogoutResponse:
+      type: object
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+
+    # ─── Activity Library ───────────────────────────────────────────────────
+    ActivityDiscipline:
+      type: string
+      enum: [speech, ot, pt, behavior, special_ed, psychology, aac, feeding, play, social_skills]
+
+    ActivityDifficulty:
+      type: string
+      enum: [beginner, intermediate, advanced]
+
+    Activity:
+      type: object
+      properties:
+        _id:              { type: string }
+        activity_code:    { type: string }
+        name_ar:          { type: string }
+        name_en:          { type: string, nullable: true }
+        description_ar:   { type: string, nullable: true }
+        discipline:       { $ref: '#/components/schemas/ActivityDiscipline' }
+        target_domains:   { type: array, items: { type: string }, nullable: true }
+        difficulty:       { $ref: '#/components/schemas/ActivityDifficulty' }
+        age_range:
+          type: object
+          properties:
+            min_months: { type: integer, nullable: true }
+            max_months: { type: integer, nullable: true }
+          nullable: true
+        duration_minutes: { type: integer, nullable: true }
+        materials:        { type: array, items: { type: string }, nullable: true }
+        instructions_steps: { type: array, items: { type: string }, nullable: true }
+        mastery_indicators: { type: array, items: { type: string }, nullable: true }
+        family_carryover_ar: { type: string, nullable: true }
+        adaptations:      { type: array, items: { type: object }, nullable: true }
+        media:
+          type: object
+          properties:
+            image_url: { type: string, nullable: true }
+            video_url: { type: string, nullable: true }
+            pdf_url:   { type: string, nullable: true }
+          nullable: true
+        progression_to:   { type: array, items: { type: string }, nullable: true }
+        evidence_reference: { type: string, nullable: true }
+        tags:             { type: array, items: { type: string }, nullable: true }
+        is_built_in:      { type: boolean, nullable: true }
+        is_active:        { type: boolean, nullable: true }
+        usage_count:      { type: integer, nullable: true }
+        avg_session_rating: { type: number, nullable: true }
+        createdAt:        { type: string, format: date-time, nullable: true }
+        updatedAt:        { type: string, format: date-time, nullable: true }
+
+    ActivityCreate:
+      type: object
+      required: [name_ar, discipline]
+      properties:
+        name_ar:          { type: string }
+        discipline:       { $ref: '#/components/schemas/ActivityDiscipline' }
+        name_en:          { type: string, nullable: true }
+        description_ar:   { type: string, nullable: true }
+        target_domains:   { type: array, items: { type: string }, nullable: true }
+        difficulty:       { $ref: '#/components/schemas/ActivityDifficulty', nullable: true }
+        age_range:
+          type: object
+          properties:
+            min_months: { type: integer, nullable: true }
+            max_months: { type: integer, nullable: true }
+          nullable: true
+        duration_minutes: { type: integer, nullable: true }
+        materials:        { type: array, items: { type: string }, nullable: true }
+        instructions_steps: { type: array, items: { type: string }, nullable: true }
+        mastery_indicators: { type: array, items: { type: string }, nullable: true }
+        family_carryover_ar: { type: string, nullable: true }
+        adaptations:      { type: array, items: { type: object }, nullable: true }
+        media:
+          type: object
+          properties:
+            image_url: { type: string, nullable: true }
+            video_url: { type: string, nullable: true }
+            pdf_url:   { type: string, nullable: true }
+          nullable: true
+        progression_to:   { type: array, items: { type: string }, nullable: true }
+        evidence_reference: { type: string, nullable: true }
+        tags:             { type: array, items: { type: string }, nullable: true }
+        is_active:        { type: boolean, nullable: true }
+
+    ActivityUpdate:
+      type: object
+      properties:
+        name_ar:          { type: string }
+        name_en:          { type: string, nullable: true }
+        description_ar:   { type: string, nullable: true }
+        target_domains:   { type: array, items: { type: string }, nullable: true }
+        difficulty:       { $ref: '#/components/schemas/ActivityDifficulty', nullable: true }
+        age_range:
+          type: object
+          properties:
+            min_months: { type: integer, nullable: true }
+            max_months: { type: integer, nullable: true }
+          nullable: true
+        duration_minutes: { type: integer, nullable: true }
+        materials:        { type: array, items: { type: string }, nullable: true }
+        instructions_steps: { type: array, items: { type: string }, nullable: true }
+        mastery_indicators: { type: array, items: { type: string }, nullable: true }
+        family_carryover_ar: { type: string, nullable: true }
+        adaptations:      { type: array, items: { type: object }, nullable: true }
+        media:
+          type: object
+          properties:
+            image_url: { type: string, nullable: true }
+            video_url: { type: string, nullable: true }
+            pdf_url:   { type: string, nullable: true }
+          nullable: true
+        progression_to:   { type: array, items: { type: string }, nullable: true }
+        evidence_reference: { type: string, nullable: true }
+        tags:             { type: array, items: { type: string }, nullable: true }
+        is_active:        { type: boolean, nullable: true }
+
+    ActivityEnvelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string, nullable: true }
+        data:    { $ref: '#/components/schemas/Activity' }
+
+    ActivityListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        total:   { type: integer }
+        page:    { type: integer }
+        limit:   { type: integer }
+        count:   { type: integer }
+        data:    { type: array, items: { $ref: '#/components/schemas/Activity' } }
+
+    DisciplineOption:
+      type: object
+      properties:
+        value: { type: string }
+        label: { type: string }
+
+    DisciplineListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:    { type: array, items: { $ref: '#/components/schemas/DisciplineOption' } }
+
+    ActivityBucket:
+      type: object
+      properties:
+        _id:   { type: string }
+        count: { type: integer }
+
+    ActivityStats:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            total:        { type: integer }
+            byDiscipline: { type: array, items: { $ref: '#/components/schemas/ActivityBucket' } }
+            byDifficulty: { type: array, items: { $ref: '#/components/schemas/ActivityBucket' } }
+
+    ActivitySeedResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data:
+          type: object
+          properties:
+            inserted:       { type: integer }
+            skipped:        { type: integer }
+            total_built_in: { type: integer }
+
+    ActivityUsageEnvelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            usage_count: { type: integer }
+            name_ar:     { type: string }
+
+    # ─── Beneficiaries ──────────────────────────────────────────────────────
+    BeneficiaryStatus:
+      type: string
+      enum:
+        [REFERRED, PENDING, ACTIVE, ON_HOLD, DISCHARGED, DECEASED, DRAFT, TRANSFERRED]
+
+    Gender:
+      type: string
+      enum: [MALE, FEMALE]
+
+    DisabilityLevel:
+      type: string
+      enum: [MILD, MODERATE, SEVERE, PROFOUND]
+
+    CalendarPreference:
+      type: string
+      enum: [GREGORIAN, HIJRI]
+
+    PdplConsentMethod:
+      type: string
+      enum: [IN_PERSON_SIGNATURE, NAFATH, PARENT_PORTAL_OTP]
+
+    Guardian:
+      type: object
+      properties:
+        id: { type: string }
+        nameAr: { type: string }
+        nameEn: { type: string, nullable: true }
+        nationalId: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        relationship: { type: string }
+        isPrimary: { type: boolean }
+        isPortalUser: { type: boolean }
+      required: [id, nameAr, relationship, isPrimary, isPortalUser]
+
+    BranchSummary:
+      type: object
+      properties:
+        id: { type: string }
+        nameAr: { type: string }
+      required: [id, nameAr]
+
+    NationalAddress:
+      type: object
+      properties:
+        buildingNumber: { type: string }
+        street: { type: string }
+        district: { type: string }
+        city: { type: string }
+        postalCode: { type: string }
+        additionalNumber: { type: string, nullable: true }
+        country: { type: string }
+      required: [buildingNumber, street, district, city, postalCode, country]
+
+    Beneficiary:
+      type: object
+      properties:
+        id: { type: string }
+        branchId: { type: string }
+        branch: { $ref: '#/components/schemas/BranchSummary', nullable: true }
+        nationalId: { type: string }
+        nameAr: { type: string }
+        nameEn: { type: string, nullable: true }
+        dateOfBirth: { type: string, format: date }
+        gender: { $ref: '#/components/schemas/Gender' }
+        status: { $ref: '#/components/schemas/BeneficiaryStatus' }
+        disabilityType: { type: array, items: { type: string } }
+        disabilityLevel: { $ref: '#/components/schemas/DisabilityLevel', nullable: true }
+        primaryDiagnosis: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        guardians: { type: array, items: { $ref: '#/components/schemas/Guardian' }, nullable: true }
+        calendarPreferred: { $ref: '#/components/schemas/CalendarPreference', nullable: true }
+        pdplConsentAt: { type: string, format: date-time, nullable: true }
+        pdplConsentMethod: { $ref: '#/components/schemas/PdplConsentMethod', nullable: true }
+        pdplConsentRevokedAt: { type: string, format: date-time, nullable: true }
+        primaryTherapistId: { type: string, nullable: true }
+        secondaryTherapistIds: { type: array, items: { type: string }, nullable: true }
+        retainUntil: { type: string, format: date-time, nullable: true }
+        lastStatusChangeAt: { type: string, format: date-time, nullable: true }
+        lastStatusChangeById: { type: string, nullable: true }
+        lastStatusChangeNote: { type: string, nullable: true }
+        transferredFromBranchId: { type: string, nullable: true }
+        transferredAt: { type: string, format: date-time, nullable: true }
+      required:
+        [id, branchId, nationalId, nameAr, dateOfBirth, gender, status, disabilityType, createdAt, updatedAt]
+
+    BeneficiaryCreate:
+      type: object
+      required: [nameAr, nationalId, dateOfBirth, gender, disabilityType, disabilityLevel]
+      properties:
+        nameAr: { type: string }
+        nameEn: { type: string, nullable: true }
+        nationalId: { type: string }
+        dateOfBirth: { type: string, format: date }
+        gender: { $ref: '#/components/schemas/Gender' }
+        disabilityType: { type: array, items: { type: string } }
+        disabilityLevel: { $ref: '#/components/schemas/DisabilityLevel' }
+        primaryDiagnosis: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        nationalAddress: { $ref: '#/components/schemas/NationalAddress', nullable: true }
+
+    BeneficiaryUpdate:
+      type: object
+      properties:
+        nameAr: { type: string }
+        nameEn: { type: string, nullable: true }
+        disabilityType: { type: array, items: { type: string } }
+        disabilityLevel: { $ref: '#/components/schemas/DisabilityLevel', nullable: true }
+        primaryDiagnosis: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        nationalAddress: { $ref: '#/components/schemas/NationalAddress', nullable: true }
+
+    BeneficiaryEnvelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string, nullable: true }
+        data: { $ref: '#/components/schemas/Beneficiary' }
+
+    BeneficiaryListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data: { type: array, items: { $ref: '#/components/schemas/Beneficiary' } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+        pages: { type: integer }
+
+    # ─── Red Flags ───────────────────────────────────────────────────────────
+    RedFlagSeverity:
+      type: string
+      enum: [critical, warning, info]
+
+    RedFlagDomain:
+      type: string
+      enum: [clinical, behavioral, operational, attendance, compliance, safety, family, financial]
+
+    ActiveRedFlag:
+      type: object
+      required: [beneficiaryId, flagId, severity, domain, blocking, raisedAt, lastObservedAt, observedValue]
+      properties:
+        beneficiaryId: { type: string }
+        flagId: { type: string }
+        severity: { $ref: '#/components/schemas/RedFlagSeverity' }
+        domain: { $ref: '#/components/schemas/RedFlagDomain' }
+        blocking: { type: boolean }
+        raisedAt: { type: string, format: date-time }
+        lastObservedAt: { type: string, format: date-time }
+        observedValue: {}
+
+    RedFlagsSummary:
+      type: object
+      required: [total, critical, warning, info, blocking]
+      properties:
+        total: { type: integer }
+        critical: { type: integer }
+        warning: { type: integer }
+        info: { type: integer }
+        blocking: { type: integer }
+
+    RedFlagsListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [beneficiaryId, active, summary]
+          properties:
+            beneficiaryId: { type: string }
+            active: { type: array, items: { $ref: '#/components/schemas/ActiveRedFlag' } }
+            summary: { $ref: '#/components/schemas/RedFlagsSummary' }
+
+    RedFlagsEvaluateRequest:
+      type: object
+      properties:
+        domains: { oneOf: [{ $ref: '#/components/schemas/RedFlagDomain' }, { type: array, items: { $ref: '#/components/schemas/RedFlagDomain' } }] }
+        severities: { oneOf: [{ $ref: '#/components/schemas/RedFlagSeverity' }, { type: array, items: { $ref: '#/components/schemas/RedFlagSeverity' } }] }
+        flagIds: { type: array, items: { type: string } }
+
+    RedFlagTransitions:
+      type: object
+      required: [beneficiaryId, evaluatedAt, newlyRaised, stillRaised, newlyResolved, stillClear, suppressedByCooldown, errored]
+      properties:
+        beneficiaryId: { type: string }
+        evaluatedAt: { type: string, format: date-time }
+        newlyRaised: { type: array, items: { $ref: '#/components/schemas/ActiveRedFlag' } }
+        stillRaised: { type: array, items: { $ref: '#/components/schemas/ActiveRedFlag' } }
+        newlyResolved: { type: array, items: { $ref: '#/components/schemas/ResolvedRedFlag' } }
+        stillClear:
+          type: array
+          items:
+            type: object
+            required: [beneficiaryId, flagId, observedValue, evaluatedAt]
+            properties:
+              beneficiaryId: { type: string }
+              flagId: { type: string }
+              observedValue: {}
+              evaluatedAt: { type: string, format: date-time }
+        suppressedByCooldown:
+          type: array
+          items:
+            type: object
+            required: [beneficiaryId, flagId, observedValue, evaluatedAt, cooldownUntil]
+            properties:
+              beneficiaryId: { type: string }
+              flagId: { type: string }
+              observedValue: {}
+              evaluatedAt: { type: string, format: date-time }
+              cooldownUntil: { type: string, format: date-time }
+        errored: { type: array, items: { type: object, properties: { flagId: { type: string }, reason: { type: string, nullable: true } }, required: [flagId] } }
+
+    RedFlagsEvaluateEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [beneficiaryId, evaluatedAt, flagsEvaluated, transitions]
+          properties:
+            beneficiaryId: { type: string }
+            evaluatedAt: { type: string, format: date-time }
+            flagsEvaluated: { type: integer }
+            transitions: { $ref: '#/components/schemas/RedFlagTransitions' }
+
+    ResolvedRedFlag:
+      allOf:
+        - { $ref: '#/components/schemas/ActiveRedFlag' }
+        - type: object
+          required: [resolvedAt, resolvedBy, resolution, cooldownUntil]
+          properties:
+            resolvedAt: { type: string, format: date-time }
+            resolvedBy: { type: string }
+            resolution: { type: string, nullable: true }
+            cooldownUntil: { type: string, format: date-time }
+
+    ResolvedRedFlagEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/ResolvedRedFlag' }
+
+    ResolveFlagRequest:
+      type: object
+      required: [resolvedBy]
+      properties:
+        resolvedBy: { type: string }
+        resolution: { type: string, nullable: true }
+
+    SessionStartCheckEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [allowed, blockingFlags, emergencyOverride]
+          properties:
+            allowed: { type: boolean }
+            blockingFlags: { type: array, items: { $ref: '#/components/schemas/ActiveRedFlag' } }
+            emergencyOverride: { type: boolean }
+
+    RecordOverrideRequest:
+      type: object
+      required: [overriddenBy, reason]
+      properties:
+        overriddenBy: { type: string }
+        reason: { type: string }
+        blockingFlagIds: { type: array, items: { type: string } }
+        context:
+          type: object
+          properties:
+            sessionId: { type: string }
+            therapistId: { type: string }
+            scheduledStartTime: { type: string, format: date-time }
+            branchId: { type: string }
+
+    OverrideRecord:
+      type: object
+      required: [id, beneficiaryId, overriddenBy, reason, overriddenAt, blockingFlagIds, context]
+      properties:
+        id: { type: string }
+        beneficiaryId: { type: string }
+        overriddenBy: { type: string }
+        reason: { type: string }
+        overriddenAt: { type: string, format: date-time }
+        blockingFlagIds: { type: array, items: { type: string } }
+        context: { type: object }
+
+    OverrideRecordEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/OverrideRecord' }
+
+    OverrideRecordsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/OverrideRecord' } }
+
+    RedFlagAggregateEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [generatedAt, totals, bySeverity, byDomain, topBeneficiaries, overrides]
+          properties:
+            generatedAt: { type: string, format: date-time }
+            totals:
+              type: object
+              required: [active, blocking]
+              properties:
+                active: { type: integer }
+                blocking: { type: integer }
+            bySeverity:
+              type: object
+              required: [critical, warning, info]
+              properties:
+                critical: { type: integer }
+                warning: { type: integer }
+                info: { type: integer }
+            byDomain:
+              type: object
+              required: [clinical, behavioral, operational, attendance, compliance, safety, family, financial]
+              properties:
+                clinical: { type: integer }
+                behavioral: { type: integer }
+                operational: { type: integer }
+                attendance: { type: integer }
+                compliance: { type: integer }
+                safety: { type: integer }
+                family: { type: integer }
+                financial: { type: integer }
+            topBeneficiaries:
+              type: array
+              items:
+                type: object
+                required: [beneficiaryId, totalFlags, critical, blocking]
+                properties:
+                  beneficiaryId: { type: string }
+                  totalFlags: { type: integer }
+                  critical: { type: integer }
+                  blocking: { type: integer }
+            overrides:
+              type: object
+              required: [last7d, last30d]
+              properties:
+                last7d: { type: integer }
+                last30d: { type: integer }
+
+    # ─── Consents ────────────────────────────────────────────────────────────
+    ConsentType:
+      type: string
+      enum: [treatment, photography, data_sharing, trip, research]
+
+    ConsentRecord:
+      type: object
+      required: [id, beneficiaryId, type, grantedBy, grantedAt, expiresAt, revokedAt, revokedReason, signatureRef, documentRef, isActive]
+      properties:
+        id: { type: string }
+        beneficiaryId: { type: string }
+        type: { $ref: '#/components/schemas/ConsentType' }
+        grantedBy: { type: string, nullable: true }
+        grantedAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: string, format: date-time, nullable: true }
+        revokedAt: { type: string, format: date-time, nullable: true }
+        revokedReason: { type: string, nullable: true }
+        signatureRef: { type: string, nullable: true }
+        documentRef: { type: string, nullable: true }
+        isActive: { type: boolean }
+
+    ConsentRecordEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/ConsentRecord' }
+
+    ConsentRecordsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/ConsentRecord' } }
+
+    GrantConsentRequest:
+      type: object
+      required: [type]
+      properties:
+        type: { $ref: '#/components/schemas/ConsentType' }
+        grantedBy: { type: string, nullable: true }
+        grantedAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: string, format: date-time, nullable: true }
+        signatureRef: { type: string, nullable: true }
+        documentRef: { type: string, nullable: true }
+
+    RevokeConsentRequest:
+      type: object
+      properties:
+        reason: { type: string, nullable: true }
+
+    ConsentTrackingState:
+      type: object
+      required: [beneficiaryId, consentTrackingEnabled]
+      properties:
+        beneficiaryId: { type: string }
+        consentTrackingEnabled: { type: boolean }
+
+    ConsentTrackingEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/ConsentTrackingState' }
+
+    ConsentTrackingUpdateRequest:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+
+    # ─── Care Plans ─────────────────────────────────────────────────────────
+    CarePlanStatus:
+      type: string
+      enum: [DRAFT, PENDING_APPROVAL, ACTIVE, SUSPENDED, COMPLETED, ARCHIVED]
+
+    CarePlanGoal:
+      type: object
+      required: [id, nameAr, status, priority, domain, targetDate]
+      properties:
+        id:              { type: string }
+        nameAr:          { type: string }
+        nameEn:          { type: string, nullable: true }
+        status:          { type: string }
+        priority:        { type: string }
+        domain:          { type: string }
+        targetDate:      { type: string, format: date }
+        baselineNote:    { type: string, nullable: true }
+        achievementNote: { type: string, nullable: true }
+        assignedToId:    { type: string, nullable: true }
+        createdAt:       { type: string, format: date-time }
+
+    CarePlan:
+      type: object
+      required: [id, beneficiaryId, branchId, startDate, status, reviewCycle, createdAt, updatedAt]
+      properties:
+        id:            { type: string }
+        beneficiaryId: { type: string }
+        branchId:      { type: string }
+        createdById:   { type: string, nullable: true }
+        startDate:     { type: string, format: date }
+        endDate:       { type: string, format: date, nullable: true }
+        status:        { $ref: '#/components/schemas/CarePlanStatus' }
+        reviewCycle:   { type: integer }
+        nextReviewDate: { type: string, format: date-time, nullable: true }
+        summary:       { type: string, nullable: true }
+        approvedById:  { type: string, nullable: true }
+        approvedAt:    { type: string, format: date-time, nullable: true }
+        createdAt:     { type: string, format: date-time }
+        updatedAt:     { type: string, format: date-time }
+        beneficiary:
+          type: object
+          nullable: true
+          properties:
+            id:        { type: string }
+            nameAr:    { type: string }
+            nationalId: { type: string, nullable: true }
+        goals:
+          type: array
+          items: { $ref: '#/components/schemas/CarePlanGoal' }
+
+    CarePlanEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/CarePlan' }
+
+    CarePlanListResponse:
+      type: object
+      required: [success, data, total]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/CarePlan' }
+        total:   { type: integer }
+        skip:    { type: integer }
+        limit:   { type: integer }
+
+    CarePlanCreate:
+      type: object
+      required: [beneficiaryId, episodeId, startDate]
+      properties:
+        beneficiaryId: { type: string }
+        episodeId:     { type: string }
+        startDate:     { type: string, format: date }
+        endDate:       { type: string, format: date }
+        reviewCycle:   { type: integer, default: 90, minimum: 7 }
+        summary:       { type: string }
+
+    CarePlanUpdate:
+      type: object
+      properties:
+        startDate:   { type: string, format: date }
+        endDate:     { type: string, format: date }
+        reviewCycle: { type: integer, minimum: 7 }
+        summary:     { type: string }
+
+    CarePlanLifecycleAction:
+      type: object
+      properties:
+        reason: { type: string }
+
+    CarePlanGoalCreate:
+      type: object
+      required: [carePlanId, assignedToId, domain, nameAr, targetDate]
+      properties:
+        carePlanId:    { type: string }
+        assignedToId:  { type: string }
+        domain:        { type: string }
+        nameAr:        { type: string }
+        nameEn:        { type: string }
+        targetDate:    { type: string, format: date }
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        baselineNote:  { type: string }
+
+    # ─── Therapy Sessions ─────────────────────────────────────────────────────
+    SessionStatus:
+      type: string
+      enum:
+        [scheduled, confirmed, in_progress, completed, cancelled, no_show, late_cancel, rescheduled]
+
+    SessionType:
+      type: string
+      enum: [individual, group, family, consultation, evaluation, crisis, followup]
+
+    SessionModality:
+      type: string
+      enum: [in_person, tele_rehab, home_visit, community, hybrid]
+
+    SessionSpecialty:
+      type: string
+      enum:
+        - speech_therapy
+        - occupational_therapy
+        - physical_therapy
+        - behavioral_therapy
+        - psychological
+        - educational
+        - social_work
+        - nursing
+        - vocational
+        - recreational
+        - multidisciplinary
+        - other
+
+    SessionGoalRating:
+      type: string
+      enum: [not_attempted, emerging, developing, achieved, maintained, regressed]
+
+    SessionGoalProgress:
+      type: object
+      properties:
+        goalId:       { type: string }
+        goalTitle:    { type: string, nullable: true }
+        progressBefore: { type: number, nullable: true }
+        progressAfter:  { type: number, nullable: true }
+        rating:       { $ref: '#/components/schemas/SessionGoalRating' }
+        notes:        { type: string, nullable: true }
+        trialData:
+          type: object
+          nullable: true
+          properties:
+            attempts:  { type: integer }
+            successes: { type: integer }
+            accuracy:  { type: number }
+
+    SessionActivity:
+      type: object
+      required: [name]
+      properties:
+        name:            { type: string }
+        name_ar:         { type: string, nullable: true }
+        domain:          { type: string }
+        durationMinutes: { type: integer }
+        materials:       { type: array, items: { type: string } }
+        instructions:    { type: string, nullable: true }
+        response:        { type: string }
+        assistanceLevel: { type: string }
+        notes:           { type: string, nullable: true }
+
+    SessionVitalSign:
+      type: object
+      properties:
+        heartRate:      { type: integer }
+        bloodPressure:
+          type: object
+          properties:
+            systolic:   { type: integer }
+            diastolic:  { type: integer }
+        temperature:    { type: number }
+        oxygenSaturation: { type: number }
+        painLevel:      { type: integer, minimum: 0, maximum: 10 }
+        recordedAt:     { type: string, format: date-time }
+
+    SessionVitalSigns:
+      type: object
+      properties:
+        pre:  { $ref: '#/components/schemas/SessionVitalSign', nullable: true }
+        post: { $ref: '#/components/schemas/SessionVitalSign', nullable: true }
+
+    SessionAttendance:
+      type: object
+      properties:
+        status:          { type: string, enum: [present, absent, late, early_leave] }
+        checkinTime:     { type: string, format: date-time, nullable: true }
+        checkoutTime:    { type: string, format: date-time, nullable: true }
+        absenceReason:   { type: string, nullable: true }
+        excused:         { type: boolean }
+        guardianPresent: { type: boolean, nullable: true }
+        guardianName:    { type: string, nullable: true }
+
+    SessionLocation:
+      type: object
+      properties:
+        type:          { type: string, enum: [center, home, school, community, virtual] }
+        room:          { type: string, nullable: true }
+        building:      { type: string, nullable: true }
+        address:       { type: string, nullable: true }
+        teleRehabLink: { type: string, nullable: true }
+
+    SessionCancellation:
+      type: object
+      properties:
+        cancelledAt:     { type: string, format: date-time }
+        cancelledBy:     { type: string, nullable: true }
+        reason:          { type: string, nullable: true }
+        rescheduledTo:   { type: string, format: date-time, nullable: true }
+
+    SessionBilling:
+      type: object
+      properties:
+        serviceCode:     { type: string, nullable: true }
+        units:           { type: integer }
+        amount:          { type: number }
+        insuranceClaim:  { type: boolean }
+        claimStatus:     { type: string, enum: [pending, submitted, approved, rejected] }
+
+    SessionAttachment:
+      type: object
+      properties:
+        title:    { type: string }
+        fileUrl:  { type: string }
+        fileType: { type: string }
+        uploadedAt: { type: string, format: date-time }
+
+    SessionHomeProgram:
+      type: object
+      properties:
+        assigned:     { type: boolean }
+        instructions: { type: string, nullable: true }
+        compliance:   { type: string, enum: [not_assigned, not_done, partial, full] }
+
+    SessionObservations:
+      type: object
+      properties:
+        attention:      { type: string, enum: [poor, fair, good, excellent] }
+        motivation:     { type: string, enum: [low, moderate, high] }
+        cooperation:    { type: string, enum: [poor, fair, good, excellent] }
+        fatigue:        { type: string, enum: [none, mild, moderate, severe] }
+        emotionalState: { type: string, nullable: true }
+        behaviorNotes:  { type: string, nullable: true }
+
+    Session:
+      type: object
+      required:
+        [id, beneficiaryId, episodeId, branchId, therapistId, scheduledDate, status, createdAt, updatedAt]
+      properties:
+        id:            { type: string }
+        beneficiaryId: { type: string }
+        episodeId:     { type: string }
+        carePlanId:    { type: string, nullable: true }
+        branchId:      { type: string }
+        therapistId:   { type: string }
+        sessionNumber: { type: string, nullable: true }
+        sequenceInEpisode: { type: integer, nullable: true }
+        type:          { $ref: '#/components/schemas/SessionType' }
+        modality:      { $ref: '#/components/schemas/SessionModality' }
+        specialty:     { $ref: '#/components/schemas/SessionSpecialty', nullable: true }
+        status:        { $ref: '#/components/schemas/SessionStatus' }
+        scheduledDate: { type: string, format: date-time }
+        scheduledStartTime: { type: string, nullable: true }
+        scheduledEndTime:   { type: string, nullable: true }
+        scheduledDurationMinutes: { type: integer }
+        actualStartTime: { type: string, format: date-time, nullable: true }
+        actualEndTime:   { type: string, format: date-time, nullable: true }
+        actualDurationMinutes: { type: integer, nullable: true }
+        additionalTherapists: { type: array, items: { type: string } }
+        location:      { $ref: '#/components/schemas/SessionLocation', nullable: true }
+        activities:    { type: array, items: { $ref: '#/components/schemas/SessionActivity' } }
+        goalProgress:  { type: array, items: { $ref: '#/components/schemas/SessionGoalProgress' } }
+        subjective:    { type: string, nullable: true }
+        objective:     { type: string, nullable: true }
+        assessment:    { type: string, nullable: true }
+        plan:          { type: string, nullable: true }
+        soapNotes:     { type: string, nullable: true }
+        observations:  { $ref: '#/components/schemas/SessionObservations', nullable: true }
+        vitalSigns:    { $ref: '#/components/schemas/SessionVitalSigns', nullable: true }
+        attendance:    { $ref: '#/components/schemas/SessionAttendance', nullable: true }
+        homeProgram:   { $ref: '#/components/schemas/SessionHomeProgram', nullable: true }
+        cancellation:  { $ref: '#/components/schemas/SessionCancellation', nullable: true }
+        billing:       { $ref: '#/components/schemas/SessionBilling', nullable: true }
+        attachments:   { type: array, items: { $ref: '#/components/schemas/SessionAttachment' } }
+        tags:          { type: array, items: { type: string } }
+        notes:         { type: string, nullable: true }
+        createdBy:     { type: string, nullable: true }
+        lastModifiedBy: { type: string, nullable: true }
+        isDeleted:     { type: boolean }
+        createdAt:     { type: string, format: date-time }
+        updatedAt:     { type: string, format: date-time }
+        beneficiary:
+          type: object
+          nullable: true
+          properties:
+            id:        { type: string }
+            nameAr:    { type: string }
+            nationalId: { type: string, nullable: true }
+
+    SessionEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Session' }
+
+    SessionListResponse:
+      type: object
+      required: [success, data, total]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Session' }
+        total:   { type: integer }
+        skip:    { type: integer }
+        limit:   { type: integer }
+
+    SessionDashboard:
+      type: object
+      required: [total, todaySessions, byStatus, byModality]
+      properties:
+        total:         { type: integer }
+        todaySessions: { type: integer }
+        byStatus:
+          type: object
+          additionalProperties: { type: integer }
+        byModality:
+          type: object
+          additionalProperties: { type: integer }
+
+    SessionDashboardEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/SessionDashboard' }
+
+    SessionCreate:
+      type: object
+      required: [beneficiaryId, episodeId, therapistId, scheduledDate]
+      properties:
+        beneficiaryId: { type: string }
+        episodeId:     { type: string }
+        carePlanId:    { type: string, nullable: true }
+        therapistId:   { type: string }
+        type:          { $ref: '#/components/schemas/SessionType', nullable: true }
+        modality:      { $ref: '#/components/schemas/SessionModality', nullable: true }
+        specialty:     { $ref: '#/components/schemas/SessionSpecialty', nullable: true }
+        scheduledDate: { type: string, format: date-time }
+        scheduledStartTime: { type: string, nullable: true }
+        scheduledEndTime:   { type: string, nullable: true }
+        scheduledDurationMinutes: { type: integer, nullable: true }
+        location:
+          $ref: '#/components/schemas/SessionLocation'
+          nullable: true
+        notes:         { type: string, nullable: true }
+        serviceType:   { type: string, nullable: true }
+
+    SessionUpdate:
+      type: object
+      properties:
+        status:        { $ref: '#/components/schemas/SessionStatus', nullable: true }
+        attendance:    { $ref: '#/components/schemas/SessionAttendance', nullable: true }
+        duration:      { type: integer, nullable: true }
+        actualDate:    { type: string, format: date-time, nullable: true }
+        notes:         { type: string, nullable: true }
+        modality:      { $ref: '#/components/schemas/SessionModality', nullable: true }
+        scheduledDate: { type: string, format: date-time, nullable: true }
+        scheduledStartTime: { type: string, nullable: true }
+        scheduledEndTime:   { type: string, nullable: true }
+        scheduledDurationMinutes: { type: integer, nullable: true }
+        location:
+          $ref: '#/components/schemas/SessionLocation'
+          nullable: true
+        subjective:    { type: string, nullable: true }
+        objective:     { type: string, nullable: true }
+        assessment:    { type: string, nullable: true }
+        plan:          { type: string, nullable: true }
+        soapNotes:     { type: string, nullable: true }
+        observations:  { $ref: '#/components/schemas/SessionObservations', nullable: true }
+        vitalSigns:    { $ref: '#/components/schemas/SessionVitalSigns', nullable: true }
+        homeProgram:   { $ref: '#/components/schemas/SessionHomeProgram', nullable: true }
+
+    SessionComplete:
+      type: object
+      required: [goalProgress]
+      properties:
+        duration:         { type: integer, nullable: true }
+        attendanceStatus: { type: string, nullable: true }
+        notes:            { type: string, nullable: true }
+        vitalSigns:       { $ref: '#/components/schemas/SessionVitalSigns', nullable: true }
+        activities:       { type: array, items: { $ref: '#/components/schemas/SessionActivity' } }
+        goalProgress:
+          type: array
+          items: { $ref: '#/components/schemas/SessionGoalProgress' }
+
+    SessionCancel:
+      type: object
+      properties:
+        reason: { type: string, nullable: true }
+
+    # ─── Documents ────────────────────────────────────────────────────────────
+    DocumentCategory:
+      type: string
+      enum: [CLINICAL, HR, FINANCE, LEGAL, QUALITY, GENERAL]
+
+    DocumentStatus:
+      type: string
+      enum: [نشط, مؤرشف, محذوف]
+
+    Document:
+      type: object
+      required:
+        [id, title, fileUrl, mimeType, sizeBytes, category, status, createdAt, updatedAt]
+      properties:
+        id:            { type: string }
+        fileName:      { type: string }
+        originalFileName: { type: string }
+        fileType:      { type: string }
+        mimeType:      { type: string }
+        fileSize:      { type: integer }
+        filePath:      { type: string }
+        fileUrl:       { type: string, nullable: true }
+        title:         { type: string }
+        description:   { type: string, nullable: true }
+        category:      { type: string }
+        tags:          { type: array, items: { type: string } }
+        entityType:    { type: string, nullable: true }
+        entityId:      { type: string, nullable: true }
+        isConfidential: { type: boolean }
+        folder:        { type: string }
+        status:        { $ref: '#/components/schemas/DocumentStatus' }
+        isArchived:    { type: boolean }
+        uploadedBy:
+          oneOf:
+            - { type: string }
+            - type: object
+              properties:
+                _id:   { type: string }
+                id:    { type: string }
+                name:  { type: string }
+                email: { type: string }
+        uploadedByName:  { type: string, nullable: true }
+        uploadedByEmail: { type: string, nullable: true }
+        downloadCount:   { type: integer }
+        viewCount:       { type: integer }
+        expiryDate:      { type: string, format: date-time, nullable: true }
+        createdAt:       { type: string, format: date-time }
+        updatedAt:       { type: string, format: date-time }
+
+    DocumentEnvelope:
+      type: object
+      required: [success, document]
+      properties:
+        success:  { type: boolean }
+        document: { $ref: '#/components/schemas/Document' }
+
+    DocumentListResponse:
+      type: object
+      required: [success, documents, total]
+      properties:
+        success: { type: boolean }
+        documents:
+          type: array
+          items: { $ref: '#/components/schemas/Document' }
+        total:   { type: integer }
+        page:    { type: integer }
+        pages:   { type: integer }
+
+    DocumentCreate:
+      type: object
+      required: [title, fileUrl, mimeType, sizeBytes, category]
+      properties:
+        title:          { type: string }
+        fileUrl:        { type: string }
+        mimeType:       { type: string }
+        sizeBytes:      { type: integer }
+        category:       { $ref: '#/components/schemas/DocumentCategory' }
+        entityType:     { type: string, nullable: true }
+        entityId:       { type: string, nullable: true }
+        isConfidential: { type: boolean }
+        expiryDate:     { type: string, format: date, nullable: true }
+        description:    { type: string, nullable: true }
+        tags:           { type: array, items: { type: string } }
+        folder:         { type: string }
+
+    DocumentUpdate:
+      type: object
+      properties:
+        title:          { type: string }
+        description:    { type: string, nullable: true }
+        category:       { type: string }
+        tags:           { type: array, items: { type: string } }
+        folder:         { type: string }
+        status:         { type: string }
+        metadata:       { type: object }
+
+    # ─── Assessments ──────────────────────────────────────────────────────────
+    AssessmentStatus:
+      type: string
+      enum: [draft, in_progress, completed, reviewed, approved, archived]
+
+    AssessmentCategory:
+      type: string
+      enum:
+        - autism_screening
+        - adaptive_behavior
+        - cognitive
+        - language
+        - motor
+        - sensory
+        - social_emotional
+        - academic
+        - behavioral
+        - quality_of_life
+        - other
+
+    AssessmentInterpretation:
+      type: string
+      enum:
+        - within_normal
+        - borderline
+        - mild
+        - moderate
+        - severe
+        - profound
+        - not_applicable
+
+    AssessmentScoreBreakdown:
+      type: object
+      required: [domain]
+      properties:
+        domain:     { type: string }
+        score:      { type: number }
+        maxScore:   { type: number }
+        percentage: { type: number }
+        notes:      { type: string, nullable: true }
+
+    AssessmentAttachment:
+      type: object
+      properties:
+        name:       { type: string }
+        url:        { type: string }
+        uploadedAt: { type: string, format: date-time }
+
+    Assessment:
+      type: object
+      required:
+        [id, beneficiary, tool, assessmentDate, status, createdAt, updatedAt]
+      properties:
+        id:            { type: string }
+        beneficiary:   { type: string }
+        episodeOfCare: { type: string, nullable: true }
+        carePlan:      { type: string, nullable: true }
+        therapist:     { type: string, nullable: true }
+        reviewer:      { type: string, nullable: true }
+        branchId:      { type: string, nullable: true }
+        tool:          { type: string }
+        toolVersion:   { type: string, nullable: true }
+        category:      { $ref: '#/components/schemas/AssessmentCategory', nullable: true }
+        assessmentDate: { type: string, format: date-time }
+        duration:      { type: integer, nullable: true }
+        score:         { type: number, nullable: true }
+        rawScore:      { type: number, nullable: true }
+        maxRawScore:   { type: number, nullable: true }
+        interpretation: { $ref: '#/components/schemas/AssessmentInterpretation', nullable: true }
+        scoreBreakdown:
+          type: array
+          items: { $ref: '#/components/schemas/AssessmentScoreBreakdown' }
+        previousScore: { type: number, nullable: true }
+        scoreChange:   { type: number, nullable: true }
+        improvement:   { type: boolean, nullable: true }
+        observations:  { type: string, nullable: true }
+        strengths:     { type: array, items: { type: string } }
+        concerns:      { type: array, items: { type: string } }
+        recommendations: { type: array, items: { type: string } }
+        status:        { $ref: '#/components/schemas/AssessmentStatus' }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/AssessmentAttachment' }
+        createdBy:     { type: string, nullable: true }
+        updatedBy:     { type: string, nullable: true }
+        createdAt:     { type: string, format: date-time }
+        updatedAt:     { type: string, format: date-time }
+
+    AssessmentEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Assessment' }
+
+    AssessmentListResponse:
+      type: object
+      required: [success, data, total]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Assessment' }
+        total:   { type: integer }
+        skip:    { type: integer }
+        limit:   { type: integer }
+
+    AssessmentDashboard:
+      type: object
+      required: [total, byStatus, overdue, byTool]
+      properties:
+        total:    { type: integer }
+        byStatus:
+          type: object
+          additionalProperties: { type: integer }
+        overdue:  { type: integer }
+        byTool:
+          type: array
+          items:
+            type: object
+            properties:
+              tool:  { type: string }
+              count: { type: integer }
+
+    AssessmentDashboardEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/AssessmentDashboard' }
+
+    AssessmentCreate:
+      type: object
+      required: [beneficiary, tool, assessmentDate]
+      properties:
+        beneficiary:   { type: string }
+        beneficiaryId: { type: string, nullable: true }
+        tool:          { type: string }
+        measureId:     { type: string, nullable: true }
+        assessmentDate: { type: string, format: date-time }
+        scheduledDate: { type: string, format: date-time, nullable: true }
+        episodeId:     { type: string, nullable: true }
+        episode:       { type: string, nullable: true }
+        carePlanId:    { type: string, nullable: true }
+        therapist:     { type: string, nullable: true }
+        assessorId:    { type: string, nullable: true }
+        category:      { type: string, nullable: true }
+        type:          { type: string, nullable: true }
+        toolVersion:   { type: string, nullable: true }
+        score:         { type: number, nullable: true }
+        summary:       { type: string, nullable: true }
+        observations:  { type: string, nullable: true }
+        nextReviewDate: { type: string, format: date, nullable: true }
+        recommendations:
+          type: array
+          items: { type: string }
+
+    AssessmentUpdate:
+      type: object
+      properties:
+        status:        { $ref: '#/components/schemas/AssessmentStatus', nullable: true }
+        reviewedBy:    { type: string, nullable: true }
+        reviewDate:    { type: string, format: date-time, nullable: true }
+        score:         { type: number, nullable: true }
+        observations:  { type: string, nullable: true }
+        summary:       { type: string, nullable: true }
+        recommendations:
+          type: array
+          items: { type: string }
+
+    AssessmentComplete:
+      type: object
+      properties:
+        results:       { type: object }
+        summary:       { type: string, nullable: true }
+        score:         { type: number, nullable: true }
+        recommendations:
+          type: array
+          items: { type: string }
+        scoreBreakdown:
+          type: array
+          items: { $ref: '#/components/schemas/AssessmentScoreBreakdown' }
+        interpretation: { $ref: '#/components/schemas/AssessmentInterpretation', nullable: true }
+        duration:      { type: integer, nullable: true }
+
+    # ─── Reports ──────────────────────────────────────────────────────────────
+    ReportStatusCount:
+      type: object
+      required: [status, count]
+      properties:
+        status: { type: string }
+        count:  { type: integer }
+
+    BeneficiarySummary:
+      type: object
+      required: [total, byStatus]
+      properties:
+        total:    { type: integer }
+        byStatus:
+          type: array
+          items: { $ref: '#/components/schemas/ReportStatusCount' }
+
+    BeneficiarySummaryEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/BeneficiarySummary' }
+
+    CarePlanSummary:
+      type: object
+      required: [total, byStatus]
+      properties:
+        total:    { type: integer }
+        byStatus:
+          type: array
+          items: { $ref: '#/components/schemas/ReportStatusCount' }
+
+    CarePlanSummaryEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/CarePlanSummary' }
+
+    AssessmentSummary:
+      type: object
+      required: [total, byStatus]
+      properties:
+        total:    { type: integer }
+        byStatus:
+          type: array
+          items: { $ref: '#/components/schemas/ReportStatusCount' }
+
+    AssessmentSummaryEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/AssessmentSummary' }
+
+    SessionVolume:
+      type: object
+      required: [total, period, byStatus]
+      properties:
+        total:    { type: integer }
+        period:
+          type: object
+          required: [from, to]
+          properties:
+            from: { type: string, format: date-time }
+            to:   { type: string, format: date-time }
+        byStatus:
+          type: array
+          items: { $ref: '#/components/schemas/ReportStatusCount' }
+
+    SessionVolumeEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/SessionVolume' }
+
+    OperationalDashboard:
+      type: object
+      required:
+        [activeBeneficiaries, submittedIntakes, activeCarePlans, scheduledSessions, draftAssessments]
+      properties:
+        activeBeneficiaries:  { type: integer }
+        submittedIntakes:     { type: integer }
+        activeCarePlans:      { type: integer }
+        scheduledSessions:    { type: integer }
+        draftAssessments:     { type: integer }
+
+    OperationalDashboardEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/OperationalDashboard' }
+
+    # ─── Notifications ────────────────────────────────────────────────────────
+    NotificationType:
+      type: string
+      enum: [ALERT, REMINDER, SYSTEM, MESSAGE]
+
+    NotificationStatus:
+      type: string
+      enum: [PENDING, SENT, DELIVERED, FAILED, READ]
+
+    NotificationChannel:
+      type: string
+      enum: [IN_APP, SMS, EMAIL, PUSH]
+
+    Notification:
+      type: object
+      required: [id, userId, type, title, body, channel, status, sentAt, readAt, entityType, entityId, createdAt]
+      properties:
+        id:         { type: string }
+        userId:     { type: string }
+        type:       { $ref: '#/components/schemas/NotificationType' }
+        title:      { type: string }
+        body:       { type: string }
+        channel:    { $ref: '#/components/schemas/NotificationChannel' }
+        status:     { $ref: '#/components/schemas/NotificationStatus' }
+        sentAt:     { type: string, format: date-time, nullable: true }
+        readAt:     { type: string, format: date-time, nullable: true }
+        entityType: { type: string, nullable: true }
+        entityId:   { type: string, nullable: true }
+        createdAt:  { type: string, format: date-time }
+
+    NotificationListEnvelope:
+      type: object
+      required: [success, notifications, total]
+      properties:
+        success:       { type: boolean }
+        notifications:
+          type: array
+          items: { $ref: '#/components/schemas/Notification' }
+        total:         { type: integer }
+        page:          { type: integer }
+        pages:         { type: integer }
+
+    NotificationUnreadCountEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          required: [count]
+          properties:
+            count: { type: integer }
+
+    NotificationReadResponse:
+      type: object
+      required: [success]
+      properties:
+        success:      { type: boolean }
+        notification: { $ref: '#/components/schemas/Notification' }
+        message:      { type: string }
+
+    NotificationReadAllResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          required: [marked]
+          properties:
+            marked: { type: integer }
+
+    # ─── Incidents ────────────────────────────────────────────────────────────
+    IncidentType:
+      type: string
+      enum: [fall, medication_error, equipment_failure, infection_control, behavioral, injury, near_miss, complaint, security, fire_safety, other]
+
+    IncidentSeverity:
+      type: string
+      enum: [minor, moderate, major, critical, sentinel]
+
+    IncidentStatus:
+      type: string
+      enum: [reported, under_investigation, action_taken, closed, escalated]
+
+    QualityIncident:
+      type: object
+      required: [id, title, type, severity, status, description, incidentDate, branchId, reportedBy, createdAt, updatedAt]
+      properties:
+        id:           { type: string }
+        title:        { type: string }
+        type:         { $ref: '#/components/schemas/IncidentType' }
+        severity:     { $ref: '#/components/schemas/IncidentSeverity' }
+        status:       { $ref: '#/components/schemas/IncidentStatus' }
+        description:  { type: string }
+        incidentDate: { type: string, format: date-time }
+        branchId:     { type: string }
+        reportedBy:   { type: string }
+        createdAt:    { type: string, format: date-time }
+        updatedAt:    { type: string, format: date-time }
+
+    IncidentListEnvelope:
+      type: object
+      required: [incidents, total]
+      properties:
+        incidents:
+          type: array
+          items: { $ref: '#/components/schemas/QualityIncident' }
+        total: { type: integer }
+        page:  { type: integer }
+        pages: { type: integer }
+
+    IncidentDetailEnvelope:
+      type: object
+      required: [incident]
+      properties:
+        incident: { $ref: '#/components/schemas/QualityIncident' }
+
+    IncidentCreate:
+      type: object
+      required: [title, incident_type, severity, incident_date, description]
+      properties:
+        title:         { type: string }
+        incident_type: { $ref: '#/components/schemas/IncidentType' }
+        severity:      { $ref: '#/components/schemas/IncidentSeverity' }
+        incident_date: { type: string, format: date-time }
+        description:   { type: string }
+
+    IncidentCreateEnvelope:
+      type: object
+      required: [incident]
+      properties:
+        incident: { $ref: '#/components/schemas/QualityIncident' }
+        message:  { type: string }
+
+    IncidentUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: '#/components/schemas/IncidentStatus' }
+
+    IncidentUpdateEnvelope:
+      type: object
+      required: [incident]
+      properties:
+        incident: { $ref: '#/components/schemas/QualityIncident' }
+        message:  { type: string }
+
+    # ─── Appointments ───────────────────────────────────────────────────────
+    AppointmentStatus:
+      type: string
+      enum: [SCHEDULED, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW]
+
+    Appointment:
+      type: object
+      required:
+        [id, beneficiaryId, branchId, therapistId, scheduledAt, durationMinutes, serviceType, status, cancellationReason, reminderSentAt, createdById, createdAt, updatedAt]
+      properties:
+        id:                 { type: string }
+        beneficiaryId:      { type: string }
+        branchId:           { type: string }
+        therapistId:        { type: string }
+        scheduledAt:        { type: string, format: date-time }
+        durationMinutes:    { type: integer }
+        serviceType:        { type: string }
+        status:             { $ref: '#/components/schemas/AppointmentStatus' }
+        cancellationReason: { type: string, nullable: true }
+        reminderSentAt: { type: string, format: date-time, nullable: true }
+        createdById: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        beneficiary:
+          type: object
+          required: [id, nameAr]
+          properties:
+            id:        { type: string }
+            nameAr:    { type: string }
+            nationalId: { type: string, nullable: true }
+          nullable: true
+        branch:
+          type: object
+          required: [id, nameAr]
+          properties:
+            id:     { type: string }
+            nameAr: { type: string }
+          nullable: true
+
+    AppointmentCreate:
+      type: object
+      required: [beneficiaryId, therapistId, scheduledAt, durationMinutes, serviceType]
+      properties:
+        beneficiaryId:      { type: string }
+        branchId:           { type: string }
+        therapistId:        { type: string }
+        scheduledAt:        { type: string, format: date-time }
+        durationMinutes:    { type: integer }
+        serviceType:        { type: string }
+        status:             { $ref: '#/components/schemas/AppointmentStatus', nullable: true }
+        notes:              { type: string, nullable: true }
+
+    AppointmentReschedule:
+      type: object
+      required: [scheduledAt]
+      properties:
+        scheduledAt:     { type: string, format: date-time }
+        durationMinutes: { type: integer, nullable: true }
+        reason:          { type: string, nullable: true }
+
+    AppointmentStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:            { $ref: '#/components/schemas/AppointmentStatus' }
+        reason:            { type: string, nullable: true }
+        cancellationReason: { type: string, nullable: true }
+
+    AppointmentEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        message: { type: string, nullable: true }
+        data:    { $ref: '#/components/schemas/Appointment' }
+
+    AppointmentListResponse:
+      type: object
+      required: [success, data, total, page, limit, pages]
+      properties:
+        success: { type: boolean }
+        data:    { type: array, items: { $ref: '#/components/schemas/Appointment' } }
+        total:   { type: integer }
+        page:    { type: integer }
+        limit:   { type: integer }
+        pages:   { type: integer }
 
     NafathSigningStatus:
       type: string
@@ -1543,3 +6043,887 @@ components:
         series:
           type: array
           items: { $ref: '#/components/schemas/IntegrationTrendSample' }
+
+    # ─── Branches ────────────────────────────────────────────────────────────
+    Branch:
+      type: object
+      required: [id, code, name_ar, name_en]
+      properties:
+        _id:        { type: string }
+        id:         { type: string }
+        code:       { type: string }
+        name_ar:    { type: string }
+        name_en:    { type: string }
+        short_name: { type: string, nullable: true }
+        type:
+          type: string
+          enum: [hq, main, branch, satellite]
+        status:
+          type: string
+          enum: [active, inactive, maintenance, opening_soon]
+        is_hq:      { type: boolean }
+        location:   { type: object, nullable: true }
+        capacity:   { type: object, nullable: true }
+        staff_count: { type: integer }
+        manager_id:  { type: string, nullable: true }
+        manager_name: { type: string, nullable: true }
+        phone:      { type: string, nullable: true }
+        email:      { type: string, nullable: true }
+        createdAt:  { type: string, format: date-time }
+        updatedAt:  { type: string, format: date-time }
+
+    BranchListEnvelope:
+      type: object
+      required: [success, items, pagination]
+      properties:
+        success: { type: boolean }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Branch' }
+        pagination:
+          type: object
+          required: [page, limit, total, pages]
+          properties:
+            page:  { type: integer }
+            limit: { type: integer }
+            total: { type: integer }
+            pages: { type: integer }
+
+    BranchDetailEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Branch' }
+
+    # ─── Complaints ───────────────────────────────────────────────────────────
+    ComplaintSource:
+      type: string
+      enum: [employee, student, customer, parent, other]
+
+    ComplaintStatus:
+      type: string
+      enum: [new, under_review, in_progress, escalated, resolved, closed, rejected]
+
+    ComplaintPriority:
+      type: string
+      enum: [critical, high, medium, low]
+
+    Complaint:
+      type: object
+      required: [id, type, source, category, subject, description, status, createdAt, updatedAt]
+      properties:
+        _id:           { type: string }
+        id:            { type: string }
+        complaintId:   { type: string }
+        type:          { type: string, enum: [complaint, suggestion, grievance, feedback] }
+        source:        { $ref: '#/components/schemas/ComplaintSource' }
+        category:      { type: string }
+        subject:       { type: string }
+        description:   { type: string }
+        priority:      { $ref: '#/components/schemas/ComplaintPriority' }
+        status:        { $ref: '#/components/schemas/ComplaintStatus' }
+        submittedBy:   { type: string, nullable: true }
+        submitterName: { type: string, nullable: true }
+        submitterEmail: { type: string, nullable: true }
+        submitterPhone: { type: string, nullable: true }
+        assignedTo:    { type: string, nullable: true }
+        department:    { type: string, nullable: true }
+        resolution:    { type: string, nullable: true }
+        resolvedAt:    { type: string, format: date-time, nullable: true }
+        rating:        { type: integer, nullable: true }
+        isAnonymous:   { type: boolean }
+        branchId:      { type: string, nullable: true }
+        beneficiaryId: { type: string, nullable: true }
+        createdBy:     { type: string, nullable: true }
+        createdAt:     { type: string, format: date-time }
+        updatedAt:     { type: string, format: date-time }
+
+    ComplaintListEnvelope:
+      type: object
+      required: [success, data, pagination]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Complaint' }
+        pagination:
+          type: object
+          required: [page, limit, total]
+          properties:
+            page:  { type: integer }
+            limit: { type: integer }
+            total: { type: integer }
+
+    ComplaintDetailEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Complaint' }
+
+    ComplaintCreate:
+      type: object
+      required: [source, category, description]
+      properties:
+        source:
+          type: string
+          enum: [FAMILY, STAFF, EXTERNAL, ANONYMOUS]
+        category:      { type: string }
+        description:   { type: string }
+        beneficiaryId: { type: string, nullable: true }
+        type:          { type: string, enum: [complaint, suggestion, grievance, feedback], nullable: true }
+
+    ComplaintCreateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Complaint' }
+        message: { type: string }
+
+    ComplaintUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:        { $ref: '#/components/schemas/ComplaintStatus' }
+        resolution:    { type: string, nullable: true }
+        assignedTo:    { type: string, nullable: true }
+        priority:      { $ref: '#/components/schemas/ComplaintPriority', nullable: true }
+
+    ComplaintUpdateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Complaint' }
+        message: { type: string }
+
+    # ─── Vehicles ─────────────────────────────────────────────────────────────
+    VehicleType:
+      type: string
+      enum: [van, minibus, bus, car, wheelchair_van]
+
+    VehicleStatus:
+      type: string
+      enum: [active, maintenance, out_of_service, retired]
+
+    Vehicle:
+      type: object
+      required: [id, license_plate, vehicle_type, status]
+      properties:
+        _id:                  { type: string }
+        id:                   { type: string }
+        vehicle_number:       { type: string, nullable: true }
+        license_plate:        { type: string }
+        branch_id:
+          oneOf:
+            - { type: string }
+            - { $ref: '#/components/schemas/Branch' }
+        make:                 { type: string, nullable: true }
+        model:                { type: string, nullable: true }
+        year:                 { type: integer, nullable: true }
+        color:                { type: string, nullable: true }
+        vehicle_type:         { $ref: '#/components/schemas/VehicleType' }
+        capacity:             { type: integer }
+        wheelchair_accessible: { type: boolean }
+        wheelchair_capacity:  { type: integer }
+        status:               { $ref: '#/components/schemas/VehicleStatus' }
+        registration_number:  { type: string, nullable: true }
+        registration_expiry:  { type: string, format: date-time, nullable: true }
+        insurance_number:     { type: string, nullable: true }
+        insurance_expiry:     { type: string, format: date-time, nullable: true }
+        inspection_expiry:    { type: string, format: date-time, nullable: true }
+        current_driver_id:
+          oneOf:
+            - { type: string }
+            - { type: object, nullable: true }
+        odometer_km:          { type: number }
+        fuel_type:            { type: string, enum: [petrol, diesel, electric, hybrid] }
+        notes:                { type: string, nullable: true }
+        deleted_at:           { type: string, format: date-time, nullable: true }
+        createdAt:            { type: string, format: date-time }
+        updatedAt:            { type: string, format: date-time }
+        created_by:           { type: string, nullable: true }
+
+    VehicleListEnvelope:
+      type: object
+      required: [success, data, pagination]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Vehicle' }
+        fleetStats:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:   { type: string }
+              count: { type: integer }
+        pagination:
+          type: object
+          required: [total, page, limit, pages]
+          properties:
+            total: { type: integer }
+            page:  { type: integer }
+            limit: { type: integer }
+            pages: { type: integer }
+
+    VehicleDetailEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Vehicle' }
+
+    VehicleCreate:
+      type: object
+      required: [license_plate]
+      properties:
+        license_plate:        { type: string }
+        make:                 { type: string, nullable: true }
+        model:                { type: string, nullable: true }
+        year:                 { type: integer, nullable: true }
+        vehicle_type:         { $ref: '#/components/schemas/VehicleType', nullable: true }
+        capacity:             { type: integer, nullable: true }
+        status:               { $ref: '#/components/schemas/VehicleStatus', nullable: true }
+        registration_expiry:  { type: string, format: date-time, nullable: true }
+        insurance_expiry:     { type: string, format: date-time, nullable: true }
+        notes:                { type: string, nullable: true }
+        branch_id:            { type: string, nullable: true }
+
+    VehicleCreateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Vehicle' }
+        message: { type: string }
+
+    VehicleUpdate:
+      type: object
+      properties:
+        license_plate:        { type: string, nullable: true }
+        make:                 { type: string, nullable: true }
+        model:                { type: string, nullable: true }
+        year:                 { type: integer, nullable: true }
+        vehicle_type:         { $ref: '#/components/schemas/VehicleType', nullable: true }
+        capacity:             { type: integer, nullable: true }
+        status:               { $ref: '#/components/schemas/VehicleStatus', nullable: true }
+        registration_expiry:  { type: string, format: date-time, nullable: true }
+        insurance_expiry:     { type: string, format: date-time, nullable: true }
+        notes:                { type: string, nullable: true }
+        branch_id:            { type: string, nullable: true }
+
+    VehicleUpdateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Vehicle' }
+        message: { type: string }
+
+    # ─── Invoices ─────────────────────────────────────────────────────────────
+    InvoiceStatus:
+      type: string
+      enum: [draft, sent, paid, partial, overdue, cancelled]
+
+    InvoiceItem:
+      type: object
+      required: [description, quantity, unitPrice]
+      properties:
+        description: { type: string }
+        quantity:    { type: number }
+        unitPrice:   { type: number }
+        vatRate:     { type: number, nullable: true }
+        amount:      { type: number, nullable: true }
+        total:       { type: number, nullable: true }
+
+    Invoice:
+      type: object
+      required: [id, invoiceNumber, status]
+      properties:
+        _id:           { type: string }
+        id:            { type: string }
+        invoiceNumber: { type: string }
+        date:          { type: string, format: date-time, nullable: true }
+        invoiceDate:   { type: string, format: date-time, nullable: true }
+        dueDate:       { type: string, format: date-time, nullable: true }
+        customer:      { type: string, nullable: true }
+        customerName:  { type: string, nullable: true }
+        customerEmail: { type: string, nullable: true }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceItem' }
+        subtotal:      { type: number, nullable: true }
+        vatRate:       { type: number, nullable: true }
+        vatAmount:     { type: number, nullable: true }
+        total:         { type: number, nullable: true }
+        totalAmount:   { type: number, nullable: true }
+        paidAmount:    { type: number, nullable: true }
+        status:        { $ref: '#/components/schemas/InvoiceStatus' }
+        notes:         { type: string, nullable: true }
+        createdAt:     { type: string, format: date-time, nullable: true }
+        updatedAt:     { type: string, format: date-time, nullable: true }
+
+    InvoiceListEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Invoice' }
+
+    InvoiceDetailEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Invoice' }
+
+    InvoiceCreate:
+      type: object
+      required: [customerName]
+      properties:
+        customerName:  { type: string }
+        customerEmail: { type: string, nullable: true }
+        dueDate:       { type: string, format: date-time, nullable: true }
+        notes:         { type: string, nullable: true }
+        amount:        { type: number, nullable: true }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceItem' }
+          nullable: true
+
+    InvoiceCreateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Invoice' }
+
+    InvoiceUpdate:
+      type: object
+      properties:
+        customerName:  { type: string, nullable: true }
+        customerEmail: { type: string, nullable: true }
+        dueDate:       { type: string, format: date-time, nullable: true }
+        notes:         { type: string, nullable: true }
+        status:        { $ref: '#/components/schemas/InvoiceStatus', nullable: true }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceItem' }
+          nullable: true
+
+    InvoiceUpdateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Invoice' }
+
+    # ─── Measures ─────────────────────────────────────────────────────────────
+    MeasureListItem:
+      type: object
+      required: [id, code, name_ar]
+      properties:
+        _id:             { type: string }
+        id:              { type: string }
+        code:            { type: string }
+        name:            { type: string, nullable: true }
+        name_ar:         { type: string }
+        abbreviation:    { type: string, nullable: true }
+        category:        { type: string, nullable: true }
+        type:            { type: string, nullable: true }
+        targetPopulation:
+          type: array
+          items: { type: string }
+        ageRange:
+          type: object
+          nullable: true
+          properties:
+            min:  { type: integer }
+            max:  { type: integer }
+            unit: { type: string }
+        scoringType:     { type: string, nullable: true }
+        isActive:        { type: boolean }
+        usageCount:      { type: integer }
+        createdAt:       { type: string, format: date-time }
+
+    MeasureListEnvelope:
+      type: object
+      required: [success, items, total]
+      properties:
+        success: { type: boolean }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/MeasureListItem' }
+        total:   { type: integer }
+        page:    { type: integer }
+        limit:   { type: integer }
+        pages:   { type: integer }
+
+    # ─── Purchase Orders ──────────────────────────────────────────────────────
+    PurchaseOrderStatus:
+      type: string
+      enum: [draft, pending_approval, approved, sent, partial, received, cancelled, closed]
+
+    PurchaseOrderItem:
+      type: object
+      required: [item_id, quantity_ordered, unit_cost]
+      properties:
+        item_id:           { type: string }
+        item_name_ar:      { type: string, nullable: true }
+        item_code:         { type: string, nullable: true }
+        quantity_ordered:  { type: number }
+        quantity_received: { type: number }
+        unit_cost:         { type: number }
+        total_cost:        { type: number, nullable: true }
+        unit_of_measure:   { type: string, nullable: true }
+        notes:             { type: string, nullable: true }
+
+    PurchaseOrder:
+      type: object
+      required: [id, status]
+      properties:
+        _id:                  { type: string }
+        id:                   { type: string }
+        po_number:            { type: string, nullable: true }
+        supplier_id:          { type: string, nullable: true }
+        supplier_name:        { type: string, nullable: true }
+        status:               { $ref: '#/components/schemas/PurchaseOrderStatus' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PurchaseOrderItem' }
+        subtotal:             { type: number }
+        discount_amount:      { type: number }
+        tax_rate:             { type: number }
+        tax_amount:           { type: number }
+        total_amount:         { type: number }
+        currency:             { type: string }
+        order_date:           { type: string, format: date-time, nullable: true }
+        expected_delivery_date:
+          type: string
+          format: date-time
+          nullable: true
+        actual_delivery_date: { type: string, format: date-time, nullable: true }
+        approved_by:          { type: string, nullable: true }
+        approved_at:          { type: string, format: date-time, nullable: true }
+        delivery_address:     { type: string, nullable: true }
+        payment_terms:        { type: string, nullable: true }
+        notes:                { type: string, nullable: true }
+        internal_notes:       { type: string, nullable: true }
+        attachments:
+          type: array
+          items: { type: string }
+        branch_id:            { type: string, nullable: true }
+        created_by:           { type: string, nullable: true }
+        updated_by:           { type: string, nullable: true }
+        deleted_at:           { type: string, format: date-time, nullable: true }
+        createdAt:            { type: string, format: date-time }
+        updatedAt:            { type: string, format: date-time }
+
+    PurchaseOrderListEnvelope:
+      type: object
+      required: [orders, total, page, pages]
+      properties:
+        orders:
+          type: array
+          items: { $ref: '#/components/schemas/PurchaseOrder' }
+        total: { type: integer }
+        page:  { type: integer }
+        pages: { type: integer }
+
+    PurchaseOrderCreate:
+      type: object
+      required: [supplier_id, branch_id, items]
+      properties:
+        supplier_id:          { type: string }
+        warehouseId:          { type: string, nullable: true }
+        branch_id:            { type: string }
+        expected_delivery_date:
+          type: string
+          format: date-time
+          nullable: true
+        notes:                { type: string, nullable: true }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PurchaseOrderItem' }
+
+    PurchaseOrderCreateEnvelope:
+      type: object
+      required: [order]
+      properties:
+        order:   { $ref: '#/components/schemas/PurchaseOrder' }
+        message: { type: string }
+
+    PurchaseOrderDetailEnvelope:
+      type: object
+      required: [order]
+      properties:
+        order: { $ref: '#/components/schemas/PurchaseOrder' }
+
+    PurchaseOrderUpdate:
+      type: object
+      properties:
+        status:               { $ref: '#/components/schemas/PurchaseOrderStatus', nullable: true }
+        supplier_id:          { type: string, nullable: true }
+        branch_id:            { type: string, nullable: true }
+        expected_delivery_date:
+          type: string
+          format: date-time
+          nullable: true
+        notes:                { type: string, nullable: true }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PurchaseOrderItem' }
+          nullable: true
+
+    PurchaseOrderUpdateEnvelope:
+      type: object
+      required: [order]
+      properties:
+        order:   { $ref: '#/components/schemas/PurchaseOrder' }
+        message: { type: string }
+
+    HREmployee:
+      type: object
+      properties:
+        _id:                  { type: string }
+        employee_number:      { type: string }
+        user_id:              { type: string, nullable: true }
+        branch_id:            { type: string }
+        name_ar:              { type: string }
+        name_en:              { type: string, nullable: true }
+        national_id:          { type: string }
+        date_of_birth:        { type: string, format: date }
+        gender:               { type: string }
+        phone:                { type: string }
+        email:                { type: string }
+        personal_email:       { type: string, nullable: true }
+        job_title_ar:         { type: string }
+        job_title_en:         { type: string, nullable: true }
+        department:           { type: string }
+        specialization:       { type: string }
+        hire_date:            { type: string, format: date }
+        contract_type:        { type: string }
+        basic_salary:         { type: number }
+        status:               { type: string }
+        scfhs_number:         { type: string, nullable: true }
+        scfhs_classification: { type: string, nullable: true }
+        scfhs_expiry:         { type: string, format: date, nullable: true }
+        max_caseload:         { type: number, nullable: true }
+        createdAt:            { type: string }
+        updatedAt:            { type: string }
+        created_by:           { type: string, nullable: true }
+        deleted_at:           { type: string, nullable: true }
+
+    HREmployeeListEnvelope:
+      type: object
+      required: [items, total]
+      properties:
+        access:     { type: string }
+        page:       { type: integer }
+        perPage:    { type: integer }
+        total:      { type: integer }
+        totalPages: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/HREmployee' }
+
+    HREmployeeCreate:
+      type: object
+      required: [nameAr, nationalId, dateOfBirth, gender, phone, email, jobTitle, department, specialization, hireDate, contractType, basicSalary, branchId]
+      properties:
+        nameAr:               { type: string }
+        nameEn:               { type: string }
+        nationalId:           { type: string }
+        dateOfBirth:          { type: string, format: date }
+        gender:               { type: string }
+        phone:                { type: string }
+        email:                { type: string }
+        personalEmail:        { type: string }
+        jobTitle:             { type: string }
+        department:           { type: string }
+        specialization:       { type: string }
+        hireDate:             { type: string, format: date }
+        contractType:         { type: string }
+        basicSalary:          { type: number }
+        branchId:             { type: string }
+        scfhsNumber:          { type: string }
+        scfhsClassification:  { type: string }
+        scfhsExpiry:          { type: string, format: date }
+        maxCaseload:          { type: number }
+        nationalAddress:      { type: object }
+
+    HREmployeeCreateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/HREmployee' }
+
+    HREmployeeDetailEnvelope:
+      type: object
+      required: [employee]
+      properties:
+        employee: { $ref: '#/components/schemas/HREmployee' }
+
+    HREmployeeUpdate:
+      type: object
+      properties:
+        jobTitle:            { type: string }
+        contractType:        { type: string }
+        department:          { type: string }
+        departmentId:        { type: string }
+        specialty:           { type: string }
+        licenseNumber:       { type: string }
+        licenseExpiry:       { type: string }
+        scfhsNumber:         { type: string }
+        scfhsClassification: { type: string }
+        scfhsExpiry:         { type: string }
+        specialization:      { type: string }
+        maxCaseload:         { type: number }
+        status:              { type: string }
+        nationalAddress:     { type: object }
+
+    HREmployeeUpdateEnvelope:
+      type: object
+      required: [employee]
+      properties:
+        employee:      { $ref: '#/components/schemas/HREmployee' }
+        changedFields:
+          type: array
+          items: { type: string }
+
+    Department:
+      type: object
+      properties:
+        _id:           { type: string }
+        name:          { type: string }
+        nameEn:        { type: string, nullable: true }
+        code:          { type: string, nullable: true }
+        description:   { type: string, nullable: true }
+        type:          { type: string }
+        parent:        { type: string, nullable: true }
+        manager:       { type: string, nullable: true }
+        managerName:   { type: string, nullable: true }
+        level:         { type: integer }
+        order:         { type: integer }
+        employeeCount: { type: integer }
+        budget:        { type: number }
+        status:        { type: string }
+        location:      { type: string, nullable: true }
+        phone:         { type: string, nullable: true }
+        email:         { type: string, nullable: true }
+        createdBy:     { type: string, nullable: true }
+        createdAt:     { type: string }
+        updatedAt:     { type: string }
+
+    DepartmentListEnvelope:
+      type: object
+      required: [success, data, pagination]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Department' }
+        pagination:
+          type: object
+          required: [page, limit, total]
+          properties:
+            page:  { type: integer }
+            limit: { type: integer }
+            total: { type: integer }
+
+    DepartmentCreate:
+      type: object
+      required: [name]
+      properties:
+        name:        { type: string }
+        nameEn:      { type: string }
+        code:        { type: string }
+        description: { type: string }
+        type:        { type: string }
+        parent:      { type: string }
+        manager:     { type: string }
+        managerName: { type: string }
+        level:       { type: integer }
+        order:       { type: integer }
+        employeeCount: { type: integer }
+        budget:      { type: number }
+        status:      { type: string }
+        location:    { type: string }
+        phone:       { type: string }
+        email:       { type: string }
+
+    DepartmentCreateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Department' }
+        message: { type: string }
+
+    DepartmentUpdate:
+      type: object
+      properties:
+        name:        { type: string }
+        nameEn:      { type: string }
+        code:        { type: string }
+        description: { type: string }
+        type:        { type: string }
+        parent:      { type: string }
+        manager:     { type: string }
+        managerName: { type: string }
+        level:       { type: integer }
+        order:       { type: integer }
+        employeeCount: { type: integer }
+        budget:      { type: number }
+        status:      { type: string }
+        location:    { type: string }
+        phone:       { type: string }
+        email:       { type: string }
+
+    DepartmentUpdateEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/Department' }
+        message: { type: string }
+
+    DepartmentSuccessEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+
+    FinanceStatementEnvelope:
+      type: object
+      required: [ok, data]
+      properties:
+        ok:    { type: boolean }
+        data:  { type: object, additionalProperties: true }
+        error: { type: string, nullable: true }
+
+    AnyObject:
+      type: object
+      additionalProperties: true
+
+    PlainArrayResponse:
+      type: array
+      items: { $ref: '#/components/schemas/AnyObject' }
+
+    GenericSuccessEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        data:    { $ref: '#/components/schemas/AnyObject' }
+        message: { type: string, nullable: true }
+
+    GenericListEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AnyObject' }
+        total:   { type: integer }
+        page:    { type: integer }
+        limit:   { type: integer }
+        message: { type: string, nullable: true }
+
+    MeasureCategoriesEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AnyObject' }
+
+    MeasuresListEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AnyObject' }
+        total: { type: integer }
+        page:  { type: integer }
+        limit: { type: integer }
+
+    MeasureDetailEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:       { $ref: '#/components/schemas/AnyObject' }
+
+    MeasureItemsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AnyObject' }
+        total: { type: integer }
+        page:  { type: integer }
+        limit: { type: integer }
+
+    OutcomesListEnvelope:
+      type: object
+      required: [success]
+      properties:
+        success:    { type: boolean }
+        statusCode: { type: integer }
+        message:    { type: string }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AnyObject' }
+        total: { type: integer }
+
+    OutcomeCreatePayload:
+      type: object
+      required: [beneficiaryId, measureId, baselineAssessmentId]
+      properties:
+        beneficiaryId:          { type: string }
+        measureId:              { type: string }
+        baselineAssessmentId:   { type: string }
+        targetScore:            { type: number, nullable: true }
+        targetDate:             { type: string, format: date, nullable: true }
+
+    OutcomeTargetPayload:
+      type: object
+      properties:
+        targetScore: { type: number, nullable: true }
+        targetDate:  { type: string, format: date, nullable: true }
+
+    OutcomeNotePayload:
+      type: object
+      required: [noteAr]
+      properties:
+        noteAr:       { type: string }
+        assessmentId: { type: string, nullable: true }
+
+    GoalSuggestionAcceptPayload:
+      type: object
+      required: [beneficiaryId]
+      properties:
+        beneficiaryId:  { type: string }
+        carePlanId:     { type: string, nullable: true }
+        targetDate:     { type: string, format: date, nullable: true }
+        customGoalText: { type: string, nullable: true }

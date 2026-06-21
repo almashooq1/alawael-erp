@@ -91,16 +91,22 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
     }
     const s = summarizeSideEffectResults(results);
     expect(s.total).toBe(results.length);
-    // three real ops self-skip (category data), the rest are deferred + emitted
-    expect(s.real).toBe(3);
-    expect(s.byCategory.data).toBe(3);
-    expect(s.deferred).toBe(results.length - 3);
-    expect(s.emitted).toBe(results.length - 3);
+    // 9 real data ops self-skip (5 forward + 4 compensation); 7 real family
+    // notification ops also self-skip. The remaining registry ops (including
+    // other notification-category ops) are deferred + emitted.
+    expect(s.real).toBe(9);
+    expect(s.byCategory.data).toBe(9);
+    expect(s.byCategory.notification).toBe(16);
+    expect(s.deferred).toBe(results.length - 16);
+    expect(s.emitted).toBe(results.length - 16);
     expect(s.emitted).toBe(emittedCount);
-    // every deferred op is one of the three downstream categories
-    expect(s.byCategory.notification + s.byCategory.compliance + s.byCategory.workflow).toBe(
-      s.deferred
-    );
+    // every dispatched op is categorized (data handlers + deferred downstream ops)
+    expect(
+      s.byCategory.data +
+        s.byCategory.notification +
+        s.byCategory.compliance +
+        s.byCategory.workflow
+    ).toBe(s.total);
     expect(s.byCategory.unknown).toBe(0);
   });
 
@@ -171,7 +177,12 @@ describe('W595 — summarizeSideEffectResults is a total, actionable reducer', (
 
   test('W652 — health.clean is false when a handler was skipped even with no failures', () => {
     const results = [
-      { name: OP.END_ACTIVE_SCHEDULES, category: 'data', skipped: true, reason: 'appointment-model-unavailable' },
+      {
+        name: OP.END_ACTIVE_SCHEDULES,
+        category: 'data',
+        skipped: true,
+        reason: 'appointment-model-unavailable',
+      },
       { category: 'data', cancelledAppointments: 1 },
     ];
     const s = summarizeSideEffectResults(results);

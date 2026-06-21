@@ -50,6 +50,12 @@ const DEFAULT_OK = {
   '/api/v1/hr/workflow/audit': { status: 401, body: '' }, // auth-gated
   '/api/v1/hr/workflow/config': { status: 401, body: '' }, // auth-gated
   '/api/v1/hr/workflow/scheduler/status': { status: 401, body: '' }, // auth-gated
+  // Blueprint-43 + launch-readiness surfaces
+  '/api/v1/next-best-action/catalogue': { status: 200, body: '{}' },
+  '/api/v1/pathway-bundles': { status: 200, body: '[]' },
+  '/api/v1/outcomes-rollup/center': { status: 200, body: '{}' },
+  '/api/v1/email-templates': { status: 200, body: '[]' },
+  '/api/v1/launch-readiness': { status: 200, body: '{}' },
 };
 
 // Build a fake fetcher we drive per-test. The runner threads it through

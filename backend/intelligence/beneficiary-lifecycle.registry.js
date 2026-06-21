@@ -171,6 +171,7 @@ const TRANSITIONS = Object.freeze([
     requiresReason: true,
     allowedReasonCodes: REASON_CODES.TRANSFER,
     sideEffects: ['freeze-record', 'notify-destination-branch', 'open-cross-branch-temp-elevated'],
+    compensatingOps: ['unfreeze-record', 'close-cross-branch-temp-elevated'],
     severity: 'critical',
     reversalWindowDays: 30,
     auditCategory: 'beneficiary.lifecycle.transfer.initiate',
@@ -193,6 +194,7 @@ const TRANSITIONS = Object.freeze([
       'data-handoff-minimum-necessary',
       'close-cross-branch-temp-elevated',
     ],
+    compensatingOps: ['rollback-transfer-destination'],
     severity: 'critical',
     reversalWindowDays: 30,
     auditCategory: 'beneficiary.lifecycle.transfer.complete',
@@ -235,6 +237,7 @@ const TRANSITIONS = Object.freeze([
       'notify-family-discharge',
       'notify-school-if-coordinated',
     ],
+    compensatingOps: ['restore-cancelled-appointments', 'reactivate-care-team'],
     severity: 'high',
     reversalWindowDays: 14,
     auditCategory: 'beneficiary.lifecycle.discharge',
@@ -257,6 +260,11 @@ const TRANSITIONS = Object.freeze([
       'generate-closure-report',
       'notify-family-condolence',
       'notify-regulator-if-required',
+    ],
+    compensatingOps: [
+      'restore-cancelled-appointments',
+      'reopen-closed-episodes',
+      'reactivate-care-team',
     ],
     severity: 'critical',
     reversalWindowDays: 14, // data-entry-error correction window only
@@ -448,6 +456,11 @@ function getSideEffects(transitionId) {
   return t ? [...t.sideEffects] : [];
 }
 
+function getCompensatingOps(transitionId) {
+  const t = findTransition(transitionId);
+  return t && Array.isArray(t.compensatingOps) ? [...t.compensatingOps] : [];
+}
+
 module.exports = {
   LIFECYCLE_STATES,
   STATES,
@@ -467,4 +480,5 @@ module.exports = {
   getAllowedReasonCodes,
   isValidReasonCode,
   getSideEffects,
+  getCompensatingOps,
 };

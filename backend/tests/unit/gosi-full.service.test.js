@@ -527,7 +527,7 @@ describe('GosiFullService', () => {
           housingAllowance: 3000,
           updatedBy: 'admin1',
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
       expect(result).toBeDefined();
     });
@@ -685,7 +685,7 @@ describe('GosiFullService', () => {
           subscriberWage: 10000,
           paymentStatus: 'pending',
         }),
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     });
 
@@ -735,7 +735,7 @@ describe('GosiFullService', () => {
           status: 'paid',
           approvedBy: 'admin1',
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -967,7 +967,7 @@ describe('GosiFullService', () => {
       expect(mockEndOfService.findByIdAndUpdate).toHaveBeenCalledWith(
         'eos1',
         { status: 'confirmed', isEstimated: false, confirmedBy: 'admin1' },
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -1006,7 +1006,7 @@ describe('GosiFullService', () => {
       expect(mockEndOfService.findByIdAndUpdate).toHaveBeenCalledWith(
         'eos1',
         expect.objectContaining({ status: 'paid' }),
-        { new: true }
+        { returnDocument: 'after' }
       );
     });
 
@@ -1245,7 +1245,7 @@ describe('GosiFullService', () => {
           status: 'pending',
           generatedBy: 'admin1',
         }),
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
       expect(result).toEqual(paymentDoc);
     });

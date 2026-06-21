@@ -226,6 +226,7 @@ const CARE_PLAN_EVENTS = {
     payload: {
       planId: 'string',
       beneficiaryId: 'string',
+      episodeId: 'string',
       achievementRate: 'number',
     },
     delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
@@ -255,6 +256,42 @@ const SESSION_EVENTS = {
     delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
     priority: PRIORITY.NORMAL,
     consumers: ['timeline', 'goals', 'dashboards', 'reports', 'ai-recommendations'],
+  },
+
+  // W974 — session lifecycle reaches the unified timeline: cancelled / no-show.
+  CANCELLED: {
+    domain: 'sessions',
+    eventType: 'session.cancelled',
+    version: 1,
+    description: 'تم إلغاء جلسة — Session cancelled',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      therapistId: 'string',
+      sessionType: 'string',
+      reason: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  NO_SHOW: {
+    domain: 'sessions',
+    eventType: 'session.no_show',
+    version: 1,
+    description: 'تغيّب المستفيد عن جلسة — Session no-show',
+    payload: {
+      sessionId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      therapistId: 'string',
+      sessionType: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards', 'ai-recommendations', 'notification'],
   },
 };
 
@@ -583,6 +620,23 @@ const SAFETY_EVENTS = {
     delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
     priority: PRIORITY.HIGH,
     consumers: ['timeline', 'dashboards', 'notification'],
+  },
+
+  EMERGENCY_PLAN_ACTIVATED: {
+    domain: 'safety',
+    eventType: 'emergency_plan.activated',
+    version: 1,
+    description: 'تم تفعيل خطة الطوارئ — Emergency plan activated',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      conditionTypes: 'array',
+      activatedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
   },
 };
 
@@ -2838,6 +2892,695 @@ const COMPLAINT_EVENTS = Object.freeze({
   },
 }); // ═══ W1136 — beneficiary-linked complaint resolved → unified core timeline ═══
 
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Authorization Events — أحداث التراخيص العلاجية
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const AUTHORIZATION_EVENTS = Object.freeze({
+  TREATMENT_AUTHORIZATION_DECIDED: {
+    domain: 'authorization',
+    eventType: 'treatment.authorization_decided',
+    version: 1,
+    description: 'تم اتخاذ قرار الترخيص العلاجي — Treatment authorization decided',
+    payload: {
+      authorizationId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      decision: 'string',
+      decidedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Care-Coordination Events — أحداث تنسيق الرعاية
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CARE_COORDINATION_EVENTS = Object.freeze({
+  MDT_MEETING_COMPLETED: {
+    domain: 'care-coordination',
+    eventType: 'mdt.meeting_completed',
+    version: 1,
+    description: 'اكتمل اجتماع الفريق متعدد التخصصات — MDT meeting completed',
+    payload: {
+      meetingId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      purpose: 'string',
+      completedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  CONSULTATION_ANSWERED: {
+    domain: 'care-coordination',
+    eventType: 'consultation.answered',
+    version: 1,
+    description: 'تم الرد على استشارة المعالج — Therapist consultation answered',
+    payload: {
+      consultationId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      topic: 'string',
+      answeredBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CDSS Events — أحداث دعم القرار السريري
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CDSS_EVENTS = Object.freeze({
+  ALERT_RESOLVED: {
+    domain: 'cdss',
+    eventType: 'alert.resolved',
+    version: 1,
+    description: 'تم حل تنبيه دعم القرار السريري — CDSS alert resolved',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      alertType: 'string',
+      resolvedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Clinical Assessment Events — أحداث التقييمات السريرية
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CLINICAL_ASSESSMENT_EVENTS = Object.freeze({
+  ADL_ASSESSMENT_COMPLETED: {
+    domain: 'clinical-assessment',
+    eventType: 'adl.assessment_completed',
+    version: 1,
+    description: 'تم اعتماد تقييم الأنشطة اليومية — ADL assessment completed',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      assessmentType: 'string',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  INTEGRATION_ASSESSMENT_COMPLETED: {
+    domain: 'clinical-assessment',
+    eventType: 'integration.assessment_completed',
+    version: 1,
+    description: 'تم اعتماد تقييم الاندماج — Integration assessment completed',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      assessmentType: 'string',
+      overallIntegrationScore: 'number',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  ICF_ASSESSMENT_APPROVED: {
+    domain: 'clinical-assessment',
+    eventType: 'icf.assessment_approved',
+    version: 1,
+    description: 'تم اعتماد تقييم ICF — ICF assessment approved',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      assessmentType: 'string',
+      icfVersion: 'string',
+      approvedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Self-Advocacy Events — أحداث التأكد الذاتي
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const SELF_ADVOCACY_EVENTS = Object.freeze({
+  PLAN_COMPLETED: {
+    domain: 'self-advocacy',
+    eventType: 'self_advocacy.plan_completed',
+    version: 1,
+    description: 'تم إكمال خطة التأكد الذاتي — Self-advocacy plan completed',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      track: 'string',
+      completedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Decision-Rights Events — أحداث تقييم حقوق القرار
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const DECISION_RIGHTS_EVENTS = Object.freeze({
+  ASSESSMENT_FINALIZED: {
+    domain: 'decision-rights',
+    eventType: 'assessment.finalized',
+    version: 1,
+    description: 'تم اعتماد تقييم حقوق القرار — Decision-rights assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      decisionType: 'string',
+      capacity: 'object',
+      finalizedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Independent-Living Events — أحداث الحياة المستقلة
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const INDEPENDENT_LIVING_EVENTS = Object.freeze({
+  PLAN_COMPLETED: {
+    domain: 'independent-living',
+    eventType: 'independent_living.plan_completed',
+    version: 1,
+    description: 'تم إكمال خطة الحياة المستقلة — Independent-living plan completed',
+    payload: {
+      planId: 'string',
+      beneficiaryId: 'string',
+      title: 'string',
+      completedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Clinical Safety Events — أحداث السلامة السريرية
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CLINICAL_SAFETY_EVENTS = Object.freeze({
+  FALLS_ASSESSMENT_FINALIZED: {
+    domain: 'clinical-safety',
+    eventType: 'falls.assessment_finalized',
+    version: 1,
+    description: 'تم اعتماد تقييم خطر السقوط — Falls risk assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      riskLevel: 'string',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  PRESSURE_INJURY_IDENTIFIED: {
+    domain: 'clinical-safety',
+    eventType: 'pressure_injury.identified',
+    version: 1,
+    description: 'تم تحديد إصابة ضغط — Pressure injury identified',
+    payload: {
+      recordId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      stage: 'string',
+      identifiedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  PRESSURE_INJURY_RESOLVED: {
+    domain: 'clinical-safety',
+    eventType: 'pressure_injury.resolved',
+    version: 1,
+    description: 'تم علاج إصابة ضغط — Pressure injury resolved',
+    payload: {
+      recordId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      resolvedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  SLEEP_ASSESSMENT_FINALIZED: {
+    domain: 'clinical-safety',
+    eventType: 'sleep.assessment_finalized',
+    version: 1,
+    description: 'تم اعتماد تقييم النوم — Sleep assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      sleepDisorder: 'string',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  OM_ASSESSMENT_FINALIZED: {
+    domain: 'clinical-safety',
+    eventType: 'om.assessment_finalized',
+    version: 1,
+    description: 'تم اعتماد تقييم التوجه والتنقل — Orientation/mobility assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      outcome: 'string',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  DRIVING_ASSESSMENT_FINALIZED: {
+    domain: 'clinical-safety',
+    eventType: 'driving.assessment_finalized',
+    version: 1,
+    description: 'تم اعتماد تقييم القيادة — Driving rehabilitation assessment finalized',
+    payload: {
+      assessmentId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      fitToDrive: 'boolean',
+      assessedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  MEDICATION_RECONCILED: {
+    domain: 'clinical-safety',
+    eventType: 'medication.reconciled',
+    version: 1,
+    description: 'تم تسوية الأدوية — Medication reconciliation completed',
+    payload: {
+      reconciliationId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      discrepancies: 'number',
+      reconciledBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  INFECTION_CASE_OPENED: {
+    domain: 'clinical-safety',
+    eventType: 'infection.case_opened',
+    version: 1,
+    description: 'تم فتح حالة عدوى — Infection surveillance case opened',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      infectionType: 'string',
+      openedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline', 'dashboards'],
+  },
+
+  INFECTION_CASE_RESOLVED: {
+    domain: 'clinical-safety',
+    eventType: 'infection.case_resolved',
+    version: 1,
+    description: 'تم إغلاق حالة عدوى — Infection surveillance case resolved',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      episodeId: 'string',
+      resolution: 'string',
+      resolvedBy: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline', 'dashboards'],
+  },
+});
+
+// ── W974/W1430 restored cross-domain contracts ───────────────────────────────
+// These contracts back the timeline subscribers restored in W1430 and whose
+// producers already exist in the codebase (OfficialLetter, EpisodeOfCare,
+// Waitlist, InsuranceClaim, FamilyHomeProgram/HomeAssignment, PostRehabCase,
+// FollowUpVisit, and the bridged SessionService cancel/no-show events).
+
+const OFFICIAL_LETTER_EVENTS = Object.freeze({
+  ISSUED: {
+    domain: 'official-letter',
+    eventType: 'official_letter.issued',
+    version: 1,
+    description: 'تم إصدار خطاب رسمي — Official letter issued',
+    payload: {
+      letterId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      letterType: 'string',
+      issuedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  REVOKED: {
+    domain: 'official-letter',
+    eventType: 'official_letter.revoked',
+    version: 1,
+    description: 'تم إلغاء خطاب رسمي — Official letter revoked',
+    payload: {
+      letterId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      letterType: 'string',
+      revokedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const CARETEAM_EVENTS = Object.freeze({
+  MEMBER_ADDED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_added',
+    version: 1,
+    description: 'تم إضافة عضو لفريق الرعاية — Care-team member added',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+      role: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  MEMBER_REMOVED: {
+    domain: 'careteam',
+    eventType: 'careteam.member_removed',
+    version: 1,
+    description: 'تمت إزالة عضو من فريق الرعاية — Care-team member removed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      userId: 'string',
+      role: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  LEAD_CHANGED: {
+    domain: 'careteam',
+    eventType: 'careteam.lead_changed',
+    version: 1,
+    description: 'تم تغيير قائد فريق الرعاية — Care-team lead changed',
+    payload: {
+      episodeId: 'string',
+      beneficiaryId: 'string',
+      previousLeadId: 'string',
+      newLeadId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const WAITLIST_EVENTS = Object.freeze({
+  ADDED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.added',
+    version: 1,
+    description: 'تمت إضافة متقدم جديد لقائمة الانتظار — Waitlist entry added',
+    payload: {
+      waitlistEntryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      applicantName: 'string',
+      addedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  BOOKED: {
+    domain: 'waitlist',
+    eventType: 'waitlist.booked',
+    version: 1,
+    description: 'تم حجز موعد لمتقدم من قائمة الانتظار — Waitlist entry booked',
+    payload: {
+      waitlistEntryId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      appointmentId: 'string',
+      bookedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const INSURANCE_OUTCOME_EVENTS = Object.freeze({
+  CLAIM_APPROVED: {
+    domain: 'insurance',
+    eventType: 'claim.approved',
+    version: 1,
+    description: 'تمت الموافقة على مطالبة تأمين — Insurance claim approved',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      claimNumber: 'string',
+      approvedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  CLAIM_REJECTED: {
+    domain: 'insurance',
+    eventType: 'claim.rejected',
+    version: 1,
+    description: 'تم رفض مطالبة تأمين — Insurance claim rejected',
+    payload: {
+      claimId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      claimNumber: 'string',
+      reason: 'string',
+      rejectedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
+const HOME_PROGRAM_EVENTS = Object.freeze({
+  ASSIGNED: {
+    domain: 'home_program',
+    eventType: 'home_program.assigned',
+    version: 1,
+    description: 'تم تكليف برنامج منزلي — Home program assigned',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+      assignedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  COMPLETED: {
+    domain: 'home_program',
+    eventType: 'home_program.completed',
+    version: 1,
+    description: 'تم إكمال برنامج منزلي — Home program completed',
+    payload: {
+      programId: 'string',
+      beneficiaryId: 'string',
+      programType: 'string',
+      title: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+});
+
+const FOLLOWUP_EVENTS = Object.freeze({
+  CASE_COMPLETED: {
+    domain: 'followup',
+    eventType: 'case.completed',
+    version: 1,
+    description: 'تم إغلاق حالة متابعة ما بعد التأهيل — Post-rehab case completed',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      completedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  CASE_LOST: {
+    domain: 'followup',
+    eventType: 'case.lost',
+    version: 1,
+    description: 'فُقدت حالة متابعة ما بعد التأهيل — Post-rehab case lost',
+    payload: {
+      caseId: 'string',
+      beneficiaryId: 'string',
+      lostAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+
+  VISIT_ATTENDED: {
+    domain: 'followup',
+    eventType: 'visit.attended',
+    version: 1,
+    description: 'تم حضور زيارة متابعة — Post-rehab follow-up visit attended',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      attendedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  VISIT_MISSED: {
+    domain: 'followup',
+    eventType: 'visit.missed',
+    version: 1,
+    description: 'تم تفويت زيارة متابعة — Post-rehab follow-up visit missed',
+    payload: {
+      visitId: 'string',
+      beneficiaryId: 'string',
+      caseId: 'string',
+      visitType: 'string',
+      missedAt: 'date',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
+const REFERRAL_OUTCOME_EVENTS = Object.freeze({
+  ACCEPTED: {
+    domain: 'referral',
+    eventType: 'referral.accepted',
+    version: 1,
+    description: 'تم قبول إحالة — Referral accepted',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  COMPLETED: {
+    domain: 'referral',
+    eventType: 'referral.completed',
+    version: 1,
+    description: 'تم إكمال إحالة — Referral completed',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['timeline'],
+  },
+
+  REJECTED: {
+    domain: 'referral',
+    eventType: 'referral.rejected',
+    version: 1,
+    description: 'تم رفض إحالة — Referral rejected',
+    payload: {
+      referralId: 'string',
+      beneficiaryId: 'string',
+      referralType: 'string',
+      status: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['timeline'],
+  },
+});
+
 const DDD_CONTRACTS = {
   core: BENEFICIARY_DDD_EVENTS,
   episodes: EPISODE_EVENTS,
@@ -2951,6 +3694,21 @@ const DDD_CONTRACTS = {
   'corrective-action': CORRECTIVE_ACTION_EVENTS,
   'beneficiary-transfer': BENEFICIARY_TRANSFER_EVENTS,
   complaint: COMPLAINT_EVENTS,
+  'clinical-safety': CLINICAL_SAFETY_EVENTS,
+  'clinical-assessment': CLINICAL_ASSESSMENT_EVENTS,
+  'self-advocacy': SELF_ADVOCACY_EVENTS,
+  'decision-rights': DECISION_RIGHTS_EVENTS,
+  'independent-living': INDEPENDENT_LIVING_EVENTS,
+  authorization: AUTHORIZATION_EVENTS,
+  'care-coordination': CARE_COORDINATION_EVENTS,
+  cdss: CDSS_EVENTS,
+  'official-letter': OFFICIAL_LETTER_EVENTS,
+  careteam: CARETEAM_EVENTS,
+  waitlist: WAITLIST_EVENTS,
+  insurance: INSURANCE_OUTCOME_EVENTS,
+  home_program: HOME_PROGRAM_EVENTS,
+  followup: FOLLOWUP_EVENTS,
+  referral: REFERRAL_OUTCOME_EVENTS,
 };
 
 /**
@@ -3076,6 +3834,21 @@ module.exports = {
   CORRECTIVE_ACTION_EVENTS,
   BENEFICIARY_TRANSFER_EVENTS,
   COMPLAINT_EVENTS,
+  CLINICAL_SAFETY_EVENTS,
+  CLINICAL_ASSESSMENT_EVENTS,
+  SELF_ADVOCACY_EVENTS,
+  DECISION_RIGHTS_EVENTS,
+  INDEPENDENT_LIVING_EVENTS,
+  AUTHORIZATION_EVENTS,
+  CARE_COORDINATION_EVENTS,
+  CDSS_EVENTS,
+  OFFICIAL_LETTER_EVENTS,
+  CARETEAM_EVENTS,
+  WAITLIST_EVENTS,
+  INSURANCE_OUTCOME_EVENTS,
+  HOME_PROGRAM_EVENTS,
+  FOLLOWUP_EVENTS,
+  REFERRAL_OUTCOME_EVENTS,
   DDD_CONTRACTS,
   getDDDContractStats,
 };

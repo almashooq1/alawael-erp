@@ -568,8 +568,31 @@ const UNIT_KEYWORDS = Object.freeze({
   human: ['موظف', 'انسان', 'بشري', 'اخصائي', 'تكلم مع', 'human', 'agent', 'representative'],
   // W1380 — new service units
   faq: ['اسئلة شائعة', 'سؤال', 'استفسار عام', 'faq', 'questions'],
-  location: ['موقع', 'العنوان', 'عنوانكم', 'وين انتم', 'كيف اوصل', 'الاتجاهات', 'خريطة', 'location', 'address', 'directions', 'map'],
-  satisfaction: ['تقييم', 'قيم', 'رضا', 'استبيان', 'رايي', 'رأيي', 'feedback', 'satisfaction', 'survey', 'rating'],
+  location: [
+    'موقع',
+    'العنوان',
+    'عنوانكم',
+    'وين انتم',
+    'كيف اوصل',
+    'الاتجاهات',
+    'خريطة',
+    'location',
+    'address',
+    'directions',
+    'map',
+  ],
+  satisfaction: [
+    'تقييم',
+    'قيم',
+    'رضا',
+    'استبيان',
+    'رايي',
+    'رأيي',
+    'feedback',
+    'satisfaction',
+    'survey',
+    'rating',
+  ],
   emergency: ['طارئ', 'طوارئ', 'عاجل', 'بلاغ عاجل', 'مستعجل', 'emergency', 'urgent'],
 });
 
@@ -800,7 +823,10 @@ function editDistanceLE1(a, b) {
 function scoreUnits(text) {
   const n = normalize(text);
   if (!n) return null;
-  const tokens = n.split(' ').map(lightStem).filter(t => t.length >= 3);
+  const tokens = n
+    .split(' ')
+    .map(lightStem)
+    .filter(t => t.length >= 3);
   let best = null;
   for (const [unitId, keywords] of Object.entries(UNIT_KEYWORDS)) {
     let score = 0;

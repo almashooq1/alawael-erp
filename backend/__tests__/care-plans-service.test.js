@@ -66,7 +66,7 @@ describe('CarePlansService', () => {
       const result = await service.createPlan({
         beneficiaryId: 'ben001',
         episodeId: 'ep001',
-        type: 'rehabilitation',
+        type: 'comprehensive',
         primaryTherapistId: 'th001',
       });
 
@@ -74,29 +74,33 @@ describe('CarePlansService', () => {
         expect.objectContaining({
           beneficiaryId: 'ben001',
           episodeId: 'ep001',
-          type: 'rehabilitation',
+          type: 'comprehensive',
           status: 'draft',
-          goals: [],
-          interventions: [],
+          globalGoals: [],
+          globalInterventions: [],
         })
       );
       expect(result._id).toBe('plan001');
     });
 
-    it('defaults type to rehabilitation when not provided', async () => {
+    it('defaults type to comprehensive when not provided', async () => {
       UCP.create.mockResolvedValueOnce(makePlan());
       await service.createPlan({ beneficiaryId: 'ben001' });
-      expect(UCP.create).toHaveBeenCalledWith(expect.objectContaining({ type: 'rehabilitation' }));
+      expect(UCP.create).toHaveBeenCalledWith(expect.objectContaining({ type: 'comprehensive' }));
     });
 
-    it('passes goals and interventions arrays', async () => {
+    it('passes goals and interventions arrays as globalGoals/globalInterventions', async () => {
       const goals = [{ title: 'Goal A' }];
       const interventions = [{ title: 'Intervention B' }];
-      UCP.create.mockResolvedValueOnce(makePlan({ goals, interventions }));
+      UCP.create.mockResolvedValueOnce(
+        makePlan({ globalGoals: goals, globalInterventions: interventions })
+      );
 
       await service.createPlan({ beneficiaryId: 'ben001', goals, interventions });
 
-      expect(UCP.create).toHaveBeenCalledWith(expect.objectContaining({ goals, interventions }));
+      expect(UCP.create).toHaveBeenCalledWith(
+        expect.objectContaining({ globalGoals: goals, globalInterventions: interventions })
+      );
     });
 
     it('throws 400 when beneficiaryId is missing', async () => {
@@ -210,7 +214,7 @@ describe('CarePlansService', () => {
       expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
         'plan001',
         { $set: { status: 'active' } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       expect(result.status).toBe('active');
     });
@@ -233,6 +237,70 @@ describe('CarePlansService', () => {
     });
   });
 
+  /* ─── lifecycle transitions (W1275) ──────────────────────────────────── */
+  describe('lifecycle transitions', () => {
+    it('submitPlan sets status to pending_approval', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(
+        makeLeanChain(makePlan({ status: 'pending_approval' }))
+      );
+      const result = await service.submitPlan('plan001');
+      expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
+        'plan001',
+        { $set: { status: 'pending_approval' } },
+        { returnDocument: 'after' }
+      );
+      expect(result.status).toBe('pending_approval');
+    });
+
+    it('rejectPlan sets status back to draft', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan({ status: 'draft' })));
+      const result = await service.rejectPlan('plan001', { reason: 'needs revision' });
+      expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
+        'plan001',
+        { $set: { status: 'draft' } },
+        { returnDocument: 'after' }
+      );
+      expect(result.status).toBe('draft');
+    });
+
+    it('suspendPlan sets status to suspended', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan({ status: 'suspended' })));
+      const result = await service.suspendPlan('plan001', { reason: 'medical leave' });
+      expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
+        'plan001',
+        { $set: { status: 'suspended' } },
+        { returnDocument: 'after' }
+      );
+      expect(result.status).toBe('suspended');
+    });
+
+    it('resumePlan sets status back to active', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan({ status: 'active' })));
+      const result = await service.resumePlan('plan001');
+      expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
+        'plan001',
+        { $set: { status: 'active' } },
+        { returnDocument: 'after' }
+      );
+      expect(result.status).toBe('active');
+    });
+
+    it('emits careplan.submitted on submit', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(
+        makeLeanChain(makePlan({ status: 'pending_approval' }))
+      );
+      const spy = jest.fn();
+      service.on('careplan.submitted', spy);
+      await service.submitPlan('plan001');
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ planId: 'plan001' }));
+    });
+
+    it('throws 404 when plan not found', async () => {
+      UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(null));
+      await expect(service.submitPlan('missing')).rejects.toMatchObject({ statusCode: 404 });
+    });
+  });
+
   /* ─── activatePlan ───────────────────────────────────────────────────── */
   describe('activatePlan', () => {
     it('sets status to active with activatedDate', async () => {
@@ -244,7 +312,7 @@ describe('CarePlansService', () => {
       expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
         'plan001',
         expect.objectContaining({ $set: expect.objectContaining({ status: 'active' }) }),
-        { new: true }
+        { returnDocument: 'after' }
       );
       expect(result.status).toBe('active');
     });
@@ -254,10 +322,10 @@ describe('CarePlansService', () => {
       await expect(service.activatePlan('missing')).rejects.toMatchObject({ statusCode: 404 });
     });
 
-    it('emits care-plan:activated on success', async () => {
+    it('emits careplan.activated on success', async () => {
       UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(makePlan({ status: 'active' })));
       const spy = jest.fn();
-      service.on('care-plan:activated', spy);
+      service.on('careplan.activated', spy);
 
       await service.activatePlan('plan001');
 
@@ -289,7 +357,7 @@ describe('CarePlansService', () => {
             outcomeRating: 5,
           }),
         }),
-        { new: true }
+        { returnDocument: 'after' }
       );
       expect(result.status).toBe('completed');
     });
@@ -305,36 +373,47 @@ describe('CarePlansService', () => {
       await expect(service.completePlan('missing')).rejects.toMatchObject({ statusCode: 404 });
     });
 
-    it('emits care-plan:completed with outcomeRating', async () => {
+    it('emits careplan.completed with achievementRate', async () => {
       UCP.findByIdAndUpdate.mockReturnValueOnce(
         makeLeanChain(makePlan({ status: 'completed', outcomeRating: 4 }))
       );
       const spy = jest.fn();
-      service.on('care-plan:completed', spy);
+      service.on('careplan.completed', spy);
 
       await service.completePlan('plan001', { outcomeRating: 4 });
 
       expect(spy).toHaveBeenCalledWith(
-        expect.objectContaining({ planId: 'plan001', outcomeRating: 4 })
+        expect.objectContaining({ planId: 'plan001', achievementRate: 4 })
       );
     });
   });
 
   /* ─── addGoal ────────────────────────────────────────────────────────── */
   describe('addGoal', () => {
-    it('pushes goal to plan goals array', async () => {
-      const goal = { title: 'Improve communication', type: 'communication' };
-      const updated = makePlan({ goals: [goal] });
+    it('maps UI goal payload onto globalGoals (canonical field)', async () => {
+      const goal = { nameAr: 'تحسين التواصل', domain: 'communication', targetDate: '2026-12-31' };
+      const updated = makePlan({
+        globalGoals: [{ title: 'تحسين التواصل', title_ar: 'تحسين التواصل', type: 'communication' }],
+      });
       UCP.findByIdAndUpdate.mockReturnValueOnce(makeLeanChain(updated));
 
       const result = await service.addGoal('plan001', goal);
 
       expect(UCP.findByIdAndUpdate).toHaveBeenCalledWith(
         'plan001',
-        { $push: { goals: goal } },
-        { new: true }
+        {
+          $push: {
+            globalGoals: expect.objectContaining({
+              title: 'تحسين التواصل',
+              title_ar: 'تحسين التواصل',
+              type: 'communication',
+              priority: 'medium',
+            }),
+          },
+        },
+        { returnDocument: 'after' }
       );
-      expect(result.goals).toHaveLength(1);
+      expect(result.globalGoals).toHaveLength(1);
     });
 
     it('throws 404 when plan not found', async () => {

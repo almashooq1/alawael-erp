@@ -652,6 +652,26 @@ jobs:
             fi
           SMOKE_SCRIPT
 
+      - name: Post-deploy primary-journey smoke
+        # Exercises the canonical beneficiary→session→attendance→invoice→report
+        # flow against the live production database. Safe-by-design: the script
+        # creates tagged documents and deletes them in a finally block.
+        if: needs.preflight.outputs.deploy_backend == 'true'
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'JOURNEY_SCRIPT'
+            set +e
+            cd /home/alawael/app/backend
+            echo "🧭 Running primary-journey smoke against live DB..."
+            sudo -u alawael node scripts/smoke-primary-journey.js 2>&1 | tee /tmp/smoke-journey-report.txt
+            EXIT=$?
+            if [ "$EXIT" -ne 0 ]; then
+              echo "⚠️  Primary-journey smoke failed (exit $EXIT)"
+            else
+              echo "✅ Primary-journey smoke passed"
+            fi
+          JOURNEY_SCRIPT
+
   # ─── Summary ─────────────────────────────────────────────────────
   notify:
     name: "📢 Summary"

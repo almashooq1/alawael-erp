@@ -25,10 +25,7 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const {
-  branchFilter,
-  requireBranchAccess,
-} = require('../middleware/branchScope.middleware');
+const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
 // W1384: effectiveBranchScope is exported by assertBranchMatch, NOT
 // branchScope.middleware — importing it from the latter yielded undefined and
 // 500'd at every call site (W1378 class).

@@ -43,7 +43,10 @@ function compaRatio(salary, midSalary) {
 }
 
 /** Classify a compa-ratio into below / within / above the band. */
-function classifyCompaRatio(ratio, { belowThreshold = DEFAULT_BELOW, aboveThreshold = DEFAULT_ABOVE } = {}) {
+function classifyCompaRatio(
+  ratio,
+  { belowThreshold = DEFAULT_BELOW, aboveThreshold = DEFAULT_ABOVE } = {}
+) {
   if (!Number.isFinite(ratio)) return null;
   if (ratio < belowThreshold) return BANDS.below;
   if (ratio > aboveThreshold) return BANDS.above;
@@ -52,7 +55,7 @@ function classifyCompaRatio(ratio, { belowThreshold = DEFAULT_BELOW, aboveThresh
 
 /** Median of a numeric array (sorted copy), or null when empty. */
 function median(values) {
-  const xs = (values || []).filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
+  const xs = (values || []).filter(v => Number.isFinite(v)).sort((a, b) => a - b);
   if (!xs.length) return null;
   const mid = Math.floor(xs.length / 2);
   return xs.length % 2 ? xs[mid] : round((xs[mid - 1] + xs[mid]) / 2, 3);
@@ -67,7 +70,7 @@ function median(values) {
 function compaRatioStats(entries, opts = {}) {
   const belowThreshold = opts.belowThreshold ?? DEFAULT_BELOW;
   const aboveThreshold = opts.aboveThreshold ?? DEFAULT_ABOVE;
-  const rated = (entries || []).filter((e) => e && Number.isFinite(e.compaRatio));
+  const rated = (entries || []).filter(e => e && Number.isFinite(e.compaRatio));
   let below = 0;
   let within = 0;
   let above = 0;
@@ -86,7 +89,7 @@ function compaRatioStats(entries, opts = {}) {
     belowPct: n ? round((below / n) * 100, 1) : 0,
     withinPct: n ? round((within / n) * 100, 1) : 0,
     abovePct: n ? round((above / n) * 100, 1) : 0,
-    medianCompaRatio: median(rated.map((e) => e.compaRatio)),
+    medianCompaRatio: median(rated.map(e => e.compaRatio)),
     thresholds: { below: belowThreshold, above: aboveThreshold },
   };
 }

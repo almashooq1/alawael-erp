@@ -79,7 +79,7 @@ describe('W1381 completeSession → integrationBus', () => {
       await sessionsService.completeSession(String(session._id), { duration: 45 });
     });
 
-    const emitted = events.filter((e) => e.eventType === 'session.completed');
+    const emitted = events.filter(e => e.eventType === 'session.completed');
     expect(emitted).toHaveLength(1);
     expect(emitted[0].domain).toBe('sessions');
     const p = emitted[0].payload;

@@ -151,11 +151,16 @@
       "prettier --write"
     ]
   },
+  "overrides": {
+    "dompurify": "$dompurify",
+    "form-data": ">=4.0.6",
+    "vite": ">=8.0.16"
+  },
   "dependencies": {
     "@inertiajs/vue3": "^3.0.2",
     "@vitejs/plugin-vue": "^6.0.5",
     "csv-parse": "^6.2.1",
-    "dompurify": "^3.3.3",
+    "dompurify": "^3.4.11",
     "framer-motion": "^12.38.0",
     "i18next": "^25.10.5",
     "jspdf": "^4.2.1",

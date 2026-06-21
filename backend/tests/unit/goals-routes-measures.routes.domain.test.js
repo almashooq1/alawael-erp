@@ -48,9 +48,9 @@ describe('domains/goals/routes/measures.routes.js', () => {
     expect(npms.length).toBe(1);
   });
 
-  test('has local dependencies (2)', () => {
+  test('has local dependencies (3)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(2);
+    expect(locals.length).toBe(3);
   });
 
   test('has module.exports', () => {

@@ -370,8 +370,7 @@ router.post('/purchase-orders', authenticate, requireBranchAccess, async (req, r
     // JWT carries id, not _id).
     const { branchId: _b1, branch_id: _b2, ...rest } = req.body || {};
     const branchId =
-      req.branchScope?.branchId ||
-      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+      req.branchScope?.branchId || (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
     const actorId = req.user?.id || req.user?._id;
     const po = await svc.createPurchaseOrder(
       { ...rest, ...(branchId ? { branchId } : {}) },

@@ -241,6 +241,24 @@ function runwayProjection(snapshots) {
  * Gives HR actionable warning: "you have 3 months to hire X Saudis
  * before you lose your green band".
  */
+/**
+ * KPI-facing summary: latest Saudization %, band, and short trend.
+ */
+function summarize(snapshots) {
+  const status = currentStatus(snapshots);
+  const trend = monthlyTrend(snapshots);
+  return {
+    saudiPct: status.saudizationPercentage || 0,
+    currentBand: status.currentBand || null,
+    currentBandLabel: status.currentBandLabel || null,
+    totalEmployees: status.totalEmployees || 0,
+    saudiEmployees: status.saudiEmployees || 0,
+    expatEmployees: status.expatEmployees || 0,
+    trend: trend.slice(-6),
+    hasData: status.hasData,
+  };
+}
+
 function detectRiskAlarm(snapshots) {
   const status = currentStatus(snapshots);
   if (!status.hasData) return { active: false, reason: 'no_data' };
@@ -282,4 +300,5 @@ module.exports = {
   bandHistory,
   runwayProjection,
   detectRiskAlarm,
+  summarize,
 };

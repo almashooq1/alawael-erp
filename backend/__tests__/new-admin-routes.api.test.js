@@ -86,7 +86,16 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (ownServer) await ownServer.stop();
+  if (ownServer) {
+    try {
+      // Force-kill the in-memory mongod; on Windows the graceful SIGINT path
+      // sometimes exceeds MMS's internal timeout and throws even though the
+      // process is eventually killed. The suite's assertions already passed.
+      await ownServer.stop({ force: true });
+    } catch {
+      /* ignore cleanup-only errors */
+    }
+  }
 }, 60_000);
 
 function token(role = 'admin') {

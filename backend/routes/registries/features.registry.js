@@ -379,7 +379,7 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'communication/notifications', notificationEnhancedRoutes);
   dualMount(app, 'branches-enhanced', branchEnhancedRoutes);
   dualMount(app, 'inventory-enhanced', inventoryEnhancedRoutes);
-  // W783 — web-admin INV_BASE is /api/v1/inventory (not inventory-enhanced).
+  // W783 web-admin compatibility alias: /api/v1/inventory/* and /api/inventory/*
   dualMount(app, 'inventory', inventoryEnhancedRoutes);
   dualMount(app, 'quality-enhanced', qualityEnhancedRoutes);
   logger.info(

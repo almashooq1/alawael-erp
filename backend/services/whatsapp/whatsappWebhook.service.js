@@ -775,6 +775,15 @@ async function dispatchBotPlan({
   } catch (_e) {
     /* analytics is best-effort */
   }
+
+  // W1417: capture an unmatched free-text intent for keyword tuning (best-effort,
+  // env-gated). The pure FSM flagged it via plan.unmatched; recording it lets an
+  // admin see what users ask that the bot misses and extend UNIT_KEYWORDS.
+  if (plan.unmatched && process.env.ENABLE_WHATSAPP_BOT_INSIGHTS === 'true') {
+    require('./whatsappBotInsights.service')
+      .recordUnmatched(plan.unmatchedText)
+      .catch(err => logger.warn(`[WhatsApp BotInsights] record failed: ${err.message}`));
+  }
 }
 
 // ─── W1372: escalate a completed bot-flow side effect to staff ──────────────

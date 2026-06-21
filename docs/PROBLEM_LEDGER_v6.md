@@ -1,7 +1,7 @@
 # Problem Ledger v6 — Repair-All-Defects continuation
 
 > Generated: 2026-06-20T22:45:00+03:00  
-> Updated: 2026-06-21T18:15:00+03:00  
+> Updated: 2026-06-21T18:55:00+03:00  
 > Scope: 66666/backend (web-admin repo not present locally)  
 > Charter: CLAUDE.md overrides defaults; invariants in force.
 
@@ -46,14 +46,15 @@
 
 ### Surfaces swept
 
-| Surface                | Result                                                                                                                                                      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                            |
-| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                      |
-| `prod-logs`            | ✅ MongoDB timeout root cause identified as missing compound indexes; indexes added in W1426. P2-4 LLM save failure still pending post-deploy verification. |
-| `structural`           | 6 findings; 3 fixed; 2 ADRs drafted (IEP-044, session-045); 1 remains gated (LLM save).                                                                     |
-| `web-admin`            | ❌ Repo not present locally.                                                                                                                                |
-| `sprint` / `jest-full` | ⚠️ MongoMemoryServer startup fixed (W1425), but full `test:sprint` cannot complete: disk `C:` is 100% full (0 bytes free). MongoDB requires 500 MB free.    |
+| Surface                | Result                                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gates`                | ✅ Clean — all 7 backend pre-push gates pass after wave renumber and force-push.                                                                                                |
+| `phantom-extra`        | ✅ Clean after removing stale `check:phantom-imports` from task script; `check:dormant-modules`, `lint:duplication`, `preflight` pass.                                          |
+| `prod-logs`            | ✅ MongoDB timeout root cause identified as missing compound indexes; indexes added in W1426. P2-4 LLM save failure still pending post-deploy verification.                     |
+| `structural`           | 6 findings; 3 fixed; 2 ADRs drafted (IEP-044, session-045); 1 remains gated (LLM save).                                                                                         |
+| `web-admin`            | ❌ Repo not present locally.                                                                                                                                                    |
+| `sprint` / `jest-full` | ⚠️ MongoMemoryServer startup fixed (W1425), but full `test:sprint` cannot complete: disk `C:` is 100% full (0 bytes free). MongoDB requires 500 MB free.                        |
+| `npm-audit`            | ✅ 0 vulnerabilities in backend, frontend, mobile, supply-chain-management (frontend/backend), services (root/queue-worker/cctv-edge-gateway) after W1433 dependency overrides. |
 
 ---
 
@@ -205,7 +206,7 @@ _“Fixed” includes code fixes and drafted ADRs that resolve the immediate def
    - `958d18c96` docs(repair): W1426
    - `780e3fde9` fix(test): W1425
    - `74230850b` perf(db): W1426
-2. Before push, run the 7 pre-push gates. Current status: ✅ all 7 pass. The repair waves were renumbered (W1423→W1427, W1424→W1428, W1425→W1429, W1426→W1430) and the rewritten branch was force-pushed to `origin/feat/w1406-preflight-followup`.
+2. Before push, run the 7 pre-push gates. Current status: ✅ all 7 pass. The repair waves were renumbered (W1423→W1427, W1424→W1428, W1425→W1429, W1426→W1430) and the rewritten branch was force-pushed to `origin/feat/w1406-preflight-followup`. npm audit vulnerabilities across the monorepo were fixed in W1433 and pushed; all audited packages report 0 vulnerabilities.
 3. After push/merge, run full `test:sprint` in an environment where MongoMemoryServer starts cleanly.
 4. **Unrelated frontend commits reverted** — `999129918` and `6ad46c9f0` were reverted from the repair branch (commits `e0f06f71d` and `f43b3318f`). The landing-page work should be re-applied on its own feature branch.
 5. Do NOT deploy until P0 production DB timeouts are resolved.

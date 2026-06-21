@@ -172,7 +172,9 @@ Test Suites: 1 passed, 1 passed
 
 1. **MongoDB buffering timeouts** root cause addressed at schema level in W1426 (compound indexes added). Production build + verification still required.
 2. **MongoMemoryServer startup FIXED** in W1425. Disk `C:` recovered to ~36 GB free (2026-06-21 09:15 local); full `test:sprint` is now running in background (`bash-w6zvvmzl`).
-3. **Primary journey smoke test** unblocked by disk recovery. First full `test:sprint` run (2 h) progressed through most suites but timed out. It exposed 2 failing linkage tests caused by missing DDD timeline subscribers; those subscribers have been restored and the tests now pass.
+3. **Primary journey smoke test** unblocked by disk recovery. Full `test:sprint` runs keep hitting infrastructure limits (2 h timeout, then 20 min heartbeat loss). They exposed:
+   - W979/W987 missing DDD timeline subscribers — fixed and verified.
+   - `new-admin-routes.api.test.js` MMS cleanup failure on Windows — fixed with force-stop + swallowed cleanup errors; 145/145 pass individually.
 4. **web-admin** surface (`alawael-rehab-platform/apps/web-admin`) was unreachable — repo not present locally.
 5. **IEP and session-model fragmentation** are unfixed architectural debt; they need ADRs before code consolidation.
 

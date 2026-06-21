@@ -57,7 +57,7 @@
 4. **سجّل جلسة** له مع تقدّم هدف → تظهر في مركز الجلسات والتحليلات (إسقاط W1240).
 5. **افتح `/launch-readiness`** في web-admin → راقب الحُكم يبقى GO ببيانات حقيقية.
 
-تحقّق فوري في أي لحظة (قراءة فقط / آمن): `npm run launch:readiness`. تحقّق فعلي عميق: `npm run smoke:launch-spine` و`npm run smoke:clinical-spine` و`npm run smoke:primary-journey` (يُنشئون ويحذفون بياناتهم). للتحقق المحلي بدون prod DB: `npm run smoke:local -- --seed smoke-launch-spine smoke-clinical-spine smoke-primary-journey`.
+تحقّق فوري في أي لحظة (قراءة فقط / آمن): `npm run launch:readiness`. تحقّق فعلي عميق: `npm run smoke:launch-spine` و`npm run smoke:clinical-spine` (يُنشئان ويحذفان بياناتهما).
 
 ---
 

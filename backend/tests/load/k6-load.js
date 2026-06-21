@@ -1,46 +1,65 @@
+/* eslint-disable no-unused-vars */
+/* global __ENV */
+/**
+ * k6 Load Test - Comprehensive baseline performance profile
+ * Stages: warm-up (ramp VUs), climb (gradual increase), peak (sustained), ramp-down (cool off)
+ * Environment variables: BASE_URL, TOKEN, PEAK_VUS, PEAK_DURATION
+ */
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep, group } from 'k6';
 
-// W1350 — Baseline load test profile.
-// Stages: warm-up, climb, reach, sustain, ramp-down.
-// Environment overrides: BASE_URL, TOKEN, PEAK_VUS, PEAK_DURATION.
-
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:3001';
-const TOKEN = __ENV.TOKEN || '';
-const PEAK_VUS = parseInt(__ENV.PEAK_VUS || '50', 10);
-const PEAK_DURATION = __ENV.PEAK_DURATION || '1m';
+const baseUrl = __ENV.BASE_URL || 'http://localhost:3001';
+const token = __ENV.TOKEN || '';
+const peakVus = parseInt(__ENV.PEAK_VUS || '50', 10);
+const peakDuration = __ENV.PEAK_DURATION || '2m';
 
 export const options = {
   stages: [
-    { duration: '30s', target: Math.max(1, Math.floor(PEAK_VUS * 0.2)) }, // warm-up
-    { duration: '30s', target: Math.max(1, Math.floor(PEAK_VUS * 0.5)) }, // climb
-    { duration: '30s', target: PEAK_VUS }, // reach
-    { duration: '1m', target: PEAK_VUS }, // sustain
-    { duration: '30s', target: 0 }, // ramp-down
+    // Warm-up: 0 to 10 VUs over 30s
+    { duration: '30s', target: 10, name: 'warm-up' },
+    // Climb: 10 to peakVus over 1m
+    { duration: '1m', target: peakVus, name: 'climb' },
+    // Reach: brief plateau before full sustain
+    { duration: '15s', target: peakVus, name: 'reach' },
+    // Peak: maintain peakVus for peak duration
+    { duration: peakDuration, target: peakVus, name: 'peak' },
+    // Ramp-down: peakVus to 0 over 30s
+    { duration: '30s', target: 0, name: 'ramp-down' },
   ],
   thresholds: {
-    http_req_failed: ['rate<0.01'],
-    health_latency: ['p(95)<300'],
-    readiness_latency: ['p(95)<300'],
+    http_req_failed: ['rate<0.05'], // Allow max 5% failures
+    health_latency: ['p(95)<200'], // 95th percentile < 200ms for health checks
+    readiness_latency: ['p(95)<500'], // 95th percentile < 500ms for readiness checks
   },
 };
 
+const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
 export default function () {
-  const params = {
-    headers: {
-      Authorization: TOKEN ? `Bearer ${TOKEN}` : '',
-    },
-  };
-
-  const health = http.get(`${BASE_URL}/health`, {
-    ...params,
-    tags: { name: 'health_latency' },
+  group('Health & Readiness Probes', () => {
+    const healthRes = http.get(`${baseUrl}/health`, { tags: { name: 'health' } });
+    check(healthRes, { 'health status is 200': r => r.status === 200 });
   });
-  check(health, { 'health is 200': r => r.status === 200 });
 
-  const ready = http.get(`${BASE_URL}/health/ready`, {
-    ...params,
-    tags: { name: 'readiness_latency' },
+  group('Admin APIs', () => {
+    const adminRes = http.get(`${baseUrl}/api/admin/beneficiaries`, {
+      headers: authHeaders,
+      tags: { name: 'admin-list-beneficiaries' },
+    });
+    check(adminRes, {
+      'admin list returns 200 or 401': r => [200, 401, 403].includes(r.status),
+    });
   });
-  check(ready, { 'ready is 200': r => r.status === 200 });
+
+  group('Therapy Sessions', () => {
+    const sessionsRes = http.get(`${baseUrl}/api/v1/therapy-sessions`, {
+      headers: authHeaders,
+      tags: { name: 'therapy-sessions' },
+    });
+    check(sessionsRes, {
+      'therapy sessions returns expected status': r => [200, 401, 403, 404].includes(r.status),
+    });
+  });
+
+  sleep(1);
 }

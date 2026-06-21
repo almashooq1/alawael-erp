@@ -24,6 +24,9 @@ const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
 const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
 const CareersPage = React.lazy(() => import('./pages/Careers/CareersPage'));
 const PublicVerifyPage = React.lazy(() => import('./pages/blockchain/PublicVerifyPage'));
+const PrivacyPolicy = React.lazy(() => import('./pages/legal/PrivacyPolicy'));
+const TermsConditions = React.lazy(() => import('./pages/legal/TermsConditions'));
+const ForgotPassword = React.lazy(() => import('./pages/legal/ForgotPassword'));
 
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
@@ -182,6 +185,31 @@ function AppRoutes() {
         element={
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <PublicVerifyPage />
+          </Suspense>
+        }
+      />
+      {/* Legal / account-help — public, always accessible */}
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <PrivacyPolicy />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <TermsConditions />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <ForgotPassword />
           </Suspense>
         }
       />

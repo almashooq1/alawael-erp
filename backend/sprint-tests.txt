@@ -872,9 +872,12 @@ __tests__/warehouse-routes-branch-isolation-wave877.test.js
 __tests__/wbci-trigger-engine-wave471.test.js
 __tests__/weighted-progress-link-index-wave243.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
+__tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js
+__tests__/whatsapp-appsecret-proof-wave1425.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js
 __tests__/whatsapp-canonical-consolidation-wave725.test.js
+__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js
 __tests__/whatsapp-contact-group-add-wave756.test.js
 __tests__/whatsapp-contact-group-csv-import-wave751.test.js
 __tests__/whatsapp-contact-group-csv-wave750.test.js
@@ -889,6 +892,7 @@ __tests__/whatsapp-contact-group-search-wave753.test.js
 __tests__/whatsapp-contact-group-sort-wave760.test.js
 __tests__/whatsapp-contact-group-stats-wave749.test.js
 __tests__/whatsapp-contact-group-wave746.test.js
+__tests__/whatsapp-group-branch-isolation-wave1412.test.js
 __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-event-bindings-wave727.test.js
 __tests__/whatsapp-group-broadcast-wave748.test.js
@@ -906,6 +910,7 @@ __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 # Adding a new sprint test: append one line. No 8KB command-line limit
 # One test path per line, blank lines + # comments ignored.
 # Sprint suite test enumeration — referenced by scripts/run-sprint.js.
+tests/unit/ops-alerter.test.js
 __tests__/go-live-checklist-doc-wave1392.test.js
 __tests__/security-compliance-audit-wave1393.test.js
 __tests__/dast-workflow-wave1394.test.js
@@ -918,7 +923,8 @@ __tests__/environment-setup-documentation-wave1400.test.js
 __tests__/performance-load-testing-wave1403.test.js
 __tests__/go-live-deployment-readiness-wave1404.test.js
 __tests__/monitoring-infrastructure-wave1405.test.js
-
+__tests__/ai-recommendations-branch-isolation-wave1409.test.js
+__tests__/alerts-workflow-branch-isolation-wave1409.test.js
 __tests__/audit-trail-unified-wave1257.test.js
 __tests__/behavior-incident-projection-wave1242.test.js
 __tests__/beneficiary-lifecycle-model-alignment-wave0.test.js
@@ -930,6 +936,11 @@ __tests__/careteam-core-linkage-wave1005.test.js
 __tests__/cctv-reports-behavioral-wave1230.test.js
 __tests__/center-ops-wave1269.test.js
 __tests__/clinical-core-linkage-wave1046.test.js
+__tests__/clinical-session-path-wave1379.test.js
+__tests__/clinical-session-ref-drift-wave1424.test.js
+__tests__/compa-ratio-lib-wave1385.test.js
+__tests__/compa-ratio-service-behavioral-wave1385.test.js
+__tests__/dead-scope-axis-read-filter-wave1408.test.js
 __tests__/deferred-islands-core-linkage-wave1075.test.js
 __tests__/diversity-behavioral-wave1199.test.js
 __tests__/driving-rehab-behavioral-wave1022.test.js
@@ -944,6 +955,7 @@ __tests__/home-program-core-linkage-wave1003.test.js
 __tests__/incident-ncr-producer-wave976.test.js
 __tests__/infection-surveillance-behavioral-wave1042.test.js
 __tests__/insurance-claim-core-linkage-wave994.test.js
+__tests__/job-band-mapping-behavioral-wave1385.test.js
 __tests__/legacy-hook-no-hang-behavioral-wave954.test.js
 __tests__/medication-reconciliation-behavioral-wave1041.test.js
 __tests__/next-best-action-behavioral-wave1212.test.js
@@ -957,6 +969,8 @@ __tests__/overdue-scanner-unified-wave1253.test.js
 __tests__/pathway-bundles-behavioral-wave1212.test.js
 __tests__/pathway-bundles-routes-behavioral-wave1219.test.js
 __tests__/pay-equity-behavioral-wave1193.test.js
+__tests__/pay-equity-compa-ratio-routes-wave1385.test.js
+__tests__/phantom-imports-fixes-wave1384.test.js
 __tests__/plateau-detector-unified-wave1255.test.js
 __tests__/postrehab-case-core-linkage-wave987.test.js
 __tests__/pressure-injury-behavioral-wave1011.test.js
@@ -969,6 +983,7 @@ __tests__/reports-analytics-hr-isolation-behavioral-wave961.test.js
 __tests__/residual-islands-core-linkage-wave1120.test.js
 __tests__/screening-core-linkage-wave980.test.js
 __tests__/seed-goal-bank-wave1223.test.js
+__tests__/session-completed-bus-wave1381.test.js
 __tests__/session-therapy-projection-wave1240.test.js
 __tests__/skills-gap-behavioral-wave1201.test.js
 __tests__/sleep-assessment-behavioral-wave1020.test.js
@@ -976,8 +991,15 @@ __tests__/smartreport-clinical-assessments-wave1261.test.js
 __tests__/staff-health-behavioral-wave1125.test.js
 __tests__/talent-grid-behavioral-wave1198.test.js
 __tests__/telehealth-v2-branch-isolation-wave925.test.js
+__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js
 __tests__/unified-care-plan-integrity-wave1252.test.js
 __tests__/unifiedNotifier-in-app-channel-wave0.test.js
 __tests__/user-login-attempts-behavioral-wave1221.test.js
 __tests__/waitlist-core-linkage-wave979.test.js
-__tests__/clinical-session-ref-drift-wave1424.test.js
+__tests__/whatsapp-bot-backnav-wave1423.test.js
+__tests__/whatsapp-bot-core-linkage-wave1408.test.js
+__tests__/whatsapp-bot-handoff-summary-wave1418.test.js
+__tests__/whatsapp-bot-nlu-wave1416.test.js
+__tests__/whatsapp-bot-records-wave1384.test.js
+__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js
+__tests__/whatsapp-bot-usage-wave1419.test.js

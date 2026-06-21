@@ -151,12 +151,13 @@ function validateEnv() {
   return value;
 }
 
-const STRICT_REQUIRED_KEYS = Object.freeze([
-  'MONGODB_URI',
-  'JWT_SECRET',
-  'JWT_REFRESH_SECRET',
-  'ENCRYPTION_KEY',
-  'SESSION_SECRET',
-]);
+/**
+ * Canonical list of env keys enforced in strict (CI / production) mode.
+ * Derived directly from `strictOverrides` so documentation, templates, and
+ * the `env:check` preflight tool cannot drift from the actual schema.
+ * Consumed by scripts/check-env.js and the W1395 / W1398 / W1400 guards.
+ * @type {string[]}
+ */
+const STRICT_REQUIRED_KEYS = Object.keys(strictOverrides.describe().keys);
 
 module.exports = { validateEnv, STRICT_REQUIRED_KEYS };

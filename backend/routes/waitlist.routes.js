@@ -26,11 +26,7 @@
 'use strict';
 
 const express = require('express');
-const {
-  requireBranchAccess,
-  branchFilter,
-  effectiveBranchScope,
-} = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -40,7 +36,12 @@ const beneficiaryService = require('../services/BeneficiaryService');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { WAITLIST_STATUSES } = require('../constants/beneficiary.constants');
 const { escapeRegex } = require('../utils/sanitize');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+// W1384: effectiveBranchScope lives in assertBranchMatch, not
+// branchScope.middleware — the old import was undefined and 500'd at call time.
+const {
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });

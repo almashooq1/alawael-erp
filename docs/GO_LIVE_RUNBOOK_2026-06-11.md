@@ -158,23 +158,16 @@ constraint; adoption is.
 Most of the "verify that…" lines below now have a one-command equivalent. Run
 these (read-only / safe-by-design; all proven LIVE on prod):
 
-| Command                         | Answers                                                                 | Covers                                                                  |
-| ------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `npm run launch:readiness`      | **GO / NOT-YET** (read-only: counts + env)                              | SMTP · branches/users · beneficiary · session-split · seeds · demo-data |
-| `npm run smoke:launch-spine`    | data-ENTRY spine (register→session→form, incl. W1240 projection)        | Phase-B paths 2–4                                                       |
-| `npm run smoke:clinical-spine`  | clinical VALUE-LOOP closes (goal↔measure→thread→NBA→roll-up)           | the golden-thread spine                                                 |
-| `npm run smoke:primary-journey` | business JOURNEY closes (beneficiary→session→attendance→invoice→report) | billing + attendance + W1240 projection                                 |
+| Command                        | Answers                                                          | Covers                                                                  |
+| ------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `npm run launch:readiness`     | **GO / NOT-YET** (read-only: counts + env)                       | SMTP · branches/users · beneficiary · session-split · seeds · demo-data |
+| `npm run smoke:launch-spine`   | data-ENTRY spine (register→session→form, incl. W1240 projection) | Phase-B paths 2–4                                                       |
+| `npm run smoke:clinical-spine` | clinical VALUE-LOOP closes (goal↔measure→thread→NBA→roll-up)    | the golden-thread spine                                                 |
 
 Last live run (prod, 2026-06-16): `launch:readiness` = **✅ GO** — 83 forms /
 8 measures / 72 goal-bank / 105 ICF / 4 branches / 13 users / 18 beneficiaries
 / SMTP configured; 2 owner-gated INFO (demo-data fate, no real sessions yet).
 The smokes create-then-delete their own docs (prod data untouched).
-
-`smoke:primary-journey` is also executed automatically after every production
-deploy (`.github/workflows/deploy-hostinger.yml` — non-blocking, surfaced in the
-workflow summary).
-
-Local validation (no prod DB required): `npm run smoke:local -- --seed smoke-launch-spine smoke-clinical-spine smoke-primary-journey`.
 
 ## Definition of "launched"
 
@@ -183,7 +176,6 @@ Local validation (no prod DB required): `npm run smoke:local -- --seed smoke-lau
 - [ ] A real beneficiary registered via the Arabic form (persists, no 500). _(`smoke:launch-spine`)_
 - [ ] A real therapy session logged against that beneficiary with goal progress. _(`smoke:clinical-spine`)_
 - [ ] The four Phase-B paths pass for a non-demo account. _(`smoke:launch-spine`)_
-- [ ] Primary business journey passes end-to-end (register → session → attendance → invoice → report). \_(`smoke:primary-journey`)
 - [ ] **Session write/read split RESOLVED** (UI-logged `ClinicalSession` reaches Session-Center/episodes/goal-progress, not only the 360) — coordinated with `feat/w928-core-linkage`.
 - [ ] Other canonical models confirmed (no new writes to deprecated IEP/goal models).
 - [ ] Demo-showcase data decision made (kept-and-tagged or cleared).

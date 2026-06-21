@@ -1,192 +1,204 @@
 # WhatsApp Menu Bot — Activation & Operations Runbook
 
-> Feature **W1372** ("مساعد الأوائل الذكي" — the stateful, menu-driven WhatsApp
-> assistant). Shipped in PR #510, merged to `main` (`5d70413d3`) and deployed to
-> production. The code is **live but inert** — it does nothing until the two
-> feature flags are set AND WhatsApp itself is provisioned. This runbook is the
-> single reference for turning it on, verifying it, and operating it.
+> The stateful, menu-driven WhatsApp assistant ("مساعد الأوائل الذكي"). Built
+> across six waves and **deployed to production** (W1366 + W1380–W1383 are live
+> on Hostinger; W1384 + W1408 are merged and deploy once the ops gate is green).
+> The code is **live but inert** until the feature flags are set AND WhatsApp
+> itself is provisioned. This is the single reference for activating, verifying,
+> and operating it.
+
+| Wave  | What it adds                                                                            |
+| ----- | --------------------------------------------------------------------------------------- |
+| W1366 | Stateful FSM: welcome menu (bot disclosure + human escalation) + 10 multi-step flows    |
+| W1380 | 4 new units → 14 total: FAQ, location, satisfaction survey, emergency fast-track        |
+| W1381 | Native interactive WhatsApp menu (tappable category list → sub-list)                    |
+| W1382 | Intelligence: score-based routing, idle-flow timeout reset, usage analytics             |
+| W1383 | Bilingual (Arabic / English), sticky + switchable                                       |
+| W1384 | Completed flows create real DB records (Complaint / NpsResponse / PublicBookingRequest) |
+| W1408 | Bot events linked to the beneficiary's unified-core CareTimeline                        |
 
 ---
 
-## 1. What it is
+## 1. The four feature flags
 
-The pre-existing WhatsApp inbound pipeline was **stateless**: one inbound
-message → one intent classification (`whatsappAI.classifyIntent`) → one reply
-decision (`autoReply.decide`). It had no concept of "which step of a multi-turn
-flow is this sender on".
+All default **OFF**. Set in `backend/.env` (production:
+`/home/alawael/app/backend/.env`). Each requires `ENABLE_WHATSAPP_BOT_MENU`.
 
-W1372 adds a deterministic **finite-state machine** on top:
+| Flag                              | Effect                                                                                        | Safety                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `ENABLE_WHATSAPP_BOT_MENU`        | The menu + all 14 flows. Lookup units **escalate** to staff.                                  | Safe — escalation-only; no PII auto-sent.                                       |
+| `ENABLE_WHATSAPP_BOT_INTERACTIVE` | Main menu sent as a tappable WhatsApp list (categories → sub-lists) instead of numbered text. | Safe — numbered text remains the fallback for old clients.                      |
+| `ENABLE_WHATSAPP_BOT_LIVE_DATA`   | Attendance / session-report / billing units return **real data** to a verified guardian.      | Sensitive — auto-sends clinical/financial data. Enable only after reviewing §5. |
+| `ENABLE_WHATSAPP_BOT_RECORDS`     | Completed flows create real trackable records (§6).                                           | Records into Complaint / NpsResponse / PublicBookingRequest queues.             |
 
-- A **welcome menu** that discloses it is a bot ("بوت افتراضي") and offers human
-  escalation (WhatsApp business-bot policy compliance).
-- A numbered **10-unit main menu**.
-- Per-unit **multi-step flows** (registration, appointment request, complaint,
-  human callback) that collect fields one short question at a time, summarize,
-  ask for confirmation, then hand off to staff.
-- Read-only **lookup units** (attendance, session report, billing) that — when
-  the live-data flag is on — return real data to a verified guardian, otherwise
-  collect the request and escalate.
-- Static **informational units** (center info, home exercises, notifications).
+**Core-timeline linkage (W1408) has no separate flag** — it runs automatically
+when the bot handles a beneficiary-attributable event (it's part of the bot's
+behavior once `ENABLE_WHATSAPP_BOT_MENU` is on; defensive, never blocks a reply).
 
-It runs **before** the stateless `autoReply` classifier and short-circuits it
-when it handles a turn. Any engine error falls through to the old path
-(fail-safe), so enabling it can never make inbound handling worse.
+Recommended rollout: `MENU` first (fully safe) → then `INTERACTIVE` → then
+`RECORDS` → then `LIVE_DATA` (most sensitive) once comfortable.
 
-## 2. The two feature flags
+## 2. Architecture & files
 
-Both default **OFF**. Set in `backend/.env` (production:
-`/home/alawael/app/backend/.env`).
+The engine is **pure** (no DB/network); the dispatcher owns all I/O.
 
-| Flag                                 | Effect                                                                                                                                     | Safety                                                                                                    |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `ENABLE_WHATSAPP_BOT_MENU=true`      | Activates the menu + all 10 flows. Lookup units **escalate** to staff (no sensitive data sent).                                            | Safe — escalation-only; no PII auto-sent.                                                                 |
-| `ENABLE_WHATSAPP_BOT_LIVE_DATA=true` | The attendance / session-report / billing units return **real data** to a verified guardian instead of escalating. Requires the menu flag. | Sensitive — auto-sends clinical/financial data. Enable only after reviewing the authorization model (§5). |
+| File                                               | Role                                                                                                                                                                          |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `intelligence/whatsapp-bot-flow.registry.js`       | Pure constants + helpers: 14-unit menu, per-unit steps, triggers, Arabic-digit menu parsing, score-based keyword routing, interactive category builders (W1381), FAQ content. |
+| `intelligence/whatsapp-bot-flow.service.js`        | The FSM. `handleTurn(flowState, text, ctx) → {reply, nextFlowState, sideEffect, handled, menu}`. Language-aware (W1383), idle-stale + analytics helpers (W1382).              |
+| `intelligence/whatsapp-bot-flow.i18n.js`           | Bilingual overlay (Arabic-first + English layer) + language detection/switch (W1383).                                                                                         |
+| `services/whatsapp/whatsappBotData.service.js`     | Guardian-verified live-data lookups (W1372 Wave 2).                                                                                                                           |
+| `services/whatsapp/whatsappBotRecords.service.js`  | Side-effect → real DB record (W1384).                                                                                                                                         |
+| `services/whatsapp/whatsappBotTimeline.service.js` | Side-effect → unified-core CareTimeline (W1408).                                                                                                                              |
+| `models/WhatsAppConversation.js`                   | `botFlow` subdoc persists the flow cursor (`unit, step, phase, collected, lang`).                                                                                             |
+| `services/whatsapp/whatsappWebhook.service.js`     | Dispatcher: runs the FSM before the stateless autoReply; `dispatchBotPlan()` sends (text or interactive list), persists, creates records, escalates, and timelines.           |
 
-You can run the menu flag alone indefinitely; the live-data flag is an
-independent, later decision.
+## 3. The 14 menu units
 
-## 3. Architecture & files
+| #   | Unit                  | On completion                           |
+| --- | --------------------- | --------------------------------------- |
+| 1   | معلومات عن المركز     | Static info                             |
+| 2   | التسجيل الأولي        | → PublicBookingRequest (or escalate)    |
+| 3   | حجز/تعديل/إلغاء موعد  | → escalate (+ timeline)                 |
+| 4   | تقارير الحضور         | Live data (or escalate)                 |
+| 5   | تقارير الجلسات        | Live data (or escalate)                 |
+| 6   | التمارين المنزلية     | Static per-department exercises         |
+| 7   | الرسوم والفواتير      | Live data (or escalate)                 |
+| 8   | الإشعارات والتنبيهات  | Static info                             |
+| 9   | الشكاوى والملاحظات    | → Complaint (+ timeline)                |
+| 10  | التواصل مع موظف بشري  | → escalate (+ timeline)                 |
+| 11  | الأسئلة الشائعة (FAQ) | Static topic answer                     |
+| 12  | الموقع والاتجاهات     | Static info                             |
+| 13  | تقييم الخدمة (رضا)    | → NpsResponse (+ timeline)              |
+| 14  | 🚨 بلاغ عاجل          | → urgent escalate (+ critical timeline) |
 
-| File                                                   | Role                                                                                                                                                                       |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `backend/intelligence/whatsapp-bot-flow.registry.js`   | Pure constants + helpers: the 10-unit menu, per-unit step definitions, triggers, Arabic-digit-aware menu parsing, free-text keyword routing, yes/no/cancel/skip detection. |
-| `backend/intelligence/whatsapp-bot-flow.service.js`    | The stateful FSM. `handleTurn(flowState, text, ctx) → {reply, nextFlowState, sideEffect, handled}`. No DB / network.                                                       |
-| `backend/services/whatsapp/whatsappBotData.service.js` | The guardian-verified live-data layer (§5).                                                                                                                                |
-| `backend/models/WhatsAppConversation.js`               | `botFlow` subdocument persists each sender's flow cursor (`{unit, step, phase, collected}`).                                                                               |
-| `backend/services/whatsapp/whatsappWebhook.service.js` | The dispatcher: runs the FSM, sends replies, persists state, escalates side effects.                                                                                       |
+Senders can type a number, a keyword (e.g. "أبغى أحجز موعد"), tap an interactive
+row, or "القائمة" to return to the menu. Typing "english" / "عربي" switches
+language (sticky). An abandoned multi-step flow auto-resets after 6h.
 
-State is persisted per phone on `WhatsAppConversation.botFlow`; `unit: null`
-means idle (between flows).
+## 4. Interactive menu (W1381)
 
-## 4. The 10 menu units
+When `ENABLE_WHATSAPP_BOT_INTERACTIVE` is on, the main menu is a WhatsApp **list**
+of 7 categories (the 14 units exceed WhatsApp's 10-row cap, so it's two-level);
+tapping a category sends a sub-list of its units. Reply ids are namespaced
+`BOTNAV:cat:*` / `BOTNAV:unit:*`. Numbered text remains the fallback.
 
-| #   | Unit                    | Behavior                              | On completion                   |
-| --- | ----------------------- | ------------------------------------- | ------------------------------- |
-| 1   | معلومات عن المركز       | Static info                           | —                               |
-| 2   | التسجيل الأولي          | Collects 8 fields → summary → confirm | Escalate (registration request) |
-| 3   | حجز/تعديل/إلغاء موعد    | Collects action + details → confirm   | Escalate (appointment request)  |
-| 4   | تقارير الحضور والانصراف | Collects name + date                  | Live data (or escalate)         |
-| 5   | تقارير الجلسات          | Collects name + dept + period         | Live data (or escalate)         |
-| 6   | التمارين المنزلية       | Collects name + dept                  | Static per-department exercises |
-| 7   | الرسوم والفواتير        | Collects guardian + name              | Live data (or escalate)         |
-| 8   | الإشعارات والتنبيهات    | Static info                           | —                               |
-| 9   | الشكاوى والملاحظات      | Collects 5 fields → summary → confirm | Escalate (complaint)            |
-| 10  | التواصل مع موظف بشري    | Collects 4 fields → summary → confirm | Escalate (callback request)     |
-
-Senders can type a number, a keyword (e.g. "أبغى أحجز موعد"), or "القائمة" to
-return to the menu at any time.
-
-## 5. Authorization model for live data (privacy-critical)
+## 5. Live-data authorization (privacy-critical)
 
 Units 4 / 5 / 7 send beneficiary data **only** when `ENABLE_WHATSAPP_BOT_LIVE_DATA`
-is on AND the request passes a strict guardian-authorization gate:
+is on AND:
 
-1. The inbound phone must resolve to a `FamilyMember` record that is an
-   **authorized guardian** (`portalAccess.enabled`, `isLegalGuardian`, or
-   `isPrimaryContact`). A bare secondary contact does not qualify.
-2. The data returned is **always** for a beneficiary in the phone's **own**
-   authorized set. The typed name only disambiguates among that phone's children
-   (siblings). If the phone has several children and the name doesn't match
-   exactly one, the bot **declines and escalates** — it never looks a stranger's
-   child up by name.
-3. Every query is keyed by an authorized `beneficiaryId`, so cross-branch
-   leakage is structurally impossible.
+1. The inbound phone resolves to a `FamilyMember` that is an **authorized
+   guardian** (`portalAccess.enabled` / `isLegalGuardian` / `isPrimaryContact`).
+2. Data is **always** for a beneficiary in the phone's **own** authorized set;
+   the typed name only disambiguates among that phone's children. Ambiguous /
+   unverified → decline + escalate (never look a stranger's child up by name).
+3. Every query is keyed by an authorized `beneficiaryId` → cross-branch leakage
+   is structurally impossible.
 
-When the gate fails (unverified phone, ambiguous child, no data, model
-unavailable) the bot falls back to escalation — staff follow up manually.
+> ⚠️ Related open finding: **W1407** (PR #526) reported a cross-tenant leak in the
+> staff-facing `/conversations` read route (scopes by an unset `organizationId`).
+> Coordinate the owner's branch-scope fix before exposing WhatsApp externally.
 
-## 6. Activation procedure
+## 6. Records (W1384) — `ENABLE_WHATSAPP_BOT_RECORDS`
+
+Completed flows create real trackable records (else escalation only). Clinical
+condition is never guessed — an unclear diagnosis maps to the schema's
+"غير متأكد — أحتاج تقييماً" with the raw text in `notes`.
+
+| Flow         | Record                                                                 |
+| ------------ | ---------------------------------------------------------------------- |
+| complaint    | `Complaint` (source=parent)                                            |
+| satisfaction | `NpsResponse` (1–5 → 0–10 NPS + bucket; needs a phone-linked guardian) |
+| registration | `PublicBookingRequest` (source=whatsapp)                               |
+
+Staff are still notified, with the created record id attached.
+
+## 7. Core-timeline linkage (W1408)
+
+Beneficiary-attributable events land on the beneficiary's unified `CareTimeline`
+(via a direct `timelineService.addEvent`, only when the phone resolves to an
+authorized-guardian beneficiary):
+
+| Event        | CareTimeline eventType (category / severity) |
+| ------------ | -------------------------------------------- |
+| complaint    | `note_added` (communication / warning)       |
+| emergency    | `red_flag_raised` (clinical / **critical**)  |
+| callback     | `family_contact` (communication)             |
+| satisfaction | `nps_response_recorded` (communication)      |
+| appointment  | `note_added` (administrative)                |
+
+Registration (no beneficiary yet) + read-only lookups are not timelined.
+
+## 8. Activation procedure
 
 ### Step 1 — Provision WhatsApp (Meta) — owner task
 
-This is external setup in Meta Business Manager (the bot does nothing until it
-is done). Obtain and set these in `backend/.env`:
+Set in `backend/.env` (the bot does nothing until WhatsApp is connected):
 
-| Key                       | Source                                               |
-| ------------------------- | ---------------------------------------------------- |
-| `WHATSAPP_API_TOKEN`      | Meta system-user permanent token                     |
-| `WHATSAPP_PHONE_ID`       | Phone-number-id from the Meta dashboard              |
-| `WHATSAPP_BUSINESS_ID`    | Meta WhatsApp Business Account ID                    |
-| `WHATSAPP_WEBHOOK_SECRET` | Meta "App Secret" (HMAC of inbound webhooks)         |
-| `WHATSAPP_VERIFY_TOKEN`   | A value you choose; entered in Meta's webhook config |
+| Key                       | Source                            |
+| ------------------------- | --------------------------------- |
+| `WHATSAPP_API_TOKEN`      | Meta system-user permanent token  |
+| `WHATSAPP_PHONE_ID`       | Phone-number-id from Meta         |
+| `WHATSAPP_BUSINESS_ID`    | Meta WhatsApp Business Account ID |
+| `WHATSAPP_WEBHOOK_SECRET` | Meta App Secret (X-Hub HMAC)      |
+| `WHATSAPP_VERIFY_TOKEN`   | A value you choose                |
 
-Then in Meta's dashboard, register the webhook callback URL
-`https://alaweal.org/api/whatsapp/webhook` with the same verify token, and
-subscribe to `messages`. Approve message templates for sends outside the 24-hour
-service window. (See also `docs/whatsapp/SETUP_AND_OTP.md`.)
+Register the webhook `https://alaweal.org/api/whatsapp/webhook` in Meta with the
+verify token, subscribe to `messages`, and approve message templates.
 
-### Step 2 — Enable the flags
-
-In `backend/.env` on production:
+### Step 2 — Enable flags + restart
 
 ```env
 ENABLE_WHATSAPP_BOT_MENU=true
-# Optional, only after reviewing §5:
+# optionally, after review:
+ENABLE_WHATSAPP_BOT_INTERACTIVE=true
+ENABLE_WHATSAPP_BOT_RECORDS=true
 ENABLE_WHATSAPP_BOT_LIVE_DATA=true
 ```
 
-### Step 3 — Restart & verify
-
 ```bash
-# on the prod host, as the app user
-pm2 restart alawael-api --update-env   # --update-env so the new .env is read
-
-# verify the service is up and WhatsApp is enabled
-curl -s http://localhost:5000/api/whatsapp/status   # (needs an auth token)
-
-# webhook reachability (Meta will call this)
-curl -s "http://localhost:5000/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=<VERIFY_TOKEN>&hub.challenge=test"
-# → should echo "test" when the verify token matches
+pm2 restart alawael-api --update-env   # --update-env re-reads .env
+curl -s "http://localhost:5000/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=<VERIFY_TOKEN>&hub.challenge=test"  # echoes "test"
 ```
 
-Then send a WhatsApp message to the business number (e.g. "القائمة") and confirm
-the welcome menu replies.
+Send "القائمة" to the business number → expect the welcome menu.
 
-## 7. Operations
+## 9. Operations
 
-- **Escalations** land in the staff "pending review" queue: a completed flow with
-  a side effect sets `WhatsAppConversation.requiresHumanReview = true`,
-  `status = 'pending_review'`, and `escalationReason`, and fires an in-app
-  notification (`category: 'whatsapp_bot_request'`) carrying the collected
-  payload.
-- **Side-effect kinds**: `create_registration`, `create_appointment_request`,
-  `lookup_attendance`, `lookup_session_report`, `lookup_billing`,
-  `create_complaint`, `callback_request`. A future wave can branch on these to
-  create dedicated records (e.g. `ComplaintEnhanced`) instead of escalating.
-- **Where staff see it**: the existing WhatsApp conversations dashboard /
-  pending-review queue (`GET /api/whatsapp/conversations/pending-review`).
+- **Escalations** → staff pending-review queue (`requiresHumanReview=true`,
+  `status='pending_review'`, in-app notification `category:'whatsapp_bot_request'`,
+  carrying any created record id). Emergencies go straight to `escalated` +
+  critical.
+- **Records** land in their own queues (Complaint / NpsResponse / admissions).
+- **Timeline** — bot events appear on the beneficiary's `CareTimeline`.
+- **Analytics** — parseable `[WhatsApp BotAnalytics] event=… unit=…` log lines.
 
-## 8. Verification & tests
+## 10. Tests
 
 ```bash
 cd backend
 npx jest --config=jest.config.js \
   __tests__/whatsapp-bot-flow-menu-wave1372.test.js \
-  __tests__/whatsapp-bot-data-lookup-wave1372.test.js --no-coverage
-# 46 tests: FSM static + behavioral walk, authZ gate, formatters, parsers.
+  __tests__/whatsapp-bot-data-lookup-wave1372.test.js \
+  __tests__/whatsapp-bot-new-units-wave1380.test.js \
+  __tests__/whatsapp-bot-interactive-menu-wave1381.test.js \
+  __tests__/whatsapp-bot-intelligence-wave1382.test.js \
+  __tests__/whatsapp-bot-bilingual-wave1383.test.js \
+  __tests__/whatsapp-bot-records-wave1384.test.js \
+  __tests__/whatsapp-bot-core-linkage-wave1408.test.js --no-coverage
 ```
 
-Both suites are enumerated in `backend/sprint-tests.txt` (so they run in the
-sharded deploy gate) and the CI `paths:` triggers.
+All enumerated in `sprint-tests.txt`; the full WhatsApp suite is green.
 
-## 9. Rollback
+## 11. Rollback
 
-To disable instantly, unset (or set to anything other than `true`) the flags and
-restart:
+Unset (or set ≠ `true`) the flags and `pm2 restart alawael-api --update-env`.
+Inbound handling reverts to the prior stateless auto-reply. No data migration;
+`botFlow` state is simply ignored while the menu flag is off.
 
-```bash
-# edit backend/.env → remove/false the two ENABLE_WHATSAPP_BOT_* lines
-pm2 restart alawael-api --update-env
-```
+## 12. Production reference
 
-Inbound handling reverts to the prior stateless auto-reply behavior. No data
-migration is involved; `botFlow` state on existing conversations is simply
-ignored while the menu flag is off.
-
-## 10. Production reference
-
-- Host: `ssh -i ~/.ssh/alawael_deploy root@72.60.84.56`
-- App dir: `/home/alawael/app/backend` (runs as the `alawael` user, pm2 process
-  `alawael-api`, port 5000 behind nginx).
-- Env: `backend/.env`, loaded via dotenv. `pm2 restart … --update-env` is
-  required for `.env` changes to take effect (a plain reload does not re-read it).
+- Host: `ssh -i ~/.ssh/alawael_deploy root@72.60.84.56` (Hostinger VPS `srv995033`).
+- App: `/home/alawael/app/backend`, runs as `alawael`, pm2 `alawael-api`, port 5000
+  behind nginx serving `alaweal.org`. `pm2 restart … --update-env` to apply `.env`.

@@ -5,7 +5,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/inventory/inventory-enhanced.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
-const { escapeRegex } = require('../utils/escapeRegex');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, requireBranchAccess, async (req, res) => {
@@ -370,8 +370,7 @@ router.post('/purchase-orders', authenticate, requireBranchAccess, async (req, r
     // JWT carries id, not _id).
     const { branchId: _b1, branch_id: _b2, ...rest } = req.body || {};
     const branchId =
-      req.branchScope?.branchId ||
-      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+      req.branchScope?.branchId || (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
     const actorId = req.user?.id || req.user?._id;
     const po = await svc.createPurchaseOrder(
       { ...rest, ...(branchId ? { branchId } : {}) },

@@ -237,6 +237,28 @@ class SessionsService extends BaseService {
       duration: duration || session.duration,
     });
 
+    // W1381 — also publish on the INTEGRATION BUS. The line above is a local
+    // BaseService EventEmitter emit; the `sessions:completed → timeline:record`
+    // subscriber (CareTimeline, since W1240) listens on the integrationBus, and
+    // the two are NOT bridged for SessionsService — so completing a session left
+    // /care/360 empty (verified live on prod: PATCH /:id/status completed → 0
+    // timeline rows). This direct publish closes the W387 cross-bus gap.
+    // completeSession persists via findByIdAndUpdate (no doc .save()), so the
+    // ClinicalSession W1379 model hook does not fire here — no double-emit.
+    try {
+      const { integrationBus } = require('../../../integration/systemIntegrationBus');
+      integrationBus.publish('sessions', 'session.completed', {
+        sessionId: String(session._id),
+        beneficiaryId: session.beneficiaryId ? String(session.beneficiaryId) : null,
+        ...(session.episodeId ? { episodeId: String(session.episodeId) } : {}),
+        ...(session.branchId ? { branchId: String(session.branchId) } : {}),
+        sessionType: session.type || null,
+        duration: duration || session.duration || null,
+      });
+    } catch (_err) {
+      /* best-effort: never fail the completion on bus failure */
+    }
+
     await projectClinicalSession(session, { logger: this.logger });
     return session;
   }

@@ -41,12 +41,29 @@ function cfg() {
 function request(method, path, body = null, token = null) {
   return new Promise((resolve, reject) => {
     const payload = body ? JSON.stringify(body) : null;
+    const accessToken = token || cfg().token;
+    // When the Meta app has "Require app secret" enabled (default for new apps),
+    // EVERY server-side Graph call must carry appsecret_proof = HMAC-SHA256 of the
+    // access token keyed by the app secret — otherwise Meta rejects with
+    // "API calls from the server require an appsecret_proof argument" (code 100),
+    // so every send/template/media call fails. Append it when an app secret is
+    // configured (WHATSAPP_WEBHOOK_SECRET). Harmless when the toggle is off, and
+    // Meta recommends it regardless. W1425 — found live during activation.
+    let apiPath = `/v21.0${path}`;
+    const appSecret = cfg().webhookSecret;
+    if (appSecret && accessToken) {
+      const proof = require('crypto')
+        .createHmac('sha256', appSecret)
+        .update(accessToken)
+        .digest('hex');
+      apiPath += (apiPath.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
+    }
     const options = {
       hostname: 'graph.facebook.com',
-      path: `/v21.0${path}`,
+      path: apiPath,
       method,
       headers: {
-        Authorization: `Bearer ${token || cfg().token}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
       },
@@ -421,9 +438,19 @@ async function markAsRead(messageId) {
  * Call this from GET /api/whatsapp/webhook
  */
 function verifyWebhook(req, res) {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+  // Meta sends the verification params as DOTTED query keys
+  // (hub.mode / hub.verify_token / hub.challenge). Two things break the naive
+  // `req.query['hub.mode']` read: (1) the global request-sanitizer
+  // (middleware/requestValidation.sanitizeInput) rebuilds req.query, and (2) the
+  // qs parser can nest dotted keys (`hub.mode` -> req.query.hub.mode). Together
+  // they made `req.query['hub.mode']` come back undefined, so EVERY Meta
+  // verification handshake 403'd (W1424 — found on prod via the live webhook).
+  // Parse straight from the raw URL (immune to both), with req.query fallbacks.
+  const raw = new URLSearchParams((req.originalUrl || req.url || '').split('?')[1] || '');
+  const q = req.query || {};
+  const mode = raw.get('hub.mode') ?? q['hub.mode'] ?? q.hub?.mode;
+  const token = raw.get('hub.verify_token') ?? q['hub.verify_token'] ?? q.hub?.verify_token;
+  const challenge = raw.get('hub.challenge') ?? q['hub.challenge'] ?? q.hub?.challenge;
 
   // Meta sends hub.verify_token equal to the value we configured in the
   // dashboard. WHATSAPP_VERIFY_TOKEN is the canonical name; we fall back to

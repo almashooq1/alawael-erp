@@ -498,6 +498,24 @@ const CANCEL_TRIGGERS = Object.freeze([
   'cancel',
 ]);
 
+// W1423 — step BACK one question mid-flow without losing progress (distinct from
+// CANCEL, which aborts the whole flow). Deliberately DISTINCTIVE multi-word
+// phrases so a back word inside a normal answer never fires (e.g. "إلغاء" stays a
+// valid unit-3 action). Matched as substrings via matchesAny.
+const BACK_TRIGGERS = Object.freeze([
+  'رجوع خطوة',
+  'رجوع خطوه',
+  'الخطوة السابقة',
+  'الخطوه السابقه',
+  'ارجع خطوة',
+  'ارجع خطوه',
+  'تعديل السابق',
+  'صحح الاجابة',
+  'صحح الاجابه',
+  'go back',
+  'previous step',
+]);
+
 const YES_TOKENS = Object.freeze([
   'نعم',
   'ايوه',
@@ -524,7 +542,7 @@ const SKIP_TOKENS = Object.freeze(['-', '—', 'تخطي', 'تخطى', 'skip', '
 const UNIT_KEYWORDS = Object.freeze({
   info: ['معلومات', 'خدماتكم', 'وش تقدمون', 'وش خدماتكم', 'عن المركز', 'الفئات', 'services'],
   register: ['تسجيل', 'ملف جديد', 'مستفيد جديد', 'اسجل', 'التحاق', 'register', 'enroll'],
-  appointment: ['موعد', 'احجز', 'حجز', 'تقييم', 'appointment', 'booking'],
+  appointment: ['موعد', 'مواعيد', 'احجز', 'حجز', 'تقييم', 'appointment', 'booking'],
   attendance: ['حضور', 'انصراف', 'حضوره', 'غياب', 'attendance'],
   session_reports: [
     'تقرير الجلسة',
@@ -550,8 +568,31 @@ const UNIT_KEYWORDS = Object.freeze({
   human: ['موظف', 'انسان', 'بشري', 'اخصائي', 'تكلم مع', 'human', 'agent', 'representative'],
   // W1380 — new service units
   faq: ['اسئلة شائعة', 'سؤال', 'استفسار عام', 'faq', 'questions'],
-  location: ['موقع', 'العنوان', 'عنوانكم', 'وين انتم', 'كيف اوصل', 'الاتجاهات', 'خريطة', 'location', 'address', 'directions', 'map'],
-  satisfaction: ['تقييم', 'قيم', 'رضا', 'استبيان', 'رايي', 'رأيي', 'feedback', 'satisfaction', 'survey', 'rating'],
+  location: [
+    'موقع',
+    'العنوان',
+    'عنوانكم',
+    'وين انتم',
+    'كيف اوصل',
+    'الاتجاهات',
+    'خريطة',
+    'location',
+    'address',
+    'directions',
+    'map',
+  ],
+  satisfaction: [
+    'تقييم',
+    'قيم',
+    'رضا',
+    'استبيان',
+    'رايي',
+    'رأيي',
+    'feedback',
+    'satisfaction',
+    'survey',
+    'rating',
+  ],
   emergency: ['طارئ', 'طوارئ', 'عاجل', 'بلاغ عاجل', 'مستعجل', 'emergency', 'urgent'],
 });
 
@@ -587,6 +628,8 @@ function normalize(s) {
     .replace(/[ً-ْ]/g, '') // harakat
     .replace(/ـ/g, '') // tatweel
     .replace(/[أإآٱ]/g, 'ا') // أ إ آ ٱ → ا
+    .replace(/ؤ/g, 'و') // W1416: ؤ → و (مسؤول/مسئول variance)
+    .replace(/ئ/g, 'ي') // W1416: ئ → ي
     .replace(/ى/g, 'ي') // ى → ي
     .replace(/ة/g, 'ه') // ة → ه
     .replace(/[٠-٩۰-۹]/g, '') // (already folded; safety)
@@ -611,6 +654,11 @@ function isMenuTrigger(text) {
 
 function isCancelTrigger(text) {
   return matchesAny(text, CANCEL_TRIGGERS);
+}
+
+/** W1423 — true when the message asks to step back one question (not cancel). */
+function isBackTrigger(text) {
+  return matchesAny(text, BACK_TRIGGERS);
 }
 
 function isYes(text) {
@@ -708,22 +756,100 @@ function resolveFaqAnswer(topicText) {
 }
 
 /**
- * Score a message against every unit's keyword catalogue (W1382 — smarter NLU).
- * Each matched keyword contributes its length (longer keyword = stronger, more
- * specific signal), so the BEST-matching unit wins rather than the first one in
- * iteration order. Returns `{ unitId, score }` for the top match, or null.
+ * Strip ONE leading definite article / conjunction-preposition so an inflected
+ * surface form reduces toward its stem for the fuzzy fallback (W1416). Very
+ * conservative — only the highest-frequency, lowest-ambiguity prefixes, and only
+ * when ≥3 chars remain (never over-strips a short word into noise). Pure. EXACT
+ * substring matching is unaffected; this only feeds the typo-tolerant fallback.
+ * @param {string} tok normalized token
+ * @returns {string}
+ */
+function lightStem(tok) {
+  if (!tok) return tok;
+  const art = tok.match(/^(?:وال|بال|فال|كال|لل|ال)(.{3,})$/); // article (± leading particle)
+  if (art) return art[1];
+  const part = tok.match(/^[وفبكل](.{3,})$/); // single leading particle و/ف/ب/ك/ل
+  return part ? part[1] : tok;
+}
+
+/**
+ * True when Levenshtein(a, b) ≤ 1 — catches a single inserted / deleted /
+ * substituted letter, the dominant single-char Arabic typo class that
+ * normalization cannot fold (e.g. "حضوور"→"حضور", "تسجل"→"تسجيل"). Early-exits;
+ * pure. A length gap > 1 returns false immediately.
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function editDistanceLE1(a, b) {
+  if (a === b) return true;
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  if (la === lb) {
+    let diffs = 0;
+    for (let i = 0; i < la; i++) {
+      if (a[i] !== b[i] && ++diffs > 1) return false;
+    }
+    return diffs === 1;
+  }
+  // off-by-one length: align the shorter inside the longer allowing one skip.
+  const s = la < lb ? a : b;
+  const l = la < lb ? b : a;
+  let i = 0;
+  let j = 0;
+  let skipped = false;
+  while (i < s.length && j < l.length) {
+    if (s[i] === l[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (skipped) return false;
+    skipped = true;
+    j++; // consume the extra char in the longer string
+  }
+  return true;
+}
+
+/**
+ * Score a message against every unit's keyword catalogue (W1382 + W1416 smarter
+ * NLU). An EXACT substring match scores the keyword's length (strongest, precise
+ * signal). When a single-word keyword (≥4 chars) has NO exact hit, a typo-tolerant
+ * fallback adds HALF weight if any lightly-stemmed message token equals it or is
+ * within one edit — so real-world typos / prefixed forms still route, while exact
+ * matches always dominate. Returns `{ unitId, score }` for the top match, or null.
  */
 function scoreUnits(text) {
   const n = normalize(text);
   if (!n) return null;
+  const tokens = n
+    .split(' ')
+    .map(lightStem)
+    .filter(t => t.length >= 3);
   let best = null;
   for (const [unitId, keywords] of Object.entries(UNIT_KEYWORDS)) {
     let score = 0;
     for (const kw of keywords) {
       const nk = normalize(kw);
       if (!nk) continue;
-      const hit = nk.length <= 2 ? n === nk : n.includes(nk);
-      if (hit) score += nk.length;
+      if (nk.length <= 2) {
+        if (n === nk) score += nk.length;
+        continue;
+      }
+      if (n.includes(nk)) {
+        score += nk.length; // exact substring — strongest signal
+        continue;
+      }
+      // W1416 typo / inflection fallback: single-word keywords only, half weight.
+      if (nk.length >= 4 && !nk.includes(' ')) {
+        for (const t of tokens) {
+          if (t === nk || editDistanceLE1(t, nk)) {
+            score += Math.ceil(nk.length / 2);
+            break;
+          }
+        }
+      }
     }
     if (score > 0 && (!best || score > best.score)) best = { unitId, score };
   }
@@ -755,6 +881,55 @@ function resolveDepartmentKey(text) {
   return null;
 }
 
+/**
+ * W1418 — derive a SHORT Arabic label from a step prompt: the question stem
+ * before the first colon / parenthesis (e.g. "اليوم أو التاريخ المفضل (مثال…):"
+ * → "اليوم أو التاريخ المفضل"). Pure.
+ * @param {string} prompt
+ * @returns {string}
+ */
+function shortLabel(prompt) {
+  if (!prompt || typeof prompt !== 'string') return '';
+  return prompt.split(/[(:：؟]/)[0].trim();
+}
+
+/**
+ * Map of collected-field key → short Arabic label, auto-built from every unit's
+ * step prompts (first definition wins; keys are consistent across units). Used
+ * to render the staff escalation summary with human labels instead of raw keys.
+ */
+const COLLECTED_LABELS = Object.freeze(
+  UNITS.reduce((map, u) => {
+    for (const s of u.steps || []) {
+      if (s && s.key && !map[s.key]) map[s.key] = shortLabel(s.prompt);
+    }
+    return map;
+  }, {})
+);
+
+/**
+ * W1418 — render a clean, human-readable Arabic handoff card for staff from a
+ * completed bot side effect, instead of a raw JSON dump. Pure + testable.
+ * @param {{kind:string, collected?:object}} sideEffect
+ * @param {{senderName?:string, phone?:string, reason?:string}} [opts]
+ * @returns {string}
+ */
+function formatEscalationSummary(sideEffect, opts = {}) {
+  const reason = opts.reason || (sideEffect && sideEffect.kind) || 'طلب عبر بوت الواتساب';
+  const lines = [`📋 ${reason}`];
+  const who = [opts.senderName, opts.phone].filter(Boolean).join(' — ');
+  if (who) lines.push(`👤 ${who}`);
+  const collected = (sideEffect && sideEffect.collected) || {};
+  let any = false;
+  for (const [k, v] of Object.entries(collected)) {
+    if (v === undefined || v === null || String(v).trim() === '') continue;
+    lines.push(`• ${COLLECTED_LABELS[k] || k}: ${String(v).trim()}`);
+    any = true;
+  }
+  if (!any) lines.push('• (لا توجد تفاصيل مُجمّعة)');
+  return lines.join('\n');
+}
+
 module.exports = {
   CENTER,
   SIDE_EFFECT,
@@ -774,6 +949,7 @@ module.exports = {
   CATEGORY_BY_ID,
   MENU_TRIGGERS,
   CANCEL_TRIGGERS,
+  BACK_TRIGGERS,
   YES_TOKENS,
   NO_TOKENS,
   SKIP_TOKENS,
@@ -784,13 +960,19 @@ module.exports = {
   matchesAny,
   isMenuTrigger,
   isCancelTrigger,
+  isBackTrigger,
   isYes,
   isNo,
   isSkip,
   parseMenuSelection,
   resolveUnitId,
   scoreUnits,
+  lightStem,
+  editDistanceLE1,
   resolveDepartmentKey,
+  shortLabel,
+  COLLECTED_LABELS,
+  formatEscalationSummary,
   resolveFaqAnswer,
   buildMainMenuList,
   buildCategoryList,

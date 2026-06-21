@@ -1,0 +1,132 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+route:
+  receiver: 'default'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  routes:
+    # Critical alerts → PagerDuty + Slack
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical'
+      group_wait: 0s
+      repeat_interval: 1h
+      continue: true
+
+    # API performance critical → Immediate Slack
+    - match:
+        alertname: 'CriticalAPILatency'
+      receiver: 'slack-critical'
+      group_wait: 0s
+      repeat_interval: 1h
+
+    # Database critical → Email + Slack
+    - match_re:
+        alertname: 'MongoDB.*|RedisDown'
+      receiver: 'email-ops'
+      group_wait: 0s
+      repeat_interval: 2h
+
+    # Warning alerts → Email only
+    - match:
+        severity: warning
+      receiver: 'email-ops'
+      group_wait: 30s
+      repeat_interval: 6h
+
+    # Backup alerts → Slack #ops
+    - match_re:
+        alertname: 'Backup.*|DiskSpace.*'
+      receiver: 'slack-ops'
+      group_wait: 10s
+      repeat_interval: 4h
+
+receivers:
+  - name: 'default'
+    slack_configs:
+      - channel: '#alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        send_resolved: true
+
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#critical-alerts'
+        title: '🔴 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          *Status*: {{ .Status }}
+          *Service*: {{ .GroupLabels.service }}
+          {{ range .Alerts.Firing }}
+          • {{ .Labels.instance }}: {{ .Annotations.description }}
+          {{ end }}
+        color: 'danger'
+        send_resolved: true
+        actions:
+          - type: button
+            text: 'View Grafana'
+            url: 'http://localhost:3010/d/alawael-dashboard'
+          - type: button
+            text: 'Runbook'
+            url: 'https://docs.alawael.local/runbooks/'
+
+  - name: 'slack-ops'
+    slack_configs:
+      - channel: '#ops-alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}'
+        details:
+          firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+          resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
+    slack_configs:
+      - channel: '#pagerduty'
+        title: '🚨 PagerDuty: {{ .GroupLabels.alertname }}'
+        text: 'Incident triggered - check PagerDuty for details'
+        color: 'danger'
+
+  - name: 'email-ops'
+    email_configs:
+      - to: '${OPS_ALERT_EMAIL}'
+        from: 'alerts@alawael.local'
+        smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+        auth_username: '${SMTP_USER}'
+        auth_password: '${SMTP_PASSWORD}'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        html: |
+          <h3>{{ .GroupLabels.alertname }}</h3>
+          <p><strong>Status:</strong> {{ .Status }}</p>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <hr/>
+          {{ range .Alerts }}
+            <p>{{ .Annotations.description }}</p>
+          {{ end }}
+
+inhibit_rules:
+  # Inhibit warning if critical is firing for same alert
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service', 'instance']
+
+  # Don't alert on pod restart if node is down
+  - source_match:
+      alertname: 'NodeDown'
+    target_match_re:
+      alertname: 'Pod.*'
+    equal: ['node']
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

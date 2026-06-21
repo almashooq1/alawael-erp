@@ -185,6 +185,7 @@ const clinicalSessionSchema = new mongoose.Schema(
     assessment: String, // A — تحليل الأخصائي
     plan: String, // P — الخطة التالية
     soapNotes: String, // Combined SOAP
+    documentedAt: Date, // W1380 — when SOAP documentation was last saved
 
     // ── Clinical Observations ──────────────────────────────────────────
     observations: {
@@ -324,6 +325,36 @@ clinicalSessionSchema.pre('save', function () {
     this.actualDurationMinutes = Math.round(
       (this.actualEndTime - this.actualStartTime) / (1000 * 60)
     );
+  }
+});
+
+// ── W1379 core-linkage: emit when a session is COMPLETED so it surfaces on
+// the unified CareTimeline. The subscriber `sessions:completed → timeline:record`
+// (pattern `sessions.session.completed`) has been wired since W1240, but the
+// PRODUCER side never existed — ClinicalSession emitted nothing, so the /care/360
+// timeline stayed empty even with real sessions (the W349/W1240 "subscriber wired
+// but never fired" class). Native pre-compile hooks (W933 lesson); best-effort —
+// never blocks the save. Gated on a status→completed TRANSITION so re-saves of an
+// already-completed session never re-emit.
+clinicalSessionSchema.pre('save', function flagSessionCompleted() {
+  this.$__sessionCompleted =
+    this.status === 'completed' && (this.isNew || this.isModified('status'));
+});
+
+clinicalSessionSchema.post('save', function emitSessionCompleted(doc) {
+  if (!doc.$__sessionCompleted || !doc.beneficiaryId) return;
+  try {
+    const { integrationBus } = require('../../../integration/systemIntegrationBus');
+    integrationBus.publish('sessions', 'session.completed', {
+      sessionId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId),
+      ...(doc.episodeId ? { episodeId: String(doc.episodeId) } : {}),
+      ...(doc.branchId ? { branchId: String(doc.branchId) } : {}),
+      sessionType: doc.type || doc.specialty || null,
+      completedAt: doc.actualEndTime || new Date(),
+    });
+  } catch (_err) {
+    /* best-effort: never block the save on bus failure */
   }
 });
 

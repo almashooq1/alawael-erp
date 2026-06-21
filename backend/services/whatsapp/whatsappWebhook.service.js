@@ -41,6 +41,14 @@ function getFamilyMemberModel() {
   }
 }
 
+function getBeneficiaryModel() {
+  try {
+    return mongoose.model('Beneficiary');
+  } catch {
+    return null;
+  }
+}
+
 function getConsentModel() {
   try {
     return require('../../models/WhatsAppConsent');
@@ -258,6 +266,23 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     beneficiaryId = familyMember?.beneficiaryId || null;
   }
 
+  // W1407: derive the conversation's branchId from the matched beneficiary so it
+  // is tenant-scoped. Unmatched inbound (no beneficiary) leaves branchId null —
+  // such conversations are visible only to cross-branch roles (fail-closed for
+  // branch-restricted users), never leaked across branches.
+  let branchId = null;
+  if (beneficiaryId) {
+    const Beneficiary = getBeneficiaryModel();
+    if (Beneficiary) {
+      try {
+        const ben = await Beneficiary.findById(beneficiaryId).select('branchId').lean();
+        branchId = ben?.branchId || null;
+      } catch (err) {
+        logger.warn(`[WhatsApp] branch derivation failed: ${err.message}`);
+      }
+    }
+  }
+
   // Record consent — first-time inbound = implicit opt-in, every inbound
   // extends the 24-hour customer-service window. Never throws.
   const Consent = getConsentModel();
@@ -292,6 +317,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           phone: fromPhone,
           senderName,
           beneficiaryId,
+          branchId, // W1407: tenant scope derived from the matched beneficiary
           familyMemberId: familyMember?._id || null,
           createdAt: new Date(),
         },
@@ -375,7 +401,13 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
         const sub = botReg.buildCategoryList(nav.id);
         if (sub) {
           await whatsappService
-            .sendInteractiveList(fromPhone, sub.bodyText, sub.buttonLabel, sub.items, sub.sectionTitle)
+            .sendInteractiveList(
+              fromPhone,
+              sub.bodyText,
+              sub.buttonLabel,
+              sub.items,
+              sub.sectionTitle
+            )
             .catch(err => logger.warn(`[WhatsApp BotMenu] category send failed: ${err.message}`));
           await Conversation.updateOne(
             { _id: conv._id },
@@ -647,7 +679,13 @@ async function dispatchBotPlan({
     const list = botReg.buildMainMenuList(botCtx || {});
     outType = 'interactive';
     sent = await whatsappService
-      .sendInteractiveList(fromPhone, list.bodyText, list.buttonLabel, list.items, list.sectionTitle)
+      .sendInteractiveList(
+        fromPhone,
+        list.bodyText,
+        list.buttonLabel,
+        list.items,
+        list.sectionTitle
+      )
       .catch(err => {
         logger.warn(`[WhatsApp BotMenu] list send failed: ${err.message}`);
         return null;
@@ -684,9 +722,53 @@ async function dispatchBotPlan({
     logger.warn(`[WhatsApp BotMenu] state persist failed: ${err.message}`)
   );
 
-  // (4) escalate any side effect not already served live
+  // (4) W1384: turn the side effect into a real DB record (env-gated), then
+  // escalate. A created record id is attached to the staff notification so it's
+  // click-through trackable; record creation failing falls back to plain
+  // escalation (the record service returns ok:false, never throws).
   if (plan.sideEffect && !suppressEscalation) {
-    await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect);
+    let recordId = null;
+    if (process.env.ENABLE_WHATSAPP_BOT_RECORDS === 'true') {
+      try {
+        const botRecords = require('./whatsappBotRecords.service');
+        if (botRecords.mapsToRecord(plan.sideEffect.kind)) {
+          const r = await botRecords.createRecordFor(plan.sideEffect, {
+            phone: fromPhone,
+            senderName,
+          });
+          if (r && r.ok) {
+            recordId = r.recordId;
+            logger.info(
+              `[WhatsApp BotRecords] created ${r.model} ${r.recordId} for ${plan.sideEffect.kind}`
+            );
+          } else {
+            logger.info(
+              `[WhatsApp BotRecords] no record (${r && r.reason}) for ${plan.sideEffect.kind}`
+            );
+          }
+        }
+      } catch (err) {
+        logger.warn(`[WhatsApp BotRecords] error: ${err.message}`);
+      }
+    }
+    await escalateForBot(Conversation, conv, fromPhone, senderName, plan.sideEffect, recordId);
+  }
+
+  // (5) W1408: link the event to the beneficiary's unified-core CareTimeline
+  // (only fires for beneficiary-attributable kinds with a resolvable guardian;
+  // a direct addEvent call — see whatsappBotTimeline.service. Never throws).
+  if (plan.sideEffect) {
+    try {
+      const botTimeline = require('./whatsappBotTimeline.service');
+      const t = await botTimeline.recordBotTimelineEvent(plan.sideEffect, fromPhone, senderName);
+      if (t && t.ok) {
+        logger.info(
+          `[WhatsApp BotTimeline] linked ${plan.sideEffect.kind} → CareTimeline ${t.eventId}`
+        );
+      }
+    } catch (err) {
+      logger.warn(`[WhatsApp BotTimeline] error: ${err.message}`);
+    }
   }
 
   logger.info(
@@ -702,8 +784,24 @@ async function dispatchBotPlan({
     const botFlow = require('../../intelligence/whatsapp-bot-flow.service');
     const ev = botFlow.deriveBotEvent(plan, priorState);
     logger.info(`[WhatsApp BotAnalytics] event=${ev.event} unit=${ev.unit || '-'}`);
+    // W1419: persist the per-unit usage funnel (entered/completed) for admin
+    // review — best-effort, env-gated; enter/complete are the only counted events.
+    if (ev.unit && process.env.ENABLE_WHATSAPP_BOT_INSIGHTS === 'true') {
+      require('./whatsappBotInsights.service')
+        .recordUnitEvent(ev.unit, ev.event)
+        .catch(err => logger.warn(`[WhatsApp BotInsights] usage failed: ${err.message}`));
+    }
   } catch (_e) {
     /* analytics is best-effort */
+  }
+
+  // W1417: capture an unmatched free-text intent for keyword tuning (best-effort,
+  // env-gated). The pure FSM flagged it via plan.unmatched; recording it lets an
+  // admin see what users ask that the bot misses and extend UNIT_KEYWORDS.
+  if (plan.unmatched && process.env.ENABLE_WHATSAPP_BOT_INSIGHTS === 'true') {
+    require('./whatsappBotInsights.service')
+      .recordUnmatched(plan.unmatchedText)
+      .catch(err => logger.warn(`[WhatsApp BotInsights] record failed: ${err.message}`));
   }
 }
 
@@ -737,9 +835,27 @@ const BOT_SIDE_EFFECT_PRIORITY = Object.freeze({
   submit_satisfaction: 'low',
 });
 
-async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect) {
+async function escalateForBot(
+  Conversation,
+  conv,
+  fromPhone,
+  senderName,
+  sideEffect,
+  recordId = null
+) {
   const reason = BOT_SIDE_EFFECT_REASON[sideEffect.kind] || `بوت الواتساب: ${sideEffect.kind}`;
   const priority = BOT_SIDE_EFFECT_PRIORITY[sideEffect.kind] || 'medium';
+  // W1418: a human-readable Arabic handoff card for staff (labelled fields)
+  // instead of a raw JSON dump. Falls back to JSON if the formatter is missing.
+  let summary;
+  try {
+    summary = require('../../intelligence/whatsapp-bot-flow.registry').formatEscalationSummary(
+      sideEffect,
+      { senderName, phone: fromPhone, reason }
+    );
+  } catch (_e) {
+    summary = JSON.stringify(sideEffect.collected || {}).slice(0, 500);
+  }
   // Emergencies jump straight to the 'escalated' state + critical urgency so
   // they surface at the top of the staff queue; everything else is pending_review.
   const isEmergency = sideEffect.kind === 'emergency_escalation';
@@ -763,8 +879,8 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
     const notifService = require('../notifications/notification-enhanced.service');
     if (notifService?.send) {
       await notifService.send({
-        title: `🤖 بوت واتساب — ${reason} (${senderName})`,
-        body: JSON.stringify(sideEffect.collected || {}).slice(0, 500),
+        title: `🤖 بوت واتساب — ${reason}${recordId ? ' 📄' : ''} (${senderName})`,
+        body: summary.slice(0, 800),
         type: 'alert',
         priority,
         category: 'whatsapp_bot_request',
@@ -774,6 +890,7 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
           conversationId: conv?._id,
           sideEffectKind: sideEffect.kind,
           collected: sideEffect.collected || {},
+          ...(recordId ? { recordId } : {}),
         },
       });
     }

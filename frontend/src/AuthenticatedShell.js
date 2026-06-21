@@ -128,6 +128,10 @@ import {
 // Pages
 import Home from './pages/common/Home';
 import NotFound from './pages/common/NotFound';
+import EntityFormPage from './pages/common/EntityFormPage';
+import CREATE_FORMS from './pages/createForms/registry';
+import EntityDetailPage from './pages/common/EntityDetailPage';
+import DETAIL_VIEWS from './pages/createForms/detailViews';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));
@@ -381,6 +385,17 @@ export default function AuthenticatedShell() {
                   <Route path="telehealth" element={<TelehealthList />} />
                   <Route path="telehealth/:sessionId" element={<TelehealthRoom />} />
 
+                  {/* Schema-driven "create" forms — replaces dead Add/New 404s.
+                      Static paths outrank module :id routes in React Router v6. */}
+                  {Object.entries(CREATE_FORMS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<EntityFormPage config={cfg} />} />
+                  ))}
+
+                  {/* Read-only detail views — replaces dead row/view :id 404s. */}
+                  {Object.entries(DETAIL_VIEWS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<EntityDetailPage config={cfg} />} />
+                  ))}
+
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}
                   {safeRoutes(HRRoutes, 'HR')}
@@ -527,9 +542,13 @@ export default function AuthenticatedShell() {
                   <Route path="reports-pro" element={<ReportsDashboardPro />} />
                   <Route path="inventory-pro" element={<InventoryDashboardPro />} />
                   <Route path="notifications-pro" element={<NotificationsDashboardPro />} />
+                  {/* Alias: header/sidebar navigate to /notifications */}
+                  <Route path="notifications" element={<NotificationsDashboardPro />} />
                   <Route path="security-pro" element={<SecurityDashboardPro />} />
                   <Route path="analytics-pro" element={<AnalyticsDashboardPro />} />
                   <Route path="settings-pro" element={<SettingsDashboardPro />} />
+                  {/* Alias: header/sidebar settings button + nav navigate to /settings */}
+                  <Route path="settings" element={<SettingsDashboardPro />} />
                   <Route path="therapist-pro" element={<TherapistProDashboard />} />
                   <Route path="kpi-pro" element={<KPIProDashboard />} />
                   <Route path="rehab-pro" element={<RehabProDashboard />} />

@@ -21,7 +21,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
-const { escapeRegex } = require('../utils/escapeRegex');
+const escapeRegex = require('../utils/escapeRegex');
 
 // Model — نستخدم AuditLog الموجود في النظام
 let AuditLog;

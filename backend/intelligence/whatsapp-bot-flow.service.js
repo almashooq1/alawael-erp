@@ -127,17 +127,19 @@ function renderClosing(unit, collected, lang) {
     body = reg.resolveFaqAnswer(collected.faqTopic); // Arabic content (translation follow-up)
   } else if (unit.id === 'home_exercises') {
     const key = reg.resolveDepartmentKey(collected.department || '');
-    if (key) body = reg.HOME_EXERCISES[key]; // Arabic content (translation follow-up)
+    if (key)
+      body = reg.HOME_EXERCISES[key]; // Arabic content (translation follow-up)
     else
       body =
         i18n.normLang(lang) === 'en'
-          ? "I couldn't identify the department. Available: occupational / speech / special education / behavior. Try again from the menu or type \"agent\"."
+          ? 'I couldn\'t identify the department. Available: occupational / speech / special education / behavior. Try again from the menu or type "agent".'
           : [
               'لم أتعرّف على القسم المطلوب بدقة. القسم المتاح: وظيفي / نطق / تربية خاصة / سلوك.',
               'يمكنك إعادة المحاولة من القائمة، أو اكتب "موظف" للمساعدة.',
             ].join('\n');
   } else {
-    const fallback = i18n.normLang(lang) === 'en' ? 'Your request was received ✅' : 'تم استلام طلبك بنجاح ✅';
+    const fallback =
+      i18n.normLang(lang) === 'en' ? 'Your request was received ✅' : 'تم استلام طلبك بنجاح ✅';
     body = i18n.unitClosing(unit.id, unit.closing || fallback, lang);
   }
   return `${body}\n\n${i18n.fw('menuHint', lang)}`;
@@ -157,11 +159,24 @@ function withLang(state, lang) {
 // W1381: the main-menu result carries `menu: true` so the dispatcher can render
 // it as a native interactive list. `prefix` prepends a one-line notice (used by
 // the W1383 language-switch acknowledgement). Always carries the active lang.
-function menuResult(ctx, prefix) {
+function menuResult(ctx, prefix, opts) {
   const lang = i18n.normLang(ctx.lang);
   let reply = renderWelcome(ctx);
   if (prefix) reply = `${prefix}\n\n${reply}`;
-  return { reply, nextFlowState: { ...IDLE, lang }, sideEffect: null, handled: true, menu: true };
+  const plan = {
+    reply,
+    nextFlowState: { ...IDLE, lang },
+    sideEffect: null,
+    handled: true,
+    menu: true,
+  };
+  // W1417: mark an idle free-text message that matched NO unit, so the dispatcher
+  // can record it for keyword tuning (distinct from an explicit menu request).
+  if (opts && opts.unmatched) {
+    plan.unmatched = true;
+    plan.unmatchedText = opts.unmatchedText;
+  }
+  return plan;
 }
 
 /**
@@ -267,15 +282,37 @@ function handleTurn(flowState, rawText, ctx = {}) {
   if (!active) {
     const unitId = reg.resolveUnitId(text);
     if (unitId) return enterUnit(unitId, lctx);
-    return menuResult(lctx);
+    // W1417: nothing matched — show the menu AND flag the phrase for tuning.
+    return menuResult(lctx, undefined, { unmatched: true, unmatchedText: text });
   }
 
   // ─── Active flow ─────────────────────────────────────────────────────────
   const unit = reg.UNIT_BY_ID[flowState.unit];
 
+  // W1423 — step BACK one question (or, from the confirm summary, edit the last
+  // answer) without losing the rest of the collected data. Checked BEFORE cancel
+  // so "رجوع خطوة" steps back while a bare "رجوع" still cancels.
+  if (reg.isBackTrigger(text)) {
+    const prev =
+      flowState.phase === reg.PHASE.CONFIRMING
+        ? Math.max(0, unit.steps.length - 1)
+        : Math.max(0, (flowState.step || 0) - 1);
+    const ack = i18n.normLang(lang) === 'en' ? '↩️ Back one step.' : '↩️ رجعنا خطوة. عدِّل إجابتك:';
+    return result(`${ack}\n\n${stepPrompt(unit, prev, lang)}`, {
+      unit: unit.id,
+      step: prev,
+      collected: flowState.collected || {},
+      phase: reg.PHASE.COLLECTING,
+      lang,
+    });
+  }
+
   // Abort words (distinct from "إلغاء" so unit-3 action answers survive).
   if (reg.isCancelTrigger(text)) {
-    return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
+    return result(`${i18n.fw('cancelled', lang)}\n\n${i18n.fw('menuHint', lang)}`, {
+      ...IDLE,
+      lang,
+    });
   }
 
   if (flowState.phase === reg.PHASE.CONFIRMING) {
@@ -288,7 +325,10 @@ function handleTurn(flowState, rawText, ctx = {}) {
       return result(renderClosing(unit, collected, lang), { ...IDLE, lang }, sideEffect);
     }
     if (reg.isNo(text)) {
-      return result(`${i18n.fw('notSent', lang)}\n\n${i18n.fw('menuHint', lang)}`, { ...IDLE, lang });
+      return result(`${i18n.fw('notSent', lang)}\n\n${i18n.fw('menuHint', lang)}`, {
+        ...IDLE,
+        lang,
+      });
     }
     return result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
   }

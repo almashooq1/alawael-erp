@@ -11,7 +11,15 @@
  *   DELETE /api/v1/landing/config/section/:id  admin — remove a section
  *   POST   /api/v1/landing/config/reset        admin — restore defaults
  *
- * The public GET is by design unauthenticated — the landing page renders
+ * Headless-CMS content layer (full rich landing-content object, draft/publish):
+ *
+ *   GET    /api/v1/landing/content              public — fetch PUBLISHED content
+ *   GET    /api/v1/landing/content/draft        admin — fetch draft (or published)
+ *   PUT    /api/v1/landing/content/draft        admin — upsert the draft content
+ *   POST   /api/v1/landing/content/publish      admin — publish draft → live
+ *   POST   /api/v1/landing/content/seed         admin — seed CMS from static content
+ *
+ * The public GETs are by design unauthenticated — the landing page renders
  * before login. Admin writes are gated to the same role set used by the
  * forms catalog instantiate path: admin / super_admin / forms_admin.
  */
@@ -20,6 +28,7 @@
 
 const express = require('express');
 const LandingConfig = require('../models/LandingConfig');
+const LandingContent = require('../models/LandingContent');
 const { authenticate, authorize } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
 
@@ -36,6 +45,26 @@ router.get('/config', async (_req, res) => {
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
     return safeError(res, err, 'landingConfig', { shape: 'ok' });
+  }
+});
+
+// ─── PUBLIC: fetch the published CMS content ─────────────────────────────────
+
+router.get('/content', async (_req, res) => {
+  try {
+    const doc = await LandingContent.findOne({ tenantId: 'default' });
+    res.set('Cache-Control', 'public, max-age=60');
+    if (!doc || doc.published == null) {
+      return res.json({ ok: true, content: null });
+    }
+    res.json({
+      ok: true,
+      content: doc.published,
+      version: doc.version,
+      publishedAt: doc.publishedAt,
+    });
+  } catch (err) {
+    return safeError(res, err, 'landingContent', { shape: 'ok' });
   }
 });
 
@@ -169,6 +198,90 @@ router.post('/config/reset', async (req, res) => {
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
     return safeError(res, err, 'landingConfig', { shape: 'ok' });
+  }
+});
+
+// ─── ADMIN: CMS content (draft / publish / seed) ─────────────────────────────
+
+router.get('/content/draft', async (_req, res) => {
+  try {
+    const doc = await LandingContent.findOne({ tenantId: 'default' });
+    const content = doc ? (doc.draft != null ? doc.draft : doc.published) : null;
+    res.json({
+      ok: true,
+      content: content != null ? content : null,
+      version: doc?.version || 0,
+      publishedAt: doc?.publishedAt || null,
+    });
+  } catch (err) {
+    return safeError(res, err, 'landingContent', { shape: 'ok' });
+  }
+});
+
+router.put('/content/draft', async (req, res) => {
+  try {
+    const content = req.body?.content;
+    if (!content || typeof content !== 'object' || Array.isArray(content)) {
+      return res.status(400).json({ ok: false, error: 'content_object_required' });
+    }
+    await LandingContent.findOneAndUpdate(
+      { tenantId: 'default' },
+      { draft: content, updatedBy: req.user?.id || req.user?.email || null },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    return safeError(res, err, 'landingContent', { shape: 'ok' });
+  }
+});
+
+router.post('/content/publish', async (req, res) => {
+  try {
+    const doc = await LandingContent.findOne({ tenantId: 'default' });
+    if (!doc || doc.draft == null) {
+      return res.status(400).json({ ok: false, error: 'no draft to publish' });
+    }
+    const publishedAt = new Date();
+    const updated = await LandingContent.findOneAndUpdate(
+      { tenantId: 'default' },
+      {
+        published: doc.draft,
+        publishedAt,
+        updatedBy: req.user?.id || req.user?.email || null,
+        $inc: { version: 1 },
+      },
+      { new: true, setDefaultsOnInsert: true }
+    );
+    res.json({ ok: true, version: updated.version, publishedAt: updated.publishedAt });
+  } catch (err) {
+    return safeError(res, err, 'landingContent', { shape: 'ok' });
+  }
+});
+
+router.post('/content/seed', async (req, res) => {
+  try {
+    const content = req.body?.content;
+    if (!content || typeof content !== 'object' || Array.isArray(content)) {
+      return res.status(400).json({ ok: false, error: 'content_object_required' });
+    }
+    const publish = req.body?.publish === true;
+    const update = {
+      draft: content,
+      updatedBy: req.user?.id || req.user?.email || null,
+    };
+    if (publish) {
+      update.published = content;
+      update.publishedAt = new Date();
+      update.$inc = { version: 1 };
+    }
+    await LandingContent.findOneAndUpdate({ tenantId: 'default' }, update, {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    return safeError(res, err, 'landingContent', { shape: 'ok' });
   }
 });
 

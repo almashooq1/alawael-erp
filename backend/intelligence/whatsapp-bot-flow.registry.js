@@ -832,6 +832,55 @@ function resolveDepartmentKey(text) {
   return null;
 }
 
+/**
+ * W1418 — derive a SHORT Arabic label from a step prompt: the question stem
+ * before the first colon / parenthesis (e.g. "اليوم أو التاريخ المفضل (مثال…):"
+ * → "اليوم أو التاريخ المفضل"). Pure.
+ * @param {string} prompt
+ * @returns {string}
+ */
+function shortLabel(prompt) {
+  if (!prompt || typeof prompt !== 'string') return '';
+  return prompt.split(/[(:：؟]/)[0].trim();
+}
+
+/**
+ * Map of collected-field key → short Arabic label, auto-built from every unit's
+ * step prompts (first definition wins; keys are consistent across units). Used
+ * to render the staff escalation summary with human labels instead of raw keys.
+ */
+const COLLECTED_LABELS = Object.freeze(
+  UNITS.reduce((map, u) => {
+    for (const s of u.steps || []) {
+      if (s && s.key && !map[s.key]) map[s.key] = shortLabel(s.prompt);
+    }
+    return map;
+  }, {})
+);
+
+/**
+ * W1418 — render a clean, human-readable Arabic handoff card for staff from a
+ * completed bot side effect, instead of a raw JSON dump. Pure + testable.
+ * @param {{kind:string, collected?:object}} sideEffect
+ * @param {{senderName?:string, phone?:string, reason?:string}} [opts]
+ * @returns {string}
+ */
+function formatEscalationSummary(sideEffect, opts = {}) {
+  const reason = opts.reason || (sideEffect && sideEffect.kind) || 'طلب عبر بوت الواتساب';
+  const lines = [`📋 ${reason}`];
+  const who = [opts.senderName, opts.phone].filter(Boolean).join(' — ');
+  if (who) lines.push(`👤 ${who}`);
+  const collected = (sideEffect && sideEffect.collected) || {};
+  let any = false;
+  for (const [k, v] of Object.entries(collected)) {
+    if (v === undefined || v === null || String(v).trim() === '') continue;
+    lines.push(`• ${COLLECTED_LABELS[k] || k}: ${String(v).trim()}`);
+    any = true;
+  }
+  if (!any) lines.push('• (لا توجد تفاصيل مُجمّعة)');
+  return lines.join('\n');
+}
+
 module.exports = {
   CENTER,
   SIDE_EFFECT,
@@ -870,6 +919,9 @@ module.exports = {
   lightStem,
   editDistanceLE1,
   resolveDepartmentKey,
+  shortLabel,
+  COLLECTED_LABELS,
+  formatEscalationSummary,
   resolveFaqAnswer,
   buildMainMenuList,
   buildCategoryList,

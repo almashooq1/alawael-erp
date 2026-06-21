@@ -1891,6 +1891,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-console-wave1420.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3760,6 +3762,8 @@ on:
       - 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-console-wave1420.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
       - 'backend/package.json'

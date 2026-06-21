@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T01:10:00+03:00  
+> Updated: 2026-06-22T01:25:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -21,15 +21,28 @@ This release contains:
    
    **Post-merge hotfix W1444**: `backend/scripts/migrate-nphies-claim-updatedAt.js` was fixed to use `NphiesClaim.collection.updateMany(...)` because Mongoose rejected the aggregation-pipeline update. Run the **latest version** of the script from `main`.
 
-2. **Run the NphiesClaim backfill migration** in production **before** deploying the new application code:
+2. **Run the NphiesClaim backfill migration** in production **before** deploying the new application code.
+
+   You can use the provided executor script (recommended):
 
    ```bash
+   export MONGODB_URI="mongodb://..."
+   export NODE_ENV=production
+   export DEPLOY_ROOT=/opt/alawael-erp
+   ./scripts/deploy-w1437.sh
+   ```
+
+   Or run the migration manually:
+
+   ```bash
+   cd /opt/alawael-erp
+   git pull origin main
    NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedAt.js
    ```
 
    This sets `nphies.submission.updatedAt` for existing documents where it is missing. Without this, the reconciliation sweeper will skip old `PENDING_REVIEW` claims.
 
-3. **Verify production MongoDB compound indexes** for `AdvancedTicket` and `NphiesClaim` are built. Mongoose `autoIndex` builds them on startup if enabled; otherwise build them manually:
+3. **Verify production MongoDB compound indexes** for `AdvancedTicket` and `NphiesClaim` are built. The `deploy-w1437.sh` script checks them automatically. Mongoose `autoIndex` builds them on startup if enabled; otherwise build them manually:
 
    ```js
    db.advancedtickets.createIndex({ status: 1, 'sla.firstResponseAt': 1, 'sla.isBreached': 1, createdAt: -1 });
@@ -116,6 +129,17 @@ Use this list in the deployment channel / runbook before cutting the release.
 
 ### 3. Database migration (run BEFORE deploying app code)
 
+Recommended — use the executor:
+
+```bash
+export MONGODB_URI="mongodb://..."
+export NODE_ENV=production
+export DEPLOY_ROOT=/opt/alawael-erp
+./scripts/deploy-w1437.sh
+```
+
+Or manually:
+
 ```bash
 cd /opt/alawael-erp   # or your deployment root
 git pull origin main
@@ -144,7 +168,13 @@ Expected output:
 
 ### 5. Post-deploy verification (30 min)
 
-Watch `error1.log` for these messages. They should **stop** after deploy:
+Use the monitor script:
+
+```bash
+./scripts/monitor-w1437.sh logs/error1.log
+```
+
+Or manually watch `error1.log` for these messages. They should **stop** after deploy:
 
 - [ ] `Operation advancedtickets.find() buffering timed out after 10000ms` (P0-1)
 - [ ] `Operation nphiesclaims.find() buffering timed out after 10000ms` (P0-2)

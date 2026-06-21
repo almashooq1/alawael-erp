@@ -13,6 +13,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import content, { isEn, tr } from '../../data/landingContentActive';
+import { openWhatsApp } from '../../data/whatsappLink';
 
 /* Inline SVG icons (Heroicons-outline style, currentColor) */
 function IconCalendar() {
@@ -183,7 +184,12 @@ export default function ContactSpeedDial({ onBook }) {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => setOpen(false)}
+          onClick={(e) => {
+            // Open the WhatsApp app directly (skip the wa.me interstitial)
+            e.preventDefault();
+            setOpen(false);
+            openWhatsApp(ap.whatsappNumber, ap.whatsappTemplate);
+          }}
           label={tr('واتساب', 'WhatsApp')}
           icon={<IconWhatsApp />}
           colorClass="bg-[#25D366]"

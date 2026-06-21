@@ -12,6 +12,7 @@ import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesC
 import jobs from '../../data/careersContent';
 import AccessibilityWidget from './AccessibilityWidget';
 import ContactSpeedDial from './ContactSpeedDial';
+import { openWhatsApp } from '../../data/whatsappLink';
 
 /* ══════════════════════ helpers ══════════════════════ */
 function useOnScreen(ref, threshold = 0.15) {
@@ -2326,11 +2327,8 @@ function BookingModal({ open, onClose }) {
       .filter(Boolean)
       .join('\n');
     const msg = `${ap.whatsappTemplate}\n\n${lines}`;
-    window.open(
-      `https://wa.me/${ap.whatsappNumber}?text=${encodeURIComponent(msg)}`,
-      '_blank',
-      'noopener'
-    );
+    // Open the WhatsApp app directly (skip the wa.me interstitial)
+    openWhatsApp(ap.whatsappNumber, msg);
 
     setConfirmationNumber(serverConfirmation);
     setSubmitted(true);
@@ -4083,6 +4081,11 @@ function MobileActionBar() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => {
+            // Open the WhatsApp app directly (skip the wa.me interstitial)
+            e.preventDefault();
+            openWhatsApp(ap.whatsappNumber, ap.whatsappTemplate);
+          }}
           className="flex flex-col items-center justify-center py-2 rounded-xl text-[#25D366] hover:bg-[#25D366]/10 active:bg-[#25D366]/15 transition-colors"
         >
           <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 24 24">

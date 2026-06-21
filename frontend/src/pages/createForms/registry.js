@@ -915,6 +915,21 @@ const RAW = {
     ],
   },
 
+  // ── HR — training course (revived module) ─────────────────────────────────
+  'training/new': {
+    title: 'إضافة دورة تدريبية', endpoint: '/training/courses', method: 'post', backTo: '/training', successMsg: 'تمت إضافة الدورة بنجاح ✓',
+    fields: [
+      { name: 'courseCode', label: 'رمز الدورة', type: 'text', required: true },
+      { name: 'titleAr', label: 'اسم الدورة (عربي)', type: 'text', required: true },
+      { name: 'titleEn', label: 'اسم الدورة (إنجليزي)', type: 'text' },
+      { name: 'category', label: 'التصنيف', type: 'select', options: [
+        { value: 'technical', label: 'تقني' }, { value: 'leadership', label: 'قيادي' }, { value: 'soft_skills', label: 'مهارات شخصية' }, { value: 'compliance', label: 'امتثال' }, { value: 'safety', label: 'سلامة' }, { value: 'professional', label: 'مهني' }, { value: 'language', label: 'لغات' }, { value: 'other', label: 'أخرى' } ] },
+      { name: 'type', label: 'نوع التدريب', type: 'select', options: [
+        { value: 'classroom', label: 'حضوري' }, { value: 'online', label: 'عن بُعد' }, { value: 'blended', label: 'مدمج' }, { value: 'workshop', label: 'ورشة عمل' }, { value: 'seminar', label: 'ندوة' }, { value: 'on_the_job', label: 'أثناء العمل' } ] },
+      { name: 'description', label: 'الوصف', type: 'textarea' },
+      { name: 'maxParticipants', label: 'الحد الأقصى للمشاركين', type: 'number' } ],
+  },
+
   // ── Services / misc ──────────────────────────────────────────────────────
   'helpdesk/new': {
     title: 'إضافة تذكرة دعم',

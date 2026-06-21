@@ -928,6 +928,7 @@ __tests__/alerts-workflow-branch-isolation-wave1409.test.js
 __tests__/whatsapp-bot-core-linkage-wave1408.test.js
 __tests__/whatsapp-bot-unmatched-intents-wave1417.test.js
 __tests__/whatsapp-bot-usage-wave1419.test.js
+__tests__/whatsapp-bot-handoff-summary-wave1418.test.js
 __tests__/whatsapp-bot-nlu-wave1416.test.js
 __tests__/clinical-session-path-wave1379.test.js
 __tests__/session-completed-bus-wave1381.test.js

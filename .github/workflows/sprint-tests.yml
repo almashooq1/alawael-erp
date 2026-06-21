@@ -1895,6 +1895,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3768,6 +3770,8 @@ on:
       - 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
       - 'backend/package.json'

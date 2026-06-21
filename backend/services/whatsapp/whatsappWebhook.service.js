@@ -826,6 +826,17 @@ const BOT_SIDE_EFFECT_PRIORITY = Object.freeze({
 async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEffect, recordId = null) {
   const reason = BOT_SIDE_EFFECT_REASON[sideEffect.kind] || `بوت الواتساب: ${sideEffect.kind}`;
   const priority = BOT_SIDE_EFFECT_PRIORITY[sideEffect.kind] || 'medium';
+  // W1418: a human-readable Arabic handoff card for staff (labelled fields)
+  // instead of a raw JSON dump. Falls back to JSON if the formatter is missing.
+  let summary;
+  try {
+    summary = require('../../intelligence/whatsapp-bot-flow.registry').formatEscalationSummary(
+      sideEffect,
+      { senderName, phone: fromPhone, reason }
+    );
+  } catch (_e) {
+    summary = JSON.stringify(sideEffect.collected || {}).slice(0, 500);
+  }
   // Emergencies jump straight to the 'escalated' state + critical urgency so
   // they surface at the top of the staff queue; everything else is pending_review.
   const isEmergency = sideEffect.kind === 'emergency_escalation';
@@ -850,7 +861,7 @@ async function escalateForBot(Conversation, conv, fromPhone, senderName, sideEff
     if (notifService?.send) {
       await notifService.send({
         title: `🤖 بوت واتساب — ${reason}${recordId ? ' 📄' : ''} (${senderName})`,
-        body: JSON.stringify(sideEffect.collected || {}).slice(0, 500),
+        body: summary.slice(0, 800),
         type: 'alert',
         priority,
         category: 'whatsapp_bot_request',

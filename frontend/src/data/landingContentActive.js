@@ -29,4 +29,22 @@ export const isEn = activeLang === 'en';
 /** Pick the right string for the active language. */
 export const tr = (arText, enText) => (isEn ? enText : arText);
 
-export default isEn ? en : ar;
+// CMS override (injected on window before this module is evaluated; see index.js).
+// MVP: CMS overrides the Arabic content only; English stays static.
+const cmsOverride =
+  (typeof window !== 'undefined' && window.__ALAWAEL_LANDING_CMS__) || null;
+
+function isPlainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+// Deep-merge src over a structural clone of base (arrays replaced wholesale).
+function deepMerge(base, src) {
+  if (!isPlainObject(base) || !isPlainObject(src)) return src === undefined ? base : src;
+  const out = Array.isArray(base) ? [...base] : { ...base };
+  for (const k of Object.keys(src)) {
+    out[k] = isPlainObject(base[k]) && isPlainObject(src[k]) ? deepMerge(base[k], src[k]) : src[k];
+  }
+  return out;
+}
+
+export default isEn ? en : cmsOverride ? deepMerge(ar, cmsOverride) : ar;

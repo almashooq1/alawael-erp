@@ -11,7 +11,6 @@ import '@fontsource/cairo/400.css';
 import '@fontsource/cairo/500.css';
 import '@fontsource/cairo/600.css';
 import '@fontsource/cairo/700.css';
-import App from './App';
 import { surfaceColors, neutralColors } from './theme/palette';
 import { initSentry } from './utils/sentry';
 import { validateFrontendEnv } from './config/validateEnv';
@@ -65,10 +64,40 @@ const styleElement = document.createElement('style');
 styleElement.textContent = globalStyles;
 document.head.appendChild(styleElement);
 
-// Render app
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Fetch published CMS landing content (if any) BEFORE the App module — which
+// imports the landing content via module-level derivations — is evaluated.
+// Any failure/null/timeout falls back to the static content file (zero flash).
+async function loadLandingCms() {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1200); // never block render long
+    const resp = await fetch('/api/v1/landing/content', {
+      signal: ctrl.signal,
+      headers: { Accept: 'application/json' },
+    });
+    clearTimeout(t);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && data.ok && data.content && typeof data.content === 'object') {
+        window.__ALAWAEL_LANDING_CMS__ = data.content;
+      }
+    }
+  } catch {
+    /* ignore — fall back to static content */
+  }
+}
+
+// Render app (App is dynamically imported AFTER the CMS fetch so that the
+// injected window override is in place before the landing content modules run).
+async function bootstrap() {
+  await loadLandingCms();
+  const { default: App } = await import('./App');
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
+
+bootstrap();

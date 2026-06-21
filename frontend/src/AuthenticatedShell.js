@@ -128,6 +128,8 @@ import {
 // Pages
 import Home from './pages/common/Home';
 import NotFound from './pages/common/NotFound';
+import EntityFormPage from './pages/common/EntityFormPage';
+import CREATE_FORMS from './pages/createForms/registry';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));
@@ -380,6 +382,12 @@ export default function AuthenticatedShell() {
                   <Route path="chat" element={<ChatV2 />} />
                   <Route path="telehealth" element={<TelehealthList />} />
                   <Route path="telehealth/:sessionId" element={<TelehealthRoom />} />
+
+                  {/* Schema-driven "create" forms — replaces dead Add/New 404s.
+                      Static paths outrank module :id routes in React Router v6. */}
+                  {Object.entries(CREATE_FORMS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<EntityFormPage config={cfg} />} />
+                  ))}
 
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}

@@ -498,6 +498,24 @@ const CANCEL_TRIGGERS = Object.freeze([
   'cancel',
 ]);
 
+// W1423 — step BACK one question mid-flow without losing progress (distinct from
+// CANCEL, which aborts the whole flow). Deliberately DISTINCTIVE multi-word
+// phrases so a back word inside a normal answer never fires (e.g. "إلغاء" stays a
+// valid unit-3 action). Matched as substrings via matchesAny.
+const BACK_TRIGGERS = Object.freeze([
+  'رجوع خطوة',
+  'رجوع خطوه',
+  'الخطوة السابقة',
+  'الخطوه السابقه',
+  'ارجع خطوة',
+  'ارجع خطوه',
+  'تعديل السابق',
+  'صحح الاجابة',
+  'صحح الاجابه',
+  'go back',
+  'previous step',
+]);
+
 const YES_TOKENS = Object.freeze([
   'نعم',
   'ايوه',
@@ -613,6 +631,11 @@ function isMenuTrigger(text) {
 
 function isCancelTrigger(text) {
   return matchesAny(text, CANCEL_TRIGGERS);
+}
+
+/** W1423 — true when the message asks to step back one question (not cancel). */
+function isBackTrigger(text) {
+  return matchesAny(text, BACK_TRIGGERS);
 }
 
 function isYes(text) {
@@ -900,6 +923,7 @@ module.exports = {
   CATEGORY_BY_ID,
   MENU_TRIGGERS,
   CANCEL_TRIGGERS,
+  BACK_TRIGGERS,
   YES_TOKENS,
   NO_TOKENS,
   SKIP_TOKENS,
@@ -910,6 +934,7 @@ module.exports = {
   matchesAny,
   isMenuTrigger,
   isCancelTrigger,
+  isBackTrigger,
   isYes,
   isNo,
   isSkip,

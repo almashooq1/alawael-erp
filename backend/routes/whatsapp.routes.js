@@ -60,7 +60,7 @@ const whatsappTemplates = require('../services/whatsapp/whatsappTemplates.servic
 const whatsappRateLimit = require('../services/whatsapp/rateLimit.service');
 const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -873,6 +873,22 @@ router.get(
         critical,
       },
     });
+  })
+);
+
+/**
+ * GET /bot/unmatched-intents — W1417 keyword-tuning feedback.
+ * Top free-text phrases the menu bot could NOT route to any unit, by frequency.
+ * Admin-gated: this is cross-tenant AGGREGATE tuning telemetry (not per-branch
+ * PII), 30-day TTL'd, normalized — used to extend UNIT_KEYWORDS post-launch.
+ */
+router.get(
+  '/bot/unmatched-intents',
+  authorize('admin', 'super_admin', 'manager'),
+  asyncHandler(async (req, res) => {
+    const insights = require('../services/whatsapp/whatsappBotInsights.service');
+    const data = await insights.topUnmatched(req.query.limit);
+    res.json({ success: true, data, total: data.length });
   })
 );
 

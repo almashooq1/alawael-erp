@@ -157,11 +157,24 @@ function withLang(state, lang) {
 // W1381: the main-menu result carries `menu: true` so the dispatcher can render
 // it as a native interactive list. `prefix` prepends a one-line notice (used by
 // the W1383 language-switch acknowledgement). Always carries the active lang.
-function menuResult(ctx, prefix) {
+function menuResult(ctx, prefix, opts) {
   const lang = i18n.normLang(ctx.lang);
   let reply = renderWelcome(ctx);
   if (prefix) reply = `${prefix}\n\n${reply}`;
-  return { reply, nextFlowState: { ...IDLE, lang }, sideEffect: null, handled: true, menu: true };
+  const plan = {
+    reply,
+    nextFlowState: { ...IDLE, lang },
+    sideEffect: null,
+    handled: true,
+    menu: true,
+  };
+  // W1417: mark an idle free-text message that matched NO unit, so the dispatcher
+  // can record it for keyword tuning (distinct from an explicit menu request).
+  if (opts && opts.unmatched) {
+    plan.unmatched = true;
+    plan.unmatchedText = opts.unmatchedText;
+  }
+  return plan;
 }
 
 /**
@@ -267,7 +280,8 @@ function handleTurn(flowState, rawText, ctx = {}) {
   if (!active) {
     const unitId = reg.resolveUnitId(text);
     if (unitId) return enterUnit(unitId, lctx);
-    return menuResult(lctx);
+    // W1417: nothing matched — show the menu AND flag the phrase for tuning.
+    return menuResult(lctx, undefined, { unmatched: true, unmatchedText: text });
   }
 
   // ─── Active flow ─────────────────────────────────────────────────────────

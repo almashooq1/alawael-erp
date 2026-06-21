@@ -29,12 +29,33 @@ function useOnScreen(ref, threshold = 0.15) {
   return visible;
 }
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(
+    typeof window !== 'undefined' && window.matchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = e => setReduced(e.matches);
+    mq.addEventListener?.('change', handler);
+    return () => mq.removeEventListener?.('change', handler);
+  }, []);
+  return reduced;
+}
+
 function CountUp({ end, duration = 2000, suffix = '' }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const visible = useOnScreen(ref);
+  const reduced = usePrefersReducedMotion();
   useEffect(() => {
     if (!visible) return;
+    if (reduced) {
+      setCount(end);
+      return;
+    }
     let start = 0;
     const step = Math.ceil(end / (duration / 16));
     const id = setInterval(() => {
@@ -45,7 +66,7 @@ function CountUp({ end, duration = 2000, suffix = '' }) {
       } else setCount(start);
     }, 16);
     return () => clearInterval(id);
-  }, [visible, end, duration]);
+  }, [visible, end, duration, reduced]);
   return (
     <span ref={ref}>
       {count.toLocaleString('ar-SA')}
@@ -59,8 +80,10 @@ function useTypewriter(words, typingSpeed = 100, deletingSpeed = 60, pauseTime =
   const [text, setText] = useState('');
   const [wordIdx, setWordIdx] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
+    if (reduced) return;
     const current = words[wordIdx];
     let timeout;
     if (!isDeleting && text === current) {
@@ -77,8 +100,9 @@ function useTypewriter(words, typingSpeed = 100, deletingSpeed = 60, pauseTime =
       );
     }
     return () => clearTimeout(timeout);
-  }, [text, isDeleting, wordIdx, words, typingSpeed, deletingSpeed, pauseTime]);
+  }, [text, isDeleting, wordIdx, words, typingSpeed, deletingSpeed, pauseTime, reduced]);
 
+  if (reduced) return words[0];
   return text;
 }
 
@@ -105,7 +129,7 @@ function FloatingParticles({ count = 30, color = 'white' }) {
   );
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none hidden lg:block">
       {particles.map(p => (
         <div
           key={p.id}
@@ -141,7 +165,7 @@ function ScrollProgress() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-1">
       <div
-        className="h-full bg-gradient-to-l from-accent-400 via-primary-500 to-emerald-500 transition-all duration-150"
+        className="h-full bg-gradient-to-l from-accent-400 via-primary-500 to-green-500 transition-all duration-150"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -268,7 +292,566 @@ const icons = {
       />
     </svg>
   ),
+  heart: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+      />
+    </svg>
+  ),
+  target: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  ),
+  star: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+      />
+    </svg>
+  ),
+  'shield-check': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+      />
+    </svg>
+  ),
+  'clipboard-document': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
+      />
+    </svg>
+  ),
+  'device-phone': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+      />
+    </svg>
+  ),
+  'video-camera': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+      />
+    </svg>
+  ),
+  sparkles: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+      />
+    </svg>
+  ),
+  'chart-bar': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+      />
+    </svg>
+  ),
+  bolt: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+      />
+    </svg>
+  ),
+  'building-office': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"
+      />
+    </svg>
+  ),
+  'building-library': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"
+      />
+    </svg>
+  ),
+  'user-circle': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  ),
+  'user-group': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+      />
+    </svg>
+  ),
+  users: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+      />
+    </svg>
+  ),
+  calendar: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+      />
+    </svg>
+  ),
+  'academic-cap': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"
+      />
+    </svg>
+  ),
+  'puzzle-piece': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.401.604-.401.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 00.659-.663 47.703 47.703 0 00-.31-4.82c-1.444.183-2.905.297-4.382.341A.64.64 0 0114.25 6.087v0z"
+      />
+    </svg>
+  ),
+  'book-open': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+      />
+    </svg>
+  ),
+  'magnifying-glass': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+      />
+    </svg>
+  ),
+  'pencil-square': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+      />
+    </svg>
+  ),
+  'arrow-trending-up': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+      />
+    </svg>
+  ),
+  trophy: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"
+      />
+    </svg>
+  ),
+  truck: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+      />
+    </svg>
+  ),
+  clock: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  ),
+  globe: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+      />
+    </svg>
+  ),
+  'document-text': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+      />
+    </svg>
+  ),
+  'map-pin': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+      />
+    </svg>
+  ),
+  'hand-raised': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.05 4.575a1.575 1.575 0 10-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l.075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 013.15 0V15M6.9 7.575a1.575 1.575 0 10-3.15 0v8.175a6.75 6.75 0 006.75 6.75h2.018a5.25 5.25 0 003.712-1.538l1.732-1.732a5.25 5.25 0 001.538-3.712l.003-2.024a.668.668 0 01.198-.471 1.575 1.575 0 10-2.228-2.228 3.818 3.818 0 00-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0116.35 15m.002 0h-.002"
+      />
+    </svg>
+  ),
+  'chat-bubble': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+      />
+    </svg>
+  ),
+  'badge-check': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
+      />
+    </svg>
+  ),
+  'light-bulb': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"
+      />
+    </svg>
+  ),
+  'rocket-launch': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+      />
+    </svg>
+  ),
+  beaker: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21a48.25 48.25 0 01-8.135-.687c-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+      />
+    </svg>
+  ),
+  'paint-brush': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"
+      />
+    </svg>
+  ),
+  'face-smile': (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"
+      />
+    </svg>
+  ),
+  check: (
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  ),
 };
+
+/* Render an icon from the `icons` map by key, controlling size/color via className.
+   Falls back to the generic `admin` cog if the key is missing. Inherits `currentColor`. */
+function Icon({ name, className = 'w-8 h-8' }) {
+  const svg = icons[name] || icons.admin;
+  return React.cloneElement(svg, { className });
+}
 
 /* ══════════════════════ data — sourced from landingContent.js ══════════════════════ */
 // Map iconKey strings in content to SVG icon components defined above.
@@ -314,6 +897,8 @@ function Navbar() {
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, [navLinks]);
+
+  const booking = useBooking();
 
   const handleNav = useCallback((e, id) => {
     e.preventDefault();
@@ -388,23 +973,27 @@ function Navbar() {
             ))}
             <div className="w-px h-6 bg-gray-300/30 mx-3" />
             <Link
-              to="/register"
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${scrolled ? 'text-primary-700 hover:bg-primary-50' : 'text-white/90 hover:bg-white/10'}`}
-            >
-              حساب جديد
-            </Link>
-            <Link
               to="/login"
-              className={`group relative px-7 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${scrolled ? 'bg-gradient-to-l from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30 hover:-translate-y-0.5' : 'bg-white text-primary-700 shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5'}`}
+              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${scrolled ? 'text-primary-700 hover:bg-primary-50' : 'text-white/90 hover:bg-white/10'}`}
             >
-              <span className="relative z-10">تسجيل الدخول</span>
-              <div className="absolute inset-0 bg-gradient-to-l from-primary-700 to-primary-800 opacity-0 group-hover:opacity-100 transition-opacity" />
+              تسجيل الدخول
             </Link>
+            <button
+              type="button"
+              onClick={() => booking.open()}
+              className="group relative px-7 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-300 overflow-hidden bg-gradient-to-l from-accent-500 to-accent-600 shadow-lg shadow-accent-500/30 hover:shadow-xl hover:shadow-accent-500/40 hover:-translate-y-0.5"
+            >
+              <span className="relative z-10">احجز زيارة تقييم</span>
+              <div className="absolute inset-0 bg-gradient-to-l from-accent-600 to-accent-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
           </div>
 
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
+            aria-label={isOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             className={`lg:hidden p-2.5 rounded-xl transition-all duration-300 ${scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}
           >
             <svg
@@ -425,6 +1014,7 @@ function Navbar() {
 
         {/* Mobile Menu */}
         <div
+          id="mobile-menu"
           className={`lg:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
         >
           <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-5 mb-4 border border-gray-100/50">
@@ -438,7 +1028,17 @@ function Navbar() {
                 {label}
               </a>
             ))}
-            <div className="flex gap-3 mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                booking.open();
+              }}
+              className="w-full py-3 mt-4 rounded-xl bg-gradient-to-l from-accent-500 to-accent-600 text-white text-center font-bold shadow-lg shadow-accent-500/30 transition-all"
+            >
+              احجز زيارة تقييم
+            </button>
+            <div className="flex gap-3 mt-3">
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
@@ -449,7 +1049,7 @@ function Navbar() {
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-l from-primary-600 to-primary-700 text-white text-center font-bold hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg"
+                className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-700 text-center font-bold hover:bg-gray-50 transition-colors"
               >
                 دخول
               </Link>
@@ -490,7 +1090,7 @@ function Hero() {
           style={{ animationDelay: '3s' }}
         />
         <div
-          className="absolute -bottom-32 left-1/3 w-[400px] h-[400px] bg-emerald-400/10 rounded-full blur-[90px] animate-blob"
+          className="absolute -bottom-32 left-1/3 w-[400px] h-[400px] bg-primary-400/10 rounded-full blur-[90px] animate-blob"
           style={{ animationDelay: '6s' }}
         />
       </div>
@@ -637,9 +1237,9 @@ function Hero() {
             <div
               className={`flex flex-wrap items-center gap-4 sm:gap-6 mt-10 transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
             >
-              <div className="flex items-center gap-2 text-white/60 text-sm">
+              <div className="flex items-center gap-2 text-white/80 text-sm">
                 <svg
-                  className="w-5 h-5 text-emerald-400"
+                  className="w-5 h-5 text-green-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -654,7 +1254,7 @@ function Hero() {
                 تأسس عام {content.brand.foundedHijri} هـ
               </div>
               <div className="h-4 w-px bg-white/20" />
-              <div className="flex items-center gap-2 text-white/60 text-sm">
+              <div className="flex items-center gap-2 text-white/80 text-sm">
                 <svg
                   className="w-5 h-5 text-accent-400"
                   fill="none"
@@ -671,9 +1271,9 @@ function Hero() {
                 {content.branches.items.length} فروع في الرياض
               </div>
               <div className="h-4 w-px bg-white/20" />
-              <div className="flex items-center gap-2 text-white/60 text-sm">
+              <div className="flex items-center gap-2 text-white/80 text-sm">
                 <svg
-                  className="w-5 h-5 text-blue-400"
+                  className="w-5 h-5 text-accent-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -700,7 +1300,7 @@ function Hero() {
                 {/* Browser dots */}
                 <div className="flex items-center gap-2 mb-5">
                   <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
+                  <div className="w-3 h-3 rounded-full bg-accent-400/80" />
                   <div className="w-3 h-3 rounded-full bg-green-400/80" />
                   <div className="flex-1 h-6 rounded-full bg-white/10 mx-3" />
                 </div>
@@ -717,9 +1317,9 @@ function Hero() {
                 {/* KPI row */}
                 <div className="grid grid-cols-3 gap-3 mb-5">
                   {[
-                    { bg: 'bg-emerald-400/20', bar: 'bg-emerald-400', w: '75%' },
+                    { bg: 'bg-green-400/20', bar: 'bg-green-400', w: '75%' },
                     { bg: 'bg-accent-400/20', bar: 'bg-accent-400', w: '60%' },
-                    { bg: 'bg-blue-400/20', bar: 'bg-blue-400', w: '85%' },
+                    { bg: 'bg-primary-400/20', bar: 'bg-primary-400', w: '85%' },
                   ].map((k, i) => (
                     <div key={i} className={`rounded-xl p-3 ${k.bg}`}>
                       <div className="h-3 bg-white/20 rounded w-2/3 mb-2" />
@@ -738,7 +1338,7 @@ function Hero() {
                     {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85].map((h, i) => (
                       <div
                         key={i}
-                        className="flex-1 rounded-t bg-gradient-to-t from-primary-400/40 to-emerald-400/40 transition-all duration-700 hover:from-primary-400/70 hover:to-emerald-400/70"
+                        className="flex-1 rounded-t bg-gradient-to-t from-primary-400/40 to-green-400/40 transition-all duration-700 hover:from-primary-400/70 hover:to-green-400/70"
                         style={{ height: `${h}%` }}
                       />
                     ))}
@@ -752,7 +1352,7 @@ function Hero() {
                 style={{ animationDelay: '1s' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -768,7 +1368,7 @@ function Hero() {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-500">مستفيدين اليوم</div>
+                    <div className="text-[11px] text-gray-600">مستفيدين اليوم</div>
                     <div className="text-lg font-bold text-gray-800">٢٤٧</div>
                   </div>
                 </div>
@@ -780,11 +1380,11 @@ function Hero() {
                 style={{ animationDelay: '1.5s' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-400 to-amber-500 flex items-center justify-center text-white text-sm">
-                    📊
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-400 to-accent-500 flex items-center justify-center text-white">
+                    <Icon name="chart-bar" className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-500">نسبة التحسن</div>
+                    <div className="text-[11px] text-gray-600">نسبة التحسن</div>
                     <div className="text-lg font-bold text-primary-700">٩٢٪</div>
                   </div>
                 </div>
@@ -796,7 +1396,7 @@ function Hero() {
                 style={{ animationDelay: '2s' }}
               >
                 <svg
-                  className="w-6 h-6 text-emerald-400"
+                  className="w-6 h-6 text-green-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -834,7 +1434,7 @@ function TrustedBy() {
         <div
           className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
-          <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
+          <p className="text-sm font-semibold text-gray-600 uppercase tracking-widest">
             متوافق مع معايير ومتطلبات
           </p>
         </div>
@@ -926,7 +1526,7 @@ function Services() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             خدماتنا التأهيلية المتخصصة
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             6 أقسام علاجية متكاملة تعمل بتناغم لخدمة كل مستفيد وفق خطّة فردية
           </p>
         </div>
@@ -952,7 +1552,7 @@ function Services() {
               <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors">
                 {s.title}
               </h3>
-              <p className="text-gray-500 leading-relaxed text-[15px]">{s.desc}</p>
+              <p className="text-gray-600 leading-relaxed text-[15px]">{s.desc}</p>
 
               {/* Arrow link */}
               <div className="mt-6 flex items-center gap-2 text-sm font-medium text-primary-600 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
@@ -1012,7 +1612,7 @@ function HowItWorks() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             {content.howItWorks.title}
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             {content.howItWorks.subtitle}
           </p>
         </div>
@@ -1038,9 +1638,9 @@ function HowItWorks() {
               {/* Step number + icon */}
               <div className="relative inline-flex mb-6">
                 <div
-                  className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${step.color} flex items-center justify-center text-4xl shadow-xl group-hover:scale-110 group-hover:shadow-2xl group-hover:-rotate-6 transition-all duration-500`}
+                  className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${step.color} flex items-center justify-center text-white shadow-xl group-hover:scale-110 group-hover:shadow-2xl group-hover:-rotate-6 transition-all duration-500`}
                 >
-                  {step.icon}
+                  <Icon name={step.iconKey} className="w-11 h-11" />
                 </div>
                 <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-sm font-bold text-primary-700 border-2 border-primary-200">
                   {step.step}
@@ -1050,7 +1650,7 @@ function HowItWorks() {
               <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary-700 transition-colors">
                 {step.title}
               </h3>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
+              <p className="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -1094,7 +1694,7 @@ function WhyUs() {
               لماذا تختار
               <span className="text-primary-600"> نظام الأوائل؟</span>
             </h2>
-            <p className="text-lg text-gray-500 leading-relaxed mb-10">
+            <p className="text-lg text-gray-600 leading-relaxed mb-10">
               نوفّر لك حلاً تقنياً متكاملاً يجمع بين البساطة والقوة، مع دعم فني متواصل ومعايير أمان
               عالمية.
             </p>
@@ -1107,11 +1707,11 @@ function WhyUs() {
                   className={`p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:border-primary-100 hover:shadow-lg transition-all duration-500 group ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="text-2xl mb-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 inline-block">
-                    {f.icon}
+                  <div className="text-primary-600 mb-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 inline-block">
+                    <Icon name={f.iconKey} className="w-7 h-7" />
                   </div>
                   <h4 className="font-bold text-gray-900 text-sm mb-1.5">{f.title}</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -1139,7 +1739,7 @@ function WhyUs() {
                     <span className="text-4xl font-bold text-accent-400">أ</span>
                   </div>
                   <h3 className="text-2xl font-bold text-white">نظام واحد متكامل</h3>
-                  <p className="text-white/60 text-sm max-w-xs mx-auto">
+                  <p className="text-white/80 text-sm max-w-xs mx-auto">
                     كل ما تحتاجه لإدارة مركزك في منصة واحدة
                   </p>
 
@@ -1175,8 +1775,8 @@ function WhyUs() {
               {/* Floating badge */}
               <div className="absolute -top-4 -left-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 text-sm">
-                    ✓
+                  <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                    <Icon name="check" className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-bold text-gray-800">99.9% مدة التشغيل</span>
                 </div>
@@ -1185,8 +1785,8 @@ function WhyUs() {
               {/* Floating users count */}
               <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 text-sm">
-                    👥
+                  <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">
+                    <Icon name="user-group" className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-bold text-gray-800">+2500 مستخدم</span>
                 </div>
@@ -1257,13 +1857,13 @@ function Stats() {
               className={`group text-center p-8 rounded-3xl bg-white/[0.07] backdrop-blur-md border border-white/[0.1] hover:bg-white/[0.14] hover:border-white/[0.2] hover:scale-[1.03] transition-all duration-500 ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
               style={{ transitionDelay: `${i * 150}ms` }}
             >
-              <div className="text-4xl mb-4 group-hover:scale-125 group-hover:-rotate-12 transition-all duration-500">
-                {s.icon}
+              <div className="flex justify-center mb-4 text-white group-hover:scale-125 group-hover:-rotate-12 transition-all duration-500">
+                <Icon name={s.iconKey} className="w-10 h-10" />
               </div>
               <div className="text-4xl sm:text-5xl font-bold text-white mb-2 tabular-nums">
                 <CountUp end={s.value} suffix={s.suffix} />
               </div>
-              <div className="text-white/60 font-medium text-sm">{s.label}</div>
+              <div className="text-white/80 font-medium text-sm">{s.label}</div>
               {/* Decorative bottom line */}
               <div className="mt-4 mx-auto w-12 h-1 rounded-full bg-gradient-to-l from-accent-400/60 to-primary-400/60 group-hover:w-20 transition-all duration-500" />
             </div>
@@ -1279,13 +1879,14 @@ function Testimonials() {
   const ref = useRef(null);
   const visible = useOnScreen(ref);
   const [active, setActive] = useState(0);
+  const reduced = usePrefersReducedMotion();
 
   // Auto-slide
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || reduced) return;
     const id = setInterval(() => setActive(prev => (prev + 1) % testimonials.length), 5000);
     return () => clearInterval(id);
-  }, [visible]);
+  }, [visible, reduced]);
 
   return (
     <section id="testimonials" ref={ref} className="py-28 bg-gray-50 relative overflow-hidden">
@@ -1316,7 +1917,7 @@ function Testimonials() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             ماذا يقولون عنا
           </h2>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
             تجارب حقيقية من مستخدمي النظام
           </p>
         </div>
@@ -1354,7 +1955,7 @@ function Testimonials() {
               </div>
               <div>
                 <div className="font-bold text-gray-900 text-lg">{testimonials[active].name}</div>
-                <div className="text-sm text-gray-500">{testimonials[active].role}</div>
+                <div className="text-sm text-gray-600">{testimonials[active].role}</div>
               </div>
             </div>
           </div>
@@ -1410,7 +2011,7 @@ function FAQ() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">
             أسئلة متكررة
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             إجابات على أكثر الأسئلة شيوعاً حول نظام الأوائل
           </p>
         </div>
@@ -1484,7 +2085,7 @@ function PlatformFeatures() {
         }}
       />
       <div className="absolute top-20 -right-20 w-96 h-96 bg-accent-400/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-20 -left-20 w-96 h-96 bg-emerald-400/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-20 -left-20 w-96 h-96 bg-accent-400/10 rounded-full blur-[120px]" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
@@ -1496,7 +2097,7 @@ function PlatformFeatures() {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">{pf.title}</h2>
           <p className="text-lg text-white/70 max-w-3xl mx-auto leading-relaxed">{pf.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-accent-400 to-emerald-400 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-accent-400 to-green-400 mt-5" />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1507,7 +2108,9 @@ function PlatformFeatures() {
               style={{ transitionDelay: `${i * 60}ms` }}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="text-4xl">{f.icon}</div>
+                <div className="text-accent-300">
+                  <Icon name={f.iconKey} className="w-10 h-10" />
+                </div>
                 <span className="text-[10px] px-2 py-1 rounded-full bg-accent-400/15 text-accent-300 font-semibold tracking-wider">
                   {f.badge}
                 </span>
@@ -1552,13 +2155,13 @@ function Team() {
               style={{ transitionDelay: `${i * 80}ms` }}
             >
               <div
-                className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center text-4xl mb-4 shadow-lg group-hover:scale-105 transition-transform`}
+                className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-105 transition-transform`}
               >
-                {member.icon}
+                <Icon name={member.iconKey} className="w-10 h-10" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-1">{member.name}</h3>
               <p className="text-sm text-primary-700 font-semibold mb-1">{member.role}</p>
-              <p className="text-xs text-gray-500 mb-3" dir="ltr">
+              <p className="text-xs text-gray-600 mb-3" dir="ltr">
                 {member.specialty}
               </p>
               <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
@@ -1591,17 +2194,28 @@ function BookingModal({ open, onClose }) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState('');
   const [apiError, setApiError] = useState('');
+  const closeBtnRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
+    // Remember what was focused, then move focus into the dialog.
+    previouslyFocusedRef.current = typeof document !== 'undefined' ? document.activeElement : null;
     const onKey = e => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    const focusTimer = setTimeout(() => {
+      closeBtnRef.current?.focus();
+    }, 0);
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      clearTimeout(focusTimer);
+      // Restore focus to the element that opened the dialog.
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === 'function') prev.focus();
     };
   }, [open, onClose]);
 
@@ -1690,11 +2304,13 @@ function BookingModal({ open, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="booking-title"
+      aria-label="نموذج حجز زيارة تقييم"
     >
       <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
-        <div className="relative bg-gradient-to-br from-primary-600 to-emerald-600 p-6 text-white flex-shrink-0">
+        <div className="relative bg-gradient-to-br from-primary-600 to-green-600 p-6 text-white flex-shrink-0">
           <button
+            ref={closeBtnRef}
             onClick={onClose}
             aria-label="إغلاق"
             className="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
@@ -1717,9 +2333,9 @@ function BookingModal({ open, onClose }) {
 
         {submitted ? (
           <div className="p-10 text-center flex-1 flex flex-col justify-center items-center">
-            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-5">
+            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-5">
               <svg
-                className="w-10 h-10 text-emerald-600"
+                className="w-10 h-10 text-green-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1733,7 +2349,7 @@ function BookingModal({ open, onClose }) {
               <div className="mb-4">
                 <p className="text-gray-600 mb-2">رقم التأكيد الخاص بك:</p>
                 <code
-                  className="inline-block px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-lg tracking-wider border border-emerald-200"
+                  className="inline-block px-4 py-2 rounded-xl bg-green-50 text-green-700 font-bold text-lg tracking-wider border border-green-200"
                   dir="ltr"
                 >
                   {confirmationNumber}
@@ -1850,7 +2466,7 @@ function BookingModal({ open, onClose }) {
             </div>
 
             {apiError ? (
-              <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              <div className="mb-4 p-3 rounded-xl bg-accent-50 border border-accent-200 text-accent-800 text-sm">
                 {apiError}
               </div>
             ) : null}
@@ -1920,7 +2536,7 @@ function BookingModal({ open, onClose }) {
                 اتصل الآن
               </a>
             </div>
-            <p className="text-xs text-gray-500 text-center mt-4">
+            <p className="text-xs text-gray-600 text-center mt-4">
               سيتم إرسال طلبك لخادمنا المحلي + فتح واتساب كقناة تواصل سريعة. نلتزم بسرية بياناتكم
               وفق نظام حماية البيانات الشخصية (PDPL).
             </p>
@@ -1935,7 +2551,7 @@ function Field({ label, required, type = 'text', dir, placeholder, value, onChan
   return (
     <label className="block">
       <span className="block text-sm font-semibold text-gray-700 mb-1.5">
-        {label} {required && <span className="text-rose-500">*</span>}
+        {label} {required && <span className="text-red-500">*</span>}
       </span>
       <input
         type={type}
@@ -1956,7 +2572,7 @@ function Select({ label, required, options, value, onChange }) {
   return (
     <label className="block">
       <span className="block text-sm font-semibold text-gray-700 mb-1.5">
-        {label} {required && <span className="text-rose-500">*</span>}
+        {label} {required && <span className="text-red-500">*</span>}
       </span>
       <select
         required={required}
@@ -2077,14 +2693,14 @@ function CareersTeaser() {
     <section
       id="careers-teaser"
       ref={ref}
-      className="py-24 bg-gradient-to-br from-amber-50 via-white to-primary-50/40 relative overflow-hidden"
+      className="py-24 bg-gradient-to-br from-accent-50 via-white to-primary-50/40 relative overflow-hidden"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div
           className={`grid lg:grid-cols-2 gap-10 items-center transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <div>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold tracking-wider uppercase mb-4">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
               انضم إلينا
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -2130,12 +2746,12 @@ function CareersTeaser() {
                   <div className="font-bold text-gray-900 truncate group-hover:text-primary-700 transition-colors">
                     {job.title}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-xs text-gray-600 mt-0.5">
                     {job.branches[0]}
                     {job.branches.length > 1 ? ` +${job.branches.length - 1}` : ''}
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold flex-shrink-0">
+                <span className="px-2.5 py-1 rounded-full bg-accent-100 text-accent-800 text-[11px] font-bold flex-shrink-0">
                   ⭐ مميّزة
                 </span>
               </Link>
@@ -2221,7 +2837,7 @@ function ArticlesTeaser() {
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2">
                     {a.excerpt}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between text-xs text-gray-600 pt-3 border-t border-gray-100">
                     <span>{a.author.name}</span>
                     <span className="flex items-center gap-1">
                       <svg
@@ -2266,7 +2882,7 @@ function Awards() {
           className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         >
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{a.title}</h2>
-          <p className="text-gray-500 text-sm">{a.subtitle}</p>
+          <p className="text-gray-600 text-sm">{a.subtitle}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {a.items.map((it, i) => (
@@ -2275,11 +2891,11 @@ function Awards() {
               className={`group flex flex-col items-center justify-center p-5 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-gray-100 hover:ring-primary-200 transition-all duration-500 text-center ${visible ? 'opacity-100' : 'opacity-0'}`}
               style={{ transitionDelay: `${i * 60}ms` }}
             >
-              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                {it.icon}
+              <div className="flex justify-center text-primary-600 mb-2 group-hover:scale-110 transition-transform">
+                <Icon name={it.iconKey} className="w-8 h-8" />
               </div>
               <div className="text-sm font-bold text-gray-900 leading-tight">{it.name}</div>
-              <div className="text-[11px] text-gray-500 mt-1 leading-snug">{it.detail}</div>
+              <div className="text-[11px] text-gray-600 mt-1 leading-snug">{it.detail}</div>
             </div>
           ))}
         </div>
@@ -2341,7 +2957,7 @@ function Quiz() {
     <section
       id="quiz"
       ref={ref}
-      className="py-28 bg-gradient-to-br from-primary-50 via-white to-emerald-50 relative overflow-hidden"
+      className="py-28 bg-gradient-to-br from-primary-50 via-white to-green-50 relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(16,185,129,0.08),transparent)]" />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -2361,7 +2977,7 @@ function Quiz() {
         >
           <div className="h-1.5 bg-gray-100">
             <div
-              className="h-full bg-gradient-to-l from-primary-500 to-emerald-500 transition-all duration-500"
+              className="h-full bg-gradient-to-l from-primary-500 to-green-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -2369,8 +2985,8 @@ function Quiz() {
           <div className="p-8 sm:p-10">
             {!started && (
               <div className="text-center py-6">
-                <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center text-4xl shadow-lg shadow-primary-500/25">
-                  🔎
+                <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary-500 to-green-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/25">
+                  <Icon name="magnifying-glass" className="w-10 h-10" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">تقييم سريع بدون تسجيل</h3>
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">
@@ -2405,7 +3021,7 @@ function Quiz() {
                 const qq = q.questions[step];
                 return (
                   <div>
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
                       <span className="font-semibold">
                         سؤال {step + 1} من {totalSteps}
                       </span>
@@ -2445,9 +3061,9 @@ function Quiz() {
             {started && step >= totalSteps && recommendation && (
               <div className="text-center py-4">
                 <div
-                  className={`w-24 h-24 mx-auto mb-5 rounded-3xl bg-gradient-to-br ${recommendation.color} flex items-center justify-center text-5xl shadow-xl`}
+                  className={`w-24 h-24 mx-auto mb-5 rounded-3xl bg-gradient-to-br ${recommendation.color} flex items-center justify-center text-white shadow-xl`}
                 >
-                  {recommendation.icon}
+                  <Icon name={recommendation.iconKey} className="w-12 h-12" />
                 </div>
                 <div className="text-sm font-semibold text-primary-700 mb-2">توصيتنا لطفلك</div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
@@ -2485,7 +3101,7 @@ function Quiz() {
                     {q.ctaRetake}
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-6 max-w-md mx-auto">
+                <p className="text-xs text-gray-600 mt-6 max-w-md mx-auto">
                   هذه التوصية استرشادية — الخطة النهائية تُبنى بعد تقييم وجاهي مع فريق متعدد
                   التخصصات.
                 </p>
@@ -2505,9 +3121,12 @@ function Gallery() {
   const g = content.gallery;
   const [filter, setFilter] = useState('all');
   const [lightbox, setLightbox] = useState(null);
+  const lightboxCloseRef = useRef(null);
+  const galleryPrevFocusRef = useRef(null);
 
   const filtered = filter === 'all' ? g.items : g.items.filter(i => i.category === filter);
 
+  // Key handling + body-scroll lock (re-runs as lightbox changes for arrow nav).
   useEffect(() => {
     if (!lightbox) return;
     const onKey = e => {
@@ -2527,6 +3146,21 @@ function Gallery() {
     };
   }, [lightbox, filtered]);
 
+  // Focus management: on open move focus into dialog, on close restore it.
+  const isOpenLightbox = Boolean(lightbox);
+  useEffect(() => {
+    if (!isOpenLightbox) return;
+    galleryPrevFocusRef.current = typeof document !== 'undefined' ? document.activeElement : null;
+    const focusTimer = setTimeout(() => {
+      lightboxCloseRef.current?.focus();
+    }, 0);
+    return () => {
+      clearTimeout(focusTimer);
+      const prev = galleryPrevFocusRef.current;
+      if (prev && typeof prev.focus === 'function') prev.focus();
+    };
+  }, [isOpenLightbox]);
+
   return (
     <section id="gallery" ref={ref} className="py-28 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2538,7 +3172,7 @@ function Gallery() {
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{g.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{g.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-primary-500 to-emerald-500 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-primary-500 to-green-500 mt-5" />
         </div>
 
         <div className="flex flex-wrap justify-center gap-2 mb-10">
@@ -2605,6 +3239,7 @@ function Gallery() {
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
+          aria-label="معرض الصور"
         >
           <div
             className="absolute inset-0 bg-black/85 backdrop-blur-sm"
@@ -2628,6 +3263,7 @@ function Gallery() {
             </div>
           </div>
           <button
+            ref={lightboxCloseRef}
             onClick={() => setLightbox(null)}
             aria-label="إغلاق"
             className="absolute top-6 left-6 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors"
@@ -2657,18 +3293,18 @@ function Stories() {
     <section
       id="stories"
       ref={ref}
-      className="py-28 bg-gradient-to-bl from-amber-50/50 via-white to-emerald-50/30 relative overflow-hidden"
+      className="py-28 bg-gradient-to-bl from-accent-50/50 via-white to-green-50/30 relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={`text-center mb-14 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold tracking-wider uppercase mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
             قصص نجاح
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{s.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{s.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-amber-500 to-primary-500 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-accent-500 to-primary-500 mt-5" />
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -2684,11 +3320,11 @@ function Stories() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xl font-bold text-gray-900">{story.name}</span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
                         {story.age} سنوات
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500">{story.condition}</div>
+                    <div className="text-xs text-gray-600">{story.condition}</div>
                   </div>
                   <div
                     className={`flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${story.color} text-white flex items-center justify-center font-bold text-xl shadow-md`}
@@ -2698,12 +3334,12 @@ function Stories() {
                 </div>
 
                 <div className="space-y-4 mb-5">
-                  <div className="p-3 rounded-xl bg-rose-50 border-r-4 border-rose-400">
-                    <div className="text-xs font-bold text-rose-700 mb-1">قبل 🕰️</div>
+                  <div className="p-3 rounded-xl bg-red-50 border-r-4 border-red-400">
+                    <div className="text-xs font-bold text-red-700 mb-1">قبل 🕰️</div>
                     <p className="text-sm text-gray-700 leading-relaxed">{story.before}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-50 border-r-4 border-emerald-500">
-                    <div className="text-xs font-bold text-emerald-700 mb-1">بعد ✨</div>
+                  <div className="p-3 rounded-xl bg-green-50 border-r-4 border-green-500">
+                    <div className="text-xs font-bold text-green-700 mb-1">بعد ✨</div>
                     <p className="text-sm text-gray-700 leading-relaxed">{story.after}</p>
                   </div>
                 </div>
@@ -2715,11 +3351,11 @@ function Stories() {
                     >
                       {story.metric.isText ? story.metric.value : `+${story.metric.value}`}
                     </div>
-                    <div className="text-[11px] text-gray-500">{story.metric.label}</div>
+                    <div className="text-[11px] text-gray-600">{story.metric.label}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-xs font-semibold text-gray-700">{story.duration}</div>
-                    <div className="text-[11px] text-gray-400">{story.program}</div>
+                    <div className="text-[11px] text-gray-600">{story.program}</div>
                   </div>
                 </div>
               </div>
@@ -2743,12 +3379,12 @@ function Comparison() {
         <div
           className={`text-center mb-12 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wider uppercase mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
             مقارنة
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{c.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{c.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-emerald-500 to-primary-500 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-green-500 to-primary-500 mt-5" />
         </div>
 
         <div
@@ -2756,13 +3392,17 @@ function Comparison() {
         >
           <div className="grid grid-cols-[2fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr]">
             <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">الميزة</div>
-            <div className="p-5 bg-gradient-to-br from-primary-600 to-emerald-600 text-white text-center">
+            <div className="p-5 bg-gradient-to-br from-primary-600 to-green-600 text-white text-center">
               <div className="text-xs opacity-90">{c.weLabel}</div>
-              <div className="text-xl font-bold mt-1">✨</div>
+              <div className="flex justify-center mt-1">
+                <Icon name="sparkles" className="w-6 h-6" />
+              </div>
             </div>
             <div className="p-5 bg-gray-100 text-gray-600 text-center">
               <div className="text-xs">{c.otherLabel}</div>
-              <div className="text-xl font-bold mt-1">🏢</div>
+              <div className="flex justify-center mt-1">
+                <Icon name="building-office" className="w-6 h-6" />
+              </div>
             </div>
           </div>
 
@@ -2776,7 +3416,7 @@ function Comparison() {
               </div>
               <div className="p-4 text-center">
                 {row.us === true ? (
-                  <div className="inline-flex w-8 h-8 rounded-full bg-emerald-500 text-white items-center justify-center shadow-md">
+                  <div className="inline-flex w-8 h-8 rounded-full bg-green-500 text-white items-center justify-center shadow-md">
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -2792,7 +3432,7 @@ function Comparison() {
                     </svg>
                   </div>
                 ) : (
-                  <span className="text-sm font-semibold text-emerald-700">{row.us}</span>
+                  <span className="text-sm font-semibold text-green-700">{row.us}</span>
                 )}
               </div>
               <div className="p-4 text-center">
@@ -2809,14 +3449,14 @@ function Comparison() {
                     </svg>
                   </div>
                 ) : (
-                  <span className="text-xs text-gray-500">{row.other}</span>
+                  <span className="text-xs text-gray-600">{row.other}</span>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6 max-w-lg mx-auto">
+        <p className="text-center text-xs text-gray-600 mt-6 max-w-lg mx-auto">
           المقارنة تعكس ملامح السوق الشائعة — قد تختلف المراكز الأخرى في بعض التفاصيل.
         </p>
       </div>
@@ -2866,7 +3506,7 @@ function Newsletter() {
     <section
       id="newsletter"
       ref={ref}
-      className="py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-emerald-700 relative overflow-hidden"
+      className="py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-green-700 relative overflow-hidden"
     >
       <div
         className="absolute inset-0 opacity-[0.06]"
@@ -2876,7 +3516,7 @@ function Newsletter() {
         }}
       />
       <div className="absolute top-0 right-1/3 w-96 h-96 bg-white/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-emerald-300/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-primary-300/10 rounded-full blur-[120px]" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
@@ -2957,12 +3597,12 @@ function Newsletter() {
               </button>
               {message && (
                 <div
-                  className={`text-sm text-center mt-2 ${status === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}
+                  className={`text-sm text-center mt-2 ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}
                 >
                   {message}
                 </div>
               )}
-              <p className="text-[11px] text-gray-400 text-center">
+              <p className="text-[11px] text-gray-600 text-center">
                 بالاشتراك، أنت توافق على استلام بريد دوري. يمكنك إلغاء الاشتراك في أي وقت.
               </p>
             </div>
@@ -3013,21 +3653,25 @@ function About() {
           <div
             className={`space-y-5 transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
           >
-            <div className="relative p-7 rounded-3xl bg-gradient-to-br from-primary-50 to-emerald-50 border border-primary-100">
-              <div className="absolute top-4 left-4 text-4xl opacity-30">🎯</div>
+            <div className="relative p-7 rounded-3xl bg-gradient-to-br from-primary-50 to-green-50 border border-primary-100">
+              <div className="absolute top-4 left-4 text-primary-600 opacity-30">
+                <Icon name="target" className="w-10 h-10" />
+              </div>
               <h3 className="text-xl font-bold text-primary-800 mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary-600" />
                 {a.vision.title}
               </h3>
               <p className="text-primary-900/80 leading-relaxed">{a.vision.text}</p>
             </div>
-            <div className="relative p-7 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
-              <div className="absolute top-4 left-4 text-4xl opacity-30">🚀</div>
-              <h3 className="text-xl font-bold text-amber-900 mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <div className="relative p-7 rounded-3xl bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-100">
+              <div className="absolute top-4 left-4 text-accent-600 opacity-30">
+                <Icon name="rocket-launch" className="w-10 h-10" />
+              </div>
+              <h3 className="text-xl font-bold text-accent-900 mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent-500" />
                 {a.mission.title}
               </h3>
-              <p className="text-amber-950/80 leading-relaxed">{a.mission.text}</p>
+              <p className="text-accent-950/80 leading-relaxed">{a.mission.text}</p>
             </div>
           </div>
         </div>
@@ -3040,11 +3684,11 @@ function About() {
               key={v.title}
               className="group text-center p-6 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl hover:-translate-y-1 border border-gray-100 transition-all duration-500"
             >
-              <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                {v.icon}
+              <div className="flex justify-center text-primary-600 mb-3 group-hover:scale-110 transition-transform">
+                <Icon name={v.iconKey} className="w-9 h-9" />
               </div>
               <h4 className="text-lg font-bold text-gray-900 mb-1">{v.title}</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">{v.desc}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{v.desc}</p>
             </div>
           ))}
         </div>
@@ -3085,7 +3729,9 @@ function Programs() {
             >
               <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-gradient-to-br from-primary-100 to-accent-100 opacity-0 group-hover:opacity-50 transition-opacity duration-700 blur-2xl" />
               <div className="relative">
-                <div className="text-5xl mb-4">{item.icon}</div>
+                <div className="text-primary-600 mb-4">
+                  <Icon name={item.iconKey} className="w-12 h-12" />
+                </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-gray-600 leading-relaxed mb-5">{item.desc}</p>
                 <div className="flex flex-wrap gap-2">
@@ -3124,7 +3770,7 @@ function Branches() {
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{b.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{b.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-primary-500 to-emerald-500 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-primary-500 to-green-500 mt-5" />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -3144,7 +3790,9 @@ function Branches() {
                     backgroundSize: '20px 20px',
                   }}
                 />
-                <div className="text-6xl relative z-10 drop-shadow-lg">{branch.icon}</div>
+                <div className="relative z-10 text-white drop-shadow-lg">
+                  <Icon name={branch.iconKey} className="w-14 h-14" />
+                </div>
                 <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 text-xs font-bold text-gray-800 backdrop-blur-sm">
                   {branch.audience}
                 </span>
@@ -3195,7 +3843,7 @@ function Branches() {
                   {branch.phoneSecondary && (
                     <a
                       href={`tel:${branch.phoneSecondary}`}
-                      className="flex items-center gap-2 text-gray-500 text-xs hover:text-primary-600 transition-colors pr-6"
+                      className="flex items-center gap-2 text-gray-600 text-xs hover:text-primary-600 transition-colors pr-6"
                       dir="ltr"
                     >
                       {branch.phoneSecondary}
@@ -3264,7 +3912,7 @@ function MobileActionBar() {
         </button>
         <a
           href={`tel:${content.contact.mainPhone}`}
-          className="flex flex-col items-center justify-center py-2 rounded-xl text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100 transition-colors"
+          className="flex flex-col items-center justify-center py-2 rounded-xl text-primary-700 hover:bg-primary-50 active:bg-primary-100 transition-colors"
         >
           <svg
             className="w-5 h-5 mb-1"
@@ -3306,18 +3954,18 @@ function Contact() {
     <section
       id="contact"
       ref={ref}
-      className="py-28 bg-gradient-to-br from-primary-50 via-white to-emerald-50/40 relative overflow-hidden"
+      className="py-28 bg-gradient-to-br from-primary-50 via-white to-green-50/40 relative overflow-hidden"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div
           className={`text-center mb-14 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold tracking-wider uppercase mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent-100 text-accent-800 text-xs font-bold tracking-wider uppercase mb-4">
             تواصل
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{c.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">{c.subtitle}</p>
-          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-emerald-500 to-primary-500 mt-5" />
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-green-500 to-primary-500 mt-5" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -3325,7 +3973,7 @@ function Contact() {
             href={`tel:${c.mainPhone}`}
             className={`group p-7 bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-1 border border-gray-100 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center mb-4 shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-green-500 flex items-center justify-center mb-4 shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
               <svg
                 className="w-7 h-7 text-white"
                 fill="none"
@@ -3341,7 +3989,7 @@ function Contact() {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">اتصل بنا</h3>
-            <p className="text-sm text-gray-500 mb-3">للاستفسار وحجز موعد تقييم</p>
+            <p className="text-sm text-gray-600 mb-3">للاستفسار وحجز موعد تقييم</p>
             <div className="text-xl font-bold text-primary-700" dir="ltr">
               {c.mainPhoneDisplay}
             </div>
@@ -3367,7 +4015,7 @@ function Contact() {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">البريد الإلكتروني</h3>
-            <p className="text-sm text-gray-500 mb-3">للاستفسارات الرسمية والتقارير</p>
+            <p className="text-sm text-gray-600 mb-3">للاستفسارات الرسمية والتقارير</p>
             <div className="text-lg font-bold text-accent-700" dir="ltr">
               {c.email}
             </div>
@@ -3376,7 +4024,7 @@ function Contact() {
           <div
             className={`group p-7 bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-1 border border-gray-100 transition-all duration-500 delay-200 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center mb-4 shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
               <svg
                 className="w-7 h-7 text-white"
                 fill="none"
@@ -3397,7 +4045,7 @@ function Contact() {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">العنوان الرئيسي</h3>
-            <p className="text-sm text-gray-500 mb-3">مقر الإدارة العامة</p>
+            <p className="text-sm text-gray-600 mb-3">مقر الإدارة العامة</p>
             <p className="text-sm text-gray-700 leading-relaxed">{c.mainAddress}</p>
           </div>
         </div>
@@ -3448,7 +4096,7 @@ function CTA() {
             }}
           />
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent-400/10 rounded-full blur-[80px]" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-[80px]" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-400/10 rounded-full blur-[80px]" />
 
           <FloatingParticles count={10} color="rgba(255,255,255,0.3)" />
 
@@ -3771,32 +4419,40 @@ export default function LandingPage() {
         dir="rtl"
         className="font-cairo antialiased text-gray-900 overflow-x-hidden"
       >
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] focus:rounded-lg focus:bg-primary-700 focus:px-4 focus:py-2 focus:text-white"
+        >
+          تخطّ إلى المحتوى
+        </a>
         <SeoJsonLd />
         <ScrollProgress />
         <Navbar />
-        <Hero />
-        <TrustedBy />
-        <Awards />
-        <About />
-        <Services />
-        <Programs />
-        <Quiz />
-        <Branches />
-        <Gallery />
-        <PlatformFeatures />
-        <HowItWorks />
-        <WhyUs />
-        <Comparison />
-        <Team />
-        <Stories />
-        <Stats />
-        <Testimonials />
-        <FAQ />
-        <ArticlesTeaser />
-        <CareersTeaser />
-        <Newsletter />
-        <Contact />
-        <CTA />
+        <main id="main">
+          <Hero />
+          <TrustedBy />
+          <Awards />
+          <About />
+          <Services />
+          <Programs />
+          <Quiz />
+          <Branches />
+          <Gallery />
+          <PlatformFeatures />
+          <HowItWorks />
+          <WhyUs />
+          <Comparison />
+          <Team />
+          <Stories />
+          <Stats />
+          <Testimonials />
+          <FAQ />
+          <ArticlesTeaser />
+          <CareersTeaser />
+          <Newsletter />
+          <Contact />
+          <CTA />
+        </main>
         <Footer />
         <BackToTop />
         <WhatsAppFab />

@@ -54,7 +54,9 @@ async function main() {
     ],
   };
 
-  const result = await NphiesClaim.updateMany(filter, [
+  // Use the native collection driver so the aggregation-pipeline update is
+  // accepted without Mongoose-level option gymnastics.
+  const result = await NphiesClaim.collection.updateMany(filter, [
     {
       $set: {
         'nphies.submission.updatedAt': fallback,

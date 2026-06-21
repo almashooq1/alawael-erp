@@ -21,15 +21,28 @@ const DEFAULTS = {
   readable: false,
   noAnim: false,
   bigCursor: false,
+  dark: false,
 };
+
+// First-load dark default: honour the OS-level color-scheme preference.
+function prefersDark() {
+  try {
+    return typeof window !== 'undefined' && !!window.matchMedia
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : false;
+  } catch {
+    return false;
+  }
+}
 
 function loadPrefs() {
   try {
     const raw = typeof window !== 'undefined' && window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULTS };
+    // No saved prefs yet → seed dark from the OS color-scheme preference.
+    if (!raw) return { ...DEFAULTS, dark: prefersDark() };
     return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    return { ...DEFAULTS };
+    return { ...DEFAULTS, dark: prefersDark() };
   }
 }
 
@@ -40,6 +53,7 @@ function applyPrefs(p) {
   el.classList.toggle('a11y-readable', !!p.readable);
   el.classList.toggle('a11y-noanim', !!p.noAnim);
   el.classList.toggle('a11y-bigcursor', !!p.bigCursor);
+  el.classList.toggle('dark', !!p.dark);
   const clamped = Math.max(FONT_MIN, Math.min(FONT_MAX, p.font || 0));
   el.style.fontSize = clamped === 0 ? '' : `${100 + clamped * FONT_STEP}%`;
 }
@@ -127,7 +141,12 @@ export default function AccessibilityWidget() {
 
   const fontPct = 100 + (prefs.font || 0) * FONT_STEP;
   const anyActive =
-    prefs.font !== 0 || prefs.links || prefs.readable || prefs.noAnim || prefs.bigCursor;
+    prefs.font !== 0 ||
+    prefs.links ||
+    prefs.readable ||
+    prefs.noAnim ||
+    prefs.bigCursor ||
+    prefs.dark;
 
   return (
     <>
@@ -236,6 +255,12 @@ export default function AccessibilityWidget() {
             onClick={() => update({ bigCursor: !prefs.bigCursor })}
             icon="🖱️"
             label="مؤشر كبير"
+          />
+          <Toggle
+            active={prefs.dark}
+            onClick={() => update({ dark: !prefs.dark })}
+            icon="🌙"
+            label="الوضع الليلي"
           />
         </div>
 

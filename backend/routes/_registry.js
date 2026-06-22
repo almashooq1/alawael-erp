@@ -515,7 +515,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── W206 Smart Rehab Engine — assessment→goals+programs+schedule ────────
   dualMountAuth(app, 'assessment-engine', require('../routes/assessmentRecommendation.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
-  dualMountAuth(app, 'episodes', require('../routes/episodes.routes'));
+  // Episodes of Care — now served by the DDD episodes domain secure router
+  // (domains/episodes/routes/episodes.routes.js). Legacy /api/v1/episodes route
+  // file retired to backend/_archived/routes.
   // rehabilitation-advanced is now registered via clinical-therapy.registry.js (via phases.registry.js)
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2-extras.routes'));
@@ -620,7 +622,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Clinical Research — auth required
   dualMountAuth(app, 'research', safeRequire('../domains/research/routes/research.routes'));
   // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
-  dualMountAuth(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
+  // Mounted by domains/episodes/index.js so the branch-isolated secure router
+  // owns /api/(v1/v2/)episodes without being shadowed by legacy routes.
+  logger.info(
+    '✅ Episodes of Care routes mounted via DDD domain: CRUD, beneficiary episodes, active episode, statistics, phase/therapist lists, workflow transitions (advance/suspend/resume/discharge), care team, clinical summary — الحلقة العلاجية (16+ endpoints)'
+  );
   // HR — الموارد البشرية الموحدة — auth required (employee PII)
   // OWNER MAP for /api/(v1/)?hr (ADR-043): this domain router owns the CORE
   // personnel subpaths (/employees, /leaves, /attendance); the Round-10 module

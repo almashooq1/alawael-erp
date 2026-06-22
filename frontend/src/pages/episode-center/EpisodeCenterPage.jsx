@@ -53,7 +53,7 @@ import {
   Schedule as PendingIcon,
   Timeline as TimelineIcon,
 } from '@mui/icons-material';
-import { episodeCenterAPI } from '../../services/ddd';
+import { episodesAPI } from '../../services/ddd';
 
 /* ── palette ─────────────────────────────────────────────────────────── */
 const PRIMARY = '#4a148c';
@@ -113,7 +113,7 @@ function DashboardTab() {
     setLoading(true);
     setError(null);
     try {
-      const res = await episodeCenterAPI.dashboard();
+      const res = await episodesAPI.getDashboard();
       setData(res.data?.data || res.data);
     } catch (e) {
       setError(e.response?.data?.message || e.message);
@@ -293,8 +293,8 @@ function EpisodesListTab({ onAdvancePhase }) {
         limit: rowsPerPage,
         ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)),
       };
-      const res = await episodeCenterAPI.list(params);
-      setEpisodes(res.data?.episodes || res.data?.data || []);
+      const res = await episodesAPI.list(params);
+      setEpisodes(res.data?.items || res.data?.episodes || res.data?.data || []);
       setTotal(res.data?.total || 0);
     } catch (e) {
       setError(e.response?.data?.message || e.message);
@@ -492,7 +492,7 @@ function CreateEpisodeTab({ onCreated }) {
     setLoading(true);
     setError(null);
     try {
-      await episodeCenterAPI.create(form);
+      await episodesAPI.create(form);
       setSuccess(true);
       setForm(EMPTY_FORM);
       if (onCreated) onCreated();
@@ -600,7 +600,7 @@ function AdvancePhaseDialog({ episodeId, open, onClose, onDone }) {
     setLoading(true);
     setError(null);
     try {
-      await episodeCenterAPI.advancePhase(episodeId, notes);
+      await episodesAPI.advancePhase(episodeId, notes);
       onDone();
       onClose();
     } catch (e) {

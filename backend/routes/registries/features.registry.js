@@ -538,10 +538,11 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── Episode Center — مركز الحلقة العلاجية الموحدة ────────────────────────
-  const episodeCenterRoutes = safeRequire('../routes/episode-center.routes');
-  dualMount(app, 'episode-center', episodeCenterRoutes);
+  // Retired: /api/v1/episode-center endpoints merged into DDD Episodes
+  // (/api/v1/episodes/dashboard, list, create, advance-phase, status, team).
+  // Frontend callers now use episodesAPI from services/ddd.
   logger.info(
-    '✅ Episode Center routes mounted: dashboard (phase/type/priority distribution), list (multi-filter), full episode (care-plan + sessions + assessments + phase-progress), advance-phase (12-step lifecycle), update-status, team-member management, beneficiary episodes — مركز الحلقة العلاجية (10+ endpoints)'
+    '✅ Episode Center routes retired from /api/v1/episode-center; now served by DDD Episodes /api/v1/episodes — مركز الحلقة العلاجية (DDD)'
   );
 
   // ─── Measures Library — مكتبة المقاييس الموحدة ────────────────────────────

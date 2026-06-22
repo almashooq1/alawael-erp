@@ -97,7 +97,7 @@ import {
   Legend as _Legend,
 } from 'recharts';
 
-import { coreAPI } from '../../services/ddd';
+import { coreAPI, episodesAPI } from '../../services/ddd';
 import { formatDate } from 'utils/dateUtils';
 
 /* ── Styled Phase Connector ─────────────────────────────────────── */
@@ -547,16 +547,7 @@ function EpisodesListTab({ onViewEpisode }) {
   const setFilter = (k, v) => setFilters(f => ({ ...f, [k]: v }));
 
   const handleCreate = async form => {
-    // POST to episode-center
-    const res = await fetch('/api/v1/episode-center', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (!res.ok) {
-      const d = await res.json();
-      throw new Error(d.message || 'فشل الإنشاء');
-    }
+    await episodesAPI.create(form);
     fetchEpisodes();
   };
 
@@ -718,11 +709,7 @@ function EpisodeDetailTab({ episodeId, onBack }) {
   const handleAdvancePhase = async () => {
     setAdvancing(true);
     try {
-      await fetch(`/api/v1/episode-center/${data?.activeEpisode?._id}/advance-phase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes: advanceNotes }),
-      });
+      await episodesAPI.advancePhase(data?.activeEpisode?._id, advanceNotes);
       setAdvanceDialog(false);
       load();
     } catch (e) {

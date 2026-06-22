@@ -61,10 +61,11 @@ export const episodesAPI = {
   list: params => apiClient.get('/api/v1/episodes', { params }),
   get: id => apiClient.get(`/api/v1/episodes/${id}`),
   update: (id, data) => apiClient.put(`/api/v1/episodes/${id}`, data),
-  advancePhase: id => apiClient.post(`/api/v1/episodes/${id}/advance-phase`),
-  /** @deprecated use advancePhase */
-  transition: (id, data) => apiClient.put(`/api/v1/episodes/${id}/transition`, data),
-  addNote: (id, data) => apiClient.post(`/api/v1/episodes/${id}/notes`, data),
+  remove: id => apiClient.delete(`/api/v1/episodes/${id}`),
+  advancePhase: (id, notes = '') =>
+    apiClient.post(`/api/v1/episodes/${id}/advance-phase`, { notes }),
+  updateStatus: (id, status, reason = '') =>
+    apiClient.patch(`/api/v1/episodes/${id}/status`, { status, reason }),
   getByBeneficiary: (beneficiaryId, params) =>
     apiClient.get(`/api/v1/episodes/beneficiary/${beneficiaryId}`, { params }),
   getActiveEpisode: beneficiaryId =>
@@ -953,32 +954,7 @@ export const sessionCenterAPI = {
 };
 
 /* ═══════════════════════════════════════════════════════════
- *  57. EPISODE CENTER — مركز الحلقة العلاجية الموحدة
- * ═══════════════════════════════════════════════════════════ */
-export const episodeCenterAPI = {
-  /** لوحة تحكم الحلقات */
-  dashboard: params => apiClient.get('/api/v1/episode-center/dashboard', { params }),
-  /** قائمة الحلقات (page, limit, status, type, priority, phase, beneficiaryId, branchId) */
-  list: params => apiClient.get('/api/v1/episode-center', { params }),
-  /** إنشاء حلقة علاجية جديدة */
-  create: data => apiClient.post('/api/v1/episode-center', data),
-  /** الحلقة الكاملة مع كل مكوناتها */
-  get: id => apiClient.get(`/api/v1/episode-center/${id}`),
-  /** تقدم للمرحلة التالية */
-  advancePhase: (id, notes) =>
-    apiClient.post(`/api/v1/episode-center/${id}/advance-phase`, { notes }),
-  /** تحديث حالة الحلقة */
-  updateStatus: (id, status, reason) =>
-    apiClient.patch(`/api/v1/episode-center/${id}/status`, { status, reason }),
-  /** إضافة عضو للفريق العلاجي */
-  addTeamMember: (id, data) => apiClient.post(`/api/v1/episode-center/${id}/team-member`, data),
-  /** جميع حلقات مستفيد معين */
-  beneficiaryEpisodes: beneficiaryId =>
-    apiClient.get(`/api/v1/episode-center/beneficiary/${beneficiaryId}`),
-};
-
-/* ═══════════════════════════════════════════════════════════
- *  58. MEASURES LIBRARY — مكتبة المقاييس الموحدة
+ *  57. MEASURES LIBRARY — مكتبة المقاييس الموحدة
  * ═══════════════════════════════════════════════════════════ */
 export const measuresLibraryAPI = {
   /** إحصائيات المكتبة */
@@ -1100,9 +1076,8 @@ const dddAPI = {
   rehabTemplates: rehabTemplatesAPI,
   // Activity Library — Phase 27
   activityLibrary: activityLibraryAPI,
-  // Clinical Core — Session & Episode Centers + Measures Library
+  // Clinical Core — Session Center + Measures Library
   sessionCenter: sessionCenterAPI,
-  episodeCenter: episodeCenterAPI,
   measuresLibrary: measuresLibraryAPI,
   // Goal Bank — بنك الأهداف التأهيلية الذكية
   goalBank: goalBankAPI,

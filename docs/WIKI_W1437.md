@@ -22,10 +22,14 @@ W1437 fixes production DB timeouts in `AdvancedTicket` and `NphiesClaim`, and ad
 ## Deployment Decision Tree
 
 ```
-Do you deploy via VPS/bare-metal?
-├── Yes ──► ./scripts/deploy-vps.sh --with-w1437-migration
-├── Docker? ──► ./scripts/deploy-w1437-docker.sh up
-└── GitHub Actions? ──► Actions → 🗄️ W1437 Production Migration
+Run final review:
+└── ./scripts/final-review-w1437.sh
+
+Then choose deploy method:
+├── VPS/bare-metal ──► ./scripts/deploy-vps.sh --with-w1437-migration
+├── Docker ──► ./scripts/deploy-w1437-docker.sh up
+├── Canary ──► ./scripts/deploy-canary-w1437.sh
+└── GitHub Actions ──► Actions → 🗄️ W1437 Production Migration
 ```
 
 ---

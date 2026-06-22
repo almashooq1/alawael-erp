@@ -14,6 +14,12 @@
 
 ---
 
+## ✅ Pre-Deploy
+
+```bash
+./scripts/final-review-w1437.sh
+```
+
 ## 🚀 Deploy (pick one)
 
 ### Option 1: Existing VPS deploy script
@@ -22,7 +28,17 @@ export MONGODB_URI="mongodb+srv://..."
 ./scripts/deploy-vps.sh --with-w1437-migration
 ```
 
-### Option 2: Standalone migration then deploy
+### Option 2: Canary deployment
+```bash
+export MONGODB_URI="mongodb+srv://..."
+export CANARY_HOST="canary.alaweal.org"
+export PROD_HOST="alaweal.org"
+export VPS_USER="..."
+export VPS_SSH_KEY="$HOME/.ssh/deploy_key"
+./scripts/deploy-canary-w1437.sh
+```
+
+### Option 3: Standalone migration then deploy
 ```bash
 # On production host
 export MONGODB_URI="mongodb+srv://..."
@@ -31,7 +47,7 @@ export NODE_ENV=production
 # Then deploy backend/frontend manually
 ```
 
-### Option 3: Docker Compose
+### Option 4: Docker Compose
 ```bash
 export MONGODB_URI="mongodb+srv://..."
 export COMPOSE_FILE="docker-compose.professional.yml:docker-compose.production.yml"
@@ -39,7 +55,7 @@ export COMPOSE_PROJECT_NAME=alawael
 ./scripts/deploy-w1437-docker.sh up
 ```
 
-### Option 4: GitHub Actions
+### Option 5: GitHub Actions
 Actions → **🗄️ W1437 Production Migration** → type `migrate` → optionally deploy.
 
 ---

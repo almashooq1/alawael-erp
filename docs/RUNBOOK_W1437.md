@@ -52,7 +52,13 @@ Before starting, ensure:
 
 ## 4. Deployment Methods
 
-Choose **one** method.
+Run the final review first:
+
+```bash
+./scripts/final-review-w1437.sh
+```
+
+Then choose **one** deployment method.
 
 ### 4.1 VPS / Bare-Metal (Recommended)
 
@@ -111,7 +117,20 @@ export COMPOSE_PROJECT_NAME=alawael
 ./scripts/monitor-w1437-docker.sh alawael-backend-1
 ```
 
-### 4.4 GitHub Actions
+### 4.4 Canary Deployment
+
+Deploy to a canary host first, verify, then promote to production:
+
+```bash
+export MONGODB_URI="mongodb+srv://..."
+export CANARY_HOST="canary.alaweal.org"
+export PROD_HOST="alaweal.org"
+export VPS_USER="..."
+export VPS_SSH_KEY="$HOME/.ssh/deploy_key"
+./scripts/deploy-canary-w1437.sh
+```
+
+### 4.5 GitHub Actions
 
 1. Go to **Actions → 🗄️ W1437 Production Migration → Run workflow**.
 2. Type `migrate` in the confirm field.

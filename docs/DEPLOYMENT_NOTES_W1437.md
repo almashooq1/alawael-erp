@@ -14,6 +14,22 @@
 - **Wiki page:** `docs/WIKI_W1437.md` (copy to GitHub Wiki)
 - **Problem ledger:** `docs/PROBLEM_LEDGER_v6.md`
 
+## Pre-deploy readiness
+
+Run the final review script locally before any production deploy:
+
+```bash
+./scripts/final-review-w1437.sh
+```
+
+It checks:
+- Current branch is `main` and clean
+- `main` is up to date with `origin/main`
+- All required scripts exist
+- Syntax checks pass
+- Backend pre-push gates pass
+- Local migration test passes (MongoMemoryServer)
+
 ## Scope
 
 This release contains:

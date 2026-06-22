@@ -92,11 +92,14 @@ insuranceClaimSchema.pre('save', async function () {
     });
     this.claim_number = `CLM-${year}-${String(count + 1).padStart(6, '0')}`;
   }
-  if (this.items && this.items.length > 0) {
-    this.total_claimed = this.items.reduce((s, i) => s + (i.claimed_amount || 0), 0);
-    this.total_approved = this.items.reduce((s, i) => s + (i.approved_amount || 0), 0);
-    this.total_rejected = this.total_claimed - this.total_approved;
-  }
+  // W1451: derive header totals from items ONLY when items change, so an explicitly
+  // set total (e.g. a lump-sum insurer remittance via processClaimResponse, with no
+  // per-item approved_amount) is not silently overwritten. total_rejected is always
+  // the difference of the two header totals.
+  require('../../intelligence/insurance-claim-money.lib').reconcileClaimTotals(
+    this,
+    this.isNew || this.isModified('items')
+  );
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
   require('../../intelligence/money.lib').deriveHalalas(this, [
     'total_claimed',

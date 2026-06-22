@@ -293,8 +293,8 @@ router.post(
     const reversedLines = original.lines.map(l => ({
       account_id: l.account_id,
       description: `عكس: ${l.description || ''}`,
-      debit_amount: l.credit_amount,
-      credit_amount: l.debit_amount,
+      debit: l.credit,
+      credit: l.debit,
       branch_id: l.branch_id,
     }));
 
@@ -436,8 +436,7 @@ router.post(
     // (JWT carries id, not _id).
     const { branch_id: _b1, branchId: _b2, ...rest } = req.body || {};
     const branchId =
-      req.branchScope?.branchId ||
-      (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
+      req.branchScope?.branchId || (req.branchScope?.allBranches ? _b1 || _b2 : undefined);
     const actorId = req.user?.id || req.user?._id;
     const invoice = new Invoice({
       ...rest,
@@ -971,8 +970,8 @@ router.get(
         const accId = line.account_id?.toString();
         if (!accId) return;
         if (!balances[accId]) balances[accId] = { debit: 0, credit: 0 };
-        balances[accId].debit += line.debit_amount || 0;
-        balances[accId].credit += line.credit_amount || 0;
+        balances[accId].debit += line.debit || 0;
+        balances[accId].credit += line.credit || 0;
       });
     });
 

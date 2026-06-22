@@ -20,7 +20,7 @@ const { CctvCamera, CctvAccessGrant, CctvViewAudit } = require('../../models/cct
 const streamService = require('../../services/cctv/streamService');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 router.use(requireRole(['parent']));
 

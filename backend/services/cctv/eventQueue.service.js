@@ -69,7 +69,7 @@ function _lazy() {
   }
   if (!eventBus) {
     try {
-      eventBus = require('../quality/qualityEventBus.service');
+      eventBus = require('../quality/qualityEventBus.service').getDefault();
     } catch (_) {
       eventBus = null;
     }

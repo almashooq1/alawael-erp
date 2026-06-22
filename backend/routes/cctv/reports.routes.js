@@ -21,7 +21,7 @@ const express = require('express');
 const reports = require('../../services/cctv/reports.service');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 router.use(requireRole(['admin', 'manager', 'security_officer', 'hr_manager']));
 

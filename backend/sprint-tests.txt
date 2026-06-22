@@ -428,6 +428,7 @@ __tests__/incidents-analytics-service.test.js
 __tests__/incidents-digest-script.test.js
 __tests__/independent-advocate-role-wave464.test.js
 __tests__/individual-education-plan-behavioral-wave200b.test.js
+__tests__/input-validation-hardening-wave1448.test.js
 __tests__/insight-foundation-wave18.test.js
 __tests__/instrumental-swallow-behavioral-wave683.test.js
 __tests__/instrumental-swallow-wave683.test.js

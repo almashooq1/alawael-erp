@@ -167,7 +167,9 @@ function createHrModulesRouter({ logger } = {}) {
         const doc = await M.findByIdAndUpdate(
           req.params.id,
           { $set: stripUpdateMeta(req.body) },
-          { returnDocument: 'after' }
+          // W1448: runValidators so a bad enum / negative-money update is rejected (400)
+          // instead of silently persisting invalid data across the generic HR CRUD modules.
+          { returnDocument: 'after', runValidators: true }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'not found' });
         res.json({ success: true, data: doc });

@@ -243,7 +243,9 @@ function createHrExtensionsRouter({ logger } = {}) {
       const goal = await EmployeeGoal.findByIdAndUpdate(
         req.params.id,
         { $set: update },
-        { returnDocument: 'after' }
+        // W1448: runValidators so an invalid status / out-of-range weight (0–100) is
+        // rejected instead of silently corrupting performance-review data.
+        { returnDocument: 'after', runValidators: true }
       );
       if (!goal) return res.status(404).json({ success: false, message: 'not found' });
       res.json({ success: true, data: goal });

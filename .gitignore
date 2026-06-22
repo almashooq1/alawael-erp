@@ -308,3 +308,9 @@ backend/fix_duplicate_models.js
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+
+# ───────────────────────────────────────────────────────────────
+# 19. Agent task / runtime state (except orchestration sketches)
+# ───────────────────────────────────────────────────────────────
+!.kimi/tasks/repair-all-defects.js
+.kimi/

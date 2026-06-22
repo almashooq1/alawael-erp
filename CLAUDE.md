@@ -572,3 +572,39 @@ A full-stack repair pass was run against `66666/backend` + `alawael-rehab-platfo
 - `docs/PROBLEM_LEDGER_v5.md` — initial + final burned ledger
 - `docs/architecture/decisions/021-sprint-runner-temp-config.md`
 - Updated `CLAUDE.md` (this section)
+
+## Security fixes W1445–W1446 — 2026-06-22
+
+Two production-safety fixes shipped on `feat/w1406-preflight-followup` and pushed to `origin`.
+
+### W1445 — community-service branch isolation + CCTV asyncRouter
+
+**Commit:** `4dff9a808`
+
+- `backend/routes/community-service.routes.js`: replaced user-supplied `branchId` filtering with `branchFilter(req)` from `branchScope.middleware` on all list/stats handlers and on every `:id` lookup (`{ _id, ...branchFilter(req) }`). Closes cross-branch IDOR on CommunityProgram / CommunityEvent / CommunityPartnership / CommunityResource / CommunityReferral data.
+- `backend/routes/cctv/asyncRouter.js`: new Express 4 async-safe router wrapper. Rejected handler promises are forwarded to `next(err)` instead of becoming unhandled rejections that hang the request.
+- Adopted `asyncRouter` in all 12 CCTV route files (`admin`, `ai`, `alerts`, `audit`, `cameras`, `events`, `nvr`, `parent-portal`, `recordings`, `reports`, `streams`, `webhooks`).
+- Added drift guards:
+  - `backend/__tests__/branch-isolation-community-service-wave1445.test.js`
+  - `backend/__tests__/cctv-async-router-wave1445.test.js`
+
+**Wave collision resolved:** the original fix used W1444 which collided with prior deployment commits; renumbered to W1445. A leftover stash from the amend still contained W1445, so `check:wave-collision` flagged a false-positive until the stash was dropped.
+
+### W1446 — await webhook telemetry save in test endpoint
+
+**Commit:** `7b2f8c758`
+
+- `backend/routes/workflowWebhooks.routes.js`: in `POST /webhooks/:id/test`, `wh.save()` was fired inside `transport.request` callbacks without being awaited. This let the success response escape before the counter write committed and turned a save rejection into an unhandled rejection. Fixed by chaining `.catch(() => {}).then(() => resolve/reject)` so the write is awaited and failures on non-critical counters are swallowed rather than leaked.
+
+### Verified green
+
+All 7 pre-push gates passed locally and on push:
+
+- `check:sprint-paths`, `check:routes-load`, `check:gitignored-sources`, `check:hook-style`, `check:wave-collision`, `check:phantom-writes`, `check:route-shadowing`
+- `frontend` lint, `supply-chain-management/frontend` lint, `mobile` lint
+
+### Pattern recap
+
+- For branch-scoped routes: import `branchFilter` and spread it into every query and every id-keyed Mongoose call; never trust `req.query.branchId` or `x-branch-id`.
+- For Express 4 async routes: use a wrapper that catches handler rejections and forwards them to the error middleware; bare `express.Router()` is unsafe for async handlers.
+- For fire-and-forget Mongoose writes inside callbacks: either `await` them or explicitly handle the rejection before resolving/rejecting the outer promise; otherwise the rejection is unhandled.

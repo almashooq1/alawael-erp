@@ -16,7 +16,7 @@ const { CctvCamera } = require('../../../models/cctv');
 const incidentService = null;
 let eventBus = null;
 try {
-  eventBus = require('../../quality/qualityEventBus.service');
+  eventBus = require('../../quality/qualityEventBus.service').getDefault();
 } catch (_) {}
 
 async function process(event) {

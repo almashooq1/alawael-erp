@@ -19,6 +19,52 @@ const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
+// W1448: anti-mass-assignment whitelists. The create route is only `authenticate`-gated
+// (any logged-in user, including a complainant), so spreading `...req.body` let a caller
+// self-set workflow/SLA state — status, slaBreached, escalationLevel, resolved/closedAt,
+// assignedTo, satisfactionRating — filing a complaint that is already "closed" with a
+// cleared SLA breach, evading the open-complaint / SLA-breach quality dashboards. Status
+// transitions must go through the dedicated POST /:id/status workflow endpoint.
+const COMPLAINT_CREATABLE = [
+  'patientId',
+  'leadId',
+  'complainantName',
+  'complainantPhone',
+  'complainantEmail',
+  'complainantType',
+  'channel',
+  'subcategory',
+  'subject',
+  'description',
+  'attachments',
+  'departmentId',
+];
+const COMPLAINT_UPDATABLE = [
+  'complainantName',
+  'complainantPhone',
+  'complainantEmail',
+  'complainantType',
+  'channel',
+  'category',
+  'subcategory',
+  'subject',
+  'description',
+  'attachments',
+  'priority',
+  'assignedTo',
+  'departmentId',
+  'resolutionNotes',
+  'rootCause',
+  'requiresFollowup',
+  'followupDate',
+];
+const pickFields = (body, allowed) => {
+  const out = {};
+  const src = body || {};
+  for (const k of allowed) if (src[k] !== undefined) out[k] = src[k];
+  return out;
+};
+
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════
@@ -397,7 +443,7 @@ router.post('/', async (req, res) => {
     const slaHours = slaConfig?.resolutionHours || 72;
 
     const complaint = new ComplaintV2({
-      ...req.body,
+      ...pickFields(req.body, COMPLAINT_CREATABLE), // W1448: whitelist, not ...req.body
       branchId: effectiveBranchId,
       complaintNumber,
       priority: req.body.priority || aiResult?.priority || 'medium',
@@ -435,7 +481,8 @@ router.put(
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
       const complaint = await ComplaintV2.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, updatedBy: req.user?._id || req.userId },
+        // W1448: whitelist editable fields; status transitions go through POST /:id/status
+        { ...pickFields(req.body, COMPLAINT_UPDATABLE), updatedBy: req.user?._id || req.userId },
         { returnDocument: 'after', runValidators: true }
       );
       if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });

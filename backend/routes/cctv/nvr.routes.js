@@ -14,7 +14,7 @@ const nvrService = require('../../services/cctv/nvrService');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { stripUpdateMeta } = require('../../utils/sanitize');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 
 router.get('/', requireRole(['admin', 'manager', 'security_officer']), async (req, res) => {

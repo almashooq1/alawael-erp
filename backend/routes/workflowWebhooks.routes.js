@@ -153,15 +153,22 @@ router.post('/webhooks/:id/test', authMiddleware, requireBranchAccess, async (re
             wh.lastTriggeredAt = new Date();
             wh.lastResponseStatus = response.statusCode;
             wh.totalTriggered += 1;
-            wh.save();
-            resolve(response.statusCode);
+            // Await the telemetry write before resolving so the response isn't sent
+            // before it commits; swallow a save failure (counters are non-critical)
+            // rather than leaving an unhandled rejection. (W1446)
+            wh.save()
+              .catch(() => {})
+              .then(() => resolve(response.statusCode));
           }
         );
         r.on('error', err => {
           wh.lastError = err.message;
           wh.totalFailed += 1;
-          wh.save();
-          reject(err);
+          // Persist the failure counter, then reject with the original transport
+          // error (not the save outcome); never leave the save promise unhandled. (W1446)
+          wh.save()
+            .catch(() => {})
+            .then(() => reject(err));
         });
         r.write(JSON.stringify(testPayload));
         r.end();

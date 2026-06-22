@@ -161,6 +161,9 @@ const BASELINE_TRACKED_IGNORED = new Set([
   'ops/health-check-all.sh',
   // SCM sub-module env template
   'supply-chain-management/backend/.env.development',
+  // Agent orchestration sketch — matches `.kimi/` ignore but is tracked
+  // as the canonical repair-all-defects task definition.
+  '.kimi/tasks/repair-all-defects.js',
 ]);
 
 function repoRoot() {

@@ -46,6 +46,8 @@ Before starting, ensure:
 | Loki alerts | `ops/loki-rules-w1437.yml` |
 | GitHub migration workflow | `.github/workflows/w1437-migrate.yml` |
 | GitHub monitor workflow | `.github/workflows/w1437-monitor.yml` |
+| GitHub final-review workflow | `.github/workflows/w1437-final-review.yml` |
+| Deployment status | `docs/W1437_DEPLOY_STATUS.md` |
 | Deployment notes | `docs/DEPLOYMENT_NOTES_W1437.md` |
 
 ---

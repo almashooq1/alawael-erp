@@ -1,0 +1,72 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — W1437 Final Pre-Deploy Review
+#
+#  Runs the W1437 final review script on every push to main and on PRs
+#  that touch deployment-relevant files. Ensures the repository is always
+#  in a deployable state.
+#
+#  The script checks:
+#    - Branch, working tree, and origin sync
+#    - Required scripts and docs exist
+#    - Syntax checks for all shell/Node scripts
+#    - Backend pre-push gates
+#    - Local migration test via MongoMemoryServer
+# ════════════════════════════════════════════════════════════════════
+name: "🔍 W1437 Final Pre-Deploy Review"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/scripts/migrate-nphies-claim-updatedAt.js"
+      - "backend/scripts/test-migration-local.js"
+      - "scripts/deploy-w1437.sh"
+      - "scripts/deploy-vps.sh"
+      - "scripts/deploy-canary-w1437.sh"
+      - "scripts/deploy-w1437-docker.sh"
+      - "scripts/monitor-w1437.sh"
+      - "scripts/monitor-w1437-docker.sh"
+      - "scripts/smoke-test-w1437.sh"
+      - "scripts/rollback-w1437.sh"
+      - "scripts/final-review-w1437.sh"
+      - "scripts/generate-runbook-pdf.py"
+      - "ops/loki-rules-w1437.yml"
+      - ".github/workflows/w1437-*.yml"
+      - "docs/RUNBOOK_W1437.md"
+      - "docs/DEPLOYMENT_NOTES_W1437.md"
+      - "docs/W1437_DEPLOY_CHEAT_SHEET.md"
+
+env:
+  NODE_VERSION: "22"
+
+concurrency:
+  group: w1437-final-review-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  final-review:
+    name: "🔍 Run W1437 final pre-deploy review"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run final review
+        run: ./scripts/final-review-w1437.sh

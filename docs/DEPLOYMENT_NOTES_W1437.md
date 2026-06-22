@@ -12,6 +12,8 @@
   Generate with: `python3 scripts/generate-runbook-pdf.py`
 - **Full runbook (Markdown):** `docs/RUNBOOK_W1437.md`
 - **Wiki page:** `docs/WIKI_W1437.md` (copy to GitHub Wiki)
+- **Deployment status:** `docs/W1437_DEPLOY_STATUS.md`  
+  Update with: `node scripts/track-deploy-status.js`
 - **Problem ledger:** `docs/PROBLEM_LEDGER_v6.md`
 
 ## Pre-deploy readiness

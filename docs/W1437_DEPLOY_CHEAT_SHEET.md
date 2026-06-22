@@ -128,5 +128,13 @@ DRY_RUN=1 NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedA
 python3 scripts/generate-runbook-pdf.py
 ```
 
+### Update deployment status page
+```bash
+node scripts/track-deploy-status.js
+```
+
+### CI final review
+GitHub Actions → **🔍 W1437 Final Pre-Deploy Review**
+
 ### Re-run GitHub monitor
 Actions → **👁️ W1437 Post-Deploy Monitor**

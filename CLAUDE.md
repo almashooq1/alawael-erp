@@ -608,3 +608,54 @@ All 7 pre-push gates passed locally and on push:
 - For branch-scoped routes: import `branchFilter` and spread it into every query and every id-keyed Mongoose call; never trust `req.query.branchId` or `x-branch-id`.
 - For Express 4 async routes: use a wrapper that catches handler rejections and forwards them to the error middleware; bare `express.Router()` is unsafe for async handlers.
 - For fire-and-forget Mongoose writes inside callbacks: either `await` them or explicitly handle the rejection before resolving/rejecting the outer promise; otherwise the rejection is unhandled.
+
+## Deep bug-hunt follow-ups W1450–W1454 — 2026-06-22
+
+Five regression fixes from the W1443–W1449 deep bug-hunt were bundled into PR #594, renumbered to avoid collisions with already-merged waves on `main`, and shipped via squash merge `9cde4aab4`.
+
+### W1450 — AI scheduler Goal participantId query (re-applied)
+
+**Commit:** `8425fcca4`
+
+- `backend/services/ai/aiScheduler.service.js`: restored the `participantId` filter on the Goal lookup that was dropped during a prior rebase. Without it the scheduler could plan against goals belonging to other participants.
+- Guard: `backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js` (wave number kept for historical traceability).
+
+### W1451 — input-validation + trial-balance hardening
+
+**Commit:** `b4246d35a`
+
+- `backend/routes/complaints-enhanced.routes.js`: replaced `...req.body` spreads with explicit field whitelists (`COMPLAINT_CREATABLE` / `COMPLAINT_UPDATABLE`) so authenticated users cannot self-set `status`, `slaBreached`, `escalationLevel`, or resolved/closed timestamps. Status transitions remain restricted to `POST /:id/status`.
+- `backend/routes/hr/hr-modules.routes.js` and `backend/routes/hr/hr-extensions.routes.js`: added `runValidators: true` to generic CRUD `PATCH` and `EmployeeGoal` update so invalid enum / negative-money / out-of-range updates fail instead of persisting silently.
+- `backend/routes/finance-module.routes.js`: trial-balance now reads `line.debit` / `line.credit` instead of the non-existent `debit_amount` / `credit_amount`, fixing zero-balance reports.
+- Guard: `backend/__tests__/input-integrity-hardening-wave1448.test.js`.
+
+### W1452 — invoice header totals reconciliation (ZATCA)
+
+**Commit:** `4ff5ff2a0`
+
+- `backend/services/billing/invoice.service.js`: adds `recalculateHeaderTotals(invoice)` and wires it into issue/submit flows so header subtotal, VAT, and total are synchronized with line-item sums before ZATCA submission.
+- Guard: `backend/__tests__/invoice-totals-reconciliation-wave1449.test.js`.
+
+### W1453 — enumerate deep-bug-hunt regression guards in sprint gate
+
+**Commit:** `62aa3abeb`
+
+- Registered the six new regression-guard tests in `backend/sprint-tests.txt` and `.github/workflows/sprint-tests.yml` so CI's canonical sprint gate actually runs them.
+
+### W1454 — Beneficiary PII field projection (PDPL)
+
+**Commit:** `1a3334106`
+
+- `backend/models/Beneficiary.js`: marked `passwordResetToken`, `passwordResetExpires`, `twoFactorSecret`, and `accountVerificationCode` with `select: false`, matching the sibling `BeneficiaryPortal` model and preventing these sensitive fields from leaking in default query projections.
+- Guard: `backend/__tests__/beneficiary-pii-select-false-wave1454.test.js`.
+
+### Verified green
+
+All 7 pre-push gates passed locally; PR #594 CI passed including `Tests & Code Quality` (~32 min), `Security Scanning`, CodeQL, and frontend/mobile/SCM quality gates.
+
+### Pattern recap
+
+- Renumber colliding waves before pushing; `check:wave-collision` exits non-zero and the suggested next free wave is authoritative.
+- Never spread `req.body` into Mongoose constructors or updates for resources that have privileged/auto-derived fields; whitelist creatable/updatable fields.
+- Always pair schema enum/range constraints with `runValidators: true` on `findByIdAndUpdate` / `updateOne` / generic CRUD patches.
+- Keep model PII symmetry: if one schema marks a sensitive field `select: false`, siblings storing equivalent data should do the same.

@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const importExportService = require('../services/importExportPro.service');
 const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -34,6 +35,7 @@ router.get('/export/excel', async (req, res) => {
       module: model,
       format: 'xlsx',
       query: parsedFilters,
+      branchId: effectiveBranchScope(req), // W1459
       userId,
     });
 
@@ -62,6 +64,7 @@ router.get('/export/pdf/:id', async (req, res) => {
       module: model,
       format: 'pdf',
       query: { _id: req.params.id },
+      branchId: effectiveBranchScope(req), // W1459
       userId,
     });
 

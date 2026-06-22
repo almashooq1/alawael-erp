@@ -15,7 +15,7 @@ const { CctvAlert, CctvEvent } = require('../../models/cctv');
 
 let eventBus = null;
 try {
-  eventBus = require('../quality/qualityEventBus.service');
+  eventBus = require('../quality/qualityEventBus.service').getDefault();
 } catch (_) {}
 let unifiedNotifier = null;
 try {

@@ -17,7 +17,7 @@ const eventQueue = require('./eventQueue.service');
 
 let eventBus = null;
 try {
-  eventBus = require('../quality/qualityEventBus.service');
+  eventBus = require('../quality/qualityEventBus.service').getDefault();
 } catch (_) {
   eventBus = null;
 }

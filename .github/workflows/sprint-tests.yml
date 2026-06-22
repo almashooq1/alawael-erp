@@ -1913,6 +1913,8 @@ on:
       - 'backend/__tests__/finance-put-massassign-wave1458.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/export-branch-scope-wave1459.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3804,6 +3806,8 @@ on:
       - 'backend/__tests__/finance-put-massassign-wave1458.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/export-branch-scope-wave1459.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

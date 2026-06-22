@@ -887,7 +887,7 @@ router.put('/settings', async (req, res) => {
 /**
  * POST /settings/change-phone — طلب تغيير رقم الهاتف (الخطوة 1)
  */
-router.post('/settings/change-phone', async (req, res) => {
+router.post('/settings/change-phone', parentOtpSendLimiter, async (req, res) => {
   try {
     const { newPhone } = req.body;
 
@@ -928,7 +928,7 @@ router.post('/settings/change-phone', async (req, res) => {
 /**
  * POST /settings/change-phone/verify — التحقق من OTP تغيير الهاتف (الخطوة 2)
  */
-router.post('/settings/change-phone/verify', async (req, res) => {
+router.post('/settings/change-phone/verify', parentOtpVerifyLimiter, async (req, res) => {
   try {
     const { newPhone, otp } = req.body;
 

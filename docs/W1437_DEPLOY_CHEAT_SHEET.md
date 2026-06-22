@@ -55,7 +55,17 @@ export COMPOSE_PROJECT_NAME=alawael
 ./scripts/deploy-w1437-docker.sh up
 ```
 
-### Option 5: GitHub Actions
+### Option 5: Blue-green
+```bash
+export MONGODB_URI="mongodb+srv://..."
+export DEPLOY_ROOT=/home/alawael/app
+export NGINX_COLOR_CONFIG=/etc/nginx/conf.d/alawael-color.conf
+export SMOKE_URL_INACTIVE=http://localhost:3002
+export SMOKE_URL_ACTIVE=https://alaweal.org
+./scripts/deploy-bluegreen-w1437.sh
+```
+
+### Option 6: GitHub Actions
 Actions → **🗄️ W1437 Production Migration** → type `migrate` → optionally deploy.
 
 ---
@@ -95,6 +105,7 @@ Actions → **🗄️ W1437 Production Migration** → type `migrate` → option
 
 ## ↩️ Rollback
 
+### Manual
 ```bash
 export DEPLOY_ROOT=/opt/alawael-erp
 ./scripts/rollback-w1437.sh
@@ -103,6 +114,16 @@ export DEPLOY_ROOT=/opt/alawael-erp
 Or to a specific commit/tag:
 ```bash
 ./scripts/rollback-w1437.sh v1.2.3
+```
+
+### GitHub Actions
+Actions → **↩️ W1437 Rollback** → type `rollback` → optionally specify target commit.
+
+## 🚩 Feature Flags
+
+Disable W1437 behavior without redeploying:
+```bash
+FEATURE_W1437=false
 ```
 
 ---
@@ -115,6 +136,16 @@ Or to a specific commit/tag:
 - Problem ledger: `docs/PROBLEM_LEDGER_v6.md`
 
 ---
+
+## 🚨 Alert Integrations
+
+Set any of these before running deploy scripts:
+```bash
+export SLACK_WEBHOOK="..."
+export TEAMS_WEBHOOK="..."
+export PAGERDUTY_INTEGRATION_KEY="..."
+export SENTRY_DSN="..."
+```
 
 ## 🔧 Useful Commands
 

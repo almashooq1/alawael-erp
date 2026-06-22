@@ -8,6 +8,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const { isFeatureEnabled } = require('../config/featureFlags');
 
 const NphiesClaimSchema = new mongoose.Schema(
   {
@@ -108,8 +109,10 @@ NphiesClaimSchema.index({
 });
 
 // W1437 — auto-stamp submission.updatedAt whenever the submission subdoc changes.
+// If FEATURE_W1437=false the field is still defaulted but not auto-updated,
+// matching pre-W1437 behavior.
 NphiesClaimSchema.pre('save', async function () {
-  if (this.isModified('nphies.submission')) {
+  if (isFeatureEnabled('w1437') && this.isModified('nphies.submission')) {
     this.nphies.submission.updatedAt = new Date();
   }
 });

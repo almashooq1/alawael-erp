@@ -132,7 +132,22 @@ export VPS_SSH_KEY="$HOME/.ssh/deploy_key"
 ./scripts/deploy-canary-w1437.sh
 ```
 
-### 4.5 GitHub Actions
+### 4.5 Blue-Green Deployment
+
+For zero-downtime cutover with instant rollback:
+
+```bash
+export MONGODB_URI="mongodb+srv://..."
+export DEPLOY_ROOT=/home/alawael/app
+export NGINX_COLOR_CONFIG=/etc/nginx/conf.d/alawael-color.conf
+export SMOKE_URL_INACTIVE=http://localhost:3002
+export SMOKE_URL_ACTIVE=https://alaweal.org
+./scripts/deploy-bluegreen-w1437.sh
+```
+
+Requires two app directories (`app-blue`, `app-green`) and an nginx upstream config.
+
+### 4.6 GitHub Actions
 
 1. Go to **Actions → 🗄️ W1437 Production Migration → Run workflow**.
 2. Type `migrate` in the confirm field.
@@ -225,19 +240,45 @@ export TEAMS_WEBHOOK="https://outlook.office.com/webhook/..."
 
 ---
 
-## 9. Known Risks
+## 9. Feature Flags
+
+W1437 behavior can be disabled at runtime without redeploying:
+
+```bash
+FEATURE_W1437=false
+```
+
+When disabled:
+- `ticketSlaScheduler` falls back to `$nin` query
+- `nphiesReconciliationService.sweep` falls back to pre-W1437 query
+- `NphiesClaim` pre-save hook stops auto-updating `updatedAt`
+
+Default is `true`.
+
+## 10. Alert Integrations
+
+The deploy scripts dispatch to:
+
+- Slack (`SLACK_WEBHOOK`)
+- Microsoft Teams (`TEAMS_WEBHOOK`)
+- PagerDuty (`PAGERDUTY_INTEGRATION_KEY`)
+- Sentry (`SENTRY_DSN`)
+
+Loki alert rules route to AlertManager; configure AlertManager to forward to PagerDuty for page-worthy events.
+
+## 11. Known Risks
 
 | Risk | Mitigation |
 |------|------------|
 | Migration not run before deploy | `deploy-w1437.sh` fails fast; GitHub Actions workflow enforces order; `--with-w1437-migration` flag in `deploy-vps.sh`. |
 | Indexes missing | Scripts verify indexes; Mongoose `autoIndex` builds them on startup if enabled. |
 | Local changes lost on production host | `--force` flag required; script aborts on dirty working tree by default. |
-| Rollback needed | `rollback-w1437.sh` automates code rollback and backup. |
+| Rollback needed | `rollback-w1437.sh` automates code rollback and backup; GitHub Actions workflow available. |
 | Long-running monitor forgotten | GitHub Actions workflow runs the full 30-minute monitor and reports result. |
 
 ---
 
-## 10. Sign-off
+## 12. Sign-off
 
 | Role | Name | Sign-off | Date |
 |------|------|----------|------|
@@ -247,7 +288,7 @@ export TEAMS_WEBHOOK="https://outlook.office.com/webhook/..."
 
 ---
 
-## 11. Appendix: Required Compound Indexes
+## 13. Appendix: Required Compound Indexes
 
 ```js
 // AdvancedTicket
@@ -259,7 +300,7 @@ export TEAMS_WEBHOOK="https://outlook.office.com/webhook/..."
 
 ---
 
-## 12. Appendix: Emergency Contacts
+## 14. Appendix: Emergency Contacts
 
 Add your team contacts here:
 

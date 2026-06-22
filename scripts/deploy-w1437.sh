@@ -26,6 +26,8 @@ FORCE_RESET=false
 BACKUP_MAX_AGE_HOURS="${BACKUP_MAX_AGE_HOURS:-24}"
 SLACK_WEBHOOK="${SLACK_WEBHOOK:-}"
 TEAMS_WEBHOOK="${TEAMS_WEBHOOK:-}"
+PAGERDUTY_INTEGRATION_KEY="${PAGERDUTY_INTEGRATION_KEY:-}"
+SENTRY_DSN="${SENTRY_DSN:-}"
 
 # Parse optional args
 for arg in "$@"; do
@@ -85,20 +87,15 @@ log "Environment OK: node $(node -v), DEPLOY_ROOT=$DEPLOY_ROOT, NODE_ENV=$NODE_E
 notify() {
   local status="$1"
   local message="$2"
-  local payload
+  local severity="$3"
+  severity="${severity:-info}"
 
-  if [[ -n "$SLACK_WEBHOOK" ]]; then
-    payload=$(printf '{"text":"[W1437 Deploy] %s: %s"}' "$status" "$message")
-    curl -sf -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK" &>/dev/null || warn "Slack notification failed"
-  fi
-
-  if [[ -n "$TEAMS_WEBHOOK" ]]; then
-    payload=$(printf '{"text":"[W1437 Deploy] %s: %s"}' "$status" "$message")
-    curl -sf -X POST -H 'Content-type: application/json' --data "$payload" "$TEAMS_WEBHOOK" &>/dev/null || warn "Teams notification failed"
+  if [[ -n "$SLACK_WEBHOOK" || -n "$TEAMS_WEBHOOK" || -n "$PAGERDUTY_INTEGRATION_KEY" || -n "$SENTRY_DSN" ]]; then
+    "${DEPLOY_ROOT}/scripts/alert-dispatch.sh" "$severity" "$status" "$message" || warn "Alert dispatch failed"
   fi
 }
 
-notify "STARTED" "Deployment pre-flight on $(hostname)"
+notify "STARTED" "Deployment pre-flight on $(hostname)" "info"
 
 # --- Backup verification -----------------------------------------------------
 log "Verifying production MongoDB backup..."
@@ -181,12 +178,12 @@ MIGRATION_MATCHED=$(echo "$MIGRATION_OUTPUT" | grep -oE '"matched":[0-9]+' | cut
 MIGRATION_MODIFIED=$(echo "$MIGRATION_OUTPUT" | grep -oE '"modified":[0-9]+' | cut -d: -f2 || echo "?")
 
 if [[ $MIGRATION_EXIT -ne 0 ]]; then
-  notify "MIGRATION_FAILED" "Migration failed with exit code $MIGRATION_EXIT"
+  notify "MIGRATION_FAILED" "Migration failed with exit code $MIGRATION_EXIT" "critical"
   fail "Migration failed with exit code $MIGRATION_EXIT. STOP. Do not deploy application code."
 fi
 
 log "Migration completed successfully (matched: $MIGRATION_MATCHED, modified: $MIGRATION_MODIFIED)"
-notify "MIGRATION_OK" "Migration completed on $(hostname): matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED"
+notify "MIGRATION_OK" "Migration completed on $(hostname): matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED" "info"
 notify "MIGRATION_OK" "Migration completed: matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED"
 
 # --- Verify indexes ----------------------------------------------------------
@@ -270,4 +267,4 @@ log "  3. Deploy mobile build (if applicable)"
 log "  4. Run: ./scripts/monitor-w1437.sh"
 log "================================================================"
 
-notify "PREDEPLOY_OK" "Pre-deploy phase complete on $(hostname). Commit: $CURRENT_COMMIT"
+notify "PREDEPLOY_OK" "Pre-deploy phase complete on $(hostname). Commit: $CURRENT_COMMIT" "info"

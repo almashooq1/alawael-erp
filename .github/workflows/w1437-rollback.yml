@@ -1,0 +1,111 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — W1437 Automated Rollback (manual)
+#
+#  Rolls back the application code to the commit before W1437 on the
+#  production host. The migration data is left in place because it is safe.
+#
+#  Required secrets:
+#    VPS_HOST      - production host
+#    VPS_USER      - SSH user
+#    VPS_SSH_KEY   - private SSH key
+#
+#  Optional secrets:
+#    DEPLOY_ROOT   - app directory on VPS (default: /home/alawael/app)
+#    ROLLBACK_TARGET - commit or tag to roll back to (default: commit before W1437 merge)
+# ════════════════════════════════════════════════════════════════════
+name: "↩️ W1437 Rollback"
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_target:
+        description: "Commit/tag للتراجع إليه (optional)"
+        required: false
+        type: string
+      confirm:
+        description: "اكتب 'rollback' للتأكيد"
+        required: true
+        type: string
+
+env:
+  DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT || '/home/alawael/app' }}
+
+concurrency:
+  group: w1437-rollback
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: "↩️ Rollback W1437 on production"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Confirm intent
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "rollback" ]; then
+            echo "❌ You must type 'rollback' in the confirm field!"
+            exit 1
+          fi
+          echo "✅ Rollback confirmed"
+
+      - name: Validate secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]    && echo "❌ Missing: VPS_HOST"    && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing: VPS_USER"    && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
+          if [ "$MISSING" -ne 0 ]; then
+            echo "❌ Required secrets are missing."
+            exit 1
+          fi
+          echo "✅ All required secrets present"
+
+      - uses: actions/checkout@v6
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "✅ SSH configured"
+
+      - name: Run rollback on production host
+        run: |
+          set -eo pipefail
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          TARGET="${{ github.event.inputs.rollback_target }}"
+
+          echo "↩️ Rolling back W1437 on $SSH_TARGET"
+
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -o BatchMode=yes \
+              "$SSH_TARGET" bash -s <<REMOTE_SCRIPT
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+            ./scripts/rollback-w1437.sh --yes $TARGET
+          REMOTE_SCRIPT
+
+          echo "✅ Rollback completed"
+
+      - name: Verify production health
+        run: |
+          sleep 10
+          HEALTH=$(curl -sf -o /dev/null -w "%{http_code}" "https://${{ secrets.DOMAIN || 'alaweal.org' }}/health" || echo "0")
+          if [ "$HEALTH" != "200" ]; then
+            echo "❌ /health returned $HEALTH after rollback"
+            exit 1
+          fi
+          echo "✅ /health → 200 after rollback"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## W1437 Rollback" >> $GITHUB_STEP_SUMMARY
+          echo "- Host: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy root: ${{ env.DEPLOY_ROOT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Target: ${{ github.event.inputs.rollback_target || 'default (pre-W1437)' }}" >> $GITHUB_STEP_SUMMARY

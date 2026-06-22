@@ -29,6 +29,7 @@ Then choose deploy method:
 ├── VPS/bare-metal ──► ./scripts/deploy-vps.sh --with-w1437-migration
 ├── Docker ──► ./scripts/deploy-w1437-docker.sh up
 ├── Canary ──► ./scripts/deploy-canary-w1437.sh
+├── Blue-Green ──► ./scripts/deploy-bluegreen-w1437.sh
 └── GitHub Actions ──► Actions → 🗄️ W1437 Production Migration
 ```
 
@@ -141,6 +142,9 @@ export DEPLOY_ROOT=/opt/alawael-erp
 | GitHub migration workflow | `.github/workflows/w1437-migrate.yml` |
 | GitHub monitor workflow | `.github/workflows/w1437-monitor.yml` |
 | GitHub final-review workflow | `.github/workflows/w1437-final-review.yml` |
+| GitHub rollback workflow | `.github/workflows/w1437-rollback.yml` |
+| Blue-green deploy | `scripts/deploy-bluegreen-w1437.sh` |
+| Alert dispatch | `scripts/alert-dispatch.sh` |
 | Deployment status | `docs/W1437_DEPLOY_STATUS.md` |
 
 ---
@@ -158,6 +162,12 @@ A: Yes, it is safe because the migration is idempotent. You can remove the varia
 
 **Q: How do I enable Loki alerts?**  
 A: Mount `ops/loki-rules-w1437.yml` into the Loki container and ensure Loki's `ruler` points to AlertManager.
+
+**Q: Can I disable W1437 behavior at runtime?**  
+A: Yes, set `FEATURE_W1437=false`. The code falls back to pre-W1437 queries.
+
+**Q: How do I page PagerDuty on critical failures?**  
+A: Set `PAGERDUTY_INTEGRATION_KEY` when running deploy scripts, or route AlertManager to PagerDuty.
 
 ---
 

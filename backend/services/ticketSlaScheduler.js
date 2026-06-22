@@ -9,6 +9,7 @@
  */
 
 const logger = require('../utils/logger');
+const { isFeatureEnabled } = require('../config/featureFlags');
 
 let schedulerStarted = false;
 let _slaInterval = null;
@@ -19,6 +20,14 @@ let _slaInterval = null;
 // Using $in with this list lets MongoDB use the status-leading compound
 // indexes. $nin ['resolved','closed'] forces a full collection scan.
 const ACTIVE_STATUSES = ['open', 'in_progress', 'waiting_on_customer', 'escalated'];
+
+// Feature-flagged: W1437 uses $in (index-friendly); pre-W1437 used $nin.
+function activeStatusFilter() {
+  if (isFeatureEnabled('w1437')) {
+    return { status: { $in: ACTIVE_STATUSES } };
+  }
+  return { status: { $nin: ['resolved', 'closed', 'cancelled'] } };
+}
 
 const SLA_CONFIG = {
   critical: { response: 1, resolution: 4 },
@@ -101,9 +110,9 @@ async function checkResolutionBreaches({ AdvancedTicket: AdvancedTicketArg } = {
     const now = new Date();
 
     // تذاكر لم تُحل بعد
-    const openTickets = await AdvancedTicket.find({
-      status: { $in: ACTIVE_STATUSES },
-    }).populate('assignee', 'name email');
+    const openTickets = await AdvancedTicket.find(
+      activeStatusFilter()
+    ).populate('assignee', 'name email');
 
     let count = 0;
 
@@ -226,7 +235,7 @@ async function assignMissingSlaDeadlines({ AdvancedTicket: AdvancedTicketArg } =
 
     const ticketsWithoutSla = await AdvancedTicket.find({
       $or: [{ 'sla.responseTime': null }, { 'sla.responseTime': { $exists: false } }],
-      status: { $in: ACTIVE_STATUSES },
+      ...activeStatusFilter(),
     }).limit(50);
 
     for (const ticket of ticketsWithoutSla) {
@@ -253,14 +262,14 @@ async function getSlaStats({ AdvancedTicket: AdvancedTicketArg } = {}) {
     const AdvancedTicket = AdvancedTicketArg || require('../models/AdvancedTicket');
 
     const [total, breached, critical, escalated] = await Promise.all([
-      AdvancedTicket.countDocuments({ status: { $in: ACTIVE_STATUSES } }),
+      AdvancedTicket.countDocuments(activeStatusFilter()),
       AdvancedTicket.countDocuments({
         'sla.isBreached': true,
-        status: { $in: ACTIVE_STATUSES },
+        ...activeStatusFilter(),
       }),
       AdvancedTicket.countDocuments({
         priority: 'critical',
-        status: { $in: ACTIVE_STATUSES },
+        ...activeStatusFilter(),
       }),
       AdvancedTicket.countDocuments({ status: 'escalated' }),
     ]);

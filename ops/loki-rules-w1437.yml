@@ -21,6 +21,11 @@
 #
 # Then restart Loki and verify rules loaded:
 #   curl http://localhost:3100/loki/api/v1/rules
+#
+# Routing to PagerDuty:
+#   Configure AlertManager with a receiver that calls PagerDuty Events API v2
+#   using PAGERDUTY_INTEGRATION_KEY. The deploy scripts also dispatch directly
+#   to PagerDuty on critical migration failures.
 
 groups:
   - name: w1437.production.timeouts

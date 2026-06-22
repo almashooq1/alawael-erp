@@ -20,6 +20,7 @@ const mongoose = require('mongoose');
 const DefaultClaim = require('../models/NphiesClaim');
 const defaultAdapter = require('./nphiesAdapter');
 const logger = require('../utils/logger');
+const { isFeatureEnabled } = require('../config/featureFlags');
 
 function defaultSessionModel() {
   try {
@@ -162,9 +163,12 @@ function createService({ claimModel = DefaultClaim, adapter = defaultAdapter, se
     // W1437 — rely on nphies.submission.updatedAt (now schema-backed + defaulted).
     // Existing documents must be backfilled by scripts/migrate-nphies-claim-updatedAt.js
     // before this code is deployed, otherwise stale PENDING_REVIEW claims won't be swept.
-    const q = {
+    // If FEATURE_W1437=false, fall back to the pre-W1437 query (slower full scan).
+    const q = isFeatureEnabled('w1437') ? {
       'nphies.submission.status': 'PENDING_REVIEW',
       'nphies.submission.updatedAt': { $lt: cutoff },
+    } : {
+      'nphies.submission.status': 'PENDING_REVIEW',
     };
     const claims = await claimModel
       .find(q)

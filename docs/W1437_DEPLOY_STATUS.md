@@ -7,8 +7,8 @@
 | Metric | Value |
 |--------|-------|
 | Branch | `main` |
-| Commit | `88a047031` |
-| Generated at | 2026-06-22T10:10:30.323Z |
+| Commit | `65b595679` |
+| Generated at | 2026-06-22T10:24:11.523Z |
 | Working tree | ❌ dirty |
 | Release | W1437 (feat/w1406-preflight-followup) |
 | Hotfix | W1444 |
@@ -32,6 +32,9 @@
 | GitHub migration workflow | `.github/workflows/w1437-migrate.yml` | ✅ present |
 | GitHub monitor workflow | `.github/workflows/w1437-monitor.yml` | ✅ present |
 | GitHub final-review workflow | `.github/workflows/w1437-final-review.yml` | ✅ present |
+| GitHub rollback workflow | `.github/workflows/w1437-rollback.yml` | ✅ present |
+| Blue-green deploy | `scripts/deploy-bluegreen-w1437.sh` | ✅ present |
+| Alert dispatch | `scripts/alert-dispatch.sh` | ✅ present |
 | Runbook PDF | `docs/RUNBOOK_W1437.pdf` | ✅ present |
 | Runbook Markdown | `docs/RUNBOOK_W1437.md` | ✅ present |
 | Wiki page | `docs/WIKI_W1437.md` | ✅ present |
@@ -69,4 +72,4 @@ If all checks pass, the repository is ready for production deployment.
 
 | Date | Commit | Event |
 |------|--------|-------|
-| 2026-06-22T10:10:30.323Z | 88a047031 | Status page generated |
+| 2026-06-22T10:24:11.523Z | 65b595679 | Status page generated |

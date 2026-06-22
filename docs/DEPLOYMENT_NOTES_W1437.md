@@ -336,6 +336,21 @@ To enable:
    curl http://localhost:3100/loki/api/v1/rules
    ```
 
+## Feature flags
+
+W1437 behavior can be disabled at runtime without redeploying:
+
+```bash
+FEATURE_W1437=false
+```
+
+When disabled:
+- `ticketSlaScheduler` falls back to `$nin` query
+- `nphiesReconciliationService.sweep` falls back to pre-W1437 query
+- `NphiesClaim` pre-save hook stops auto-updating `updatedAt`
+
+Default is `true`.
+
 ## Notifications & audit
 
 The deployment scripts can send notifications on start, migration success, and migration failure.
@@ -344,6 +359,10 @@ The deployment scripts can send notifications on start, migration success, and m
 export SLACK_WEBHOOK="https://hooks.slack.com/services/..."
 # OR
 export TEAMS_WEBHOOK="https://outlook.office.com/webhook/..."
+# OR
+export PAGERDUTY_INTEGRATION_KEY="..."
+# OR
+export SENTRY_DSN="..."
 ./scripts/deploy-w1437.sh
 ```
 

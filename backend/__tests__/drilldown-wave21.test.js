@@ -76,8 +76,8 @@ describe('drilldown.registry — shape', () => {
 
 describe('drilldown.service — substitutePath', () => {
   test('substitutes single param', () => {
-    expect(substitutePath('/care/360/:beneficiaryId', { beneficiaryId: 'b1' })).toBe(
-      '/care/360/b1'
+    expect(substitutePath('/beneficiary-portal/:beneficiaryId', { beneficiaryId: 'b1' })).toBe(
+      '/beneficiary-portal/b1'
     );
   });
 
@@ -95,11 +95,15 @@ describe('drilldown.service — substitutePath', () => {
   });
 
   test('leaves placeholder when param missing', () => {
-    expect(substitutePath('/care/360/:beneficiaryId', {})).toBe('/care/360/:beneficiaryId');
+    expect(substitutePath('/beneficiary-portal/:beneficiaryId', {})).toBe(
+      '/beneficiary-portal/:beneficiaryId'
+    );
   });
 
   test('ignores extraneous params', () => {
-    expect(substitutePath('/care/360/:id', { id: 'x', other: 'y' })).toBe('/care/360/x');
+    expect(substitutePath('/beneficiary-portal/:id', { id: 'x', other: 'y' })).toBe(
+      '/beneficiary-portal/x'
+    );
   });
 });
 
@@ -157,7 +161,9 @@ describe('drilldown.service — level navigation', () => {
       'entity-list',
       'record',
     ]);
-    expect(r.chain.find(c => c.level === 'record').deepLink).toBe('/care/360/p1?tab=goals');
+    expect(r.chain.find(c => c.level === 'record').deepLink).toBe(
+      '/beneficiary-portal/p1?tab=goals'
+    );
   });
 });
 

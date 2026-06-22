@@ -531,10 +531,10 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── Beneficiary Core — نواة المستفيد الموحدة ─────────────────────────────
-  const beneficiaryCoreRoutes = safeRequire('../routes/beneficiary-core.routes');
-  dualMount(app, 'beneficiary-core', beneficiaryCoreRoutes);
+  // (legacy /api/v1/beneficiary-core facade retired; endpoints now live under
+  // /api/v1/core/beneficiaries via DDD Core — see domains/core/routes/beneficiary.routes.js)
   logger.info(
-    '✅ Beneficiary Core routes mounted: dashboard, list (search/filter/paginate), 360° profile (9 parallel data sources), timeline, stats, episodes, sessions, assessments, documents, care-plan, progress, alerts — الملف الطولي الموحد للمستفيد (15+ endpoints)'
+    '✅ Beneficiary Core routes retired from /api/v1/beneficiary-core; now served by DDD Core /api/v1/core/beneficiaries (dashboard, episode-center list/profile) — نواة المستفيد الموحدة (DDD)'
   );
 
   // ─── Episode Center — مركز الحلقة العلاجية الموحدة ────────────────────────

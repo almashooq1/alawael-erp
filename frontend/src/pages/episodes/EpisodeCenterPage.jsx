@@ -97,7 +97,7 @@ import {
   Legend as _Legend,
 } from 'recharts';
 
-import beneficiaryCoreService from '../../services/beneficiaryCoreService';
+import { coreAPI } from '../../services/ddd';
 import { formatDate } from 'utils/dateUtils';
 
 /* ── Styled Phase Connector ─────────────────────────────────────── */
@@ -380,7 +380,7 @@ function DashboardTab() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await beneficiaryCoreService.getDashboard();
+        const res = await coreAPI.getDashboard();
         setData(res?.data || res);
       } catch {
         setData(null);
@@ -524,8 +524,8 @@ function EpisodesListTab({ onViewEpisode }) {
     setLoading(true);
     setError('');
     try {
-      // Use beneficiaryCore list for the beneficiary-centric view
-      const res = await beneficiaryCoreService.listBeneficiaries({
+      // Use unified DDD core list for the beneficiary-centric view
+      const res = await coreAPI.listEpisodeCenter({
         page,
         limit: 20,
         search,
@@ -702,7 +702,7 @@ function EpisodeDetailTab({ episodeId, onBack }) {
     setLoading(true);
     setError('');
     try {
-      const res = await beneficiaryCoreService.get360Profile(episodeId);
+      const res = await coreAPI.getEpisodeCenterProfile(episodeId);
       setData(res?.data || res);
     } catch (e) {
       setError(e.message || 'حدث خطأ أثناء تحميل البيانات');

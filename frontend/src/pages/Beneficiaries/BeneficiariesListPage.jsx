@@ -107,7 +107,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors, statusColors, neutralColors } from 'theme/palette';
-import beneficiaryService from 'services/beneficiaryService';
+import { coreAPI } from 'services/ddd';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 
@@ -331,7 +331,7 @@ const BeneficiariesListPage = () => {
 
   // ── Load Cities ─────────────────────────────────
   useEffect(() => {
-    beneficiaryService
+    coreAPI
       .getCities()
       .then(res => {
         const data = res?.data?.data || res?.data || [];
@@ -342,7 +342,7 @@ const BeneficiariesListPage = () => {
 
   // ── Load At-Risk IDs ────────────────────────────
   useEffect(() => {
-    beneficiaryService
+    coreAPI
       .getAtRisk(200)
       .then(res => {
         const data = res?.data?.data || res?.data || [];
@@ -378,9 +378,9 @@ const BeneficiariesListPage = () => {
         // We'll filter client-side after load for at-risk
       }
 
-      const res = await beneficiaryService.getAll(params);
+      const res = await coreAPI.list(params);
       const rawData = res?.data?.data || res?.data || res?.beneficiaries || res || [];
-      const pagination = res?.data?.pagination;
+      const pagination = res?.pagination || res?.data?.pagination;
       const list = Array.isArray(rawData) ? rawData.map(normalize) : [];
 
       // Mark at-risk
@@ -403,8 +403,8 @@ const BeneficiariesListPage = () => {
 
   // ── Load Statistics ─────────────────────────────
   useEffect(() => {
-    beneficiaryService
-      .getStatistics()
+    coreAPI
+      .getStats()
       .then(res => {
         const d = res?.data?.data || res?.data;
         if (d) {
@@ -471,7 +471,7 @@ const BeneficiariesListPage = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await beneficiaryService.updateStatus(id, newStatus);
+      await coreAPI.updateStatus(id, newStatus);
       showSnackbar('تم تحديث حالة المستفيد', 'success');
       loadData();
     } catch {
@@ -483,7 +483,7 @@ const BeneficiariesListPage = () => {
   const handleArchive = async id => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
-      await beneficiaryService.remove(id, 'أرشفة من قائمة المستفيدين');
+      await coreAPI.archive(id, 'أرشفة من قائمة المستفيدين');
       showSnackbar('تم أرشفة المستفيد بنجاح', 'success');
       loadData();
     } catch {
@@ -493,7 +493,7 @@ const BeneficiariesListPage = () => {
 
   const handleExport = async () => {
     try {
-      const res = await beneficiaryService.exportData({ format: 'csv' });
+      const res = await coreAPI.export();
       const blob = res?.data || res;
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
@@ -515,7 +515,7 @@ const BeneficiariesListPage = () => {
   const handleBulkArchive = async () => {
     if (!window.confirm(`هل تريد أرشفة ${selected.length} مستفيد؟`)) return;
     try {
-      await beneficiaryService.bulkAction('delete', selected, { reason: 'أرشفة جماعية' });
+      await coreAPI.bulkAction('archive', selected, { reason: 'أرشفة جماعية' });
       showSnackbar(`تم أرشفة ${selected.length} مستفيد`, 'success');
       setSelected([]);
       loadData();
@@ -526,7 +526,7 @@ const BeneficiariesListPage = () => {
 
   const handleBulkStatusChange = async newStatus => {
     try {
-      await beneficiaryService.bulkAction('update-status', selected, { status: newStatus });
+      await coreAPI.bulkAction('update-status', selected, { status: newStatus });
       showSnackbar(`تم تحديث حالة ${selected.length} مستفيد`, 'success');
       setSelected([]);
       loadData();

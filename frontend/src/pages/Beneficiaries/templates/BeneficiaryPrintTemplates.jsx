@@ -52,7 +52,7 @@ import {
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import beneficiaryService from 'services/beneficiaryService';
+import { coreAPI } from 'services/ddd';
 // html2canvas + jsPDF loaded dynamically on demand (saves ~290KB from initial bundle)
 
 // ── Template Definitions ──────────────────────────
@@ -244,7 +244,7 @@ const BeneficiaryPrintTemplates = () => {
   const loadBeneficiaries = useCallback(async (search = '') => {
     setLoadingList(true);
     try {
-      const res = await beneficiaryService.getAll({ limit: 50, search });
+      const res = await coreAPI.list({ limit: 50, search });
       const list = res?.data?.data || res?.data || [];
       setBeneficiaries(Array.isArray(list) ? list.map(normalizeBeneficiary) : []);
     } catch {

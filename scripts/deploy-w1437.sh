@@ -9,7 +9,10 @@
 #   export MONGODB_URI="mongodb://..."
 #   export NODE_ENV=production
 #   export DEPLOY_ROOT=/opt/alawael-erp
-#   ./scripts/deploy-w1437.sh
+#   ./scripts/deploy-w1437.sh [--force]
+#
+# Use --force to discard any local uncommitted changes in DEPLOY_ROOT.
+# Without --force the script aborts if the working tree is dirty.
 #
 
 set -euo pipefail
@@ -19,6 +22,19 @@ DEPLOY_ROOT="${DEPLOY_ROOT:-/opt/alawael-erp}"
 MONGODB_URI="${MONGODB_URI:-${MONGO_URI:-}}"
 NODE_ENV="${NODE_ENV:-production}"
 REQUIRED_NODE_VERSION="22"
+FORCE_RESET=false
+
+# Parse optional args
+for arg in "$@"; do
+  case "$arg" in
+    --force) FORCE_RESET=true ;;
+    -h|--help)
+      sed -n '2,20p' "$0"
+      exit 0
+      ;;
+    *) echo "unknown arg: $arg" >&2; exit 2 ;;
+  esac
+done
 
 # --- Colors ------------------------------------------------------------------
 RED='\033[0;31m'
@@ -64,6 +80,15 @@ log "Environment OK: node $(node -v), DEPLOY_ROOT=$DEPLOY_ROOT, NODE_ENV=$NODE_E
 
 # --- Pull latest main --------------------------------------------------------
 log "Pulling latest main from origin..."
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  warn "Working tree is dirty."
+  if [[ "$FORCE_RESET" != "true" ]]; then
+    fail "Aborting. Use --force to discard local changes, or commit/stash them first."
+  fi
+  warn "--force supplied; local changes will be discarded."
+fi
+
 git fetch origin main
 git checkout main
 git reset --hard origin/main || fail "Could not reset to origin/main"
@@ -73,6 +98,7 @@ log "Now on main at commit $CURRENT_COMMIT"
 
 # --- Run migration -----------------------------------------------------------
 log "Running NphiesClaim updatedAt backfill migration..."
+log "(URI host: $(echo "$MONGODB_URI" | sed -E 's#^mongodb(\+srv)?://([^/]+)/.*#\2#'))"
 MONGODB_URI="$MONGODB_URI" NODE_ENV="$NODE_ENV" node backend/scripts/migrate-nphies-claim-updatedAt.js
 MIGRATION_EXIT=$?
 

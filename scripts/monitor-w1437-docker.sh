@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
 #
-# W1437 Post-Deploy Monitor
+# W1437 Post-Deploy Monitor for Docker
 #
-# Watches error1.log for 30 minutes and reports occurrences of the
-# production DB timeout / LLM anomaly save failure signatures.
+# Watches a backend container's logs for 30 minutes and reports occurrences
+# of the production DB timeout / LLM anomaly save failure signatures.
 #
 # Usage:
-#   ./scripts/monitor-w1437.sh [LOG_PATH]
+#   ./scripts/monitor-w1437-docker.sh [CONTAINER_NAME]
 #
-# Default LOG_PATH: logs/error1.log
+# Default CONTAINER_NAME: alawael-backend-1
 #
 
 set -uo pipefail
 
-LOG_PATH="${1:-logs/error1.log}"
+CONTAINER_NAME="${1:-alawael-backend-1}"
 DURATION_MINUTES=30
 CHECK_INTERVAL_SECONDS=10
 START_TIME=$(date +%s)
 END_TIME=$((START_TIME + DURATION_MINUTES * 60))
+LAST_REPORT_TIME=$START_TIME
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -30,39 +31,26 @@ warn()  { echo -e "${YELLOW}[$(date -u +%Y-%m-%dT%H:%M:%SZ)] WARN:${NC} $*"; }
 error() { echo -e "${RED}[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ERROR:${NC} $*"; }
 info()  { echo -e "${BLUE}[$(date -u +%Y-%m-%dT%H:%M:%SZ)] STAT:${NC} $*"; }
 
-# Patterns to watch
 PATTERNS=(
   "Operation advancedtickets.find() buffering timed out after 10000ms"
   "Operation nphiesclaims.find() buffering timed out after 10000ms"
   "[llm-anomaly-history] save failed:"
 )
 
-# Counters
- declare -A COUNTS
- declare -A FIRST_SEEN
- declare -A LAST_SEEN
-
+declare -A COUNTS
 for p in "${PATTERNS[@]}"; do
   COUNTS["$p"]=0
-  FIRST_SEEN["$p"]=""
-  LAST_SEEN["$p"]=""
 done
 
-log "Starting W1437 post-deploy monitor"
-log "Watching: $LOG_PATH"
+log "Starting W1437 Docker post-deploy monitor"
+log "Container: $CONTAINER_NAME"
 log "Duration: $DURATION_MINUTES minutes"
 
-if [[ ! -f "$LOG_PATH" ]]; then
-  warn "Log file not found yet: $LOG_PATH. Will retry every ${CHECK_INTERVAL_SECONDS}s."
+if ! docker inspect "$CONTAINER_NAME" &>/dev/null; then
+  warn "Container $CONTAINER_NAME not found. Will retry every ${CHECK_INTERVAL_SECONDS}s."
 fi
 
-# If the log exists, remember its current size so we only scan new lines.
-LAST_SIZE=0
-if [[ -f "$LOG_PATH" ]]; then
-  LAST_SIZE=$(stat -c%s "$LOG_PATH" 2>/dev/null || stat -f%z "$LOG_PATH" 2>/dev/null || echo 0)
-fi
-
-LAST_REPORT_TIME=$START_TIME
+LAST_LOGS=""
 
 while [[ $(date +%s) -lt $END_TIME ]]; do
   NOW=$(date +%s)
@@ -70,38 +58,19 @@ while [[ $(date +%s) -lt $END_TIME ]]; do
   MINUTES=$((REMAINING / 60))
   SECONDS=$((REMAINING % 60))
 
-  if [[ -f "$LOG_PATH" ]]; then
-    CURRENT_SIZE=$(stat -c%s "$LOG_PATH" 2>/dev/null || stat -f%z "$LOG_PATH" 2>/dev/null || echo 0)
+  if docker inspect "$CONTAINER_NAME" &>/dev/null; then
+    CURRENT_LOGS=$(docker logs "$CONTAINER_NAME" --since "$((CHECK_INTERVAL_SECONDS + 2))s" 2>&1 || true)
 
-    if [[ $CURRENT_SIZE -gt $LAST_SIZE ]]; then
-      # Read only new bytes
-      tail -c +$((LAST_SIZE + 1)) "$LOG_PATH" 2>/dev/null | while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ -n "$CURRENT_LOGS" ]]; then
+      while IFS= read -r line || [[ -n "$line" ]]; do
         for p in "${PATTERNS[@]}"; do
           if [[ "$line" == *"$p"* ]]; then
-            TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            echo "[$TIMESTAMP] MATCH: $p"
+            COUNTS["$p"]=$((COUNTS["$p"] + 1))
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] MATCH: $p"
             echo "  LINE: ${line:0:200}"
           fi
         done
-      done > "/tmp/w1437-monitor-hits.$$"
-
-      # Update counters from hits file
-      if [[ -s "/tmp/w1437-monitor-hits.$$" ]]; then
-        while IFS= read -r line; do
-          for p in "${PATTERNS[@]}"; do
-            if [[ "$line" == *"MATCH: $p"* ]]; then
-              COUNTS["$p"]=$((COUNTS["$p"] + 1))
-              if [[ -z "${FIRST_SEEN[$p]}" ]]; then
-                FIRST_SEEN["$p"]=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-              fi
-              LAST_SEEN["$p"]=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            fi
-          done
-        done < "/tmp/w1437-monitor-hits.$$"
-        rm -f "/tmp/w1437-monitor-hits.$$"
-      fi
-
-      LAST_SIZE=$CURRENT_SIZE
+      done <<< "$CURRENT_LOGS"
     fi
   fi
 
@@ -112,7 +81,7 @@ while [[ $(date +%s) -lt $END_TIME ]]; do
     for p in "${PATTERNS[@]}"; do
       count=${COUNTS[$p]:-0}
       if [[ $count -gt 0 ]]; then
-        error "  '$p' => $count occurrence(s) (first: ${FIRST_SEEN[$p]}, last: ${LAST_SEEN[$p]})"
+        error "  '$p' => $count occurrence(s)"
       else
         log "  '$p' => 0 occurrences ✓"
       fi
@@ -125,7 +94,7 @@ done
 # --- Final report ------------------------------------------------------------
 echo ""
 log "================================================================"
-log "W1437 post-deploy monitoring COMPLETE ($DURATION_MINUTES minutes)"
+log "W1437 Docker post-deploy monitoring COMPLETE ($DURATION_MINUTES minutes)"
 log "================================================================"
 
 ANY_ERROR=0

@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T01:25:00+03:00  
+> Updated: 2026-06-22T01:35:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -13,6 +13,48 @@ This release contains:
 - **W1436**: Structured diagnostics for LLM anomaly save failures.
 - **W1437**: Production DB timeout root-cause fixes (`AdvancedTicket` `$nin` → `$in`, `NphiesClaim.updatedAt` schema fix).
 - **Bulk sync**: All previously pending working-tree changes committed, including new backend modules (beneficiary lifecycle, journey score, access console, clinical legacy adapter), frontend components, docs, and security/config files.
+
+## Deployment methods
+
+Choose **one** of the following methods based on your production setup:
+
+### Method A: VPS / bare-metal (_pm2/systemd_)
+
+Use `scripts/deploy-w1437.sh` (see detailed steps below).
+
+### Method B: Docker Compose
+
+Use `scripts/deploy-w1437-docker.sh`.
+
+```bash
+export MONGODB_URI="mongodb+srv://..."
+export COMPOSE_FILE="docker-compose.professional.yml:docker-compose.production.yml"
+export COMPOSE_PROJECT_NAME=alawael
+./scripts/deploy-w1437-docker.sh up
+```
+
+Use `./scripts/deploy-w1437-docker.sh migrate-only` to run only the migration without restarting services.
+
+### Method C: GitHub Actions
+
+Trigger the manual workflow **"🗄️ W1437 Production Migration"** (`w1437-migrate.yml`):
+
+- Go to Actions → "🗄️ W1437 Production Migration" → Run workflow
+- Type `migrate` in the confirm field
+- Check **"نشر التطبيق بعد الميجرشن؟"** if you also want the workflow to deploy backend + frontend
+
+Required secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `MONGODB_URI`.
+Optional secrets: `DEPLOY_ROOT` (default `/home/alawael/app`).
+
+### Method D: Automatic migration on every deploy
+
+The production deploy workflow (`deploy-hostinger.yml`) has an optional W1437 migration step. Enable it by setting the repository variable:
+
+```
+RUN_W1437_MIGRATION = true
+```
+
+This is idempotent, so it is safe to leave enabled until the release is stable, then remove the variable.
 
 ## Prerequisites before deploy
 
@@ -168,13 +210,19 @@ Expected output:
 
 ### 5. Post-deploy verification (30 min)
 
-Use the monitor script:
+Use the appropriate monitor script:
 
-```bash
-./scripts/monitor-w1437.sh logs/error1.log
-```
+- **VPS / bare-metal:**
+  ```bash
+  ./scripts/monitor-w1437.sh logs/error1.log
+  ```
 
-Or manually watch `error1.log` for these messages. They should **stop** after deploy:
+- **Docker Compose:**
+  ```bash
+  ./scripts/monitor-w1437-docker.sh alawael-backend-1
+  ```
+
+Or manually watch `error1.log` / container logs for these messages. They should **stop** after deploy:
 
 - [ ] `Operation advancedtickets.find() buffering timed out after 10000ms` (P0-1)
 - [ ] `Operation nphiesclaims.find() buffering timed out after 10000ms` (P0-2)

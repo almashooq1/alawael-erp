@@ -1,0 +1,174 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — W1437 Production Migration (manual)
+#
+#  Runs the mandatory NphiesClaim updatedAt backfill migration on the
+#  production host. This must be executed BEFORE deploying application
+#  code for release W1437.
+#
+#  Required secrets:
+#    VPS_HOST      - production host (e.g. alaweal.org)
+#    VPS_USER      - SSH user
+#    VPS_SSH_KEY   - private SSH key
+#    MONGODB_URI   - production MongoDB connection string
+#
+#  Optional secrets:
+#    DEPLOY_ROOT   - app directory on VPS (default: /home/alawael/app)
+# ════════════════════════════════════════════════════════════════════
+name: "🗄️ W1437 Production Migration"
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_after:
+        description: "نشر التطبيق بعد الميجرشن؟"
+        required: false
+        default: false
+        type: boolean
+      confirm:
+        description: "اكتب 'migrate' للتأكيد"
+        required: true
+        type: string
+
+env:
+  DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT || '/home/alawael/app' }}
+  NODE_VERSION: "22"
+
+concurrency:
+  group: w1437-migration
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: "🗄️ Run W1437 migration on production"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Confirm intent
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "migrate" ]; then
+            echo "❌ You must type 'migrate' in the confirm field!"
+            exit 1
+          fi
+          echo "✅ Migration confirmed"
+
+      - name: Validate secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]    && echo "❌ Missing: VPS_HOST"    && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing: VPS_USER"    && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
+          [ -z "${{ secrets.MONGODB_URI }}" ] && echo "❌ Missing: MONGODB_URI" && MISSING=1
+          if [ "$MISSING" -ne 0 ]; then
+            echo "❌ Required secrets are missing. See workflow header."
+            exit 1
+          fi
+          echo "✅ All required secrets present"
+
+      - uses: actions/checkout@v6
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "✅ SSH configured"
+
+      - name: Run migration on production host
+        id: migration
+        run: |
+          set -eo pipefail
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          echo "🗄️ Running migration on $SSH_TARGET:${{ env.DEPLOY_ROOT }}"
+
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -o BatchMode=yes \
+              -o ConnectTimeout=25 \
+              "$SSH_TARGET" bash -s <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+            export MONGODB_URI="${{ secrets.MONGODB_URI }}"
+            export NODE_ENV=production
+            export DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+            ./scripts/deploy-w1437.sh --force
+          REMOTE_SCRIPT
+
+          echo "✅ Migration completed on production host"
+
+      - name: Deploy application (optional)
+        if: ${{ github.event.inputs.deploy_after == 'true' }}
+        run: |
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          echo "🚀 Deploying application after migration..."
+
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -o BatchMode=yes \
+              "$SSH_TARGET" bash -s <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+
+            # Backend
+            if [ -f "package.json" ]; then
+              echo "📦 Installing backend dependencies..."
+              npm ci --omit=dev
+            fi
+
+            # Restart via pm2 if available
+            if command -v pm2 &>/dev/null && [ -f "ecosystem.config.js" ]; then
+              echo "♻️ Restarting backend via pm2..."
+              pm2 reload ecosystem.config.js || pm2 restart all
+            elif command -v systemctl &>/dev/null; then
+              echo "♻️ Restarting backend via systemctl..."
+              sudo systemctl restart alawael-api || echo "⚠️ systemctl service name may differ"
+            else
+              echo "⚠️ No recognized restart mechanism found. Please restart services manually."
+            fi
+
+            # Frontend
+            if [ -d "frontend" ]; then
+              echo "🎨 Building frontend..."
+              cd frontend
+              npm ci --omit=dev
+              npm run build
+              cd ..
+            fi
+          REMOTE_SCRIPT
+
+          echo "✅ Application deployed"
+
+      - name: Post-deploy monitor (optional)
+        if: ${{ github.event.inputs.deploy_after == 'true' }}
+        timeout-minutes: 35
+        run: |
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          echo "👁️ Starting 30-minute post-deploy monitor..."
+
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -o BatchMode=yes \
+              "$SSH_TARGET" bash -s <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+            ./scripts/monitor-w1437.sh logs/error1.log
+          REMOTE_SCRIPT
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## W1437 Production Migration" >> $GITHUB_STEP_SUMMARY
+          echo "- Host: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy root: ${{ env.DEPLOY_ROOT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy after migration: ${{ github.event.inputs.deploy_after }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.migration.outcome }}" = "success" ]; then
+            echo "- Migration: ✅ success" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Migration: ❌ failed" >> $GITHUB_STEP_SUMMARY
+          fi

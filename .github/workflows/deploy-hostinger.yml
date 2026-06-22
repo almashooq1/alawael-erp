@@ -358,6 +358,35 @@ jobs:
           fi
           echo "✅ Guard passed — proceeding"
 
+      # W1437 — mandatory pre-deploy migration. Safe to run on every deploy
+      # because the migration is idempotent (only touches docs missing
+      # nphies.submission.updatedAt). Controlled by repository variable
+      # RUN_W1437_MIGRATION so it can be disabled after the release is stable.
+      - name: W1437 pre-deploy migration
+        if: |
+          needs.preflight.outputs.deploy_backend == 'true' &&
+          vars.RUN_W1437_MIGRATION == 'true'
+        run: |
+          set -eo pipefail
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          if [ -z "${{ secrets.MONGODB_URI }}" ]; then
+            echo "❌ MONGODB_URI secret is required for W1437 migration"
+            exit 1
+          fi
+
+          echo "🗄️ Running W1437 migration on production host..."
+          $SSH_CMD $SSH_TARGET bash -s <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            cd "${{ env.APP_DIR }}"
+            export MONGODB_URI="${{ secrets.MONGODB_URI }}"
+            export NODE_ENV=production
+            export DEPLOY_ROOT="${{ env.APP_DIR }}"
+            ./scripts/deploy-w1437.sh --force
+          REMOTE_SCRIPT
+          echo "✅ W1437 migration completed"
+
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
         run: |

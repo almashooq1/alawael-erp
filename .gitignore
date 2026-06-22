@@ -188,6 +188,7 @@ ops/*
 !ops/prometheus.yml
 !ops/alerting-rules.yml
 !ops/alertmanager.yml
+!ops/loki-rules-w1437.yml
 !ops/grafana/
 _*.py
 !**/__init__.py

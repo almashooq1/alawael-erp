@@ -1,0 +1,69 @@
+# W1437 Loki Alerting Rules
+#
+# Detects the production DB timeout signatures and LLM anomaly save failures
+# in application logs. Add this file to Loki's ruler config:
+#
+#   ruler:
+#     alertmanager_url: http://alertmanager:9093
+#     enable_alertmanager_v2: true
+#     enable_api: true
+#     ring:
+#       kvstore:
+#         store: inmemory
+#     rule_path: /tmp/loki/rules
+#     storage:
+#       type: local
+#       local:
+#         directory: /loki/rules
+#
+# Mount this file into the Loki container as:
+#   /loki/rules/fake/w1437.yml
+#
+# Then restart Loki and verify rules loaded:
+#   curl http://localhost:3100/loki/api/v1/rules
+
+groups:
+  - name: w1437.production.timeouts
+    interval: 30s
+    rules:
+      - alert: W1437_AdvancedTicket_DB_Timeout
+        expr: |
+          sum by (service) (
+            count_over_time({service="alawael-erp"} |= "Operation advancedtickets.find() buffering timed out after 10000ms" [5m])
+          ) > 0
+        for: 1m
+        labels:
+          severity: critical
+          release: w1437
+        annotations:
+          summary: "W1437 regression: AdvancedTicket DB timeout detected"
+          description: "The W1437 fix for AdvancedTicket $nin timeouts is not effective. Check ticketSlaScheduler and compound indexes."
+          action: "Run ./scripts/monitor-w1437.sh and verify advancedtickets compound index."
+
+      - alert: W1437_NphiesClaim_DB_Timeout
+        expr: |
+          sum by (service) (
+            count_over_time({service="alawael-erp"} |= "Operation nphiesclaims.find() buffering timed out after 10000ms" [5m])
+          ) > 0
+        for: 1m
+        labels:
+          severity: critical
+          release: w1437
+        annotations:
+          summary: "W1437 regression: NphiesClaim DB timeout detected"
+          description: "The W1437 fix for NphiesClaim $exists:false scan is not effective. Check nphiesReconciliationService and compound index."
+          action: "Run ./scripts/monitor-w1437.sh and verify nphiesclaims compound index."
+
+      - alert: W1437_LLM_Anomaly_Save_Failed
+        expr: |
+          sum by (service) (
+            count_over_time({service="alawael-erp"} |= "[llm-anomaly-history] save failed:" [5m])
+          ) > 0
+        for: 2m
+        labels:
+          severity: warning
+          release: w1437
+        annotations:
+          summary: "W1437: LLM anomaly save failure persists"
+          description: "LLM anomaly diagnostic history save is still failing after W1437 deploy. Check structured log line for name/code/source."
+          action: "Inspect error1.log for [llm-anomaly-history] save failed: entries."

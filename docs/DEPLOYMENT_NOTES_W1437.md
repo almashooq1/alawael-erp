@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T01:50:00+03:00  
+> Updated: 2026-06-22T02:00:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -21,6 +21,18 @@ Choose **one** of the following methods based on your production setup:
 ### Method A: VPS / bare-metal (_pm2/systemd_)
 
 Use `scripts/deploy-w1437.sh` (see detailed steps below).
+
+Or run the existing VPS deploy script with the migration integrated:
+
+```bash
+export MONGODB_URI="mongodb+srv://..."
+./scripts/deploy-vps.sh --with-w1437-migration
+```
+
+This will:
+1. Run `scripts/deploy-w1437.sh` on the VPS via SSH
+2. Deploy backend + frontend as usual
+3. Verify `/health` and `/api/v1/build-info`
 
 **Dry run (estimate impact without writing):**
 ```bash
@@ -124,6 +136,22 @@ This is idempotent, so it is safe to leave enabled until the release is stable, 
 5. Verify application starts without errors.
 
 ## Post-deployment verification
+
+### 1. Smoke tests (30 seconds)
+
+```bash
+./scripts/smoke-test-w1437.sh https://alaweal.org
+```
+
+Checks:
+- `/health` returns 200
+- `/api/v1/build-info` contains commit
+- SLA stats and NPHIES reconciliation endpoints are reachable
+- TLS certificate is valid
+
+### 2. Log monitoring (30 minutes)
+
+Continue with the 30-minute monitor as described below.
 
 1. **P0-1 / P0-2 DB timeouts**: Watch `error1.log` for 30 minutes. The following messages should stop:
 
@@ -257,6 +285,29 @@ Also verify:
 
 - [ ] NPHIES reconciliation sweeper is transitioning old `PENDING_REVIEW` claims.
 - [ ] SLA scheduler (`checkResolutionBreaches`, `assignMissingSlaDeadlines`, `getSlaStats`) completes without timeout errors.
+
+## Grafana / Loki alerts
+
+A Loki alerting rule file is provided at `ops/loki-rules-w1437.yml`. It detects:
+
+- `Operation advancedtickets.find() buffering timed out after 10000ms`
+- `Operation nphiesclaims.find() buffering timed out after 10000ms`
+- `[llm-anomaly-history] save failed:`
+
+To enable:
+
+1. Mount the file into the Loki container:
+   ```yaml
+   volumes:
+     - ./ops/loki-rules-w1437.yml:/loki/rules/fake/w1437.yml:ro
+   ```
+
+2. Ensure Loki `ruler` is configured with `alertmanager_url`.
+
+3. Restart Loki and verify:
+   ```bash
+   curl http://localhost:3100/loki/api/v1/rules
+   ```
 
 ## Notifications & audit
 

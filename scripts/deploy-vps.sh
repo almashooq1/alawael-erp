@@ -46,13 +46,15 @@ DEPLOY_BACKEND=true
 DEPLOY_FRONTEND=true
 DRY_RUN=false
 ROLLBACK=false
+W1437_MIGRATION=false
 
 for arg in "$@"; do
   case "$arg" in
-    --backend-only)  DEPLOY_FRONTEND=false ;;
-    --frontend-only) DEPLOY_BACKEND=false ;;
-    --dry-run)       DRY_RUN=true ;;
-    --rollback)      ROLLBACK=true ;;
+    --backend-only)         DEPLOY_FRONTEND=false ;;
+    --frontend-only)        DEPLOY_BACKEND=false ;;
+    --dry-run)              DRY_RUN=true ;;
+    --rollback)             ROLLBACK=true ;;
+    --with-w1437-migration) W1437_MIGRATION=true ;;
     -h|--help)
       sed -n '2,31p' "$0"
       exit 0
@@ -119,6 +121,42 @@ ok "Local commit: $LOCAL_SHA_SHORT ($LOCAL_SHA)"
 
 ssh_run "echo connected" >/dev/null || die "SSH to $VPS_HOST failed"
 ok "SSH to $VPS_HOST"
+
+# ─── W1437 pre-deploy migration (optional) ──────────────────────────
+if $W1437_MIGRATION; then
+  say "W1437 pre-deploy migration requested"
+
+  MONGODB_URI="${MONGODB_URI:-${MONGO_URI:-}}"
+  [[ -n "$MONGODB_URI" ]] || die "MONGODB_URI/MONGO_URI is required for --with-w1437-migration"
+
+  # Copy latest migration scripts to VPS (idempotent, atomic temp path)
+  STAMP_MIG=$(date +%Y%m%d-%H%M%S)
+  REMOTE_MIG_DIR="$VPS_APP_DIR/.w1437-migration-$STAMP_MIG"
+
+  ssh_run "mkdir -p $REMOTE_MIG_DIR/scripts $REMOTE_MIG_DIR/backend/scripts"
+  scp -i "$SSH_KEY" -o ConnectTimeout=30 \
+    scripts/deploy-w1437.sh \
+    backend/scripts/migrate-nphies-claim-updatedAt.js \
+    "$VPS_HOST:$REMOTE_MIG_DIR/"
+
+  ok "Migration scripts copied to $REMOTE_MIG_DIR"
+
+  # Run migration on VPS via a temporary env file (avoids leaking URI in ssh ps)
+  MIG_ENV_FILE="/tmp/.w1437-migration-env-$STAMP_MIG"
+  ssh_run "cat > $MIG_ENV_FILE <<'EOF'
+MONGODB_URI='$MONGODB_URI'
+NODE_ENV=production
+DEPLOY_ROOT=$VPS_APP_DIR
+EOF
+chmod 600 $MIG_ENV_FILE"
+
+  say "Running W1437 migration on VPS (host only: $(echo "$MONGODB_URI" | sed -E 's#^mongodb(\+srv)?://([^/]+)/.*#\2#'))"
+  ssh_run "sudo -u $PM2_USER bash -c 'set -e; source $MIG_ENV_FILE; cd $VPS_APP_DIR; cp $REMOTE_MIG_DIR/deploy-w1437.sh ./scripts/deploy-w1437.sh; cp $REMOTE_MIG_DIR/migrate-nphies-claim-updatedAt.js ./backend/scripts/migrate-nphies-claim-updatedAt.js; chmod +x ./scripts/deploy-w1437.sh; ./scripts/deploy-w1437.sh --force'" || die "W1437 migration failed — aborting deploy"
+
+  # Cleanup
+  ssh_run "rm -f $MIG_ENV_FILE; rm -rf $REMOTE_MIG_DIR" || true
+  ok "W1437 migration completed"
+fi
 
 CURRENT_REMOTE_SHA=$(curl -sf "$BUILD_INFO_URL" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' || echo "?")
 say "Current production commit: ${CURRENT_REMOTE_SHA:0:8}"

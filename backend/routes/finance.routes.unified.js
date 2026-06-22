@@ -13,7 +13,7 @@ const finV = require('../middleware/validators/finance.validators');
 const logger = require('../utils/logger');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripProtectedFinanceFields } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 
 // Unified email service
@@ -1170,6 +1170,7 @@ router.post(
  */
 router.put(
   '/accounts/:id',
+  createRBACMiddleware(['finance:update']), // W1458: was reachable by any authenticated user
   validateObjectId('id'),
   asyncHandler(async (req, res) => {
     if (!Account) {
@@ -1737,6 +1738,7 @@ router.post(
  */
 router.put(
   '/cost-centers/:id',
+  createRBACMiddleware(['finance:update']), // W1458
   validateObjectId('id'),
   asyncHandler(async (req, res) => {
     if (!CostCenter) {
@@ -1817,6 +1819,7 @@ router.post(
  */
 router.put(
   '/fixed-assets/:id',
+  createRBACMiddleware(['finance:update']), // W1458
   validateObjectId('id'),
   asyncHandler(async (req, res) => {
     if (!FixedAsset) {
@@ -2062,12 +2065,16 @@ router.get(
  */
 router.put(
   '/invoices/:id',
+  createRBACMiddleware(['finance:update']), // W1458: was reachable by any authenticated user
   validateObjectId('id'),
   asyncHandler(async (req, res) => {
     if (!AccountingInvoice) {
       throw new AppError('Invoice model not available', 503);
     }
-    const updateData = { ...req.body };
+    // W1458: strip financial-state fields (status/paidAmount/totals) so a generic PUT
+    // cannot mark an invoice paid or rewrite amounts — those go through the dedicated
+    // payment/status endpoints + server-side recompute.
+    const updateData = { ...stripProtectedFinanceFields(req.body) };
     if (updateData.customer) updateData.customerName = updateData.customer;
     updateData.updatedBy = req.user?.id;
 

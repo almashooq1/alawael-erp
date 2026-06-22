@@ -1909,6 +1909,8 @@ on:
       - 'backend/__tests__/sanitize-mongo-filter-wave1456.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/user-mutation-authz-wave1457.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/finance-put-massassign-wave1458.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3796,6 +3798,8 @@ on:
       - 'backend/__tests__/sanitize-mongo-filter-wave1456.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/user-mutation-authz-wave1457.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/finance-put-massassign-wave1458.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

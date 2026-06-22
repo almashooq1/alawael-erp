@@ -1,9 +1,17 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T02:00:00+03:00  
+> Updated: 2026-06-22T02:15:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
+
+## Related runbooks
+
+- **Full runbook (PDF):** `docs/RUNBOOK_W1437.pdf`  
+  Generate with: `python3 scripts/generate-runbook-pdf.py`
+- **Full runbook (Markdown):** `docs/RUNBOOK_W1437.md`
+- **Wiki page:** `docs/WIKI_W1437.md` (copy to GitHub Wiki)
+- **Problem ledger:** `docs/PROBLEM_LEDGER_v6.md`
 
 ## Scope
 

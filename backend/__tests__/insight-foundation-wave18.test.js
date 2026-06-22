@@ -79,7 +79,7 @@ function basePayload(overrides = {}) {
       generatorId: 'care-gap.v1',
       inputDigest: 'a'.repeat(40), // 40-char SHA1 hex
     },
-    deepLink: '/care/360/b1',
+    deepLink: '/beneficiary-portal/b1',
     ...overrides,
   };
 }

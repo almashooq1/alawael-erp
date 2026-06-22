@@ -260,7 +260,7 @@ const ROLE_GROUPS = {
         id: 'open-care-360',
         titleAr: 'افتح 360',
         titleEn: 'Open Care 360',
-        deepLink: '/care/360',
+        deepLink: '/beneficiary-portal',
         estimatedMin: 5,
       },
       {

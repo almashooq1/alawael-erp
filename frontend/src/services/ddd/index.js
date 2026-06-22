@@ -19,6 +19,25 @@ export const coreAPI = {
   remove: id => apiClient.delete(`/api/v1/core/beneficiaries/${id}`),
   search: params => apiClient.get('/api/v1/core/beneficiaries/search', { params }),
   getStats: params => apiClient.get('/api/v1/core/beneficiaries/stats', { params }),
+  // Admin operations
+  updateStatus: (id, status, reason = '') =>
+    apiClient.patch(`/api/v1/core/beneficiaries/${id}/status`, { status, reason }),
+  bulkAction: (action, ids, payload = {}) =>
+    apiClient.post('/api/v1/core/beneficiaries/bulk-action', { action, ids, payload }),
+  getRecent: (limit = 5) =>
+    apiClient.get('/api/v1/core/beneficiaries/recent', { params: { limit } }),
+  export: params =>
+    apiClient.get('/api/v1/core/beneficiaries/export', { params, responseType: 'blob' }),
+  archive: (id, reason) => apiClient.post(`/api/v1/core/beneficiaries/${id}/archive`, { reason }),
+  unarchive: id => apiClient.post(`/api/v1/core/beneficiaries/${id}/unarchive`),
+  getAtRisk: (limit = 50) =>
+    apiClient.get('/api/v1/core/beneficiaries/at-risk', { params: { limit } }),
+  getCities: () => apiClient.get('/api/v1/core/beneficiaries/cities'),
+  // Episode-center compatibility (legacy facade /api/v1/beneficiary-core)
+  getDashboard: () => apiClient.get('/api/v1/core/beneficiaries/dashboard'),
+  listEpisodeCenter: params =>
+    apiClient.get('/api/v1/core/beneficiaries/episode-center', { params }),
+  getEpisodeCenterProfile: id => apiClient.get(`/api/v1/core/beneficiaries/${id}/episode-center`),
   // 360° Profile — paths match domains/core/routes/beneficiary360.routes.js
   get360: id => apiClient.get(`/api/v1/core/beneficiaries/${id}/360`),
   get360Widget: (id, widget) =>

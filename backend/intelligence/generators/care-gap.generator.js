@@ -226,7 +226,7 @@ async function evaluate(ctx = {}) {
         },
         reasoning: { bulletsAr, bulletsEn, supportingFacts },
         branchId: ben.branchId || null,
-        deepLink: `/care/360/${ben._id}`,
+        deepLink: `/beneficiary-portal/${ben._id}`,
         suggestedActions: gaps.map(g => {
           if (g.key === 'plan-review-overdue') {
             return {
@@ -250,7 +250,7 @@ async function evaluate(ctx = {}) {
             return {
               titleAr: 'تواصل مع ولي الأمر لاستكمال التطعيمات',
               titleEn: 'Contact guardian to complete vaccinations',
-              deepLink: `/care/360/${ben._id}?tab=vaccinations`,
+              deepLink: `/beneficiary-portal/${ben._id}?tab=vaccinations`,
               estimatedMin: 10,
               severity: 'must',
             };
@@ -258,7 +258,7 @@ async function evaluate(ctx = {}) {
           return {
             titleAr: 'افتح ملف المستفيد للتفاصيل',
             titleEn: 'Open beneficiary file',
-            deepLink: `/care/360/${ben._id}`,
+            deepLink: `/beneficiary-portal/${ben._id}`,
             estimatedMin: 5,
             severity: 'may',
           };

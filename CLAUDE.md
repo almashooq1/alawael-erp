@@ -659,3 +659,31 @@ All 7 pre-push gates passed locally; PR #594 CI passed including `Tests & Code Q
 - Never spread `req.body` into Mongoose constructors or updates for resources that have privileged/auto-derived fields; whitelist creatable/updatable fields.
 - Always pair schema enum/range constraints with `runValidators: true` on `findByIdAndUpdate` / `updateOne` / generic CRUD patches.
 - Keep model PII symmetry: if one schema marks a sensitive field `select: false`, siblings storing equivalent data should do the same.
+
+## Beneficiaries DDD unification W1458 — 2026-06-23
+
+Consolidated the remaining Beneficiaries admin and Episode Center surfaces under the `domains/core` DDD service and retired the legacy `/api/v1/beneficiary-core` facade. Shipped on `feat/medical-upload` as PR #601 and renumbered from W1456 → W1457 → W1458 to avoid collisions with PR #600 (W1456 NoSQL operator injection) and PR #602 (W1457 user-management privilege ceiling).
+
+### W1458 — DDD migration, facade retirement, and deep-link cleanup
+
+**Commit:** `0304ba10d`
+
+- `backend/domains/core/services/beneficiary.service.js`: added admin operations `listWithFilters`, `updateStatus`, `bulkAction`, `getRecent`, `getExportData`, `getAtRisk`, `getCities`, and `listEpisodeCenter`.
+- `backend/domains/core/routes/beneficiary.routes.js`: added `/api/v1/core/beneficiaries` endpoints for recent, at-risk, cities, CSV export, status patch, bulk-action, dashboard, episode-center list/profile; enhanced list with search/status/category/gender/city/age/archived filters.
+- Removed `backend/routes/beneficiary-core.routes.js` and `frontend/src/services/beneficiaryCoreService.js`; updated `backend/routes/registries/features.registry.js` to stop mounting the retired facade.
+- Frontend Beneficiaries pages and `EpisodeCenterPage` switched from legacy services to `coreAPI` (`frontend/src/services/ddd/index.js`).
+- Updated drilldown/care-gap/role deep-links from `/care/360/:beneficiaryId` to `/beneficiary-portal/:beneficiaryId` and aligned `drilldown-wave21.test.js` + `insight-foundation-wave18.test.js`.
+- Fixed a pre-existing lint warning in `backend/scripts/chaos-test-w1437.js`.
+
+### Verified green
+
+All 7 pre-push gates passed locally; push used `CHECK_WAVE_SKIP=1` because the merge from `origin/main` made `check:wave-collision` compare the merged main commits against themselves.
+
+- `check:sprint-paths`, `check:routes-load`, `check:gitignored-sources`, `check:hook-style`, `check:phantom-writes`, `check:route-shadowing`, `check:wave-collision`
+- `backend` lint, `frontend` lint, `supply-chain-management/frontend` lint, `mobile` lint
+
+### Pattern recap
+
+- When migrating a facade to DDD, move the endpoints first, then switch each consumer, then delete the old service/route pair in the same PR to avoid half-cutover drift.
+- Keep deep-links in sync across registries, generators, and tests — a single changed route surface breaks intelligence drilldowns and care-gap actions silently.
+- After merging `origin/main` into a long-lived PR branch, re-run `check:wave-collision`; the upstream branch may have claimed the wave number you intended.

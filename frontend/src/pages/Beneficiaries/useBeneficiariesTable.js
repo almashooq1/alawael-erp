@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import beneficiaryService from 'services/beneficiaryService';
+import { coreAPI } from 'services/ddd';
 import exportService from 'services/exportService';
 import { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { sampleData, DEFAULT_FILTERS } from './beneficiariesTableConstants';
@@ -49,7 +49,7 @@ const useBeneficiariesTable = () => {
   const loadBeneficiaries = async () => {
     setLoading(true);
     try {
-      const res = await beneficiaryService.getAll();
+      const res = await coreAPI.list();
       const data = res?.data || res?.beneficiaries || res || [];
       if (Array.isArray(data) && data.length > 0) {
         setBeneficiaries(data);
@@ -152,7 +152,7 @@ const useBeneficiariesTable = () => {
           confirmColor: 'error',
           onConfirm: async () => {
             for (const id of selected) {
-              await beneficiaryService.updateProfile({ id, status: 'inactive' });
+              await coreAPI.updateStatus(id, 'inactive');
             }
             setSnackbar({
               open: true,

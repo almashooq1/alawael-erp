@@ -50,7 +50,7 @@ import {
   progressColors,
 } from '../../theme/palette';
 import logger from '../../utils/logger';
-import beneficiaryService from '../../services/beneficiaryService';
+import { coreAPI } from '../../services/ddd';
 import { useNavigate } from 'react-router-dom';
 import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
@@ -190,8 +190,8 @@ export default function BeneficiariesDashboard() {
     try {
       /* ── Try server-aggregated statistics first ── */
       const [statsRes, recentRes] = await Promise.allSettled([
-        beneficiaryService.getStatistics(),
-        beneficiaryService.getRecent(),
+        coreAPI.getStats(),
+        coreAPI.getRecent(),
       ]);
 
       const sData =
@@ -293,7 +293,7 @@ export default function BeneficiariesDashboard() {
         }
       } else {
         /* Fallback: compute stats client-side from getAll */
-        const res = await beneficiaryService.getAll().catch(err => {
+        const res = await coreAPI.list().catch(err => {
           logger.warn('Beneficiaries: list fetch', err);
           return null;
         });

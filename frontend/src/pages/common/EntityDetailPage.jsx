@@ -63,7 +63,7 @@ export default function EntityDetailPage({ config }) {
       setLoading(true);
       setError('');
       try {
-        const r = await apiClient.get(`${cfg.getBase}/${id}`);
+        const r = await apiClient.get(`${cfg.getBase}/${id}${cfg.getSuffix || ''}`);
         const d = r?.data;
         const rec =
           d?.data ||
@@ -87,7 +87,7 @@ export default function EntityDetailPage({ config }) {
     return () => {
       alive = false;
     };
-  }, [cfg.getBase, id]);
+  }, [cfg.getBase, cfg.getSuffix, id]);
 
   const entries =
     record && typeof record === 'object'

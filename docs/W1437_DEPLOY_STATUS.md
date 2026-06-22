@@ -7,8 +7,8 @@
 | Metric | Value |
 |--------|-------|
 | Branch | `main` |
-| Commit | `65b595679` |
-| Generated at | 2026-06-22T10:24:11.523Z |
+| Commit | `fe036d1b5` |
+| Generated at | 2026-06-22T11:29:42.614Z |
 | Working tree | ❌ dirty |
 | Release | W1437 (feat/w1406-preflight-followup) |
 | Hotfix | W1444 |
@@ -19,6 +19,7 @@
 |----------|------|--------|
 | Migration script | `backend/scripts/migrate-nphies-claim-updatedAt.js` | ✅ present |
 | Local migration test | `backend/scripts/test-migration-local.js` | ✅ present |
+| Chaos/regression test | `backend/scripts/chaos-test-w1437.js` | ✅ present |
 | VPS deploy executor | `scripts/deploy-w1437.sh` | ✅ present |
 | VPS deploy integration | `scripts/deploy-vps.sh` | ✅ present |
 | Canary deploy | `scripts/deploy-canary-w1437.sh` | ✅ present |
@@ -72,4 +73,4 @@ If all checks pass, the repository is ready for production deployment.
 
 | Date | Commit | Event |
 |------|--------|-------|
-| 2026-06-22T10:24:11.523Z | 65b595679 | Status page generated |
+| 2026-06-22T11:29:42.614Z | fe036d1b5 | Status page generated |

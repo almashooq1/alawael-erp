@@ -352,8 +352,10 @@ const beneficiarySchema = new mongoose.Schema(
     },
     lastLoginDate: Date,
     loginAttempts: { type: Number, default: 0 },
-    passwordResetToken: String,
-    passwordResetExpires: Date,
+    // W1450: select:false to match the sibling BeneficiaryPortal — keeps the reset
+    // token out of default query/response projections (defense-in-depth; PDPL).
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
     twoFactorSecret: { type: String, select: false },
     twoFactorEnabled: { type: Boolean, default: false },
     accountVerified: { type: Boolean, default: false },

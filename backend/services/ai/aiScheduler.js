@@ -109,15 +109,22 @@ async function calculateActualProgress(prediction) {
     const Goal = mongoose.models.Goal || null;
     if (!Goal) return null;
 
-    const goals = await Goal.find({
-      plan_id: prediction.plan_id,
-      deleted_at: null,
-    });
+    // Goals link to a beneficiary via `participantId` (ref: Beneficiary). The Goal
+    // schema has no `plan_id` / `deleted_at` fields, so the previous query matched
+    // ZERO documents and this function always returned null — silently disabling the
+    // AI accuracy feedback loop (updateModelAccuracy never reached its ≥10-sample
+    // threshold). `beneficiary_id` may be populated upstream (validateExpiredPredictions
+    // populates it), so normalize to the id before querying.
+    const beneficiaryId =
+      (prediction.beneficiary_id && prediction.beneficiary_id._id) || prediction.beneficiary_id;
+    if (!beneficiaryId) return null;
+
+    const goals = await Goal.find({ participantId: beneficiaryId });
 
     if (!goals || goals.length === 0) return null;
 
     const avgProgress =
-      goals.reduce((sum, g) => sum + (g.progress_percentage || 0), 0) / goals.length;
+      goals.reduce((sum, g) => sum + (g.progressPercentage || 0), 0) / goals.length;
     return Math.round((avgProgress / 100) * 10000) / 10000; // تقريب لـ 4 منازل عشرية
   } catch {
     return null;
@@ -315,4 +322,5 @@ module.exports = {
   runDailyChecks,
   validateExpiredPredictions,
   generateMonthlyReports,
+  calculateActualProgress, // exported as a test seam (see ai-scheduler-actual-progress test)
 };

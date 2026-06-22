@@ -25,7 +25,7 @@ const aiDispatcher = require('../../services/cctv/ai');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { stripUpdateMeta } = require('../../utils/sanitize'); // W451
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 
 // ─── Faces ─────────────────────────────────────────────────────────────

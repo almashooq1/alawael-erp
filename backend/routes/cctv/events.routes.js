@@ -13,7 +13,7 @@ const eventService = require('../../services/cctv/eventService');
 const { CctvEvent } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 
 router.get('/', async (req, res) => {

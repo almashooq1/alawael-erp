@@ -18,7 +18,7 @@ const cameraService = require('../../services/cctv/cameraService');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { stripUpdateMeta } = require('../../utils/sanitize');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 
 router.use(authenticateToken);
 

@@ -20,7 +20,7 @@ const { CctvViewAudit } = require('../../models/cctv');
 const adapter = require('../../services/cctv/adapter');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 
 function ipMetaOf(req) {

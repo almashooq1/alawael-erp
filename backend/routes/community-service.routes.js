@@ -34,7 +34,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
@@ -84,8 +84,7 @@ const paginate = (page, limit) => ({
 // ─────────────────────────────────────────────
 router.get('/stats', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
-    const filter = branchId ? { branchId } : {};
+    const filter = { ...branchFilter(req) }; // W1444: scope to caller's branch (was: trusted user-supplied branchId → cross-branch leak)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -99,7 +98,7 @@ router.get('/stats', async (req, res) => {
       CommunityDonation.aggregate([
         {
           $match: {
-            ...(branchId ? { branchId } : {}),
+            ...filter,
             status: 'received',
             deletedAt: null,
           },
@@ -130,9 +129,8 @@ router.get('/stats', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/programs', async (req, res) => {
   try {
-    const { search, status, programType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { search, status, programType, page = 1, limit = 15 } = req.query;
+    const filter = { ...branchFilter(req) }; // W1444
     if (status) filter.status = status;
     if (programType) filter.programType = programType;
     if (search) {
@@ -168,7 +166,7 @@ router.post('/programs', async (req, res) => {
 
 router.get('/programs/:id', async (req, res) => {
   try {
-    const doc = await CommunityProgram.findById(req.params.id).lean();
+    const doc = await CommunityProgram.findOne({ _id: req.params.id, ...branchFilter(req) }).lean(); // W1444
     if (!doc) return fail(res, 'البرنامج غير موجود', 404);
     ok(res, { data: doc });
   } catch (err) {
@@ -178,10 +176,11 @@ router.get('/programs/:id', async (req, res) => {
 
 router.put('/programs/:id', async (req, res) => {
   try {
-    const doc = await CommunityProgram.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const doc = await CommunityProgram.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      stripUpdateMeta(req.body),
+      { returnDocument: 'after', runValidators: true }
+    );
     if (!doc) return fail(res, 'البرنامج غير موجود', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {
@@ -191,9 +190,10 @@ router.put('/programs/:id', async (req, res) => {
 
 router.delete('/programs/:id', async (req, res) => {
   try {
-    const doc = await CommunityProgram.findByIdAndUpdate(req.params.id, {
-      deletedAt: new Date(),
-    });
+    const doc = await CommunityProgram.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      { deletedAt: new Date() }
+    );
     if (!doc) return fail(res, 'البرنامج غير موجود', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -208,9 +208,7 @@ router.delete('/programs/:id', async (req, res) => {
 // الفعاليات القادمة (يجب أن يكون قبل /:id)
 router.get('/events/upcoming', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
-    const filter = { status: 'upcoming', eventDate: { $gte: new Date() } };
-    if (branchId) filter.branchId = branchId;
+    const filter = { ...branchFilter(req), status: 'upcoming', eventDate: { $gte: new Date() } }; // W1444
     const data = await CommunityEvent.find(filter)
       .sort({ eventDate: 1 })
       .limit(20)
@@ -224,9 +222,8 @@ router.get('/events/upcoming', async (req, res) => {
 
 router.get('/events', async (req, res) => {
   try {
-    const { status, eventType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, eventType, page = 1, limit = 15 } = req.query;
+    const filter = { ...branchFilter(req) }; // W1444
     if (status) filter.status = status;
     if (eventType) filter.eventType = eventType;
     const { skip } = paginate(page, limit);
@@ -254,7 +251,7 @@ router.post('/events', async (req, res) => {
 
 router.get('/events/:id', async (req, res) => {
   try {
-    const doc = await CommunityEvent.findById(req.params.id)
+    const doc = await CommunityEvent.findOne({ _id: req.params.id, ...branchFilter(req) }) // W1444
       .populate('programId', 'name nameAr')
       .lean();
     if (!doc) return fail(res, 'الفعالية غير موجودة', 404);
@@ -266,10 +263,11 @@ router.get('/events/:id', async (req, res) => {
 
 router.put('/events/:id', async (req, res) => {
   try {
-    const doc = await CommunityEvent.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const doc = await CommunityEvent.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      stripUpdateMeta(req.body),
+      { returnDocument: 'after', runValidators: true }
+    );
     if (!doc) return fail(res, 'الفعالية غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {
@@ -279,7 +277,10 @@ router.put('/events/:id', async (req, res) => {
 
 router.delete('/events/:id', async (req, res) => {
   try {
-    const doc = await CommunityEvent.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    const doc = await CommunityEvent.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      { deletedAt: new Date() }
+    );
     if (!doc) return fail(res, 'الفعالية غير موجودة', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -292,9 +293,8 @@ router.delete('/events/:id', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/partnerships', async (req, res) => {
   try {
-    const { status, organizationType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, organizationType, page = 1, limit = 15 } = req.query;
+    const filter = { ...branchFilter(req) }; // W1444
     if (status) filter.status = status;
     if (organizationType) filter.organizationType = organizationType;
     const { skip } = paginate(page, limit);
@@ -322,10 +322,11 @@ router.post('/partnerships', async (req, res) => {
 
 router.put('/partnerships/:id', async (req, res) => {
   try {
-    const doc = await CsoPartnership.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const doc = await CsoPartnership.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      stripUpdateMeta(req.body),
+      { returnDocument: 'after', runValidators: true }
+    );
     if (!doc) return fail(res, 'الشراكة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {
@@ -335,7 +336,10 @@ router.put('/partnerships/:id', async (req, res) => {
 
 router.delete('/partnerships/:id', async (req, res) => {
   try {
-    const doc = await CsoPartnership.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    const doc = await CsoPartnership.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      { deletedAt: new Date() }
+    );
     if (!doc) return fail(res, 'الشراكة غير موجودة', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -354,12 +358,10 @@ router.get('/resources', async (req, res) => {
       isFree,
       isDisabilitySpecific,
       search,
-      branchId,
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { isActive: true };
-    if (branchId) filter.branchId = branchId;
+    const filter = { ...branchFilter(req), isActive: true }; // W1444
     if (resourceType) filter.resourceType = resourceType;
     if (city) filter.city = new RegExp(escapeRegex(String(city)), 'i');
     if (isFree !== undefined) filter.isFree = isFree === 'true';
@@ -402,8 +404,8 @@ router.post('/resources', async (req, res) => {
 
 router.put('/resources/:id', async (req, res) => {
   try {
-    const doc = await CommunityResource.findByIdAndUpdate(
-      req.params.id,
+    const doc = await CommunityResource.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -419,9 +421,8 @@ router.put('/resources/:id', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/referrals', async (req, res) => {
   try {
-    const { status, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, page = 1, limit = 15 } = req.query;
+    const filter = { ...branchFilter(req) }; // W1444
     if (status) filter.status = status;
     const { skip } = paginate(page, limit);
     const [data, total] = await Promise.all([
@@ -463,9 +464,11 @@ router.patch('/referrals/:id/status', async (req, res) => {
     if (status === 'accepted') updates.acceptedAt = new Date();
     if (status === 'completed') updates.completedAt = new Date();
 
-    const doc = await CommunityReferral.findByIdAndUpdate(req.params.id, updates, {
-      returnDocument: 'after',
-    });
+    const doc = await CommunityReferral.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) }, // W1444
+      updates,
+      { returnDocument: 'after' }
+    );
     if (!doc) return fail(res, 'الإحالة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم تحديث حالة الإحالة بنجاح' });
   } catch (err) {
@@ -478,9 +481,8 @@ router.patch('/referrals/:id/status', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/donations', async (req, res) => {
   try {
-    const { status, donorType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const { status, donorType, page = 1, limit = 15 } = req.query;
+    const filter = { ...branchFilter(req) }; // W1444
     if (status) filter.status = status;
     if (donorType) filter.donorType = donorType;
     const { skip } = paginate(page, limit);
@@ -515,12 +517,11 @@ router.post('/donations', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/impact-report', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
     const year = parseInt(req.query.year) || new Date().getFullYear();
     const yearStart = new Date(year, 0, 1);
     const yearEnd = new Date(year + 1, 0, 1);
 
-    const branchFilter = branchId ? { branchId } : {};
+    const scope = branchFilter(req); // W1444: caller-branch scope via helper (was: user-supplied branchId → cross-branch leak)
 
     const [
       programsLaunched,
@@ -532,13 +533,13 @@ router.get('/impact-report', async (req, res) => {
       activePartnerships,
     ] = await Promise.all([
       CommunityProgram.countDocuments({
-        ...branchFilter,
+        ...scope,
         startDate: { $gte: yearStart, $lt: yearEnd },
       }),
       CommunityProgram.aggregate([
         {
           $match: {
-            ...(branchId ? { branchId } : {}),
+            ...scope,
             startDate: { $gte: yearStart, $lt: yearEnd },
             deletedAt: null,
           },
@@ -546,14 +547,14 @@ router.get('/impact-report', async (req, res) => {
         { $group: { _id: null, total: { $sum: '$actualBeneficiaries' } } },
       ]),
       CommunityEvent.countDocuments({
-        ...branchFilter,
+        ...scope,
         eventDate: { $gte: yearStart, $lt: yearEnd },
         status: 'completed',
       }),
       CommunityEvent.aggregate([
         {
           $match: {
-            ...(branchId ? { branchId } : {}),
+            ...scope,
             eventDate: { $gte: yearStart, $lt: yearEnd },
             deletedAt: null,
           },
@@ -563,7 +564,7 @@ router.get('/impact-report', async (req, res) => {
       CommunityDonation.aggregate([
         {
           $match: {
-            ...(branchId ? { branchId } : {}),
+            ...scope,
             donationDate: { $gte: yearStart, $lt: yearEnd },
             status: 'received',
             deletedAt: null,
@@ -572,11 +573,11 @@ router.get('/impact-report', async (req, res) => {
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       CommunityReferral.countDocuments({
-        ...branchFilter,
+        ...scope,
         referralDate: { $gte: yearStart, $lt: yearEnd },
         status: 'completed',
       }),
-      CsoPartnership.countDocuments({ ...branchFilter, status: 'active' }),
+      CsoPartnership.countDocuments({ ...scope, status: 'active' }),
     ]);
 
     ok(res, {

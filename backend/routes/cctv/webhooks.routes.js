@@ -22,7 +22,7 @@ const aiDispatcher = require('../../services/cctv/ai');
 
 const eventQueue = require('../../services/cctv/eventQueue.service');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 
 router.use(express.raw({ type: '*/*', limit: '5mb' }));
 

@@ -16,7 +16,7 @@ const express = require('express');
 const { CctvViewAudit, CctvAccessGrant } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 
 const auditRoles = ['admin', 'dpo', 'auditor', 'security_officer'];

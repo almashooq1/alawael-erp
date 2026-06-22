@@ -17,7 +17,7 @@ const adapter = require('../../services/cctv/adapter');
 const eventQueue = require('../../services/cctv/eventQueue.service');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
-const router = express.Router();
+const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
 router.use(requireRole(['admin', 'manager', 'security_officer']));
 

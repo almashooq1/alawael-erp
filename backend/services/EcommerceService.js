@@ -87,6 +87,15 @@ class EcommerceService {
   }
 
   /**
+   * CREATE PRODUCT
+   * Persists a new catalog product (finalPrice is computed by the pre-save hook).
+   */
+  static async createProduct(data) {
+    const product = await Product.create(data || {});
+    return product;
+  }
+
+  /**
    * SEARCH PRODUCTS
    * Full-text search with relevance scoring
    */

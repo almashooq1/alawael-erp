@@ -1162,6 +1162,61 @@ const RAW = {
       { name: 'startDate', label: 'تاريخ البدء', type: 'date' },
     ],
   },
+
+  // ── Inventory — warehouse stock item (warehouse picker) ───────────────────
+  'warehouse/receive': {
+    title: 'استلام صنف للمخزون',
+    endpoint: '/warehouse/items',
+    method: 'post',
+    backTo: '/warehouse',
+    successMsg: 'تم استلام الصنف بنجاح ✓',
+    fields: [
+      {
+        name: 'warehouse',
+        label: 'المستودع',
+        type: 'entity-select',
+        required: true,
+        optionsEndpoint: '/warehouse',
+        optionValue: '_id',
+        optionLabel: ['nameAr', 'name', 'nameEn', 'code'],
+      },
+      { name: 'nameAr', label: 'اسم الصنف', type: 'text', required: true },
+      { name: 'sku', label: 'رمز الصنف (SKU)', type: 'text' },
+      {
+        name: 'category',
+        label: 'الفئة',
+        type: 'select',
+        options: [
+          { value: 'medical', label: 'طبي' },
+          { value: 'therapy', label: 'علاجي' },
+          { value: 'office', label: 'مكتبي' },
+          { value: 'cleaning', label: 'تنظيف' },
+          { value: 'food', label: 'غذائي' },
+          { value: 'maintenance', label: 'صيانة' },
+          { value: 'equipment', label: 'معدات' },
+          { value: 'other', label: 'أخرى' },
+        ],
+      },
+      {
+        name: 'unit',
+        label: 'الوحدة',
+        type: 'select',
+        options: [
+          { value: 'piece', label: 'قطعة' },
+          { value: 'box', label: 'علبة' },
+          { value: 'pack', label: 'حزمة' },
+          { value: 'kg', label: 'كجم' },
+          { value: 'liter', label: 'لتر' },
+          { value: 'meter', label: 'متر' },
+          { value: 'set', label: 'طقم' },
+          { value: 'other', label: 'أخرى' },
+        ],
+      },
+      { name: 'quantity', label: 'الكمية', type: 'number', required: true },
+      { name: 'unitCost', label: 'تكلفة الوحدة (ر.س)', type: 'number' },
+      { name: 'expiryDate', label: 'تاريخ الانتهاء', type: 'date' },
+    ],
+  },
 };
 
 // Normalise: ensure every endpoint has a single leading slash.

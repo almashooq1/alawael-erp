@@ -245,6 +245,36 @@ router.post('/:warehouseId/items', async (req, res) => {
   }
 });
 
+// Non-scoped item detail + create (so the dashboard's row / receive screens
+// can resolve without a warehouseId in the URL; warehouse comes from the body).
+router.get('/items/:id', async (req, res) => {
+  try {
+    const WHItem = safeModel('WarehouseItem');
+    if (!WHItem) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+    const item = await WHItem.findById(req.params.id).lean();
+    if (!item?.warehouse) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+    const wh = await assertWarehouseInScope(req, item.warehouse);
+    if (!wh) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+    res.json({ success: true, data: item });
+  } catch (err) {
+    safeError(res, err, 'warehouse');
+  }
+});
+
+router.post('/items', async (req, res) => {
+  try {
+    const WHItem = safeModel('WarehouseItem');
+    if (!WHItem) return res.status(503).json({ success: false, message: 'الخدمة غير متاحة' });
+    const warehouseId = req.body.warehouse;
+    const wh = await assertWarehouseInScope(req, warehouseId);
+    if (!wh) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
+    const data = await WHItem.create({ ...req.body, warehouse: warehouseId });
+    res.status(201).json({ success: true, data });
+  } catch (err) {
+    safeError(res, err, 'warehouse');
+  }
+});
+
 router.put('/items/:id', async (req, res) => {
   try {
     const WHItem = safeModel('WarehouseItem');

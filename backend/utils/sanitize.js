@@ -72,10 +72,35 @@ const stripUpdateMeta = obj => {
   return clean;
 };
 
+/**
+ * Recursively strip MongoDB query operators ($-prefixed keys) and dotted keys from a
+ * user-supplied filter object. Use before passing a filter that originated from
+ * untrusted input into a Mongoose query — e.g. a `JSON.parse`'d query-string param,
+ * which bypasses the global express-mongo-sanitize (that only sees the raw string).
+ * Prevents operator injection ($ne / $gt / $where / $regex / etc.) and dotted-path
+ * injection. Returns a deep-cleaned copy; primitives pass through unchanged.
+ *
+ * @param {*} value - user-supplied filter (object / array / primitive)
+ * @returns {*} cleaned value with no operator/dotted/dangerous keys
+ */
+const sanitizeMongoFilter = value => {
+  if (Array.isArray(value)) return value.map(sanitizeMongoFilter);
+  if (value && typeof value === 'object') {
+    const clean = {};
+    for (const key of Object.keys(value)) {
+      if (key.startsWith('$') || key.includes('.') || DANGEROUS_KEYS.has(key)) continue;
+      clean[key] = sanitizeMongoFilter(value[key]);
+    }
+    return clean;
+  }
+  return value;
+};
+
 module.exports = {
   escapeRegex,
   stripDangerousKeys,
   stripUpdateMeta,
+  sanitizeMongoFilter,
   DANGEROUS_KEYS,
   UPDATE_BLACKLIST,
 };

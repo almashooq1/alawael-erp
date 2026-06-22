@@ -29,7 +29,7 @@ const logger = require('../utils/logger');
 
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, sanitizeMongoFilter } = require('../utils/sanitize');
 
 // ──────────────────────────────────────────────────────
 // Module Registry + System Templates — extracted to ./importExport/
@@ -1035,7 +1035,13 @@ class ImportExportProService {
       return [];
     }
 
-    const mongoQuery = { ...query };
+    // W1456: the export routes JSON.parse a user-supplied `filters` query-string param
+    // AFTER the global express-mongo-sanitize ran (it only saw an opaque string), so an
+    // attacker could inject operators ($ne/$gt/$where/$regex) into this query and exfiltrate
+    // arbitrary collections or run server-side JS. Strip operator/dotted keys here, at the
+    // shared sink, before they reach Model.find(). Server-side dateRange operators below are
+    // added AFTER sanitization, so they are preserved.
+    const mongoQuery = { ...sanitizeMongoFilter(query) };
 
     // Apply date range
     if (dateRange && dateRange.field && /^[A-Za-z0-9_.]+$/.test(dateRange.field)) {

@@ -16,6 +16,7 @@ const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const Branch = require('../models/Branch');
 const safeError = require('../utils/safeError');
+const { assertUserMutationAllowed } = require('../authorization/user-mutation-authz');
 
 // ─── Helper: Validate MongoDB ObjectId ────────────────────
 const isValidObjectId = id => mongoose.Types.ObjectId.isValid(id);
@@ -446,6 +447,12 @@ router.post('/bulk-action', async (req, res) => {
             .status(403)
             .json({ success: false, message: 'فقط مدير النظام يمكنه تعيين هذا الدور' });
         }
+        // W1457: can't bulk-assign a role above your own.
+        if (!assertUserMutationAllowed({ actorRole: req.user?.role, newRole }).ok) {
+          return res
+            .status(403)
+            .json({ success: false, message: 'لا يمكنك تعيين دور أعلى من دورك' });
+        }
         result = await User.updateMany(
           { _id: { $in: userIds } },
           { role: newRole, updatedAt: new Date() }
@@ -744,6 +751,19 @@ router.put('/:id', async (req, res) => {
       return res.status(403).json({ success: false, message: 'لا يمكنك تعيين دور مدير النظام' });
     }
 
+    // W1457: privilege-ceiling — can't assign a role above your own, can't change your
+    // OWN role/permissions, and custom/denied permissions require admin tier.
+    const ceiling = assertUserMutationAllowed({
+      actorRole: req.user?.role,
+      actorId: req.user?.id || req.user?._id,
+      targetUserId: req.params.id,
+      newRole: role,
+      settingPermissions: customPermissions !== undefined || deniedPermissions !== undefined,
+    });
+    if (!ceiling.ok) {
+      return res.status(ceiling.status).json({ success: false, message: ceiling.message });
+    }
+
     const updateData = {};
     if (fullName !== undefined) updateData.fullName = fullName;
     if (username !== undefined) updateData.username = username || undefined;
@@ -952,6 +972,17 @@ router.put('/:id/permissions', async (req, res) => {
   }
   try {
     const { customPermissions, deniedPermissions } = req.body;
+
+    // W1457: setting permissions requires admin tier and cannot target yourself.
+    const ceiling = assertUserMutationAllowed({
+      actorRole: req.user?.role,
+      actorId: req.user?.id || req.user?._id,
+      targetUserId: req.params.id,
+      settingPermissions: true,
+    });
+    if (!ceiling.ok) {
+      return res.status(ceiling.status).json({ success: false, message: ceiling.message });
+    }
 
     const user = await User.findByIdAndUpdate(
       req.params.id,

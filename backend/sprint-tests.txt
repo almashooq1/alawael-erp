@@ -1014,3 +1014,4 @@ __tests__/beneficiary-pii-select-false-wave1454.test.js
 __tests__/insurance-claim-totals-wave1451.test.js
 __tests__/invoice-number-race-retry-wave1452.test.js
 __tests__/sanitize-mongo-filter-wave1456.test.js
+__tests__/user-mutation-authz-wave1457.test.js

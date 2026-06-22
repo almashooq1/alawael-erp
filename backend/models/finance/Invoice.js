@@ -102,31 +102,9 @@ invoiceSchema.pre('save', async function () {
   if (!this.uuid) {
     this.uuid = crypto.randomUUID();
   }
-  // حساب الإجماليات
-  if (this.lines && this.lines.length > 0) {
-    let subtotal = 0,
-      discountTotal = 0,
-      vatTotal = 0;
-    this.lines.forEach(line => {
-      const lineTotal = line.quantity * line.unit_price;
-      const discountAmt = line.discount_amount || lineTotal * (line.discount_percentage / 100 || 0);
-      const taxable = lineTotal - discountAmt;
-      const vat = taxable * (line.vat_rate / 100);
-      line.taxable_amount = taxable;
-      line.vat_amount = Math.round(vat * 100) / 100;
-      line.total_amount = Math.round((taxable + vat) * 100) / 100;
-      line.discount_amount = Math.round(discountAmt * 100) / 100;
-      subtotal += lineTotal;
-      discountTotal += discountAmt;
-      vatTotal += vat;
-    });
-    this.subtotal = Math.round(subtotal * 100) / 100;
-    this.discount_total = Math.round(discountTotal * 100) / 100;
-    this.taxable_amount = Math.round((subtotal - discountTotal) * 100) / 100;
-    this.vat_amount = Math.round(vatTotal * 100) / 100;
-    this.total_amount = Math.round((this.taxable_amount + this.vat_amount) * 100) / 100;
-    this.balance_due = Math.round((this.total_amount - this.paid_amount) * 100) / 100;
-  }
+  // حساب الإجماليات — W1449: header totals reconcile to the line items (ZATCA);
+  // sums the ROUNDED per-line values so header tax/total === Σ line tax/total.
+  require('../../intelligence/invoice-money.lib').computeInvoiceTotals(this);
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings from
   // the float fields just computed. Additive: does not change float behaviour.
   require('../../intelligence/invoice-money.lib').applyInvoiceHalalas(this);

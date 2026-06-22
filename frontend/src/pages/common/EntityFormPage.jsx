@@ -131,7 +131,7 @@ export default function EntityFormPage({ config }) {
     (async () => {
       setLoading(true);
       try {
-        const r = await apiClient.get(`${cfg.getEndpoint}/${id}`);
+        const r = await apiClient.get(cfg.singleton ? cfg.getEndpoint : `${cfg.getEndpoint}/${id}`);
         const d = r?.data;
         const rec =
           d?.data ||
@@ -202,7 +202,7 @@ export default function EntityFormPage({ config }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await apiClient.put(`${cfg.endpoint}/${id}`, buildPayload());
+        await apiClient.put(cfg.singleton ? cfg.endpoint : `${cfg.endpoint}/${id}`, buildPayload());
       } else {
         const method = (cfg.method || 'post').toLowerCase();
         await apiClient[method](cfg.endpoint, buildPayload());

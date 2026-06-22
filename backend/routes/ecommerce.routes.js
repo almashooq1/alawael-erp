@@ -69,6 +69,20 @@ router.get('/products', createRBACMiddleware(['ecommerce:read']), async (req, re
 });
 
 /**
+ * POST /api/ecommerce/products
+ * Create a catalog product
+ * @requires Permission: ecommerce:write
+ */
+router.post('/products', createRBACMiddleware(['ecommerce:write']), async (req, res) => {
+  try {
+    const product = await EcommerceService.createProduct(req.body);
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+/**
  * GET /api/ecommerce/products/search/:query
  * Search products
  * @requires Permission: ecommerce:read

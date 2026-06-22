@@ -29,6 +29,7 @@ const DETAIL_VIEWS = {
     title: 'تفاصيل الحادثة الطارئة',
   },
   'documents/:id': { getBase: '/documents', backTo: '/documents', title: 'تفاصيل المستند' },
+  'ecommerce/products/:id': { getBase: '/ecommerce/products', backTo: '/ecommerce', title: 'تفاصيل المنتج' },
   'facility/:id': { getBase: '/facilities/rooms', backTo: '/facility', title: 'تفاصيل المرفق' },
   'gps-tracking/vehicles/:id': {
     getBase: '/vehicles',

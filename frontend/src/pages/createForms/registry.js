@@ -1217,6 +1217,49 @@ const RAW = {
       { name: 'expiryDate', label: 'تاريخ الانتهاء', type: 'date' },
     ],
   },
+
+  // ── PR — media coverage ───────────────────────────────────────────────────
+  'public-relations/new': {
+    title: 'إضافة تغطية إعلامية',
+    endpoint: '/public-relations/media',
+    method: 'post',
+    backTo: '/public-relations',
+    successMsg: 'تمت الإضافة بنجاح ✓',
+    fields: [
+      { name: 'coverageCode', label: 'رمز التغطية', type: 'text', required: true },
+      { name: 'titleAr', label: 'العنوان', type: 'text', required: true },
+      { name: 'type', label: 'النوع', type: 'select', options: [
+        { value: 'press_release', label: 'بيان صحفي' }, { value: 'news_article', label: 'مقال إخباري' }, { value: 'tv_coverage', label: 'تغطية تلفزيونية' }, { value: 'radio', label: 'إذاعة' }, { value: 'social_media', label: 'وسائل التواصل' }, { value: 'interview', label: 'مقابلة' }, { value: 'report', label: 'تقرير' }, { value: 'other', label: 'أخرى' } ] },
+      { name: 'sentiment', label: 'الانطباع', type: 'select', options: [
+        { value: 'positive', label: 'إيجابي' }, { value: 'neutral', label: 'محايد' }, { value: 'negative', label: 'سلبي' } ] },
+      { name: 'status', label: 'الحالة', type: 'select', options: [
+        { value: 'draft', label: 'مسودة' }, { value: 'published', label: 'منشور' }, { value: 'archived', label: 'مؤرشف' } ] },
+      { name: 'publicationDate', label: 'تاريخ النشر', type: 'date' },
+      { name: 'reach', label: 'مدى الوصول', type: 'number' },
+      { name: 'url', label: 'الرابط', type: 'text' },
+      { name: 'content', label: 'المحتوى', type: 'textarea' } ],
+  },
+
+  // ── E-commerce — product ──────────────────────────────────────────────────
+  'ecommerce/products/new': {
+    title: 'إضافة منتج',
+    endpoint: '/ecommerce/products',
+    method: 'post',
+    backTo: '/ecommerce',
+    successMsg: 'تمت إضافة المنتج بنجاح ✓',
+    fields: [
+      { name: 'name', label: 'اسم المنتج', type: 'text', required: true },
+      { name: 'price', label: 'السعر (ر.س)', type: 'number', required: true },
+      { name: 'category', label: 'الفئة', type: 'select', options: [
+        { value: 'Electronics', label: 'إلكترونيات' }, { value: 'Clothing', label: 'ملابس' }, { value: 'Food', label: 'أغذية' }, { value: 'Books', label: 'كتب' }, { value: 'Home', label: 'منزل' }, { value: 'Sports', label: 'رياضة' }, { value: 'Tools', label: 'أدوات' }, { value: 'Other', label: 'أخرى' } ] },
+      { name: 'description', label: 'الوصف', type: 'textarea' },
+      { name: 'totalStock', label: 'المخزون', type: 'number' },
+      { name: 'lowStockThreshold', label: 'حد المخزون المنخفض', type: 'number' },
+      { name: 'discount', label: 'الخصم (%)', type: 'number' },
+      { name: 'sku', label: 'رمز SKU', type: 'text' },
+      { name: 'isActive', label: 'نشط', type: 'checkbox' },
+      { name: 'isFeatured', label: 'مميز', type: 'checkbox' } ],
+  },
 };
 
 // Normalise: ensure every endpoint has a single leading slash.

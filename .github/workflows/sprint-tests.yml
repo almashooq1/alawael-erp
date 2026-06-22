@@ -1900,6 +1900,8 @@ on:
       - 'backend/__tests__/cctv-event-bus-wiring-wave1447.test.js'
       - 'backend/__tests__/input-integrity-hardening-wave1448.test.js'
       - 'backend/__tests__/invoice-totals-reconciliation-wave1449.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-pii-select-false-wave1454.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3778,6 +3780,8 @@ on:
       - 'backend/__tests__/cctv-event-bus-wiring-wave1447.test.js'
       - 'backend/__tests__/input-integrity-hardening-wave1448.test.js'
       - 'backend/__tests__/invoice-totals-reconciliation-wave1449.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-pii-select-false-wave1454.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

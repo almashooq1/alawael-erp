@@ -1010,3 +1010,4 @@ __tests__/cctv-async-router-wave1445.test.js
 __tests__/cctv-event-bus-wiring-wave1447.test.js
 __tests__/input-integrity-hardening-wave1448.test.js
 __tests__/invoice-totals-reconciliation-wave1449.test.js
+__tests__/beneficiary-pii-select-false-wave1454.test.js

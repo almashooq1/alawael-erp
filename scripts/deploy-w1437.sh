@@ -184,7 +184,6 @@ fi
 
 log "Migration completed successfully (matched: $MIGRATION_MATCHED, modified: $MIGRATION_MODIFIED)"
 notify "MIGRATION_OK" "Migration completed on $(hostname): matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED" "info"
-notify "MIGRATION_OK" "Migration completed: matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED"
 
 # --- Verify indexes ----------------------------------------------------------
 log "Verifying required compound indexes exist..."

@@ -31,6 +31,13 @@ It checks:
 - Syntax checks pass
 - Backend pre-push gates pass
 - Local migration test passes (MongoMemoryServer)
+- Chaos/regression tests pass (feature flags, idempotency, concurrent migrations)
+
+Run chaos tests standalone:
+
+```bash
+cd backend && node scripts/chaos-test-w1437.js
+```
 
 ## Scope
 

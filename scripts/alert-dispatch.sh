@@ -24,6 +24,10 @@ DETAILS="${3:-}"
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 HOSTNAME=$(hostname)
 
+# Escape quotes for JSON payloads
+JSON_SUMMARY=$(printf '%s' "$SUMMARY" | sed 's/\\/\\\\/g; s/"/\\"/g')
+JSON_DETAILS=$(printf '%s' "$DETAILS" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
 send_slack() {
   [[ -n "${SLACK_WEBHOOK:-}" ]] || return 0
   local color="good"
@@ -35,8 +39,8 @@ send_slack() {
 {
   "attachments": [{
     "color": "$color",
-    "title": "[$SEVERITY] $SUMMARY",
-    "text": "$DETAILS",
+    "title": "[$SEVERITY] $JSON_SUMMARY",
+    "text": "$JSON_DETAILS",
     "footer": "W1437 deploy • $HOSTNAME • $TIMESTAMP"
   }]
 }
@@ -57,11 +61,11 @@ send_teams() {
   "@type": "MessageCard",
   "@context": "https://schema.org/extensions",
   "themeColor": "$color",
-  "summary": "[$SEVERITY] $SUMMARY",
+  "summary": "[$SEVERITY] $JSON_SUMMARY",
   "sections": [{
-    "activityTitle": "[$SEVERITY] $SUMMARY",
+    "activityTitle": "[$SEVERITY] $JSON_SUMMARY",
     "activitySubtitle": "W1437 deploy • $HOSTNAME • $TIMESTAMP",
-    "text": "$DETAILS"
+    "text": "$JSON_DETAILS"
   }]
 }
 EOF
@@ -81,11 +85,11 @@ send_pagerduty() {
   "routing_key": "$PAGERDUTY_INTEGRATION_KEY",
   "event_action": "trigger",
   "payload": {
-    "summary": "[$SEVERITY] $SUMMARY",
+    "summary": "[$SEVERITY] $JSON_SUMMARY",
     "severity": "$severity_pd",
     "source": "$HOSTNAME",
     "custom_details": {
-      "details": "$DETAILS",
+      "details": "$JSON_DETAILS",
       "timestamp": "$TIMESTAMP"
     }
   }

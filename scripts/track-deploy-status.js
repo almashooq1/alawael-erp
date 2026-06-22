@@ -47,6 +47,7 @@ const dirty = run('git status --porcelain') ? '❌ dirty' : '✅ clean';
 const artifacts = [
   ['Migration script', 'backend/scripts/migrate-nphies-claim-updatedAt.js'],
   ['Local migration test', 'backend/scripts/test-migration-local.js'],
+  ['Chaos/regression test', 'backend/scripts/chaos-test-w1437.js'],
   ['VPS deploy executor', 'scripts/deploy-w1437.sh'],
   ['VPS deploy integration', 'scripts/deploy-vps.sh'],
   ['Canary deploy', 'scripts/deploy-canary-w1437.sh'],

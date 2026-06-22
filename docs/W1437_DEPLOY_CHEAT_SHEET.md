@@ -159,6 +159,11 @@ DRY_RUN=1 NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedA
 python3 scripts/generate-runbook-pdf.py
 ```
 
+### Run chaos/regression tests
+```bash
+cd backend && node scripts/chaos-test-w1437.js
+```
+
 ### Update deployment status page
 ```bash
 node scripts/track-deploy-status.js

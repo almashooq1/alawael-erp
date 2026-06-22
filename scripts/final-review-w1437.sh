@@ -61,6 +61,7 @@ check "Cheat sheet exists" test -f docs/W1437_DEPLOY_CHEAT_SHEET.md
 # --- Syntax checks -----------------------------------------------------------
 check "Migration script syntax" node -c backend/scripts/migrate-nphies-claim-updatedAt.js
 check "Local migration test syntax" node -c backend/scripts/test-migration-local.js
+check "Chaos test syntax" node -c backend/scripts/chaos-test-w1437.js
 check "Deploy script syntax" bash -n scripts/deploy-w1437.sh
 check "Monitor script syntax" bash -n scripts/monitor-w1437.sh
 check "Rollback script syntax" bash -n scripts/rollback-w1437.sh
@@ -82,6 +83,17 @@ if bash -c "cd backend && node scripts/test-migration-local.js" &>/tmp/w1437-mig
 else
   echo -e "${RED}FAIL${NC}"
   error "See /tmp/w1437-migration-test.log"
+  FAIL=$((FAIL + 1))
+fi
+
+# --- Chaos/regression tests --------------------------------------------------
+info "Running W1437 chaos/regression tests (may take 1-2 minutes)..."
+if bash -c "cd backend && node scripts/chaos-test-w1437.js" &>/tmp/w1437-chaos-test.log; then
+  echo -e "${GREEN}PASS${NC}"
+  PASS=$((PASS + 1))
+else
+  echo -e "${RED}FAIL${NC}"
+  error "See /tmp/w1437-chaos-test.log"
   FAIL=$((FAIL + 1))
 fi
 

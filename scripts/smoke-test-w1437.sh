@@ -52,11 +52,12 @@ fail() { echo -e "${RED}[$(date -u +%Y-%m-%dT%H:%M:%SZ)] FAIL:${NC} $*"; }
 
 check() {
   local name="$1"
-  local cmd="$2"
-  local expect="$3"
+  shift
+  local expect="$1"
+  shift
 
   echo -n "▶ $name ... "
-  result=$(eval "$cmd" 2>&1 || true)
+  result=$("$@" 2>&1 || true)
 
   if [[ "$result" == *"$expect"* ]]; then
     echo -e "${GREEN}PASS${NC}"
@@ -73,13 +74,13 @@ log "W1437 smoke tests against $BASE_URL"
 
 # --- Basic health -----------------------------------------------------------
 check "Health endpoint returns 200" \
-  "curl -sf -o /dev/null -w '%{http_code}' '$HEALTH_URL'" \
-  "200"
+  "200" \
+  curl -sf -o /dev/null -w '%{http_code}' "$HEALTH_URL"
 
 # --- Build info -------------------------------------------------------------
 check "Build info contains commit" \
-  "curl -sf '$BUILD_INFO_URL'" \
-  "commit"
+  "commit" \
+  curl -sf "$BUILD_INFO_URL"
 
 # --- API availability (public/unauthenticated endpoints) --------------------
 # These endpoints should exist and return JSON even if they require auth.
@@ -108,8 +109,8 @@ test_api "/nphies/reconciliation/status" "NPHIES reconciliation endpoint reachab
 
 # --- DNS / TLS sanity -------------------------------------------------------
 check "TLS certificate valid" \
-  "echo | openssl s_client -connect $(echo "$BASE_URL" | sed -E 's#https?://##'):443 -servername $(echo "$BASE_URL" | sed -E 's#https?://##') 2>/dev/null | openssl x509 -noout -subject" \
-  "subject="
+  "subject=" \
+  bash -c "echo | openssl s_client -connect \$(echo \"$BASE_URL\" | sed -E 's#https?://##'):443 -servername \$(echo \"$BASE_URL\" | sed -E 's#https?://##') 2>/dev/null | openssl x509 -noout -subject"
 
 # --- Summary ----------------------------------------------------------------
 echo ""

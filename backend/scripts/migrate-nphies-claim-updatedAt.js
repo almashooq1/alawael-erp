@@ -14,6 +14,9 @@
  * Run:
  *   NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedAt.js
  *
+ * Dry run (count only, no writes):
+ *   DRY_RUN=1 NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedAt.js
+ *
  * Safety:
  *   - Uses updateMany with a filter that only touches docs missing the field.
  *   - Defaults to submittedAt, then createdAt, then now.
@@ -25,6 +28,8 @@ const mongoose = require('mongoose');
 
 async function main() {
   const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+  const dryRun = ['1', 'true', 'yes'].includes((process.env.DRY_RUN || '').toLowerCase());
+
   if (!mongoUri) {
     console.error('[migrate-nphies-claim-updatedAt] MONGODB_URI/MONGO_URI is required');
     process.exit(1);
@@ -43,6 +48,16 @@ async function main() {
       { 'nphies.submission.updatedAt': null },
     ],
   };
+
+  if (dryRun) {
+    const count = await NphiesClaim.collection.countDocuments(filter);
+    console.log('[migrate-nphies-claim-updatedAt] dry-run', {
+      wouldMatch: count,
+      wouldModify: count,
+    });
+    await mongoose.disconnect();
+    return;
+  }
 
   const fallback = {
     $cond: [

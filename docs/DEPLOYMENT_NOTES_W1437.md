@@ -1,7 +1,7 @@
 # Deployment Notes — W1437 (feat/w1406-preflight-followup)
 
 > Generated: 2026-06-21  
-> Updated: 2026-06-22T01:35:00+03:00  
+> Updated: 2026-06-22T01:50:00+03:00  
 > Branch: `feat/w1406-preflight-followup`  
 > PR: [#579](https://github.com/almashooq1/alawael-erp/pull/579)
 
@@ -21,6 +21,18 @@ Choose **one** of the following methods based on your production setup:
 ### Method A: VPS / bare-metal (_pm2/systemd_)
 
 Use `scripts/deploy-w1437.sh` (see detailed steps below).
+
+**Dry run (estimate impact without writing):**
+```bash
+export MONGODB_URI="mongodb://..."
+DRY_RUN=1 NODE_ENV=production node backend/scripts/migrate-nphies-claim-updatedAt.js
+```
+
+**Rollback (application code only):**
+```bash
+export DEPLOY_ROOT=/opt/alawael-erp
+./scripts/rollback-w1437.sh
+```
 
 ### Method B: Docker Compose
 
@@ -45,6 +57,8 @@ Trigger the manual workflow **"🗄️ W1437 Production Migration"** (`w1437-mig
 
 Required secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `MONGODB_URI`.
 Optional secrets: `DEPLOY_ROOT` (default `/home/alawael/app`).
+
+After deployment, trigger **"👁️ W1437 Post-Deploy Monitor"** (`w1437-monitor.yml`) to run the 30-minute log watch from GitHub Actions.
 
 ### Method D: Automatic migration on every deploy
 
@@ -127,9 +141,20 @@ This is idempotent, so it is safe to leave enabled until the release is stable, 
 
 ## Rollback
 
+Use the provided rollback script:
+
+```bash
+export DEPLOY_ROOT=/opt/alawael-erp
+./scripts/rollback-w1437.sh [TARGET_COMMIT_OR_TAG]
+```
+
+- If `TARGET_COMMIT_OR_TAG` is omitted, the script rolls back to the commit immediately before the W1437 merge (`009c676bd^1`).
+- The script backs up the current `backend/` and `frontend/` directories.
+- The W1437 migration data is **NOT** removed — it is safe to leave `nphies.submission.updatedAt` populated; old code will simply ignore it.
+
+Manual alternative:
 - Revert the merge commit on `main`.
 - Re-deploy the previous release.
-- Note: reverting the W1437 code without rolling back the migration is safe; old code will ignore the new `updatedAt` field.
 
 ## Dependency audit
 
@@ -232,6 +257,23 @@ Also verify:
 
 - [ ] NPHIES reconciliation sweeper is transitioning old `PENDING_REVIEW` claims.
 - [ ] SLA scheduler (`checkResolutionBreaches`, `assignMissingSlaDeadlines`, `getSlaStats`) completes without timeout errors.
+
+## Notifications & audit
+
+The deployment scripts can send notifications on start, migration success, and migration failure.
+
+```bash
+export SLACK_WEBHOOK="https://hooks.slack.com/services/..."
+# OR
+export TEAMS_WEBHOOK="https://outlook.office.com/webhook/..."
+./scripts/deploy-w1437.sh
+```
+
+A deployment log is written to stdout. Capture it for audit:
+
+```bash
+./scripts/deploy-w1437.sh 2>&1 | tee "logs/deploy-w1437-$(date +%Y%m%d-%H%M%S).log"
+```
 
 ## Known risks / follow-up work
 

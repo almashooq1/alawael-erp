@@ -1,0 +1,98 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — W1437 Post-Deploy Monitor (manual)
+#
+#  Runs a 30-minute monitor on the production host after deployment.
+#  Watches error1.log for the P0-1, P0-2, and P2-4 signatures.
+#
+#  Required secrets:
+#    VPS_HOST      - production host
+#    VPS_USER      - SSH user
+#    VPS_SSH_KEY   - private SSH key
+#
+#  Optional secrets:
+#    DEPLOY_ROOT   - app directory on VPS (default: /home/alawael/app)
+# ════════════════════════════════════════════════════════════════════
+name: "👁️ W1437 Post-Deploy Monitor"
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: "مدة المراقبة بالدقائق (default 30)"
+        required: false
+        default: "30"
+      log_path:
+        description: "مسار ملف الأخطاء على الـ VPS"
+        required: false
+        default: "logs/error1.log"
+
+env:
+  DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT || '/home/alawael/app' }}
+
+concurrency:
+  group: w1437-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    name: "👁️ Monitor production logs"
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Validate secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]    && echo "❌ Missing: VPS_HOST"    && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing: VPS_USER"    && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
+          if [ "$MISSING" -ne 0 ]; then
+            echo "❌ Required secrets are missing."
+            exit 1
+          fi
+          echo "✅ All required secrets present"
+
+      - uses: actions/checkout@v6
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "✅ SSH configured"
+
+      - name: Run monitor
+        timeout-minutes: 35
+        run: |
+          set -eo pipefail
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          DURATION="${{ github.event.inputs.duration_minutes }}"
+          LOG_PATH="${{ github.event.inputs.log_path }}"
+
+          echo "👁️ Starting ${DURATION}-minute monitor on $SSH_TARGET:$LOG_PATH"
+
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -o BatchMode=yes \
+              "$SSH_TARGET" bash -s <<REMOTE_SCRIPT
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+            export MONITOR_DURATION_MINUTES="$DURATION"
+            ./scripts/monitor-w1437.sh "$LOG_PATH"
+          REMOTE_SCRIPT
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## W1437 Post-Deploy Monitor" >> $GITHUB_STEP_SUMMARY
+          echo "- Host: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Log path: ${{ github.event.inputs.log_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Duration: ${{ github.event.inputs.duration_minutes }} min" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "- Result: ✅ clean" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Result: ❌ signatures detected" >> $GITHUB_STEP_SUMMARY
+          fi

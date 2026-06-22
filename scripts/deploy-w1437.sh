@@ -23,6 +23,9 @@ MONGODB_URI="${MONGODB_URI:-${MONGO_URI:-}}"
 NODE_ENV="${NODE_ENV:-production}"
 REQUIRED_NODE_VERSION="22"
 FORCE_RESET=false
+BACKUP_MAX_AGE_HOURS="${BACKUP_MAX_AGE_HOURS:-24}"
+SLACK_WEBHOOK="${SLACK_WEBHOOK:-}"
+TEAMS_WEBHOOK="${TEAMS_WEBHOOK:-}"
 
 # Parse optional args
 for arg in "$@"; do
@@ -78,6 +81,74 @@ fi
 
 log "Environment OK: node $(node -v), DEPLOY_ROOT=$DEPLOY_ROOT, NODE_ENV=$NODE_ENV"
 
+# --- Notify start ------------------------------------------------------------
+notify() {
+  local status="$1"
+  local message="$2"
+  local payload
+
+  if [[ -n "$SLACK_WEBHOOK" ]]; then
+    payload=$(printf '{"text":"[W1437 Deploy] %s: %s"}' "$status" "$message")
+    curl -sf -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK" &>/dev/null || warn "Slack notification failed"
+  fi
+
+  if [[ -n "$TEAMS_WEBHOOK" ]]; then
+    payload=$(printf '{"text":"[W1437 Deploy] %s: %s"}' "$status" "$message")
+    curl -sf -X POST -H 'Content-type: application/json' --data "$payload" "$TEAMS_WEBHOOK" &>/dev/null || warn "Teams notification failed"
+  fi
+}
+
+notify "STARTED" "Deployment pre-flight on $(hostname)"
+
+# --- Backup verification -----------------------------------------------------
+log "Verifying production MongoDB backup..."
+
+# Try common backup locations
+BACKUP_DIR=""
+for candidate in "$DEPLOY_ROOT/backups/mongodb" "/var/backups/mongodb" "/opt/backups/mongodb" "/backup/mongodb"; do
+  if [[ -d "$candidate" ]]; then
+    BACKUP_DIR="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$BACKUP_DIR" ]]; then
+  warn "Could not find a MongoDB backup directory. Skipping backup age check."
+  warn "Expected one of: $DEPLOY_ROOT/backups/mongodb, /var/backups/mongodb, /opt/backups/mongodb, /backup/mongodb"
+else
+  LATEST_BACKUP=$(find "$BACKUP_DIR" -type f -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)
+  if [[ -z "$LATEST_BACKUP" ]]; then
+    warn "No backup files found in $BACKUP_DIR"
+  else
+    BACKUP_AGE_HOURS=$(( ( $(date +%s) - $(stat -c %Y "$LATEST_BACKUP" 2>/dev/null || stat -f %m "$LATEST_BACKUP" 2>/dev/null || echo 0) ) / 3600 ))
+    log "Latest backup: $LATEST_BACKUP (age: ${BACKUP_AGE_HOURS}h)"
+    if [[ $BACKUP_AGE_HOURS -gt $BACKUP_MAX_AGE_HOURS ]]; then
+      fail "Backup is older than ${BACKUP_MAX_AGE_HOURS}h. Create a fresh backup before proceeding."
+    fi
+  fi
+fi
+
+# --- Pre-flight DB connectivity ----------------------------------------------
+log "Testing MongoDB connectivity..."
+node - <<'NODE_SCRIPT'
+const mongoose = require('mongoose');
+(async () => {
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+  if (!mongoUri) {
+    console.error('MONGODB_URI not set');
+    process.exit(1);
+  }
+  await mongoose.connect(mongoUri, {
+    maxPoolSize: 2,
+    serverSelectionTimeoutMS: 10000,
+  });
+  const admin = mongoose.connection.db.admin();
+  const info = await admin.serverInfo();
+  console.log(`[DB] Connected: MongoDB ${info.version}`);
+  await mongoose.disconnect();
+})();
+NODE_SCRIPT
+
 # --- Pull latest main --------------------------------------------------------
 log "Pulling latest main from origin..."
 
@@ -99,14 +170,24 @@ log "Now on main at commit $CURRENT_COMMIT"
 # --- Run migration -----------------------------------------------------------
 log "Running NphiesClaim updatedAt backfill migration..."
 log "(URI host: $(echo "$MONGODB_URI" | sed -E 's#^mongodb(\+srv)?://([^/]+)/.*#\2#'))"
-MONGODB_URI="$MONGODB_URI" NODE_ENV="$NODE_ENV" node backend/scripts/migrate-nphies-claim-updatedAt.js
+
+MIGRATION_OUTPUT=$(MONGODB_URI="$MONGODB_URI" NODE_ENV="$NODE_ENV" node backend/scripts/migrate-nphies-claim-updatedAt.js 2>&1)
 MIGRATION_EXIT=$?
 
+# Log output locally
+printf '%s\n' "$MIGRATION_OUTPUT"
+
+MIGRATION_MATCHED=$(echo "$MIGRATION_OUTPUT" | grep -oE '"matched":[0-9]+' | cut -d: -f2 || echo "?")
+MIGRATION_MODIFIED=$(echo "$MIGRATION_OUTPUT" | grep -oE '"modified":[0-9]+' | cut -d: -f2 || echo "?")
+
 if [[ $MIGRATION_EXIT -ne 0 ]]; then
+  notify "MIGRATION_FAILED" "Migration failed with exit code $MIGRATION_EXIT"
   fail "Migration failed with exit code $MIGRATION_EXIT. STOP. Do not deploy application code."
 fi
 
-log "Migration completed successfully"
+log "Migration completed successfully (matched: $MIGRATION_MATCHED, modified: $MIGRATION_MODIFIED)"
+notify "MIGRATION_OK" "Migration completed on $(hostname): matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED"
+notify "MIGRATION_OK" "Migration completed: matched=$MIGRATION_MATCHED modified=$MIGRATION_MODIFIED"
 
 # --- Verify indexes ----------------------------------------------------------
 log "Verifying required compound indexes exist..."
@@ -188,3 +269,5 @@ log "  2. Deploy frontend build"
 log "  3. Deploy mobile build (if applicable)"
 log "  4. Run: ./scripts/monitor-w1437.sh"
 log "================================================================"
+
+notify "PREDEPLOY_OK" "Pre-deploy phase complete on $(hostname). Commit: $CURRENT_COMMIT"

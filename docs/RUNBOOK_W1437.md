@@ -77,6 +77,12 @@ Then deploy backend + frontend as usual and run smoke tests:
 ./scripts/smoke-test-w1437.sh https://alaweal.org
 ```
 
+Or with automatic rollback if smoke tests fail:
+
+```bash
+./scripts/smoke-test-w1437.sh --auto-rollback https://alaweal.org
+```
+
 Finally, start the 30-minute monitor:
 
 ```bash

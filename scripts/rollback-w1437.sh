@@ -19,7 +19,26 @@ set -euo pipefail
 
 DEPLOY_ROOT="${DEPLOY_ROOT:-/opt/alawael-erp}"
 W1437_MERGE_COMMIT="009c676bd"
-TARGET="${1:-}"
+AUTO_YES=false
+TARGET=""
+
+for arg in "$@"; do
+  case "$arg" in
+    --yes) AUTO_YES=true ;;
+    -h|--help)
+      sed -n '2,16p' "$0"
+      exit 0
+      ;;
+    *)
+      if [[ -z "$TARGET" ]]; then
+        TARGET="$arg"
+      else
+        echo "unknown arg: $arg" >&2
+        exit 2
+      fi
+      ;;
+  esac
+done
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -63,9 +82,12 @@ log "Rollback target: $TARGET_SHORT"
 
 warn "This will revert application code to $TARGET_SHORT."
 warn "The W1437 migration data will NOT be removed (it is safe to leave)."
-read -rp "Continue? [y/N] " ans
-if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
-  fail "Rollback cancelled by user"
+
+if [[ "$AUTO_YES" != "true" ]]; then
+  read -rp "Continue? [y/N] " ans
+  if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+    fail "Rollback cancelled by user"
+  fi
 fi
 
 # Create a backup stamp

@@ -13,7 +13,27 @@
 
 set -uo pipefail
 
-BASE_URL="${1:-https://alaweal.org}"
+AUTO_ROLLBACK=false
+BASE_URL="https://alaweal.org"
+
+for arg in "$@"; do
+  case "$arg" in
+    --auto-rollback) AUTO_ROLLBACK=true ;;
+    -h|--help)
+      sed -n '2,18p' "$0"
+      exit 0
+      ;;
+    *)
+      if [[ "$arg" != -* ]]; then
+        BASE_URL="$arg"
+      else
+        echo "unknown arg: $arg" >&2
+        exit 2
+      fi
+      ;;
+  esac
+done
+
 HEALTH_URL="${BASE_URL}/health"
 BUILD_INFO_URL="${BASE_URL}/api/v1/build-info"
 API_URL="${BASE_URL}/api/v1"
@@ -102,5 +122,17 @@ if [[ $FAIL -eq 0 ]]; then
   exit 0
 else
   fail "❌ $FAIL smoke test(s) failed. Investigate before declaring the release healthy."
+
+  if [[ "$AUTO_ROLLBACK" == "true" ]]; then
+    warn "Auto-rollback requested. Rolling back application code..."
+    ./scripts/rollback-w1437.sh --yes
+    ROLLBACK_EXIT=$?
+    if [[ $ROLLBACK_EXIT -eq 0 ]]; then
+      log "✅ Auto-rollback completed"
+    else
+      fail "❌ Auto-rollback failed with exit code $ROLLBACK_EXIT. Manual intervention required."
+    fi
+  fi
+
   exit 1
 fi

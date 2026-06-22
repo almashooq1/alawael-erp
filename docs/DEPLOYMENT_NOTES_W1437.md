@@ -7,6 +7,7 @@
 
 ## Related runbooks
 
+- **Quick cheat sheet:** `docs/W1437_DEPLOY_CHEAT_SHEET.md`
 - **Full runbook (PDF):** `docs/RUNBOOK_W1437.pdf`  
   Generate with: `python3 scripts/generate-runbook-pdf.py`
 - **Full runbook (Markdown):** `docs/RUNBOOK_W1437.md`

@@ -1011,3 +1011,5 @@ __tests__/cctv-event-bus-wiring-wave1447.test.js
 __tests__/input-integrity-hardening-wave1448.test.js
 __tests__/invoice-totals-reconciliation-wave1449.test.js
 __tests__/beneficiary-pii-select-false-wave1454.test.js
+__tests__/insurance-claim-totals-wave1451.test.js
+__tests__/invoice-number-race-retry-wave1452.test.js

@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-template-curly-in-string */
+
 /** sessions-admin-compat-mount.test.js — W1465 Admin Therapy Sessions unification drift guard */
 
 jest.setTimeout(60000);

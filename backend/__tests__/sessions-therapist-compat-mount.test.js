@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-template-curly-in-string */
+
 /** sessions-therapist-compat-mount.test.js — Phase 8 Therapist Portal unification drift guard */
 
 jest.setTimeout(60000);

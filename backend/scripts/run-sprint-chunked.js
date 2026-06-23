@@ -97,7 +97,7 @@ function runChunk(listFile, idx, total, memory) {
     });
 
     child.on('error', reject);
-    child.on('exit', rawCode => {
+    child.on('close', rawCode => {
       const code = rawCode == null ? 1 : rawCode;
       const elapsed = ((Date.now() - started) / 1000).toFixed(1);
 

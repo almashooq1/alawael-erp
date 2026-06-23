@@ -28,7 +28,7 @@ const { spawn } = require('child_process');
 const BACKEND_DIR = path.resolve(__dirname, '..');
 const JEST_CACHE = path.join(BACKEND_DIR, '.jest-cache');
 const DEFAULT_SCRIPT = 'test';
-const DEFAULT_CHUNK_SIZE = 150;
+const DEFAULT_CHUNK_SIZE = 100;
 const DEFAULT_MEMORY_MB = 4096;
 
 function parseArgs(argv) {

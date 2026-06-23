@@ -42,7 +42,10 @@ const MUST_HAVE_PROBE = [
   'admin/insurance-tariffs', // tariff resolution for NPHIES claims
   'admin/zatca-credentials', // ZATCA per-branch CSIDs
   'admin/nphies-claims', // claim submission pipeline
-  'admin/therapy-sessions', // session→claim bridge entry-point
+  // NOTE: 'admin/therapy-sessions' was removed from the dualMount registry
+  // in Phase 8 (sessions unification). The admin surface now lives at
+  // /api/v1/sessions/admin and is guarded by sessions-admin-compat-mount.test.js
+  // plus the smoke probe at /api/v1/sessions/admin.
 
   // CBAHI / ISO 9001 (regulatory — Saudi healthcare accreditation)
   'management-review', // ISO 9001 §9.3

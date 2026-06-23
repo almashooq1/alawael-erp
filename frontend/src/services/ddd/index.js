@@ -184,6 +184,39 @@ export const sessionsAPI = {
     goalsProgress: episodeId => apiClient.get(`/api/v1/sessions/session-center/goals/${episodeId}`),
     soapSummary: sessionId => apiClient.get(`/api/v1/sessions/session-center/soap/${sessionId}`),
   },
+  // Admin therapy sessions (compat /api/admin/therapy-sessions)
+  admin: {
+    list: params => apiClient.get('/api/v1/sessions/admin', { params }),
+    get: id => apiClient.get(`/api/v1/sessions/admin/${id}`),
+    create: data => apiClient.post('/api/v1/sessions/admin', data),
+    update: (id, data) => apiClient.patch(`/api/v1/sessions/admin/${id}`, data),
+    delete: id => apiClient.delete(`/api/v1/sessions/admin/${id}`),
+    getStats: params => apiClient.get('/api/v1/sessions/admin/stats', { params }),
+    getCalendar: params => apiClient.get('/api/v1/sessions/admin/calendar', { params }),
+    checkConflicts: data => apiClient.post('/api/v1/sessions/admin/conflicts', data),
+    updateStatus: (id, data) => apiClient.post(`/api/v1/sessions/admin/${id}/status`, data),
+    checkIn: id => apiClient.post(`/api/v1/sessions/admin/${id}/check-in`, {}),
+    finalize: id => apiClient.post(`/api/v1/sessions/admin/${id}/finalize`, {}),
+    amend: (id, data) => apiClient.post(`/api/v1/sessions/admin/${id}/amend`, data),
+    createClaim: (id, data) => apiClient.post(`/api/v1/sessions/admin/${id}/create-claim`, data),
+    bulkCreateClaims: data => apiClient.post('/api/v1/sessions/admin/bulk-create-claims', data),
+  },
+  // Therapist portal sessions (compat /api/v1/therapist/sessions & /schedule)
+  therapist: {
+    list: params => apiClient.get('/api/v1/sessions/therapist/sessions', { params }),
+    create: data => apiClient.post('/api/v1/sessions/therapist/sessions', data),
+    get: id => apiClient.get(`/api/v1/sessions/therapist/sessions/${id}`),
+    update: (id, data) => apiClient.put(`/api/v1/sessions/therapist/sessions/${id}`, data),
+    delete: id => apiClient.delete(`/api/v1/sessions/therapist/sessions/${id}`),
+    getDocumentation: id =>
+      apiClient.get(`/api/v1/sessions/therapist/sessions/${id}/documentation`),
+    saveDocumentation: (id, data) =>
+      apiClient.post(`/api/v1/sessions/therapist/sessions/${id}/documentation`, data),
+    getSchedule: params => apiClient.get('/api/v1/sessions/therapist/schedule', { params }),
+    createSchedule: data => apiClient.post('/api/v1/sessions/therapist/schedule', data),
+    updateSchedule: (id, data) => apiClient.put(`/api/v1/sessions/therapist/schedule/${id}`, data),
+    deleteSchedule: id => apiClient.delete(`/api/v1/sessions/therapist/schedule/${id}`),
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════

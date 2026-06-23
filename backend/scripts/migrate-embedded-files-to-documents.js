@@ -33,6 +33,9 @@ async function main() {
   require('../models/Document');
   require('../models/HR/Employee');
   const CaseManagement = require('../models/CaseManagement');
+  process.stdout.write(
+    `[MIGRATION] CaseManagement type=${typeof CaseManagement} updateOne=${typeof CaseManagement.updateOne}\n`
+  );
   require('../models/Invoice');
   const Payment = require('../models/Payment');
 
@@ -44,12 +47,23 @@ async function main() {
   };
 
   // Migrate CaseManagement.medicalFiles
-  const cases = await CaseManagement.find({ 'medicalFiles.0': { $exists: true } }).lean();
+  const allCases = await CaseManagement.find({}).lean();
+  process.stdout.write(`[MIGRATION] Total cases: ${allCases.length}\n`);
+  if (allCases.length > 0) {
+    process.stdout.write(
+      `[MIGRATION] First case medicalFiles: ${JSON.stringify(allCases[0].medicalFiles)}\n`
+    );
+  }
+  const cases = await CaseManagement.find({ medicalFiles: { $exists: true, $ne: [] } }).lean();
+  process.stdout.write(`[MIGRATION] Cases with medicalFiles: ${cases.length}\n`);
   for (const c of cases) {
     for (const mf of c.medicalFiles || []) {
       try {
         if (mf.documentId) continue;
         const filePath = resolveFilePath(mf.fileUrl);
+        process.stdout.write(
+          `[MIGRATION] case ${c._id} fileUrl=${mf.fileUrl} resolved=${filePath} exists=${fs.existsSync(filePath)}\n`
+        );
         if (!filePath || !fs.existsSync(filePath)) {
           stats.skipped++;
           continue;
@@ -79,13 +93,13 @@ async function main() {
         stats.cases++;
       } catch (err) {
         stats.errors++;
-        logger.error(`[Migration] Case ${c._id}: ${err.message}`);
+        process.stderr.write(`[Migration] Case ${c._id}: ${err.stack || err.message}\n`);
       }
     }
   }
 
   // Migrate Payment.attachments
-  const payments = await Payment.find({ 'attachments.0': { $exists: true } }).lean();
+  const payments = await Payment.find({ attachments: { $exists: true, $ne: [] } }).lean();
   for (const p of payments) {
     for (const att of p.attachments || []) {
       try {
@@ -125,7 +139,7 @@ async function main() {
     }
   }
 
-  console.log('Migration stats:', stats);
+  process.stdout.write(`Migration stats: ${JSON.stringify(stats)}\n`);
   await mongoose.disconnect();
   console.log('Disconnected');
 }
@@ -138,20 +152,24 @@ async function createDocumentFromBuffer(buffer, originalName, mimeType, metadata
     mimetype: mimeType,
     size: buffer.length,
   };
+  const migrationUserId = new mongoose.Types.ObjectId();
   return documentUploadService.createDocumentRecord(
     file,
-    { id: null, name: 'migration' },
+    { id: migrationUserId, name: 'System Migration' },
     metadata
   );
 }
 
 function resolveFilePath(urlOrPath) {
   if (!urlOrPath) return null;
-  if (path.isAbsolute(urlOrPath)) return urlOrPath;
-  // Convert /uploads/... to local path
+  // Convert web-style /uploads/... to local path first
   if (urlOrPath.startsWith('/uploads/')) {
-    return path.join(process.cwd(), 'backend', urlOrPath);
+    // Resolve relative to this script's backend root to avoid double-backend
+    // paths when the script is executed from inside backend/.
+    const backendRoot = path.resolve(__dirname, '..');
+    return path.join(backendRoot, urlOrPath);
   }
+  if (path.isAbsolute(urlOrPath)) return urlOrPath;
   return null;
 }
 
@@ -171,7 +189,11 @@ function inferMimeType(fileName) {
   return map[ext] || 'application/octet-stream';
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = { main };

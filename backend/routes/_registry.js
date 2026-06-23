@@ -509,7 +509,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'newsletter', require('../routes/newsletter.routes'));
   dualMount(app, 'careers', require('../routes/careers.routes'));
   dualMount(app, 'admin/beneficiaries', require('../routes/beneficiaries-admin.routes'));
-  dualMount(app, 'admin/therapy-sessions', require('../routes/therapy-sessions-admin.routes'));
+  // Admin Therapy Sessions now served by DDD Sessions /api/v1/sessions/admin/*
+  // (compat layer in domains/sessions/routes/sessions-admin-compat.routes.js).
+  // dualMount(app, 'admin/therapy-sessions', require('../routes/therapy-sessions-admin.routes'));
   dualMount(app, 'admin/assessments', require('../routes/assessments-admin.routes'));
   // ── Disability Assessment Tests (اختبارات تقييم الإعاقة) ─────────────────
   dualMount(app, 'disability', safeRequire('../routes/disability-assessment.routes'));

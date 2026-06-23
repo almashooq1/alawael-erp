@@ -92,9 +92,7 @@ export const therapistService = {
   // ─── Schedule ──────────────────────────────────────────────────────────
   async getTherapistSchedule(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapist/schedule', {
-        params: { therapistId, ...query },
-      });
+      const res = await sessionsAPI.therapist.getSchedule({ therapistId, ...query });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSchedule fallback:', err?.message);
@@ -104,10 +102,7 @@ export const therapistService = {
 
   async addScheduleSession(therapistId, sessionData) {
     try {
-      const res = await apiClient.post('/api/v1/therapist/schedule', {
-        therapistId,
-        ...sessionData,
-      });
+      const res = await sessionsAPI.therapist.createSchedule({ therapistId, ...sessionData });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.addScheduleSession error:', err?.message);
@@ -144,9 +139,7 @@ export const therapistService = {
   // ─── Sessions ──────────────────────────────────────────────────────────
   async getTherapistSessions(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapist/sessions', {
-        params: { therapistId, ...query },
-      });
+      const res = await sessionsAPI.therapist.list({ therapistId, ...query });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSessions fallback:', err?.message);

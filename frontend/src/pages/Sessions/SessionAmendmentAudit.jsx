@@ -1,7 +1,8 @@
 /**
  * SessionAmendmentAudit — سجل تعديلات الجلسات السريرية (BC-04)
  *
- * Reads amendment history from /api/admin/therapy-sessions/:id
+ * Reads amendment history from /api/admin/therapy-sessions/:id (legacy)
+ * and /api/v1/sessions/admin/:id (unified).
  * Shows finalization + all amendments for auditors / supervisors.
  * Roles: admin, super_admin, clinical_supervisor, manager
  */
@@ -63,7 +64,7 @@ export default function SessionAmendmentAudit() {
       setLoading(true);
       setError('');
       try {
-        const r = await apiClient.get(`/api/admin/therapy-sessions/${target}`);
+        const r = await apiClient.get(`/api/v1/sessions/admin/${target}`);
         setSession(r?.data?.data || r?.data || null);
         setSessionId(target);
       } catch (err) {

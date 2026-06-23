@@ -231,13 +231,42 @@ class SessionsDomain extends BaseDomainModule {
     const { authenticate } = require('../../middleware/auth');
     const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
     const analyticsRouter = require('./routes/sessions-analytics-compat.routes');
+    const adminCompatRouter = require('./routes/sessions-admin-compat.routes');
+    const therapistCompatRouter = require('./routes/sessions-therapist-compat.routes');
     const secureRouter = require('./routes/sessions.routes');
+
+    // Admin compat surface must be mounted before the generic secure router
+    // so `/sessions/admin/*` is not swallowed by `/:sessionId`.
+    app.use(`/api/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+    app.use(`/api/v1/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+    app.use(`/api/v2/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
 
     // Analytics compat surface must be mounted before the generic secure router
     // so `/sessions/analytics/*` is not swallowed by `/:sessionId`.
     app.use(`/api/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
     app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
     app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
+
+    // Therapist portal compat surface must be mounted before the generic secure
+    // router so `/sessions/therapist/*` is not swallowed by `/:sessionId`.
+    app.use(
+      `/api/${this.name}/therapist`,
+      authenticate,
+      requireBranchAccess,
+      therapistCompatRouter
+    );
+    app.use(
+      `/api/v1/${this.name}/therapist`,
+      authenticate,
+      requireBranchAccess,
+      therapistCompatRouter
+    );
+    app.use(
+      `/api/v2/${this.name}/therapist`,
+      authenticate,
+      requireBranchAccess,
+      therapistCompatRouter
+    );
 
     app.use(`/api/${this.name}`, authenticate, requireBranchAccess, secureRouter);
     app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, secureRouter);

@@ -1903,6 +1903,11 @@ on:
       - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
       - 'backend/__tests__/access-review-mfa-wave1464.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/migrate-embedded-files-to-documents.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sessions-admin-compat-mount.test.js'
+      - 'backend/__tests__/sessions-therapist-compat-mount.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3784,6 +3789,11 @@ on:
       - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
       - 'backend/__tests__/access-review-mfa-wave1464.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/migrate-embedded-files-to-documents.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sessions-admin-compat-mount.test.js'
+      - 'backend/__tests__/sessions-therapist-compat-mount.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

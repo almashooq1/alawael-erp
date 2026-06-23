@@ -594,6 +594,7 @@ __tests__/medication-reconciliation-behavioral-wave1041.test.js
 __tests__/meeting-branch-tenancy-wave635.test.js
 __tests__/meetings-routes-branch-isolation-wave914.test.js
 __tests__/messaging-threads-real-impl-wave276c.test.js
+__tests__/migrate-embedded-files-to-documents.test.js
 __tests__/model-event-bridge-global-plugin-wave974.test.js
 __tests__/models-use-defensive-guard-wave411.test.js
 __tests__/module-gap-alerts-subscriber-wave717.test.js
@@ -864,8 +865,10 @@ __tests__/session-goal-linkage-behavioral-wave1149.test.js
 __tests__/session-goal-linkage-wave1149.test.js
 __tests__/session-lifecycle-timeline-subscriber-wave974.test.js
 __tests__/session-therapy-projection-wave1240.test.js
+__tests__/sessions-admin-compat-mount.test.js
 __tests__/sessions-analytics-branch-isolation.test.js
 __tests__/sessions-session-center-branch-isolation.test.js
+__tests__/sessions-therapist-compat-mount.test.js
 __tests__/sibling-adjustment-behavioral-wave468.test.js
 __tests__/sibling-adjustment-wave468.test.js
 __tests__/sidebar-paths-routed.test.js

@@ -12,7 +12,7 @@
  *
  * Constraints:
  *   - 8 MB max per file
- *   - allowed mime: image/jpeg|png|gif|webp|svg+xml | application/pdf
+ *   - allowed mime: image/jpeg|png|gif|webp | application/pdf (svg excluded — stored-XSS, W1462)
  *   - bucket must be a slug (no slashes)
  *   - filenames are content-hashed: <sha1>.<ext> so duplicates dedupe
  */
@@ -31,12 +31,17 @@ const router = express.Router();
 
 const ROOT = process.env.UPLOADS_ROOT || '/home/alawael/app/uploads';
 const PUBLIC_PREFIX = process.env.UPLOADS_PUBLIC_PREFIX || '/uploads';
+// W1462: image/svg+xml is intentionally EXCLUDED. These files are served statically
+// and inline by nginx at /uploads/* (see app.js), so an SVG carrying inline <script>
+// would execute as stored XSS in a victim's browser. The app cannot set
+// Content-Disposition on the nginx-served path, so the only safe mitigation is to
+// reject SVG at upload (matching public-uploads.routes.js). If SVG support is ever
+// required, add server-side SVG sanitization before re-allowing it.
 const ALLOWED_MIMES = new Set([
   'image/jpeg',
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
   'application/pdf',
 ]);
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -64,7 +69,6 @@ function extFor(mime, originalName) {
     'image/png': '.png',
     'image/gif': '.gif',
     'image/webp': '.webp',
-    'image/svg+xml': '.svg',
     'application/pdf': '.pdf',
   };
   if (map[mime]) return map[mime];

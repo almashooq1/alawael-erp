@@ -237,9 +237,25 @@ class SessionsDomain extends BaseDomainModule {
 
     // Admin compat surface must be mounted before the generic secure router
     // so `/sessions/admin/*` is not swallowed by `/:sessionId`.
-    app.use(`/api/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+    // prettier-ignore
     app.use(`/api/v1/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+    // prettier-ignore
+    app.use(`/api/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+    // prettier-ignore
     app.use(`/api/v2/${this.name}/admin`, authenticate, requireBranchAccess, adminCompatRouter);
+
+    // Legacy admin therapy-sessions alias (kept for main-branch smoke tests).
+    // prettier-ignore
+    app.use('/api/admin/therapy-sessions', authenticate, requireBranchAccess, adminCompatRouter);
+
+    // Therapist portal compat surface must be mounted before the generic secure
+    // router so `/sessions/therapist/*` is not swallowed by `/:sessionId`.
+    // prettier-ignore
+    app.use(`/api/v1/${this.name}/therapist`, authenticate, requireBranchAccess, therapistCompatRouter);
+    // prettier-ignore
+    app.use(`/api/${this.name}/therapist`, authenticate, requireBranchAccess, therapistCompatRouter);
+    // prettier-ignore
+    app.use(`/api/v2/${this.name}/therapist`, authenticate, requireBranchAccess, therapistCompatRouter);
 
     // Analytics compat surface must be mounted before the generic secure router
     // so `/sessions/analytics/*` is not swallowed by `/:sessionId`.
@@ -247,27 +263,7 @@ class SessionsDomain extends BaseDomainModule {
     app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
     app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
 
-    // Therapist portal compat surface must be mounted before the generic secure
-    // router so `/sessions/therapist/*` is not swallowed by `/:sessionId`.
-    app.use(
-      `/api/${this.name}/therapist`,
-      authenticate,
-      requireBranchAccess,
-      therapistCompatRouter
-    );
-    app.use(
-      `/api/v1/${this.name}/therapist`,
-      authenticate,
-      requireBranchAccess,
-      therapistCompatRouter
-    );
-    app.use(
-      `/api/v2/${this.name}/therapist`,
-      authenticate,
-      requireBranchAccess,
-      therapistCompatRouter
-    );
-
+    // prettier-ignore
     app.use(`/api/${this.name}`, authenticate, requireBranchAccess, secureRouter);
     app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, secureRouter);
     app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, secureRouter);

@@ -43,8 +43,16 @@ function communication(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
+async function waitForRows(query, expected = 1, timeout = 2000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const count = await CareTimeline.countDocuments(query);
+    if (count >= expected) return;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  throw new Error(
+    `Timed out waiting for ${expected} CareTimeline row(s) for ${JSON.stringify(query)}`
+  );
 }
 
 describe('W1112 — FamilyCommunication logging → unified-core CareTimeline linkage', () => {
@@ -54,7 +62,7 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
     const doc = await FamilyCommunication.create(
       communication(beneficiaryId, { branchId, type: 'home_visit' })
     );
-    await settle();
+    await waitForRows({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -71,7 +79,7 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
   test('records a row even without branch context', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'whatsapp' }));
-    await settle();
+    await waitForRows({ beneficiaryId });
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -82,12 +90,12 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
   test('does not double-record on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await FamilyCommunication.create(communication(beneficiaryId));
-    await settle();
+    await waitForRows({ beneficiaryId });
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.subject = 'Updated subject line';
     await doc.save();
-    await settle();
+    await waitForRows({ beneficiaryId });
 
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
   });
@@ -96,7 +104,7 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'sms' }));
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'email' }));
-    await settle();
+    await waitForRows({ beneficiaryId }, 2);
 
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(2);
   });

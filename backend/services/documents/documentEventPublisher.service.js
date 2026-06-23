@@ -19,6 +19,19 @@ const EVENT_TYPES = [
   'shared',
 ];
 
+// Literal event-type strings used by the integration bus. Kept explicit so
+// consumers and drift guards can grep for them in source.
+const EVENT_TYPE_LITERALS = {
+  uploaded: 'document.uploaded',
+  linked: 'document.linked',
+  updated: 'document.updated',
+  deleted: 'document.deleted',
+  archived: 'document.archived',
+  restored: 'document.restored',
+  expiring: 'document.expiring',
+  shared: 'document.shared',
+};
+
 function getBus() {
   try {
     return require('../../integration/systemIntegrationBus').integrationBus;
@@ -39,8 +52,13 @@ async function publish(eventType, payload, options = {}) {
     return null;
   }
 
+  const eventTypeLiteral = EVENT_TYPE_LITERALS[eventType];
+  if (!eventTypeLiteral) {
+    throw new Error(`Unknown document event type literal: ${eventType}`);
+  }
+
   try {
-    const result = await bus.publish('documents', `document.${eventType}`, payload, {
+    const result = await bus.publish('documents', eventTypeLiteral, payload, {
       domain: 'documents',
       aggregateType: 'Document',
       aggregateId: payload.documentId,

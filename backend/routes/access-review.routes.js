@@ -68,6 +68,7 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/access-review.registry');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 
 const REASON_TO_STATUS = Object.freeze({
   PERMISSION_DENIED: 403,
@@ -167,9 +168,17 @@ function createAccessReviewRouter({
   }
 
   // POST /attestations
+  // W1464: enforce step-up MFA SERVER-SIDE (was prompted client-side only — a direct API
+  // caller bypassed it). All reviewTypes map to tier 2 or 3 in the web-admin
+  // (REVIEW_TYPE_TO_MFA_TIER), which steps up BEFORE calling createAttestation, so a
+  // tier-2 floor is satisfied by every legitimate request. (Backend enforces the floor;
+  // the UI enforces the exact per-reviewType tier — a future enhancement could mirror the
+  // per-type map here.)
   router.post(
     '/attestations',
+    attachMfaActor,
     requirePerm('access-review.attestation.create'),
+    requireMfaTier(2),
     async (req, res) => {
       try {
         const body = req.body || {};

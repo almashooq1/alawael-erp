@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const { MeasureAlert } = require('../domains/goals/models/MeasureAlert');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -44,10 +45,6 @@ function alert(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1116 — MeasureAlert raised → unified-core CareTimeline linkage', () => {
   test('records a clinical row when a measure-driven alert is raised', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -55,9 +52,7 @@ describe('W1116 — MeasureAlert raised → unified-core CareTimeline linkage', 
     const doc = await MeasureAlert.create(
       alert(beneficiaryId, { branchId, measureCode: 'CARS2', severity: 'high' })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('measure_alert_raised');
@@ -75,9 +70,7 @@ describe('W1116 — MeasureAlert raised → unified-core CareTimeline linkage', 
     await MeasureAlert.create(
       alert(beneficiaryId, { severity: 'critical', alertType: 'PLATEAU_DETECTED' })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].severity).toBe('critical');
   });
@@ -85,23 +78,18 @@ describe('W1116 — MeasureAlert raised → unified-core CareTimeline linkage', 
   test('does not double-record on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await MeasureAlert.create(alert(beneficiaryId));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.status = 'acknowledged';
     doc.acknowledgedAt = new Date();
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('records one row per distinct alert', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MeasureAlert.create(alert(beneficiaryId, { alertType: 'MCID_NOT_MET' }));
     await MeasureAlert.create(alert(beneficiaryId, { alertType: 'FORECAST_OFF_TRACK' }));
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(2);
+    await waitForCount({ beneficiaryId }, 2);
   });
 });

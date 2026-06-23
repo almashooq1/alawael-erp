@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const BehaviorRecord = require('../domains/behavior/models/BehaviorRecord');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -49,18 +50,12 @@ function record(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1114 — BehaviorRecord logging → unified-core CareTimeline linkage', () => {
   test('records a clinical/warning row when an ABC record is submitted on create', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const branchId = new mongoose.Types.ObjectId();
     const doc = await BehaviorRecord.create(record(beneficiaryId, { branchId }));
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('behavior_record_logged');
@@ -75,35 +70,27 @@ describe('W1114 — BehaviorRecord logging → unified-core CareTimeline linkage
   test('does not fire while a record stays in draft, then fires on submit', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BehaviorRecord.create(record(beneficiaryId, { status: 'draft' }));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'submitted';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('does not fire for a later review transition', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BehaviorRecord.create(record(beneficiaryId));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.status = 'reviewed';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('records exactly one row per distinct submitted record', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BehaviorRecord.create(record(beneficiaryId));
     await BehaviorRecord.create(record(beneficiaryId, { setting: 'playground' }));
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(2);
+    await waitForCount({ beneficiaryId }, 2);
   });
 });

@@ -1019,3 +1019,4 @@ __tests__/finance-put-massassign-wave1458.test.js
 __tests__/export-branch-scope-wave1459.test.js
 __tests__/changephone-otp-limiter-wave1460.test.js
 __tests__/uploads-svg-xss-wave1462.test.js
+__tests__/access-review-mfa-wave1464.test.js

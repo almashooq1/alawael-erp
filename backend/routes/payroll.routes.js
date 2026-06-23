@@ -18,6 +18,7 @@ const {
 const PayrollCalculationService = require('../services/payrollCalculationService');
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 const safeError = require('../utils/safeError');
@@ -270,9 +271,11 @@ router.post(
 router.post(
   '/process-monthly',
   authenticateToken,
+  attachMfaActor, // W1461
   requireBranchAccess,
   requireBranchAccess,
   requireRole('admin', 'payroll'),
+  requireMfaTier(2), // W1461
   [
     body('month').isInt({ min: 1, max: 12 }).withMessage('الشهر يجب أن يكون بين 1-12'),
     body('year').isInt({ min: 2020, max: 2100 }).withMessage('السنة غير صالحة'),
@@ -340,9 +343,11 @@ router.put(
 router.put(
   '/:payrollId/approve',
   authenticateToken,
+  attachMfaActor, // W1461: populate req.actor for the MFA tier check
   requireBranchAccess,
   requireBranchAccess,
   requireRole('admin', 'director'),
+  requireMfaTier(2), // W1461: payroll approval requires step-up MFA (ADR-019 doctrine)
   async (req, res) => {
     try {
       const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
@@ -432,9 +437,11 @@ router.put(
 router.put(
   '/:payrollId/process',
   authenticateToken,
+  attachMfaActor, // W1461
   requireBranchAccess,
   requireBranchAccess,
   requireRole('admin', 'payroll'),
+  requireMfaTier(2), // W1461
   async (req, res) => {
     try {
       const payroll = await loadPayrollScoped(req, res, req.params.payrollId);
@@ -466,9 +473,11 @@ router.put(
 router.put(
   '/:payrollId/transfer',
   authenticateToken,
+  attachMfaActor, // W1461
   requireBranchAccess,
   requireBranchAccess,
   requireRole('admin', 'payroll'),
+  requireMfaTier(2), // W1461
   async (req, res) => {
     try {
       const { transactionRef, bankName } = req.body;
@@ -501,9 +510,11 @@ router.put(
 router.put(
   '/:payrollId/confirm-payment',
   authenticateToken,
+  attachMfaActor, // W1461
   requireBranchAccess,
   requireBranchAccess,
   requireRole('admin', 'payroll'),
+  requireMfaTier(2), // W1461
   async (req, res) => {
     try {
       const payroll = await loadPayrollScoped(req, res, req.params.payrollId);

@@ -30,16 +30,14 @@ async function main() {
   await mongoose.connect(MONGODB_URI);
   console.log('Connected to MongoDB');
 
-  const Document = require('../models/Document');
-  const Employee = require('../models/HR/Employee');
+  require('../models/Document');
+  require('../models/HR/Employee');
   const CaseManagement = require('../models/CaseManagement');
-  const Invoice = require('../models/Invoice');
+  require('../models/Invoice');
   const Payment = require('../models/Payment');
 
   const stats = {
-    employees: 0,
     cases: 0,
-    invoices: 0,
     payments: 0,
     skipped: 0,
     errors: 0,

@@ -23,7 +23,6 @@ import {
   Visibility as ViewIcon,
   Download as DownloadIcon,
   Delete as DeleteIcon,
-  Archive as ArchiveIcon,
 } from '@mui/icons-material';
 import documentHubApi from '../../services/documentHubApi';
 import logger from '../../utils/logger';

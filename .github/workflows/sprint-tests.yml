@@ -1899,12 +1899,13 @@ on:
       - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sessions-session-center-branch-isolation.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-link.service.test.js'
       - 'backend/__tests__/document-upload.service.test.js'
       - 'backend/__tests__/storage.service.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sessions-analytics-branch-isolation.test.js'
+      - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
+      - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
+      - 'backend/__tests__/access-review-mfa-wave1464.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3782,12 +3783,13 @@ on:
       - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sessions-session-center-branch-isolation.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-link.service.test.js'
       - 'backend/__tests__/document-upload.service.test.js'
       - 'backend/__tests__/storage.service.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sessions-analytics-branch-isolation.test.js'
+      - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
+      - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
+      - 'backend/__tests__/access-review-mfa-wave1464.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -5,7 +5,6 @@
  */
 
 import apiClient from './api.client';
-import logger from 'utils/logger';
 import { triggerBlobDownload } from 'utils/downloadHelper';
 
 const documentHubApi = {

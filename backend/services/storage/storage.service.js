@@ -7,7 +7,6 @@
  * يمكن تبديل المزود عبر متغير البيئة STORAGE_PROVIDER.
  */
 
-const path = require('path');
 const logger = require('../../utils/logger');
 
 const PROVIDERS = {

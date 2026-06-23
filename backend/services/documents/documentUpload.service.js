@@ -237,7 +237,7 @@ function validateBuffer(buffer, mimeType, originalName, sourceModule) {
   return true;
 }
 
-async function scanForVirus(buffer) {
+async function scanForVirus(_buffer) {
   // Stub: integrate ClamAV in production via CLAMAV_HOST
   if (!process.env.CLAMAV_HOST) {
     return { clean: true, skipped: true };

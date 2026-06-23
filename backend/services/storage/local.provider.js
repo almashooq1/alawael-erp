@@ -92,7 +92,7 @@ async function exists(storagePath) {
   }
 }
 
-function getUrl(storagePath) {
+function getUrl(_storagePath) {
   // Local files are served by the documents API, not via direct public URL
   return null;
 }

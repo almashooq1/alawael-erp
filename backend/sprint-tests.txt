@@ -8,6 +8,7 @@ __tests__/absence-detection-sweeper-wave402.test.js
 __tests__/access-console-wave1420.test.js
 __tests__/access-grant-model-canonical-wave599.test.js
 __tests__/access-review-attestation-behavioral-wave38.test.js
+__tests__/access-review-mfa-wave1464.test.js
 __tests__/access-review-wave38.test.js
 __tests__/adapter-audit-ttl-guard.test.js
 __tests__/adapter-circuit-breaker.test.js
@@ -200,6 +201,7 @@ __tests__/cdss-alert-raised-core-linkage-wave1094.test.js
 __tests__/cdss-risk-assessed-core-linkage-wave1082.test.js
 __tests__/center-ops-wave1269.test.js
 __tests__/changelog-structure.test.js
+__tests__/changephone-otp-limiter-wave1460.test.js
 __tests__/check-authz-consolidation-script.test.js
 __tests__/check-can-scope-contract-script.test.js
 __tests__/check-dormant-modules-script.test.js
@@ -952,6 +954,7 @@ __tests__/unescaped-regexp-redos-wave1180.test.js
 __tests__/unified-care-plan-integrity-wave1252.test.js
 __tests__/unifiedNotifier-in-app-channel-wave0.test.js
 __tests__/untenanted-aggregations-ratchet-wave944.test.js
+__tests__/uploads-svg-xss-wave1462.test.js
 __tests__/user-branch-role-window.test.js
 __tests__/user-login-attempts-behavioral-wave1221.test.js
 __tests__/user-mutation-authz-wave1457.test.js

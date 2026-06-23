@@ -631,96 +631,6 @@ const SYSTEM_EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  Documents Domain Events — أحداث نظام إدارة المستندات
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const DOCUMENT_EVENTS = {
-  DOCUMENT_UPLOADED: {
-    domain: 'documents',
-    eventType: 'document.uploaded',
-    version: 1,
-    description: 'تم رفع مستند جديد — New document uploaded',
-    payload: {
-      documentId: 'string',
-      sourceModule: 'string',
-      entityType: 'string',
-      entityId: 'string',
-      fileName: 'string',
-      fileSize: 'number',
-      mimeType: 'string',
-      uploadedBy: 'string',
-    },
-    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
-    priority: PRIORITY.NORMAL,
-    consumers: ['hr', 'medical', 'finance', 'notification'],
-  },
-
-  DOCUMENT_LINKED: {
-    domain: 'documents',
-    eventType: 'document.linked',
-    version: 1,
-    description: 'تم ربط مستند بكيان — Document linked to entity',
-    payload: {
-      documentId: 'string',
-      entityType: 'string',
-      entityId: 'string',
-      sourceModule: 'string',
-      linkedBy: 'string',
-    },
-    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
-    priority: PRIORITY.NORMAL,
-    consumers: ['hr', 'medical', 'finance'],
-  },
-
-  DOCUMENT_DELETED: {
-    domain: 'documents',
-    eventType: 'document.deleted',
-    version: 1,
-    description: 'تم حذف مستند — Document deleted',
-    payload: {
-      documentId: 'string',
-      sourceModule: 'string',
-      deletedBy: 'string',
-    },
-    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.LOCAL],
-    priority: PRIORITY.NORMAL,
-    consumers: ['hr', 'medical', 'finance'],
-  },
-
-  DOCUMENT_ARCHIVED: {
-    domain: 'documents',
-    eventType: 'document.archived',
-    version: 1,
-    description: 'تم أرشفة مستند — Document archived',
-    payload: {
-      documentId: 'string',
-      sourceModule: 'string',
-      archivedBy: 'string',
-    },
-    delivery: [DELIVERY.PERSIST, DELIVERY.LOCAL],
-    priority: PRIORITY.LOW,
-    consumers: ['archival', 'audit'],
-  },
-
-  DOCUMENT_EXPIRING: {
-    domain: 'documents',
-    eventType: 'document.expiring',
-    version: 1,
-    description: 'مستند على وشك الانتهاء — Document expiring soon',
-    payload: {
-      documentId: 'string',
-      entityType: 'string',
-      entityId: 'string',
-      expiryDate: 'date',
-      daysRemaining: 'number',
-    },
-    delivery: [DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
-    priority: PRIORITY.HIGH,
-    consumers: ['hr', 'medical', 'finance', 'notification'],
-  },
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Contract Registry — سجل العقود
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -732,7 +642,6 @@ const ALL_CONTRACTS = {
   attendance: ATTENDANCE_EVENTS,
   notification: NOTIFICATION_EVENTS,
   system: SYSTEM_EVENTS,
-  documents: DOCUMENT_EVENTS,
 };
 
 /**
@@ -824,7 +733,6 @@ module.exports = {
   ATTENDANCE_EVENTS,
   NOTIFICATION_EVENTS,
   SYSTEM_EVENTS,
-  DOCUMENT_EVENTS,
 
   // Registry
   ALL_CONTRACTS,

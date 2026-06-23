@@ -9,6 +9,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../../utils/logger');
+const documentEventPublisher = require('./documentEventPublisher.service');
 
 // ─────────────────────────────────────────────
 // مخطط سياسة الاحتفاظ
@@ -440,10 +441,27 @@ class DocumentRetentionService {
         isDeleted: { $ne: true },
         'retentionPolicy.legalHold': { $ne: true },
       })
-        .select('title category expiryDate createdAt')
+        .select('title category expiryDate createdAt entityType entityId')
         .sort({ expiryDate: 1 })
         .limit(options.limit || 100)
         .lean();
+
+      // Notify downstream consumers about documents approaching expiry.
+      await Promise.allSettled(
+        docs.map(doc => {
+          const daysRemaining = Math.max(
+            0,
+            Math.floor((new Date(doc.expiryDate) - new Date()) / (1000 * 60 * 60 * 24))
+          );
+          return documentEventPublisher.publish('expiring', {
+            documentId: String(doc._id),
+            entityType: doc.entityType || null,
+            entityId: doc.entityId || null,
+            expiryDate: doc.expiryDate,
+            daysRemaining,
+          });
+        })
+      );
 
       return { success: true, documents: docs, total: docs.length };
     } catch (err) {

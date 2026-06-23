@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const CorrectiveAction = require('../domains/quality/models/CorrectiveAction');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -42,10 +43,6 @@ function action(overrides = {}) {
     dueDate: new Date(Date.now() + 7 * 86400000),
     ...overrides,
   };
-}
-
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
 }
 
 /** Poll until a timeline row matching `query` exists (CI-load safe). */
@@ -110,9 +107,7 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
 
   test('does NOT link a facility-level action (no beneficiaryId)', async () => {
     await CorrectiveAction.create(action({ type: 'equipment_request' }));
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
   });
 
   test('does not double-record on a later lifecycle save', async () => {
@@ -124,9 +119,7 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
     doc.status = 'in_progress';
     doc.startedAt = new Date();
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('payload carries audit linkage + due date for downstream consumers', async () => {

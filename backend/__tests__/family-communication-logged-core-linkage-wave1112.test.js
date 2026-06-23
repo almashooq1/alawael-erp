@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const FamilyCommunication = require('../domains/family/models/FamilyCommunication');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -43,18 +44,6 @@ function communication(beneficiaryId, overrides = {}) {
   };
 }
 
-async function waitForRows(query, expected = 1, timeout = 2000) {
-  const deadline = Date.now() + timeout;
-  while (Date.now() < deadline) {
-    const count = await CareTimeline.countDocuments(query);
-    if (count >= expected) return;
-    await new Promise(r => setTimeout(r, 50));
-  }
-  throw new Error(
-    `Timed out waiting for ${expected} CareTimeline row(s) for ${JSON.stringify(query)}`
-  );
-}
-
 describe('W1112 — FamilyCommunication logging → unified-core CareTimeline linkage', () => {
   test('records a family/info timeline row on create with metadata and branch', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -62,9 +51,7 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
     const doc = await FamilyCommunication.create(
       communication(beneficiaryId, { branchId, type: 'home_visit' })
     );
-    await waitForRows({ beneficiaryId });
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('family_communication_logged');
@@ -79,9 +66,8 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
   test('records a row even without branch context', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'whatsapp' }));
-    await waitForRows({ beneficiaryId });
 
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].metadata.type).toBe('whatsapp');
     expect(rows[0].branchId).toBeUndefined();
@@ -90,22 +76,17 @@ describe('W1112 — FamilyCommunication logging → unified-core CareTimeline li
   test('does not double-record on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await FamilyCommunication.create(communication(beneficiaryId));
-    await waitForRows({ beneficiaryId });
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.subject = 'Updated subject line';
     await doc.save();
-    await waitForRows({ beneficiaryId });
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('records exactly one row per distinct communication', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'sms' }));
     await FamilyCommunication.create(communication(beneficiaryId, { type: 'email' }));
-    await waitForRows({ beneficiaryId }, 2);
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(2);
+    await waitForCount({ beneficiaryId }, 2);
   });
 });

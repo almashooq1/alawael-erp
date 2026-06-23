@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -47,10 +48,6 @@ function task(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1115 — MeasureReassessmentTask completion → unified-core CareTimeline linkage', () => {
   test('records a clinical/success row when a reassessment task is completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -58,15 +55,12 @@ describe('W1115 — MeasureReassessmentTask completion → unified-core CareTime
     const doc = await MeasureReassessmentTask.create(
       task(beneficiaryId, { branchId, measureCode: 'CARS2' })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'completed';
     doc.completedAt = new Date();
     await doc.save();
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('measure_reassessment_completed');
@@ -83,9 +77,7 @@ describe('W1115 — MeasureReassessmentTask completion → unified-core CareTime
     await MeasureReassessmentTask.create(
       task(beneficiaryId, { status: 'completed', completedAt: new Date(), measureCode: 'GMFM88' })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].metadata.measureCode).toBe('GMFM88');
   });
@@ -93,13 +85,11 @@ describe('W1115 — MeasureReassessmentTask completion → unified-core CareTime
   test('does not fire for an acknowledged (non-completed) transition', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await MeasureReassessmentTask.create(task(beneficiaryId));
-    await settle();
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'acknowledged';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   test('does not double-record on a later unrelated save', async () => {
@@ -107,13 +97,10 @@ describe('W1115 — MeasureReassessmentTask completion → unified-core CareTime
     const doc = await MeasureReassessmentTask.create(
       task(beneficiaryId, { status: 'completed', completedAt: new Date() })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.acknowledgedAt = new Date();
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

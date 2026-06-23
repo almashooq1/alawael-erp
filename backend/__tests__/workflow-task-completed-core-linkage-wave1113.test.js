@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const WorkflowTask = require('../domains/workflow/models/WorkflowTask');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -44,10 +45,6 @@ function task(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1113 — WorkflowTask completion → unified-core CareTimeline linkage', () => {
   test('records an administrative/success row when a task transitions to completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -55,15 +52,12 @@ describe('W1113 — WorkflowTask completion → unified-core CareTimeline linkag
     const doc = await WorkflowTask.create(
       task(beneficiaryId, { branchId, type: 'family_meeting' })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'completed';
     doc.completedAt = new Date();
     await doc.save();
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('workflow_task_completed');
@@ -78,9 +72,7 @@ describe('W1113 — WorkflowTask completion → unified-core CareTimeline linkag
   test('fires when a task is created already completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await WorkflowTask.create(task(beneficiaryId, { status: 'completed', type: 'followup_call' }));
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].metadata.type).toBe('followup_call');
   });
@@ -88,25 +80,20 @@ describe('W1113 — WorkflowTask completion → unified-core CareTimeline linkag
   test('does not fire for a non-completed status change', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await WorkflowTask.create(task(beneficiaryId));
-    await settle();
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'in_progress';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   test('does not double-record on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await WorkflowTask.create(task(beneficiaryId, { status: 'completed' }));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.description = 'Closed and archived';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

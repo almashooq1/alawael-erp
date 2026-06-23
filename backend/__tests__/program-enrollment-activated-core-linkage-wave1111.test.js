@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const { ProgramEnrollment } = require('../domains/programs/models/ProgramEnrollment');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -42,10 +43,6 @@ function enrollment(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 /** Poll until a timeline row matching `query` exists (CI-load safe). */
 async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
   const start = Date.now();
@@ -67,8 +64,7 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
     );
 
     // Approved (not active yet) → no row
-    await settle();
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
 
     doc.status = 'active';
     doc.actualStartDate = new Date();
@@ -102,9 +98,7 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
 
     doc.status = 'on_hold';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   test('does not double-record on a later unrelated save', async () => {
@@ -115,8 +109,6 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
 
     doc.expectedEndDate = new Date(Date.now() + 86400000);
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

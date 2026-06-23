@@ -96,11 +96,44 @@ const sanitizeMongoFilter = value => {
   return value;
 };
 
+/**
+ * Financial-state fields on accounting documents that must NEVER be set via a generic
+ * update body — payment/lifecycle state and computed money totals. These belong to
+ * dedicated transition endpoints (mark-paid / cancel / payment) and server-side
+ * recomputation, not a raw `findByIdAndUpdate({ ...req.body })`. (W1458)
+ */
+const FINANCE_PROTECTED_FIELDS = new Set([
+  'status',
+  'paidAmount',
+  'remainingAmount',
+  'totalAmount',
+  'subtotal',
+  'vatAmount',
+  'balance',
+]);
+
+/**
+ * Shallow-strip the financial-state fields above from a user-supplied update body, so
+ * a generic invoice/account PUT cannot mark an invoice paid or overwrite a balance.
+ * @param {object} obj - request body
+ * @returns {object} cleaned copy
+ */
+const stripProtectedFinanceFields = obj => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (!FINANCE_PROTECTED_FIELDS.has(key)) clean[key] = obj[key];
+  }
+  return clean;
+};
+
 module.exports = {
   escapeRegex,
   stripDangerousKeys,
   stripUpdateMeta,
   sanitizeMongoFilter,
+  stripProtectedFinanceFields,
   DANGEROUS_KEYS,
   UPDATE_BLACKLIST,
+  FINANCE_PROTECTED_FIELDS,
 };

@@ -29,10 +29,7 @@
 'use strict';
 
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
@@ -49,177 +46,7 @@ const { requireDocumentAccess } = require('../middleware/documentAccess.middlewa
 // ──────────────────────────────────────────────────────────────────────────────
 // Storage configuration
 // ──────────────────────────────────────────────────────────────────────────────
-const UPLOADS_ROOT =
-  process.env.UPLOADS_ROOT ||
-  (process.platform === 'win32'
-    ? path.join(process.cwd(), 'uploads')
-    : '/home/alawael/app/uploads');
-
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
-
-// Broad set of allowed MIME types for clinical documents
-const ALLOWED_MIMES = new Set([
-  // Documents
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-word.document.macroenabled.12',
-  'application/vnd.oasis.opendocument.text',
-  'application/rtf',
-  'text/rtf',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-excel.sheet.macroenabled.12',
-  'application/vnd.oasis.opendocument.spreadsheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'application/vnd.ms-powerpoint.presentation.macroenabled.12',
-  'application/vnd.oasis.opendocument.presentation',
-  // Text / data
-  'text/plain',
-  'text/csv',
-  'application/json',
-  'text/xml',
-  'application/xml',
-  'text/html',
-  // Images
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-  'image/bmp',
-  'image/tiff',
-  // Audio
-  'audio/mpeg',
-  'audio/wav',
-  'audio/ogg',
-  'audio/mp4',
-  'audio/flac',
-  'audio/aac',
-  // Video
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'video/x-msvideo',
-  // Archives
-  'application/zip',
-  'application/x-rar-compressed',
-  'application/x-7z-compressed',
-  'application/gzip',
-  'application/x-tar',
-]);
-
-// Use memory storage — hash content for dedup, then write to disk manually
-const memStorage = multer.memoryStorage();
-const upload = multer({
-  storage: memStorage,
-  limits: { fileSize: MAX_BYTES, files: 1 },
-  fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIMES.has(file.mimetype)) return cb(null, true);
-    // Allow even if mime check misses, fall back to extension check
-    const ext = path
-      .extname(file.originalname || '')
-      .toLowerCase()
-      .slice(1);
-    const KNOWN_EXTS = new Set([
-      'pdf',
-      'doc',
-      'docx',
-      'docm',
-      'odt',
-      'rtf',
-      'xls',
-      'xlsx',
-      'xlsm',
-      'ods',
-      'csv',
-      'ppt',
-      'pptx',
-      'pptm',
-      'odp',
-      'txt',
-      'json',
-      'xml',
-      'html',
-      'htm',
-      'jpg',
-      'jpeg',
-      'png',
-      'gif',
-      'bmp',
-      'webp',
-      'tiff',
-      'tif',
-      'svg',
-      'mp3',
-      'wav',
-      'ogg',
-      'm4a',
-      'flac',
-      'aac',
-      'mp4',
-      'webm',
-      'avi',
-      'mkv',
-      'mov',
-      'zip',
-      'rar',
-      '7z',
-      'gz',
-      'tar',
-    ]);
-    if (KNOWN_EXTS.has(ext)) return cb(null, true);
-    cb(Object.assign(new Error(`نوع الملف غير مدعوم: ${file.mimetype}`), { statusCode: 400 }));
-  },
-});
-
-/** Resolve file extension from mime or original name */
-function extFor(mime, originalName) {
-  const mimeMap = {
-    'application/pdf': '.pdf',
-    'application/msword': '.doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-    'application/vnd.oasis.opendocument.text': '.odt',
-    'text/rtf': '.rtf',
-    'application/rtf': '.rtf',
-    'application/vnd.ms-excel': '.xls',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-    'application/vnd.oasis.opendocument.spreadsheet': '.ods',
-    'application/vnd.ms-powerpoint': '.ppt',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-    'application/vnd.oasis.opendocument.presentation': '.odp',
-    'text/plain': '.txt',
-    'text/csv': '.csv',
-    'application/json': '.json',
-    'text/xml': '.xml',
-    'application/xml': '.xml',
-    'text/html': '.html',
-    'image/jpeg': '.jpg',
-    'image/png': '.png',
-    'image/gif': '.gif',
-    'image/webp': '.webp',
-    'image/svg+xml': '.svg',
-    'image/bmp': '.bmp',
-    'image/tiff': '.tiff',
-    'audio/mpeg': '.mp3',
-    'audio/wav': '.wav',
-    'audio/ogg': '.ogg',
-    'audio/mp4': '.m4a',
-    'audio/flac': '.flac',
-    'audio/aac': '.aac',
-    'video/mp4': '.mp4',
-    'video/webm': '.webm',
-    'video/ogg': '.ogv',
-    'video/x-msvideo': '.avi',
-    'application/zip': '.zip',
-    'application/x-7z-compressed': '.7z',
-    'application/gzip': '.gz',
-    'application/x-tar': '.tar',
-  };
-  if (mimeMap[mime]) return mimeMap[mime];
-  return path.extname(originalName || '').toLowerCase() || '.bin';
-}
 
 /** Map mime type to Document.fileType enum value */
 function mimeToFileType(mime, originalName) {
@@ -275,22 +102,6 @@ function mimeToFileType(mime, originalName) {
   if (mime.startsWith('video/')) return 'mp4';
   if (mime === 'application/pdf') return 'pdf';
   return 'other';
-}
-
-/** Save buffer to disk under UPLOADS_ROOT/documents/YYYY-MM/ using sha256 hash name */
-function saveToDisk(buffer, mime, originalName) {
-  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
-  const ext = extFor(mime, originalName);
-  const now = new Date();
-  const folder = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const dir = path.join(UPLOADS_ROOT, 'documents', folder);
-  fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
-  const filename = `${hash}${ext}`;
-  const fullPath = path.join(dir, filename);
-  if (!fs.existsSync(fullPath)) {
-    fs.writeFileSync(fullPath, buffer, { mode: 0o644 });
-  }
-  return { hash, filename, fullPath, folder, relativePath: `documents/${folder}/${filename}` };
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

@@ -23,7 +23,6 @@ const Document = require('../models/Document');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const documentUploadService = require('../services/documents/documentUpload.service');
-const documentLinkService = require('../services/documents/documentLink.service');
 const storageService = require('../services/storage/storage.service');
 
 router.use(authenticate);

@@ -111,7 +111,7 @@ describe('W502 — mount-layer authentication on 20 previously-unauth routes', (
     );
     expect(domainSrc).toMatch(/\bauthenticate\b/);
     expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
-    expect(domainSrc).toContain('app.use(`/api/${this.name}`');
+    expect(domainSrc).toMatch(/app\.use\(`\/api\/\$\{this\.name\}`/);
   });
 
   test('sessions is mounted securely via the DDD domain (not registry dualMount)', () => {
@@ -124,7 +124,7 @@ describe('W502 — mount-layer authentication on 20 previously-unauth routes', (
     );
     expect(domainSrc).toMatch(/\bauthenticate\b/);
     expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
-    expect(domainSrc).toContain('app.use(`/api/${this.name}`');
+    expect(domainSrc).toMatch(/app\.use\(`\/api\/\$\{this\.name\}`/);
   });
 
   test('W502 doc comment present in _registry.js', () => {

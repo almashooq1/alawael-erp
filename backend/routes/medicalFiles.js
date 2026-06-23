@@ -3,15 +3,12 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
-const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
-const { validateUploadedFile } = require('../utils/uploadValidator');
 const safeError = require('../utils/safeError');
 const documentUploadService = require('../services/documents/documentUpload.service');
-const documentLinkService = require('../services/documents/documentLink.service');
 const storageService = require('../services/storage/storage.service');
 const Document = require('../models/Document');
 
@@ -109,6 +106,7 @@ router.post(
   '/single',
   authenticate,
   requireBranchAccess,
+  bodyScopedBeneficiaryGuard, // W441: enforce branch on req.body.beneficiaryId
   upload.single('file'),
   handleMulterError,
   async (req, res) => {
@@ -166,6 +164,7 @@ router.post(
   '/multiple',
   authenticate,
   requireBranchAccess,
+  bodyScopedBeneficiaryGuard, // W441: enforce branch on req.body.beneficiaryId
   upload.array('files', 10),
   handleMulterError,
   async (req, res) => {

@@ -22,9 +22,6 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
-const fsp = require('fs/promises');
 const multer = require('multer');
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
@@ -38,7 +35,6 @@ const storageService = require('../services/storage/storage.service');
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard);
 
-const UPLOAD_ROOT = path.resolve(__dirname, '..', 'uploads');
 const MAX_BYTES = parseInt(process.env.UPLOAD_MAX_BYTES || '10485760', 10); // 10MB default
 
 const memStorage = multer.memoryStorage();

@@ -20,8 +20,6 @@ const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
@@ -89,31 +87,6 @@ async function assertClinicalDocInScope(req, docId, res) {
   if (!benId) return false;
   const denied = await assertBeneficiaryInScope(req, benId, res);
   return !!denied;
-}
-
-// Map extension → enum fileType
-function pickFileType(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  const known = [
-    'pdf',
-    'doc',
-    'docx',
-    'xls',
-    'xlsx',
-    'ppt',
-    'pptx',
-    'txt',
-    'csv',
-    'jpg',
-    'jpeg',
-    'png',
-    'gif',
-    'webp',
-    'tiff',
-    'tif',
-    'zip',
-  ];
-  return known.includes(ext) ? ext : 'other';
 }
 
 // ── GET / — list ─────────────────────────────────────────────────────────

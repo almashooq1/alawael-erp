@@ -660,14 +660,22 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Clinical Assessments (تقييمات سريرية) — auth required (PII)
   dualMountAuth(app, 'assessments', safeRequire('../domains/assessments/routes/assessments.routes'));
   // Clinical Sessions (جلسات علاجية) — auth required (PII)
-  dualMountAuth(app, 'sessions', safeRequire('../domains/sessions/routes/sessions.routes'));
-  // Therapy Sessions — extended CRUD + documentation + bulk ops (maps frontend /therapy-sessions/*) — auth required
-  dualMountAuth(app, 'therapy-sessions', safeRequire('../routes/therapy-sessions.routes'));
-  // Therapy Sessions Analytics — KPIs, trends, calendar, billing (maps frontend /therapy-sessions-analytics/*)
-  dualMount(
-    app,
-    'therapy-sessions-analytics',
-    safeRequire('../routes/therapy-sessions-analytics.routes')
+  // Mounted by domains/sessions/index.js so the branch-isolated secure router
+  // owns /api/(v1/v2/)sessions without being shadowed by legacy routes.
+  logger.info(
+    '✅ Clinical Sessions routes mounted via DDD domain: CRUD, schedule, status transitions, attendance, reschedule, SOAP/documentation, branch-scoped lists, Session-Center analytics — الجلسات العلاجية الموحدة (20+ endpoints)'
+  );
+  // Therapy Sessions — retired: /api/v1/therapy-sessions merged into DDD Sessions
+  // (/api/v1/sessions). Frontend callers now use therapySessions.service.js which
+  // delegates to sessionsAPI from services/ddd.
+  logger.info(
+    '✅ /api/v1/therapy-sessions routes retired; now served by DDD Sessions /api/v1/sessions — الجلسات العلاجية (توحيد الأسطح)'
+  );
+  // Therapy Sessions Analytics — retired: merged into DDD Sessions
+  // (/api/v1/sessions/analytics/*). Frontend callers now use therapistService
+  // which delegates to sessionsAPI.analytics from services/ddd.
+  logger.info(
+    '✅ /api/v1/therapy-sessions-analytics routes retired; now served by DDD Sessions /api/v1/sessions/analytics — تحليلات الجلسات (توحيد الأسطح)'
   );
   // Therapist Extended — treatment plans, assessments, prescriptions, professional-dev, analytics, consultations
   dualMountAuth(app, 'therapist-extended', safeRequire('../routes/therapist-extended.routes'));

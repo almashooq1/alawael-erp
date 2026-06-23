@@ -101,6 +101,10 @@ const MedicalFileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  documentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Document',
+  },
   fileSize: Number,
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,

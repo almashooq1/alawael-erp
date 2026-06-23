@@ -216,6 +216,38 @@ class SessionsDomain extends BaseDomainModule {
     await super.initialize();
   }
 
+  /**
+   * Override the default domain mount so the secure branch-isolated router
+   * (`domains/sessions/routes/sessions.routes.js`) is the ONLY HTTP surface
+   * for sessions. The inline routes below remain available for tests/event
+   * subscribers but are NOT mounted directly — this prevents the un-isolated
+   * index.js routes from shadowing the secure router on /api/v1/sessions.
+   */
+  mount(app) {
+    if (!this._initialized) {
+      throw new Error(`[Domain:${this.name}] Must be initialized before mounting`);
+    }
+
+    const { authenticate } = require('../../middleware/auth');
+    const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+    const analyticsRouter = require('./routes/sessions-analytics-compat.routes');
+    const secureRouter = require('./routes/sessions.routes');
+
+    // Analytics compat surface must be mounted before the generic secure router
+    // so `/sessions/analytics/*` is not swallowed by `/:sessionId`.
+    app.use(`/api/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
+    app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
+    app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, analyticsRouter);
+
+    app.use(`/api/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+    app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+    app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+
+    logger.info(
+      `[Domain:${this.name}] Mounted secure branch-isolated sessions router on /api/${this.name}, /api/v1/${this.name}, /api/v2/${this.name}`
+    );
+  }
+
   registerRoutes(router) {
     super.registerRoutes(router);
     const svc = this.service;

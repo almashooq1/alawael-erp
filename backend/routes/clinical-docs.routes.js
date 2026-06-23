@@ -31,24 +31,12 @@ const Guardian = require('../models/Guardian');
 const User = require('../models/User');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
-// ── multer setup ─────────────────────────────────────────────────────────
-const UPLOAD_DIR = path.join(__dirname, '../uploads/clinical-docs');
-try {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-} catch {
-  /* dir may exist */
-}
+const documentUploadService = require('../services/documents/documentUpload.service');
+const storageService = require('../services/storage/storage.service');
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => {
-    const unique = crypto.randomBytes(8).toString('hex');
-    const ext = path.extname(file.originalname) || '';
-    cb(null, `${Date.now()}-${unique}${ext}`);
-  },
-});
+// ── multer setup ─────────────────────────────────────────────────────────
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
   fileFilter: (_req, file, cb) => {
     const allowed = /\.(pdf|docx?|xlsx?|pptx?|txt|csv|png|jpe?g|gif|webp|tiff?|zip)$/i;
@@ -222,14 +210,20 @@ router.get('/:id/download', async (req, res) => {
       return res.status(403).json({ success: false, message: 'غير مصرح' });
     }
 
-    const filePath = path.isAbsolute(doc.filePath)
-      ? doc.filePath
-      : path.join(__dirname, '..', doc.filePath.replace(/^\//, ''));
-
-    if (!fs.existsSync(filePath))
+    const fileExists = await storageService
+      .exists(doc.filePath, doc.storageProvider || 'local')
+      .catch(() => false);
+    if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير متوفر على الخادم' });
+    }
 
-    res.download(filePath, doc.originalFileName || doc.fileName);
+    const buffer = await storageService.download(doc.filePath, doc.storageProvider || 'local');
+    res.set('Content-Type', doc.mimeType || 'application/octet-stream');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(doc.originalFileName || doc.fileName)}"`
+    );
+    res.send(buffer);
   } catch (err) {
     return safeError(res, err, 'docs.download');
   }
@@ -244,27 +238,24 @@ router.post('/', requireRole(WRITE_ROLES), upload.single('file'), async (req, re
 
     if (!title) return res.status(400).json({ success: false, message: 'العنوان مطلوب' });
 
-    const relPath = `/uploads/clinical-docs/${req.file.filename}`;
-    const doc = await Document.create({
-      fileName: req.file.filename,
-      originalFileName: req.file.originalname,
-      fileType: pickFileType(req.file.originalname),
-      mimeType: req.file.mimetype,
-      fileSize: req.file.size,
-      filePath: relPath,
+    const parsedTags = Array.isArray(tags)
+      ? tags
+      : tags
+        ? String(tags)
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean)
+        : [];
+
+    const doc = await documentUploadService.createDocumentRecord(req.file, req.user, {
       title,
       description,
       category,
-      tags: Array.isArray(tags)
-        ? tags
-        : tags
-          ? String(tags)
-              .split(',')
-              .map(t => t.trim())
-          : [],
-      uploadedBy: req.user?.id,
-      uploadedByName: req.user?.name || '',
-      uploadedByEmail: req.user?.email || '',
+      tags: parsedTags,
+      sourceModule: 'clinical',
+      entityType: beneficiaryId ? 'Beneficiary' : null,
+      entityId: beneficiaryId || null,
+      folder: 'clinical-docs',
       metadata:
         beneficiaryId && mongoose.isValidObjectId(beneficiaryId)
           ? { beneficiary: beneficiaryId }

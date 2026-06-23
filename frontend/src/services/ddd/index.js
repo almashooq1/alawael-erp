@@ -124,13 +124,66 @@ export const sessionsAPI = {
   list: params => apiClient.get('/api/v1/sessions', { params }),
   get: id => apiClient.get(`/api/v1/sessions/${id}`),
   update: (id, data) => apiClient.put(`/api/v1/sessions/${id}`, data),
+  remove: id => apiClient.delete(`/api/v1/sessions/${id}`),
   complete: (id, data) => apiClient.put(`/api/v1/sessions/${id}/complete`, data),
   cancel: (id, data) => apiClient.put(`/api/v1/sessions/${id}/cancel`, data),
+  updateStatus: (id, status, reason = '') =>
+    apiClient.patch(`/api/v1/sessions/${id}/status`, { status, reason }),
+  attend: id => apiClient.post(`/api/v1/sessions/${id}/attend`),
+  start: id => apiClient.post(`/api/v1/sessions/${id}/start`),
+  noShow: (id, reason = '') => apiClient.post(`/api/v1/sessions/${id}/no-show`, { reason }),
+  reschedule: (id, data) => apiClient.patch(`/api/v1/sessions/${id}/reschedule`, data),
+  bulkReschedule: body => apiClient.post('/api/v1/sessions/bulk-reschedule', body),
+  getDocumentation: id => apiClient.get(`/api/v1/sessions/${id}/documentation`),
+  saveDocumentation: (id, data) => apiClient.put(`/api/v1/sessions/${id}/documentation`, data),
+  getStats: params => apiClient.get('/api/v1/sessions/stats', { params }),
+  getToday: params => apiClient.get('/api/v1/sessions/today', { params }),
+  getStatistics: params => apiClient.get('/api/v1/sessions/statistics', { params }),
+  getAvailability: (therapistId, params) =>
+    apiClient.get(`/api/v1/sessions/availability/${therapistId}`, { params }),
+  getUpcoming: (beneficiaryId, params) =>
+    apiClient.get(`/api/v1/sessions/upcoming/${beneficiaryId}`, { params }),
   getByBeneficiary: (beneficiaryId, params) =>
     apiClient.get(`/api/v1/sessions/beneficiary/${beneficiaryId}`, { params }),
   getByTherapist: (therapistId, params) =>
     apiClient.get(`/api/v1/sessions/therapist/${therapistId}`, { params }),
+  getEpisodeSessions: (episodeId, params) =>
+    apiClient.get(`/api/v1/sessions/episode/${episodeId}`, { params }),
+  getTherapistSchedule: (therapistId, params) =>
+    apiClient.get(`/api/v1/sessions/therapist/${therapistId}/schedule`, { params }),
   getDashboard: params => apiClient.get('/api/v1/sessions/dashboard', { params }),
+  // Sessions Analytics (compat /api/v1/therapy-sessions-analytics)
+  analytics: {
+    overview: params => apiClient.get('/api/v1/sessions/analytics/overview', { params }),
+    trends: params => apiClient.get('/api/v1/sessions/analytics/trends', { params }),
+    therapistPerformance: params =>
+      apiClient.get('/api/v1/sessions/analytics/therapist-performance', { params }),
+    roomUtilization: params =>
+      apiClient.get('/api/v1/sessions/analytics/room-utilization', { params }),
+    attendance: params => apiClient.get('/api/v1/sessions/analytics/attendance', { params }),
+    billing: params => apiClient.get('/api/v1/sessions/analytics/billing', { params }),
+    goalProgress: params => apiClient.get('/api/v1/sessions/analytics/goal-progress', { params }),
+    cancellations: params => apiClient.get('/api/v1/sessions/analytics/cancellations', { params }),
+    calendar: params => apiClient.get('/api/v1/sessions/analytics/calendar', { params }),
+    exportReport: data => apiClient.post('/api/v1/sessions/analytics/export/report', data),
+    waitlist: params => apiClient.get('/api/v1/sessions/analytics/waitlist', { params }),
+    sessionBilling: sessionId => apiClient.get(`/api/v1/sessions/analytics/${sessionId}/billing`),
+    bulkBilling: data => apiClient.post('/api/v1/sessions/analytics/billing/bulk', data),
+  },
+  // Session Center analytics (compat /api/v1/session-center)
+  sessionCenter: {
+    dashboard: params => apiClient.get('/api/v1/sessions/session-center/dashboard', { params }),
+    calendar: params => apiClient.get('/api/v1/sessions/session-center/calendar', { params }),
+    therapistLoad: params =>
+      apiClient.get('/api/v1/sessions/session-center/therapist-load', { params }),
+    attendance: params => apiClient.get('/api/v1/sessions/session-center/attendance', { params }),
+    episodeSessions: episodeId =>
+      apiClient.get(`/api/v1/sessions/session-center/episode/${episodeId}`),
+    beneficiarySessions: (beneficiaryId, params) =>
+      apiClient.get(`/api/v1/sessions/session-center/beneficiary/${beneficiaryId}`, { params }),
+    goalsProgress: episodeId => apiClient.get(`/api/v1/sessions/session-center/goals/${episodeId}`),
+    soapSummary: sessionId => apiClient.get(`/api/v1/sessions/session-center/soap/${sessionId}`),
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -935,22 +988,24 @@ export const activityLibraryAPI = {
  * ═══════════════════════════════════════════════════════════ */
 export const sessionCenterAPI = {
   /** لوحة تحكم: KPIs + توزيعات + اتجاهات */
-  dashboard: params => apiClient.get('/api/v1/session-center/dashboard', { params }),
+  dashboard: params => apiClient.get('/api/v1/sessions/session-center/dashboard', { params }),
   /** فتحات التقويم (year, month, therapistId?, beneficiaryId?) */
-  calendar: params => apiClient.get('/api/v1/session-center/calendar', { params }),
+  calendar: params => apiClient.get('/api/v1/sessions/session-center/calendar', { params }),
   /** حمل المعالجين (from, to, therapistId?) */
-  therapistLoad: params => apiClient.get('/api/v1/session-center/therapist-load', { params }),
+  therapistLoad: params =>
+    apiClient.get('/api/v1/sessions/session-center/therapist-load', { params }),
   /** تقرير الحضور (from, to, beneficiaryId?, therapistId?) */
-  attendance: params => apiClient.get('/api/v1/session-center/attendance', { params }),
+  attendance: params => apiClient.get('/api/v1/sessions/session-center/attendance', { params }),
   /** جلسات حلقة علاجية + ميتاداتا التقدم */
-  episodeSessions: episodeId => apiClient.get(`/api/v1/session-center/episode/${episodeId}`),
+  episodeSessions: episodeId =>
+    apiClient.get(`/api/v1/sessions/session-center/episode/${episodeId}`),
   /** تاريخ جلسات مستفيد معين */
   beneficiarySessions: (beneficiaryId, params) =>
-    apiClient.get(`/api/v1/session-center/beneficiary/${beneficiaryId}`, { params }),
+    apiClient.get(`/api/v1/sessions/session-center/beneficiary/${beneficiaryId}`, { params }),
   /** تقدم الأهداف لحلقة علاجية */
-  goalsProgress: episodeId => apiClient.get(`/api/v1/session-center/goals/${episodeId}`),
+  goalsProgress: episodeId => apiClient.get(`/api/v1/sessions/session-center/goals/${episodeId}`),
   /** ملخص SOAP لجلسة واحدة */
-  soap: sessionId => apiClient.get(`/api/v1/session-center/soap/${sessionId}`),
+  soap: sessionId => apiClient.get(`/api/v1/sessions/session-center/soap/${sessionId}`),
 };
 
 /* ═══════════════════════════════════════════════════════════

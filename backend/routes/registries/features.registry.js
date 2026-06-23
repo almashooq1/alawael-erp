@@ -553,10 +553,11 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── Session Center — مركز الجلسات العلاجية الموحد ───────────────────────
-  const sessionCenterRoutes = safeRequire('../routes/session-center.routes');
-  dualMount(app, 'session-center', sessionCenterRoutes);
+  // Retired: /api/v1/session-center endpoints merged into DDD Sessions
+  // (/api/v1/sessions/session-center/*). Frontend callers now use sessionCenterAPI
+  // or sessionCenterService which delegates to sessionsAPI from services/ddd.
   logger.info(
-    '✅ Session Center routes mounted: dashboard (KPIs/trends/distributions), calendar, therapist-load, attendance report, episode sessions, beneficiary timeline, goals progress, SOAP summary — مركز الجلسات العلاجية (8 endpoints)'
+    '✅ /api/v1/session-center routes retired; now served by DDD Sessions /api/v1/sessions/session-center — مركز الجلسات العلاجية (توحيد الأسطح)'
   );
 
   // ─── Report Center — مركز التقارير السريرية الموحد ────────────────────────

@@ -6,7 +6,7 @@
  * P1 compliance flags so no therapy session starts without them.
  *
  * API:
- *   GET    /api/v1/beneficiaries          — beneficiary roster
+ *   GET    /api/v1/core/beneficiaries     — beneficiary roster (DDD Core)
  *   GET    /api/v1/beneficiaries/:id/consents
  *   POST   /api/v1/beneficiaries/:id/consents
  *   POST   /api/v1/beneficiaries/:id/consents/:cid/revoke

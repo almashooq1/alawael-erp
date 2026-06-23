@@ -12,17 +12,24 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const FileRecord = require('../models/documents/FileRecord');
 const FileFolder = require('../models/documents/FileFolder');
+const Document = require('../models/Document');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const documentUploadService = require('../services/documents/documentUpload.service');
+const documentLinkService = require('../services/documents/documentLink.service');
+const storageService = require('../services/storage/storage.service');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 // ══════════════════════════════════════════════════════════════
 // FOLDERS — المجلدات
 // ══════════════════════════════════════════════════════════════
@@ -157,17 +164,56 @@ router.get('/files', async (req, res) => {
   }
 });
 
-// POST /files — رفع ملف جديد
-router.post('/files', async (req, res) => {
+// POST /files — رفع ملف جديد (موحد)
+router.post('/files', upload.single('file'), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'الملف مطلوب' });
+    }
+
     const scope = effectiveBranchScope(req);
-    const file = await FileRecord.create({
-      ...req.body,
+    const { title, description, category, tags, reference_type, reference_id, branch_id } =
+      req.body || {};
+
+    const sourceModule = inferSourceModule(reference_type);
+    const doc = await documentUploadService.createDocumentRecord(req.file, req.user, {
+      title: title || req.file.originalname,
+      description,
+      category: category || 'أخرى',
+      tags: tags
+        ? Array.isArray(tags)
+          ? tags
+          : tags
+              .split(',')
+              .map(t => t.trim())
+              .filter(Boolean)
+        : [],
+      sourceModule,
+      entityType: reference_type || null,
+      entityId: reference_id || null,
+      folder: 'files-module',
+    });
+
+    // Create a FileRecord mirror for compatibility
+    const fileRecord = await FileRecord.create({
+      title_ar: title || req.file.originalname,
+      title_en: title || req.file.originalname,
+      description,
+      category: category || 'other',
+      file_path: doc.filePath,
+      original_name: doc.originalFileName,
+      file_size: doc.fileSize,
+      file_type: doc.fileType,
+      mime_type: doc.mimeType,
+      checksum: doc.checksum,
+      reference_type: reference_type || null,
+      reference_id: reference_id || null,
       uploaded_by: req.user._id,
       created_by: req.user._id,
-      ...(scope ? { branch_id: scope } : {}),
+      branch_id: branch_id || scope || null,
     });
-    res.status(201).json({ success: true, data: file });
+
+    res.status(201).json({ success: true, data: { document: doc, fileRecord } });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
@@ -240,7 +286,7 @@ router.put('/files/:id', async (req, res) => {
   }
 });
 
-// GET /files/:id/download — تسجيل تحميل
+// GET /files/:id/download — تحميل الملف
 router.get('/files/:id/download', async (req, res) => {
   try {
     const file = await FileRecord.findOneAndUpdate(
@@ -249,8 +295,19 @@ router.get('/files/:id/download', async (req, res) => {
       { returnDocument: 'after' }
     );
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
-    // في الإنتاج: يُعيد مسار الملف أو رابط مؤقت
-    res.json({ success: true, data: { file_path: file.file_path, file_name: file.original_name } });
+
+    // Resolve to Document record for unified download
+    const doc = await Document.findOne({ filePath: file.file_path }).sort({ createdAt: -1 });
+    const storageProvider = doc?.storageProvider || 'local';
+    const storagePath = doc?.filePath || file.file_path;
+
+    const buffer = await storageService.download(storagePath, storageProvider);
+    res.set('Content-Type', file.mime_type || 'application/octet-stream');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(file.original_name || file.title_ar)}"`
+    );
+    res.send(buffer);
   } catch (err) {
     safeError(res, err);
   }
@@ -307,5 +364,15 @@ router.delete('/files/:id', async (req, res) => {
     safeError(res, err);
   }
 });
+
+function inferSourceModule(referenceType) {
+  const map = {
+    Beneficiary: 'beneficiary',
+    Employee: 'hr',
+    Assessment: 'medical',
+    Invoice: 'finance',
+  };
+  return map[referenceType] || 'core';
+}
 
 module.exports = router;

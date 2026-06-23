@@ -1,18 +1,19 @@
 'use strict';
 
 /**
- * files.routes.js — Wave 207b.
+ * files.routes.js — Wave 207b (Unified Document Hub edition).
  *
- * Phase 1: local disk storage at backend/uploads/<purpose>/<yyyy-mm-dd>/.
- * Phase 2: switch storageProvider='s3' and replace the writer/reader with
- * AWS SDK calls — model schema is already storage-agnostic.
+ * This route is now a thin compatibility layer over the central Document model.
+ * New uploads become Document records with sourceModule derived from the
+ * `purpose` field. Existing UploadedFile records continue to be readable
+ * through this surface for backward compatibility.
  *
  * Endpoints:
  *   POST   /                    — multipart upload (single file)
  *   GET    /                    — list (filters: purpose, beneficiaryId, refId)
  *   GET    /:id                 — metadata
  *   GET    /:id/download        — stream the file (with role check + access log)
- *   DELETE /:id                 — soft-delete (file stays on disk for forensics)
+ *   DELETE /:id                 — soft-delete
  *   DELETE /:id?hard=1          — admin-only: hard-delete from disk
  *
  * Size cap: 10MB per file (configurable via UPLOAD_MAX_BYTES env var).
@@ -24,87 +25,26 @@ const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs/promises');
-const crypto = require('crypto');
 const multer = require('multer');
 
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const Document = require('../models/Document');
 const UploadedFile = require('../models/UploadedFile');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const documentUploadService = require('../services/documents/documentUpload.service');
+const storageService = require('../services/storage/storage.service');
 
 router.use(authenticateToken);
-router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(bodyScopedBeneficiaryGuard);
 
 const UPLOAD_ROOT = path.resolve(__dirname, '..', 'uploads');
 const MAX_BYTES = parseInt(process.env.UPLOAD_MAX_BYTES || '10485760', 10); // 10MB default
 
-// Ensure upload root exists at module load
-try {
-  fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
-} catch {
-  // best-effort
-}
-
-const ALLOWED_MIMES = new Set([
-  // images
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  // documents
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  // videos (caps file size below)
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-]);
-
-const storage = multer.diskStorage({
-  destination: function (req, _file, cb) {
-    // W452: path-traversal defense. Pre-W452 `req.body.purpose` flowed
-    // straight into path.join — an attacker could send
-    // `purpose: '../../../etc/sneaky'` and multer would create the
-    // directory (and write the file) OUTSIDE UPLOAD_ROOT before the
-    // route handler's PURPOSES allowlist check ran. The post-write
-    // unlink would only remove the file inside the escaped dir; the
-    // dir itself remains, and the file could land in a web-accessible
-    // location if writable. Validate the purpose against the canonical
-    // PURPOSES list at multer time, and verify the resolved path
-    // stays within UPLOAD_ROOT before continuing.
-    const raw = String(req.body?.purpose || 'other');
-    const purpose = UploadedFile.PURPOSES.includes(raw) ? raw : 'other';
-    const dateDir = new Date().toISOString().slice(0, 10);
-    const dir = path.join(UPLOAD_ROOT, purpose, dateDir);
-    const resolved = path.resolve(dir);
-    if (!resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
-      return cb(new Error('invalid upload path'), '');
-    }
-    fs.mkdir(dir, { recursive: true }, err => {
-      if (err) return cb(err, '');
-      cb(null, dir);
-    });
-  },
-  filename: function (_req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase().slice(0, 10);
-    const uuid = crypto.randomBytes(16).toString('hex');
-    cb(null, `${uuid}${ext}`);
-  },
-});
-
+const memStorage = multer.memoryStorage();
 const upload = multer({
-  storage,
+  storage: memStorage,
   limits: { fileSize: MAX_BYTES },
-  fileFilter: (_req, file, cb) => {
-    if (!ALLOWED_MIMES.has(file.mimetype)) {
-      cb(new Error(`نوع الملف غير مسموح: ${file.mimetype}`));
-      return;
-    }
-    cb(null, true);
-  },
 });
 
 const READ_ROLES = [
@@ -133,41 +73,42 @@ const UPLOAD_ROLES = [
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager'];
 const HARD_DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
+const PURPOSE_TO_MODULE = {
+  portfolio: 'beneficiary',
+  disability_card_scan: 'beneficiary',
+  trip_doc: 'beneficiary',
+  pickup_auth_doc: 'beneficiary',
+  iep_signed_pdf: 'medical',
+  rs_evidence: 'medical',
+  meal_menu: 'other',
+  other: 'core',
+};
+
 // ── POST / — upload ────────────────────────────────────────────────────
 router.post('/', requireRole(UPLOAD_ROLES), upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'لم يُرفَع ملف' });
     }
+
     const { purpose, beneficiaryId, refModel, refId, metadata } = req.body || {};
-    if (!UploadedFile.PURPOSES.includes(String(purpose))) {
-      // Clean up the stored file
-      await fsp.unlink(req.file.path).catch(() => {});
-      return res.status(400).json({
-        success: false,
-        message: `purpose يجب أن يكون: ${UploadedFile.PURPOSES.join(' | ')}`,
-      });
-    }
-    const doc = await UploadedFile.create({
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimeType: req.file.mimetype,
-      sizeBytes: req.file.size,
-      purpose,
-      beneficiaryId:
-        beneficiaryId && mongoose.isValidObjectId(beneficiaryId) ? beneficiaryId : null,
-      refModel: String(refModel || '').slice(0, 50),
-      refId: refId && mongoose.isValidObjectId(refId) ? refId : null,
-      storagePath: req.file.path,
-      storageProvider: 'local',
-      uploadedBy: req.user?.id || null,
-      uploadedByName: req.user?.name || '',
-      metadata: metadata && typeof metadata === 'object' ? metadata : {},
+    const rawPurpose = String(purpose || 'other');
+    const validPurpose = UploadedFile.PURPOSES.includes(rawPurpose) ? rawPurpose : 'other';
+
+    const sourceModule = PURPOSE_TO_MODULE[validPurpose] || 'core';
+    const entityType = refModel || (beneficiaryId ? 'Beneficiary' : null);
+    const entityId = refId || beneficiaryId || null;
+
+    const doc = await documentUploadService.createDocumentRecord(req.file, req.user, {
+      sourceModule,
+      entityType,
+      entityId,
+      folder: validPurpose,
+      ...(metadata && typeof metadata === 'object' ? metadata : {}),
     });
-    res.status(201).json({ success: true, data: doc.toJSON() });
+
+    res.status(201).json({ success: true, data: doc.toJSON ? doc.toJSON() : doc });
   } catch (err) {
-    // Clean up disk artifact on DB failure
-    if (req.file?.path) await fsp.unlink(req.file.path).catch(() => {});
     return safeError(res, err, 'files.upload');
   }
 });
@@ -189,26 +130,29 @@ router.use((err, _req, res, next) => {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: 'active' };
+    const filter = { status: 'نشط' };
     if (req.query.purpose && UploadedFile.PURPOSES.includes(String(req.query.purpose))) {
-      filter.purpose = String(req.query.purpose);
+      filter.folder = String(req.query.purpose);
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
-      filter.beneficiaryId = req.query.beneficiaryId;
+      filter.entityType = 'Beneficiary';
+      filter.entityId = String(req.query.beneficiaryId);
     }
     if (req.query.refId && mongoose.isValidObjectId(req.query.refId)) {
-      filter.refId = req.query.refId;
+      filter.entityId = String(req.query.refId);
     }
+
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
-      UploadedFile.find(filter)
+      Document.find(filter)
         .sort({ createdAt: -1 })
         .skip((p - 1) * l)
         .limit(l)
-        .lean({ virtuals: true }),
-      UploadedFile.countDocuments(filter),
+        .lean(),
+      Document.countDocuments(filter),
     ]);
+
     res.json({
       success: true,
       items,
@@ -225,9 +169,14 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const doc = await UploadedFile.findById(req.params.id).lean({ virtuals: true });
+
+    // Prefer Document; fall back to UploadedFile for legacy IDs
+    let doc = await Document.findById(req.params.id).lean();
+    if (!doc) {
+      doc = await UploadedFile.findById(req.params.id).lean({ virtuals: true });
+    }
     if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
-    if (doc.status === 'soft_deleted') {
+    if (doc.status === 'محذوف' || doc.status === 'soft_deleted') {
       return res.status(404).json({ success: false, message: 'الملف محذوف' });
     }
     res.json({ success: true, data: doc });
@@ -242,29 +191,23 @@ router.get('/:id/download', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const doc = await UploadedFile.findById(req.params.id);
+
+    let doc = await Document.findById(req.params.id);
+    if (!doc) {
+      doc = await UploadedFile.findById(req.params.id);
+    }
     if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
-    if (doc.status === 'soft_deleted') {
+    if (doc.status === 'محذوف' || doc.status === 'soft_deleted') {
       return res.status(404).json({ success: false, message: 'الملف محذوف' });
     }
-    // W453: ensure path is within UPLOAD_ROOT (prevent traversal).
-    // Pre-W453 the check was `resolved.startsWith(UPLOAD_ROOT)` which
-    // matches a sibling like `/path/uploads-evil/file` when UPLOAD_ROOT
-    // is `/path/uploads`. Adding `+ path.sep` requires the path to be
-    // STRICTLY inside the directory (not a prefix-shared sibling).
-    const resolved = path.resolve(doc.storagePath);
-    if (!resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
-      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
-    }
-    if (!fs.existsSync(resolved)) {
+
+    const storageProvider = doc.storageProvider || 'local';
+    const storagePath = doc.filePath || doc.storagePath;
+    const fileExists = await storageService.exists(storagePath, storageProvider).catch(() => false);
+    if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على القرص' });
     }
-    // W463: defense-in-depth stored-XSS guard (sibling of W462 on
-    // documents.routes.js). ALLOWED_MIMES currently excludes the
-    // executable-script mime classes, but if a future maintainer
-    // adds text/html, text/xml, application/xml, or image/svg+xml
-    // to the allowlist, inline render would be stored-XSS. Force
-    // attachment + sandbox CSP for those mimes regardless.
+
     const mime = doc.mimeType || 'application/octet-stream';
     const isExecutableScript =
       /^text\/(html|xml)/i.test(mime) ||
@@ -274,13 +217,15 @@ router.get('/:id/download', requireRole(READ_ROLES), async (req, res) => {
     res.set('Content-Type', mime);
     res.set(
       'Content-Disposition',
-      `${disposition}; filename="${encodeURIComponent(doc.originalName)}"`
+      `${disposition}; filename="${encodeURIComponent(doc.originalName || doc.originalFileName || doc.fileName)}"`
     );
     if (isExecutableScript) {
       res.set('X-Frame-Options', 'DENY');
       res.set('Content-Security-Policy', "sandbox; default-src 'none'");
     }
-    fs.createReadStream(resolved).pipe(res);
+
+    const buffer = await storageService.download(storagePath, storageProvider);
+    res.send(buffer);
   } catch (err) {
     return safeError(res, err, 'files.download');
   }
@@ -292,27 +237,35 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
+
     const hard = req.query.hard === '1';
     if (hard) {
       const role = String(req.user?.role || req.user?.roleCode || '').toLowerCase();
       if (!HARD_DELETE_ROLES.includes(role)) {
         return res.status(403).json({ success: false, message: 'الحذف النهائي يحتاج مدير عام' });
       }
-      const doc = await UploadedFile.findByIdAndDelete(req.params.id);
+      const doc = await Document.findById(req.params.id);
       if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
-      const resolved = path.resolve(doc.storagePath);
-      // W453: strict path-sep boundary (see /:id/download for rationale)
-      if (resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
-        await fsp.unlink(resolved).catch(() => {});
-      }
+      await storageService.remove(doc.filePath, doc.storageProvider || 'local').catch(() => {});
+      await Document.findByIdAndDelete(req.params.id);
       return res.json({ success: true, message: 'تم الحذف النهائي' });
     }
-    const doc = await UploadedFile.findByIdAndUpdate(
+
+    const doc = await Document.findByIdAndUpdate(
       req.params.id,
-      { status: 'soft_deleted', deletedAt: new Date() },
+      { status: 'محذوف', isArchived: false },
       { returnDocument: 'after' }
     );
-    if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+    if (!doc) {
+      // Fallback to legacy UploadedFile soft-delete
+      const legacy = await UploadedFile.findByIdAndUpdate(
+        req.params.id,
+        { status: 'soft_deleted', deletedAt: new Date() },
+        { returnDocument: 'after' }
+      );
+      if (!legacy) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+      return res.json({ success: true, message: 'تم الحذف (Soft)' });
+    }
     res.json({ success: true, message: 'تم الحذف (Soft)' });
   } catch (err) {
     return safeError(res, err, 'files.delete');

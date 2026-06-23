@@ -60,7 +60,7 @@ const W502_AUTHED_SLUGS = [
   'family',
   'behavior',
   'goals',
-  'episodes',
+  // 'sessions' retired: now mounted securely by domains/sessions/index.js (W1463)
   'security/domain',
   'quality',
   'rehab-measures',
@@ -98,6 +98,33 @@ describe('W502 — mount-layer authentication on 20 previously-unauth routes', (
       'utf8'
     );
     expect(nafath).toMatch(/no auth required[\s\S]*login flow/i);
+  });
+
+  test('episodes is mounted securely via the DDD domain (not registry dualMount)', () => {
+    // W1460 retired the legacy /api/v1/episodes registry mount; the secure
+    // router is now mounted by domains/episodes/index.js with authenticate +
+    // requireBranchAccess, so it must not leak back in as a bare dualMount.
+    expect(src).not.toMatch(/\bdualMount(Auth)?\(app,\s*['"]episodes['"]/);
+    const domainSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'domains', 'episodes', 'index.js'),
+      'utf8'
+    );
+    expect(domainSrc).toMatch(/\bauthenticate\b/);
+    expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
+    expect(domainSrc).toContain('app.use(`/api/${this.name}`');
+  });
+
+  test('sessions is mounted securely via the DDD domain (not registry dualMount)', () => {
+    // W1463 retired /api/v1/therapy-sessions and /api/v1/session-center; the
+    // secure DDD Sessions router owns /api/(v1/v2/)sessions.
+    expect(src).not.toMatch(/\bdualMount(Auth)?\(app,\s*['"]sessions['"]/);
+    const domainSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'domains', 'sessions', 'index.js'),
+      'utf8'
+    );
+    expect(domainSrc).toMatch(/\bauthenticate\b/);
+    expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
+    expect(domainSrc).toContain('app.use(`/api/${this.name}`');
   });
 
   test('W502 doc comment present in _registry.js', () => {

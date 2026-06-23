@@ -2,7 +2,8 @@
  * SessionsManagement — Main orchestrator (split into sub-components)
  * ──────────────────────
  * Full-featured admin page for managing therapy sessions & schedules.
- * Uses /api/therapy-sessions endpoints via therapySessions.service.js.
+ * Uses the unified DDD Sessions API (/api/v1/sessions) via
+ * therapySessions.service.js.
  */
 import React from 'react';
 import {

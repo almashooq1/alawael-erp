@@ -10,6 +10,10 @@ const logger = require('../utils/logger');
 
 const { validateUploadedFile } = require('../utils/uploadValidator');
 const safeError = require('../utils/safeError');
+const documentUploadService = require('../services/documents/documentUpload.service');
+const documentLinkService = require('../services/documents/documentLink.service');
+const storageService = require('../services/storage/storage.service');
+const Document = require('../models/Document');
 
 /** Safely parse JSON — returns fallback on invalid input */
 const safeJsonParse = (str, fallback = []) => {
@@ -21,7 +25,7 @@ const safeJsonParse = (str, fallback = []) => {
   }
 };
 
-// إعداد مجلدات التخزين
+// إعداد مجلدات التخزين (للتوافق مع الملفات المرفوعة سابقًا)
 const UPLOAD_DIRS = {
   أشعة: 'radiology',
   تحاليل: 'lab-results',
@@ -31,43 +35,6 @@ const UPLOAD_DIRS = {
   مستند: 'documents',
   أخرى: 'other',
 };
-
-// إنشاء المجلدات عند بدء التشغيل
-const initUploadDirs = async () => {
-  const baseDir = path.join(__dirname, '../uploads/medical-files');
-  await fs.mkdir(baseDir, { recursive: true });
-
-  for (const dir of Object.values(UPLOAD_DIRS)) {
-    await fs.mkdir(path.join(baseDir, dir), { recursive: true });
-  }
-};
-
-initUploadDirs().catch(err =>
-  logger.error('Failed to init upload dirs:', { message: err.message })
-);
-
-// إعداد Multer للتخزين
-const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const fileType = req.body.fileType || 'أخرى';
-    const subDir = UPLOAD_DIRS[fileType] || 'other';
-    const uploadPath = path.join(__dirname, '../uploads/medical-files', subDir);
-
-    try {
-      await fs.mkdir(uploadPath, { recursive: true });
-      cb(null, uploadPath);
-    } catch (error) {
-      cb(error);
-    }
-  },
-  filename: (req, file, cb) => {
-    // توليد اسم فريد للملف
-    const uniqueSuffix = crypto.randomBytes(16).toString('hex');
-    const ext = path.extname(file.originalname);
-    const timestamp = Date.now();
-    cb(null, `${timestamp}-${uniqueSuffix}${ext}`);
-  },
-});
 
 // الأنواع المسموح بها
 const ALLOWED_FILE_TYPES = {
@@ -82,31 +49,28 @@ const ALLOWED_FILE_TYPES = {
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
 };
 
-// فلتر الملفات
-const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const mimeType = file.mimetype;
-
-  // التحقق من نوع الملف
-  if (ALLOWED_FILE_TYPES[mimeType] && ALLOWED_FILE_TYPES[mimeType].includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(
-      new Error(
-        `نوع الملف غير مسموح به. الأنواع المسموحة: ${Object.values(ALLOWED_FILE_TYPES).flat().join(', ')}`
-      ),
-      false
-    );
-  }
-};
-
-// إعداد Multer
+// إعداد Multer باستخدام memory storage (يتم التخزين عبر DocumentUploadService)
+const memStorage = multer.memoryStorage();
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: memStorage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mimeType = file.mimetype;
+
+    if (ALLOWED_FILE_TYPES[mimeType] && ALLOWED_FILE_TYPES[mimeType].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          `نوع الملف غير مسموح به. الأنواع المسموحة: ${Object.values(ALLOWED_FILE_TYPES).flat().join(', ')}`
+        ),
+        false
+      );
+    }
+  },
   limits: {
     fileSize: 20 * 1024 * 1024, // 20MB
-    files: 10, // حد أقصى 10 ملفات في طلب واحد
+    files: 10,
   },
 });
 
@@ -145,9 +109,7 @@ router.post(
   '/single',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   upload.single('file'),
-  validateUploadedFile,
   handleMulterError,
   async (req, res) => {
     try {
@@ -158,18 +120,34 @@ router.post(
         });
       }
 
-      const fileInfo = {
-        originalName: req.file.originalname,
-        fileName: req.file.filename,
-        fileType: req.body.fileType || 'أخرى',
-        mimeType: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path,
-        url: `/uploads/medical-files/${UPLOAD_DIRS[req.body.fileType] || 'other'}/${req.file.filename}`,
-        uploadDate: new Date(),
-        uploadedBy: req.user.id,
+      const fileType = req.body.fileType || 'أخرى';
+      const entityType = req.body.caseId ? 'CaseManagement' : 'Beneficiary';
+      const entityId = req.body.caseId || req.body.beneficiaryId;
+
+      const doc = await documentUploadService.createDocumentRecord(req.file, req.user, {
+        title: req.file.originalname,
         description: req.body.description || '',
-        tags: safeJsonParse(req.body.tags, []),
+        category: 'تقارير',
+        tags: [fileType, ...safeJsonParse(req.body.tags, [])],
+        sourceModule: 'medical',
+        entityType,
+        entityId,
+        folder: 'medical-files',
+      });
+
+      const fileInfo = {
+        documentId: doc._id,
+        originalName: doc.originalFileName,
+        fileName: doc.fileName,
+        fileType,
+        mimeType: doc.mimeType,
+        size: doc.fileSize,
+        path: doc.filePath,
+        url: `/api/v1/documents/${doc._id}/download`,
+        uploadDate: doc.createdAt,
+        uploadedBy: doc.uploadedBy,
+        description: doc.description,
+        tags: doc.tags,
       };
 
       res.json({
@@ -178,15 +156,6 @@ router.post(
         data: fileInfo,
       });
     } catch (error) {
-      // حذف الملف في حالة الخطأ
-      if (req.file) {
-        try {
-          await fs.unlink(req.file.path);
-        } catch (unlinkError) {
-          logger.error('خطأ في حذف الملف:', { message: unlinkError.message });
-        }
-      }
-
       safeError(res, error, 'medicalFiles');
     }
   }
@@ -197,9 +166,7 @@ router.post(
   '/multiple',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   upload.array('files', 10),
-  validateUploadedFile,
   handleMulterError,
   async (req, res) => {
     try {
@@ -213,20 +180,39 @@ router.post(
       const parsedFileTypes = safeJsonParse(req.body.fileTypes, []);
       const parsedDescriptions = safeJsonParse(req.body.descriptions, []);
       const parsedTags = safeJsonParse(req.body.tags, []);
+      const entityType = req.body.caseId ? 'CaseManagement' : 'Beneficiary';
+      const entityId = req.body.caseId || req.body.beneficiaryId;
 
-      const filesInfo = req.files.map((file, index) => ({
-        originalName: file.originalname,
-        fileName: file.filename,
-        fileType: parsedFileTypes[index] || 'أخرى',
-        mimeType: file.mimetype,
-        size: file.size,
-        path: file.path,
-        url: `/uploads/medical-files/${file.path.split('medical-files')[1].replace(/\\/g, '/')}`,
-        uploadDate: new Date(),
-        uploadedBy: req.user.id,
-        description: parsedDescriptions[index] || '',
-        tags: parsedTags,
-      }));
+      const filesInfo = [];
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const fileType = parsedFileTypes[i] || 'أخرى';
+        const doc = await documentUploadService.createDocumentRecord(file, req.user, {
+          title: file.originalname,
+          description: parsedDescriptions[i] || '',
+          category: 'تقارير',
+          tags: [fileType, ...parsedTags],
+          sourceModule: 'medical',
+          entityType,
+          entityId,
+          folder: 'medical-files',
+        });
+
+        filesInfo.push({
+          documentId: doc._id,
+          originalName: doc.originalFileName,
+          fileName: doc.fileName,
+          fileType,
+          mimeType: doc.mimeType,
+          size: doc.fileSize,
+          path: doc.filePath,
+          url: `/api/v1/documents/${doc._id}/download`,
+          uploadDate: doc.createdAt,
+          uploadedBy: doc.uploadedBy,
+          description: doc.description,
+          tags: doc.tags,
+        });
+      }
 
       res.json({
         success: true,
@@ -234,28 +220,43 @@ router.post(
         data: filesInfo,
       });
     } catch (error) {
-      // حذف الملفات في حالة الخطأ
-      if (req.files) {
-        for (const file of req.files) {
-          try {
-            await fs.unlink(file.path);
-          } catch (unlinkError) {
-            logger.error('خطأ في حذف الملف:', { message: unlinkError.message });
-          }
-        }
-      }
-
       safeError(res, error, 'medicalFiles');
     }
   }
 );
 
-// عرض ملف
+// عرض/تحميل ملف بواسطة documentId
+router.get('/download/:documentId', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const doc = await Document.findById(req.params.documentId);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+    }
+
+    const fileExists = await storageService
+      .exists(doc.filePath, doc.storageProvider || 'local')
+      .catch(() => false);
+    if (!fileExists) {
+      return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+    }
+
+    const buffer = await storageService.download(doc.filePath, doc.storageProvider || 'local');
+    res.set('Content-Type', doc.mimeType || 'application/octet-stream');
+    res.set(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(doc.originalFileName || doc.fileName)}"`
+    );
+    res.send(buffer);
+  } catch (error) {
+    safeError(res, error, 'medicalFiles');
+  }
+});
+
+// Legacy: عرض ملف (path-based)
 router.get('/view/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
-    // Path-traversal protection
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
@@ -263,29 +264,23 @@ router.get('/view/:fileType/:fileName', authenticate, requireBranchAccess, async
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 
-    // التحقق من وجود الملف
     try {
       await fs.access(filePath);
     } catch {
-      return res.status(404).json({
-        success: false,
-        message: 'الملف غير موجود',
-      });
+      return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     }
 
-    // إرسال الملف
     res.sendFile(filePath);
   } catch (error) {
     safeError(res, error, 'medicalFiles');
   }
 });
 
-// تحميل ملف
+// Legacy: تحميل ملف (path-based)
 router.get('/download/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
-    // Path-traversal protection
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
@@ -293,42 +288,28 @@ router.get('/download/:fileType/:fileName', authenticate, requireBranchAccess, a
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 
-    // التحقق من وجود الملف
     try {
       await fs.access(filePath);
     } catch {
-      return res.status(404).json({
-        success: false,
-        message: 'الملف غير موجود',
-      });
+      return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     }
 
-    // الحصول على معلومات الملف
-    const _stats = await fs.stat(filePath);
-
-    // تحميل الملف
-    res.download(filePath, fileName, err => {
-      if (err) {
-        logger.error('خطأ في تحميل الملف:', { message: err.message });
-      }
-    });
+    res.download(filePath, fileName);
   } catch (error) {
     safeError(res, error, 'medicalFiles');
   }
 });
 
-// حذف ملف
+// Legacy: حذف ملف (path-based)
 router.delete(
   '/:fileType/:fileName',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
       const { fileType, fileName } = req.params;
       const subDir = UPLOAD_DIRS[fileType] || 'other';
-      // Path-traversal protection
       const safeName = path.basename(fileName);
       const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
       const filePath = path.join(baseDir, safeName);
@@ -336,35 +317,25 @@ router.delete(
         return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
       }
 
-      // التحقق من وجود الملف
       try {
         await fs.access(filePath);
       } catch {
-        return res.status(404).json({
-          success: false,
-          message: 'الملف غير موجود',
-        });
+        return res.status(404).json({ success: false, message: 'الملف غير موجود' });
       }
 
-      // حذف الملف
       await fs.unlink(filePath);
-
-      res.json({
-        success: true,
-        message: 'تم حذف الملف بنجاح',
-      });
+      res.json({ success: true, message: 'تم حذف الملف بنجاح' });
     } catch (error) {
       safeError(res, error, 'medicalFiles');
     }
   }
 );
 
-// الحصول على معلومات ملف
+// Legacy: معلومات ملف (path-based)
 router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
-    // Path-traversal protection
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
@@ -372,22 +343,16 @@ router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 
-    // التحقق من وجود الملف
     try {
       await fs.access(filePath);
     } catch {
-      return res.status(404).json({
-        success: false,
-        message: 'الملف غير موجود',
-      });
+      return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     }
 
-    // الحصول على معلومات الملف
     const stats = await fs.stat(filePath);
-
     const fileInfo = {
-      fileName: fileName,
-      fileType: fileType,
+      fileName,
+      fileType,
       size: stats.size,
       sizeFormatted: formatBytes(stats.size),
       createdAt: stats.birthtime,
@@ -396,10 +361,7 @@ router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async
       url: `/uploads/medical-files/${subDir}/${fileName}`,
     };
 
-    res.json({
-      success: true,
-      data: fileInfo,
-    });
+    res.json({ success: true, data: fileInfo });
   } catch (error) {
     safeError(res, error, 'medicalFiles');
   }
@@ -441,11 +403,7 @@ router.get(
           totalSize += dirSize;
           totalFiles += files.length;
         } catch {
-          stats[type] = {
-            filesCount: 0,
-            size: 0,
-            sizeFormatted: '0 B',
-          };
+          stats[type] = { filesCount: 0, size: 0, sizeFormatted: '0 B' };
         }
       }
 
@@ -466,16 +424,12 @@ router.get(
   }
 );
 
-// دالة مساعدة لتنسيق حجم الملف
 function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
-
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 

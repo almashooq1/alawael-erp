@@ -28,7 +28,9 @@ describe('services/therapySessions.service.js', () => {
   });
 
   test('makes API calls', () => {
-    expect(source).toMatch(/(?:axios|api\.|fetch\(|\.get\(|\.post\(|\.put\(|\.delete\()/);
+    expect(source).toMatch(
+      /(?:axios|api\.|fetch\(|\.get\(|\.post\(|\.put\(|\.delete\(|sessionsAPI)/
+    );
   });
 
   test('has async functions (16)', () => {

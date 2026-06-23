@@ -6,11 +6,14 @@ All public session surfaces have been consolidated onto the DDD Sessions domain 
 
 ## Retired Surfaces
 
-| Legacy Path                            | New Path                            | Status             |
-| -------------------------------------- | ----------------------------------- | ------------------ |
-| `/api/v1/therapy-sessions/*`           | `/api/v1/sessions/*`                | Retired & archived |
-| `/api/v1/session-center/*`             | `/api/v1/sessions/session-center/*` | Retired & archived |
-| `/api/v1/therapy-sessions-analytics/*` | `/api/v1/sessions/analytics/*`      | Retired & archived |
+| Legacy Path                            | New Path                              | Status             |
+| -------------------------------------- | ------------------------------------- | ------------------ |
+| `/api/v1/therapy-sessions/*`           | `/api/v1/sessions/*`                  | Retired & archived |
+| `/api/v1/session-center/*`             | `/api/v1/sessions/session-center/*`   | Retired & archived |
+| `/api/v1/therapy-sessions-analytics/*` | `/api/v1/sessions/analytics/*`        | Retired & archived |
+| `/api/admin/therapy-sessions/*`        | `/api/v1/sessions/admin/*`            | Retired in place   |
+| `/api/v1/therapist/sessions/*`         | `/api/v1/sessions/therapist/sessions` | Retired in place   |
+| `/api/v1/therapist/schedule/*`         | `/api/v1/sessions/therapist/schedule` | Retired in place   |
 
 ## Unified DDD Sessions Endpoints
 
@@ -82,11 +85,42 @@ All public session surfaces have been consolidated onto the DDD Sessions domain 
 
 All endpoints respect `effectiveBranchScope(req)` (W269/W1152). `:sessionId` params use `branchScopedResourceParam(ClinicalSession)` to prevent cross-branch IDOR.
 
+## Admin Therapy Sessions (Compat)
+
+- `GET    /api/v1/sessions/admin`
+- `GET    /api/v1/sessions/admin/stats`
+- `GET    /api/v1/sessions/admin/calendar`
+- `POST   /api/v1/sessions/admin`
+- `PATCH  /api/v1/sessions/admin/:id`
+- `DELETE /api/v1/sessions/admin/:id`
+- `POST   /api/v1/sessions/admin/:id/status`
+- `POST   /api/v1/sessions/admin/:id/check-in`
+- `POST   /api/v1/sessions/admin/:id/finalize`
+- `POST   /api/v1/sessions/admin/:id/amend`
+- `POST   /api/v1/sessions/admin/:id/create-claim`
+- `POST   /api/v1/sessions/admin/bulk-create-claims`
+
+## Therapist Portal Sessions (Compat)
+
+- `GET    /api/v1/sessions/therapist/sessions`
+- `POST   /api/v1/sessions/therapist/sessions`
+- `GET    /api/v1/sessions/therapist/sessions/:sessionId`
+- `PUT    /api/v1/sessions/therapist/sessions/:sessionId`
+- `DELETE /api/v1/sessions/therapist/sessions/:sessionId`
+- `GET    /api/v1/sessions/therapist/sessions/:sessionId/documentation`
+- `POST   /api/v1/sessions/therapist/sessions/:sessionId/documentation`
+- `GET    /api/v1/sessions/therapist/schedule`
+- `POST   /api/v1/sessions/therapist/schedule`
+- `PUT    /api/v1/sessions/therapist/schedule/:sessionId`
+- `DELETE /api/v1/sessions/therapist/schedule/:sessionId`
+
 ## Frontend Services
 
 - `frontend/src/services/therapySessions.service.js` → delegates to `sessionsAPI`.
 - `frontend/src/services/sessionCenterService.js` → delegates to `sessionCenterAPI`.
-- `frontend/src/services/therapistService.js` analytics → delegates to `sessionsAPI.analytics`.
+- `frontend/src/services/therapistService.js` sessions/schedule → delegates to `sessionsAPI.therapist`.
+- `frontend/src/services/disabilityRehabService.js` therapy sessions/schedule → delegates to `sessionsAPI.therapist`.
+- Admin therapy callers → `sessionsAPI.admin`.
 
 ## Archived Files
 
@@ -97,7 +131,8 @@ All endpoints respect `effectiveBranchScope(req)` (W269/W1152). `:sessionId` par
 - `backend/__tests__/_archived/therapy-sessions-documentation-branch-isolation-wave1409.test.js.archived`
 - `backend/tests/unit/_archived/session-center.routes.test.js.archived`
 
-## Remaining Out-of-Scope Surfaces
+## Branch Isolation Notes
 
-- `/api/v1/therapist/sessions/*` — Therapist Portal (requires therapist-ownership enforcement before merging).
-- `/api/admin/therapy-sessions/*` — Admin surface with claims bridge.
+- All DDD Sessions endpoints respect `effectiveBranchScope(req)` (W269/W1152).
+- `:sessionId` params on the core/analytics/admin surfaces use `branchScopedResourceParam(ClinicalSession)`.
+- The therapist compat surface uses `branchScopedResourceParam(TherapySession)` plus therapist-employee ownership via `TherapistPortalService`.

@@ -177,6 +177,14 @@ export default defineConfig(({ mode }) => {
               }
             }
 
+            // ── Heavy page-specific template modules ────────────────────────
+            if (id.includes('/src/pages/PrintCenter/templates/')) {
+              // Split each template family into its own chunk so no single chunk
+              // exceeds the 1000 kB warning threshold.
+              const match = id.match(/\/([^/]+)PrintTemplates\.jsx?$/);
+              return match ? `print-${match[1].toLowerCase()}` : 'print-templates';
+            }
+
             // ── Route modules: split by business domain ─────────────────────
             if (id.includes('/src/routes/')) {
               if (

@@ -15,7 +15,7 @@ const DEFAULT_OK = {
   '/api/admin/insurance-tariffs': { status: 200, body: '[]' },
   '/api/admin/zatca-credentials': { status: 200, body: '[]' },
   '/api/admin/nphies-claims': { status: 200, body: '[]' },
-  '/api/admin/therapy-sessions': { status: 200, body: '[]' },
+  '/api/v1/sessions/admin': { status: 200, body: '[]' },
   '/api/admin/pii-access-audit': { status: 200, body: '{"data":[]}' },
   '/api/management-review/reference': { status: 200, body: '{}' },
   '/api/evidence/reference': { status: 200, body: '{}' },
@@ -107,7 +107,11 @@ describe('scripts/post-deploy-smoke', () => {
         const probe = PROBES.find(p => p.name === name);
         expect(probe).toBeDefined();
         expect(probe.critical).toBe(true);
-        expect(probe.path.startsWith('/api/admin/')).toBe(true);
+        // therapy-sessions was unified onto the DDD Sessions surface;
+        // the rest remain under /api/admin/*.
+        expect(
+          probe.path.startsWith('/api/admin/') || probe.path === '/api/v1/sessions/admin'
+        ).toBe(true);
       }
     });
 

@@ -195,6 +195,14 @@ const employeeSchema = new Schema(
     photo_path: String,
     notes: String,
 
+    // مراجع المستندات الموحدة (عقود، شهادات، هوية، إقامة...)
+    documentIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Document',
+      },
+    ],
+
     // Soft delete
     deleted_at: { type: Date, default: null },
   },

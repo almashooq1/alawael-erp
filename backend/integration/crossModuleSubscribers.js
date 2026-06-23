@@ -574,6 +574,34 @@ function createSubscribers(integrationBus, moduleConnector) {
   // needed in the future, add SYSTEM_EVENTS.ACCOUNT_LOCKED contract +
   // wire from a brute-force-detection middleware/service.
 
+  // ─── Documents → HR/Medical/Finance: notify on document expiry ───────
+  subscribers.push({
+    name: 'documents:expiring → hr/medical/finance:notify',
+    pattern: 'documents.document.expiring',
+    handler: async event => {
+      const { entityType, entityId, documentId, daysRemaining } = event.payload || {};
+      logger.info(
+        `[CrossModule] Document ${documentId} expiring in ${daysRemaining} days for ${entityType}:${entityId}`
+      );
+      try {
+        if (moduleConnector && moduleConnector.hasService('notification.send')) {
+          await moduleConnector.invoke('notification.send', {
+            type: 'document_expiring',
+            priority: 'high',
+            templateData: {
+              entityType,
+              entityId,
+              documentId,
+              daysRemaining,
+            },
+          });
+        }
+      } catch (err) {
+        logger.warn(`[CrossModule] Failed to send document expiry notification:`, err.message);
+      }
+    },
+  });
+
   return subscribers;
 }
 

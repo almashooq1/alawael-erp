@@ -436,8 +436,17 @@ const _uriFile = _path.join(__dirname, '.test-mongo-uri');
 
 beforeAll(() => {
   try {
-    const memUri = _fs.readFileSync(_uriFile, 'utf-8').trim();
+    let memUri = _fs.readFileSync(_uriFile, 'utf-8').trim();
     if (memUri) {
+      const workerId = process.env.JEST_WORKER_ID;
+      if (workerId) {
+        // Give each Jest worker its own database on the shared in-memory
+        // mongod so integration tests can run safely in parallel.
+        const parsed = new URL(memUri);
+        const baseDb = parsed.pathname.replace(/^\/+/, '') || 'alawael-test';
+        parsed.pathname = `/${baseDb}-worker-${workerId}`;
+        memUri = parsed.toString();
+      }
       process.env.MONGO_URI = memUri;
       process.env.MONGODB_URI = memUri;
     }

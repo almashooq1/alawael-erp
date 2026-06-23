@@ -38,17 +38,17 @@ function runMigration(uri, dryRun) {
     let stdout = '';
     let stderr = '';
 
-    child.stdout.on('data', (data) => {
+    child.stdout.on('data', data => {
       stdout += data.toString();
       process.stdout.write(data);
     });
 
-    child.stderr.on('data', (data) => {
+    child.stderr.on('data', data => {
       stderr += data.toString();
       process.stderr.write(data);
     });
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       if (code === 0) {
         resolve({ stdout, stderr });
       } else {
@@ -84,7 +84,7 @@ async function main() {
       },
       { collection: 'nphiesclaims' }
     );
-    const NphiesClaim = mongoose.model('NphiesClaim', NphiesClaimSchema);
+    const NphiesClaim = mongoose.model('NphiesClaimMigrationTest', NphiesClaimSchema);
 
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -123,7 +123,9 @@ async function main() {
         { 'nphies.submission.updatedAt': null },
       ],
     });
-    console.log(`[test-migration-local] Seeded: ${beforeCount} docs, ${beforeMissing} missing updatedAt`);
+    console.log(
+      `[test-migration-local] Seeded: ${beforeCount} docs, ${beforeMissing} missing updatedAt`
+    );
 
     // Run dry-run
     console.log('[test-migration-local] Running migration in DRY-RUN mode...');
@@ -136,7 +138,9 @@ async function main() {
       ],
     });
     if (afterDryRunMissing !== beforeMissing) {
-      throw new Error(`Dry-run modified data! Missing count changed from ${beforeMissing} to ${afterDryRunMissing}`);
+      throw new Error(
+        `Dry-run modified data! Missing count changed from ${beforeMissing} to ${afterDryRunMissing}`
+      );
     }
     console.log('[test-migration-local] Dry-run OK: no documents modified');
 
@@ -154,8 +158,12 @@ async function main() {
       throw new Error(`Real migration left ${afterRealMissing} documents without updatedAt`);
     }
 
-    const updatedDocs = await NphiesClaim.find({ 'nphies.submission.updatedBy': 'migration' }).lean();
-    console.log(`[test-migration-local] Real migration OK: ${updatedDocs.length} documents updated`);
+    const updatedDocs = await NphiesClaim.find({
+      'nphies.submission.updatedBy': 'migration',
+    }).lean();
+    console.log(
+      `[test-migration-local] Real migration OK: ${updatedDocs.length} documents updated`
+    );
 
     // Verify fallback values
     for (const doc of updatedDocs) {

@@ -67,39 +67,10 @@ router.get(
 //  الجدول والمواعيد — Schedule
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get(
-  '/schedule',
-  wrap(async (req, res) => {
-    const data = await svc.getSchedule(req.user.id, req.query);
-    res.json({ success: true, data });
-  })
-);
-
-router.post(
-  '/schedule',
-  wrap(async (req, res) => {
-    const data = await svc.addScheduleSession(req.user.id, req.body);
-    res.status(201).json({ success: true, data });
-  })
-);
-
-router.put(
-  '/schedule/:sessionId',
-  wrap(async (req, res) => {
-    const data = await svc.updateScheduleSession(req.user.id, req.params.sessionId, req.body);
-    if (!data) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.json({ success: true, data });
-  })
-);
-
-router.delete(
-  '/schedule/:sessionId',
-  wrap(async (req, res) => {
-    const deleted = await svc.deleteScheduleSession(req.user.id, req.params.sessionId);
-    if (!deleted) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.json({ success: true, message: 'تم الحذف' });
-  })
-);
+// ─── Schedule retired ───────────────────────────────────────────────────────
+// Session/schedule scheduling is now served by the unified DDD Sessions surface:
+//   /api/v1/sessions/therapist/schedule
+// Keep this comment as a tombstone for code-searchability.
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  التوفر الأسبوعي — Availability
@@ -133,75 +104,10 @@ router.post(
 //  الجلسات العلاجية — Sessions
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get(
-  '/sessions',
-  wrap(async (req, res) => {
-    const result = await svc.getSessions(req.user.id, req.query);
-    res.json({
-      success: true,
-      data: result.sessions,
-      total: result.total,
-      page: result.page,
-      limit: result.limit,
-    });
-  })
-);
-
-router.post(
-  '/sessions',
-  wrap(async (req, res) => {
-    const data = await svc.saveSessionReport(req.user.id, req.body);
-    if (!data) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.status(201).json({ success: true, data });
-  })
-);
-
-router.get(
-  '/sessions/:sessionId',
-  wrap(async (req, res) => {
-    const data = await svc.getSessionById(req.user.id, req.params.sessionId);
-    if (!data) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.json({ success: true, data });
-  })
-);
-
-router.put(
-  '/sessions/:sessionId',
-  wrap(async (req, res) => {
-    const data = await svc.updateSession(req.user.id, req.params.sessionId, req.body);
-    if (!data) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.json({ success: true, data });
-  })
-);
-
-router.delete(
-  '/sessions/:sessionId',
-  wrap(async (req, res) => {
-    const deleted = await svc.deleteSession(req.user.id, req.params.sessionId);
-    if (!deleted) return res.status(404).json({ success: false, error: 'الجلسة غير موجودة' });
-    res.json({ success: true, message: 'تم الحذف' });
-  })
-);
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  التوثيق السريري — Session Documentation (SOAP)
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get(
-  '/sessions/:sessionId/documentation',
-  wrap(async (req, res) => {
-    const data = await svc.getSessionDocumentation(req.user.id, req.params.sessionId);
-    res.json({ success: true, data: data || null });
-  })
-);
-
-router.post(
-  '/sessions/:sessionId/documentation',
-  wrap(async (req, res) => {
-    const data = await svc.createSessionDocumentation(req.user.id, req.params.sessionId, req.body);
-    res.status(201).json({ success: true, data });
-  })
-);
+// ─── Sessions retired ───────────────────────────────────────────────────────
+// Therapist portal sessions (CRUD + SOAP documentation) are now served by the
+// unified DDD Sessions surface: /api/v1/sessions/therapist/sessions
+// Keep this comment as a tombstone for code-searchability.
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  الخطط العلاجية — Therapeutic Plans

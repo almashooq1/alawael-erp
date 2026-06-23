@@ -3462,7 +3462,7 @@ paths:
                       errors:       { type: integer }
 
   # ─── Phase 21 — Session→Claim Bridge ────────────────────────────────────
-  /api/admin/therapy-sessions/{id}/create-claim:
+  /api/v1/sessions/admin/{id}/create-claim:
     post:
       tags: [Session→Claim Bridge]
       summary: Build a draft NPHIES claim from a completed therapy session
@@ -3514,7 +3514,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/SessionToClaimErrorResponse' }
 
-  /api/admin/therapy-sessions/bulk-create-claims:
+  /api/v1/sessions/admin/bulk-create-claims:
     post:
       tags: [Session→Claim Bridge]
       summary: Month-end batch — bridge every COMPLETED session in a window

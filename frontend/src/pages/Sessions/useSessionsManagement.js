@@ -1,6 +1,7 @@
 /**
  * useSessionsManagement — Custom hook for session state & logic
- * Wired to therapySessionsService (backend /api/therapy-sessions)
+ * Wired to therapySessionsService which delegates to the unified
+ * DDD Sessions API (/api/v1/sessions).
  */
 import { useState, useEffect, useCallback } from 'react';
 import therapySessionsService from '../../services/therapySessions.service';

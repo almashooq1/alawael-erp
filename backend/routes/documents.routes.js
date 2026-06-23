@@ -29,10 +29,7 @@
 'use strict';
 
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
@@ -40,181 +37,16 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const Document = require('../models/Document');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const documentUploadService = require('../services/documents/documentUpload.service');
+const documentLinkService = require('../services/documents/documentLink.service');
+const storageService = require('../services/storage/storage.service');
+const { single: singleUpload } = require('../middleware/documentUpload.middleware');
+const { requireDocumentAccess } = require('../middleware/documentAccess.middleware');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Storage configuration
 // ──────────────────────────────────────────────────────────────────────────────
-const UPLOADS_ROOT =
-  process.env.UPLOADS_ROOT ||
-  (process.platform === 'win32'
-    ? path.join(process.cwd(), 'uploads')
-    : '/home/alawael/app/uploads');
-
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
-
-// Broad set of allowed MIME types for clinical documents
-const ALLOWED_MIMES = new Set([
-  // Documents
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-word.document.macroenabled.12',
-  'application/vnd.oasis.opendocument.text',
-  'application/rtf',
-  'text/rtf',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-excel.sheet.macroenabled.12',
-  'application/vnd.oasis.opendocument.spreadsheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'application/vnd.ms-powerpoint.presentation.macroenabled.12',
-  'application/vnd.oasis.opendocument.presentation',
-  // Text / data
-  'text/plain',
-  'text/csv',
-  'application/json',
-  'text/xml',
-  'application/xml',
-  'text/html',
-  // Images
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-  'image/bmp',
-  'image/tiff',
-  // Audio
-  'audio/mpeg',
-  'audio/wav',
-  'audio/ogg',
-  'audio/mp4',
-  'audio/flac',
-  'audio/aac',
-  // Video
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'video/x-msvideo',
-  // Archives
-  'application/zip',
-  'application/x-rar-compressed',
-  'application/x-7z-compressed',
-  'application/gzip',
-  'application/x-tar',
-]);
-
-// Use memory storage — hash content for dedup, then write to disk manually
-const memStorage = multer.memoryStorage();
-const upload = multer({
-  storage: memStorage,
-  limits: { fileSize: MAX_BYTES, files: 1 },
-  fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIMES.has(file.mimetype)) return cb(null, true);
-    // Allow even if mime check misses, fall back to extension check
-    const ext = path
-      .extname(file.originalname || '')
-      .toLowerCase()
-      .slice(1);
-    const KNOWN_EXTS = new Set([
-      'pdf',
-      'doc',
-      'docx',
-      'docm',
-      'odt',
-      'rtf',
-      'xls',
-      'xlsx',
-      'xlsm',
-      'ods',
-      'csv',
-      'ppt',
-      'pptx',
-      'pptm',
-      'odp',
-      'txt',
-      'json',
-      'xml',
-      'html',
-      'htm',
-      'jpg',
-      'jpeg',
-      'png',
-      'gif',
-      'bmp',
-      'webp',
-      'tiff',
-      'tif',
-      'svg',
-      'mp3',
-      'wav',
-      'ogg',
-      'm4a',
-      'flac',
-      'aac',
-      'mp4',
-      'webm',
-      'avi',
-      'mkv',
-      'mov',
-      'zip',
-      'rar',
-      '7z',
-      'gz',
-      'tar',
-    ]);
-    if (KNOWN_EXTS.has(ext)) return cb(null, true);
-    cb(Object.assign(new Error(`نوع الملف غير مدعوم: ${file.mimetype}`), { statusCode: 400 }));
-  },
-});
-
-/** Resolve file extension from mime or original name */
-function extFor(mime, originalName) {
-  const mimeMap = {
-    'application/pdf': '.pdf',
-    'application/msword': '.doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-    'application/vnd.oasis.opendocument.text': '.odt',
-    'text/rtf': '.rtf',
-    'application/rtf': '.rtf',
-    'application/vnd.ms-excel': '.xls',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-    'application/vnd.oasis.opendocument.spreadsheet': '.ods',
-    'application/vnd.ms-powerpoint': '.ppt',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-    'application/vnd.oasis.opendocument.presentation': '.odp',
-    'text/plain': '.txt',
-    'text/csv': '.csv',
-    'application/json': '.json',
-    'text/xml': '.xml',
-    'application/xml': '.xml',
-    'text/html': '.html',
-    'image/jpeg': '.jpg',
-    'image/png': '.png',
-    'image/gif': '.gif',
-    'image/webp': '.webp',
-    'image/svg+xml': '.svg',
-    'image/bmp': '.bmp',
-    'image/tiff': '.tiff',
-    'audio/mpeg': '.mp3',
-    'audio/wav': '.wav',
-    'audio/ogg': '.ogg',
-    'audio/mp4': '.m4a',
-    'audio/flac': '.flac',
-    'audio/aac': '.aac',
-    'video/mp4': '.mp4',
-    'video/webm': '.webm',
-    'video/ogg': '.ogv',
-    'video/x-msvideo': '.avi',
-    'application/zip': '.zip',
-    'application/x-7z-compressed': '.7z',
-    'application/gzip': '.gz',
-    'application/x-tar': '.tar',
-  };
-  if (mimeMap[mime]) return mimeMap[mime];
-  return path.extname(originalName || '').toLowerCase() || '.bin';
-}
 
 /** Map mime type to Document.fileType enum value */
 function mimeToFileType(mime, originalName) {
@@ -270,22 +102,6 @@ function mimeToFileType(mime, originalName) {
   if (mime.startsWith('video/')) return 'mp4';
   if (mime === 'application/pdf') return 'pdf';
   return 'other';
-}
-
-/** Save buffer to disk under UPLOADS_ROOT/documents/YYYY-MM/ using sha256 hash name */
-function saveToDisk(buffer, mime, originalName) {
-  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
-  const ext = extFor(mime, originalName);
-  const now = new Date();
-  const folder = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const dir = path.join(UPLOADS_ROOT, 'documents', folder);
-  fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
-  const filename = `${hash}${ext}`;
-  const fullPath = path.join(dir, filename);
-  if (!fs.existsSync(fullPath)) {
-    fs.writeFileSync(fullPath, buffer, { mode: 0o644 });
-  }
-  return { hash, filename, fullPath, folder, relativePath: `documents/${folder}/${filename}` };
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -364,6 +180,7 @@ router.post(
       uploadedBy: actorId,
       uploadedByName: req.user.name || req.user.fullName || '',
       uploadedByEmail: req.user.email || '',
+      sourceModule: 'core',
       ...(entityType ? { entityType: String(entityType) } : {}),
       ...(entityId ? { entityId: String(entityId) } : {}),
       ...(typeof isConfidential === 'boolean' ? { isConfidential } : {}),
@@ -377,30 +194,21 @@ router.post(
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
-// POST /upload — رفع مستند جديد
+// POST /upload — رفع مستند جديد (موحد)
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/upload',
-  upload.single('file'),
+  singleUpload('file', MAX_BYTES),
   wrap(async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'الملف مطلوب' });
     }
 
-    const { title, description, category, tags, folder, parentFolderId } = req.body;
+    const { title, description, category, tags, folder, parentFolderId, entityType, entityId } =
+      req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: 'عنوان المستند مطلوب' });
     }
-
-    const {
-      hash,
-      relativePath: _relativePath,
-      fullPath,
-    } = saveToDisk(req.file.buffer, req.file.mimetype, req.file.originalname);
-
-    const fileType = mimeToFileType(req.file.mimetype, req.file.originalname);
-    const ext = extFor(req.file.mimetype, req.file.originalname);
-    const fileName = `${hash}${ext}`;
 
     // Parse tags from comma-separated string or JSON array
     let parsedTags = [];
@@ -415,24 +223,16 @@ router.post(
       }
     }
 
-    const doc = await Document.create({
-      fileName,
-      originalFileName: req.file.originalname,
-      fileType,
-      mimeType: req.file.mimetype,
-      fileSize: req.file.size,
-      filePath: fullPath,
+    const doc = await documentUploadService.createDocumentRecord(req.file, req.user, {
       title: title.trim(),
       description: description || '',
       category: category || 'أخرى',
       tags: parsedTags,
       folder: folder || 'root',
       parentFolderId: parentFolderId || null,
-      uploadedBy: req.user._id,
-      uploadedByName: req.user.name || req.user.fullName || '',
-      uploadedByEmail: req.user.email || '',
-      contentFingerprint: hash,
-      status: 'نشط',
+      entityType: entityType || null,
+      entityId: entityId || null,
+      sourceModule: 'core',
     });
 
     logger.info(`[Documents] Uploaded: ${doc.title} by ${req.user._id}`);
@@ -800,68 +600,47 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.get(
   '/:id/preview',
+  requireDocumentAccess('view'),
   wrap(async (req, res) => {
-    const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
-    if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
-
-    // W454: defense-in-depth path-boundary check. `doc.filePath` is
-    // currently set only by saveToDisk() (server-controlled) and PUT
-    // /:id uses an explicit allowlist (no filePath update), so this
-    // check is belt-and-suspenders against future regressions, direct
-    // DB writes, or migrations that touch filePath.
-    const resolvedPath = path.resolve(doc.filePath);
-    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
-      logger.warn('[Documents] Path-boundary violation', {
-        docId: String(doc._id),
-        filePath: doc.filePath,
-      });
-      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
+    const doc = req.document;
+    if (!doc || doc.status === 'محذوف') {
+      return res.status(404).json({ success: false, message: 'المستند غير موجود' });
     }
 
-    if (!fs.existsSync(resolvedPath)) {
+    // Verify file exists in storage
+    const fileExists = await storageService
+      .exists(doc.filePath, doc.storageProvider)
+      .catch(() => false);
+    if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
-    // W462: Stored-XSS defense on preview. ALLOWED_MIMES includes
-    // `text/html`, `text/xml`, and `application/xml` for legitimate
-    // template/report uploads — but with Content-Disposition:inline
-    // an attacker uploading malicious HTML (`<script>` tags) would
-    // get it RENDERED in the application origin on preview, owning
-    // any admin who clicks the preview link (session theft, CSRF
-    // token theft, PHI exfil). `text/xml` carries the same risk via
-    // XSL processing instructions.
-    //
-    // Mitigation: for these executable-script MIME types, force the
-    // `attachment` disposition (browser downloads, never renders).
-    // Also strip the X-Frame-Options header that some browsers honor
-    // for iframe embedding. PDF/images/Word docs continue to preview
-    // inline as before.
+    // W462: Stored-XSS defense on preview.
     const mime = doc.mimeType || 'application/octet-stream';
     const isExecutableScript =
       /^text\/(html|xml)/i.test(mime) ||
       /^application\/xml/i.test(mime) ||
-      /^image\/svg/i.test(mime); // SVG can carry inline <script> too
+      /^image\/svg/i.test(mime);
     const disposition = isExecutableScript ? 'attachment' : 'inline';
 
     res.setHeader('Content-Type', mime);
     res.setHeader(
       'Content-Disposition',
-      `${disposition}; filename="${encodeURIComponent(doc.originalFileName)}"`
+      `${disposition}; filename="${encodeURIComponent(doc.originalFileName || doc.fileName)}"`
     );
     if (isExecutableScript) {
-      // Defense-in-depth: even if a browser ignores the disposition,
-      // these headers block in-iframe rendering and execution.
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'");
     }
     res.setHeader('Cache-Control', 'private, max-age=3600');
 
-    const stream = fs.createReadStream(resolvedPath);
-    stream.pipe(res);
-    stream.on('error', err => {
-      logger.error('[Documents] Preview stream error:', err);
+    try {
+      const buffer = await storageService.download(doc.filePath, doc.storageProvider);
+      res.send(buffer);
+    } catch (err) {
+      logger.error('[Documents] Preview download error:', err);
       if (!res.headersSent) safeError(res, err, 'preview');
-    });
+    }
   })
 );
 
@@ -870,21 +649,17 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.get(
   '/:id/download',
+  requireDocumentAccess('download'),
   wrap(async (req, res) => {
-    const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
-    if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
-
-    // W454: defense-in-depth path-boundary check (see /preview)
-    const resolvedPath = path.resolve(doc.filePath);
-    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
-      logger.warn('[Documents] Path-boundary violation', {
-        docId: String(doc._id),
-        filePath: doc.filePath,
-      });
-      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
+    const doc = req.document;
+    if (!doc || doc.status === 'محذوف') {
+      return res.status(404).json({ success: false, message: 'المستند غير موجود' });
     }
 
-    if (!fs.existsSync(resolvedPath)) {
+    const fileExists = await storageService
+      .exists(doc.filePath, doc.storageProvider)
+      .catch(() => false);
+    if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
@@ -896,12 +671,13 @@ router.get(
     res.setHeader('Content-Length', doc.fileSize);
     res.setHeader('Cache-Control', 'private, no-cache');
 
-    const stream = fs.createReadStream(resolvedPath);
-    stream.pipe(res);
-    stream.on('error', err => {
-      logger.error('[Documents] Download stream error:', err);
+    try {
+      const buffer = await storageService.download(doc.filePath, doc.storageProvider);
+      res.send(buffer);
+    } catch (err) {
+      logger.error('[Documents] Download error:', err);
       if (!res.headersSent) safeError(res, err, 'download');
-    });
+    }
   })
 );
 
@@ -965,6 +741,66 @@ router.put(
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
     res.json({ success: true, document: doc });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /:id/link — ربط المستند بكيان
+// ══════════════════════════════════════════════════════════════════════════════
+router.post(
+  '/:id/link',
+  wrap(async (req, res) => {
+    const { entityType, entityId, sourceModule } = req.body;
+    if (!entityType || !entityId) {
+      return res.status(400).json({ success: false, message: 'نوع الكيان ومعرّفه مطلوبان' });
+    }
+
+    const doc = await documentLinkService.linkDocumentToEntity(
+      req.params.id,
+      entityType,
+      entityId,
+      {
+        sourceModule,
+        userId: req.user._id,
+      }
+    );
+
+    res.json({ success: true, message: 'تم ربط المستند بالكيان', document: doc });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /:id/unlink — فك ربط المستند عن كيان
+// ══════════════════════════════════════════════════════════════════════════════
+router.post(
+  '/:id/unlink',
+  wrap(async (req, res) => {
+    const { entityType, entityId } = req.body;
+    if (!entityType || !entityId) {
+      return res.status(400).json({ success: false, message: 'نوع الكيان ومعرّفه مطلوبان' });
+    }
+
+    const doc = await documentLinkService.unlinkDocumentFromEntity(
+      req.params.id,
+      entityType,
+      entityId
+    );
+    res.json({ success: true, message: 'تم فك الربط', document: doc });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /entity/:type/:id — مستندات كيان معين
+// ══════════════════════════════════════════════════════════════════════════════
+router.get(
+  '/entity/:type/:id',
+  wrap(async (req, res) => {
+    const result = await documentLinkService.getDocumentsForEntity(req.params.type, req.params.id, {
+      page: req.query.page,
+      limit: req.query.limit,
+      includeArchived: req.query.includeArchived === 'true',
+    });
+    res.json(result);
   })
 );
 
@@ -1086,11 +922,11 @@ router.delete(
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
-// POST /:id/upload-version — رفع إصدار جديد
+// POST /:id/upload-version — رفع إصدار جديد (موحد)
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/upload-version',
-  upload.single('file'),
+  singleUpload('file', MAX_BYTES),
   wrap(async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'الملف مطلوب' });
@@ -1099,11 +935,17 @@ router.post(
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
-    const { hash, fullPath } = saveToDisk(
-      req.file.buffer,
-      req.file.mimetype,
-      req.file.originalname
-    );
+    const newDoc = await documentUploadService.createDocumentRecord(req.file, req.user, {
+      title: doc.title,
+      description: doc.description,
+      category: doc.category,
+      tags: doc.tags,
+      folder: doc.folder,
+      parentFolderId: doc.parentFolderId,
+      entityType: doc.entityType,
+      entityId: doc.entityId,
+      sourceModule: doc.sourceModule || 'core',
+    });
 
     // Save current version to previousVersions
     const prevEntry = {
@@ -1116,17 +958,18 @@ router.post(
     };
 
     const newVersion = (doc.version || 1) + 1;
-    const ext = extFor(req.file.mimetype, req.file.originalname);
 
     await Document.findByIdAndUpdate(req.params.id, {
       $set: {
-        fileName: `${hash}${ext}`,
-        originalFileName: req.file.originalname,
-        fileType: mimeToFileType(req.file.mimetype, req.file.originalname),
-        mimeType: req.file.mimetype,
-        fileSize: req.file.size,
-        filePath: fullPath,
-        contentFingerprint: hash,
+        fileName: newDoc.fileName,
+        originalFileName: newDoc.originalFileName,
+        fileType: newDoc.fileType,
+        mimeType: newDoc.mimeType,
+        fileSize: newDoc.fileSize,
+        filePath: newDoc.filePath,
+        storageProvider: newDoc.storageProvider,
+        checksum: newDoc.checksum,
+        contentFingerprint: newDoc.contentFingerprint,
         version: newVersion,
         isLatestVersion: true,
         lastModified: new Date(),
@@ -1134,6 +977,9 @@ router.post(
       },
       $push: { previousVersions: prevEntry },
     });
+
+    // Clean up the temporary new document record (we only needed its file)
+    await Document.findByIdAndDelete(newDoc._id);
 
     res.json({ success: true, message: 'تم رفع الإصدار الجديد', version: newVersion });
   })

@@ -538,10 +538,11 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── Episode Center — مركز الحلقة العلاجية الموحدة ────────────────────────
-  const episodeCenterRoutes = safeRequire('../routes/episode-center.routes');
-  dualMount(app, 'episode-center', episodeCenterRoutes);
+  // Retired: /api/v1/episode-center endpoints merged into DDD Episodes
+  // (/api/v1/episodes/dashboard, list, create, advance-phase, status, team).
+  // Frontend callers now use episodesAPI from services/ddd.
   logger.info(
-    '✅ Episode Center routes mounted: dashboard (phase/type/priority distribution), list (multi-filter), full episode (care-plan + sessions + assessments + phase-progress), advance-phase (12-step lifecycle), update-status, team-member management, beneficiary episodes — مركز الحلقة العلاجية (10+ endpoints)'
+    '✅ Episode Center routes retired from /api/v1/episode-center; now served by DDD Episodes /api/v1/episodes — مركز الحلقة العلاجية (DDD)'
   );
 
   // ─── Measures Library — مكتبة المقاييس الموحدة ────────────────────────────
@@ -552,10 +553,11 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── Session Center — مركز الجلسات العلاجية الموحد ───────────────────────
-  const sessionCenterRoutes = safeRequire('../routes/session-center.routes');
-  dualMount(app, 'session-center', sessionCenterRoutes);
+  // Retired: /api/v1/session-center endpoints merged into DDD Sessions
+  // (/api/v1/sessions/session-center/*). Frontend callers now use sessionCenterAPI
+  // or sessionCenterService which delegates to sessionsAPI from services/ddd.
   logger.info(
-    '✅ Session Center routes mounted: dashboard (KPIs/trends/distributions), calendar, therapist-load, attendance report, episode sessions, beneficiary timeline, goals progress, SOAP summary — مركز الجلسات العلاجية (8 endpoints)'
+    '✅ /api/v1/session-center routes retired; now served by DDD Sessions /api/v1/sessions/session-center — مركز الجلسات العلاجية (توحيد الأسطح)'
   );
 
   // ─── Report Center — مركز التقارير السريرية الموحد ────────────────────────

@@ -10,6 +10,7 @@
 
 import apiClient from './api.client';
 import logger from 'utils/logger';
+import { sessionsAPI } from './ddd';
 
 // ─── Minimal Mock Fallbacks ──────────────────────────────────────────────
 
@@ -91,9 +92,7 @@ export const therapistService = {
   // ─── Schedule ──────────────────────────────────────────────────────────
   async getTherapistSchedule(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapist/schedule', {
-        params: { therapistId, ...query },
-      });
+      const res = await sessionsAPI.therapist.getSchedule({ therapistId, ...query });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSchedule fallback:', err?.message);
@@ -103,10 +102,7 @@ export const therapistService = {
 
   async addScheduleSession(therapistId, sessionData) {
     try {
-      const res = await apiClient.post('/api/v1/therapist/schedule', {
-        therapistId,
-        ...sessionData,
-      });
+      const res = await sessionsAPI.therapist.createSchedule({ therapistId, ...sessionData });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.addScheduleSession error:', err?.message);
@@ -143,9 +139,7 @@ export const therapistService = {
   // ─── Sessions ──────────────────────────────────────────────────────────
   async getTherapistSessions(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapist/sessions', {
-        params: { therapistId, ...query },
-      });
+      const res = await sessionsAPI.therapist.list({ therapistId, ...query });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSessions fallback:', err?.message);
@@ -155,11 +149,8 @@ export const therapistService = {
 
   async addSessionNotes(sessionId, notes) {
     try {
-      const res = await apiClient.post(
-        `/api/v1/therapy-sessions/${sessionId}/documentation`,
-        notes
-      );
-      return res?.data?.data || res?.data;
+      const res = await sessionsAPI.saveDocumentation(sessionId, notes);
+      return res?.data?.data ?? res?.data;
     } catch (err) {
       logger.warn('therapistService.addSessionNotes error:', err?.message);
       throw err;
@@ -290,15 +281,13 @@ export const therapistService = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  //  Analytics — التحليلات المتقدمة
+  //  Analytics — التحليلات المتقدمة (now backed by DDD Sessions /api/v1/sessions/analytics)
   // ═══════════════════════════════════════════════════════════════════════════
 
   async getAnalyticsOverview(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/overview', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.overview(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getAnalyticsOverview fallback:', err?.message);
       return null;
@@ -307,10 +296,8 @@ export const therapistService = {
 
   async getSessionTrends(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/trends', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.trends(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getSessionTrends fallback:', err?.message);
       return null;
@@ -319,11 +306,8 @@ export const therapistService = {
 
   async getTherapistPerformanceComparison(query = {}) {
     try {
-      const res = await apiClient.get(
-        '/therapy-sessions-analytics/analytics/therapist-performance',
-        { params: query }
-      );
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.therapistPerformance(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getPerformanceComparison fallback:', err?.message);
       return null;
@@ -332,13 +316,8 @@ export const therapistService = {
 
   async getRoomUtilization(query = {}) {
     try {
-      const res = await apiClient.get(
-        '/api/v1/therapy-sessions-analytics/analytics/room-utilization',
-        {
-          params: query,
-        }
-      );
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.roomUtilization(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getRoomUtilization fallback:', err?.message);
       return null;
@@ -347,10 +326,8 @@ export const therapistService = {
 
   async getAttendanceReport(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/attendance', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.attendance(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getAttendanceReport fallback:', err?.message);
       return null;
@@ -359,10 +336,8 @@ export const therapistService = {
 
   async getBillingSummary(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/billing', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.billing(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getBillingSummary fallback:', err?.message);
       return null;
@@ -371,13 +346,8 @@ export const therapistService = {
 
   async getGoalProgress(query = {}) {
     try {
-      const res = await apiClient.get(
-        '/api/v1/therapy-sessions-analytics/analytics/goal-progress',
-        {
-          params: query,
-        }
-      );
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.goalProgress(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getGoalProgress fallback:', err?.message);
       return null;
@@ -386,13 +356,8 @@ export const therapistService = {
 
   async getCancellationAnalysis(query = {}) {
     try {
-      const res = await apiClient.get(
-        '/api/v1/therapy-sessions-analytics/analytics/cancellations',
-        {
-          params: query,
-        }
-      );
-      return res?.data?.data || res?.data || null;
+      const res = await sessionsAPI.analytics.cancellations(query);
+      return res?.data?.data ?? res?.data ?? null;
     } catch (err) {
       logger.warn('therapistService.getCancellationAnalysis fallback:', err?.message);
       return null;
@@ -401,10 +366,17 @@ export const therapistService = {
 
   async getCalendarSessions(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/calendar', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || { events: [], total: 0 };
+      const params = { ...query };
+      if (query.startDate) {
+        params.from = query.startDate;
+        delete params.startDate;
+      }
+      if (query.endDate) {
+        params.to = query.endDate;
+        delete params.endDate;
+      }
+      const res = await sessionsAPI.analytics.calendar(params);
+      return res?.data?.data ?? res?.data ?? { events: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getCalendarSessions fallback:', err?.message);
       return { events: [], total: 0 };
@@ -413,8 +385,8 @@ export const therapistService = {
 
   async exportReport(query = {}) {
     try {
-      const res = await apiClient.post('/api/v1/therapy-sessions-analytics/export/report', query);
-      return res?.data?.data || res?.data || res;
+      const res = await sessionsAPI.analytics.exportReport(query);
+      return res?.data?.data ?? res?.data ?? res;
     } catch (err) {
       logger.warn('therapistService.exportReport error:', err?.message);
       throw err;
@@ -423,10 +395,8 @@ export const therapistService = {
 
   async getWaitlist(query = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/waitlist', {
-        params: query,
-      });
-      return res?.data?.data || res?.data || { availableSlots: [], totalAvailable: 0 };
+      const res = await sessionsAPI.analytics.waitlist(query);
+      return res?.data?.data ?? res?.data ?? { availableSlots: [], totalAvailable: 0 };
     } catch (err) {
       logger.warn('therapistService.getWaitlist fallback:', err?.message);
       return { availableSlots: [], totalAvailable: 0 };
@@ -435,11 +405,13 @@ export const therapistService = {
 
   async updateSessionBilling(sessionId, billingData) {
     try {
-      const res = await apiClient.patch(
-        `/therapy-sessions-analytics/${sessionId}/billing`,
-        billingData
-      );
-      return res?.data?.data || res?.data;
+      // Legacy PATCH surface removed; use session update for billing changes.
+      const res = await sessionsAPI.update(sessionId, {
+        billingStatus: billingData?.billingStatus,
+        billingAmount: billingData?.billingAmount,
+        billingNotes: billingData?.billingNotes,
+      });
+      return res?.data?.data ?? res?.data;
     } catch (err) {
       logger.warn('therapistService.updateBilling error:', err?.message);
       throw err;
@@ -448,12 +420,12 @@ export const therapistService = {
 
   async bulkUpdateBilling(sessionIds, isBilled = true, invoiceId = null) {
     try {
-      const res = await apiClient.post('/api/v1/therapy-sessions-analytics/billing/bulk', {
+      const res = await sessionsAPI.analytics.bulkBilling({
         sessionIds,
-        isBilled,
+        billingStatus: isBilled ? 'billed' : 'unbilled',
         invoiceId,
       });
-      return res?.data?.data || res?.data;
+      return res?.data?.data ?? res?.data;
     } catch (err) {
       logger.warn('therapistService.bulkUpdateBilling error:', err?.message);
       throw err;

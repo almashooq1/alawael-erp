@@ -158,6 +158,9 @@ function validateEnv() {
  * Consumed by scripts/check-env.js and the W1395 / W1398 / W1400 guards.
  * @type {string[]}
  */
-const STRICT_REQUIRED_KEYS = Object.keys(strictOverrides.describe().keys);
+const STRICT_REQUIRED_KEYS =
+  typeof strictOverrides.describe === 'function'
+    ? Object.keys(strictOverrides.describe().keys)
+    : [];
 
 module.exports = { validateEnv, STRICT_REQUIRED_KEYS };

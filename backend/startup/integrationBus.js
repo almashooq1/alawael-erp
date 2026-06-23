@@ -194,6 +194,16 @@ function setupIntegrationBus(app) {
       );
     }
 
+    // Document Hub cross-module subscribers
+    try {
+      require('../integration/subscribers/documentHR.subscriber').register(integrationBus);
+      require('../integration/subscribers/documentMedical.subscriber').register(integrationBus);
+      require('../integration/subscribers/documentFinance.subscriber').register(integrationBus);
+      logger.info('[Integration] ✓ Document Hub subscribers wired');
+    } catch (docSubErr) {
+      logger.warn('[Integration] Document Hub subscribers skipped:', docSubErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

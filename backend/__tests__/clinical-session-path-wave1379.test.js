@@ -147,7 +147,7 @@ describe('W1380 SOAP documentation stores four fields (not the object in a Strin
     const fs = require('fs');
     const path = require('path');
     const src = fs.readFileSync(
-      path.join(__dirname, '..', 'routes', 'therapy-sessions.routes.js'),
+      path.join(__dirname, '..', 'domains', 'sessions', 'routes', 'sessions.routes.js'),
       'utf8'
     );
     expect(src).not.toMatch(/soapNotes:\s*req\.body/);

@@ -1,24 +1,14 @@
 /**
- * therapy-sessions-analytics.routes.js
- * ══════════════════════════════════════════════════════════════════
- * تحليلات الجلسات العلاجية — Therapy Sessions Analytics API
+ * Sessions Analytics Compatibility Router
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Phase 6 surface unification: absorbs the legacy
+ * `/api/v1/therapy-sessions-analytics/*` surface into DDD Sessions.
  *
- * Endpoints:
- *   GET  /analytics/overview          — KPIs summary
- *   GET  /analytics/trends            — time-series trends
- *   GET  /analytics/therapist-performance — per-therapist stats
- *   GET  /analytics/room-utilization  — room usage (placeholder)
- *   GET  /analytics/attendance        — attendance breakdown
- *   GET  /analytics/billing           — billing summary
- *   GET  /analytics/goal-progress     — goal achievement stats
- *   GET  /analytics/cancellations     — cancellation analysis
- *   GET  /calendar                    — sessions calendar view
- *   POST /export/report               — trigger PDF/Excel export
- *   GET  /waitlist                    — waitlist queue
- *   GET  /:sessionId/billing          — session billing record
- *   POST /billing/bulk                — bulk billing update
+ * Mounted under `/api/v1/sessions/analytics/*` by the sessions domain so the
+ * branch-isolated secure router remains the only HTTP surface for sessions.
  *
- * Mounted at: /api/v1/therapy-sessions-analytics
+ * W269/W1152 — every query is scoped through effectiveBranchScope(req); the
+ * :sessionId param uses branchScopedResourceParam to prevent cross-branch IDOR.
  */
 
 'use strict';
@@ -26,23 +16,27 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticateToken } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
-// W657 — this analytics router had NO router-level auth; mounts in this repo
-// are per-route, so isolation can't be assumed. Authenticate + populate
-// req.branchScope so baseQuery(req) can branch-scope every ClinicalSession
-// aggregate (ClinicalSession already carries branchId). branchFilter = {} for
-// cross-branch/HQ analysts → org-wide analytics preserved.
-router.use(authenticateToken, requireBranchAccess);
+const {
+  branchScopedResourceParam,
+  effectiveBranchScope,
+} = require('../../../middleware/assertBranchMatch');
 
-// ── Lazy model ────────────────────────────────────────────────────────────────
+router.param(
+  'sessionId',
+  branchScopedResourceParam({
+    modelName: 'ClinicalSession',
+    label: 'session',
+    loadModel: () => require('../models/ClinicalSession'),
+  })
+);
+
 function Session() {
   try {
     return mongoose.model('ClinicalSession');
   } catch (_e) {
     try {
-      require('../domains/sessions/models/ClinicalSession');
+      require('../models/ClinicalSession');
       return mongoose.model('ClinicalSession');
     } catch (_e2) {
       return null;
@@ -50,7 +44,6 @@ function Session() {
   }
 }
 
-// Inline waitlist model
 function Waitlist() {
   try {
     return mongoose.model('TherapyWaitlist');
@@ -61,6 +54,7 @@ function Waitlist() {
         {
           beneficiaryId: mongoose.Schema.Types.ObjectId,
           therapistId: mongoose.Schema.Types.ObjectId,
+          branchId: mongoose.Schema.Types.ObjectId,
           requestedDate: Date,
           priority: { type: String, default: 'normal' },
           status: { type: String, default: 'waiting', enum: ['waiting', 'assigned', 'cancelled'] },
@@ -74,7 +68,6 @@ function Waitlist() {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-// ── Date range helper ─────────────────────────────────────────────────────────
 function buildDateFilter(from, to) {
   if (!from && !to) return {};
   const f = {};
@@ -84,20 +77,29 @@ function buildDateFilter(from, to) {
 }
 
 function baseQuery(req, extra = {}) {
-  // W657 — branch-scope every analytics query at the single shared helper.
-  return { isDeleted: { $ne: true }, ...branchFilter(req), ...extra };
+  const q = { isDeleted: { $ne: true }, ...extra };
+  const branchId = effectiveBranchScope(req);
+  if (branchId) q.branchId = branchId;
+  return q;
 }
 
-/* ══════════════════════ ANALYTICS OVERVIEW ════════════════════════════════ */
+function toObjectId(id) {
+  if (!id) return null;
+  if (typeof id === 'object' && id._id) return id._id;
+  return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null;
+}
 
+/* ─── GET /sessions/analytics/overview ─────────────────────────────────── */
 router.get(
-  '/analytics/overview',
+  '/overview',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: {} });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to, therapistId } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
-    if (therapistId) q.therapistId = new mongoose.Types.ObjectId(therapistId);
+    const tid = toObjectId(therapistId);
+    if (tid) q.therapistId = tid;
 
     const [total, byStatus, byModality, byType] = await Promise.all([
       S.countDocuments(q),
@@ -107,9 +109,9 @@ router.get(
     ]);
 
     const statusMap = Object.fromEntries(byStatus.map(r => [r._id, r.count]));
-    const attended = statusMap['completed'] || 0;
-    const cancelled = statusMap['cancelled'] || 0;
-    const noShow = statusMap['no_show'] || 0;
+    const attended = statusMap.completed || 0;
+    const cancelled = statusMap.cancelled || 0;
+    const noShow = statusMap.no_show || 0;
     const attendanceRate = total ? +((attended / total) * 100).toFixed(1) : 0;
     const cancellationRate = total ? +((cancelled / total) * 100).toFixed(1) : 0;
 
@@ -128,13 +130,13 @@ router.get(
   })
 );
 
-/* ══════════════════════ TRENDS ════════════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/trends ───────────────────────────────────── */
 router.get(
-  '/analytics/trends',
+  '/trends',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: [] });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to, granularity = 'day' } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
@@ -168,13 +170,13 @@ router.get(
   })
 );
 
-/* ══════════════════════ THERAPIST PERFORMANCE ══════════════════════════════ */
-
+/* ─── GET /sessions/analytics/therapist-performance ────────────────────── */
 router.get(
-  '/analytics/therapist-performance',
+  '/therapist-performance',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: [] });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
@@ -197,15 +199,18 @@ router.get(
   })
 );
 
-/* ══════════════════════ ROOM UTILIZATION ═══════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/room-utilization ─────────────────────────── */
 router.get(
-  '/analytics/room-utilization',
+  '/room-utilization',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: [] });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
-    const q = baseQuery(req, { ...buildDateFilter(from, to), room: { $exists: true, $ne: null } });
+    const q = baseQuery(req, {
+      ...buildDateFilter(from, to),
+      room: { $exists: true, $ne: null },
+    });
 
     const utilization = await S.aggregate([
       { $match: q },
@@ -223,13 +228,13 @@ router.get(
   })
 );
 
-/* ══════════════════════ ATTENDANCE ═════════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/attendance ───────────────────────────────── */
 router.get(
-  '/analytics/attendance',
+  '/attendance',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: {} });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
@@ -245,24 +250,24 @@ router.get(
       success: true,
       data: {
         total,
-        attended: statusMap['attended'] || 0,
-        absent: statusMap['absent'] || 0,
-        noShow: statusMap['no_show'] || 0,
-        late: statusMap['late'] || 0,
+        attended: statusMap.attended || 0,
+        absent: statusMap.absent || 0,
+        noShow: statusMap.no_show || 0,
+        late: statusMap.late || 0,
         byStatus: statusMap,
-        attendanceRate: total ? +(((statusMap['attended'] || 0) / total) * 100).toFixed(1) : 0,
+        attendanceRate: total ? +(((statusMap.attended || 0) / total) * 100).toFixed(1) : 0,
       },
     });
   })
 );
 
-/* ══════════════════════ BILLING SUMMARY ════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/billing ──────────────────────────────────── */
 router.get(
-  '/analytics/billing',
+  '/billing',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: {} });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
 
@@ -288,13 +293,13 @@ router.get(
   })
 );
 
-/* ══════════════════════ GOAL PROGRESS ══════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/goal-progress ────────────────────────────── */
 router.get(
-  '/analytics/goal-progress',
+  '/goal-progress',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: {} });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
     const q = baseQuery(req, {
       ...buildDateFilter(from, to),
@@ -318,13 +323,13 @@ router.get(
   })
 );
 
-/* ══════════════════════ CANCELLATIONS ══════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/cancellations ────────────────────────────── */
 router.get(
-  '/analytics/cancellations',
+  '/cancellations',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: {} });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to } = req.query;
     const q = baseQuery(req, {
       ...buildDateFilter(from, to),
@@ -345,17 +350,19 @@ router.get(
   })
 );
 
-/* ══════════════════════ CALENDAR ═══════════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/calendar ─────────────────────────────────── */
 router.get(
   '/calendar',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: [] });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { from, to, therapistId, beneficiaryId, limit = 200 } = req.query;
     const q = baseQuery(req, { ...buildDateFilter(from, to) });
-    if (therapistId) q.therapistId = new mongoose.Types.ObjectId(therapistId);
-    if (beneficiaryId) q.beneficiaryId = new mongoose.Types.ObjectId(beneficiaryId);
+    const tid = toObjectId(therapistId);
+    const bid = toObjectId(beneficiaryId);
+    if (tid) q.therapistId = tid;
+    if (bid) q.beneficiaryId = bid;
 
     const sessions = await S.find(q)
       .sort({ scheduledDate: 1 })
@@ -367,12 +374,10 @@ router.get(
   })
 );
 
-/* ══════════════════════ EXPORT ═════════════════════════════════════════════ */
-
+/* ─── POST /sessions/analytics/export/report ───────────────────────────── */
 router.post(
   '/export/report',
   asyncHandler(async (req, res) => {
-    // Placeholder — returns a download token or triggers async export
     const jobId = new mongoose.Types.ObjectId().toHexString();
     res.json({
       success: true,
@@ -385,31 +390,35 @@ router.post(
   })
 );
 
-/* ══════════════════════ WAITLIST ════════════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/waitlist ─────────────────────────────────── */
 router.get(
   '/waitlist',
   asyncHandler(async (req, res) => {
     const M = Waitlist();
     const { status = 'waiting', limit = 50, skip = 0 } = req.query;
     const q = { status };
-    if (req.query.therapistId) q.therapistId = new mongoose.Types.ObjectId(req.query.therapistId);
+    const tid = toObjectId(req.query.therapistId);
+    if (tid) q.therapistId = tid;
+    const branchId = effectiveBranchScope(req);
+    if (branchId) q.branchId = branchId;
+
     const data = await M.find(q)
       .sort({ requestedDate: 1 })
       .skip(Number(skip))
       .limit(Number(limit))
       .lean();
+
     res.json({ success: true, data, total: data.length });
   })
 );
 
-/* ══════════════════════ SESSION BILLING ════════════════════════════════════ */
-
+/* ─── GET /sessions/analytics/:sessionId/billing ───────────────────────── */
 router.get(
   '/:sessionId/billing',
   asyncHandler(async (req, res) => {
     const S = Session();
-    if (!S) return res.json({ success: true, data: null });
+    if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const session = await S.findById(req.params.sessionId)
       .select('billingAmount billingStatus billingDate billingNotes')
       .lean();
@@ -418,21 +427,26 @@ router.get(
   })
 );
 
+/* ─── POST /sessions/analytics/billing/bulk ────────────────────────────── */
 router.post(
   '/billing/bulk',
   asyncHandler(async (req, res) => {
     const S = Session();
     if (!S) return res.status(503).json({ success: false, message: 'Session model unavailable' });
+
     const { sessionIds = [], billingStatus, billingAmount } = req.body || {};
     if (!sessionIds.length)
       return res.status(400).json({ success: false, message: 'sessionIds required' });
 
-    const update = {};
+    const update = { billingDate: new Date() };
     if (billingStatus) update.billingStatus = billingStatus;
     if (billingAmount !== undefined) update.billingAmount = billingAmount;
-    update.billingDate = new Date();
 
-    const result = await S.updateMany({ _id: { $in: sessionIds } }, { $set: update });
+    const q = { _id: { $in: sessionIds } };
+    const branchId = effectiveBranchScope(req);
+    if (branchId) q.branchId = branchId;
+
+    const result = await S.updateMany(q, { $set: update });
     res.json({ success: true, data: { modified: result.modifiedCount } });
   })
 );

@@ -82,7 +82,7 @@ const _COMPLETION_STATUSES = new Set(['COMPLETED']);
 const CANCELLED_STATUSES = new Set(['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER', 'NO_SHOW']);
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'RESCHEDULED']);
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function _dateRange(from, to) {
   const start = from ? new Date(from) : new Date(Date.now() - 30 * 86400000);
   const end = to ? new Date(to) : new Date();
@@ -91,12 +91,36 @@ function _dateRange(from, to) {
   return { start, end };
 }
 
+function _objectId(id) {
+  if (!id) return null;
+  if (typeof id === 'object' && id._id) return id._id;
+  if (mongoose.Types.ObjectId.isValid(id)) return new mongoose.Types.ObjectId(id);
+  return null;
+}
+
+function _applyBranch(match, branchId) {
+  const bid = _objectId(branchId);
+  if (bid) match.branchId = bid;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 class SessionCenterSvc {
   // ──────────────────────────────────────────────────────────────────────────
   /** Dashboard — KPIs + distributions + trends (last 30 days default) */
-  async getDashboard({ from, to } = {}) {
+  async getDashboard({ from, to, branchId } = {}) {
     const { start, end } = _dateRange(from, to);
+    const baseMatch = { date: { $gte: start, $lte: end } };
+    _applyBranch(baseMatch, branchId);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tmrw = new Date(today);
+    tmrw.setDate(tmrw.getDate() + 1);
+    const todayMatch = {
+      date: { $gte: today, $lt: tmrw },
+      status: { $in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+    };
+    _applyBranch(todayMatch, branchId);
 
     const [
       totalInRange,
@@ -111,49 +135,28 @@ class SessionCenterSvc {
       teleCount,
     ] = await Promise.all([
       // totals in range
-      safeQuery(M.TherapySession, S => S.countDocuments({ date: { $gte: start, $lte: end } }), 0),
-      safeQuery(
-        M.TherapySession,
-        S => S.countDocuments({ date: { $gte: start, $lte: end }, status: 'COMPLETED' }),
-        0
-      ),
+      safeQuery(M.TherapySession, S => S.countDocuments({ ...baseMatch }), 0),
+      safeQuery(M.TherapySession, S => S.countDocuments({ ...baseMatch, status: 'COMPLETED' }), 0),
       safeQuery(
         M.TherapySession,
         S =>
           S.countDocuments({
-            date: { $gte: start, $lte: end },
+            ...baseMatch,
             status: { $in: ['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER'] },
           }),
         0
       ),
-      safeQuery(
-        M.TherapySession,
-        S => S.countDocuments({ date: { $gte: start, $lte: end }, status: 'NO_SHOW' }),
-        0
-      ),
+      safeQuery(M.TherapySession, S => S.countDocuments({ ...baseMatch, status: 'NO_SHOW' }), 0),
 
       // active today
-      safeQuery(
-        M.TherapySession,
-        S => {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const tmrw = new Date(today);
-          tmrw.setDate(tmrw.getDate() + 1);
-          return S.countDocuments({
-            date: { $gte: today, $lt: tmrw },
-            status: { $in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
-          });
-        },
-        0
-      ),
+      safeQuery(M.TherapySession, S => S.countDocuments({ ...todayMatch }), 0),
 
       // by type
       safeQuery(
         M.TherapySession,
         S =>
           S.aggregate([
-            { $match: { date: { $gte: start, $lte: end } } },
+            { $match: { ...baseMatch } },
             { $group: { _id: '$sessionType', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
           ]),
@@ -165,7 +168,7 @@ class SessionCenterSvc {
         M.TherapySession,
         S =>
           S.aggregate([
-            { $match: { date: { $gte: start, $lte: end } } },
+            { $match: { ...baseMatch } },
             { $group: { _id: '$status', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
           ]),
@@ -177,7 +180,7 @@ class SessionCenterSvc {
         M.TherapySession,
         S =>
           S.aggregate([
-            { $match: { date: { $gte: start, $lte: end }, status: 'COMPLETED' } },
+            { $match: { ...baseMatch, status: 'COMPLETED' } },
             {
               $group: { _id: '$therapist', count: { $sum: 1 }, avgDuration: { $avg: '$duration' } },
             },
@@ -197,7 +200,7 @@ class SessionCenterSvc {
         M.TherapySession,
         S =>
           S.aggregate([
-            { $match: { date: { $gte: start, $lte: end } } },
+            { $match: { ...baseMatch } },
             {
               $group: {
                 _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
@@ -213,7 +216,7 @@ class SessionCenterSvc {
       // telehealth count
       safeQuery(
         M.TherapySession,
-        S => S.countDocuments({ date: { $gte: start, $lte: end }, 'telehealth.enabled': true }),
+        S => S.countDocuments({ ...baseMatch, 'telehealth.enabled': true }),
         0
       ),
     ]);
@@ -244,13 +247,16 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** All sessions for an Episode of Care with progress metrics */
-  async getEpisodeSessions(episodeId) {
+  async getEpisodeSessions(episodeId, { branchId } = {}) {
     if (!episodeId) return { sessions: [], meta: {} };
+
+    const query = { episodeOfCare: episodeId };
+    _applyBranch(query, branchId);
 
     const sessions = await safeQuery(
       M.TherapySession,
       S =>
-        S.find({ episodeOfCare: episodeId })
+        S.find(query)
           .sort({ date: 1 })
           .populate('therapist', 'name specialty')
           .populate('beneficiary', 'name arabicName')
@@ -288,7 +294,7 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Full session history for a beneficiary (timeline with SOAP) */
-  async getBeneficiarySessions(beneficiaryId, { from, to, limit = 50 } = {}) {
+  async getBeneficiarySessions(beneficiaryId, { from, to, limit = 50, branchId } = {}) {
     if (!beneficiaryId) return { sessions: [], meta: {} };
 
     const query = { beneficiary: beneficiaryId };
@@ -296,6 +302,7 @@ class SessionCenterSvc {
       const { start, end } = _dateRange(from, to);
       query.date = { $gte: start, $lte: end };
     }
+    _applyBranch(query, branchId);
 
     const sessions = await safeQuery(
       M.TherapySession,
@@ -340,7 +347,7 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Therapist workload — daily session counts (default this week) */
-  async getTherapistLoad({ from, to, therapistId } = {}) {
+  async getTherapistLoad({ from, to, therapistId, branchId } = {}) {
     const { start, end } = _dateRange(
       from || new Date(Date.now() - 7 * 86400000).toISOString(),
       to || new Date().toISOString()
@@ -348,6 +355,7 @@ class SessionCenterSvc {
 
     const match = { date: { $gte: start, $lte: end } };
     if (therapistId) match.therapist = new mongoose.Types.ObjectId(therapistId);
+    _applyBranch(match, branchId);
 
     const rows = await safeQuery(
       M.TherapySession,
@@ -399,7 +407,7 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Calendar slots for a given month — lightweight (id, date, type, status) */
-  async getCalendarSlots({ year, month, therapistId, beneficiaryId } = {}) {
+  async getCalendarSlots({ year, month, therapistId, beneficiaryId, branchId } = {}) {
     const y = parseInt(year, 10) || new Date().getFullYear();
     const m = (parseInt(month, 10) || new Date().getMonth() + 1) - 1;
     const start = new Date(y, m, 1);
@@ -408,6 +416,7 @@ class SessionCenterSvc {
     const match = { date: { $gte: start, $lte: end } };
     if (therapistId) match.therapist = new mongoose.Types.ObjectId(therapistId);
     if (beneficiaryId) match.beneficiary = new mongoose.Types.ObjectId(beneficiaryId);
+    _applyBranch(match, branchId);
 
     const sessions = await safeQuery(
       M.TherapySession,
@@ -436,11 +445,13 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Full SOAP summary for a single session */
-  async getSOAPSummary(sessionId) {
+  async getSOAPSummary(sessionId, { branchId } = {}) {
+    const query = { _id: sessionId };
+    _applyBranch(query, branchId);
     return safeQuery(
       M.TherapySession,
       S =>
-        S.findById(sessionId)
+        S.findOne(query)
           .populate('therapist', 'name specialty')
           .populate('beneficiary', 'name arabicName dateOfBirth disabilityType')
           .populate('episodeOfCare', 'status currentPhase')
@@ -452,12 +463,13 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Attendance report — presence/absence/noshow breakdown by period */
-  async getAttendanceReport({ from, to, beneficiaryId, therapistId } = {}) {
+  async getAttendanceReport({ from, to, beneficiaryId, therapistId, branchId } = {}) {
     const { start, end } = _dateRange(from, to);
 
     const match = { date: { $gte: start, $lte: end } };
     if (beneficiaryId) match.beneficiary = new mongoose.Types.ObjectId(beneficiaryId);
     if (therapistId) match.therapist = new mongoose.Types.ObjectId(therapistId);
+    _applyBranch(match, branchId);
 
     const rows = await safeQuery(
       M.TherapySession,
@@ -539,20 +551,19 @@ class SessionCenterSvc {
 
   // ──────────────────────────────────────────────────────────────────────────
   /** Goals progress extracted from session.goalsProgress[] */
-  async getGoalsProgress(episodeId) {
+  async getGoalsProgress(episodeId, { branchId } = {}) {
     if (!episodeId) return [];
+
+    const query = {
+      episodeOfCare: episodeId,
+      status: 'COMPLETED',
+      'goalsProgress.0': { $exists: true },
+    };
+    _applyBranch(query, branchId);
 
     const sessions = await safeQuery(
       M.TherapySession,
-      S =>
-        S.find({
-          episodeOfCare: episodeId,
-          status: 'COMPLETED',
-          'goalsProgress.0': { $exists: true },
-        })
-          .sort({ date: 1 })
-          .select('date goalsProgress')
-          .lean(),
+      S => S.find(query).sort({ date: 1 }).select('date goalsProgress').lean(),
       []
     );
 

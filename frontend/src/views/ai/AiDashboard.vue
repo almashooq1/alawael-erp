@@ -836,7 +836,7 @@ async function loadBranches() {
 
 async function loadBeneficiaries() {
   try {
-    const res = await axios.get('/api/beneficiaries', { params: { limit: 200, status: 'active' } })
+    const res = await axios.get('/api/v1/core/beneficiaries', { params: { limit: 200, status: 'active' } })
     beneficiariesList.value = res.data?.data || res.data || []
   } catch {}
 }

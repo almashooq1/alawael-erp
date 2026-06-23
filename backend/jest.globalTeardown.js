@@ -5,17 +5,30 @@
  */
 const path = require('path');
 const fs = require('fs');
+const rimraf = require('rimraf');
 
 const URI_FILE = path.join(__dirname, '.test-mongo-uri');
 const DBPATH_FILE = path.join(__dirname, '.test-mongo-dbpath');
 
-function _rimraf(dir) {
+async function _rimraf(dir) {
   if (!dir || !fs.existsSync(dir)) return;
-  try {
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3 });
-  } catch (err) {
-    // Best-effort cleanup; don't fail the test run because of temp files.
-    console.warn('[globalTeardown] could not remove temp dir:', dir, err.message);
+  // Best-effort cleanup with retries. On Windows mongod may still hold locks
+  // briefly after mongod.stop() resolves, causing EPERM. Wait and retry.
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      rimraf.sync(dir);
+      return;
+    } catch (err) {
+      if (attempt === 5) {
+        console.warn(
+          '[globalTeardown] could not remove temp dir after 5 attempts:',
+          dir,
+          err.message
+        );
+        return;
+      }
+      await new Promise(r => setTimeout(r, attempt * 300));
+    }
   }
 }
 
@@ -41,7 +54,7 @@ module.exports = async () => {
   // this on stop(), but leaked dirs have been observed after crashes/OOMs.
   try {
     const dbPath = fs.readFileSync(DBPATH_FILE, 'utf-8').trim();
-    _rimraf(dbPath);
+    await _rimraf(dbPath);
   } catch {
     // no dbPath file — nothing to clean
   }

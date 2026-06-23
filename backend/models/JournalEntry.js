@@ -159,8 +159,9 @@ const journalEntrySchema = new mongoose.Schema(
 // Auto-generate entryNumber before save
 journalEntrySchema.pre('save', async function () {
   if (!this.entryNumber) {
-    const count = await this.constructor.countDocuments();
-    this.entryNumber = `JE-${String(count + 1).padStart(3, '0')}`;
+    // W1463: atomic sequence (was countDocuments()+1 → race → duplicate JE-NNN / E11000)
+    const seq = await require('../database/utils/counter').nextSequence('journal_entry');
+    this.entryNumber = `JE-${String(seq).padStart(3, '0')}`;
   }
   if (!this.reference) {
     this.reference = this.entryNumber;

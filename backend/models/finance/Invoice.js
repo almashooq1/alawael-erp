@@ -92,12 +92,12 @@ const invoiceSchema = new mongoose.Schema(
 // under Mongoose 9 → "next is not a function" on every save).
 invoiceSchema.pre('save', async function () {
   if (!this.invoice_number) {
+    // W1463: atomic year-scoped sequence (was countDocuments()+1 → race → dup INV / E11000).
+    // Format + invoice_counter (ICV, year-scoped) preserved exactly.
     const year = new Date().getFullYear();
-    const count = await this.constructor.countDocuments({
-      invoice_number: new RegExp(`^INV-${year}-`),
-    });
-    this.invoice_number = `INV-${year}-${String(count + 1).padStart(7, '0')}`;
-    this.invoice_counter = count + 1;
+    const seq = await require('../../database/utils/counter').nextSequence('finance_invoice');
+    this.invoice_number = `INV-${year}-${String(seq).padStart(7, '0')}`;
+    this.invoice_counter = seq;
   }
   if (!this.uuid) {
     this.uuid = crypto.randomUUID();

@@ -217,8 +217,9 @@ class InventoryEnhancedService {
 
   async createPurchaseOrder(data, requestedBy) {
     const year = new Date().getFullYear();
-    const count = await PurchaseOrder.countDocuments({ poNumber: { $regex: `^PO-${year}` } });
-    const poNumber = `PO-${year}-${String(count + 1).padStart(4, '0')}`;
+    // W1463: atomic year-scoped sequence (was countDocuments()+1 → race → dup PO / E11000)
+    const seq = await require('../../database/utils/counter').nextSequence('inv_purchase_order');
+    const poNumber = `PO-${year}-${String(seq).padStart(4, '0')}`;
 
     // حساب الإجماليات
     let subtotal = 0;
@@ -338,8 +339,9 @@ class InventoryEnhancedService {
 
   async createStockCount(warehouseId, type, countDate, initiatedBy) {
     const year = new Date().getFullYear();
-    const count = await StockCount.countDocuments();
-    const countNumber = `SC-${year}-${String(count + 1).padStart(3, '0')}`;
+    // W1463: atomic year-scoped sequence (was countDocuments()+1 → race → dup SC / E11000)
+    const seq = await require('../../database/utils/counter').nextSequence('inv_stock_count');
+    const countNumber = `SC-${year}-${String(seq).padStart(3, '0')}`;
 
     // جلب جميع أصناف المستودع
     const stocks = await InventoryStock.find({ warehouseId });
@@ -446,8 +448,9 @@ class InventoryEnhancedService {
 
   async createItem(data) {
     const { InventoryItem: Item } = require('../../models/InventoryItem');
-    const count = await Item.countDocuments();
-    const sku = `ITM-${String(count + 1).padStart(4, '0')}`;
+    // W1463: atomic sequence (was countDocuments()+1 → race → dup SKU / E11000)
+    const seq = await require('../../database/utils/counter').nextSequence('inv_item');
+    const sku = `ITM-${String(seq).padStart(4, '0')}`;
     return Item.create({ ...data, sku });
   }
 
@@ -482,8 +485,9 @@ class InventoryEnhancedService {
   }
 
   async createSupplier(data) {
-    const count = await Supplier.countDocuments();
-    const code = `SUP-${String(count + 1).padStart(3, '0')}`;
+    // W1463: atomic sequence (was countDocuments()+1 → race → dup supplier code / E11000)
+    const seq = await require('../../database/utils/counter').nextSequence('inv_supplier');
+    const code = `SUP-${String(seq).padStart(3, '0')}`;
     return Supplier.create({ ...data, code });
   }
 }

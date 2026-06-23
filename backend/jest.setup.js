@@ -571,17 +571,18 @@ const RealMongoose = jest.requireActual('mongoose');
 const _realConnect = RealMongoose.connect.bind(RealMongoose);
 RealMongoose.connect = async function connect(uri, options) {
   const opts = {
-    serverSelectionTimeoutMS: 5000,
-    connectTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 10000,
     ...options,
   };
   let lastErr;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
       return await _realConnect(uri, opts);
     } catch (err) {
       lastErr = err;
-      if (attempt < 2) {
+      if (attempt < 4) {
         await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
       }
     }

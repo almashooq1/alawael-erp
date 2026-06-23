@@ -164,7 +164,6 @@ const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
 const branchesRoutes = safeRequire('../routes/branches.routes');
 const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
-const beneficiariesAdminRoutes = safeRequire('../routes/beneficiaries');
 const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.routes');
 
 // Wave 2: Fixed Route Files (16 additional CRUD routes)
@@ -457,7 +456,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'predictions', predictionsRoutes);
   dualMount(app, 'branches', branchesRoutes);
   dualMount(app, 'beneficiary-portal', beneficiaryPortalRoutes);
-  dualMount(app, 'beneficiaries', beneficiariesAdminRoutes);
+  // Beneficiary admin CRUD is now served by DDD Core /api/v1/core/beneficiaries
+  // (legacy /api/v1/beneficiaries base routes retired).
+  logger.info('✅ Beneficiary admin routes retired from /api/v1/beneficiaries; now served by DDD Core /api/v1/core/beneficiaries');
   dualMount(app, 'community-integration', communityIntegrationRoutes);
   logger.info(
     'Community Integration module mounted (activities, partnerships, participation, assessments, awareness — 30+ endpoints)'

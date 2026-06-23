@@ -180,12 +180,9 @@ export default function BeneficiaryConsentAdmin() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const bRes = await fetch(
-        `${API}/v1/beneficiaries?limit=200&fields=id,fileNumber,firstName_ar,lastName_ar,branch,consentTrackingEnabled`,
-        {
-          headers: authH(),
-        }
-      );
+      const bRes = await fetch(`${API}/v1/core/beneficiaries?limit=200`, {
+        headers: authH(),
+      });
       if (!bRes.ok) throw new Error('API error');
       const bJson = await bRes.json();
       const bList = (bJson.data || bJson.beneficiaries || []).slice(0, 200);

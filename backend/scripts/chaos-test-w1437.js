@@ -33,7 +33,7 @@ async function runMigration(uri, dryRun) {
   });
 }
 
-async function testFeatureFlags(uri) {
+async function testFeatureFlags(_uri) {
   console.log('[chaos-test-w1437] Testing feature flag behavior...');
 
   // Load the modules fresh for each env state

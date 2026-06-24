@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let BeneficiarySubsidyEntry;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseEntry(overrides = {}) {
   return {
@@ -78,7 +69,8 @@ describe('W1074 — received subsidy payments reach the unified-core timeline', 
     e.receivedDate = new Date();
     await e.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'subsidy_payment_received' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'subsidy_payment_received' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -98,7 +90,8 @@ describe('W1074 — received subsidy payments reach the unified-core timeline', 
       })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'subsidy_payment_received' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'subsidy_payment_received' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.metadata.subsidyType).toBe('social_security');
   });
@@ -107,13 +100,13 @@ describe('W1074 — received subsidy payments reach the unified-core timeline', 
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BeneficiarySubsidyEntry.create(baseEntry({ beneficiaryId, status: 'expected' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'subsidy_payment_received',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a received entry does not re-fire the event', async () => {
@@ -123,18 +116,19 @@ describe('W1074 — received subsidy payments reach the unified-core timeline', 
     e.receivedDate = new Date();
     await e.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'subsidy_payment_received' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'subsidy_payment_received' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await BeneficiarySubsidyEntry.findById(e._id);
     again.receiptNumber = 'RC-7781';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'subsidy_payment_received',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

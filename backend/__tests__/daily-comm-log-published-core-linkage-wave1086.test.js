@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let DailyCommunicationLog;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function dailyLog(beneficiaryId, overrides = {}) {
   return {
@@ -73,7 +64,8 @@ describe('W1086 — published daily communication logs reach the unified-core ti
     const beneficiaryId = new mongoose.Types.ObjectId();
     const d = await DailyCommunicationLog.create(dailyLog(beneficiaryId));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'daily_comm_log_published' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'daily_comm_log_published' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('info');
@@ -87,27 +79,22 @@ describe('W1086 — published daily communication logs reach the unified-core ti
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DailyCommunicationLog.create(dailyLog(beneficiaryId, { status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'daily_comm_log_published' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'daily_comm_log_published' }, 0);
   });
 
   it('marking the log parent-seen later does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const d = await DailyCommunicationLog.create(dailyLog(beneficiaryId));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'daily_comm_log_published' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'daily_comm_log_published' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await DailyCommunicationLog.findById(d._id);
     again.parentSeen = true;
     again.parentSeenAt = new Date();
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'daily_comm_log_published' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'daily_comm_log_published' }, 1);
   });
 
   it('records logs for distinct beneficiaries independently', async () => {
@@ -116,8 +103,16 @@ describe('W1086 — published daily communication logs reach the unified-core ti
     await DailyCommunicationLog.create(dailyLog(a));
     await DailyCommunicationLog.create(dailyLog(b, { mood: 'tired', engagement: 'low' }));
 
-    const tlA = await waitForTimeline({ beneficiaryId: a, eventType: 'daily_comm_log_published' });
-    const tlB = await waitForTimeline({ beneficiaryId: b, eventType: 'daily_comm_log_published' });
+    const tlARows = await waitForRows(
+      { beneficiaryId: a, eventType: 'daily_comm_log_published' },
+      1
+    );
+    const tlA = tlARows[0];
+    const tlBRows = await waitForRows(
+      { beneficiaryId: b, eventType: 'daily_comm_log_published' },
+      1
+    );
+    const tlB = tlBRows[0];
     expect(tlA).toBeTruthy();
     expect(tlB).toBeTruthy();
     expect(tlB.metadata.mood).toBe('tired');

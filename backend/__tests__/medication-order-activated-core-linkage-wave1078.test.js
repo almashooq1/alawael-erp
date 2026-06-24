@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let MedicationOrder;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseOrder(overrides = {}) {
   return {
@@ -71,7 +62,8 @@ describe('W1078 — new active medication orders reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     const o = await MedicationOrder.create(baseOrder({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_order_started' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_order_started' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info');
@@ -83,44 +75,45 @@ describe('W1078 — new active medication orders reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MedicationOrder.create(baseOrder({ beneficiaryId, status: 'held' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'medication_order_started',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('a stopped order does NOT create a timeline row', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MedicationOrder.create(baseOrder({ beneficiaryId, status: 'stopped' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'medication_order_started',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('editing an active order does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const o = await MedicationOrder.create(baseOrder({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_order_started' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_order_started' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await MedicationOrder.findById(o._id);
     again.rxNormClass = 'antipsychotic';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'medication_order_started',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

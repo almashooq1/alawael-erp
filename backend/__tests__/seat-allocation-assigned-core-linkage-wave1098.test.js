@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function allocation(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -71,7 +64,8 @@ describe('W1098 — SeatAllocation → CareTimeline linkage', () => {
       allocation({ beneficiaryId, branchId, seatLabel: 'طاولة 2', period: 'morning' })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('seat_allocation_assigned');
     expect(row.category).toBe('administrative');
@@ -89,9 +83,7 @@ describe('W1098 — SeatAllocation → CareTimeline linkage', () => {
       allocation({ beneficiaryId, status: 'on_hold', holdReason: 'بانتظار التقييم' })
     );
 
-    await new Promise(r => setTimeout(r, 300));
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('captures effectiveFrom in metadata', async () => {
@@ -100,7 +92,8 @@ describe('W1098 — SeatAllocation → CareTimeline linkage', () => {
       allocation({ beneficiaryId, effectiveFrom: new Date('2026-06-01T00:00:00.000Z') })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(new Date(row.metadata.effectiveFrom).toISOString()).toContain('2026-06-01');
   });
@@ -109,15 +102,12 @@ describe('W1098 — SeatAllocation → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await SeatAllocation.create(allocation({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.status = 'released';
     doc.releasedAt = new Date();
     doc.releaseReason = 'انتقل المستفيد لفرع آخر';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

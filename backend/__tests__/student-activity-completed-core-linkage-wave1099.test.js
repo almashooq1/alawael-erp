@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function activity(beneficiaryId, overrides = {}) {
   return {
     beneficiaryId,
@@ -69,14 +62,14 @@ describe('W1099 — StudentActivity → CareTimeline linkage', () => {
     const doc = await StudentActivity.create(activity(beneficiaryId));
 
     // No row yet — still pending.
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'completed';
     doc.completedAt = new Date('2026-05-03T09:30:00.000Z');
     await doc.save();
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('student_activity_completed');
     expect(row.category).toBe('clinical');
@@ -93,16 +86,14 @@ describe('W1099 — StudentActivity → CareTimeline linkage', () => {
     doc.status = 'skipped';
     await doc.save();
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does NOT fire merely on activity creation while pending', async () => {
     const beneficiaryId = String(new mongoose.Types.ObjectId());
     await StudentActivity.create(activity(beneficiaryId));
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row on a subsequent unrelated save', async () => {
@@ -112,12 +103,10 @@ describe('W1099 — StudentActivity → CareTimeline linkage', () => {
     doc.completedAt = new Date();
     await doc.save();
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.descriptionAr = 'تم التحديث';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

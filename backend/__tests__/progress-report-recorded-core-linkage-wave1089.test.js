@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -52,15 +54,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function progress(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -78,7 +71,8 @@ describe('W1089 — BeneficiaryProgress → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BeneficiaryProgress.create(progress({ beneficiaryId }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('progress_report_recorded');
     expect(row.category).toBe('clinical');
@@ -92,7 +86,8 @@ describe('W1089 — BeneficiaryProgress → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BeneficiaryProgress.create(progress({ beneficiaryId, overallPerformance: 'excellent' }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('success');
   });
@@ -103,7 +98,8 @@ describe('W1089 — BeneficiaryProgress → CareTimeline linkage', () => {
       progress({ beneficiaryId, overallPerformance: 'needs_improvement' })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('warning');
   });
@@ -112,13 +108,10 @@ describe('W1089 — BeneficiaryProgress → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BeneficiaryProgress.create(progress({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.teacherNotes = 'updated note';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

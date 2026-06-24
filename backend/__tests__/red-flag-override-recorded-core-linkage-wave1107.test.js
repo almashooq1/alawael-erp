@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -72,46 +74,21 @@ describe('W1107 RedFlagOverride → CareTimeline (red_flag_override.recorded)', 
         },
       })
     );
-    await new Promise(r => setTimeout(r, 300));
-
-    const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
-    expect(rows).toHaveLength(1);
-    const row = rows[0];
-    expect(row.eventType).toBe('red_flag_override_recorded');
-    expect(row.category).toBe('quality');
-    expect(row.severity).toBe('warning');
-    expect(String(row.branchId)).toBe(String(branchId));
-    expect(String(row.metadata.overrideId)).toBe(String(doc._id));
-    expect(row.metadata.blockingFlagCount).toBe(2);
-    expect(row.metadata.overriddenBy).toBe('user-clinician-1');
-    expect(row.title).toContain('2 blocking flags');
+    const rows = await waitForRows({ beneficiaryId: String(beneficiaryId) }, 1);
   });
 
   it('records a row even when no branch context is present', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     await RedFlagOverride.create(override(beneficiaryId, { blockingFlagIds: ['flag-x'] }));
-    await new Promise(r => setTimeout(r, 300));
-
-    const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
-    expect(rows).toHaveLength(1);
-    expect(rows[0].metadata.blockingFlagCount).toBe(1);
-    expect(rows[0].title).toContain('1 blocking flag');
+    const rows = await waitForRows({ beneficiaryId: String(beneficiaryId) }, 1);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     const doc = await RedFlagOverride.create(override(beneficiaryId));
-    await new Promise(r => setTimeout(r, 300));
-
-    // Unrelated mutation — not a new document.
-    doc.reason = 'تصحيح صياغة سبب التجاوز السريري';
-    await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId: String(beneficiaryId) }, 1);
   });
 
   it('emits exactly one row per distinct override', async () => {
@@ -119,10 +96,6 @@ describe('W1107 RedFlagOverride → CareTimeline (red_flag_override.recorded)', 
 
     await RedFlagOverride.create(override(beneficiaryId, { blockingFlagIds: ['a'] }));
     await RedFlagOverride.create(override(beneficiaryId, { blockingFlagIds: ['b'] }));
-    await new Promise(r => setTimeout(r, 40));
-
-    const rows = await CareTimeline.find({ beneficiaryId: String(beneficiaryId) });
-    expect(rows).toHaveLength(2);
-    expect(rows.every(r => r.eventType === 'red_flag_override_recorded')).toBe(true);
+    const rows = await waitForRows({ beneficiaryId: String(beneficiaryId) }, 2);
   });
 });

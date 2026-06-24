@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let GoalProgressEntry;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseEntry(overrides = {}) {
   return {
@@ -71,7 +62,8 @@ describe('W1081 — goal progress entries reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await GoalProgressEntry.create(baseEntry({ beneficiaryId, progressPercent: 55 }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info');
@@ -84,7 +76,8 @@ describe('W1081 — goal progress entries reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     await GoalProgressEntry.create(baseEntry({ beneficiaryId, progressPercent: 80 }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.title).toContain('80%');
   });
@@ -94,7 +87,8 @@ describe('W1081 — goal progress entries reach the unified-core timeline', () =
     const carePlanId = new mongoose.Types.ObjectId();
     await GoalProgressEntry.create(baseEntry({ beneficiaryId, carePlanId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(String(tl.metadata.carePlanId)).toBe(String(carePlanId));
   });
@@ -103,15 +97,13 @@ describe('W1081 — goal progress entries reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await GoalProgressEntry.create(baseEntry({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await GoalProgressEntry.findById(e._id);
     again.note = 'updated after the fact';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'goal_progress_recorded' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'goal_progress_recorded' }, 1);
   });
 });

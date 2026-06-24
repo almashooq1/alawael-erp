@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let BehaviorPlan;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function basePlan(overrides = {}) {
   return {
@@ -83,7 +74,8 @@ describe('W1032 — Behavior plan completion reaches the unified-core timeline',
     const beneficiaryId = new mongoose.Types.ObjectId();
     const plan = await complete(await BehaviorPlan.create(basePlan({ beneficiaryId })));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'behavior_plan_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'behavior_plan_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -95,23 +87,20 @@ describe('W1032 — Behavior plan completion reaches the unified-core timeline',
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BehaviorPlan.create(basePlan({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'behavior_plan_completed' })).toBe(0);
+    await waitForCount({ eventType: 'behavior_plan_completed' }, 0);
   });
 
   it('re-saving an already-completed plan does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const plan = await complete(await BehaviorPlan.create(basePlan({ beneficiaryId })));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'behavior_plan_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'behavior_plan_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await BehaviorPlan.findById(plan._id);
     again.notes = 'Closed after MDT review.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'behavior_plan_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'behavior_plan_completed' }, 1);
   });
 });

@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -47,16 +49,6 @@ function transition(beneficiaryId, overrides = {}) {
 // W1227 deflake pattern — poll until the async bus → subscriber → create
 // chain materialises `expected` rows, instead of a fixed sleep that loses
 // the race under CI load.
-async function waitForRows(filter, expected, timeoutMs = 5000) {
-  const deadline = Date.now() + timeoutMs;
-  let rows = [];
-  for (;;) {
-    rows = await CareTimeline.find(filter).lean();
-    if (rows.length >= expected || Date.now() > deadline) return rows;
-    await new Promise(r => setTimeout(r, 25));
-  }
-}
-
 
 describe('W1118 — WorkflowTransitionLog recorded → unified-core CareTimeline linkage', () => {
   test('records an administrative row when a workflow transition is logged', async () => {

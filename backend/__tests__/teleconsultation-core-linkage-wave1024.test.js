@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -25,17 +27,6 @@ let mongod;
 let Teleconsultation;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 let tcSeq = 0;
 function baseTeleconsultation(overrides = {}) {
@@ -88,10 +79,14 @@ describe('W1024 — Tele-rehab consultation completion reaches the unified-core 
     tc.durationMinutes = 32;
     await tc.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'teleconsultation_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'teleconsultation_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -106,8 +101,7 @@ describe('W1024 — Tele-rehab consultation completion reaches the unified-core 
     const beneficiary = new mongoose.Types.ObjectId();
     await Teleconsultation.create(baseTeleconsultation({ beneficiary, status: 'scheduled' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'teleconsultation_completed' })).toBe(0);
+    await waitForCount({ eventType: 'teleconsultation_completed' }, 0);
   });
 
   it('re-saving an already-completed consultation does not re-fire', async () => {
@@ -118,21 +112,25 @@ describe('W1024 — Tele-rehab consultation completion reaches the unified-core 
     tc.status = 'completed';
     await tc.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'teleconsultation_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'teleconsultation_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await Teleconsultation.findById(tc._id);
     again.clinicalNotes = 'Remote session summary filed.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary,
         eventType: 'teleconsultation_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

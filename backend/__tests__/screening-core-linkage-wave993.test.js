@@ -33,6 +33,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -41,17 +43,6 @@ let VisionScreening;
 let HearingScreening;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w993-screening-core' } });
@@ -93,7 +84,8 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
       screenedAt: new Date(),
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info'); // pass → info
@@ -115,7 +107,8 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
       screenedAt: new Date(),
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning'); // refer → warning
     expect(tl.metadata.screeningType).toBe('vision');
@@ -131,12 +124,13 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
       status: 'draft',
     });
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({
-      beneficiaryId,
-      eventType: 'screening_completed',
-    });
-    expect(count).toBe(0);
+    await waitForCount(
+      {
+        beneficiaryId,
+        eventType: 'screening_completed',
+      },
+      0
+    );
   });
 
   it('finalizing a previously-draft screening fires exactly once', async () => {
@@ -148,10 +142,7 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
       outcome: 'monitor',
       status: 'draft',
     });
-    await new Promise(r => setTimeout(r, 100));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'screening_completed' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'screening_completed' }, 0);
 
     const reloaded = await VisionScreening.findById(ev._id);
     reloaded.status = 'finalized';
@@ -159,7 +150,8 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
     reloaded.screenedAt = new Date();
     await reloaded.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     // Re-saving a finalized screening must NOT re-fire (status unchanged).
@@ -167,10 +159,7 @@ describe('W993 — Vision screenings reach the unified-core timeline', () => {
     again.outcome = 'refer';
     again.referralReason = 'Follow-up referral on re-review.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'screening_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'screening_completed' }, 1);
   });
 });
 
@@ -187,7 +176,8 @@ describe('W993 — Hearing screenings reach the unified-core timeline', () => {
       screenedAt: new Date(),
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info'); // monitor → info
@@ -209,7 +199,8 @@ describe('W993 — Hearing screenings reach the unified-core timeline', () => {
       screenedAt: new Date(),
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
     expect(tl.metadata.screeningType).toBe('hearing');

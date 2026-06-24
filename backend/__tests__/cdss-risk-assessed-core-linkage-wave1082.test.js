@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let CdssRiskAssessment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseAssessment(riskLevel, overrides = {}) {
   return {
@@ -73,7 +64,8 @@ describe('W1082 — CDSS risk assessments reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await CdssRiskAssessment.create(baseAssessment('low', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'cdss_risk_assessed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'cdss_risk_assessed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info');
@@ -86,7 +78,8 @@ describe('W1082 — CDSS risk assessments reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CdssRiskAssessment.create(baseAssessment('very_high', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'cdss_risk_assessed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'cdss_risk_assessed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('critical');
     expect(tl.metadata.riskLevel).toBe('very_high');
@@ -96,7 +89,8 @@ describe('W1082 — CDSS risk assessments reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CdssRiskAssessment.create(baseAssessment('high', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'cdss_risk_assessed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'cdss_risk_assessed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('error');
   });
@@ -105,16 +99,14 @@ describe('W1082 — CDSS risk assessments reach the unified-core timeline', () =
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await CdssRiskAssessment.create(baseAssessment('moderate', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'cdss_risk_assessed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'cdss_risk_assessed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
 
     const again = await CdssRiskAssessment.findById(a._id);
     again.clinicalNotes = 'reviewed';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'cdss_risk_assessed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'cdss_risk_assessed' }, 1);
   });
 });

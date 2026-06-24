@@ -24,6 +24,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -31,17 +33,6 @@ let mongod;
 let DischargePlan;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w995-discharge-core' } });
@@ -78,10 +69,14 @@ describe('W995 — Discharge completion reaches the unified-core timeline', () =
       status: 'completed',
     });
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary_id,
-      eventType: 'discharge_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary_id,
+        eventType: 'discharge_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -98,12 +93,13 @@ describe('W995 — Discharge completion reaches the unified-core timeline', () =
       status: 'planning',
     });
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({
-      beneficiaryId: beneficiary_id,
-      eventType: 'discharge_completed',
-    });
-    expect(count).toBe(0);
+    await waitForCount(
+      {
+        beneficiaryId: beneficiary_id,
+        eventType: 'discharge_completed',
+      },
+      0
+    );
   });
 
   it('transitioning in_progress→completed fires exactly once', async () => {
@@ -113,34 +109,38 @@ describe('W995 — Discharge completion reaches the unified-core timeline', () =
       discharge_info: { discharge_type: 'aging_out' },
       status: 'in_progress',
     });
-    await new Promise(r => setTimeout(r, 100));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary_id,
         eventType: 'discharge_completed',
-      })
-    ).toBe(0);
+      },
+      0
+    );
 
     const reloaded = await DischargePlan.findById(plan._id);
     reloaded.status = 'completed';
     await reloaded.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary_id,
-      eventType: 'discharge_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary_id,
+        eventType: 'discharge_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     // Re-saving without a status change must NOT re-fire.
     const again = await DischargePlan.findById(plan._id);
     again.discharge_info.reason = 'Reached maximum age for the program.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary_id,
         eventType: 'discharge_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

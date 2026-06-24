@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let PainAssessment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 // A no-pain draft assessment (satisfies invariants: painPresent=false → score 0).
 function baseDraft(overrides = {}) {
@@ -84,10 +75,14 @@ describe('W1064 — finalized pain assessments reach the unified-core timeline',
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'pain_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'pain_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info'); // no pain → not significant
@@ -108,10 +103,14 @@ describe('W1064 — finalized pain assessments reach the unified-core timeline',
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'pain_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'pain_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
     expect(tl.metadata.significant).toBe(true);
@@ -121,13 +120,13 @@ describe('W1064 — finalized pain assessments reach the unified-core timeline',
     const beneficiaryId = new mongoose.Types.ObjectId();
     await PainAssessment.create(baseDraft({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'pain_assessment_finalized',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a finalized assessment does not re-fire the event', async () => {
@@ -136,21 +135,25 @@ describe('W1064 — finalized pain assessments reach the unified-core timeline',
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'pain_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'pain_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await PainAssessment.findById(a._id);
     again.notes = 'addendum';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'pain_assessment_finalized',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

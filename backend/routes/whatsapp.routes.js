@@ -60,6 +60,7 @@ const whatsappTemplates = require('../services/whatsapp/whatsappTemplates.servic
 const whatsappRateLimit = require('../services/whatsapp/rateLimit.service');
 const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
+const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const socketEmitter = require('../utils/socketEmitter');
@@ -285,6 +286,44 @@ router.get(
     }
 
     res.json({ success: true, data: conv });
+  })
+);
+
+/**
+ * GET /conversations/:id/context — rehab-context sidebar (W1491)
+ *
+ * Returns the linked beneficiary's identity + disability, active care plan,
+ * active goals, upcoming sessions (+ therapists), and outstanding invoices so
+ * staff get full clinical context WITHOUT leaving the Inbox. Branch-isolated
+ * via byIdScopedFilter (a foreign-branch conversation id → clean 404); the
+ * aggregation itself is best-effort (Promise.allSettled) so one slow/missing
+ * source never blanks the panel.
+ */
+router.get(
+  '/conversations/:id/context',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id beneficiaryId branchId phone senderName')
+      .lean();
+
+    if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+    // Unlinked conversation (no beneficiary on file yet) → empty-but-shaped
+    // payload so the UI renders a "link a beneficiary" state, not an error.
+    if (!conv.beneficiaryId) {
+      return res.json({
+        success: true,
+        data: { linked: false, ...whatsappBeneficiaryContext.emptyContext() },
+      });
+    }
+
+    const context = await whatsappBeneficiaryContext.buildContext({
+      beneficiaryId: conv.beneficiaryId,
+    });
+    res.json({ success: true, data: { linked: true, ...context } });
   })
 );
 

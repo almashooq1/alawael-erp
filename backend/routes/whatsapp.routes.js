@@ -62,6 +62,7 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const socketEmitter = require('../utils/socketEmitter');
 const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {
@@ -305,6 +306,20 @@ router.post(
       { returnDocument: 'after' }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+
+    socketEmitter.emitWhatsAppConversationUpdate({
+      branchId: data.branchId?.toString?.() || data.branchId,
+      organizationId: data.organizationId?.toString?.() || data.organizationId,
+      conversationId: data._id?.toString?.() || data._id,
+      changes: {
+        status: data.status,
+        requiresHumanReview: data.requiresHumanReview,
+        resolvedAt: data.resolvedAt,
+        resolvedBy: data.resolvedBy,
+        unreadCount: data.unreadCount || 0,
+      },
+    });
+
     res.json({ success: true, data });
   })
 );
@@ -330,10 +345,21 @@ router.post(
   '/conversations/:id/mark-read',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    await Conversation.updateOne(
+    const data = await Conversation.findOneAndUpdate(
       Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
-      { unreadCount: 0 }
-    );
+      { unreadCount: 0 },
+      { returnDocument: 'after', projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 } }
+    ).lean();
+
+    if (data) {
+      socketEmitter.emitWhatsAppConversationUpdate({
+        branchId: data.branchId?.toString?.() || data.branchId,
+        organizationId: data.organizationId?.toString?.() || data.organizationId,
+        conversationId: data._id?.toString?.() || data._id,
+        changes: { unreadCount: 0 },
+      });
+    }
+
     res.json({ success: true });
   })
 );

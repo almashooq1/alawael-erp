@@ -9,6 +9,7 @@ const dashboardHandler = require('./dashboardHandler');
 const notificationHandler = require('./notificationHandler');
 const chatHandler = require('./chatHandler');
 const dddHandler = require('./dddHandler');
+const whatsappHandler = require('./whatsappHandler');
 const logger = require('../../utils/logger');
 const safeError = require('../../utils/safeError');
 
@@ -37,6 +38,7 @@ function initializeHandlers(io) {
     notificationHandler(socket, io, activeSubscriptions);
     chatHandler(socket, io, activeSubscriptions);
     dddHandler(socket, io, activeSubscriptions);
+    whatsappHandler(socket, io, activeSubscriptions);
 
     // Connection health check
     socket.on('ping', () => {

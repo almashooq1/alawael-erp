@@ -238,7 +238,10 @@ router.get('/analytics', requireRole('admin', 'manager', 'supervisor'), async (r
     const base = { branchId: req.user.branchId };
     const [total, open, resolved] = await Promise.all([
       WA.countDocuments(base),
-      WA.countDocuments({ ...base, status: 'open' }),
+      // W1488: "open" = non-terminal. WhatsAppConversation status enum is
+      // [active, resolved, pending_review, escalated, archived]; the literal 'open'
+      // is not in it (→ always 0). Open = not resolved and not archived.
+      WA.countDocuments({ ...base, status: { $nin: ['resolved', 'archived'] } }),
       WA.countDocuments({ ...base, status: 'resolved' }),
     ]);
     res.json({

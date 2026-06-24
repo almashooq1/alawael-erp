@@ -61,6 +61,13 @@ const DEFAULT_EXCLUDE_PREFIXES = [
   '/api/v1/landing/',
   '/api/newsletter/',
   '/api/v1/newsletter/',
+  // W1488 — inbound provider webhooks authenticate via HMAC signature
+  // (X-Hub-Signature-256), not a session cookie/CSRF token. CSRF is N/A and
+  // would 403 every external delivery — which silently blocked all Meta WhatsApp
+  // inbound messages until this was added. Mounted at both /api/whatsapp and
+  // /api/v1/whatsapp.
+  '/api/whatsapp/webhook',
+  '/api/v1/whatsapp/webhook',
 ];
 
 // Pre-compute exclude paths set (rebuilt only when env var changes)

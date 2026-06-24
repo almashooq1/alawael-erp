@@ -341,7 +341,12 @@ whatsappConversationSchema.pre('save', async function () {
 
 // Covers the webhook upsert (findOneAndUpdate) + any update*-family write that
 // changes urgencyLevel via $set or a top-level field.
-function syncUrgencyRankOnUpdate(next) {
+// W1488 — async hook (NO `next`). The callback form `function (next) { … next() }`
+// throws "next is not a function" under this codebase's Mongoose setup (same class
+// as W954/W483), which silently broke EVERY findOneAndUpdate/updateOne/updateMany
+// on this model — including the WhatsApp inbound webhook's conversation upsert, so
+// the menu bot never replied. Mirrors the `pre('save')` async hook above.
+async function syncUrgencyRankOnUpdate() {
   const update = this.getUpdate() || {};
   const level =
     (update.$set && update.$set.urgencyLevel) !== undefined
@@ -352,7 +357,6 @@ function syncUrgencyRankOnUpdate(next) {
     update.$set.urgencyRank = urgencyRankFor(level);
     this.setUpdate(update);
   }
-  next();
 }
 whatsappConversationSchema.pre('findOneAndUpdate', syncUrgencyRankOnUpdate);
 whatsappConversationSchema.pre('updateOne', syncUrgencyRankOnUpdate);

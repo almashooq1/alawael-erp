@@ -9,10 +9,11 @@
  * fixed-size chunks, runs each via run-sprint.js, and aggregates results.
  *
  * Usage:
- *   node scripts/run-sprint-chunked.js [--chunk-size N] [--continue-on-fail]
+ *   node scripts/run-sprint-chunked.js [--chunk-size N] [--memory MB] [--continue-on-fail]
  *
  * Defaults:
- *   chunk-size = 150
+ *   chunk-size = 75
+ *   memory     = 4096
  */
 
 const fs = require('fs');
@@ -66,6 +67,12 @@ function runChunk(listFile, idx, total, memory) {
     _cleanMaintenanceFlag();
     console.log(`[chunk ${idx}/${total}] starting: ${listFile}`);
     const logFile = path.join(BACKEND_DIR, '.jest-cache', `sprint-chunk-${idx}.log`);
+    // Start each chunk with a fresh log so old summaries don't confuse extraction.
+    try {
+      fs.writeFileSync(logFile, '', 'utf8');
+    } catch {
+      // ignore logging setup errors
+    }
     const child = spawn(
       process.execPath,
       [`--max-old-space-size=${memory}`, RUN_SPRINT, '--list-file', listFile, '--runInBand'],
@@ -75,12 +82,10 @@ function runChunk(listFile, idx, total, memory) {
       }
     );
 
-    let stdout = '';
     let stderr = '';
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
     child.stdout.on('data', d => {
-      stdout += d;
       try {
         fs.appendFileSync(logFile, d, 'utf8');
       } catch {
@@ -101,12 +106,29 @@ function runChunk(listFile, idx, total, memory) {
       const code = rawCode == null ? 1 : rawCode;
       const elapsed = ((Date.now() - started) / 1000).toFixed(1);
 
-      const stripAnsi = require('strip-ansi');
-      const cleanStdout = stripAnsi(stdout);
-      const summaryMatch = cleanStdout.match(/Test Suites:\s*(.+)/);
-      const testsMatch = cleanStdout.match(/Tests:\s*(.+)/);
-      const summary = summaryMatch ? summaryMatch[1].trim() : 'unknown';
-      const tests = testsMatch ? testsMatch[1].trim() : 'unknown';
+      // Extract the final summary from the log file. Reading the log avoids
+      // relying on a potentially huge in-memory stdout string and ignores
+      // any stray color codes or carriage returns.
+      let summary = 'unknown';
+      let tests = 'unknown';
+      try {
+        const stripAnsiMod = require('strip-ansi');
+        const stripAnsi = typeof stripAnsiMod === 'function' ? stripAnsiMod : stripAnsiMod.default;
+        const logRaw = fs.readFileSync(logFile, 'utf8');
+        const logLines = stripAnsi(logRaw).split(/\r?\n/);
+        for (let i = logLines.length - 1; i >= 0; i--) {
+          const line = logLines[i].trim();
+          if (summary === 'unknown' && line.startsWith('Test Suites:')) {
+            summary = line.replace(/^Test Suites:\s*/, '').trim();
+          }
+          if (tests === 'unknown' && line.startsWith('Tests:')) {
+            tests = line.replace(/^Tests:\s*/, '').trim();
+          }
+          if (summary !== 'unknown' && tests !== 'unknown') break;
+        }
+      } catch {
+        // fall back to unknown
+      }
 
       console.log(
         `[chunk ${idx}/${total}] ${code === 0 ? 'PASS' : 'FAIL'} (${elapsed}s) — suites: ${summary}, tests: ${tests}`
@@ -159,26 +181,21 @@ async function main() {
     }
   }
 
-  const passed = results.filter(r => r.ok).length;
-  const failed = results.length - passed;
-
   console.log('\n===== run-sprint-chunked summary =====');
-  console.log(
-    `chunks run : ${results.length}/${chunks.length}${stopped ? ' (stopped early)' : ''}`
-  );
-  console.log(`chunks ok  : ${passed}`);
-  console.log(`chunks fail: ${failed}`);
+  console.log(`chunks run : ${results.length}/${chunks.length}${stopped ? ' (stopped early)' : ''}`);
+  console.log(`chunks ok  : ${results.filter(r => r.ok).length}`);
+  console.log(`chunks fail: ${results.filter(r => !r.ok).length}`);
   for (const r of results) {
     console.log(
       `  chunk ${r.idx}: ${r.ok ? 'PASS' : 'FAIL'} — suites ${r.summary}, tests ${r.tests}`
     );
   }
-  console.log('=====================================\n');
+  console.log('=====================================');
 
-  process.exit(failed > 0 ? 1 : 0);
+  process.exit(results.every(r => r.ok) ? 0 : 1);
 }
 
 main().catch(err => {
-  console.error('run-sprint-chunked: fatal error:', err.message);
+  console.error('run-sprint-chunked: unexpected error:', err.message);
   process.exit(1);
 });

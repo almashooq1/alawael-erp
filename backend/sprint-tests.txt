@@ -1026,3 +1026,4 @@ tests/unit/ops-alerter.test.js
 __tests__/traffic-accidents-stats-fix-wave1481.test.js
 __tests__/case-management-create-mapping-wave1482.test.js
 __tests__/enum-query-fixes-wave1486.test.js
+__tests__/whatsapp-inbound-fixes-wave1488.test.js

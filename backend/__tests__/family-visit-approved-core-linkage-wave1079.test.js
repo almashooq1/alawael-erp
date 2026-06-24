@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let FamilyVisitRequest;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseRequest(overrides = {}) {
   return {
@@ -79,7 +70,8 @@ describe('W1079 — approved family visits reach the unified-core timeline', () 
     const beneficiaryId = new mongoose.Types.ObjectId();
     const r = await FamilyVisitRequest.create(baseRequest({ beneficiaryId, ...approvedFields() }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'family_visit_approved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'family_visit_approved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('success');
@@ -91,10 +83,7 @@ describe('W1079 — approved family visits reach the unified-core timeline', () 
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyVisitRequest.create(baseRequest({ beneficiaryId }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'family_visit_approved' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'family_visit_approved' }, 0);
   });
 
   it('approving a previously-requested visit fires on transition', async () => {
@@ -109,7 +98,8 @@ describe('W1079 — approved family visits reach the unified-core timeline', () 
     r.approvedAt = new Date();
     await r.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'family_visit_approved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'family_visit_approved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
   });
 
@@ -117,7 +107,8 @@ describe('W1079 — approved family visits reach the unified-core timeline', () 
     const beneficiaryId = new mongoose.Types.ObjectId();
     const r = await FamilyVisitRequest.create(baseRequest({ beneficiaryId, ...approvedFields() }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'family_visit_approved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'family_visit_approved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await FamilyVisitRequest.findById(r._id);

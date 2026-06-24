@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let RedFlagState;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function activeFlag(beneficiaryId, overrides = {}) {
   return {
@@ -73,7 +64,8 @@ describe('W1083 — raised red flags reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId().toString();
     await RedFlagState.create(activeFlag(beneficiaryId, { severity: 'critical', blocking: true }));
 
-    const tl = await waitForTimeline({ eventType: 'red_flag_raised' });
+    const tlRows = await waitForRows({ eventType: 'red_flag_raised' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('critical');
@@ -92,15 +84,15 @@ describe('W1083 — raised red flags reach the unified-core timeline', () => {
       cooldownUntil: new Date(Date.now() + 60_000),
     });
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(await CareTimeline.countDocuments({ eventType: 'red_flag_raised' })).toBe(0);
+    await waitForCount({ eventType: 'red_flag_raised' }, 0);
   });
 
   it('an info-severity flag is recorded as info', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId().toString();
     await RedFlagState.create(activeFlag(beneficiaryId, { flagId: 'fyi', severity: 'info' }));
 
-    const tl = await waitForTimeline({ eventType: 'red_flag_raised' });
+    const tlRows = await waitForRows({ eventType: 'red_flag_raised' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('info');
   });
@@ -109,13 +101,13 @@ describe('W1083 — raised red flags reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId().toString();
     const f = await RedFlagState.create(activeFlag(beneficiaryId));
 
-    const tl = await waitForTimeline({ eventType: 'red_flag_raised' });
+    const tlRows = await waitForRows({ eventType: 'red_flag_raised' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await RedFlagState.findById(f._id);
     again.lastObservedAt = new Date();
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'red_flag_raised' })).toBe(1);
+    await waitForCount({ eventType: 'red_flag_raised' }, 1);
   });
 });

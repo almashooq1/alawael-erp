@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let DietPrescription;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function basePrescription(overrides = {}) {
   return {
@@ -85,7 +76,11 @@ describe('W1031 — Diet prescription activation reaches the unified-core timeli
     const beneficiaryId = new mongoose.Types.ObjectId();
     const rx = await activate(await DietPrescription.create(basePrescription({ beneficiaryId })));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'diet_prescription_activated' });
+    const tlRows = await waitForRows(
+      { beneficiaryId, eventType: 'diet_prescription_activated' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info');
@@ -97,23 +92,23 @@ describe('W1031 — Diet prescription activation reaches the unified-core timeli
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DietPrescription.create(basePrescription({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'diet_prescription_activated' })).toBe(0);
+    await waitForCount({ eventType: 'diet_prescription_activated' }, 0);
   });
 
   it('re-saving an already-active prescription does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const rx = await activate(await DietPrescription.create(basePrescription({ beneficiaryId })));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'diet_prescription_activated' });
+    const tlRows = await waitForRows(
+      { beneficiaryId, eventType: 'diet_prescription_activated' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await DietPrescription.findById(rx._id);
     again.notes = 'Reviewed by SLP at MDT.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'diet_prescription_activated' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'diet_prescription_activated' }, 1);
   });
 });

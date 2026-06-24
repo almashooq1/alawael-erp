@@ -18,23 +18,14 @@
 jest.unmock('mongoose');
 jest.setTimeout(120000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let CareTimeline;
 let ICF, TreatmentAuthorization, Pathway, Mdt, Swallow, Emergency, Consult, Cdss;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function oid() {
   return new mongoose.Types.ObjectId();
@@ -81,7 +72,8 @@ describe('W1075 — ICF approval reaches the timeline', () => {
     const r = await ICF.findById(doc._id);
     r.status = 'approved';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'icf_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'icf_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.category).toBe('clinical');
     expect(row.metadata.icfVersion).toBe('ICF-2001');
@@ -105,7 +97,8 @@ describe('W1075 — treatment authorization decision reaches the timeline', () =
     const r = await TreatmentAuthorization.findById(doc._id);
     r.status = 'approved';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'treatment_authorization' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'treatment_authorization' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('success');
     expect(row.metadata.decision).toBe('approved');
@@ -127,7 +120,8 @@ describe('W1075 — treatment authorization decision reaches the timeline', () =
     const r = await TreatmentAuthorization.findById(doc._id);
     r.status = 'denied';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'treatment_authorization' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'treatment_authorization' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
   });
@@ -147,7 +141,11 @@ describe('W1075 — clinical pathway completion reaches the timeline', () => {
     const r = await Pathway.findById(doc._id);
     r.status = 'COMPLETED';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'clinical_pathway_completed' });
+    const rowRows = await waitForRows(
+      { beneficiaryId, eventType: 'clinical_pathway_completed' },
+      1
+    );
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('success');
     expect(row.metadata.pathwayType).toBe('GENERIC_REHAB');
@@ -166,7 +164,8 @@ describe('W1075 — MDT meeting completion reaches the timeline', () => {
     const r = await Mdt.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'mdt_meeting' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'mdt_meeting' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.metadata.purpose).toBe('care_plan_review');
   });
@@ -186,7 +185,8 @@ describe('W1075 — instrumental swallow study completion reaches the timeline',
     await r.save();
     // This branch's W1054 wiring: instrumental-swallow-study.swallow_study.completed
     // → eventType 'swallow_study_completed'.
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'swallow_study_completed' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'swallow_study_completed' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
     expect(row.metadata.studyType).toBe('vfss');
@@ -201,7 +201,8 @@ describe('W1075 — emergency plan activation reaches the timeline', () => {
       branchId: oid(),
       knownConditions: [{ type: 'seizure' }],
     });
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'emergency_plan_activated' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'emergency_plan_activated' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
     expect(row.metadata.conditionTypes).toContain('seizure');
@@ -220,7 +221,8 @@ describe('W1075 — therapist consultation answered reaches the timeline', () =>
     const r = await Consult.findById(doc._id);
     r.status = 'answered';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'consultation' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'consultation' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.metadata.topic).toBe('Feeding posture');
   });
@@ -242,7 +244,8 @@ describe('W1075 — CDSS alert resolution reaches the timeline', () => {
     r.status = 'resolved';
     r.resolvedAt = new Date();
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'cdss_alert_resolved' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'cdss_alert_resolved' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.metadata.alertType).toBe('drug_interaction');
   });

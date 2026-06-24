@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let BeneficiaryContract;
 let CareTimeline;
 let integrationBus;
 let seq = 0;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseContract(overrides = {}) {
   const now = Date.now();
@@ -79,7 +70,8 @@ describe('W1073 — activated service contracts reach the unified-core timeline'
     c.status = 'active';
     await c.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'service_contract_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'service_contract_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -92,7 +84,8 @@ describe('W1073 — activated service contracts reach the unified-core timeline'
     const beneficiaryId = new mongoose.Types.ObjectId();
     const c = await BeneficiaryContract.create(baseContract({ beneficiaryId, status: 'active' }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'service_contract_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'service_contract_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(String(tl.metadata.contractId)).toBe(String(c._id));
   });
@@ -101,13 +94,13 @@ describe('W1073 — activated service contracts reach the unified-core timeline'
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BeneficiaryContract.create(baseContract({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'service_contract_activated',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving an active contract does not re-fire the event', async () => {
@@ -116,18 +109,19 @@ describe('W1073 — activated service contracts reach the unified-core timeline'
     c.status = 'active';
     await c.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'service_contract_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'service_contract_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await BeneficiaryContract.findById(c._id);
     again.notes = 'addendum signed';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'service_contract_activated',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

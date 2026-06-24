@@ -26,6 +26,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -33,16 +35,6 @@ let mongod;
 let Appointment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w930-appt-core' } });
@@ -82,10 +74,14 @@ describe('W970 — Appointment lifecycle reaches the unified-core timeline', () 
   it('booking lands an appointment_booked CareTimeline row', async () => {
     const appt = await newAppointment();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: appt.beneficiary,
-      eventType: 'appointment_booked',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: appt.beneficiary,
+        eventType: 'appointment_booked',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(String(tl.metadata.appointmentId)).toBe(String(appt._id));
@@ -94,16 +90,20 @@ describe('W970 — Appointment lifecycle reaches the unified-core timeline', () 
 
   it('no-show lands a HIGH-signal appointment_no_show row (and does not re-fire booked)', async () => {
     const appt = await newAppointment();
-    await waitForTimeline({ beneficiaryId: appt.beneficiary, eventType: 'appointment_booked' });
+    await waitForRows({ beneficiaryId: appt.beneficiary, eventType: 'appointment_booked' }, 1);
 
     const reloaded = await Appointment.findById(appt._id);
     reloaded.status = 'NO_SHOW';
     await reloaded.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: appt.beneficiary,
-      eventType: 'appointment_no_show',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: appt.beneficiary,
+        eventType: 'appointment_no_show',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
 
@@ -117,25 +117,27 @@ describe('W970 — Appointment lifecycle reaches the unified-core timeline', () 
 
   it('cancellation lands an appointment_cancelled row', async () => {
     const appt = await newAppointment();
-    await waitForTimeline({ beneficiaryId: appt.beneficiary, eventType: 'appointment_booked' });
+    await waitForRows({ beneficiaryId: appt.beneficiary, eventType: 'appointment_booked' }, 1);
 
     const reloaded = await Appointment.findById(appt._id);
     reloaded.status = 'CANCELLED';
     await reloaded.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: appt.beneficiary,
-      eventType: 'appointment_cancelled',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: appt.beneficiary,
+        eventType: 'appointment_cancelled',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
   });
 
   it('an appointment with no beneficiary produces no timeline row', async () => {
     await Appointment.create({ type: 'تقييم', date: new Date(), startTime: '10:00' });
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({ eventType: 'appointment_booked' });
-    expect(count).toBe(0);
+    await waitForCount({ eventType: 'appointment_booked' }, 0);
   });
 });
 
@@ -147,7 +149,8 @@ describe('W970 — regression guard: core timeline subscribers actually PERSIST'
       mrn: 'MRN-001',
       name: 'سالم الأحمد',
     });
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'registration' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'registration' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
   });

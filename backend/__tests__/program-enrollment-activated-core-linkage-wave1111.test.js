@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -10,7 +12,6 @@ require('../models/Beneficiary');
 const { ProgramEnrollment } = require('../domains/programs/models/ProgramEnrollment');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
-const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -43,17 +44,6 @@ function enrollment(beneficiaryId, overrides = {}) {
   };
 }
 
-/** Poll until a timeline row matching `query` exists (CI-load safe). */
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
-
 describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline linkage', () => {
   test('records an administrative/success timeline row when an enrollment becomes active', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -69,7 +59,7 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
     doc.status = 'active';
     doc.actualStartDate = new Date();
     await doc.save();
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -85,7 +75,7 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
   test('fires when an enrollment is created already active', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ProgramEnrollment.create(enrollment(beneficiaryId, { status: 'active' }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -104,7 +94,7 @@ describe('W1111 — ProgramEnrollment activation → unified-core CareTimeline l
   test('does not double-record on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await ProgramEnrollment.create(enrollment(beneficiaryId, { status: 'active' }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.expectedEndDate = new Date(Date.now() + 86400000);

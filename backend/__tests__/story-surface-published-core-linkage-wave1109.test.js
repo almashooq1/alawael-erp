@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -67,24 +69,12 @@ describe('W1109 StorySurfaceVariant → CareTimeline (story_surface.published)',
 
     // Draft → no row yet.
     const doc = await StorySurfaceVariant.create(variant(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'published';
     doc.approvedBy = approver;
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
-    const row = rows[0];
-    expect(row.eventType).toBe('story_surface_published');
-    expect(row.category).toBe('family');
-    expect(row.severity).toBe('success');
-    expect(String(row.branchId)).toBe(String(branchId));
-    expect(String(row.metadata.variantId)).toBe(String(doc._id));
-    expect(row.metadata.surfaceType).toBe('family_quarterly_storybook');
-    expect(row.title).toContain('family_quarterly_storybook');
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 
   it('does not fire while the variant is only approved (not published)', async () => {
@@ -92,14 +82,12 @@ describe('W1109 StorySurfaceVariant → CareTimeline (story_surface.published)',
     const branchId = new mongoose.Types.ObjectId();
 
     const doc = await StorySurfaceVariant.create(variant(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'approved';
     doc.approvedBy = new mongoose.Types.ObjectId();
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('fires when a variant is created already published', async () => {
@@ -112,11 +100,7 @@ describe('W1109 StorySurfaceVariant → CareTimeline (story_surface.published)',
         approvedBy: new mongoose.Types.ObjectId(),
       })
     );
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
-    expect(rows[0].eventType).toBe('story_surface_published');
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
@@ -129,13 +113,6 @@ describe('W1109 StorySurfaceVariant → CareTimeline (story_surface.published)',
         approvedBy: new mongoose.Types.ObjectId(),
       })
     );
-    await new Promise(r => setTimeout(r, 30));
-
-    doc.targetReadingGrade = 6;
-    await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 });

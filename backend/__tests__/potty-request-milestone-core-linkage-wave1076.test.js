@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -24,17 +26,6 @@ let mongod;
 let ToiletingEvent;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseEvent(overrides = {}) {
   return {
@@ -75,7 +66,8 @@ describe('W1076 — potty-request milestones reach the unified-core timeline', (
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await ToiletingEvent.create(baseEvent({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'potty_request_milestone' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'potty_request_milestone' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -87,44 +79,45 @@ describe('W1076 — potty-request milestones reach the unified-core timeline', (
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ToiletingEvent.create(baseEvent({ beneficiaryId, type: 'wet' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'potty_request_milestone',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('a diaper_change event does NOT create a timeline row', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ToiletingEvent.create(baseEvent({ beneficiaryId, type: 'diaper_change' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'potty_request_milestone',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a requested_potty event does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await ToiletingEvent.create(baseEvent({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'potty_request_milestone' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'potty_request_milestone' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await ToiletingEvent.findById(e._id);
     again.notes = 'staff confirmed';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'potty_request_milestone',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

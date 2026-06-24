@@ -15,23 +15,14 @@
 jest.unmock('mongoose');
 jest.setTimeout(120000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let CareTimeline;
 let Falls, Pressure, Sleep, OM, Driving, MedRec, Infection;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1046-core-linkage' } });
@@ -82,7 +73,8 @@ describe('W1046 — falls-risk finalized reaches the timeline', () => {
     reloaded.finalizedAt = new Date();
     await reloaded.save();
 
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'falls_risk_assessed' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'falls_risk_assessed' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
     expect(row.category).toBe('clinical');
@@ -101,7 +93,8 @@ describe('W1046 — pressure injury identified + resolved reach the timeline', (
       status: 'active',
       offloadingOrders: ['repositioning_2hourly'],
     });
-    const opened = await waitForTimeline({ beneficiaryId, eventType: 'pressure_injury' });
+    const openedRows = await waitForRows({ beneficiaryId, eventType: 'pressure_injury' }, 1);
+    const opened = openedRows[0];
     expect(opened).not.toBeNull();
     expect(opened.severity).toBe('error');
 
@@ -109,10 +102,14 @@ describe('W1046 — pressure injury identified + resolved reach the timeline', (
     reloaded.status = 'healed';
     reloaded.healedAt = new Date();
     await reloaded.save();
-    const resolved = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'pressure_injury_resolved',
-    });
+    const resolvedRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'pressure_injury_resolved',
+      },
+      1
+    );
+    const resolved = resolvedRows[0];
     expect(resolved).not.toBeNull();
     expect(resolved.severity).toBe('success');
   });
@@ -135,7 +132,8 @@ describe('W1046 — sleep / O&M / driving finalize reach the timeline', () => {
     r.finalizedByName = 'د. منى';
     r.finalizedAt = new Date();
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'sleep_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'sleep_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
   });
@@ -155,7 +153,8 @@ describe('W1046 — sleep / O&M / driving finalize reach the timeline', () => {
     r.finalizedByName = 'أخصائي';
     r.finalizedAt = new Date();
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'mobility_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'mobility_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
   });
@@ -174,7 +173,8 @@ describe('W1046 — sleep / O&M / driving finalize reach the timeline', () => {
     r.finalizedByName = 'أخصائي';
     r.finalizedAt = new Date();
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'driving_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'driving_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
   });
@@ -194,7 +194,8 @@ describe('W1046 — medication reconciliation reaches the timeline', () => {
     r.reconciledByName = 'صيدلي';
     r.reconciledAt = new Date();
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'medication_reconciliation' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'medication_reconciliation' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('warning');
   });
@@ -212,7 +213,8 @@ describe('W1046 — infection case opened + resolved reach the timeline', () => 
       isolationRequired: true,
       precautionType: 'contact',
     });
-    const opened = await waitForTimeline({ beneficiaryId, eventType: 'infection_case' });
+    const openedRows = await waitForRows({ beneficiaryId, eventType: 'infection_case' }, 1);
+    const opened = openedRows[0];
     expect(opened).not.toBeNull();
     expect(opened.severity).toBe('error');
 
@@ -220,7 +222,8 @@ describe('W1046 — infection case opened + resolved reach the timeline', () => 
     reloaded.caseStatus = 'resolved';
     reloaded.resolutionDate = new Date('2026-06-08');
     await reloaded.save();
-    const resolved = await waitForTimeline({ beneficiaryId, eventType: 'infection_resolved' });
+    const resolvedRows = await waitForRows({ beneficiaryId, eventType: 'infection_resolved' }, 1);
+    const resolved = resolvedRows[0];
     expect(resolved).not.toBeNull();
     expect(resolved.severity).toBe('success');
   });

@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -25,17 +27,6 @@ let mongod;
 let SafeguardingConcern;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseConcern(overrides = {}) {
   return {
@@ -89,10 +80,14 @@ describe('W1027 — Safeguarding concern closure reaches the unified-core timeli
     concern.closedAt = new Date();
     await concern.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'safeguarding_concern_closed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'safeguarding_concern_closed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -107,8 +102,7 @@ describe('W1027 — Safeguarding concern closure reaches the unified-core timeli
       baseConcern({ subjectBeneficiaryId: beneficiaryId, status: 'triaged' })
     );
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'safeguarding_concern_closed' })).toBe(0);
+    await waitForCount({ eventType: 'safeguarding_concern_closed' }, 0);
   });
 
   it('re-saving an already-closed concern does not re-fire the closure event', async () => {
@@ -123,21 +117,25 @@ describe('W1027 — Safeguarding concern closure reaches the unified-core timeli
     concern.closedAt = new Date();
     await concern.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'safeguarding_concern_closed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'safeguarding_concern_closed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await SafeguardingConcern.findById(concern._id);
     again.notes = 'Supervisory note appended after closure.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'safeguarding_concern_closed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

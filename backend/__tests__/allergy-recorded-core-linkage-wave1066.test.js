@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let Allergy;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseAllergy(overrides = {}) {
   return {
@@ -70,7 +61,8 @@ describe('W1066 — recorded allergies reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await Allergy.create(baseAllergy({ beneficiaryId, severity: 'moderate' }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'allergy_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'allergy_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('warning');
@@ -84,7 +76,8 @@ describe('W1066 — recorded allergies reach the unified-core timeline', () => {
       baseAllergy({ beneficiaryId, substance: 'peanut', severity: 'life_threatening' })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'allergy_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'allergy_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('error');
     expect(tl.metadata.severe).toBe(true);
@@ -94,25 +87,20 @@ describe('W1066 — recorded allergies reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await Allergy.create(baseAllergy({ beneficiaryId, status: 'inactive' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'allergy_recorded' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'allergy_recorded' }, 0);
   });
 
   it('updating an existing allergy does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await Allergy.create(baseAllergy({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'allergy_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'allergy_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await Allergy.findById(a._id);
     again.reaction = 'hives';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'allergy_recorded' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'allergy_recorded' }, 1);
   });
 });

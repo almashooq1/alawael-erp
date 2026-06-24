@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let IQAssessment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseAssessment(overrides = {}) {
   return {
@@ -78,10 +69,14 @@ describe('W1056 — IQ assessment recording reaches the unified-core timeline', 
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await IQAssessment.create(baseAssessment({ beneficiaryId, fullScaleIQ: 112 }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'iq_assessment_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'iq_assessment_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -93,16 +88,14 @@ describe('W1056 — IQ assessment recording reaches the unified-core timeline', 
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await IQAssessment.create(baseAssessment({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'iq_assessment_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'iq_assessment_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await IQAssessment.findById(a._id);
     again.recommendations = { en: 'Re-test in 12 months.', ar: 'إعادة التقييم بعد 12 شهرًا.' };
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'iq_assessment_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'iq_assessment_completed' }, 1);
   });
 
   it('two assessments for one beneficiary produce two timeline rows', async () => {
@@ -112,9 +105,6 @@ describe('W1056 — IQ assessment recording reaches the unified-core timeline', 
       baseAssessment({ beneficiaryId, instrumentType: 'WECHSLER', edition: 'WAIS-IV' })
     );
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'iq_assessment_completed' })
-    ).toBe(2);
+    await waitForCount({ beneficiaryId, eventType: 'iq_assessment_completed' }, 2);
   });
 });

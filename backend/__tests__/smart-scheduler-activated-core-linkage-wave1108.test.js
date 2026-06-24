@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -54,29 +56,17 @@ afterEach(async () => {
   await SmartScheduler.deleteMany({});
 });
 
-/** Poll until a timeline row matching `query` exists (CI-load safe). */
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
-
 describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', () => {
   it('records an administrative/success row when a schedule is activated', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     // Created in draft → no row yet.
     const doc = await SmartScheduler.create(scheduler(beneficiaryId, { status: 'draft' }));
-    await new Promise(r => setTimeout(r, 30));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'active';
     await doc.save();
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(1);
@@ -93,7 +83,7 @@ describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     await SmartScheduler.create(scheduler(beneficiaryId, { status: 'active' }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId });
     expect(rows).toHaveLength(1);
@@ -104,26 +94,21 @@ describe('W1108 SmartScheduler → CareTimeline (smart_scheduler.activated)', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     const doc = await SmartScheduler.create(scheduler(beneficiaryId, { status: 'draft' }));
-    await new Promise(r => setTimeout(r, 30));
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'pending-review';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
 
     const doc = await SmartScheduler.create(scheduler(beneficiaryId, { status: 'active' }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.nextReviewDate = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 });

@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let DttSession;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 // A scheduled DTT session with one target carrying trial data.
 function baseSession(overrides = {}) {
@@ -86,7 +77,8 @@ describe('W1067 — completed DTT sessions reach the unified-core timeline', () 
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'dtt_session_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'dtt_session_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info');
@@ -112,7 +104,8 @@ describe('W1067 — completed DTT sessions reach the unified-core timeline', () 
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'dtt_session_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'dtt_session_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('success');
     expect(tl.metadata.masteryCount).toBe(1);
@@ -122,10 +115,7 @@ describe('W1067 — completed DTT sessions reach the unified-core timeline', () 
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DttSession.create(baseSession({ beneficiaryId, status: 'scheduled' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'dtt_session_completed' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'dtt_session_completed' }, 0);
   });
 
   it('re-saving a completed session does not re-fire the event', async () => {
@@ -134,15 +124,13 @@ describe('W1067 — completed DTT sessions reach the unified-core timeline', () 
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'dtt_session_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'dtt_session_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await DttSession.findById(s._id);
     again.sessionNotes = 'addendum';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'dtt_session_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'dtt_session_completed' }, 1);
   });
 });

@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -25,17 +27,6 @@ let mongod;
 let HomeVisit;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseHomeVisit(overrides = {}) {
   return {
@@ -80,10 +71,14 @@ describe('W1025 — Home visit completion reaches the unified-core timeline', ()
     visit.visitSummary = 'Family briefed; environment safe.';
     await visit.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'home_visit_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'home_visit_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('info');
@@ -96,8 +91,7 @@ describe('W1025 — Home visit completion reaches the unified-core timeline', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
     await HomeVisit.create(baseHomeVisit({ beneficiaryId, status: 'scheduled' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'home_visit_completed' })).toBe(0);
+    await waitForCount({ eventType: 'home_visit_completed' }, 0);
   });
 
   it('re-saving an already-completed home visit does not re-fire', async () => {
@@ -108,21 +102,25 @@ describe('W1025 — Home visit completion reaches the unified-core timeline', ()
     visit.visitSummary = 'Initial summary.';
     await visit.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'home_visit_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'home_visit_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await HomeVisit.findById(visit._id);
     again.visitSummary = 'Summary amended after review.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'home_visit_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

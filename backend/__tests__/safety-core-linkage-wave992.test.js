@@ -31,6 +31,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -40,17 +42,6 @@ let SafeguardingConcern;
 let RestraintSeclusionEvent;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w992-safety-core' } });
@@ -93,7 +84,8 @@ describe('W992 — Seizure events reach the unified-core timeline', () => {
       durationSeconds: 90,
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'seizure_event' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'seizure_event' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('warning');
@@ -112,7 +104,8 @@ describe('W992 — Seizure events reach the unified-core timeline', () => {
       durationSeconds: 360, // 6 min → status-epilepticus candidate
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'seizure_event' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'seizure_event' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('critical');
     expect(tl.metadata.statusEpilepticus).toBe(true);
@@ -126,7 +119,7 @@ describe('W992 — Seizure events reach the unified-core timeline', () => {
       startTime: new Date(),
       type: 'absence',
     });
-    await waitForTimeline({ beneficiaryId, eventType: 'seizure_event' });
+    await waitForRows({ beneficiaryId, eventType: 'seizure_event' }, 1);
 
     const reloaded = await SeizureEvent.findById(ev._id);
     reloaded.status = 'reviewed';
@@ -134,9 +127,7 @@ describe('W992 — Seizure events reach the unified-core timeline', () => {
     reloaded.reviewedAt = new Date();
     await reloaded.save();
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({ beneficiaryId, eventType: 'seizure_event' });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'seizure_event' }, 1);
   });
 });
 
@@ -152,7 +143,8 @@ describe('W992 — Safeguarding concerns reach the unified-core timeline', () =>
       description: 'Observed signs warranting a safeguarding review.',
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'safeguarding_concern' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'safeguarding_concern' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('error'); // high → error
@@ -172,7 +164,8 @@ describe('W992 — Safeguarding concerns reach the unified-core timeline', () =>
       description: 'Critical safeguarding concern requiring immediate escalation.',
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'safeguarding_concern' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'safeguarding_concern' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('critical');
   });
@@ -186,9 +179,7 @@ describe('W992 — Safeguarding concerns reach the unified-core timeline', () =>
       description: 'Concern about a staff member — no beneficiary timeline applies.',
     });
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({ eventType: 'safeguarding_concern' });
-    expect(count).toBe(0);
+    await waitForCount({ eventType: 'safeguarding_concern' }, 0);
   });
 });
 
@@ -205,7 +196,8 @@ describe('W992 — Restraint/seclusion events reach the unified-core timeline', 
       durationMinutes: 4,
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'restraint_seclusion' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'restraint_seclusion' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('warning');

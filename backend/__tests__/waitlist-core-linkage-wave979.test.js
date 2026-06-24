@@ -16,22 +16,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let Waitlist, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w978-waitlist' } });
@@ -67,7 +58,8 @@ function newEntry(extra = {}) {
 describe('W979 — waitlist journey reaches the unified-core timeline', () => {
   it('adding to the waitlist lands a "waitlisted" row', async () => {
     const e = await newEntry();
-    const tl = await waitForTimeline({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' });
+    const tlRows = await waitForRows({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.metadata.department).toBe('SPEECH');
@@ -75,16 +67,20 @@ describe('W979 — waitlist journey reaches the unified-core timeline', () => {
 
   it('booking from the waitlist lands a "waitlist_booked" (admission) row, once', async () => {
     const e = await newEntry();
-    await waitForTimeline({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' });
+    await waitForRows({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' }, 1);
 
     const loaded = await Waitlist.findById(e._id);
     loaded.status = 'BOOKED';
     await loaded.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: e.beneficiary,
-      eventType: 'waitlist_booked',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: e.beneficiary,
+        eventType: 'waitlist_booked',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('success');
 
@@ -96,16 +92,16 @@ describe('W979 — waitlist journey reaches the unified-core timeline', () => {
 
   it('an OFFERED transition does not produce a booked row', async () => {
     const e = await newEntry();
-    await waitForTimeline({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' });
+    await waitForRows({ beneficiaryId: e.beneficiary, eventType: 'waitlisted' }, 1);
     const loaded = await Waitlist.findById(e._id);
     loaded.status = 'OFFERED';
     await loaded.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: e.beneficiary,
         eventType: 'waitlist_booked',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 });

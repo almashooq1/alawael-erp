@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -38,23 +40,6 @@ function usage(beneficiaryId, branchId, overrides = {}) {
     orderAmount: 300,
     ...overrides,
   };
-}
-
-/**
- * Wait until the async post-save → bus → subscriber chain materialises the
- * expected number of CareTimeline rows (W1227 deflake: the previous fixed
- * 30 ms sleep lost the race under CI load — deploy-gate red on shard 4 of
- * run 27364124300). Polls every 25 ms up to `timeoutMs`, then returns
- * whatever is there so the assertion still reports a clear diff.
- */
-async function waitForRows(filter, expected, timeoutMs = 5000) {
-  const deadline = Date.now() + timeoutMs;
-  let rows = [];
-  for (;;) {
-    rows = await CareTimeline.find(filter).sort({ createdAt: 1 });
-    if (rows.length >= expected || Date.now() > deadline) return rows;
-    await new Promise(r => setTimeout(r, 25));
-  }
 }
 
 beforeAll(async () => {
@@ -99,10 +84,7 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
     const branchId = new mongoose.Types.ObjectId();
 
     await CouponUsage.create(usage(beneficiaryId, branchId, { deletedAt: new Date() }));
-    await new Promise(r => setTimeout(r, 150));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
@@ -115,10 +97,7 @@ describe('W1105 CouponUsage → CareTimeline (coupon_usage.redeemed)', () => {
     // Unrelated mutation — not a new document.
     doc.orderAmount = 350;
     await doc.save();
-    await new Promise(r => setTimeout(r, 150));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 
   it('emits exactly one row per distinct redemption', async () => {

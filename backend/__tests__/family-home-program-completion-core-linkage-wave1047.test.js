@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let FamilyHomeProgram;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseProgram(overrides = {}) {
   return {
@@ -75,10 +66,14 @@ describe('W1047 — family home-program completion reaches the unified-core time
     p.endDate = new Date('2026-05-30');
     await p.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'family_home_program_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'family_home_program_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('success');
@@ -90,10 +85,7 @@ describe('W1047 — family home-program completion reaches the unified-core time
     const beneficiaryId = new mongoose.Types.ObjectId();
     await FamilyHomeProgram.create(baseProgram({ beneficiaryId, status: 'ACTIVE' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'family_home_program_completed' })).toBe(
-      0
-    );
+    await waitForCount({ eventType: 'family_home_program_completed' }, 0);
   });
 
   it('re-saving an already-completed home program does not re-fire the event', async () => {
@@ -102,21 +94,25 @@ describe('W1047 — family home-program completion reaches the unified-core time
       baseProgram({ beneficiaryId, status: 'COMPLETED', endDate: new Date('2026-05-30') })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'family_home_program_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'family_home_program_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await FamilyHomeProgram.findById(p._id);
     again.title = 'Daily speech practice (archived)';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'family_home_program_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

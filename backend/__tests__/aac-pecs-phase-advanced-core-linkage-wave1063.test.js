@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let AacProfile;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseProfile(overrides = {}) {
   return {
@@ -74,10 +65,14 @@ describe('W1063 — AAC PECS phase advancement reaches the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     const p = await AacProfile.create(baseProfile({ beneficiaryId, pecsPhase: { current: 2 } }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'aac_pecs_phase_advanced',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'aac_pecs_phase_advanced',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -89,34 +84,38 @@ describe('W1063 — AAC PECS phase advancement reaches the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     await AacProfile.create(baseProfile({ beneficiaryId }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'aac_pecs_phase_advanced',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving without advancing the phase does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const p = await AacProfile.create(baseProfile({ beneficiaryId, pecsPhase: { current: 1 } }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'aac_pecs_phase_advanced',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'aac_pecs_phase_advanced',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await AacProfile.findById(p._id);
     again.currentVocabularySize = 40;
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'aac_pecs_phase_advanced',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

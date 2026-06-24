@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -24,17 +26,6 @@ let mongod;
 let InsuranceClaim;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseClaim(overrides = {}) {
   return {
@@ -81,10 +72,14 @@ describe('W1000 — Insurance claim payment reaches the unified-core timeline', 
     claim.payment = { date: new Date(), amount: 640, method: 'bank_transfer' };
     await claim.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'insurance_claim_paid',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'insurance_claim_paid',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -97,8 +92,7 @@ describe('W1000 — Insurance claim payment reaches the unified-core timeline', 
     const beneficiary = new mongoose.Types.ObjectId();
     await InsuranceClaim.create(baseClaim({ beneficiary, status: 'approved' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'insurance_claim_paid' })).toBe(0);
+    await waitForCount({ eventType: 'insurance_claim_paid' }, 0);
   });
 
   it('re-saving an already-paid claim does not re-fire', async () => {
@@ -107,21 +101,25 @@ describe('W1000 — Insurance claim payment reaches the unified-core timeline', 
     claim.status = 'paid';
     await claim.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'insurance_claim_paid',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'insurance_claim_paid',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await InsuranceClaim.findById(claim._id);
     again.notes = 'Remittance advice filed.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary,
         eventType: 'insurance_claim_paid',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

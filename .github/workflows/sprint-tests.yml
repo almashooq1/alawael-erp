@@ -1911,7 +1911,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/traffic-accidents-stats-fix-wave1481.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/case-management-create-mapping-wave1482.test.js'
       - 'backend/package.json'
@@ -3803,7 +3802,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/traffic-accidents-stats-fix-wave1481.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/case-management-create-mapping-wave1482.test.js'
       - 'backend/package.json'

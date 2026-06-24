@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function request(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -65,7 +58,8 @@ describe('W1096 — PdplRequest → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await PdplRequest.create(request({ beneficiaryId, requestType: 'deletion' }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('pdpl_request_received');
     expect(row.category).toBe('administrative');
@@ -79,7 +73,8 @@ describe('W1096 — PdplRequest → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await PdplRequest.create(request({ beneficiaryId, requestType: 'correction' }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.metadata.status).toBe('received');
   });
@@ -102,14 +97,11 @@ describe('W1096 — PdplRequest → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await PdplRequest.create(request({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.status = 'completed';
     doc.respondedAt = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

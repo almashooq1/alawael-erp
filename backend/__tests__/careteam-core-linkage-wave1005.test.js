@@ -19,22 +19,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let EpisodeOfCare, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function newEpisode(extra = {}) {
   return EpisodeOfCare.create({
@@ -67,15 +58,18 @@ afterEach(async () => {
 describe('W1005 — care-team changes reach the unified-core timeline', () => {
   it('creating an episode emits no care-team row; adding a member → team_member_added', async () => {
     const ep = await newEpisode();
-    await new Promise(r => setTimeout(r, 150));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: ep.beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId: ep.beneficiaryId }, 0);
 
     const loaded = await EpisodeOfCare.findById(ep._id);
     await loaded.addTeamMember({ userId: new mongoose.Types.ObjectId(), role: 'speech_therapist' });
-    const tl = await waitForTimeline({
-      beneficiaryId: ep.beneficiaryId,
-      eventType: 'team_member_added',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: ep.beneficiaryId,
+        eventType: 'team_member_added',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
   });
@@ -85,14 +79,18 @@ describe('W1005 — care-team changes reach the unified-core timeline', () => {
     const ep = await newEpisode();
     let loaded = await EpisodeOfCare.findById(ep._id);
     await loaded.addTeamMember({ userId: uid, role: 'psychologist' });
-    await waitForTimeline({ beneficiaryId: ep.beneficiaryId, eventType: 'team_member_added' });
+    await waitForRows({ beneficiaryId: ep.beneficiaryId, eventType: 'team_member_added' }, 1);
 
     loaded = await EpisodeOfCare.findById(ep._id);
     await loaded.removeTeamMember(uid);
-    const tl = await waitForTimeline({
-      beneficiaryId: ep.beneficiaryId,
-      eventType: 'team_member_removed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: ep.beneficiaryId,
+        eventType: 'team_member_removed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
   });
 
@@ -101,10 +99,14 @@ describe('W1005 — care-team changes reach the unified-core timeline', () => {
     const loaded = await EpisodeOfCare.findById(ep._id);
     loaded.leadTherapistId = new mongoose.Types.ObjectId();
     await loaded.save();
-    const tl = await waitForTimeline({
-      beneficiaryId: ep.beneficiaryId,
-      eventType: 'lead_changed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: ep.beneficiaryId,
+        eventType: 'lead_changed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('info');
   });

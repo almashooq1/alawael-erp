@@ -1024,3 +1024,4 @@ __tests__/zkteco-device-merge-script.test.js
 __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 tests/unit/ops-alerter.test.js
 __tests__/traffic-accidents-stats-fix-wave1481.test.js
+__tests__/case-management-create-mapping-wave1482.test.js

@@ -61,6 +61,7 @@ const whatsappRateLimit = require('../services/whatsapp/rateLimit.service');
 const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
+const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const socketEmitter = require('../utils/socketEmitter');
@@ -511,6 +512,64 @@ router.post(
       { returnDocument: 'after', projection: { linkedTicketId: 1, linkedSessionId: 1 } }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAMPAIGNS (W1495) — persisted, trackable broadcasts over a saved contact
+// group. The send reuses the consent-filter + rate-limit + template primitives;
+// these routes are a thin branch-scoped layer over whatsappCampaign.service.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** GET /campaigns — list (branch-scoped, optional ?status) */
+router.get(
+  '/campaigns',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.listCampaigns(effectiveBranchScope(req), {
+      status: req.query.status,
+      limit: req.query.limit,
+    });
+    res.json({ success: true, data, total: data.length });
+  })
+);
+
+/** POST /campaigns — create (draft, or scheduled if scheduledAt given) */
+router.post(
+  '/campaigns',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.createCampaign(req.body || {}, {
+      branchId: effectiveBranchScope(req),
+      actorId: req.user?._id || req.user?.id || null,
+    });
+    res.status(201).json({ success: true, data });
+  })
+);
+
+/** GET /campaigns/:id */
+router.get(
+  '/campaigns/:id',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.getCampaign(req.params.id, effectiveBranchScope(req));
+    if (!data) return res.status(404).json({ success: false, message: 'Campaign not found' });
+    res.json({ success: true, data });
+  })
+);
+
+/** POST /campaigns/:id/run — launch now (consent-filtered send) */
+router.post(
+  '/campaigns/:id/run',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.runCampaign(req.params.id, effectiveBranchScope(req));
+    res.json({ success: true, data });
+  })
+);
+
+/** POST /campaigns/:id/cancel */
+router.post(
+  '/campaigns/:id/cancel',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.cancelCampaign(req.params.id, effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );

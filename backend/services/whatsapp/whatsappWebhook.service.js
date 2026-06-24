@@ -21,6 +21,7 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const logger = require('../../utils/logger');
+const socketEmitter = require('../../utils/socketEmitter');
 const whatsappService = require('./whatsappService');
 const whatsappAI = require('./whatsappAI.service');
 
@@ -231,15 +232,29 @@ async function handleStatusUpdate(status, _phoneNumberId) {
   const Conversation = getConversationModel();
   if (!Conversation) return;
 
-  await Conversation.updateOne(
+  const conv = await Conversation.findOneAndUpdate(
     { 'messages.providerMessageId': messageId },
     {
       $set: {
         'messages.$.deliveryStatus': state,
         'messages.$.statusUpdatedAt': new Date(parseInt(timestamp || Date.now() / 1000) * 1000),
       },
-    }
-  ).catch(err => logger.warn(`[WhatsApp] Status update DB error: ${err.message}`));
+    },
+    { projection: { _id: 1, branchId: 1, organizationId: 1, phone: 1 } }
+  ).catch(err => {
+    logger.warn(`[WhatsApp] Status update DB error: ${err.message}`);
+    return null;
+  });
+
+  if (conv) {
+    socketEmitter.emitWhatsAppStatusUpdate({
+      branchId: conv.branchId?.toString?.() || conv.branchId,
+      organizationId: conv.organizationId?.toString?.() || conv.organizationId,
+      conversationId: conv._id?.toString?.() || conv._id,
+      providerMessageId: messageId,
+      status: state,
+    });
+  }
 
   logger.debug(`[WhatsApp] Message ${messageId} → ${to}: ${state}`);
 }
@@ -350,6 +365,43 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
 
     // Mark as read with WhatsApp API
     await whatsappService.markAsRead(msg.id).catch(() => {});
+
+    // Real-time update to staff dashboard
+    if (conv) {
+      const lastMessage = conv.messages?.[conv.messages.length - 1];
+      socketEmitter.emitWhatsAppMessage({
+        branchId: conv.branchId?.toString?.() || conv.branchId,
+        organizationId: conv.organizationId?.toString?.() || conv.organizationId,
+        conversationId: conv._id?.toString?.() || conv._id,
+        message: lastMessage
+          ? {
+              _id: lastMessage._id?.toString?.() || lastMessage._id,
+              direction: lastMessage.direction,
+              type: lastMessage.type,
+              text: lastMessage.text,
+              mediaType: lastMessage.mediaType,
+              mediaId: lastMessage.mediaId,
+              filename: lastMessage.filename,
+              intent: lastMessage.intent,
+              sentiment: lastMessage.sentiment,
+              confidence: lastMessage.confidence,
+              deliveryStatus: lastMessage.deliveryStatus,
+              timestamp: lastMessage.timestamp,
+            }
+          : null,
+        conversation: {
+          _id: conv._id?.toString?.() || conv._id,
+          phone: conv.phone,
+          senderName: conv.senderName,
+          lastMessageAt: conv.lastMessageAt,
+          lastIntent: conv.lastIntent,
+          lastSentiment: conv.lastSentiment,
+          unreadCount: conv.unreadCount,
+          requiresHumanReview: conv.requiresHumanReview,
+          urgencyLevel: conv.urgencyLevel,
+        },
+      });
+    }
   }
 
   // ─── Auto-reply decision ────────────────────────────────────────────────
@@ -622,6 +674,38 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       }
     } catch (err) {
       logger.warn(`[WhatsApp Webhook] Notification emit error: ${err.message}`);
+    }
+
+    // Real-time escalation to staff dashboard
+    if (conv) {
+      socketEmitter.emitWhatsAppEscalation({
+        branchId: conv.branchId?.toString?.() || conv.branchId,
+        organizationId: conv.organizationId?.toString?.() || conv.organizationId,
+        conversationId: conv._id?.toString?.() || conv._id,
+        reason:
+          decision.reason ||
+          (classified.urgencyLevel === 'critical'
+            ? `critical_urgency:${classified.intent}`
+            : `requires_human_review:${classified.intent}`),
+        conversation: {
+          _id: conv._id?.toString?.() || conv._id,
+          phone: conv.phone,
+          senderName: conv.senderName,
+          lastMessageAt: conv.lastMessageAt,
+          lastIntent: conv.lastIntent,
+          lastSentiment: conv.lastSentiment,
+          unreadCount: conv.unreadCount,
+          requiresHumanReview: true,
+          status: 'escalated',
+          urgencyLevel: conv.urgencyLevel,
+        },
+        metadata: {
+          intent: classified.intent,
+          urgencyLevel: classified.urgencyLevel,
+          sentiment: classified.sentiment,
+          messageText: content.text?.slice(0, 300),
+        },
+      });
     }
   }
 

@@ -46,8 +46,8 @@ async function publish(eventType, payload, options = {}) {
     throw new Error(`Unknown document event type: ${eventType}`);
   }
 
-  const bus = getBus();
-  if (!bus || !bus.publish) {
+  const integrationBus = getBus();
+  if (!integrationBus || !integrationBus.publish) {
     logger.debug(`[DocumentEventPublisher] Bus not available, skipping event ${eventType}`);
     return null;
   }
@@ -57,14 +57,28 @@ async function publish(eventType, payload, options = {}) {
     throw new Error(`Unknown document event type literal: ${eventType}`);
   }
 
+  const publishOptions = {
+    domain: 'documents',
+    aggregateType: 'Document',
+    aggregateId: payload.documentId,
+    priority: payload.isConfidential ? 'high' : 'normal',
+    ...options,
+  };
+
   try {
-    const result = await bus.publish('documents', eventTypeLiteral, payload, {
-      domain: 'documents',
-      aggregateType: 'Document',
-      aggregateId: payload.documentId,
-      priority: payload.isConfidential ? 'high' : 'normal',
-      ...options,
-    });
+    // Emit the literal event-type string explicitly so W392 drift guards can
+    // correlate producers with subscribers.
+    let result;
+    if (eventType === 'expiring') {
+      result = await integrationBus.publish(
+        'documents',
+        'document.expiring',
+        payload,
+        publishOptions
+      );
+    } else {
+      result = await integrationBus.publish('documents', eventTypeLiteral, payload, publishOptions);
+    }
     logger.info(
       `[DocumentEventPublisher] Published document.${eventType} for ${payload.documentId}`
     );

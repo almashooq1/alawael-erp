@@ -1916,6 +1916,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-query-fixes-wave1486.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-enum-literal-queries-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3810,6 +3812,8 @@ on:
       - 'backend/__tests__/case-management-create-mapping-wave1482.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-query-fixes-wave1486.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-enum-literal-queries-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
       - 'backend/package.json'

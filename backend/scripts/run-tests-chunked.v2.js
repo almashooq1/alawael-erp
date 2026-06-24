@@ -140,6 +140,23 @@ function removeStaleArtifacts() {
   }
 }
 
+function ensureNoopHelpers() {
+  fs.mkdirSync(path.dirname(NOOP_SETUP), { recursive: true });
+  const body = "'use strict';\nmodule.exports = async () => {};\n";
+  fs.writeFileSync(NOOP_SETUP, body, 'utf8');
+  fs.writeFileSync(NOOP_TEARDOWN, body, 'utf8');
+}
+
+function removeNoopHelpers() {
+  for (const f of [NOOP_SETUP, NOOP_TEARDOWN]) {
+    try {
+      if (fs.existsSync(f)) fs.unlinkSync(f);
+    } catch {
+      // ignore
+    }
+  }
+}
+
 async function startMongoMemoryServer() {
   removeStaleArtifacts();
 
@@ -312,6 +329,8 @@ async function main() {
   }
   console.log(`[v2] discovered ${tests.length} test files`);
 
+  ensureNoopHelpers();
+
   const { mocked, real } = splitByMongooseMock(tests);
   console.log(`[v2] mocked-mongoose: ${mocked.length}, real-mongoose: ${real.length}`);
 
@@ -346,6 +365,7 @@ async function main() {
   }
 
   if (mongod) await stopMongoMemoryServer(mongod);
+  removeNoopHelpers();
 
   console.log(`\n[v2] final verdict: ${globalOk ? 'PASS' : 'FAIL'}`);
   process.exit(globalOk ? 0 : 1);
@@ -353,5 +373,6 @@ async function main() {
 
 main().catch(err => {
   console.error('[v2] fatal error:', err.message);
+  removeNoopHelpers();
   process.exit(1);
 });

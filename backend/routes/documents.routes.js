@@ -47,6 +47,7 @@ const { requireDocumentAccess } = require('../middleware/documentAccess.middlewa
 // Storage configuration
 // ──────────────────────────────────────────────────────────────────────────────
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
+const UPLOADS_ROOT = process.env.UPLOADS_ROOT || '/home/alawael/app/uploads';
 
 /** Map mime type to Document.fileType enum value */
 function mimeToFileType(mime, originalName) {
@@ -607,9 +608,16 @@ router.get(
       return res.status(404).json({ success: false, message: 'المستند غير موجود' });
     }
 
+    // W454: strict path-boundary check before streaming.
+    const resolvedPath = path.resolve(doc.filePath);
+    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
+      logger.warn(`[Documents] Path traversal blocked: ${doc.filePath}`);
+      return res.status(400).json({ success: false, message: 'مسار ملف غير صالح' });
+    }
+
     // Verify file exists in storage
     const fileExists = await storageService
-      .exists(doc.filePath, doc.storageProvider)
+      .exists(resolvedPath, doc.storageProvider)
       .catch(() => false);
     if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
@@ -635,7 +643,7 @@ router.get(
     res.setHeader('Cache-Control', 'private, max-age=3600');
 
     try {
-      const buffer = await storageService.download(doc.filePath, doc.storageProvider);
+      const buffer = await storageService.download(resolvedPath, doc.storageProvider);
       res.send(buffer);
     } catch (err) {
       logger.error('[Documents] Preview download error:', err);
@@ -656,8 +664,15 @@ router.get(
       return res.status(404).json({ success: false, message: 'المستند غير موجود' });
     }
 
+    // W454: strict path-boundary check before streaming.
+    const resolvedPath = path.resolve(doc.filePath);
+    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
+      logger.warn(`[Documents] Path traversal blocked: ${doc.filePath}`);
+      return res.status(400).json({ success: false, message: 'مسار ملف غير صالح' });
+    }
+
     const fileExists = await storageService
-      .exists(doc.filePath, doc.storageProvider)
+      .exists(resolvedPath, doc.storageProvider)
       .catch(() => false);
     if (!fileExists) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
@@ -672,7 +687,7 @@ router.get(
     res.setHeader('Cache-Control', 'private, no-cache');
 
     try {
-      const buffer = await storageService.download(doc.filePath, doc.storageProvider);
+      const buffer = await storageService.download(resolvedPath, doc.storageProvider);
       res.send(buffer);
     } catch (err) {
       logger.error('[Documents] Download error:', err);

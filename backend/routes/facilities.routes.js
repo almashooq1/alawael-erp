@@ -479,7 +479,7 @@ router.get('/dashboard', async (req, res) => {
       Room.countDocuments(roomScope),
       Room.countDocuments({ ...roomScope, status: 'available' }),
       Room.countDocuments({ ...roomScope, status: 'occupied' }),
-      Room.countDocuments({ ...roomScope, status: 'under_maintenance' }),
+      Room.countDocuments({ ...roomScope, status: 'maintenance' }), // W1486: was 'under_maintenance' (not in Room enum → always 0)
       RoomBooking.countDocuments(bookingsScope),
       MaintenanceRequest.countDocuments(maintenanceScope),
       Room.aggregate([

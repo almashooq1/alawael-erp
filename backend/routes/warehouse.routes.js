@@ -78,7 +78,7 @@ router.get('/dashboard', async (req, res) => {
     const [totalWarehouses, totalItems, lowStock, transactions] = await Promise.all([
       WH ? WH.countDocuments(mergeListFilter(req, { isActive: true })) : 0,
       WHItem ? WHItem.countDocuments(itemFilter) : 0,
-      WHItem ? WHItem.countDocuments({ ...itemFilter, status: 'low' }) : 0,
+      WHItem ? WHItem.countDocuments({ ...itemFilter, status: 'low_stock' }) : 0, // W1486: was 'low' (not in WHItem enum → always 0)
       WHTx
         ? WHTx.countDocuments({
             ...txFilter,

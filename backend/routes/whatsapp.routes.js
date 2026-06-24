@@ -403,6 +403,118 @@ router.post(
   })
 );
 
+/**
+ * POST /conversations/:id/notes — add a private staff note (W1493).
+ * Internal only; never sent to WhatsApp. Branch-isolated; explicit field
+ * extraction (no mass-assignment).
+ */
+router.post(
+  '/conversations/:id/notes',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    validate(['text'], req.body);
+    const note = {
+      text: String(req.body.text).slice(0, 4000),
+      authorId: req.user?._id || req.user?.id || null,
+      authorName: req.user?.name || req.user?.email || null,
+      createdAt: new Date(),
+    };
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $push: { internalNotes: note } },
+      { returnDocument: 'after', projection: { internalNotes: 1 } }
+    ).lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    const notes = data.internalNotes || [];
+    res.status(201).json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
+  })
+);
+
+/**
+ * POST /conversations/:id/transfer — hand the conversation to another staff
+ * member with an audited reason (W1493). Strengthens /assign with a transfer
+ * trail. Branch-isolated; explicit field extraction (no mass-assignment).
+ */
+router.post(
+  '/conversations/:id/transfer',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    validate(['staffId'], req.body);
+    const toUserId = String(req.body.staffId);
+    if (!mongoose.isValidObjectId(toUserId)) {
+      return res.status(400).json({ success: false, message: 'Invalid staffId' });
+    }
+    const reason = req.body.reason ? String(req.body.reason).slice(0, 1000) : undefined;
+
+    // Read the current assignee first so the audit entry records who it left.
+    const current = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id assignedTo branchId organizationId')
+      .lean();
+    if (!current) return res.status(404).json({ success: false, message: 'Not found' });
+
+    const entry = {
+      fromUserId: current.assignedTo || req.user?._id || req.user?.id || null,
+      toUserId,
+      reason,
+      at: new Date(),
+    };
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $set: { assignedTo: toUserId, status: 'pending_review' }, $push: { transferLog: entry } },
+      { returnDocument: 'after' }
+    )
+      .populate('assignedTo', 'name email')
+      .lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+
+    socketEmitter.emitWhatsAppConversationUpdate({
+      branchId: data.branchId?.toString?.() || data.branchId,
+      organizationId: data.organizationId?.toString?.() || data.organizationId,
+      conversationId: data._id?.toString?.() || data._id,
+      changes: { assignedTo: toUserId, status: data.status },
+    });
+
+    res.json({ success: true, data });
+  })
+);
+
+/**
+ * POST /conversations/:id/link — cross-reference this thread to a Complaint
+ * ticket and/or ClinicalSession (W1493). Pass null/'' to clear a link.
+ * Branch-isolated.
+ */
+router.post(
+  '/conversations/:id/link',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const set = {};
+    if ('ticketId' in req.body) {
+      const t = req.body.ticketId;
+      if (t === null || t === '') set.linkedTicketId = null;
+      else if (mongoose.isValidObjectId(t)) set.linkedTicketId = t;
+      else return res.status(400).json({ success: false, message: 'Invalid ticketId' });
+    }
+    if ('sessionId' in req.body) {
+      const s = req.body.sessionId;
+      if (s === null || s === '') set.linkedSessionId = null;
+      else if (mongoose.isValidObjectId(s)) set.linkedSessionId = s;
+      else return res.status(400).json({ success: false, message: 'Invalid sessionId' });
+    }
+    if (Object.keys(set).length === 0) {
+      return res.status(400).json({ success: false, message: 'Provide ticketId or sessionId' });
+    }
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $set: set },
+      { returnDocument: 'after', projection: { linkedTicketId: 1, linkedSessionId: 1 } }
+    ).lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MESSAGING
 // ═══════════════════════════════════════════════════════════════════════════

@@ -252,6 +252,7 @@
     "check:wave-collision:json": "node scripts/check-wave-collision.js --json",
     "check:route-shadowing": "node scripts/check-route-shadowing.js",
     "check:dormant-modules": "node scripts/check-dormant-modules.js",
+    "check:enum-literal-queries": "node scripts/check-enum-literal-queries.js",
     "check:dormant-modules:json": "node scripts/check-dormant-modules.js --json",
     "check:dormant-modules:bare": "node scripts/check-dormant-modules.js --bare",
     "check:authz-consolidation": "node scripts/check-authz-consolidation.js",

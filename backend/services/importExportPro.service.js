@@ -29,7 +29,8 @@ const logger = require('../utils/logger');
 
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, sanitizeMongoFilter } = require('../utils/sanitize');
+const mongoExportScope = require('../utils/exportBranchScope');
 
 // ──────────────────────────────────────────────────────
 // Module Registry + System Templates — extracted to ./importExport/
@@ -57,6 +58,7 @@ class ImportExportProService {
       query = {},
       sort = { createdAt: -1 },
       dateRange,
+      branchId,
       options = {},
       userId,
       jobName,
@@ -78,7 +80,7 @@ class ImportExportProService {
 
     try {
       // Fetch data
-      const data = await this._fetchModuleData(module, query, fields, sort, dateRange);
+      const data = await this._fetchModuleData(module, query, fields, sort, dateRange, branchId);
 
       job.progress.total = data.length;
 
@@ -1024,7 +1026,7 @@ class ImportExportProService {
   /**
    * Fetch data from a module
    */
-  async _fetchModuleData(module, query = {}, fields, sort, dateRange) {
+  async _fetchModuleData(module, query = {}, fields, sort, dateRange, branchId) {
     const Model = this._getModel(module);
 
     if (!Model) {
@@ -1035,7 +1037,19 @@ class ImportExportProService {
       return [];
     }
 
-    const mongoQuery = { ...query };
+    // W1456: the export routes JSON.parse a user-supplied `filters` query-string param
+    // AFTER the global express-mongo-sanitize ran (it only saw an opaque string), so an
+    // attacker could inject operators ($ne/$gt/$where/$regex) into this query and exfiltrate
+    // arbitrary collections or run server-side JS. Strip operator/dotted keys here, at the
+    // shared sink, before they reach Model.find(). Server-side dateRange operators below are
+    // added AFTER sanitization, so they are preserved.
+    const mongoQuery = { ...sanitizeMongoFilter(query) };
+
+    // W1459: tenant isolation — force the caller's branch on branch-partitioned models so
+    // a restricted user cannot export another branch's data via the `filters` param
+    // (overrides any user-supplied branchId). branchId is null for HQ/cross-branch callers,
+    // and models without a branch field (global/reference data) are left unscoped.
+    mongoExportScope.scopeQueryToBranch(mongoQuery, Model, branchId);
 
     // Apply date range
     if (dateRange && dateRange.field && /^[A-Za-z0-9_.]+$/.test(dateRange.field)) {

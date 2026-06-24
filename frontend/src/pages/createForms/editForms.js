@@ -15,6 +15,24 @@ const EDIT_FORMS = {
     title: 'تعديل التوجيه المسبق',
     successMsg: 'تم حفظ التعديلات ✓',
   },
+  'beneficiaries/:id/edit': {
+    mode: 'edit',
+    getEndpoint: '/core/beneficiaries',
+    endpoint: '/core/beneficiaries',
+    backTo: '/beneficiaries',
+    title: 'تعديل بيانات المستفيد',
+    successMsg: 'تم حفظ التعديلات ✓',
+  },
+  // Singleton settings screen — no :id; GET + PUT a single policy object.
+  'sso-admin/config': {
+    mode: 'edit',
+    singleton: true,
+    getEndpoint: '/security/policy',
+    endpoint: '/security/policy',
+    backTo: '/sso-admin',
+    title: 'إعدادات الأمان والدخول',
+    successMsg: 'تم حفظ الإعدادات ✓',
+  },
 };
 
 export default EDIT_FORMS;

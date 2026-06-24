@@ -608,3 +608,133 @@ All 7 pre-push gates passed locally and on push:
 - For branch-scoped routes: import `branchFilter` and spread it into every query and every id-keyed Mongoose call; never trust `req.query.branchId` or `x-branch-id`.
 - For Express 4 async routes: use a wrapper that catches handler rejections and forwards them to the error middleware; bare `express.Router()` is unsafe for async handlers.
 - For fire-and-forget Mongoose writes inside callbacks: either `await` them or explicitly handle the rejection before resolving/rejecting the outer promise; otherwise the rejection is unhandled.
+
+## Deep bug-hunt follow-ups W1450–W1454 — 2026-06-22
+
+Five regression fixes from the W1443–W1449 deep bug-hunt were bundled into PR #594, renumbered to avoid collisions with already-merged waves on `main`, and shipped via squash merge `9cde4aab4`.
+
+### W1450 — AI scheduler Goal participantId query (re-applied)
+
+**Commit:** `8425fcca4`
+
+- `backend/services/ai/aiScheduler.service.js`: restored the `participantId` filter on the Goal lookup that was dropped during a prior rebase. Without it the scheduler could plan against goals belonging to other participants.
+- Guard: `backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js` (wave number kept for historical traceability).
+
+### W1451 — input-validation + trial-balance hardening
+
+**Commit:** `b4246d35a`
+
+- `backend/routes/complaints-enhanced.routes.js`: replaced `...req.body` spreads with explicit field whitelists (`COMPLAINT_CREATABLE` / `COMPLAINT_UPDATABLE`) so authenticated users cannot self-set `status`, `slaBreached`, `escalationLevel`, or resolved/closed timestamps. Status transitions remain restricted to `POST /:id/status`.
+- `backend/routes/hr/hr-modules.routes.js` and `backend/routes/hr/hr-extensions.routes.js`: added `runValidators: true` to generic CRUD `PATCH` and `EmployeeGoal` update so invalid enum / negative-money / out-of-range updates fail instead of persisting silently.
+- `backend/routes/finance-module.routes.js`: trial-balance now reads `line.debit` / `line.credit` instead of the non-existent `debit_amount` / `credit_amount`, fixing zero-balance reports.
+- Guard: `backend/__tests__/input-integrity-hardening-wave1448.test.js`.
+
+### W1452 — invoice header totals reconciliation (ZATCA)
+
+**Commit:** `4ff5ff2a0`
+
+- `backend/services/billing/invoice.service.js`: adds `recalculateHeaderTotals(invoice)` and wires it into issue/submit flows so header subtotal, VAT, and total are synchronized with line-item sums before ZATCA submission.
+- Guard: `backend/__tests__/invoice-totals-reconciliation-wave1449.test.js`.
+
+### W1453 — enumerate deep-bug-hunt regression guards in sprint gate
+
+**Commit:** `62aa3abeb`
+
+- Registered the six new regression-guard tests in `backend/sprint-tests.txt` and `.github/workflows/sprint-tests.yml` so CI's canonical sprint gate actually runs them.
+
+### W1454 — Beneficiary PII field projection (PDPL)
+
+**Commit:** `1a3334106`
+
+- `backend/models/Beneficiary.js`: marked `passwordResetToken`, `passwordResetExpires`, `twoFactorSecret`, and `accountVerificationCode` with `select: false`, matching the sibling `BeneficiaryPortal` model and preventing these sensitive fields from leaking in default query projections.
+- Guard: `backend/__tests__/beneficiary-pii-select-false-wave1454.test.js`.
+
+### Verified green
+
+All 7 pre-push gates passed locally; PR #594 CI passed including `Tests & Code Quality` (~32 min), `Security Scanning`, CodeQL, and frontend/mobile/SCM quality gates.
+
+### Pattern recap
+
+- Renumber colliding waves before pushing; `check:wave-collision` exits non-zero and the suggested next free wave is authoritative.
+- Never spread `req.body` into Mongoose constructors or updates for resources that have privileged/auto-derived fields; whitelist creatable/updatable fields.
+- Always pair schema enum/range constraints with `runValidators: true` on `findByIdAndUpdate` / `updateOne` / generic CRUD patches.
+- Keep model PII symmetry: if one schema marks a sensitive field `select: false`, siblings storing equivalent data should do the same.
+
+## Beneficiaries DDD unification W1457 — 2026-06-23
+
+Consolidated the remaining Beneficiaries admin and Episode Center surfaces under the `domains/core` DDD service and retired the legacy `/api/v1/beneficiary-core` facade. Shipped on `feat/medical-upload` as PR #601.
+
+**Wave-number note:** the internal commits were renumbered from W1456 → W1457 → W1458 to avoid collisions with PR #600 (W1456 NoSQL operator injection) and PR #602 (W1457 user-management privilege ceiling). However, the squash-merge title retained `W1457`, so the merge commit on `main` is W1457. This created an unavoidable wave collision with PR #602 in the commit history; CLAUDE.md records both under W1457.
+
+### W1457 — DDD migration, facade retirement, and deep-link cleanup
+
+**Merge commit:** `0edc735b9`
+
+- `backend/domains/core/services/beneficiary.service.js`: added admin operations `listWithFilters`, `updateStatus`, `bulkAction`, `getRecent`, `getExportData`, `getAtRisk`, `getCities`, and `listEpisodeCenter`.
+- `backend/domains/core/routes/beneficiary.routes.js`: added `/api/v1/core/beneficiaries` endpoints for recent, at-risk, cities, CSV export, status patch, bulk-action, dashboard, episode-center list/profile; enhanced list with search/status/category/gender/city/age/archived filters.
+- Removed `backend/routes/beneficiary-core.routes.js` and `frontend/src/services/beneficiaryCoreService.js`; updated `backend/routes/registries/features.registry.js` to stop mounting the retired facade.
+- Frontend Beneficiaries pages and `EpisodeCenterPage` switched from legacy services to `coreAPI` (`frontend/src/services/ddd/index.js`).
+- Updated drilldown/care-gap/role deep-links from `/care/360/:beneficiaryId` to `/beneficiary-portal/:beneficiaryId` and aligned `drilldown-wave21.test.js` + `insight-foundation-wave18.test.js`.
+- Fixed a pre-existing lint warning in `backend/scripts/chaos-test-w1437.js`.
+
+### Verified green
+
+All 7 pre-push gates passed locally; push used `CHECK_WAVE_SKIP=1` because the merge from `origin/main` made `check:wave-collision` compare the merged main commits against themselves.
+
+- `check:sprint-paths`, `check:routes-load`, `check:gitignored-sources`, `check:hook-style`, `check:phantom-writes`, `check:route-shadowing`, `check:wave-collision`
+- `backend` lint, `frontend` lint, `supply-chain-management/frontend` lint, `mobile` lint
+
+### Pattern recap
+
+- When migrating a facade to DDD, move the endpoints first, then switch each consumer, then delete the old service/route pair in the same PR to avoid half-cutover drift.
+- Keep deep-links in sync across registries, generators, and tests — a single changed route surface breaks intelligence drilldowns and care-gap actions silently.
+- After merging `origin/main` into a long-lived PR branch, re-run `check:wave-collision`; the upstream branch may have claimed the wave number you intended.
+
+## Session Center / document upload follow-up W1465 — 2026-06-23
+
+Pushed as the next commit on `feat/medical-upload` (PR #605).
+
+### W1465 — Session Center DDD unification + document-upload plumbing
+
+**Commit:** `ff518c32d`
+
+- `backend/domains/sessions/index.js`: override `mount()` so the secure
+  branch-isolated router owns `/api/(v1/v2/)sessions`; retire legacy
+  `/api/v1/therapy-sessions` and `/api/v1/session-center` registry mounts.
+- `backend/domains/sessions/routes/sessions.routes.js`: add `/stats`, `/today`,
+  `/statistics` and `/session-center/*` analytics aliases.
+- Retire remaining beneficiaries admin surface: delete
+  `backend/routes/beneficiaries.js`, `backend/tests/unit/beneficiaries.route.test.js`,
+  obsolete `__tests__` guards, and `frontend/src/services/beneficiaryService.js`.
+- Document upload/storage plumbing: add `backend/services/storage/*`,
+  `backend/services/documents/*`, `backend/middleware/document{Upload,Access}.middleware.js`,
+  `backend/integration/subscribers/*`, migration script, and route/model wiring
+  for documents across clinical/finance/HR surfaces.
+- Frontend: document hub components, `documentHubApi.js`, and session/therapy
+  callers switched to `/api/v1/sessions` via `services/ddd`.
+- Sprint gate: prune deleted test files from `sprint-tests.txt`/`sprint-tests.yml`,
+  add `sessions-session-center-branch-isolation.test.js`, and update
+  `auth-gate-mount-sweep-wave502` + `dual-mount-auth-locked` to allow
+  DDD-domain mounts for `sessions` and `episodes`.
+
+### Verified green locally
+
+- `check:sprint-paths`, `check:routes-load`, `check:gitignored-sources`,
+  `check:hook-style`, `check:phantom-writes`, `check:route-shadowing`,
+  `check:wave-collision`.
+- `frontend`, `supply-chain-management/frontend`, and `mobile` lints all zero-warning.
+- Targeted tests: `auth-gate-mount-sweep-wave502`, `dual-mount-auth-locked`,
+  `sessions-session-center-branch-isolation`, `ci-path-triggers-exist`,
+  `sprint-test-files-exist`.
+
+### Pattern recap
+
+- When a DDD domain takes over a surface, remove the registry `dualMountAuth`
+  entry and add a static test proving the domain `mount()` applies
+  `authenticate` + `requireBranchAccess`; otherwise the `dual-mount-auth-locked`
+  invariant test will rightfully fail.
+- Deleting a test file must be paired with pruning it from
+  `sprint-tests.txt` (and therefore `.github/workflows/sprint-tests.yml`);
+  otherwise `sprint-test-files-exist` and `ci-path-triggers-exist` go red.
+- Keep untracked feature files in the same commit as their consumers to avoid
+  half-merged pushes that break `require` chains in CI.

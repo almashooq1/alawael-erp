@@ -133,6 +133,8 @@ import CREATE_FORMS from './pages/createForms/registry';
 import EntityDetailPage from './pages/common/EntityDetailPage';
 import DETAIL_VIEWS from './pages/createForms/detailViews';
 import EDIT_FORMS from './pages/createForms/editForms';
+import FileUploadPage from './pages/common/FileUploadPage';
+import UPLOAD_FORMS from './pages/createForms/uploadForms';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));
@@ -400,6 +402,11 @@ export default function AuthenticatedShell() {
                   {/* Edit forms — replaces dead edit :id 404s (GET prefill + PUT). */}
                   {Object.entries(EDIT_FORMS).map(([p, cfg]) => (
                     <Route key={p} path={p} element={<EntityFormPage config={cfg} />} />
+                  ))}
+
+                  {/* File-upload screens — replaces dead /upload 404s (multipart). */}
+                  {Object.entries(UPLOAD_FORMS).map(([p, cfg]) => (
+                    <Route key={p} path={p} element={<FileUploadPage config={cfg} />} />
                   ))}
 
                   {/* Domain Route Modules */}

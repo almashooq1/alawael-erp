@@ -164,7 +164,6 @@ const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
 const branchesRoutes = safeRequire('../routes/branches.routes');
 const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
-const beneficiariesAdminRoutes = safeRequire('../routes/beneficiaries');
 const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.routes');
 
 // Wave 2: Fixed Route Files (16 additional CRUD routes)
@@ -457,7 +456,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'predictions', predictionsRoutes);
   dualMount(app, 'branches', branchesRoutes);
   dualMount(app, 'beneficiary-portal', beneficiaryPortalRoutes);
-  dualMount(app, 'beneficiaries', beneficiariesAdminRoutes);
+  // Beneficiary admin CRUD is now served by DDD Core /api/v1/core/beneficiaries
+  // (legacy /api/v1/beneficiaries base routes retired).
+  logger.info('✅ Beneficiary admin routes retired from /api/v1/beneficiaries; now served by DDD Core /api/v1/core/beneficiaries');
   dualMount(app, 'community-integration', communityIntegrationRoutes);
   logger.info(
     'Community Integration module mounted (activities, partnerships, participation, assessments, awareness — 30+ endpoints)'
@@ -508,14 +509,18 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'newsletter', require('../routes/newsletter.routes'));
   dualMount(app, 'careers', require('../routes/careers.routes'));
   dualMount(app, 'admin/beneficiaries', require('../routes/beneficiaries-admin.routes'));
-  dualMount(app, 'admin/therapy-sessions', require('../routes/therapy-sessions-admin.routes'));
+  // Admin Therapy Sessions now served by DDD Sessions /api/v1/sessions/admin/*
+  // (compat layer in domains/sessions/routes/sessions-admin-compat.routes.js).
+  // dualMount(app, 'admin/therapy-sessions', require('../routes/therapy-sessions-admin.routes'));
   dualMount(app, 'admin/assessments', require('../routes/assessments-admin.routes'));
   // ── Disability Assessment Tests (اختبارات تقييم الإعاقة) ─────────────────
   dualMount(app, 'disability', safeRequire('../routes/disability-assessment.routes'));
   // ── W206 Smart Rehab Engine — assessment→goals+programs+schedule ────────
   dualMountAuth(app, 'assessment-engine', require('../routes/assessmentRecommendation.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
-  dualMountAuth(app, 'episodes', require('../routes/episodes.routes'));
+  // Episodes of Care — now served by the DDD episodes domain secure router
+  // (domains/episodes/routes/episodes.routes.js). Legacy /api/v1/episodes route
+  // file retired to backend/_archived/routes.
   // rehabilitation-advanced is now registered via clinical-therapy.registry.js (via phases.registry.js)
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2-extras.routes'));
@@ -620,7 +625,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Clinical Research — auth required
   dualMountAuth(app, 'research', safeRequire('../domains/research/routes/research.routes'));
   // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
-  dualMountAuth(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
+  // Mounted by domains/episodes/index.js so the branch-isolated secure router
+  // owns /api/(v1/v2/)episodes without being shadowed by legacy routes.
+  logger.info(
+    '✅ Episodes of Care routes mounted via DDD domain: CRUD, beneficiary episodes, active episode, statistics, phase/therapist lists, workflow transitions (advance/suspend/resume/discharge), care team, clinical summary — الحلقة العلاجية (16+ endpoints)'
+  );
   // HR — الموارد البشرية الموحدة — auth required (employee PII)
   // OWNER MAP for /api/(v1/)?hr (ADR-043): this domain router owns the CORE
   // personnel subpaths (/employees, /leaves, /attendance); the Round-10 module
@@ -653,14 +662,22 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Clinical Assessments (تقييمات سريرية) — auth required (PII)
   dualMountAuth(app, 'assessments', safeRequire('../domains/assessments/routes/assessments.routes'));
   // Clinical Sessions (جلسات علاجية) — auth required (PII)
-  dualMountAuth(app, 'sessions', safeRequire('../domains/sessions/routes/sessions.routes'));
-  // Therapy Sessions — extended CRUD + documentation + bulk ops (maps frontend /therapy-sessions/*) — auth required
-  dualMountAuth(app, 'therapy-sessions', safeRequire('../routes/therapy-sessions.routes'));
-  // Therapy Sessions Analytics — KPIs, trends, calendar, billing (maps frontend /therapy-sessions-analytics/*)
-  dualMount(
-    app,
-    'therapy-sessions-analytics',
-    safeRequire('../routes/therapy-sessions-analytics.routes')
+  // Mounted by domains/sessions/index.js so the branch-isolated secure router
+  // owns /api/(v1/v2/)sessions without being shadowed by legacy routes.
+  logger.info(
+    '✅ Clinical Sessions routes mounted via DDD domain: CRUD, schedule, status transitions, attendance, reschedule, SOAP/documentation, branch-scoped lists, Session-Center analytics — الجلسات العلاجية الموحدة (20+ endpoints)'
+  );
+  // Therapy Sessions — retired: /api/v1/therapy-sessions merged into DDD Sessions
+  // (/api/v1/sessions). Frontend callers now use therapySessions.service.js which
+  // delegates to sessionsAPI from services/ddd.
+  logger.info(
+    '✅ /api/v1/therapy-sessions routes retired; now served by DDD Sessions /api/v1/sessions — الجلسات العلاجية (توحيد الأسطح)'
+  );
+  // Therapy Sessions Analytics — retired: merged into DDD Sessions
+  // (/api/v1/sessions/analytics/*). Frontend callers now use therapistService
+  // which delegates to sessionsAPI.analytics from services/ddd.
+  logger.info(
+    '✅ /api/v1/therapy-sessions-analytics routes retired; now served by DDD Sessions /api/v1/sessions/analytics — تحليلات الجلسات (توحيد الأسطح)'
   );
   // Therapist Extended — treatment plans, assessments, prescriptions, professional-dev, analytics, consultations
   dualMountAuth(app, 'therapist-extended', safeRequire('../routes/therapist-extended.routes'));

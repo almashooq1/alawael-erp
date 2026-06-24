@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const importExportService = require('../services/importExportPro.service');
 const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -51,6 +52,7 @@ router.get('/:format', async (req, res) => {
       format: format || 'xlsx',
       query: parsedFilters,
       fields: fields ? fields.split(',') : undefined,
+      branchId: effectiveBranchScope(req), // W1459: tenant-scope export to caller's branch
       userId,
     });
 

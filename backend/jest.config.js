@@ -20,6 +20,9 @@ module.exports = {
   globalSetup: '<rootDir>/jest.globalSetup.js',
   globalTeardown: '<rootDir>/jest.globalTeardown.js',
 
+  // Restart workers before they bloat; keeps parallel runs stable and fast.
+  workerIdleMemoryLimit: '512MB',
+
   // Setup files — jest.env.js sets env vars BEFORE modules load,
   // jest.setup.js runs AFTER the test framework is installed
   setupFiles: ['<rootDir>/jest.env.js'],
@@ -167,9 +170,6 @@ module.exports = {
   // overwhelming the shared MongoMemoryServer used by integration tests.
   // Serial run (--runInBand) passes; failures at '50%' are connection timeouts.
   maxWorkers: 2,
-
-  // Reclaim workers that exceed 512 MB — prevents OOM during stress/endurance tests
-  workerIdleMemoryLimit: '512MB',
 
   // Mock management
   clearMocks: true,

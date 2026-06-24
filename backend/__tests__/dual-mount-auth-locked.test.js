@@ -42,8 +42,8 @@ const REQUIRES_AUTH = new Set([
   'dashboards',
   'hr',
   'research',
-  'sessions',
-  'therapy-sessions',
+  // 'sessions' is mounted by domains/sessions/index.js (auth + branch isolation), not by _registry.js
+  // 'therapy-sessions' retired: merged into DDD Sessions /api/v1/sessions (Phase 5 surface unification)
   'reports',
   'system-settings',
   'rehab-templates',
@@ -121,4 +121,15 @@ describe('dualMountAuth invariant (commit 501420d66)', () => {
       }
     });
   }
+
+  test('sessions is no longer dual-mounted in registry (now DDD domain mount)', () => {
+    const sessionMounts = mounts.filter(m => m.path === 'sessions');
+    expect(sessionMounts).toEqual([]);
+    const domainSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'domains', 'sessions', 'index.js'),
+      'utf8'
+    );
+    expect(domainSrc).toMatch(/\bauthenticate\b/);
+    expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
+  });
 });

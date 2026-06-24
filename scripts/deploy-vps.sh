@@ -30,7 +30,7 @@
 #   • Local clean git tree (so BUILD_SHA matches what's on disk)
 #   • Run from repo root
 
-set -euo pipefail
+set +H -euo pipefail
 
 # ─── Config (override via env) ──────────────────────────────────────
 SSH_KEY="${SSH_KEY:-$HOME/.ssh-alaweal/alaweal_root_ed25519}"
@@ -99,7 +99,7 @@ if $ROLLBACK; then
   [[ "$HEALTH_STATUS" == "200" ]] || die "/health returned $HEALTH_STATUS after rollback"
   ok "/health → 200 after rollback"
 
-  NEW_SHA=$(curl -sf "$BUILD_INFO_URL" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')
+  NEW_SHA=$(curl -sf "$BUILD_INFO_URL" 2>/dev/null | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' || echo "?")
   ok "Rolled back: production now reports ${NEW_SHA:0:8} (was ${CUR_SHA:0:8})"
   warn "The forward state is preserved at $VPS_APP_DIR/backend.rolled-back-$STAMP for forensics"
   exit 0
@@ -129,29 +129,28 @@ if $W1437_MIGRATION; then
   MONGODB_URI="${MONGODB_URI:-${MONGO_URI:-}}"
   [[ -n "$MONGODB_URI" ]] || die "MONGODB_URI/MONGO_URI is required for --with-w1437-migration"
 
-  # Copy latest migration scripts to VPS (idempotent, atomic temp path)
+  # Copy migration script to VPS (idempotent, atomic temp path)
   STAMP_MIG=$(date +%Y%m%d-%H%M%S)
   REMOTE_MIG_DIR="$VPS_APP_DIR/.w1437-migration-$STAMP_MIG"
 
-  ssh_run "mkdir -p $REMOTE_MIG_DIR/scripts $REMOTE_MIG_DIR/backend/scripts"
+  ssh_run "mkdir -p $REMOTE_MIG_DIR/backend/scripts"
   scp -i "$SSH_KEY" -o ConnectTimeout=30 \
-    scripts/deploy-w1437.sh \
     backend/scripts/migrate-nphies-claim-updatedAt.js \
-    "$VPS_HOST:$REMOTE_MIG_DIR/"
+    "$VPS_HOST:$REMOTE_MIG_DIR/backend/scripts/"
 
-  ok "Migration scripts copied to $REMOTE_MIG_DIR"
+  ok "Migration script copied to $REMOTE_MIG_DIR/backend/scripts"
 
   # Run migration on VPS via a temporary env file (avoids leaking URI in ssh ps)
   MIG_ENV_FILE="/tmp/.w1437-migration-env-$STAMP_MIG"
   ssh_run "cat > $MIG_ENV_FILE <<'EOF'
-MONGODB_URI='$MONGODB_URI'
-NODE_ENV=production
-DEPLOY_ROOT=$VPS_APP_DIR
+export MONGODB_URI='$MONGODB_URI'
+export NODE_ENV=production
 EOF
+chown $PM2_USER:$PM2_USER $MIG_ENV_FILE
 chmod 600 $MIG_ENV_FILE"
 
-  say "Running W1437 migration on VPS (host only: $(echo "$MONGODB_URI" | sed -E 's#^mongodb(\+srv)?://([^/]+)/.*#\2#'))"
-  ssh_run "sudo -u $PM2_USER bash -c 'set -e; source $MIG_ENV_FILE; cd $VPS_APP_DIR; cp $REMOTE_MIG_DIR/deploy-w1437.sh ./scripts/deploy-w1437.sh; cp $REMOTE_MIG_DIR/migrate-nphies-claim-updatedAt.js ./backend/scripts/migrate-nphies-claim-updatedAt.js; chmod +x ./scripts/deploy-w1437.sh; ./scripts/deploy-w1437.sh --force'" || die "W1437 migration failed — aborting deploy"
+  say "Running W1437 migration on VPS (host only: $(echo "$MONGODB_URI" | sed -E 's#^mongodb(\+srv)?://([^:@]+)(:[^@]+)?@([^/]+)/.*#\4#'))"
+  ssh_run "bash -c 'set +H -e; source $MIG_ENV_FILE; cp $REMOTE_MIG_DIR/backend/scripts/migrate-nphies-claim-updatedAt.js $VPS_APP_DIR/backend/scripts/migrate-nphies-claim-updatedAt.js; cd $VPS_APP_DIR/backend; node scripts/migrate-nphies-claim-updatedAt.js'" || die "W1437 migration failed — aborting deploy"
 
   # Cleanup
   ssh_run "rm -f $MIG_ENV_FILE; rm -rf $REMOTE_MIG_DIR" || true
@@ -302,7 +301,7 @@ HEALTH_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "0
 ok "/health → 200"
 
 if $DEPLOY_BACKEND; then
-  NEW_SHA=$(curl -sf "$BUILD_INFO_URL" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')
+  NEW_SHA=$(curl -sf "$BUILD_INFO_URL" 2>/dev/null | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' || echo "?")
   if [[ "$NEW_SHA" == "$LOCAL_SHA" ]]; then
     ok "/api/v1/build-info commit matches local: ${NEW_SHA:0:8}"
   else

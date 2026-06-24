@@ -50,6 +50,14 @@ const invoiceSchema = new mongoose.Schema(
 
     notes: String,
 
+    // المرفقات (مرجعية للمستندات الموحدة)
+    attachmentIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Document',
+      },
+    ],
+
     // ─── ZATCA Phase-2 e-invoicing envelope ─────────────────────────────
     zatca: {
       uuid: String, // v4 UUID per invoice

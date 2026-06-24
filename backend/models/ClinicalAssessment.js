@@ -105,6 +105,7 @@ const clinicalAssessmentSchema = new mongoose.Schema(
       {
         name: String,
         url: String,
+        documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
         uploadedAt: Date,
       },
     ],

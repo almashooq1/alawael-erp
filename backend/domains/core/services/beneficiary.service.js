@@ -5,6 +5,7 @@
 
 const { BaseService } = require('../../_base/BaseService');
 const logger = require('../../../utils/logger');
+const legacyBeneficiaryCore = require('../../../services/beneficiaryCore.service');
 
 class BeneficiaryService extends BaseService {
   constructor(repository) {
@@ -215,6 +216,166 @@ class BeneficiaryService extends BaseService {
    */
   async getCasesNeedingAttention(branchId) {
     return this.repository.findWithoutActiveEpisode(branchId);
+  }
+
+  /**
+   * قائمة المستفيدين مع جميع الفلاتر المستخدمة في الواجهة الإدارية
+   * (بحث، حالة، فئة، جنس، مدينة، عمر، فرع)
+   */
+  async listWithFilters({ page = 1, limit = 20, sort = { createdAt: -1 }, ...filters } = {}) {
+    const Beneficiary = this.repository.model;
+    const queryBuilder = Beneficiary.advancedSearch(filters);
+
+    // advancedSearch does not apply branchId — add it here when present.
+    const filter = queryBuilder.getFilter();
+    if (filters.branchId) {
+      filter.branchId = filters.branchId;
+      queryBuilder.find(filter);
+    }
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [data, total] = await Promise.all([
+      queryBuilder.skip(skip).limit(limitNum).sort(sort).lean({ virtuals: true }),
+      Beneficiary.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+        hasNext: pageNum * limitNum < total,
+        hasPrev: pageNum > 1,
+      },
+    };
+  }
+
+  /**
+   * تحديث حالة المستفيد
+   */
+  async updateStatus(id, status, context = {}) {
+    return this.update(id, { status, statusReason: context.reason || '' }, context);
+  }
+
+  /**
+   * تنفيذ عملية جماعية على مجموعة من المستفيدين
+   */
+  async bulkAction(action, ids, payload = {}, context = {}) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      const error = new Error('يجب تحديد معرّفات المستفيدين');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const results = [];
+
+    if (action === 'archive') {
+      for (const id of ids) {
+        const result = await this.archiveBeneficiary(
+          id,
+          payload.reason || 'أرشفة جماعية',
+          context.userId
+        );
+        results.push({ id, status: 'archived', result });
+      }
+    } else if (action === 'update-status') {
+      for (const id of ids) {
+        const result = await this.updateStatus(id, payload.status, context);
+        results.push({ id, status: payload.status, result });
+      }
+    } else if (action === 'delete') {
+      for (const id of ids) {
+        const result = await this.delete(id, context);
+        results.push({ id, status: 'deleted', result });
+      }
+    } else {
+      const error = new Error(`العملية الجماعية غير مدعومة: ${action}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    this._invalidateCache();
+    return { action, processed: results.length, results };
+  }
+
+  /**
+   * أحدث المستفيدين المسجلين
+   */
+  async getRecent(limit = 5, branchId) {
+    const filter = { isArchived: { $ne: true } };
+    if (branchId) filter.branchId = branchId;
+
+    return this.repository.find(filter, {
+      sort: { createdAt: -1 },
+      limit: parseInt(limit, 10),
+    });
+  }
+
+  /**
+   * بيانات جاهزة للتصدير (CSV/Excel)
+   */
+  async getExportData(filters = {}) {
+    const Beneficiary = this.repository.model;
+    const queryBuilder = Beneficiary.advancedSearch({ ...filters, limit: 10000 });
+
+    const filter = queryBuilder.getFilter();
+    if (filters.branchId) {
+      filter.branchId = filters.branchId;
+      queryBuilder.find(filter);
+    }
+
+    return queryBuilder.sort({ createdAt: -1 }).lean({ virtuals: true });
+  }
+
+  /**
+   * الحالات عالية المخاطر (اسم بديل للواجهة الأمامية)
+   */
+  async getAtRisk(limit = 50, branchId) {
+    return this.getHighRiskCases(branchId, limit);
+  }
+
+  /**
+   * قائمة المدن المسجلة للمستفيدين
+   */
+  async getCities(branchId) {
+    const filter = { isArchived: { $ne: true } };
+    if (branchId) filter.branchId = branchId;
+
+    const cities = await this.repository.model
+      .distinct('address.city', filter)
+      .then(list => list.filter(Boolean).sort());
+
+    return cities.map(city => ({ _id: city, name: city, count: null }));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // توافق واجهة المركز اليومي القديمة (facade /api/v1/beneficiary-core)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  /**
+   * لوحة مركز الحالات — توافق EpisodeCenterPage
+   */
+  async getDashboard(branchId) {
+    return legacyBeneficiaryCore.getDashboard({ branchId });
+  }
+
+  /**
+   * قائمة المستفيدين لمركز الحالات — توافق EpisodeCenterPage
+   */
+  async listEpisodeCenter(query = {}) {
+    return legacyBeneficiaryCore.list(query);
+  }
+
+  /**
+   * ملف المستفيد الشامل (360) لمركز الحالات — توافق EpisodeCenterPage
+   */
+  async getEpisodeCenterProfile(beneficiaryId) {
+    return legacyBeneficiaryCore.get360Profile(beneficiaryId);
   }
 }
 

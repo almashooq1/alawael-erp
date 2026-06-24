@@ -63,7 +63,7 @@ import {
 } from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
-import beneficiaryService from '../../services/beneficiaryService';
+import { coreAPI } from '../../services/ddd';
 import BeneficiaryLifecyclePanel from './BeneficiaryLifecyclePanel';
 import logger from '../../utils/logger';
 import { formatDate as _fmtDate } from 'utils/dateUtils';
@@ -160,7 +160,7 @@ export default function BeneficiaryProfilePage() {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await beneficiaryService.getById(id);
+      const res = await coreAPI.get(id);
       const data = res?.data?.data || res?.data || res;
       setBeneficiary(data);
       setProgressHistory(data?.progressHistory || []);
@@ -199,7 +199,7 @@ export default function BeneficiaryProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await beneficiaryService.update(id, editData);
+      await coreAPI.update(id, editData);
       showSnackbar('تم تحديث بيانات المستفيد بنجاح', 'success');
       setEditing(false);
       loadData();
@@ -212,7 +212,7 @@ export default function BeneficiaryProfilePage() {
 
   const _handleStatusChange = async newStatus => {
     try {
-      await beneficiaryService.updateStatus(id, newStatus);
+      await coreAPI.updateStatus(id, newStatus);
       showSnackbar('تم تحديث الحالة', 'success');
       loadData();
     } catch {
@@ -223,7 +223,7 @@ export default function BeneficiaryProfilePage() {
   const handleDelete = async () => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
-      await beneficiaryService.remove(id, 'أرشفة من صفحة التفاصيل');
+      await coreAPI.archive(id, 'أرشفة من صفحة التفاصيل');
       showSnackbar('تم أرشفة المستفيد', 'success');
       navigate('/beneficiary-portal/management');
     } catch {

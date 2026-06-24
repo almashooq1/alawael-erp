@@ -199,8 +199,10 @@ export default function RehabRoutes() {
       {/* Specialized Rehabilitation Module */}
       <Route path="specialized-scales" element={<SpecializedScalesLibrary />} />
       <Route path="scale-administration" element={<ScaleAdministration />} />
+      <Route path="scale-administration/:scaleId" element={<ScaleAdministration />} />
       <Route path="rehab-programs-library" element={<RehabProgramsLibrary />} />
       <Route path="program-enrollment" element={<ProgramEnrollment />} />
+      <Route path="program-enrollment/:programId" element={<ProgramEnrollment />} />
       <Route path="rehab-progress" element={<RehabProgressTracking />} />
       <Route path="behavior-management" element={<BehaviorManagement />} />
 

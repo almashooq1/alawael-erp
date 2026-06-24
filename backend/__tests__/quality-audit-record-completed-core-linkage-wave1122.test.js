@@ -10,6 +10,7 @@ require('../models/Beneficiary');
 const QualityAudit = require('../domains/quality/models/QualityAudit');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -41,10 +42,6 @@ function audit(beneficiaryId, overrides = {}) {
     complianceLevel: 'good',
     ...overrides,
   };
-}
-
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
 }
 
 /** Poll until a timeline row matching `query` exists (CI-load safe). */
@@ -99,9 +96,7 @@ describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage
       overallScore: 75,
       complianceLevel: 'acceptable',
     });
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
     expect(doc.scope).toBe('branch');
   });
 
@@ -113,8 +108,6 @@ describe('W1122 — QualityAudit completed → unified-core CareTimeline linkage
 
     doc.overallScore = 90;
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

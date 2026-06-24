@@ -1,34 +1,36 @@
 /**
  * Session Center Service — خدمة مركز الجلسات العلاجية
- * جميع المكالمات API الخاصة بـ /api/v1/session-center
+ * ════════════════════════════════════════════════════════════════════════════
+ * Compatibility wrapper over the unified DDD Sessions Session-Center surface
+ * (/api/v1/sessions/session-center/*). Keeps the existing method signatures so
+ * SessionCenterPage callers continue to work.
  */
-import apiClient from './api.client';
+import { sessionCenterAPI } from './ddd';
 
-const BASE = '/api/v1/session-center';
+const unwrap = res => res?.data?.data ?? res?.data;
 
 export const getDashboard = (params = {}) =>
-  apiClient.get(`${BASE}/dashboard`, { params }).then(r => r.data);
+  sessionCenterAPI.dashboard(params).then(r => unwrap(r));
 
 export const getCalendarSlots = (params = {}) =>
-  apiClient.get(`${BASE}/calendar`, { params }).then(r => r.data);
+  sessionCenterAPI.calendar(params).then(r => unwrap(r) || []);
 
 export const getTherapistLoad = (params = {}) =>
-  apiClient.get(`${BASE}/therapist-load`, { params }).then(r => r.data);
+  sessionCenterAPI.therapistLoad(params).then(r => unwrap(r) || []);
 
 export const getAttendanceReport = (params = {}) =>
-  apiClient.get(`${BASE}/attendance`, { params }).then(r => r.data);
+  sessionCenterAPI.attendance(params).then(r => unwrap(r));
 
 export const getEpisodeSessions = episodeId =>
-  apiClient.get(`${BASE}/episode/${episodeId}`).then(r => r.data);
+  sessionCenterAPI.episodeSessions(episodeId).then(r => unwrap(r));
 
 export const getBeneficiarySessions = (beneficiaryId, params = {}) =>
-  apiClient.get(`${BASE}/beneficiary/${beneficiaryId}`, { params }).then(r => r.data);
+  sessionCenterAPI.beneficiarySessions(beneficiaryId, params).then(r => unwrap(r));
 
 export const getGoalsProgress = episodeId =>
-  apiClient.get(`${BASE}/goals/${episodeId}`).then(r => r.data);
+  sessionCenterAPI.goalsProgress(episodeId).then(r => unwrap(r) || []);
 
-export const getSOAPSummary = sessionId =>
-  apiClient.get(`${BASE}/soap/${sessionId}`).then(r => r.data);
+export const getSOAPSummary = sessionId => sessionCenterAPI.soap(sessionId).then(r => unwrap(r));
 
 const sessionCenterService = {
   getDashboard,

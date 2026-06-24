@@ -3,7 +3,7 @@
  * session→NPHIES bulk endpoint.
  *
  * Backend contract:
- *   POST /api/admin/therapy-sessions/bulk-create-claims
+ *   POST /api/api/v1/sessions/admin/bulk-create-claims
  *   body: { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD', dryRun?, maxBatch? }
  *   resp: { ok, candidateCount, created, skipped, failed, dryRun, durationMs }
  *
@@ -144,7 +144,7 @@ export default function BulkCreateClaimsDialog({ open, onClose, onCompleted }) {
     setReport(null);
     setLoading(true);
     try {
-      const { data } = await apiClient.post('/admin/therapy-sessions/bulk-create-claims', {
+      const { data } = await apiClient.post('/api/v1/sessions/admin/bulk-create-claims', {
         from,
         to,
         dryRun,

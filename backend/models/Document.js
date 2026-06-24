@@ -105,6 +105,20 @@ const DocumentSchema = new mongoose.Schema(
     fileUrl: { type: String },
     isConfidential: { type: Boolean, default: false },
 
+    // ═══ التكامل والربط بالأنظمة ═══
+    sourceModule: {
+      type: String,
+      enum: ['core', 'hr', 'medical', 'clinical', 'finance', 'beneficiary', 'other'],
+      default: 'core',
+      index: true,
+    },
+    linkedAt: { type: Date },
+    linkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // ═══ سلامة الملف ═══
+    storageProvider: { type: String, default: 'local', enum: ['local', 's3'] },
+    checksum: { type: String, index: true, sparse: true },
+
     // التنظيم
     folder: {
       type: String,

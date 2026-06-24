@@ -436,8 +436,17 @@ const _uriFile = _path.join(__dirname, '.test-mongo-uri');
 
 beforeAll(() => {
   try {
-    const memUri = _fs.readFileSync(_uriFile, 'utf-8').trim();
+    let memUri = _fs.readFileSync(_uriFile, 'utf-8').trim();
     if (memUri) {
+      const workerId = process.env.JEST_WORKER_ID;
+      if (workerId) {
+        // Give each Jest worker its own database on the shared in-memory
+        // mongod so integration tests can run safely in parallel.
+        const parsed = new URL(memUri);
+        const baseDb = parsed.pathname.replace(/^\/+/, '') || 'alawael-test';
+        parsed.pathname = `/${baseDb}-worker-${workerId}`;
+        memUri = parsed.toString();
+      }
       process.env.MONGO_URI = memUri;
       process.env.MONGODB_URI = memUri;
     }
@@ -562,17 +571,18 @@ const RealMongoose = jest.requireActual('mongoose');
 const _realConnect = RealMongoose.connect.bind(RealMongoose);
 RealMongoose.connect = async function connect(uri, options) {
   const opts = {
-    serverSelectionTimeoutMS: 5000,
-    connectTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 10000,
     ...options,
   };
   let lastErr;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
       return await _realConnect(uri, opts);
     } catch (err) {
       lastErr = err;
-      if (attempt < 2) {
+      if (attempt < 4) {
         await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
       }
     }

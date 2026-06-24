@@ -71,10 +71,7 @@ class FinanceOperationsService {
   }
 
   async createInvoice(data, userId) {
-    // Auto-generate invoice number: INV-YYYY-NNNN
     const year = new Date().getFullYear();
-    const count = await Invoice.countDocuments({ invoiceNumber: new RegExp(`^INV-${year}-`) });
-    data.invoiceNumber = `INV-${year}-${String(count + 1).padStart(4, '0')}`;
     data.issuer = userId;
 
     // Calculate subTotal from items
@@ -87,9 +84,23 @@ class FinanceOperationsService {
       data.totalAmount = data.subTotal + (data.taxAmount || 0) - (data.discount || 0);
     }
 
-    const doc = await Invoice.create(data);
-    logger.info(`Invoice created: ${doc.invoiceNumber}`);
-    return doc;
+    // Auto-generate invoice number: INV-YYYY-NNNN. The count+1 derivation races under
+    // concurrent creation — two requests read the same count, build the same number,
+    // and the second Invoice.create throws E11000 on the unique index. Retry with a
+    // freshly recomputed number instead of surfacing a 500. (W1452)
+    const MAX_ATTEMPTS = 5;
+    for (let attempt = 0; ; attempt += 1) {
+      const count = await Invoice.countDocuments({ invoiceNumber: new RegExp(`^INV-${year}-`) });
+      data.invoiceNumber = `INV-${year}-${String(count + 1 + attempt).padStart(4, '0')}`;
+      try {
+        const doc = await Invoice.create(data);
+        logger.info(`Invoice created: ${doc.invoiceNumber}`);
+        return doc;
+      } catch (err) {
+        if (err && err.code === 11000 && attempt < MAX_ATTEMPTS - 1) continue;
+        throw err;
+      }
+    }
   }
 
   async updateInvoice(id, data, userId) {

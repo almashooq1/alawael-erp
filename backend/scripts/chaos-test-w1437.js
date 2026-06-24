@@ -27,8 +27,8 @@ async function runMigration(uri, dryRun) {
     });
     let stdout = '';
     let stderr = '';
-    child.stdout.on('data', d => stdout += d);
-    child.stderr.on('data', d => stderr += d);
+    child.stdout.on('data', d => (stdout += d));
+    child.stderr.on('data', d => (stderr += d));
     child.on('close', code => (code === 0 ? resolve(stdout) : reject(new Error(stderr))));
   });
 }
@@ -44,12 +44,20 @@ async function testFeatureFlags(_uri) {
 
   process.env.FEATURE_W1437 = 'true';
   const ffTrue = require('../config/featureFlags');
-  assert.strictEqual(ffTrue.isFeatureEnabled('w1437'), true, 'FEATURE_W1437=true should be enabled');
+  assert.strictEqual(
+    ffTrue.isFeatureEnabled('w1437'),
+    true,
+    'FEATURE_W1437=true should be enabled'
+  );
 
   process.env.FEATURE_W1437 = 'false';
   delete require.cache[require.resolve('../config/featureFlags')];
   const ffFalse = require('../config/featureFlags');
-  assert.strictEqual(ffFalse.isFeatureEnabled('w1437'), false, 'FEATURE_W1437=false should be disabled');
+  assert.strictEqual(
+    ffFalse.isFeatureEnabled('w1437'),
+    false,
+    'FEATURE_W1437=false should be disabled'
+  );
 
   process.env.FEATURE_W1437 = 'true';
   console.log('[chaos-test-w1437] Feature flag behavior OK');
@@ -82,18 +90,30 @@ async function testMigrationIdempotency(uri) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   await NphiesClaim.insertMany([
-    { status: 'PENDING_REVIEW', nphies: { submission: { status: 'PENDING_REVIEW', submittedAt: yesterday } }, createdAt: yesterday },
-    { status: 'PENDING_REVIEW', nphies: { submission: { status: 'PENDING_REVIEW', submittedAt: null } }, createdAt: yesterday },
+    {
+      status: 'PENDING_REVIEW',
+      nphies: { submission: { status: 'PENDING_REVIEW', submittedAt: yesterday } },
+      createdAt: yesterday,
+    },
+    {
+      status: 'PENDING_REVIEW',
+      nphies: { submission: { status: 'PENDING_REVIEW', submittedAt: null } },
+      createdAt: yesterday,
+    },
   ]);
 
   // First run
   await runMigration(uri, false);
-  const afterFirst = await NphiesClaim.countDocuments({ 'nphies.submission.updatedBy': 'migration' });
+  const afterFirst = await NphiesClaim.countDocuments({
+    'nphies.submission.updatedBy': 'migration',
+  });
   assert.strictEqual(afterFirst, 2, 'First migration should update 2 docs');
 
   // Second run should modify nothing
   await runMigration(uri, false);
-  const afterSecond = await NphiesClaim.countDocuments({ 'nphies.submission.updatedBy': 'migration' });
+  const afterSecond = await NphiesClaim.countDocuments({
+    'nphies.submission.updatedBy': 'migration',
+  });
   assert.strictEqual(afterSecond, 2, 'Second migration should not change count');
 
   await mongoose.disconnect();

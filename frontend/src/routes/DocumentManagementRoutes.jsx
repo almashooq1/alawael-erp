@@ -6,6 +6,7 @@ import { lazyWithRetry } from '../utils/lazyLoader';
 
 // مركز الوثائق الموحد — نقطة الدخول الرئيسية الجديدة
 const DocumentCenter = lazyWithRetry(() => import('../pages/documents/DocumentCenter'));
+const DocumentHub = lazyWithRetry(() => import('../pages/documents/DocumentHub'));
 
 const DocumentsDashboard = lazyWithRetry(() => import('../pages/documents/DocumentsDashboard'));
 const DocumentsMgmt = lazyWithRetry(() => import('../pages/DocumentsMgmt'));
@@ -31,6 +32,7 @@ export default function DocumentManagementRoutes() {
       {/* ═══ مركز الوثائق الموحد — نقطة الدخول الرئيسية ═══ */}
       <Route path="document-management" element={<DocumentCenter />} />
       <Route path="document-management/center" element={<DocumentCenter />} />
+      <Route path="document-management/hub" element={<DocumentHub />} />
 
       {/* ═══ الصفحات الكلاسيكية (محتفظ بها للتوافق) ═══ */}
       <Route path="document-management/dashboard" element={<DocumentsDashboard />} />

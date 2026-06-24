@@ -82,7 +82,7 @@ import {
 } from 'utils/chartHelpers';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import beneficiaryService from 'services/beneficiaryService';
+import { coreAPI } from 'services/ddd';
 import { PAGE_SIZE, GradientHeader, KpiCard } from './beneficiariesConstants';
 import { useBeneficiariesChartData, TREND_COLOR, TREND_FILL } from './useBeneficiariesChartData';
 import BeneficiaryCard from './BeneficiaryCard';
@@ -108,7 +108,7 @@ const BeneficiariesManagementPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await beneficiaryService.getAll();
+      const res = await coreAPI.list();
       const data = res?.data?.data || res?.data || res?.beneficiaries || res || [];
       if (Array.isArray(data)) setBeneficiaries(data);
     } catch {
@@ -178,7 +178,7 @@ const BeneficiariesManagementPage = () => {
 
   const handleExport = async () => {
     try {
-      const res = await beneficiaryService.exportData('csv');
+      const res = await coreAPI.export();
       const blob = res?.data || res;
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
@@ -197,7 +197,7 @@ const BeneficiariesManagementPage = () => {
   const _handleDeleteBeneficiary = async id => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
-      await beneficiaryService.remove(id, 'أرشفة من صفحة الإدارة');
+      await coreAPI.archive(id, 'أرشفة من صفحة الإدارة');
       showSnackbar('تم أرشفة المستفيد بنجاح', 'success');
       loadData();
     } catch {
@@ -207,7 +207,7 @@ const BeneficiariesManagementPage = () => {
 
   const _handleStatusChange = async (id, newStatus) => {
     try {
-      await beneficiaryService.updateStatus(id, newStatus);
+      await coreAPI.updateStatus(id, newStatus);
       showSnackbar('تم تحديث حالة المستفيد', 'success');
       loadData();
     } catch {

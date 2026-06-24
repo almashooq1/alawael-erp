@@ -72,10 +72,68 @@ const stripUpdateMeta = obj => {
   return clean;
 };
 
+/**
+ * Recursively strip MongoDB query operators ($-prefixed keys) and dotted keys from a
+ * user-supplied filter object. Use before passing a filter that originated from
+ * untrusted input into a Mongoose query — e.g. a `JSON.parse`'d query-string param,
+ * which bypasses the global express-mongo-sanitize (that only sees the raw string).
+ * Prevents operator injection ($ne / $gt / $where / $regex / etc.) and dotted-path
+ * injection. Returns a deep-cleaned copy; primitives pass through unchanged.
+ *
+ * @param {*} value - user-supplied filter (object / array / primitive)
+ * @returns {*} cleaned value with no operator/dotted/dangerous keys
+ */
+const sanitizeMongoFilter = value => {
+  if (Array.isArray(value)) return value.map(sanitizeMongoFilter);
+  if (value && typeof value === 'object') {
+    const clean = {};
+    for (const key of Object.keys(value)) {
+      if (key.startsWith('$') || key.includes('.') || DANGEROUS_KEYS.has(key)) continue;
+      clean[key] = sanitizeMongoFilter(value[key]);
+    }
+    return clean;
+  }
+  return value;
+};
+
+/**
+ * Financial-state fields on accounting documents that must NEVER be set via a generic
+ * update body — payment/lifecycle state and computed money totals. These belong to
+ * dedicated transition endpoints (mark-paid / cancel / payment) and server-side
+ * recomputation, not a raw `findByIdAndUpdate({ ...req.body })`. (W1458)
+ */
+const FINANCE_PROTECTED_FIELDS = new Set([
+  'status',
+  'paidAmount',
+  'remainingAmount',
+  'totalAmount',
+  'subtotal',
+  'vatAmount',
+  'balance',
+]);
+
+/**
+ * Shallow-strip the financial-state fields above from a user-supplied update body, so
+ * a generic invoice/account PUT cannot mark an invoice paid or overwrite a balance.
+ * @param {object} obj - request body
+ * @returns {object} cleaned copy
+ */
+const stripProtectedFinanceFields = obj => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (!FINANCE_PROTECTED_FIELDS.has(key)) clean[key] = obj[key];
+  }
+  return clean;
+};
+
 module.exports = {
   escapeRegex,
   stripDangerousKeys,
   stripUpdateMeta,
+  sanitizeMongoFilter,
+  stripProtectedFinanceFields,
   DANGEROUS_KEYS,
   UPDATE_BLACKLIST,
+  FINANCE_PROTECTED_FIELDS,
 };

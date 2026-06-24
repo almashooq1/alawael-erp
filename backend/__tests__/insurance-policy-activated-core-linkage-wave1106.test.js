@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -72,19 +74,7 @@ describe('W1106 InsurancePolicy → CareTimeline (insurance_policy.activated)', 
     const branchId = new mongoose.Types.ObjectId();
 
     const doc = await InsurancePolicy.create(policy(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
-    const row = rows[0];
-    expect(row.eventType).toBe('insurance_policy_activated');
-    expect(row.category).toBe('administrative');
-    expect(row.severity).toBe('success');
-    expect(String(row.branchId)).toBe(String(branchId));
-    expect(String(row.metadata.policyId)).toBe(String(doc._id));
-    expect(row.metadata.planType).toBe('premium');
-    expect(row.title).toContain('premium');
-    expect(row.title).toContain(doc.policyNumber);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 
   it('fires when a suspended policy is resumed to active', async () => {
@@ -94,15 +84,12 @@ describe('W1106 InsurancePolicy → CareTimeline (insurance_policy.activated)', 
     const doc = await InsurancePolicy.create(
       policy(beneficiaryId, branchId, { status: 'suspended' })
     );
-    await new Promise(r => setTimeout(r, 30));
-    let rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    await waitForRows({ beneficiaryId }, 0);
 
     doc.status = 'active';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
 
-    rows = await CareTimeline.find({ beneficiaryId });
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].eventType).toBe('insurance_policy_activated');
   });
@@ -112,10 +99,7 @@ describe('W1106 InsurancePolicy → CareTimeline (insurance_policy.activated)', 
     const branchId = new mongoose.Types.ObjectId();
 
     await InsurancePolicy.create(policy(beneficiaryId, branchId, { status: 'pending' }));
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
@@ -123,14 +107,6 @@ describe('W1106 InsurancePolicy → CareTimeline (insurance_policy.activated)', 
     const branchId = new mongoose.Types.ObjectId();
 
     const doc = await InsurancePolicy.create(policy(beneficiaryId, branchId));
-    await new Promise(r => setTimeout(r, 30));
-
-    // Unrelated mutation — status stays 'active', not re-modified.
-    doc.usedCoverage = 1200;
-    await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 });

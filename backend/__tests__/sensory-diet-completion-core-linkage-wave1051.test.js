@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let SensoryDietProgram;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseProgram(overrides = {}) {
   return {
@@ -73,10 +64,14 @@ describe('W1051 — sensory-diet completion reaches the unified-core timeline', 
     p.status = 'completed';
     await p.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'sensory_diet_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'sensory_diet_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -87,26 +82,26 @@ describe('W1051 — sensory-diet completion reaches the unified-core timeline', 
     const beneficiaryId = new mongoose.Types.ObjectId();
     await SensoryDietProgram.create(baseProgram({ beneficiaryId, status: 'active' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'sensory_diet_completed' })).toBe(0);
+    await waitForCount({ eventType: 'sensory_diet_completed' }, 0);
   });
 
   it('re-saving an already-completed program does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const p = await SensoryDietProgram.create(baseProgram({ beneficiaryId, status: 'completed' }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'sensory_diet_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'sensory_diet_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await SensoryDietProgram.findById(p._id);
     again.reviewNotes = 'Goals achieved; regulation stable.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'sensory_diet_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'sensory_diet_completed' }, 1);
   });
 });

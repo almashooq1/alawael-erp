@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -10,7 +12,6 @@ require('../models/Beneficiary');
 const CorrectiveAction = require('../domains/quality/models/CorrectiveAction');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
-const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 
@@ -45,24 +46,13 @@ function action(overrides = {}) {
   };
 }
 
-/** Poll until a timeline row matching `query` exists (CI-load safe). */
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
-
 describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkage', () => {
   test('records a quality row when a beneficiary-scoped action is opened', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const branchId = new mongoose.Types.ObjectId();
     const episodeId = new mongoose.Types.ObjectId();
     const doc = await CorrectiveAction.create(action({ beneficiaryId, branchId, episodeId }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -83,7 +73,7 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
     await CorrectiveAction.create(
       action({ beneficiaryId, severity: 'critical', type: 'escalate_to_supervisor' })
     );
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const row = await CareTimeline.findOne({ beneficiaryId }).lean();
     expect(row).toBeTruthy();
@@ -96,8 +86,8 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
     const b2 = new mongoose.Types.ObjectId();
     await CorrectiveAction.create(action({ beneficiaryId: b1, severity: 'medium' }));
     await CorrectiveAction.create(action({ beneficiaryId: b2, severity: 'low' }));
-    await waitForTimeline({ beneficiaryId: b1 });
-    await waitForTimeline({ beneficiaryId: b2 });
+    await waitForRows({ beneficiaryId: b1 }, 1);
+    await waitForRows({ beneficiaryId: b2 }, 1);
 
     const r1 = await CareTimeline.findOne({ beneficiaryId: b1 }).lean();
     const r2 = await CareTimeline.findOne({ beneficiaryId: b2 }).lean();
@@ -113,7 +103,7 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
   test('does not double-record on a later lifecycle save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await CorrectiveAction.create(action({ beneficiaryId }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.status = 'in_progress';
@@ -127,7 +117,7 @@ describe('W1134 — CorrectiveAction opened → unified-core CareTimeline linkag
     const auditId = new mongoose.Types.ObjectId();
     const dueDate = new Date(Date.now() + 7 * 86400000);
     await CorrectiveAction.create(action({ beneficiaryId, auditId, dueDate }));
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const row = await CareTimeline.findOne({ beneficiaryId }).lean();
     expect(String(row.metadata.auditId)).toBe(String(auditId));

@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -45,15 +47,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function recording(beneficiaryId, branchId, overrides = {}) {
   return {
     beneficiaryId,
@@ -76,8 +69,7 @@ describe('W1102 — SpeechSessionRecording → CareTimeline linkage', () => {
     const doc = await SpeechSessionRecording.create(recording(beneficiaryId, branchId));
 
     // Upload alone must NOT fire.
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.analysisStatus = 'completed';
     doc.transcriptLanguage = 'ar';
@@ -86,7 +78,8 @@ describe('W1102 — SpeechSessionRecording → CareTimeline linkage', () => {
     doc.analysisCompletedAt = new Date();
     await doc.save();
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('speech_session_analyzed');
     expect(row.category).toBe('clinical');
@@ -102,8 +95,7 @@ describe('W1102 — SpeechSessionRecording → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     await SpeechSessionRecording.create(recording(beneficiaryId, branchId));
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does NOT fire when analysis fails', async () => {
@@ -115,8 +107,7 @@ describe('W1102 — SpeechSessionRecording → CareTimeline linkage', () => {
     doc.analysisError = 'STT timeout';
     await doc.save();
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row on a subsequent unrelated save', async () => {
@@ -127,11 +118,10 @@ describe('W1102 — SpeechSessionRecording → CareTimeline linkage', () => {
     doc.analysisStatus = 'completed';
     doc.analysisCompletedAt = new Date();
     await doc.save();
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.audioPurgedAt = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

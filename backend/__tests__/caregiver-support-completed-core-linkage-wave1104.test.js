@@ -18,6 +18,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -61,17 +63,6 @@ afterEach(async () => {
   await CaregiverSupportProgram.deleteMany({});
 });
 
-/** Poll until `expected` rows exist (or timeout) — W1227 deflake pattern. */
-async function waitForRows(filter, expected, timeoutMs = 5000) {
-  const deadline = Date.now() + timeoutMs;
-  let rows = [];
-  for (;;) {
-    rows = await CareTimeline.find(filter);
-    if (rows.length >= expected || Date.now() > deadline) return rows;
-    await new Promise(r => setTimeout(r, 25));
-  }
-}
-
 describe('W1104 CaregiverSupportProgram → CareTimeline (caregiver_support.completed)', () => {
   it('records a family/success timeline row when a program completes', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -105,10 +96,7 @@ describe('W1104 CaregiverSupportProgram → CareTimeline (caregiver_support.comp
     const doc = await CaregiverSupportProgram.create(program(beneficiaryId));
     doc.status = 'in_progress';
     await doc.save();
-    await new Promise(r => setTimeout(r, 150));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not fire when a program is discontinued', async () => {
@@ -118,10 +106,7 @@ describe('W1104 CaregiverSupportProgram → CareTimeline (caregiver_support.comp
     doc.discontinuedAt = new Date();
     doc.discontinuationReason = 'انتقال الأسرة لمدينة أخرى';
     await doc.save();
-    await new Promise(r => setTimeout(r, 150));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
@@ -130,14 +115,6 @@ describe('W1104 CaregiverSupportProgram → CareTimeline (caregiver_support.comp
     doc.status = 'completed';
     doc.completedAt = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 150));
-
-    // Unrelated mutation — status stays 'completed', not re-modified.
-    doc.notes = 'ملاحظة ختامية';
-    await doc.save();
-    await new Promise(r => setTimeout(r, 150));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 });

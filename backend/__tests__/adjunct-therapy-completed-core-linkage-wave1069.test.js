@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let AdjunctTherapySession;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 // A scheduled hydrotherapy session that satisfies the completion invariants
 // once status flips: medically cleared + has content.
@@ -82,7 +73,8 @@ describe('W1069 — completed adjunct-therapy sessions reach the unified-core ti
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'adjunct_therapy_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'adjunct_therapy_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -103,7 +95,8 @@ describe('W1069 — completed adjunct-therapy sessions reach the unified-core ti
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'adjunct_therapy_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'adjunct_therapy_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
     expect(tl.metadata.hadIncident).toBe(true);
@@ -113,10 +106,7 @@ describe('W1069 — completed adjunct-therapy sessions reach the unified-core ti
     const beneficiaryId = new mongoose.Types.ObjectId();
     await AdjunctTherapySession.create(baseSession({ beneficiaryId, status: 'scheduled' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'adjunct_therapy_completed' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'adjunct_therapy_completed' }, 0);
   });
 
   it('re-saving a completed session does not re-fire the event', async () => {
@@ -125,15 +115,13 @@ describe('W1069 — completed adjunct-therapy sessions reach the unified-core ti
     s.status = 'completed';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'adjunct_therapy_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'adjunct_therapy_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await AdjunctTherapySession.findById(s._id);
     again.notes = 'addendum';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'adjunct_therapy_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'adjunct_therapy_completed' }, 1);
   });
 });

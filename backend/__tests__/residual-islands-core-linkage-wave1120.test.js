@@ -16,23 +16,14 @@
 jest.unmock('mongoose');
 jest.setTimeout(120000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let CareTimeline;
 let ADL, Integ, SelfAdv, DecRights, IndLiving, Caregiver;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query).sort({ createdAt: -1 });
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function oid() {
   return new mongoose.Types.ObjectId();
@@ -75,7 +66,8 @@ describe('W1120 — ADL assessment completion reaches the timeline', () => {
     const r = await ADL.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'adl_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'adl_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.category).toBe('clinical');
     expect(row.metadata.assessmentType).toBe('initial');
@@ -95,7 +87,8 @@ describe('W1120 — integration assessment completion reaches the timeline', () 
     const r = await Integ.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'integration_assessment' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'integration_assessment' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.metadata.assessmentType).toBe('initial');
   });
@@ -113,7 +106,8 @@ describe('W1120 — self-advocacy plan completion reaches the timeline', () => {
     const r = await SelfAdv.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'self_advocacy_completed' });
+    const rowRows = await waitForRows({ beneficiaryId, eventType: 'self_advocacy_completed' }, 1);
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('success');
   });
@@ -134,7 +128,11 @@ describe('W1120 — decision-rights assessment finalization reaches the timeline
     const r = await DecRights.findById(doc._id);
     r.status = 'finalized';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'decision_rights_assessment' });
+    const rowRows = await waitForRows(
+      { beneficiaryId, eventType: 'decision_rights_assessment' },
+      1
+    );
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.metadata.decisionType).toBe('therapy_participation');
   });
@@ -153,7 +151,11 @@ describe('W1120 — independent-living plan completion reaches the timeline', ()
     const r = await IndLiving.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'independent_living_completed' });
+    const rowRows = await waitForRows(
+      { beneficiaryId, eventType: 'independent_living_completed' },
+      1
+    );
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.severity).toBe('success');
   });
@@ -172,7 +174,11 @@ describe('W1120 — caregiver support program completion reaches the timeline', 
     const r = await Caregiver.findById(doc._id);
     r.status = 'completed';
     await r.save();
-    const row = await waitForTimeline({ beneficiaryId, eventType: 'caregiver_support_completed' });
+    const rowRows = await waitForRows(
+      { beneficiaryId, eventType: 'caregiver_support_completed' },
+      1
+    );
+    const row = rowRows[0];
     expect(row).not.toBeNull();
     expect(row.category).toBe('family');
     expect(row.metadata.programType).toBe('caregiver_training');

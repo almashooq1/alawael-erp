@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let AssistiveDevice;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 let tagSeq = 0;
 function baseDevice(overrides = {}) {
@@ -98,7 +89,8 @@ describe('W1028 — Assistive-device return reaches the unified-core timeline', 
     const beneficiaryId = new mongoose.Types.ObjectId();
     const dev = await checkoutAndReturn(await AssistiveDevice.create(baseDevice()), beneficiaryId);
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'assistive_device_returned' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'assistive_device_returned' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -109,23 +101,20 @@ describe('W1028 — Assistive-device return reaches the unified-core timeline', 
 
   it('a device that is never loaned produces NO return timeline row', async () => {
     await AssistiveDevice.create(baseDevice());
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'assistive_device_returned' })).toBe(0);
+    await waitForCount({ eventType: 'assistive_device_returned' }, 0);
   });
 
   it('re-saving an already-returned device does not re-fire the return event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const dev = await checkoutAndReturn(await AssistiveDevice.create(baseDevice()), beneficiaryId);
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'assistive_device_returned' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'assistive_device_returned' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await AssistiveDevice.findById(dev._id);
     again.notes = 'Cleaned and shelved after return.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'assistive_device_returned' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'assistive_device_returned' }, 1);
   });
 });

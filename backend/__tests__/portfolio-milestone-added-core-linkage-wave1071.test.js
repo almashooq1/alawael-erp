@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let BeneficiaryPortfolioItem;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseItem(overrides = {}) {
   return {
@@ -74,7 +65,8 @@ describe('W1071 — portfolio milestones reach the unified-core timeline', () =>
     const beneficiaryId = new mongoose.Types.ObjectId();
     const item = await BeneficiaryPortfolioItem.create(baseItem({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'portfolio_milestone_added' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'portfolio_milestone_added' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('success');
@@ -88,7 +80,8 @@ describe('W1071 — portfolio milestones reach the unified-core timeline', () =>
     const branchId = new mongoose.Types.ObjectId();
     await BeneficiaryPortfolioItem.create(baseItem({ beneficiaryId, branchId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'portfolio_milestone_added' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'portfolio_milestone_added' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(String(tl.branchId)).toBe(String(branchId));
   });
@@ -99,25 +92,20 @@ describe('W1071 — portfolio milestones reach the unified-core timeline', () =>
       baseItem({ beneficiaryId, type: 'photo', isMilestone: false })
     );
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'portfolio_milestone_added' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'portfolio_milestone_added' }, 0);
   });
 
   it('re-saving a milestone item does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const item = await BeneficiaryPortfolioItem.create(baseItem({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'portfolio_milestone_added' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'portfolio_milestone_added' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await BeneficiaryPortfolioItem.findById(item._id);
     again.description = 'captured during morning session';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'portfolio_milestone_added' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'portfolio_milestone_added' }, 1);
   });
 });

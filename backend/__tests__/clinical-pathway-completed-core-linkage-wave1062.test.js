@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let ClinicalPathwayPlan;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function basePlan(overrides = {}) {
   return {
@@ -75,10 +66,14 @@ describe('W1062 — completed clinical pathway plans reach the unified-core time
     p.status = 'COMPLETED';
     await p.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'clinical_pathway_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'clinical_pathway_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -89,13 +84,13 @@ describe('W1062 — completed clinical pathway plans reach the unified-core time
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ClinicalPathwayPlan.create(basePlan({ beneficiaryId, status: 'ACTIVE' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'clinical_pathway_completed',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a completed pathway plan does not re-fire the event', async () => {
@@ -104,21 +99,25 @@ describe('W1062 — completed clinical pathway plans reach the unified-core time
     p.status = 'COMPLETED';
     await p.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'clinical_pathway_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'clinical_pathway_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await ClinicalPathwayPlan.findById(p._id);
     again.currentStageCode = 'DONE';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'clinical_pathway_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

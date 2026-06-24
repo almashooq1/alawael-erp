@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let Sponsorship;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseSponsorship(overrides = {}) {
   return {
@@ -78,7 +69,8 @@ describe('W1075 — activated sponsorships reach the unified-core timeline', () 
     s.status = 'active';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'sponsorship_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'sponsorship_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -98,7 +90,8 @@ describe('W1075 — activated sponsorships reach the unified-core timeline', () 
       })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'sponsorship_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'sponsorship_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.metadata.sponsorshipType).toBe('partial');
   });
@@ -107,13 +100,13 @@ describe('W1075 — activated sponsorships reach the unified-core timeline', () 
     const beneficiaryId = new mongoose.Types.ObjectId();
     await Sponsorship.create(baseSponsorship({ beneficiaryId, status: 'pending' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'sponsorship_activated',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving an active sponsorship does not re-fire the event', async () => {
@@ -122,18 +115,19 @@ describe('W1075 — activated sponsorships reach the unified-core timeline', () 
     s.status = 'active';
     await s.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'sponsorship_activated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'sponsorship_activated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await Sponsorship.findById(s._id);
     again.notes = 'agreement scanned';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'sponsorship_activated',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let BeneficiaryDisabilityCard;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 async function waitForNoTimeline(query, { timeout = 2000, interval = 25 } = {}) {
   const start = Date.now();
@@ -91,7 +82,8 @@ describe('W1070 — registered disability cards reach the unified-core timeline'
     const beneficiaryId = new mongoose.Types.ObjectId();
     const card = await BeneficiaryDisabilityCard.create(baseCard({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'disability_card_registered' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'disability_card_registered' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -105,7 +97,8 @@ describe('W1070 — registered disability cards reach the unified-core timeline'
     const branchId = new mongoose.Types.ObjectId();
     await BeneficiaryDisabilityCard.create(baseCard({ beneficiaryId, branchId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'disability_card_registered' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'disability_card_registered' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(String(tl.branchId)).toBe(String(branchId));
     expect(tl.metadata.expiryDate).toBeTruthy();
@@ -126,16 +119,14 @@ describe('W1070 — registered disability cards reach the unified-core timeline'
     const beneficiaryId = new mongoose.Types.ObjectId();
     const card = await BeneficiaryDisabilityCard.create(baseCard({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'disability_card_registered' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'disability_card_registered' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await BeneficiaryDisabilityCard.findById(card._id);
     again.notes = 'verified';
     await again.save();
     // Allow a short window for any accidental duplicate event to be written.
-    await new Promise(r => setTimeout(r, 300));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'disability_card_registered' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'disability_card_registered' }, 1);
   });
 });

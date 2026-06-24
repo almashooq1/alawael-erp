@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let HomeCarryoverEntry;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseEntry(overrides = {}) {
   return {
@@ -72,7 +63,8 @@ describe('W1077 — completed home-practice logs reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await HomeCarryoverEntry.create(baseEntry({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'home_practice_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'home_practice_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('success');
@@ -84,44 +76,45 @@ describe('W1077 — completed home-practice logs reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     await HomeCarryoverEntry.create(baseEntry({ beneficiaryId, outcome: 'skipped' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'home_practice_completed',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('a partial entry does NOT create a timeline row', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await HomeCarryoverEntry.create(baseEntry({ beneficiaryId, outcome: 'partial' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'home_practice_completed',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('editing a completed entry does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const e = await HomeCarryoverEntry.create(baseEntry({ beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'home_practice_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'home_practice_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await HomeCarryoverEntry.findById(e._id);
     again.notes = 'reviewed by therapist';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'home_practice_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

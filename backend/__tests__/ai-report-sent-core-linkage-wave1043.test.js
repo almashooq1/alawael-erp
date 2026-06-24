@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let AiGeneratedReport;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseReport(overrides = {}) {
   return {
@@ -85,10 +76,14 @@ describe('W1043 — AI-generated report delivery reaches the unified-core timeli
     const beneficiary_id = new mongoose.Types.ObjectId();
     const report = await send(await AiGeneratedReport.create(baseReport({ beneficiary_id })));
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary_id,
-      eventType: 'ai_report_sent',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary_id,
+        eventType: 'ai_report_sent',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('communication');
     expect(tl.severity).toBe('success');
@@ -101,29 +96,32 @@ describe('W1043 — AI-generated report delivery reaches the unified-core timeli
     const beneficiary_id = new mongoose.Types.ObjectId();
     await AiGeneratedReport.create(baseReport({ beneficiary_id, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'ai_report_sent' })).toBe(0);
+    await waitForCount({ eventType: 'ai_report_sent' }, 0);
   });
 
   it('re-saving an already-sent report does not re-fire the event', async () => {
     const beneficiary_id = new mongoose.Types.ObjectId();
     const report = await send(await AiGeneratedReport.create(baseReport({ beneficiary_id })));
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary_id,
-      eventType: 'ai_report_sent',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary_id,
+        eventType: 'ai_report_sent',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await AiGeneratedReport.findById(report._id);
     again.model_version = 'gpt-4o-2026-05';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary_id,
         eventType: 'ai_report_sent',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

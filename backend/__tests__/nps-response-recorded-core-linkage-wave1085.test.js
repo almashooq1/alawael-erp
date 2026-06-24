@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let NpsResponse;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function nps(score, bucket, overrides = {}) {
   return {
@@ -73,7 +64,8 @@ describe('W1085 — family NPS responses reach the unified-core timeline', () =>
     const beneficiaryId = new mongoose.Types.ObjectId();
     const r = await NpsResponse.create(nps(10, 'promoter', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'nps_response_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'nps_response_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('quality');
     expect(tl.severity).toBe('success');
@@ -86,7 +78,8 @@ describe('W1085 — family NPS responses reach the unified-core timeline', () =>
     const beneficiaryId = new mongoose.Types.ObjectId();
     await NpsResponse.create(nps(3, 'detractor', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'nps_response_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'nps_response_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
     expect(tl.metadata.bucket).toBe('detractor');
@@ -98,23 +91,20 @@ describe('W1085 — family NPS responses reach the unified-core timeline', () =>
     delete payload.beneficiaryId;
     await NpsResponse.create(payload);
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(await CareTimeline.countDocuments({ eventType: 'nps_response_recorded' })).toBe(0);
+    await waitForCount({ eventType: 'nps_response_recorded' }, 0);
   });
 
   it('editing an existing response does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const r = await NpsResponse.create(nps(9, 'promoter', { beneficiaryId }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'nps_response_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'nps_response_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await NpsResponse.findById(r._id);
     again.comment = 'great staff';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'nps_response_recorded' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'nps_response_recorded' }, 1);
   });
 });

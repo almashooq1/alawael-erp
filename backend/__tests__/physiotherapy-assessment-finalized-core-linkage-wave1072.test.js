@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let PhysiotherapyAssessment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 // A draft PT assessment that satisfies the finalize invariants once status flips.
 function baseAssessment(overrides = {}) {
@@ -80,10 +71,14 @@ describe('W1072 — finalized physiotherapy assessments reach the unified-core t
     a.status = 'finalized';
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'physiotherapy_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'physiotherapy_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -105,10 +100,14 @@ describe('W1072 — finalized physiotherapy assessments reach the unified-core t
     a.status = 'finalized';
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'physiotherapy_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'physiotherapy_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.metadata.assessmentType).toBe('discharge');
   });
@@ -117,13 +116,13 @@ describe('W1072 — finalized physiotherapy assessments reach the unified-core t
     const beneficiaryId = new mongoose.Types.ObjectId();
     await PhysiotherapyAssessment.create(baseAssessment({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'physiotherapy_assessment_finalized',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a finalized assessment does not re-fire the event', async () => {
@@ -132,21 +131,25 @@ describe('W1072 — finalized physiotherapy assessments reach the unified-core t
     a.status = 'finalized';
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'physiotherapy_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'physiotherapy_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await PhysiotherapyAssessment.findById(a._id);
     again.notes = 'addendum';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'physiotherapy_assessment_finalized',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let DysphagiaAssessment;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 // A low-risk draft swallow assessment (satisfies invariants).
 function baseDraft(overrides = {}) {
@@ -82,10 +73,14 @@ describe('W1065 — finalized dysphagia assessments reach the unified-core timel
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'dysphagia_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'dysphagia_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info'); // low risk → safe
@@ -105,10 +100,14 @@ describe('W1065 — finalized dysphagia assessments reach the unified-core timel
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'dysphagia_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'dysphagia_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('error');
     expect(tl.metadata.unsafe).toBe(true);
@@ -119,13 +118,13 @@ describe('W1065 — finalized dysphagia assessments reach the unified-core timel
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DysphagiaAssessment.create(baseDraft({ beneficiaryId, status: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'dysphagia_assessment_finalized',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a finalized assessment does not re-fire the event', async () => {
@@ -134,21 +133,25 @@ describe('W1065 — finalized dysphagia assessments reach the unified-core timel
     finalize(a);
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'dysphagia_assessment_finalized',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'dysphagia_assessment_finalized',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await DysphagiaAssessment.findById(a._id);
     again.notes = 'addendum';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'dysphagia_assessment_finalized',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

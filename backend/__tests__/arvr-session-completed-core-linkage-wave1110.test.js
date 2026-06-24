@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -10,7 +12,6 @@ require('../models/Beneficiary');
 const ARVRSession = require('../domains/ar-vr/models/ARVRSession');
 const { integrationBus } = require('../integration/systemIntegrationBus');
 const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
-const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
 
 let mongo;
 

@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let ProstheticOrthoticOrder;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseOrder(overrides = {}) {
   return {
@@ -81,10 +72,14 @@ describe('W1049 — prosthetic/orthotic delivery reaches the unified-core timeli
     Object.assign(order, deliveredFields());
     await order.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'prosthetic_orthotic_delivered',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'prosthetic_orthotic_delivered',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -96,10 +91,7 @@ describe('W1049 — prosthetic/orthotic delivery reaches the unified-core timeli
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ProstheticOrthoticOrder.create(baseOrder({ beneficiaryId, stage: 'prescribed' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'prosthetic_orthotic_delivered' })).toBe(
-      0
-    );
+    await waitForCount({ eventType: 'prosthetic_orthotic_delivered' }, 0);
   });
 
   it('re-saving an already-delivered order does not re-fire the event', async () => {
@@ -108,21 +100,25 @@ describe('W1049 — prosthetic/orthotic delivery reaches the unified-core timeli
       baseOrder({ beneficiaryId, ...deliveredFields() })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'prosthetic_orthotic_delivered',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'prosthetic_orthotic_delivered',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await ProstheticOrthoticOrder.findById(order._id);
     again.wearingSchedule = '8 hours daily';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'prosthetic_orthotic_delivered',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

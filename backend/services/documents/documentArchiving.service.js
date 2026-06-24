@@ -256,10 +256,14 @@ class DocumentArchivingService extends EventEmitter {
     this.emit('archived', { archiveId, documentId, category });
 
     try {
-      const doc = await Document.findById(documentId).select('sourceModule').lean();
+      const doc = await Document.findById(documentId)
+        .select('sourceModule entityType entityId')
+        .lean();
       await documentEventPublisher.publish('archived', {
         documentId,
         sourceModule: doc?.sourceModule || 'archive',
+        entityType: doc?.entityType || null,
+        entityId: doc?.entityId || null,
         archivedBy: userId,
       });
     } catch (err) {

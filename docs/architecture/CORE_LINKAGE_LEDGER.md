@@ -43,6 +43,8 @@ Per-beneficiary timeline + dashboards react in real time to:
 - **Care plans** — created / updated / activated / completed
 - **Behavior** — incident_recorded
 - **Appointments** — booked / cancelled / no-show (W970)
+- **Documents** — uploaded / linked / updated / deleted / archived / restored /
+  expiring / shared for beneficiaries (W1487)
 - **Quality** — corrective_action_required
 - **Safety** — seizure / safeguarding / restraint (W977)
 - **Waitlist → admission** — added / booked (W979)
@@ -194,15 +196,16 @@ persist to the EventStore — intended behaviour. It is a **prod behaviour chang
 
 ---
 
-## 6. Coverage snapshot (updated 2026-06-08)
+## 6. Coverage snapshot (updated 2026-06-23)
 
-- Real timeline/dashboard linkage: the **clinical spine** + 18 leaf domains wired
+- Real timeline/dashboard linkage: the **clinical spine** + 19 leaf domains wired
   since 2026-06-05 via native pre-compile hooks (W977 safety · W979 waitlist ·
   W980 screenings · W981 MAR · W982 beneficiary-status · W984 complaints ·
   W985 family-visits · W986 transitions · W987 post-rehab follow-up cases ·
   W992 follow-up visits · W994 insurance claims · W997 referrals (4 subsystems) ·
   W1002 consent (PDPL/CRPD) · W1003 home programs · W1004 acute crises ·
-  W1005 care-team — all merged to main). All shape-guarded by W998.
+  W1005 care-team · W1487 beneficiary-linked document lifecycle — all merged to
+  main). All shape-guarded by W998.
 - - 21 LIVE-registry mappings, **wired but dormant behind the flag**.
 - ≈ **460 route files** still operate as standalone CRUD with no core emission.
 - The frozen V4 `services/core` is **not** consumed by the live UI and is out of

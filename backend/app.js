@@ -430,6 +430,16 @@ try {
   logger.warn('[AbsenceDetection] bootstrap skipped:', err.message);
 }
 
+// W1501: WhatsApp campaign scheduler — hourly launch of scheduled campaigns
+// whose scheduledAt has passed. Env-gated (ENABLE_WHATSAPP_CAMPAIGN_SCHEDULER);
+// off by default.
+try {
+  const { bootstrapWhatsappCampaign } = require('./startup/whatsappCampaignBootstrap');
+  bootstrapWhatsappCampaign({ logger, isTestEnv });
+} catch (err) {
+  logger.warn('[WhatsappCampaign] bootstrap skipped:', err.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 7.5 BENEFICIARY-360 RED-FLAG SYSTEM
 //     (registry → engine → store → routes — Commits 1–10)

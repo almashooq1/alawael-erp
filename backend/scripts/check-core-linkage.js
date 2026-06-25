@@ -5,7 +5,7 @@
  * check-core-linkage.js - meta-guard for beneficiary-keyed model coverage.
  *
  * Problem (from CORE_LINKAGE_LEDGER): coverage today is enforced only by
- * scattered `*-core-linkage-wave*.test.js` suites + a manual ledger. A new
+ * scattered core-linkage-wave test suites + a manual ledger. A new
  * beneficiary-keyed model can ship with no unified-core producer and nothing
  * fails at CI.
  *

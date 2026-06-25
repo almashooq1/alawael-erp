@@ -578,4 +578,46 @@ try {
   /* loaded before services exist — skip silently */
 }
 
+// ─── Unified-core event producers (W1501) ───────────────────────────────
+// Emit document.updated / document.deleted on the integration bus so the
+// wildcard subscriber in crossModuleSubscribers can record beneficiary-linked
+// lifecycle events in CareTimeline. Fire-and-forget: failures must not break
+// the save/delete path.
+
+DocumentSchema.pre('save', function (next) {
+  this.$locals.wasNew = this.isNew;
+  next();
+});
+
+DocumentSchema.post('save', async function (doc) {
+  if (doc.$locals && doc.$locals.wasNew) return;
+  await emitDocumentEvent('updated', doc);
+});
+
+DocumentSchema.post('findOneAndUpdate', async function (doc) {
+  if (!doc) return;
+  await emitDocumentEvent('updated', doc);
+});
+
+DocumentSchema.post('findOneAndDelete', async function (doc) {
+  if (!doc) return;
+  await emitDocumentEvent('deleted', doc);
+});
+
+async function emitDocumentEvent(eventType, doc, extra) {
+  try {
+    const eventPublisher = require('../services/documents/documentEventPublisher.service');
+    await eventPublisher.publish(eventType, {
+      documentId: String(doc._id),
+      sourceModule: doc.sourceModule || 'documents',
+      entityType: doc.entityType || null,
+      entityId: doc.entityId || null,
+      fileName: doc.fileName || doc.title || null,
+      ...(extra || {}),
+    });
+  } catch (_err) {
+    // Swallow: core linkage is best-effort and must not break document CRUD.
+  }
+}
+
 module.exports = mongoose.models.Document || mongoose.model('Document', DocumentSchema);

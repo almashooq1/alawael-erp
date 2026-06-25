@@ -59,24 +59,43 @@ describe('W1525 enqueueReminders — idempotent producer', () => {
   test('creates a row per requested type; re-enqueue skips existing', async () => {
     const appointmentId = APPT();
     const when = new Date(Date.now() + 24 * 3600_000);
-    const first = await svc.enqueueReminders({ appointmentId, recipientPhone: '966500000001', when });
+    const first = await svc.enqueueReminders({
+      appointmentId,
+      recipientPhone: '966500000001',
+      when,
+    });
     expect(first.created).toBe(2); // reminder_24h + reminder_2h
-    const again = await svc.enqueueReminders({ appointmentId, recipientPhone: '966500000001', when });
+    const again = await svc.enqueueReminders({
+      appointmentId,
+      recipientPhone: '966500000001',
+      when,
+    });
     expect(again.created).toBe(0);
-    expect(await Reminder.countDocuments({ appointment: appointmentId, channel: 'whatsapp' })).toBe(2);
+    expect(await Reminder.countDocuments({ appointment: appointmentId, channel: 'whatsapp' })).toBe(
+      2
+    );
   });
 
   test('scheduledAt = appointment time − lead', async () => {
     const appointmentId = APPT();
     const when = new Date('2026-07-01T10:00:00Z');
-    await svc.enqueueReminders({ appointmentId, recipientPhone: '966500000001', when, types: ['reminder_2h'] });
+    await svc.enqueueReminders({
+      appointmentId,
+      recipientPhone: '966500000001',
+      when,
+      types: ['reminder_2h'],
+    });
     const row = await Reminder.findOne({ appointment: appointmentId }).lean();
     expect(new Date(row.scheduledAt).toISOString()).toBe('2026-07-01T08:00:00.000Z'); // 2h before
   });
 
   test('rejects bad appointmentId / when', async () => {
-    await expect(svc.enqueueReminders({ appointmentId: 'nope', when: new Date() })).rejects.toMatchObject({ statusCode: 400 });
-    await expect(svc.enqueueReminders({ appointmentId: APPT(), when: 'not-a-date' })).rejects.toMatchObject({ statusCode: 400 });
+    await expect(
+      svc.enqueueReminders({ appointmentId: 'nope', when: new Date() })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    await expect(
+      svc.enqueueReminders({ appointmentId: APPT(), when: 'not-a-date' })
+    ).rejects.toMatchObject({ statusCode: 400 });
   });
 });
 
@@ -135,7 +154,10 @@ describe('W1525 dispatchDueReminders — delivery, gating, idempotency', () => {
     const beneficiary = BENE();
     await pendingRow({ recipientPhone: undefined, beneficiary });
     const wa = whatsappOk();
-    const getGuardianPhone = jest.fn(async () => ({ phone: '966599999999', beneficiaryName: 'سعد' }));
+    const getGuardianPhone = jest.fn(async () => ({
+      phone: '966599999999',
+      beneficiaryName: 'سعد',
+    }));
     const r = await svc.dispatchDueReminders({ deps: { whatsappService: wa, getGuardianPhone } });
     expect(getGuardianPhone).toHaveBeenCalledWith(beneficiary);
     expect(r.sent).toBe(1);
@@ -178,9 +200,27 @@ describe('W1525 dispatchDueReminders — delivery, gating, idempotency', () => {
 describe('W1525 getReminderStats', () => {
   test('counts whatsapp reminders by status', async () => {
     await Reminder.create([
-      { appointment: APPT(), channel: 'whatsapp', type: 'reminder_24h', scheduledAt: new Date(), status: 'sent' },
-      { appointment: APPT(), channel: 'whatsapp', type: 'reminder_24h', scheduledAt: new Date(), status: 'pending' },
-      { appointment: APPT(), channel: 'sms', type: 'reminder_24h', scheduledAt: new Date(), status: 'sent' }, // other channel — ignored
+      {
+        appointment: APPT(),
+        channel: 'whatsapp',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'sent',
+      },
+      {
+        appointment: APPT(),
+        channel: 'whatsapp',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'pending',
+      },
+      {
+        appointment: APPT(),
+        channel: 'sms',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'sent',
+      }, // other channel — ignored
     ]);
     const stats = await svc.getReminderStats({});
     expect(stats.sent).toBe(1);

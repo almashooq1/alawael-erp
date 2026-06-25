@@ -96,7 +96,10 @@ function setupIntegrationBus(app) {
       } = require('../services/whatsapp/whatsappComplaintResolvedSubscriber');
       wireWhatsappComplaintResolved(integrationBus, { logger });
     } catch (waCmpErr) {
-      logger.warn('[Integration] WhatsApp complaint-resolved subscriber skipped:', waCmpErr.message);
+      logger.warn(
+        '[Integration] WhatsApp complaint-resolved subscriber skipped:',
+        waCmpErr.message
+      );
     }
 
     // W1517: configurable WhatsApp event→message bindings (admin-managed). One

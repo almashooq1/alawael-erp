@@ -48,8 +48,7 @@ async function handleAppointmentBooked(payload, deps = {}) {
   if (when.getTime() <= now) return { enqueued: 0, reason: 'not_future' };
 
   const enqueue =
-    deps.enqueueReminders ||
-    require('./whatsappAppointmentReminder.service').enqueueReminders;
+    deps.enqueueReminders || require('./whatsappAppointmentReminder.service').enqueueReminders;
   const res = await enqueue({
     appointmentId: payload.appointmentId,
     beneficiaryId: payload.beneficiaryId,
@@ -80,7 +79,9 @@ function wireWhatsappReminderAutoEnqueue(bus, deps = {}) {
       const payload = (envelope && envelope.payload) || envelope || {};
       const r = await handleAppointmentBooked(payload, handlerDeps);
       if (r.enqueued > 0) {
-        log?.info?.(`[whatsapp-reminder-enqueue] queued ${r.enqueued} for appt=${payload.appointmentId}`);
+        log?.info?.(
+          `[whatsapp-reminder-enqueue] queued ${r.enqueued} for appt=${payload.appointmentId}`
+        );
       }
     } catch (err) {
       log?.warn?.('[whatsapp-reminder-enqueue] handler failed', { error: err.message });

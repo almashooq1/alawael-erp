@@ -95,7 +95,10 @@ async function enqueueReminders(input = {}, deps = {}) {
   const existing = await Reminder.find({ appointment: appointmentId, channel: CHANNEL })
     .select('type')
     .lean();
-  const toCreate = missingTypes(types, existing.map(e => e.type));
+  const toCreate = missingTypes(
+    types,
+    existing.map(e => e.type)
+  );
   if (!toCreate.length) return { created: 0, skipped: types.length };
 
   const rows = toCreate.map(type => ({
@@ -165,7 +168,10 @@ async function dispatchDueReminders(opts = {}) {
         beneficiaryName = g && g.beneficiaryName;
       }
       if (!phone) {
-        await Reminder.updateOne({ _id: claimed._id }, { status: 'cancelled', failureReason: 'no_phone' });
+        await Reminder.updateOne(
+          { _id: claimed._id },
+          { status: 'cancelled', failureReason: 'no_phone' }
+        );
         skipped += 1;
         continue;
       }
@@ -174,7 +180,10 @@ async function dispatchDueReminders(opts = {}) {
       if (!verdict || !verdict.allowed) {
         await Reminder.updateOne(
           { _id: claimed._id },
-          { status: 'cancelled', failureReason: `consent:${(verdict && verdict.reason) || 'denied'}` }
+          {
+            status: 'cancelled',
+            failureReason: `consent:${(verdict && verdict.reason) || 'denied'}`,
+          }
         );
         skipped += 1;
         continue;
@@ -186,7 +195,10 @@ async function dispatchDueReminders(opts = {}) {
         await Reminder.updateOne({ _id: claimed._id }, { status: 'sent', sentAt: new Date() });
         sent += 1;
       } else {
-        await Reminder.updateOne({ _id: claimed._id }, { status: 'failed', failureReason: 'send_failed' });
+        await Reminder.updateOne(
+          { _id: claimed._id },
+          { status: 'failed', failureReason: 'send_failed' }
+        );
         failed += 1;
       }
     } catch (err) {

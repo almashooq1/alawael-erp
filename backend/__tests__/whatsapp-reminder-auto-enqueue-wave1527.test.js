@@ -40,11 +40,18 @@ describe('W1527 handleAppointmentBooked (behavioral, mocked enqueue)', () => {
   test('enqueues for a future appointment', async () => {
     const enqueueReminders = jest.fn(async () => ({ created: 2 }));
     const r = await sub.handleAppointmentBooked(
-      { appointmentId: 'a1', beneficiaryId: 'b1', date: new Date(NOW + 48 * 3600_000), startTime: '09:00' },
+      {
+        appointmentId: 'a1',
+        beneficiaryId: 'b1',
+        date: new Date(NOW + 48 * 3600_000),
+        startTime: '09:00',
+      },
       { enqueueReminders, now: NOW }
     );
     expect(r).toEqual({ enqueued: 2, reason: 'ok' });
-    expect(enqueueReminders).toHaveBeenCalledWith(expect.objectContaining({ appointmentId: 'a1', beneficiaryId: 'b1' }));
+    expect(enqueueReminders).toHaveBeenCalledWith(
+      expect.objectContaining({ appointmentId: 'a1', beneficiaryId: 'b1' })
+    );
   });
 
   test('skips a past appointment', async () => {
@@ -59,7 +66,10 @@ describe('W1527 handleAppointmentBooked (behavioral, mocked enqueue)', () => {
 
   test('skips a payload with no appointmentId', async () => {
     const enqueueReminders = jest.fn();
-    expect(await sub.handleAppointmentBooked({}, { enqueueReminders })).toEqual({ enqueued: 0, reason: 'no_appointment' });
+    expect(await sub.handleAppointmentBooked({}, { enqueueReminders })).toEqual({
+      enqueued: 0,
+      reason: 'no_appointment',
+    });
     expect(enqueueReminders).not.toHaveBeenCalled();
   });
 });

@@ -16,10 +16,22 @@ const path = require('path');
 const svc = require('../services/whatsapp/whatsappAppointmentReminder.service');
 
 const svcDir = path.join(__dirname, '../services/whatsapp');
-const SVC_SRC = fs.readFileSync(path.join(svcDir, 'whatsappAppointmentReminder.service.js'), 'utf8');
-const BOOT_SRC = fs.readFileSync(path.join(__dirname, '../startup/whatsappReminderBootstrap.js'), 'utf8');
-const ROUTE_SRC = fs.readFileSync(path.join(__dirname, '../routes/whatsapp-reminders.routes.js'), 'utf8');
-const REG_SRC = fs.readFileSync(path.join(__dirname, '../routes/registries/communication.registry.js'), 'utf8');
+const SVC_SRC = fs.readFileSync(
+  path.join(svcDir, 'whatsappAppointmentReminder.service.js'),
+  'utf8'
+);
+const BOOT_SRC = fs.readFileSync(
+  path.join(__dirname, '../startup/whatsappReminderBootstrap.js'),
+  'utf8'
+);
+const ROUTE_SRC = fs.readFileSync(
+  path.join(__dirname, '../routes/whatsapp-reminders.routes.js'),
+  'utf8'
+);
+const REG_SRC = fs.readFileSync(
+  path.join(__dirname, '../routes/registries/communication.registry.js'),
+  'utf8'
+);
 const APP_SRC = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
 
 describe('W1525 pure helpers', () => {
@@ -31,7 +43,9 @@ describe('W1525 pure helpers', () => {
   });
 
   test('missingTypes returns only the not-yet-queued types (idempotency core)', () => {
-    expect(svc.missingTypes(['reminder_24h', 'reminder_2h'], ['reminder_24h'])).toEqual(['reminder_2h']);
+    expect(svc.missingTypes(['reminder_24h', 'reminder_2h'], ['reminder_24h'])).toEqual([
+      'reminder_2h',
+    ]);
     expect(svc.missingTypes(['reminder_24h', 'reminder_24h'], [])).toEqual(['reminder_24h']); // de-duped
     expect(svc.missingTypes(['reminder_2h'], ['reminder_2h'])).toEqual([]);
   });

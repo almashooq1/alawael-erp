@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let mongod;
 let RiskSnapshot;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function snapshot(beneficiaryId, overrides = {}) {
   return {
@@ -77,7 +68,8 @@ describe('W1088 — risk escalations reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const s = await RiskSnapshot.create(snapshot(beneficiaryId));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'risk_snapshot_escalated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'risk_snapshot_escalated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('error');
@@ -92,7 +84,8 @@ describe('W1088 — risk escalations reach the unified-core timeline', () => {
       snapshot(beneficiaryId, { overallTier: 'critical', previousTier: 'high', overallScore: 92 })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'risk_snapshot_escalated' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'risk_snapshot_escalated' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('critical');
   });
@@ -112,14 +105,15 @@ describe('W1088 — risk escalations reach the unified-core timeline', () => {
       })
     );
 
-    const tlA = await waitForTimeline({ beneficiaryId: a, eventType: 'risk_snapshot_escalated' });
+    const tlARows = await waitForRows(
+      { beneficiaryId: a, eventType: 'risk_snapshot_escalated' },
+      1
+    );
+    const tlA = tlARows[0];
     expect(tlA).toBeTruthy();
     expect(tlA.severity).toBe('error');
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId: b, eventType: 'risk_snapshot_escalated' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId: b, eventType: 'risk_snapshot_escalated' }, 0);
   });
 
   it('a deescalation / unchanged snapshot does not fire', async () => {
@@ -132,9 +126,6 @@ describe('W1088 — risk escalations reach the unified-core timeline', () => {
       })
     );
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'risk_snapshot_escalated' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'risk_snapshot_escalated' }, 0);
   });
 });

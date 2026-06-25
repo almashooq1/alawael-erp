@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function reading(overrides = {}) {
   return {
     fbaAssessmentId: new mongoose.Types.ObjectId(),
@@ -80,7 +73,8 @@ describe('W1097 — BipEffectiveness → CareTimeline linkage', () => {
       })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('bip_effectiveness_recorded');
     expect(row.category).toBe('clinical');
@@ -101,7 +95,8 @@ describe('W1097 — BipEffectiveness → CareTimeline linkage', () => {
       })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('warning');
     expect(row.metadata.percentChangeFromBaseline).toBe(30);
@@ -113,7 +108,8 @@ describe('W1097 — BipEffectiveness → CareTimeline linkage', () => {
       reading({ beneficiaryId, target: { frequency: 5 }, snapshot: {} })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('info');
   });
@@ -122,13 +118,10 @@ describe('W1097 — BipEffectiveness → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BipEffectiveness.create(reading({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.notes_ar = 'مراجعة محلل السلوك';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

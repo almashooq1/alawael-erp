@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,17 +25,6 @@ let MorningHealthCheck;
 let CareTimeline;
 let integrationBus;
 let seq = 0;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseCheck(overrides = {}) {
   seq += 1;
@@ -75,10 +66,14 @@ describe('W1059 — flagged morning health checks reach the unified-core timelin
       baseCheck({ beneficiaryId, decision: 'send_home', reason: 'fever', temperatureC: 38.5 })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'morning_health_check_flagged',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'morning_health_check_flagged',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('error');
@@ -89,10 +84,14 @@ describe('W1059 — flagged morning health checks reach the unified-core timelin
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MorningHealthCheck.create(baseCheck({ beneficiaryId, decision: 'observe' }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'morning_health_check_flagged',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'morning_health_check_flagged',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
   });
@@ -101,12 +100,12 @@ describe('W1059 — flagged morning health checks reach the unified-core timelin
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MorningHealthCheck.create(baseCheck({ beneficiaryId, decision: 'allow' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'morning_health_check_flagged',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 });

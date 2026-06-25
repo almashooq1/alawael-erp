@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function book(beneficiaryId, branchId, overrides = {}) {
   return {
     beneficiaryId,
@@ -72,14 +65,14 @@ describe('W1100 — StoryBook → CareTimeline linkage', () => {
     const doc = await StoryBook.create(book(beneficiaryId, branchId));
 
     // No row yet — still a draft.
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.reviewedBy = reviewedBy;
     doc.status = 'published';
     await doc.save();
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('story_book_published');
     expect(row.category).toBe('family');
@@ -99,8 +92,7 @@ describe('W1100 — StoryBook → CareTimeline linkage', () => {
     doc.status = 'reviewed';
     await doc.save();
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does NOT fire merely on draft creation', async () => {
@@ -108,8 +100,7 @@ describe('W1100 — StoryBook → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     await StoryBook.create(book(beneficiaryId, branchId));
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row on a subsequent unrelated save', async () => {
@@ -120,11 +111,10 @@ describe('W1100 — StoryBook → CareTimeline linkage', () => {
     doc.status = 'published';
     await doc.save();
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.notes = 'family review note';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

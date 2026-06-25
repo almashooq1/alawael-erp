@@ -18,22 +18,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let Beneficiary, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w982-benstatus' } });
@@ -61,10 +52,7 @@ function newBeneficiary(extra = {}) {
 describe('W982 — beneficiary status changes reach the unified-core timeline', () => {
   it('creating a beneficiary does NOT emit a status_changed row', async () => {
     const b = await newBeneficiary();
-    await new Promise(r => setTimeout(r, 150));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId: b._id, eventType: 'status_changed' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId: b._id, eventType: 'status_changed' }, 0);
   });
 
   it('active → graduated lands a success status_changed row', async () => {
@@ -72,7 +60,8 @@ describe('W982 — beneficiary status changes reach the unified-core timeline', 
     const loaded = await Beneficiary.findById(b._id);
     loaded.status = 'graduated';
     await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: b._id, eventType: 'status_changed' });
+    const tlRows = await waitForRows({ beneficiaryId: b._id, eventType: 'status_changed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('success');
     expect(tl.metadata.oldStatus).toBe('active');
@@ -84,7 +73,8 @@ describe('W982 — beneficiary status changes reach the unified-core timeline', 
     const loaded = await Beneficiary.findById(b._id);
     loaded.status = 'deceased';
     await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: b._id, eventType: 'status_changed' });
+    const tlRows = await waitForRows({ beneficiaryId: b._id, eventType: 'status_changed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('critical');
   });

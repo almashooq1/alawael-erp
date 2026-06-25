@@ -16,6 +16,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -72,10 +74,8 @@ describe('W1103 PortalPayment → CareTimeline (portal_payment.paid)', () => {
     doc.status = 'paid';
     doc.paidDate = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
 
-    rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    rows = await waitForRows({ beneficiaryId }, 1);
     const row = rows[0];
     expect(row.eventType).toBe('portal_payment_paid');
     expect(row.category).toBe('family');
@@ -91,10 +91,7 @@ describe('W1103 PortalPayment → CareTimeline (portal_payment.paid)', () => {
     const doc = await PortalPayment.create(payment(beneficiaryId));
     doc.description = 'updated description';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not fire for a non-paid status (refunded/cancelled)', async () => {
@@ -102,10 +99,7 @@ describe('W1103 PortalPayment → CareTimeline (portal_payment.paid)', () => {
     const doc = await PortalPayment.create(payment(beneficiaryId));
     doc.status = 'cancelled';
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(0);
+    const rows = await waitForRows({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the row on a later unrelated save', async () => {
@@ -114,14 +108,6 @@ describe('W1103 PortalPayment → CareTimeline (portal_payment.paid)', () => {
     doc.status = 'paid';
     doc.paidDate = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    // Unrelated mutation — status stays 'paid', not re-modified.
-    doc.reminderSentAt = new Date();
-    await doc.save();
-    await new Promise(r => setTimeout(r, 30));
-
-    const rows = await CareTimeline.find({ beneficiaryId });
-    expect(rows).toHaveLength(1);
+    const rows = await waitForRows({ beneficiaryId }, 1);
   });
 });

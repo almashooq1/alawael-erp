@@ -80,6 +80,54 @@ function pick(src, fields) {
   for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
   return out;
 }
+
+// W1482: CASE_FIELDS are FLAT patient fields (patientName, nationalId, gender, ...),
+// but the schema nests them under `beneficiary` (with beneficiary.name REQUIRED) +
+// keeps only status/priority at the top level. The old code spread the flat fields
+// straight into `new CaseManagement(...)` / findByIdAndUpdate(...), so beneficiary.name
+// was never set → POST threw "beneficiary.name is required" (create totally broken) and
+// PUT silently no-op'd every patient field. These helpers map flat → the schema shape.
+const CASE_BENEFICIARY_MAP = {
+  patientName: 'name',
+  nationalId: 'nationalId',
+  dateOfBirth: 'dateOfBirth',
+  gender: 'gender',
+  phone: 'phone',
+  email: 'email',
+  address: 'address',
+  emergencyContact: 'emergencyContact',
+};
+const CASE_TOP_LEVEL_FIELDS = ['status', 'priority']; // CASE_FIELDS entries that ARE real top-level schema paths
+
+function caseBeneficiaryFromBody(picked) {
+  const b = {};
+  for (const [flat, nested] of Object.entries(CASE_BENEFICIARY_MAP)) {
+    if (picked[flat] !== undefined) b[nested] = picked[flat];
+  }
+  return b;
+}
+
+function mapCaseCreateBody(body, userId) {
+  const picked = pick(body, CASE_FIELDS);
+  const caseData = {
+    beneficiary: caseBeneficiaryFromBody(picked),
+    createdBy: userId,
+    lastModifiedBy: userId,
+  };
+  for (const k of CASE_TOP_LEVEL_FIELDS) if (picked[k] !== undefined) caseData[k] = picked[k];
+  return caseData;
+}
+
+// Partial update: use dot-notation for nested beneficiary fields so a `$set` only
+// touches the provided keys (a nested object would replace the whole sub-doc).
+function mapCaseUpdateBody(body, userId) {
+  const picked = pick(body, CASE_FIELDS);
+  const updateData = { lastModifiedBy: userId, lastUpdateDate: new Date() };
+  const ben = caseBeneficiaryFromBody(picked);
+  for (const [k, v] of Object.entries(ben)) updateData[`beneficiary.${k}`] = v;
+  for (const k of CASE_TOP_LEVEL_FIELDS) if (picked[k] !== undefined) updateData[k] = picked[k];
+  return updateData;
+}
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads/medical-files');
@@ -123,11 +171,7 @@ router.post(
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
-      const caseData = {
-        ...pick(req.body, CASE_FIELDS),
-        createdBy: req.user._id,
-        lastModifiedBy: req.user._id,
-      };
+      const caseData = mapCaseCreateBody(req.body, req.user._id);
 
       const newCase = new CaseManagement(caseData);
       newCase.calculateAge();
@@ -279,11 +323,7 @@ router.put(
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
-      const updateData = {
-        ...pick(req.body, CASE_FIELDS),
-        lastModifiedBy: req.user._id,
-        lastUpdateDate: new Date(),
-      };
+      const updateData = mapCaseUpdateBody(req.body, req.user._id);
 
       const caseDoc = await CaseManagement.findByIdAndUpdate(req.params.id, updateData, {
         returnDocument: 'after',
@@ -761,3 +801,6 @@ router.get('/:id/report', authenticate, requireBranchAccess, async (req, res) =>
 });
 
 module.exports = router;
+// W1482: exported for unit testing the flat→nested mapping fix.
+module.exports.mapCaseCreateBody = mapCaseCreateBody;
+module.exports.mapCaseUpdateBody = mapCaseUpdateBody;

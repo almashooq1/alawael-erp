@@ -40,9 +40,15 @@ describe('W1458 stripProtectedFinanceFields', () => {
   });
 
   test('protected set covers the AccountingInvoice money/state fields', () => {
-    ['status', 'paidAmount', 'remainingAmount', 'totalAmount', 'subtotal', 'vatAmount', 'balance'].forEach(
-      f => expect(FINANCE_PROTECTED_FIELDS.has(f)).toBe(true)
-    );
+    [
+      'status',
+      'paidAmount',
+      'remainingAmount',
+      'totalAmount',
+      'subtotal',
+      'vatAmount',
+      'balance',
+    ].forEach(f => expect(FINANCE_PROTECTED_FIELDS.has(f)).toBe(true));
   });
 });
 
@@ -56,7 +62,9 @@ describe('W1458 finance PUT routes are RBAC-gated', () => {
     'PUT %s carries createRBACMiddleware([finance:update])',
     route => {
       const re = new RegExp(
-        "'" + route.replace(/[/:]/g, '\\$&') + "'[\\s\\S]{0,90}createRBACMiddleware\\(\\['finance:update'\\]\\)"
+        "'" +
+          route.replace(/[/:]/g, '\\$&') +
+          "'[\\s\\S]{0,90}createRBACMiddleware\\(\\['finance:update'\\]\\)"
       );
       expect(src).toMatch(re);
     }

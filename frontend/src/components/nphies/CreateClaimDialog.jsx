@@ -2,7 +2,7 @@
  * CreateClaimDialog.jsx — UI front-end for the session→NPHIES claim bridge.
  *
  * Backend contract:
- *   POST /api/admin/therapy-sessions/:id/create-claim
+ *   POST /api/api/v1/sessions/admin/:id/create-claim
  *   body: { unitPrice, diagnosis: [{ code, description }], cptOverride?, dryRun? }
  *   response: { ok, claim, errors, warnings, dryRun }
  *
@@ -98,7 +98,7 @@ export default function CreateClaimDialog({ open, sessionId, sessionMeta, onClos
 
     setLoading(true);
     try {
-      const { data } = await apiClient.post(`/admin/therapy-sessions/${sessionId}/create-claim`, {
+      const { data } = await apiClient.post(`/api/v1/sessions/admin/${sessionId}/create-claim`, {
         unitPrice: unitPrice ? Number(unitPrice) : undefined,
         diagnosis: cleanDiagnosis.length ? cleanDiagnosis : undefined,
         dryRun,

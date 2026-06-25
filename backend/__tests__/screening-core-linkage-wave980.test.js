@@ -13,22 +13,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let VisionScreening, HearingScreening, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w980-screen' } });
@@ -72,15 +63,15 @@ describe('W980 — screenings reach the unified-core timeline', () => {
       outcome: 'pass',
       status: 'draft',
     });
-    await new Promise(r => setTimeout(r, 150));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     const loaded = await VisionScreening.findById(v._id);
     loaded.status = 'finalized';
     Object.assign(loaded, finalizeFields());
     await loaded.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('info');
   });
@@ -97,7 +88,8 @@ describe('W980 — screenings reach the unified-core timeline', () => {
       status: 'finalized',
       ...finalizeFields(),
     });
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
     expect(tl.metadata.outcome).toBe('refer');
@@ -113,7 +105,8 @@ describe('W980 — screenings reach the unified-core timeline', () => {
       status: 'finalized',
       ...finalizeFields(),
     });
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'screening_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'screening_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
   });

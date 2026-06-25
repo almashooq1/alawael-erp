@@ -93,6 +93,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // via toContain(...). That path resolves from app.js's directory, not from
   // __tests__/ — quoted assertion string, not a real import (W1175 class).
   path.join('__tests__', 'email-migration-digests-wave1246.test.js'),
+  // W1487 check-enum-literal-queries-script self-test writes
+  // `require('../models/Thing')` / `require('../models/sub/Thing')` as fixture
+  // CONTENT (string arrays written to mkdtempSync repos) — same W522/W1189 class:
+  // literal fixture strings, not real imports.
+  path.join('__tests__', 'check-enum-literal-queries-script.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

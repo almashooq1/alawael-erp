@@ -287,6 +287,7 @@ class TherapistPortalService {
       therapist: therapistId,
       status: { $in: ['SCHEDULED', 'CONFIRMED'] },
     };
+    if (query.branchId) filter.branchId = query.branchId;
     if (query.from) filter.date = { $gte: new Date(query.from) };
     else filter.date = { $gte: new Date() };
     if (query.to) filter.date = { ...filter.date, $lte: new Date(query.to) };
@@ -320,6 +321,7 @@ class TherapistPortalService {
       therapist: therapistId,
       beneficiary,
       plan: plan || undefined,
+      branchId: data.branchId || undefined,
       date: new Date(date),
       startTime,
       endTime,
@@ -436,6 +438,7 @@ class TherapistPortalService {
   async getSessions(therapistId, query = {}) {
     const Session = getTherapySession();
     const filter = { therapist: therapistId };
+    if (query.branchId) filter.branchId = query.branchId;
     if (query.status) filter.status = query.status;
     if (query.sessionType) filter.sessionType = query.sessionType;
     if (query.from || query.to) {

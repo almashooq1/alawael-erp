@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -45,10 +47,6 @@ function alert(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1120 — DecisionAlert raised → unified-core CareTimeline linkage', () => {
   test('records a system row when a beneficiary decision alert is raised', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -56,9 +54,7 @@ describe('W1120 — DecisionAlert raised → unified-core CareTimeline linkage',
     const doc = await DecisionAlert.create(
       alert(beneficiaryId, { branchId, category: 'treatment_gap', severity: 'high' })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('decision_alert_raised');
@@ -73,9 +69,7 @@ describe('W1120 — DecisionAlert raised → unified-core CareTimeline linkage',
   test('maps a critical alert to a critical row', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DecisionAlert.create(alert(beneficiaryId, { severity: 'critical' }));
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].severity).toBe('critical');
   });
@@ -89,23 +83,18 @@ describe('W1120 — DecisionAlert raised → unified-core CareTimeline linkage',
       source: { type: 'kpi_monitor' },
       branchId: new mongoose.Types.ObjectId(),
     });
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
     expect(doc.category).toBe('kpi_breach');
   });
 
   test('does not double-record on a later status save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await DecisionAlert.create(alert(beneficiaryId));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.status = 'acknowledged';
     doc.acknowledgedAt = new Date();
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

@@ -10,17 +10,14 @@
  *
  *   /me              — object payload, viewerMode in response
  *   /today           — object payload, viewerMode in response
- *   /schedule        — bare array (returns [] for admin_no_target)
  *   /beneficiaries   — bare array (returns [] for admin_no_target)
  *   /assessments     — bare array (returns [] for admin_no_target)
  *   /credentials     — object payload, viewerMode in response
  *
  * New /therapists picker (admin-only) returns the clinical Employee list.
  *
- * Mutations (/sessions/:id/start, /sessions/:id/draft, /sessions/:id/sign,
- * /goals/:goalId/progress, POST /assessments, POST /red-flags) keep their
- * 404 EmployeeNotFound behavior — admin should not act on behalf of a
- * therapist without explicit SoD wiring.
+ * NOTE: /schedule and /sessions/* mutations were retired in Phase 8; they are
+ * now served by the unified DDD Sessions surface /api/v1/sessions/therapist/*.
  */
 
 const express = require('express');
@@ -238,26 +235,6 @@ describe('W234 — therapist-portal admin viewer mode', () => {
     });
   });
 
-  // ── /schedule (bare-array contract) ───────────────────────────────────
-  describe('GET /schedule', () => {
-    test('admin without target → 200 [] (preserves array shape)', async () => {
-      Employee.findOne.mockReturnValueOnce(chain(null));
-      const res = await request(buildApp()).get('/api/v1/therapist/schedule').set(asUser('admin'));
-      expect(res.status).toBe(200);
-      // Must be a bare array, not an envelope object — frontend .map() depends on it.
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toEqual([]);
-    });
-
-    test('therapist without Employee still 404', async () => {
-      Employee.findOne.mockReturnValueOnce(chain(null));
-      const res = await request(buildApp())
-        .get('/api/v1/therapist/schedule')
-        .set(asUser('therapist'));
-      expect(res.status).toBe(404);
-    });
-  });
-
   // ── /beneficiaries (bare-array contract) ──────────────────────────────
   describe('GET /beneficiaries', () => {
     test('admin without target → 200 []', async () => {
@@ -320,19 +297,6 @@ describe('W234 — therapist-portal admin viewer mode', () => {
         .get('/api/v1/therapist/credentials')
         .set(asUser('therapist'));
       expect(res.status).toBe(404);
-    });
-  });
-
-  // ── Mutations stay locked down ────────────────────────────────────────
-  describe('mutation endpoints unaffected', () => {
-    test('POST /sessions/:id/start as admin without target → 404 (no act-on-behalf)', async () => {
-      Employee.findOne.mockReturnValueOnce(chain(null));
-      const res = await request(buildApp())
-        .post(`/api/v1/therapist/sessions/${TARGET_ID}/start`)
-        .set(asUser('admin'))
-        .send({});
-      expect(res.status).toBe(404);
-      expect(res.body.error).toBe('EmployeeNotFound');
     });
   });
 });

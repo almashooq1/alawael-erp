@@ -30,10 +30,22 @@ const logger = console;
  * @param {SystemIntegrationBus} integrationBus
  * @param {ModuleConnector} moduleConnector
  */
+const DDD_INITIALIZED = Symbol.for('dddCrossModuleSubscribers.initialized');
+
 function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   if (!integrationBus) {
     logger.warn('[DDD-CrossModule] No integration bus — skipping subscriber registration');
     return;
+  }
+
+  // Idempotency guard: the integration bus is a process singleton. Multiple
+  // core-linkage tests call initializeDDDSubscribers(integrationBus) in the
+  // same Jest worker; without this guard the same handlers are registered
+  // repeatedly and events such as portal_payment.ped create duplicate timeline
+  // rows (W1103 flakiness).
+  if (integrationBus[DDD_INITIALIZED]) {
+    logger.info('[DDD-CrossModule] already initialized — skipping duplicate registration');
+    return [];
   }
 
   const subscribers = [];
@@ -5043,6 +5055,7 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     `[DDD-CrossModule] ✓ ${registered}/${subscribers.length} DDD event subscribers registered`
   );
 
+  integrationBus[DDD_INITIALIZED] = true;
   return subscribers;
 }
 

@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let SpasticityInjection;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseInjection(overrides = {}) {
   return {
@@ -82,10 +73,14 @@ describe('W1048 — spasticity-injection completion reaches the unified-core tim
     Object.assign(inj, completedFields());
     await inj.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'spasticity_injection_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'spasticity_injection_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -97,10 +92,7 @@ describe('W1048 — spasticity-injection completion reaches the unified-core tim
     const beneficiaryId = new mongoose.Types.ObjectId();
     await SpasticityInjection.create(baseInjection({ beneficiaryId, status: 'planned' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'spasticity_injection_completed' })).toBe(
-      0
-    );
+    await waitForCount({ eventType: 'spasticity_injection_completed' }, 0);
   });
 
   it('re-saving an already-completed injection does not re-fire the event', async () => {
@@ -109,21 +101,25 @@ describe('W1048 — spasticity-injection completion reaches the unified-core tim
       baseInjection({ beneficiaryId, ...completedFields() })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'spasticity_injection_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'spasticity_injection_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await SpasticityInjection.findById(inj._id);
     again.notes = 'Tolerated procedure well.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'spasticity_injection_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

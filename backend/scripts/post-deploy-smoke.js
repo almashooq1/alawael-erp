@@ -98,9 +98,9 @@ const PROBES = [
   adminMounted('insurance-tariffs', '/api/admin/insurance-tariffs'),
   adminMounted('zatca-credentials', '/api/admin/zatca-credentials'),
   adminMounted('nphies-claims', '/api/admin/nphies-claims'),
-  // bulk-create-claims POSTs in real use, but the GET will return 405
-  // (method not allowed) when mounted; we still get out of 404 territory.
-  adminMounted('therapy-sessions', '/api/admin/therapy-sessions'),
+  // Therapy Sessions admin surface unified under DDD Sessions.
+  // GET / returns 401 without a token when mounted.
+  mountedRoute('therapy-sessions', '/api/v1/sessions/admin'),
   adminMounted('pii-access-audit', '/api/admin/pii-access-audit'),
 
   // ── Regulatory routes (CBAHI + PDPL) shipped 2026-05-02 ──────────

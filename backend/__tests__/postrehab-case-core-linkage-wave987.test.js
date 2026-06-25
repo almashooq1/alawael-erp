@@ -16,22 +16,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let PostRehabCase, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w987-postrehab' } });
@@ -67,17 +58,20 @@ function newActiveCase(extra = {}) {
 describe('W987 — post-rehab follow-up cases reach the unified-core timeline', () => {
   it('an active case produces no timeline row until it reaches a terminal status', async () => {
     const c = await newActiveCase();
-    await new Promise(r => setTimeout(r, 150));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: c.beneficiary })).toBe(0);
+    await waitForCount({ beneficiaryId: c.beneficiary }, 0);
 
     const loaded = await PostRehabCase.findById(c._id);
     loaded.status = 'COMPLETED';
     await loaded.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: c.beneficiary,
-      eventType: 'followup_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: c.beneficiary,
+        eventType: 'followup_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -88,10 +82,14 @@ describe('W987 — post-rehab follow-up cases reach the unified-core timeline', 
     const loaded = await PostRehabCase.findById(c._id);
     loaded.status = 'LOST_TO_FOLLOW_UP';
     await loaded.save();
-    const tl = await waitForTimeline({
-      beneficiaryId: c.beneficiary,
-      eventType: 'followup_lost',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: c.beneficiary,
+        eventType: 'followup_lost',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
   });
@@ -101,7 +99,6 @@ describe('W987 — post-rehab follow-up cases reach the unified-core timeline', 
     const loaded = await PostRehabCase.findById(c._id);
     loaded.status = 'ON_HOLD';
     await loaded.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: c.beneficiary })).toBe(0);
+    await waitForCount({ beneficiaryId: c.beneficiary }, 0);
   });
 });

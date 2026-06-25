@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let PriorAuthorization;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 let seq = 0;
 function baseAuth(overrides = {}) {
@@ -81,10 +72,14 @@ describe('W1052 — prior-authorization approval reaches the unified-core timeli
     a.status = 'approved';
     await a.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'prior_authorization_approved',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'prior_authorization_approved',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -95,31 +90,32 @@ describe('W1052 — prior-authorization approval reaches the unified-core timeli
     const beneficiaryId = new mongoose.Types.ObjectId();
     await PriorAuthorization.create(baseAuth({ beneficiaryId, status: 'pending' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'prior_authorization_approved' })).toBe(
-      0
-    );
+    await waitForCount({ eventType: 'prior_authorization_approved' }, 0);
   });
 
   it('re-saving an already-approved auth does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await PriorAuthorization.create(baseAuth({ beneficiaryId, status: 'approved' }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'prior_authorization_approved',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'prior_authorization_approved',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await PriorAuthorization.findById(a._id);
     again.notes = 'Filed with NPHIES.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'prior_authorization_approved',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

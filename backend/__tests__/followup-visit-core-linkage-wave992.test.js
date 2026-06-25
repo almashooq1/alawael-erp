@@ -17,22 +17,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let FollowUpVisit, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w992-followupvisit' } });
@@ -72,14 +63,17 @@ function newScheduledVisit(extra = {}) {
 describe('W992 — post-rehab follow-up visits reach the unified-core timeline', () => {
   it('a scheduled visit produces no timeline row until it is attended/missed', async () => {
     const v = await newScheduledVisit();
-    await new Promise(r => setTimeout(r, 150));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: v.beneficiary })).toBe(0);
+    await waitForCount({ beneficiaryId: v.beneficiary }, 0);
 
     const loaded = await FollowUpVisit.findById(v._id);
     loaded.status = 'COMPLETED';
     await loaded.save();
 
-    const tl = await waitForTimeline({ beneficiaryId: v.beneficiary, eventType: 'followup_visit' });
+    const tlRows = await waitForRows(
+      { beneficiaryId: v.beneficiary, eventType: 'followup_visit' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -90,7 +84,11 @@ describe('W992 — post-rehab follow-up visits reach the unified-core timeline',
     const loaded = await FollowUpVisit.findById(v._id);
     loaded.status = 'MISSED';
     await loaded.save();
-    const tl = await waitForTimeline({ beneficiaryId: v.beneficiary, eventType: 'followup_visit' });
+    const tlRows = await waitForRows(
+      { beneficiaryId: v.beneficiary, eventType: 'followup_visit' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
   });
@@ -100,7 +98,6 @@ describe('W992 — post-rehab follow-up visits reach the unified-core timeline',
     const loaded = await FollowUpVisit.findById(v._id);
     loaded.status = 'RESCHEDULED';
     await loaded.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: v.beneficiary })).toBe(0);
+    await waitForCount({ beneficiaryId: v.beneficiary }, 0);
   });
 });

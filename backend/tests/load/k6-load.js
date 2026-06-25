@@ -52,9 +52,9 @@ export default function () {
   });
 
   group('Therapy Sessions', () => {
-    const sessionsRes = http.get(`${baseUrl}/api/v1/therapy-sessions`, {
+    const sessionsRes = http.get(`${baseUrl}/api/v1/sessions`, {
       headers: authHeaders,
-      tags: { name: 'therapy-sessions' },
+      tags: { name: 'sessions' },
     });
     check(sessionsRes, {
       'therapy sessions returns expected status': r => [200, 401, 403, 404].includes(r.status),

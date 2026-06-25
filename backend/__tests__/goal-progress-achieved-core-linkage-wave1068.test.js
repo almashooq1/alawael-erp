@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let GoalProgressSnapshot;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseSnapshot(overrides = {}) {
   return {
@@ -70,7 +61,8 @@ describe('W1068 — achieved goals reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const s = await GoalProgressSnapshot.create(baseSnapshot({ beneficiaryId, progressPct: 100 }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_achieved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_achieved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -82,7 +74,8 @@ describe('W1068 — achieved goals reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await GoalProgressSnapshot.create(baseSnapshot({ beneficiaryId, progressPct: 110 }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_achieved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_achieved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.metadata.progressPct).toBe(110);
   });
@@ -91,25 +84,20 @@ describe('W1068 — achieved goals reach the unified-core timeline', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await GoalProgressSnapshot.create(baseSnapshot({ beneficiaryId, progressPct: 80 }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'goal_progress_achieved' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'goal_progress_achieved' }, 0);
   });
 
   it('editing an existing achieved snapshot does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const s = await GoalProgressSnapshot.create(baseSnapshot({ beneficiaryId, progressPct: 100 }));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'goal_progress_achieved' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'goal_progress_achieved' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await GoalProgressSnapshot.findById(s._id);
     again.notes = 'verified';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'goal_progress_achieved' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'goal_progress_achieved' }, 1);
   });
 });

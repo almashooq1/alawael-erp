@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let CreativeArtsTherapySession;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseSession(overrides = {}) {
   return {
@@ -84,10 +75,14 @@ describe('W1057 — creative arts therapy completion reaches the unified-core ti
     Object.assign(s, completedFields());
     await s.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'creative_arts_therapy_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'creative_arts_therapy_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -99,10 +94,7 @@ describe('W1057 — creative arts therapy completion reaches the unified-core ti
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CreativeArtsTherapySession.create(baseSession({ beneficiaryId, status: 'scheduled' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ eventType: 'creative_arts_therapy_completed' })
-    ).toBe(0);
+    await waitForCount({ eventType: 'creative_arts_therapy_completed' }, 0);
   });
 
   it('re-saving an already-completed session does not re-fire the event', async () => {
@@ -111,21 +103,25 @@ describe('W1057 — creative arts therapy completion reaches the unified-core ti
       baseSession({ beneficiaryId, ...completedFields() })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'creative_arts_therapy_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'creative_arts_therapy_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await CreativeArtsTherapySession.findById(s._id);
     again.notes = 'Shared the artwork with the parent at pickup.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'creative_arts_therapy_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

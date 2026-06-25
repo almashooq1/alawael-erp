@@ -36,7 +36,7 @@ const DIRECT_ROUTER_FILES = [
   'mhpss.routes.js',
   'phase37.routes.js',
   'rehabilitationPlan.routes.js',
-  'therapy-sessions.routes.js',
+  // 'therapy-sessions.routes.js' retired — merged into DDD Sessions /api/v1/sessions (Phase 5)
 ];
 
 const FACTORY_FILES = ['beneficiary-red-flags.routes.js'];
@@ -90,7 +90,7 @@ describe('W1148 — legacy routes/ branch isolation (static wiring)', () => {
   });
 });
 
-describe('W1148 — behavioral (representative: therapy-sessions router)', () => {
+describe('W1148 — behavioral (representative: DDD sessions router)', () => {
   let mongoose;
 
   beforeEach(() => {
@@ -103,7 +103,7 @@ describe('W1148 — behavioral (representative: therapy-sessions router)', () =>
   });
 
   function loadRouter() {
-    return require('../routes/therapy-sessions.routes');
+    return require('../domains/sessions/routes/sessions.routes');
   }
 
   function paramHandler(router) {

@@ -22,6 +22,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -29,17 +31,6 @@ let mongod;
 let MedicalReferral;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseReferral(overrides = {}) {
   return {
@@ -80,10 +71,14 @@ describe('W1001 — Medical referral completion reaches the unified-core timelin
     ref.status = 'completed';
     await ref.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'medical_referral_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'medical_referral_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -96,8 +91,7 @@ describe('W1001 — Medical referral completion reaches the unified-core timelin
     const beneficiary = new mongoose.Types.ObjectId();
     await MedicalReferral.create(baseReferral({ beneficiary, status: 'in_progress' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'medical_referral_completed' })).toBe(0);
+    await waitForCount({ eventType: 'medical_referral_completed' }, 0);
   });
 
   it('re-saving an already-completed referral does not re-fire', async () => {
@@ -106,21 +100,25 @@ describe('W1001 — Medical referral completion reaches the unified-core timelin
     ref.status = 'completed';
     await ref.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId: beneficiary,
-      eventType: 'medical_referral_completed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId: beneficiary,
+        eventType: 'medical_referral_completed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await MedicalReferral.findById(ref._id);
     again.notes = 'Consultation letter filed.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId: beneficiary,
         eventType: 'medical_referral_completed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

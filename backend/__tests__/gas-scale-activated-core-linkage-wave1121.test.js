@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -54,18 +56,12 @@ function scale(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1121 — GasScale activated → unified-core CareTimeline linkage', () => {
   test('records a clinical success row when a GAS scale is activated', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const branchId = new mongoose.Types.ObjectId();
     const doc = await GasScale.create(scale(beneficiaryId, { branchId, domain: 'communication' }));
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('gas_scale_activated');
@@ -81,37 +77,30 @@ describe('W1121 — GasScale activated → unified-core CareTimeline linkage', (
   test('does not double-record on a non-status save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await GasScale.create(scale(beneficiaryId));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.weight = 2;
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('re-activating (archived → active) records again', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await GasScale.create(scale(beneficiaryId, { status: 'archived' }));
-    await settle();
     // archived on create → status !== active → no row
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.status = 'active';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('metadata carries the goal + beneficiary linkage', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const goalId = new mongoose.Types.ObjectId();
     await GasScale.create(scale(beneficiaryId, { goalId }));
-    await settle();
-
-    const row = await CareTimeline.findOne({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
+    const row = rows[0];
     expect(row).toBeTruthy();
     expect(String(row.metadata.goalId)).toBe(String(goalId));
     expect(String(row.metadata.beneficiaryId)).toBe(String(beneficiaryId));

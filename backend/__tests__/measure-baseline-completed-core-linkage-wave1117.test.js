@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -45,21 +47,6 @@ function slot(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
-/** Poll until a timeline row matching `query` exists (CI-load safe). */
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
-
 describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline linkage', () => {
   test('records a clinical/success row when a baseline slot is completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -67,14 +54,13 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
     const doc = await MeasureBaselineSlot.create(
       slot(beneficiaryId, { branchId, measureCode: 'CARS2' })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.state = 'BASELINE_COMPLETED';
     doc.baselineApplicationId = new mongoose.Types.ObjectId();
     doc.completedAt = new Date();
     await doc.save();
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -99,7 +85,7 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
         measureCode: 'GMFM88',
       })
     );
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     const rows = await CareTimeline.find({ beneficiaryId }).lean();
     expect(rows).toHaveLength(1);
@@ -109,13 +95,11 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
   test('does not fire for a non-completed transition (scheduled)', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await MeasureBaselineSlot.create(slot(beneficiaryId));
-    await settle();
+    await waitForCount({ beneficiaryId }, 0);
 
     doc.state = 'BASELINE_SCHEDULED';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   test('does not double-record on a later unrelated save', async () => {
@@ -127,15 +111,13 @@ describe('W1117 — MeasureBaselineSlot completion → unified-core CareTimeline
         completedAt: new Date(),
       })
     );
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
     expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
 
     doc.state = 'BASELINE_LOCKED';
     doc.lockedAt = new Date();
     doc.lockedBy = new mongoose.Types.ObjectId();
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

@@ -60,8 +60,12 @@ const whatsappTemplates = require('../services/whatsapp/whatsappTemplates.servic
 const whatsappRateLimit = require('../services/whatsapp/rateLimit.service');
 const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
+const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
+const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
+const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const socketEmitter = require('../utils/socketEmitter');
 const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {
@@ -287,6 +291,44 @@ router.get(
   })
 );
 
+/**
+ * GET /conversations/:id/context — rehab-context sidebar (W1491)
+ *
+ * Returns the linked beneficiary's identity + disability, active care plan,
+ * active goals, upcoming sessions (+ therapists), and outstanding invoices so
+ * staff get full clinical context WITHOUT leaving the Inbox. Branch-isolated
+ * via byIdScopedFilter (a foreign-branch conversation id → clean 404); the
+ * aggregation itself is best-effort (Promise.allSettled) so one slow/missing
+ * source never blanks the panel.
+ */
+router.get(
+  '/conversations/:id/context',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id beneficiaryId branchId phone senderName')
+      .lean();
+
+    if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+    // Unlinked conversation (no beneficiary on file yet) → empty-but-shaped
+    // payload so the UI renders a "link a beneficiary" state, not an error.
+    if (!conv.beneficiaryId) {
+      return res.json({
+        success: true,
+        data: { linked: false, ...whatsappBeneficiaryContext.emptyContext() },
+      });
+    }
+
+    const context = await whatsappBeneficiaryContext.buildContext({
+      beneficiaryId: conv.beneficiaryId,
+    });
+    res.json({ success: true, data: { linked: true, ...context } });
+  })
+);
+
 /** POST /conversations/:id/resolve */
 router.post(
   '/conversations/:id/resolve',
@@ -305,6 +347,20 @@ router.post(
       { returnDocument: 'after' }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+
+    socketEmitter.emitWhatsAppConversationUpdate({
+      branchId: data.branchId?.toString?.() || data.branchId,
+      organizationId: data.organizationId?.toString?.() || data.organizationId,
+      conversationId: data._id?.toString?.() || data._id,
+      changes: {
+        status: data.status,
+        requiresHumanReview: data.requiresHumanReview,
+        resolvedAt: data.resolvedAt,
+        resolvedBy: data.resolvedBy,
+        unreadCount: data.unreadCount || 0,
+      },
+    });
+
     res.json({ success: true, data });
   })
 );
@@ -330,11 +386,229 @@ router.post(
   '/conversations/:id/mark-read',
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
-    await Conversation.updateOne(
+    const data = await Conversation.findOneAndUpdate(
       Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
-      { unreadCount: 0 }
-    );
+      { unreadCount: 0 },
+      {
+        returnDocument: 'after',
+        projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 },
+      }
+    ).lean();
+
+    if (data) {
+      socketEmitter.emitWhatsAppConversationUpdate({
+        branchId: data.branchId?.toString?.() || data.branchId,
+        organizationId: data.organizationId?.toString?.() || data.organizationId,
+        conversationId: data._id?.toString?.() || data._id,
+        changes: { unreadCount: 0 },
+      });
+    }
+
     res.json({ success: true });
+  })
+);
+
+/**
+ * POST /conversations/:id/notes — add a private staff note (W1493).
+ * Internal only; never sent to WhatsApp. Branch-isolated; explicit field
+ * extraction (no mass-assignment).
+ */
+router.post(
+  '/conversations/:id/notes',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    validate(['text'], req.body);
+    const note = {
+      text: String(req.body.text).slice(0, 4000),
+      authorId: req.user?._id || req.user?.id || null,
+      authorName: req.user?.name || req.user?.email || null,
+      createdAt: new Date(),
+    };
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $push: { internalNotes: note } },
+      { returnDocument: 'after', projection: { internalNotes: 1 } }
+    ).lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    const notes = data.internalNotes || [];
+    res
+      .status(201)
+      .json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
+  })
+);
+
+/**
+ * POST /conversations/:id/transfer — hand the conversation to another staff
+ * member with an audited reason (W1493). Strengthens /assign with a transfer
+ * trail. Branch-isolated; explicit field extraction (no mass-assignment).
+ */
+router.post(
+  '/conversations/:id/transfer',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    validate(['staffId'], req.body);
+    const toUserId = String(req.body.staffId);
+    if (!mongoose.isValidObjectId(toUserId)) {
+      return res.status(400).json({ success: false, message: 'Invalid staffId' });
+    }
+    const reason = req.body.reason ? String(req.body.reason).slice(0, 1000) : undefined;
+
+    // Read the current assignee first so the audit entry records who it left.
+    const current = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id assignedTo branchId organizationId')
+      .lean();
+    if (!current) return res.status(404).json({ success: false, message: 'Not found' });
+
+    const entry = {
+      fromUserId: current.assignedTo || req.user?._id || req.user?.id || null,
+      toUserId,
+      reason,
+      at: new Date(),
+    };
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $set: { assignedTo: toUserId, status: 'pending_review' }, $push: { transferLog: entry } },
+      { returnDocument: 'after' }
+    )
+      .populate('assignedTo', 'name email')
+      .lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+
+    socketEmitter.emitWhatsAppConversationUpdate({
+      branchId: data.branchId?.toString?.() || data.branchId,
+      organizationId: data.organizationId?.toString?.() || data.organizationId,
+      conversationId: data._id?.toString?.() || data._id,
+      changes: { assignedTo: toUserId, status: data.status },
+    });
+
+    res.json({ success: true, data });
+  })
+);
+
+/**
+ * POST /conversations/:id/link — cross-reference this thread to a Complaint
+ * ticket and/or ClinicalSession (W1493). Pass null/'' to clear a link.
+ * Branch-isolated.
+ */
+router.post(
+  '/conversations/:id/link',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const set = {};
+    if ('ticketId' in req.body) {
+      const t = req.body.ticketId;
+      if (t === null || t === '') set.linkedTicketId = null;
+      else if (mongoose.isValidObjectId(t)) set.linkedTicketId = t;
+      else return res.status(400).json({ success: false, message: 'Invalid ticketId' });
+    }
+    if ('sessionId' in req.body) {
+      const s = req.body.sessionId;
+      if (s === null || s === '') set.linkedSessionId = null;
+      else if (mongoose.isValidObjectId(s)) set.linkedSessionId = s;
+      else return res.status(400).json({ success: false, message: 'Invalid sessionId' });
+    }
+    if (Object.keys(set).length === 0) {
+      return res.status(400).json({ success: false, message: 'Provide ticketId or sessionId' });
+    }
+    const data = await Conversation.findOneAndUpdate(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
+      { $set: set },
+      { returnDocument: 'after', projection: { linkedTicketId: 1, linkedSessionId: 1 } }
+    ).lean();
+    if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data });
+  })
+);
+
+/**
+ * POST /conversations/:id/appointment-action — staff-mediated two-way sync (W1497)
+ *
+ * Body: { sessionId, action: 'cancel' | 'no_show', reason? }. Cancels or marks
+ * a session as a no-show from the Inbox while chatting with the family. The
+ * mutation is delegated to the sessions domain facade (canonical events fire);
+ * branch-isolated, and the session must belong to this conversation's
+ * beneficiary.
+ */
+router.post(
+  '/conversations/:id/appointment-action',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id beneficiaryId branchId')
+      .lean();
+    if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+    const data = await whatsappAppointmentSync.applyAppointmentAction({
+      beneficiaryId: conv.beneficiaryId,
+      sessionId: req.body.sessionId,
+      action: req.body.action,
+      reason: req.body.reason,
+      branchScope: effectiveBranchScope(req),
+      actorId: req.user?._id || req.user?.id || null,
+    });
+    res.json({ success: true, data });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAMPAIGNS (W1495) — persisted, trackable broadcasts over a saved contact
+// group. The send reuses the consent-filter + rate-limit + template primitives;
+// these routes are a thin branch-scoped layer over whatsappCampaign.service.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** GET /campaigns — list (branch-scoped, optional ?status) */
+router.get(
+  '/campaigns',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.listCampaigns(effectiveBranchScope(req), {
+      status: req.query.status,
+      limit: req.query.limit,
+    });
+    res.json({ success: true, data, total: data.length });
+  })
+);
+
+/** POST /campaigns — create (draft, or scheduled if scheduledAt given) */
+router.post(
+  '/campaigns',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.createCampaign(req.body || {}, {
+      branchId: effectiveBranchScope(req),
+      actorId: req.user?._id || req.user?.id || null,
+    });
+    res.status(201).json({ success: true, data });
+  })
+);
+
+/** GET /campaigns/:id */
+router.get(
+  '/campaigns/:id',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.getCampaign(req.params.id, effectiveBranchScope(req));
+    if (!data) return res.status(404).json({ success: false, message: 'Campaign not found' });
+    res.json({ success: true, data });
+  })
+);
+
+/** POST /campaigns/:id/run — launch now (consent-filtered send) */
+router.post(
+  '/campaigns/:id/run',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.runCampaign(req.params.id, effectiveBranchScope(req));
+    res.json({ success: true, data });
+  })
+);
+
+/** POST /campaigns/:id/cancel */
+router.post(
+  '/campaigns/:id/cancel',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.cancelCampaign(req.params.id, effectiveBranchScope(req));
+    res.json({ success: true, data });
   })
 );
 

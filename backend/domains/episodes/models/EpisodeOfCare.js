@@ -444,7 +444,7 @@ episodeOfCareSchema.pre('save', async function () {
 
 // ─── Instance Methods ───────────────────────────────────────────────────────
 
-episodeOfCareSchema.methods.advancePhase = function (completedBy) {
+episodeOfCareSchema.methods.advancePhase = function (completedBy, notes) {
   const currentPhaseIndex = this.phases.findIndex(p => p.name === this.currentPhase);
   if (currentPhaseIndex < 0) return this;
 
@@ -452,6 +452,9 @@ episodeOfCareSchema.methods.advancePhase = function (completedBy) {
   this.phases[currentPhaseIndex].status = 'completed';
   this.phases[currentPhaseIndex].completedAt = new Date();
   this.phases[currentPhaseIndex].completedBy = completedBy;
+  if (notes != null) {
+    this.phases[currentPhaseIndex].notes = notes;
+  }
 
   // Move to next
   const nextIndex = currentPhaseIndex + 1;

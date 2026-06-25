@@ -1,7 +1,11 @@
 /**
  * therapy-sessions-admin.routes.js — real CRUD for clinical therapy sessions.
  *
- * Mount at /api/admin/therapy-sessions. Covers:
+ * Legacy mount: /api/admin/therapy-sessions (retired).
+ * Unified mount: /api/v1/sessions/admin/* via
+ * domains/sessions/routes/sessions-admin-compat.routes.js.
+ *
+ * Covers:
  *  • GET /            — list + filters + pagination
  *  • GET /stats       — dashboard counters (by status, by type, today, week)
  *  • GET /calendar    — grouped by date (range-limited)

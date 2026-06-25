@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -45,15 +47,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function scoring(beneficiaryId, branchId, overrides = {}) {
   return {
     scaleId: new mongoose.Types.ObjectId(),
@@ -79,7 +72,8 @@ describe('W1101 — GasScoring → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     const doc = await GasScoring.create(scoring(beneficiaryId, branchId, { achievedLevel: 2 }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('gas_scoring_recorded');
     expect(row.category).toBe('clinical');
@@ -101,7 +95,8 @@ describe('W1101 — GasScoring → CareTimeline linkage', () => {
       })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('warning');
     expect(row.metadata.metExpected).toBe(false);
@@ -112,8 +107,7 @@ describe('W1101 — GasScoring → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     await GasScoring.create(scoring(beneficiaryId, branchId, { status: 'superseded' }));
 
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row on a subsequent unrelated save', async () => {
@@ -121,11 +115,10 @@ describe('W1101 — GasScoring → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     const doc = await GasScoring.create(scoring(beneficiaryId, branchId));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.evidence_ar = 'ملاحظة مراجعة';
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

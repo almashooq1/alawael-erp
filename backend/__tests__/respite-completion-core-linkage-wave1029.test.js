@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let RespiteBooking;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseBooking(overrides = {}) {
   return {
@@ -87,7 +78,8 @@ describe('W1029 — Respite booking completion reaches the unified-core timeline
       await RespiteBooking.create(baseBooking({ beneficiaryId }))
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'respite_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'respite_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('family');
     expect(tl.severity).toBe('success');
@@ -99,8 +91,7 @@ describe('W1029 — Respite booking completion reaches the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     await RespiteBooking.create(baseBooking({ beneficiaryId, status: 'requested' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'respite_completed' })).toBe(0);
+    await waitForCount({ eventType: 'respite_completed' }, 0);
   });
 
   it('re-saving an already-completed booking does not re-fire the event', async () => {
@@ -109,15 +100,13 @@ describe('W1029 — Respite booking completion reaches the unified-core timeline
       await RespiteBooking.create(baseBooking({ beneficiaryId }))
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'respite_completed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'respite_completed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await RespiteBooking.findById(booking._id);
     again.checkOutHandoffNotes = 'Family briefed at handover.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'respite_completed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'respite_completed' }, 1);
   });
 });

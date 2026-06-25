@@ -114,10 +114,15 @@ router.patch('/:id/close', authorize('admin', 'manager'), async (req, res) => {
 router.get('/stats/overview', async (req, res) => {
   try {
     const TrafficAccident = require('../models/Traffic/TrafficAccident');
-    const [total, open, bySeverity, byMonth] = await Promise.all([
+    // W1481 fix: previously `open` counted status:'open' (NOT in the enum
+    // [pending,investigating,resolved,disputed] → always 0) and `bySeverity`
+    // grouped by a non-existent top-level `severity` (severity only exists nested
+    // in vehicles[].damage + injuries[]) → meaningless [{_id:null,...}]. Now `open`
+    // = non-terminal statuses, and we group by the real top-level `status` field.
+    const [total, open, byStatus, byMonth] = await Promise.all([
       TrafficAccident.countDocuments({}),
-      TrafficAccident.countDocuments({ status: 'open' }),
-      TrafficAccident.aggregate([{ $group: { _id: '$severity', count: { $sum: 1 } } }]),
+      TrafficAccident.countDocuments({ status: { $in: ['pending', 'investigating'] } }),
+      TrafficAccident.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       TrafficAccident.aggregate([
         {
           $group: {
@@ -129,7 +134,7 @@ router.get('/stats/overview', async (req, res) => {
         { $limit: 12 },
       ]),
     ]);
-    res.json({ success: true, data: { total, open, bySeverity, byMonth } });
+    res.json({ success: true, data: { total, open, byStatus, byMonth } });
   } catch (err) {
     return safeError(res, err, 'trafficAccidents');
   }

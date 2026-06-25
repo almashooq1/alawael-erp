@@ -6,7 +6,7 @@
  *
  * API:
  *   GET    /api/beneficiary-transfers           — list (status, fromBranch, toBranch, page)
- *   POST   /api/beneficiaries/:id/transfer      — initiate { toBranchId, transferDate, reason }
+ *   POST   /api/beneficiary-transfers           — initiate { beneficiaryId, toBranchId, transferDate, reason }
  *   POST   /api/beneficiary-transfers/:id/approve
  *   POST   /api/beneficiary-transfers/:id/reject  { reason }
  *   POST   /api/beneficiary-transfers/:id/complete

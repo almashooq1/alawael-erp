@@ -236,6 +236,145 @@ async function getClientsInRoom(roomName) {
 }
 
 /**
+ * Emit WhatsApp message event to branch room
+ * إرسال رسالة واتساب فورية لغرفة الفرع
+ */
+function emitWhatsAppMessage({ branchId, organizationId, conversationId, message, conversation }) {
+  const io = getIO();
+  if (!io) return false;
+
+  try {
+    const payload = {
+      type: 'message',
+      conversationId,
+      message,
+      conversation: conversation || null,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (branchId) {
+      io.to(`whatsapp:branch:${branchId}`).emit('whatsapp:message', payload);
+    }
+    if (organizationId) {
+      io.to(`whatsapp:org:${organizationId}`).emit('whatsapp:message', payload);
+    }
+    logger.debug(`[SocketEmitter] WhatsApp message emitted for branch ${branchId}`);
+    return true;
+  } catch (error) {
+    logger.error('[SocketEmitter] Failed to emit WhatsApp message:', error);
+    return false;
+  }
+}
+
+/**
+ * Emit WhatsApp status update (delivered/read/failed)
+ * إرسال تحديث حالة رسالة واتساب
+ */
+function emitWhatsAppStatusUpdate({
+  branchId,
+  organizationId,
+  conversationId,
+  providerMessageId,
+  status,
+  errorCode,
+}) {
+  const io = getIO();
+  if (!io) return false;
+
+  try {
+    const payload = {
+      type: 'status',
+      conversationId,
+      providerMessageId,
+      status,
+      errorCode,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (branchId) {
+      io.to(`whatsapp:branch:${branchId}`).emit('whatsapp:status', payload);
+    }
+    if (organizationId) {
+      io.to(`whatsapp:org:${organizationId}`).emit('whatsapp:status', payload);
+    }
+    logger.debug(`[SocketEmitter] WhatsApp status update emitted for branch ${branchId}`);
+    return true;
+  } catch (error) {
+    logger.error('[SocketEmitter] Failed to emit WhatsApp status update:', error);
+    return false;
+  }
+}
+
+/**
+ * Emit WhatsApp conversation metadata update
+ * إرسال تحديث بيانات محادثة واتساب
+ */
+function emitWhatsAppConversationUpdate({ branchId, organizationId, conversationId, changes }) {
+  const io = getIO();
+  if (!io) return false;
+
+  try {
+    const payload = {
+      type: 'conversation',
+      conversationId,
+      changes,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (branchId) {
+      io.to(`whatsapp:branch:${branchId}`).emit('whatsapp:conversation', payload);
+    }
+    if (organizationId) {
+      io.to(`whatsapp:org:${organizationId}`).emit('whatsapp:conversation', payload);
+    }
+    logger.debug(`[SocketEmitter] WhatsApp conversation update emitted for branch ${branchId}`);
+    return true;
+  } catch (error) {
+    logger.error('[SocketEmitter] Failed to emit WhatsApp conversation update:', error);
+    return false;
+  }
+}
+
+/**
+ * Emit WhatsApp escalation to human staff
+ * إرسال تنبيه تصعيد محادثة واتساب لموظف
+ */
+function emitWhatsAppEscalation({
+  branchId,
+  organizationId,
+  conversationId,
+  reason,
+  conversation,
+  metadata,
+}) {
+  const io = getIO();
+  if (!io) return false;
+
+  try {
+    const payload = {
+      type: 'escalation',
+      conversationId,
+      reason,
+      conversation: conversation || null,
+      metadata: metadata || {},
+      timestamp: new Date().toISOString(),
+    };
+
+    if (branchId) {
+      io.to(`whatsapp:branch:${branchId}`).emit('whatsapp:escalation', payload);
+    }
+    if (organizationId) {
+      io.to(`whatsapp:org:${organizationId}`).emit('whatsapp:escalation', payload);
+    }
+    logger.info(`[SocketEmitter] WhatsApp escalation emitted for branch ${branchId}: ${reason}`);
+    return true;
+  } catch (error) {
+    logger.error('[SocketEmitter] Failed to emit WhatsApp escalation:', error);
+    return false;
+  }
+}
+
+/**
  * Broadcast to all connected clients
  * البث لجميع العملاء المتصلين
  */
@@ -265,6 +404,10 @@ module.exports = {
   emitChatMessage,
   emitSystemAlert,
   emitDataChange,
+  emitWhatsAppMessage,
+  emitWhatsAppStatusUpdate,
+  emitWhatsAppConversationUpdate,
+  emitWhatsAppEscalation,
   getConnectedClientsCount,
   getClientsInRoom,
   broadcast,

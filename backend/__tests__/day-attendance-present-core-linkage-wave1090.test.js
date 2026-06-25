@@ -13,6 +13,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -43,15 +45,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function rollcall(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -70,7 +63,8 @@ describe('W1090 — BeneficiaryDayAttendance → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     const doc = await BeneficiaryDayAttendance.create(rollcall({ beneficiaryId, branchId }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('day_attendance_present');
     expect(row.category).toBe('administrative');
@@ -85,7 +79,8 @@ describe('W1090 — BeneficiaryDayAttendance → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await BeneficiaryDayAttendance.create(rollcall({ beneficiaryId, status: 'late' }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('warning');
   });
@@ -96,22 +91,17 @@ describe('W1090 — BeneficiaryDayAttendance → CareTimeline linkage', () => {
       rollcall({ beneficiaryId, status: 'absent', checkInTime: null })
     );
 
-    await new Promise(r => setTimeout(r, 300));
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row when the rollcall is updated', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await BeneficiaryDayAttendance.create(rollcall({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.checkOutTime = new Date('2026-05-12T14:00:00.000Z');
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

@@ -60,7 +60,6 @@ const W472_AUTHED_SLUGS = [
   'family',
   'behavior',
   'goals',
-  'episodes',
   'security/domain',
   'quality',
   'rehab-measures',
@@ -86,6 +85,20 @@ describe('W472 — mount-layer authentication on 20 previously-unauth routes', (
         .join('\n');
       expect(code).not.toMatch(reBare);
     });
+  });
+
+  test('episodes is mounted securely via the DDD domain (not registry dualMount)', () => {
+    // W1460 retired the legacy /api/v1/episodes registry mount; the secure
+    // router is now mounted by domains/episodes/index.js with authenticate +
+    // requireBranchAccess, so it must not leak back in as a bare dualMount.
+    expect(src).not.toMatch(/\bdualMount(Auth)?\(app,\s*['"]episodes['"]/);
+    const domainSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'domains', 'episodes', 'index.js'),
+      'utf8'
+    );
+    expect(domainSrc).toMatch(/\bauthenticate\b/);
+    expect(domainSrc).toMatch(/\brequireBranchAccess\b/);
+    expect(domainSrc).toMatch(/app\.use\(`\/api\/\$\{this\.name\}`/);
   });
 
   test('auth/nafath remains intentionally public (login flow)', () => {

@@ -1920,7 +1920,6 @@ on:
       - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
       - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/whatsapp-rbac-gating-wave1509.test.js'
@@ -3830,7 +3829,6 @@ on:
       - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
       - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/whatsapp-rbac-gating-wave1509.test.js'

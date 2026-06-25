@@ -20,6 +20,7 @@ const logger = require('../../utils/logger');
 
 const ENV_FLAG = 'ENABLE_WHATSAPP_REMINDER_AUTO_ENQUEUE';
 const EVENT = 'appointments.appointment.booked';
+const CANCEL_EVENT = 'appointments.appointment.cancelled';
 
 // Combine the event's `date` (Date) + `startTime` ("HH:MM") into the full
 // appointment datetime. Returns a Date or null. Pure + testable.
@@ -53,8 +54,7 @@ async function handleAppointmentBooked(payload, deps = {}) {
   // W1537: risk-aware intensity — when enabled, the no-show predictor decides the
   // reminder set (reliable family → one reminder). null → default two-touch.
   const riskTypes =
-    deps.riskAwareReminderTypes ||
-    require('./whatsappReminderRiskPolicy').riskAwareReminderTypes;
+    deps.riskAwareReminderTypes || require('./whatsappReminderRiskPolicy').riskAwareReminderTypes;
   const types = await riskTypes(payload.appointmentId, { logger: deps.log });
 
   const res = await enqueue({
@@ -64,6 +64,21 @@ async function handleAppointmentBooked(payload, deps = {}) {
     ...(types ? { types } : {}),
   });
   return { enqueued: (res && res.created) || 0, reason: 'ok' };
+}
+
+/**
+ * Handle one appointment.cancelled event → cancel that appointment's still-
+ * pending reminders, so the sweeper never reminds a family about an appointment
+ * that won't happen. Idempotent (only 'pending' rows are touched).
+ * @returns {Promise<{cancelled:number, reason:string}>}
+ */
+async function handleAppointmentCancelled(payload, deps = {}) {
+  if (!payload || !payload.appointmentId) return { cancelled: 0, reason: 'no_appointment' };
+  const cancel =
+    deps.cancelRemindersForAppointment ||
+    require('./whatsappAppointmentReminder.service').cancelRemindersForAppointment;
+  const res = await cancel(payload.appointmentId);
+  return { cancelled: (res && res.cancelled) || 0, reason: 'ok' };
 }
 
 /**
@@ -81,9 +96,12 @@ function wireWhatsappReminderAutoEnqueue(bus, deps = {}) {
   const handlerDeps = {
     log,
     ...(deps.enqueueReminders ? { enqueueReminders: deps.enqueueReminders } : {}),
+    ...(deps.cancelRemindersForAppointment
+      ? { cancelRemindersForAppointment: deps.cancelRemindersForAppointment }
+      : {}),
   };
 
-  const unsubscribe = bus.subscribe(EVENT, async envelope => {
+  const unsubBooked = bus.subscribe(EVENT, async envelope => {
     try {
       const payload = (envelope && envelope.payload) || envelope || {};
       const r = await handleAppointmentBooked(payload, handlerDeps);
@@ -93,17 +111,38 @@ function wireWhatsappReminderAutoEnqueue(bus, deps = {}) {
         );
       }
     } catch (err) {
-      log?.warn?.('[whatsapp-reminder-enqueue] handler failed', { error: err.message });
+      log?.warn?.('[whatsapp-reminder-enqueue] booked handler failed', { error: err.message });
     }
   });
-  log?.info?.(`[whatsapp-reminder-enqueue] subscriber wired on ${EVENT}`);
-  return unsubscribe;
+
+  // Cancel pending reminders when the appointment is cancelled.
+  const unsubCancelled = bus.subscribe(CANCEL_EVENT, async envelope => {
+    try {
+      const payload = (envelope && envelope.payload) || envelope || {};
+      const r = await handleAppointmentCancelled(payload, handlerDeps);
+      if (r.cancelled > 0) {
+        log?.info?.(
+          `[whatsapp-reminder-enqueue] cancelled ${r.cancelled} reminder(s) for appt=${payload.appointmentId}`
+        );
+      }
+    } catch (err) {
+      log?.warn?.('[whatsapp-reminder-enqueue] cancel handler failed', { error: err.message });
+    }
+  });
+
+  log?.info?.(`[whatsapp-reminder-enqueue] subscriber wired on ${EVENT} + ${CANCEL_EVENT}`);
+  return () => {
+    if (unsubBooked) unsubBooked();
+    if (unsubCancelled) unsubCancelled();
+  };
 }
 
 module.exports = {
   handleAppointmentBooked,
+  handleAppointmentCancelled,
   wireWhatsappReminderAutoEnqueue,
   appointmentDateTime,
   ENV_FLAG,
   EVENT,
+  CANCEL_EVENT,
 };

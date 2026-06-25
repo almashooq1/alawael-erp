@@ -1938,6 +1938,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/document-model-hooks-producer-wave1510.test.js'
       - 'backend/package.json'
@@ -3853,6 +3855,8 @@ on:
       - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-campaign-scheduler-wave1501.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js

@@ -16,7 +16,10 @@ const fs = require('fs');
 const path = require('path');
 
 const ROUTE_SRC = fs.readFileSync(path.join(__dirname, '../routes/whatsapp.routes.js'), 'utf8');
-const MODEL_SRC = fs.readFileSync(path.join(__dirname, '../models/WhatsAppConversation.js'), 'utf8');
+const MODEL_SRC = fs.readFileSync(
+  path.join(__dirname, '../models/WhatsAppConversation.js'),
+  'utf8'
+);
 
 const ROUTES = [
   '/conversations/:id/notes',
@@ -34,11 +37,14 @@ describe('W1493 WhatsApp staff-ops routes — declared + branch-isolated', () =>
     expect(ROUTE_SRC).toContain(`'${route}'`);
   });
 
-  test.each(ROUTES)('route %s is branch-scoped (byIdScopedFilter + effectiveBranchScope)', route => {
-    const slice = sliceFor(route);
-    expect(slice).toMatch(/byIdScopedFilter/);
-    expect(slice).toMatch(/effectiveBranchScope\(req\)/);
-  });
+  test.each(ROUTES)(
+    'route %s is branch-scoped (byIdScopedFilter + effectiveBranchScope)',
+    route => {
+      const slice = sliceFor(route);
+      expect(slice).toMatch(/byIdScopedFilter/);
+      expect(slice).toMatch(/effectiveBranchScope\(req\)/);
+    }
+  );
 
   test.each(ROUTES)('route %s never sends to WhatsApp (internal only)', route => {
     expect(sliceFor(route)).not.toMatch(/whatsappService\.send/);
@@ -77,6 +83,8 @@ describe('W1493 WhatsAppConversation — schema shape (static)', () => {
   });
 
   test('internal note requires text (max length capped)', () => {
-    expect(MODEL_SRC).toMatch(/text:\s*\{\s*type:\s*String,\s*required:\s*true,\s*maxlength:\s*4000/);
+    expect(MODEL_SRC).toMatch(
+      /text:\s*\{\s*type:\s*String,\s*required:\s*true,\s*maxlength:\s*4000/
+    );
   });
 });

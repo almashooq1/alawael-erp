@@ -19,6 +19,7 @@ beforeAll(async () => {
   mongod = await MongoMemoryServer.create();
   await mongoose.connect(mongod.getUri());
   RehabilitationProgram = require('../models/rehab-program/RehabilitationProgram.model');
+  await RehabilitationProgram.syncIndexes();
 }, 60000);
 
 afterAll(async () => {

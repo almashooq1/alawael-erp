@@ -159,7 +159,9 @@ function emptyContext(sources = {}) {
 async function buildContext({ beneficiaryId, limits = {} } = {}) {
   const lim = { ...DEFAULT_LIMITS, ...limits };
   const valid =
-    typeof mongoose.isValidObjectId === 'function' ? mongoose.isValidObjectId(beneficiaryId) : !!beneficiaryId;
+    typeof mongoose.isValidObjectId === 'function'
+      ? mongoose.isValidObjectId(beneficiaryId)
+      : !!beneficiaryId;
   if (!beneficiaryId || !valid) return emptyContext();
 
   const oid = beneficiaryId;

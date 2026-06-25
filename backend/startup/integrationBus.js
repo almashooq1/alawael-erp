@@ -75,6 +75,18 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] DDD subscribers skipped:', dddSubErr.message);
     }
 
+    // W1511: WhatsApp post-session summary subscriber — on session.completed,
+    // message the guardian. Env-gated (ENABLE_WHATSAPP_POST_SESSION_SUMMARY);
+    // off by default + consent-gated.
+    try {
+      const {
+        wireWhatsappPostSessionSummary,
+      } = require('../services/whatsapp/whatsappPostSessionSubscriber');
+      wireWhatsappPostSessionSummary(integrationBus, { logger });
+    } catch (waSubErr) {
+      logger.warn('[Integration] WhatsApp post-session subscriber skipped:', waSubErr.message);
+    }
+
     // W1513: WhatsApp complaint-resolved subscriber — on complaint.resolved
     // (with a linked beneficiary), notify the guardian. Env-gated
     // (ENABLE_WHATSAPP_COMPLAINT_RESOLVED); off by default + consent-gated.

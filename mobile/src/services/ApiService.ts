@@ -80,7 +80,7 @@ class ApiService {
             if (result.success) {
               return this.api(originalRequest);
             }
-          } catch (refreshError) {
+          } catch {
             this.handleAuthError();
           }
         }

@@ -99,6 +99,18 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] WhatsApp complaint-resolved subscriber skipped:', waCmpErr.message);
     }
 
+    // W1517: configurable WhatsApp event→message bindings (admin-managed). One
+    // generic dispatcher over the bindable producer events. Env-gated
+    // (ENABLE_WHATSAPP_EVENT_BINDINGS); off by default + consent-gated.
+    try {
+      const {
+        wireEventBindingDispatcher,
+      } = require('../services/whatsapp/whatsappEventBindingDispatcher');
+      wireEventBindingDispatcher(integrationBus, { logger });
+    } catch (waBindErr) {
+      logger.warn('[Integration] WhatsApp event-binding dispatcher skipped:', waBindErr.message);
+    }
+
     // W387: bridge service-local EventEmitter emits (W379-W386 wires) to
     // integrationBus.publish so subscribers actually receive them. Pre-W387
     // the W379-W386 producers fired on local BaseService EventEmitter while

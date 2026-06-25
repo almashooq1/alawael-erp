@@ -14,10 +14,12 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 
 const router = express.Router();
 router.use(authenticate);
+router.use(requireBranchAccess); // W833: populate req.branchScope before branch-scope helpers
 
 const WRITE_ROLES = ['admin', 'super_admin', 'manager', 'branch_manager'];
 

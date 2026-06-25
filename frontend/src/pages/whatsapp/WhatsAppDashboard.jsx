@@ -62,6 +62,9 @@ import {
   Person as PersonIcon,
   Inbox as InboxIcon,
   AutoAwesome as AutoAwesomeIcon,
+  Check as CheckIcon,
+  DoneAll as DoneAllIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -136,6 +139,24 @@ function AnalyticsCard({ label, value, icon, color = 'primary', loading }) {
   );
 }
 
+// ─── Delivery status icon ───────────────────────────────────────────────────
+function DeliveryStatusIcon({ status }) {
+  const sx = { fontSize: 12, opacity: 0.8, ml: 0.25 };
+  switch (status) {
+    case 'failed':
+      return <ErrorIcon aria-label="failed" sx={{ ...sx, color: 'error.light' }} />;
+    case 'read':
+      return <DoneAllIcon aria-label="read" sx={{ ...sx, color: 'info.light' }} />;
+    case 'delivered':
+      return <DoneAllIcon aria-label="delivered" sx={sx} />;
+    case 'sent':
+    case 'accepted':
+      return <CheckIcon aria-label="sent" sx={sx} />;
+    default:
+      return null;
+  }
+}
+
 // ─── Message Bubble ──────────────────────────────────────────────────────────
 function MessageBubble({ msg }) {
   const isOut = msg.direction === 'outgoing';
@@ -185,6 +206,7 @@ function MessageBubble({ msg }) {
           <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.65rem' }}>
             {msg.timestamp ? format(new Date(msg.timestamp), 'HH:mm') : ''}
           </Typography>
+          {isOut && <DeliveryStatusIcon status={msg.deliveryStatus} />}
           {msg.isAutoReply && (
             <Tooltip title="رد تلقائي بالذكاء الاصطناعي">
               <AIIcon sx={{ fontSize: 12, opacity: 0.8 }} />
@@ -495,10 +517,7 @@ export default function WhatsAppDashboard() {
   const [statusEnabled, setStatusEnabled] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const notify = useCallback(
-    (msg, severity = 'success') => setSnackbar({ open: true, msg, severity }),
-    []
-  );
+  const notify = useCallback((msg, severity = 'success') => setSnackbar({ open: true, msg, severity }), []);
 
   // ── Document title unread badge ────────────────────────────────────────────
   const totalUnread = useMemo(
@@ -533,6 +552,32 @@ export default function WhatsAppDashboard() {
       osc.stop(ctx.currentTime + 0.3);
     } catch {
       // ignore audio errors
+    }
+  }, []);
+
+  // ── Browser notification for escalations when tab is hidden
+  const showEscalationNotification = useCallback(({ senderName, phone, reason }) => {
+    if (typeof Notification === 'undefined' || document.visibilityState === 'visible') return;
+    const title = '⚠️ تصعيد واتساب';
+    const body = `${senderName || phone || 'محادثة جديدة'} — ${reason || 'تحتاج مراجعة بشرية'}`;
+    const show = () => {
+      const n = new Notification(title, {
+        body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: `whatsapp-escalation-${Date.now()}`,
+      });
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+    };
+    if (Notification.permission === 'granted') {
+      show();
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') show();
+      });
     }
   }, []);
 
@@ -582,25 +627,20 @@ export default function WhatsAppDashboard() {
   }, [tab, loadAnalytics]);
 
   // ── Open conversation ──────────────────────────────────────────────────────
-  const openConversation = useCallback(
-    async conv => {
-      setSelectedConv(null);
-      setLoadingConv(true);
-      try {
-        const { data } = await apiClient.get(
-          `/whatsapp/conversations/${conv._id}?withInsights=true`
-        );
-        setSelectedConv(data.data);
-        // Mark read
-        await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
-      } catch {
-        notify('فشل تحميل المحادثة', 'error');
-      } finally {
-        setLoadingConv(false);
-      }
-    },
-    [notify]
-  );
+  const openConversation = useCallback(async conv => {
+    setSelectedConv(null);
+    setLoadingConv(true);
+    try {
+      const { data } = await apiClient.get(`/whatsapp/conversations/${conv._id}?withInsights=true`);
+      setSelectedConv(data.data);
+      // Mark read
+      await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
+    } catch {
+      notify('فشل تحميل المحادثة', 'error');
+    } finally {
+      setLoadingConv(false);
+    }
+  }, [notify]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -700,6 +740,11 @@ export default function WhatsAppDashboard() {
         'warning'
       );
       playEscalationBeep();
+      showEscalationNotification({
+        senderName: payload.conversation?.senderName,
+        phone: payload.conversation?.phone,
+        reason: payload.reason,
+      });
     };
 
     socket.on('whatsapp:message', handleMessage);
@@ -714,7 +759,7 @@ export default function WhatsAppDashboard() {
       socket.off('whatsapp:escalation', handleEscalation);
       socket.emit('whatsapp:unsubscribe');
     };
-  }, [socket, currentUser, notify, playEscalationBeep]);
+  }, [socket, currentUser, notify, playEscalationBeep, showEscalationNotification]);
 
   // ── Send message ───────────────────────────────────────────────────────────
   const sendMessage = async () => {

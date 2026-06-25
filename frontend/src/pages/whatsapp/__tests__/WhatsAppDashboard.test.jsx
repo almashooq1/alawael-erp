@@ -13,6 +13,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import WhatsAppDashboard from '../WhatsAppDashboard';
 import { useAuth } from 'contexts/AuthContext';
 import { useSocket } from 'contexts/SocketContext';
@@ -53,14 +54,16 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     };
   }
 
-  function setupMocks({ user = null, conversations = [] } = {}) {
+  function setupMocks({ user = null, conversations = [], selectedConversation = null } = {}) {
     socketMock = createSocketMock();
     useAuth.mockReturnValue({ currentUser: user });
     useSocket.mockReturnValue({ socket: socketMock, isConnected: true });
     apiClient.get.mockImplementation(url => {
       if (url === '/whatsapp/status') return Promise.resolve({ data: { data: { enabled: true } } });
-      if (url === '/whatsapp/conversations')
-        return Promise.resolve({ data: { data: conversations } });
+      if (url === '/whatsapp/conversations') return Promise.resolve({ data: { data: conversations } });
+      if (selectedConversation && url.startsWith(`/whatsapp/conversations/${selectedConversation._id}?withInsights=true`)) {
+        return Promise.resolve({ data: { data: selectedConversation } });
+      }
       return Promise.resolve({ data: { data: null } });
     });
     apiClient.post.mockResolvedValue({ data: { success: true } });
@@ -68,6 +71,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.HTMLElement.prototype.scrollIntoView = jest.fn();
   });
 
   test('subscribes to branch and org rooms on mount', async () => {
@@ -101,9 +105,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
 
     render(<WhatsAppDashboard />);
 
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
 
     const incomingMessage = {
       _id: 'msg-1',
@@ -129,13 +131,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
       phone: '+966500000001',
       senderName: 'ولي أمر',
       messages: [
-        {
-          _id: 'msg-1',
-          direction: 'outgoing',
-          text: 'تمام',
-          providerMessageId: 'prov-1',
-          deliveryStatus: 'sent',
-        },
+        { _id: 'msg-1', direction: 'outgoing', text: 'تمام', providerMessageId: 'prov-1', deliveryStatus: 'sent' },
       ],
     };
     setupMocks({
@@ -144,9 +140,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
 
     act(() => {
       eventHandlers['whatsapp:status']({
@@ -174,9 +168,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
 
     act(() => {
       eventHandlers['whatsapp:conversation']({
@@ -202,9 +194,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
 
     act(() => {
       eventHandlers['whatsapp:escalation']({
@@ -224,9 +214,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     const { unmount } = render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(socketMock.emit).toHaveBeenCalledWith('whatsapp:subscribe', expect.any(Object))
-    );
+    await waitFor(() => expect(socketMock.emit).toHaveBeenCalledWith('whatsapp:subscribe', expect.any(Object)));
 
     unmount();
 
@@ -249,9 +237,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     const { unmount } = render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
     await waitFor(() => expect(document.title).toBe('(5) واتساب — مركز التواصل الذكي'));
 
     unmount();
@@ -291,9 +277,7 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() =>
-      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
-    );
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
 
     act(() => {
       eventHandlers['whatsapp:escalation']({
@@ -309,5 +293,79 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     expect(stop).toHaveBeenCalled();
 
     delete window.AudioContext;
+  });
+
+  test('shows delivery status icon and updates on status event', async () => {
+    const selectedConv = {
+      _id: 'conv-1',
+      phone: '+966500000001',
+      senderName: 'ولي أمر',
+      messages: [
+        { _id: 'msg-1', direction: 'outgoing', text: 'مرحباً', providerMessageId: 'prov-1', deliveryStatus: 'sent' },
+      ],
+    };
+    setupMocks({
+      user: { _id: 'user-1', branchId: 'branch-1' },
+      conversations: [selectedConv],
+      selectedConversation: selectedConv,
+    });
+
+    render(<WhatsAppDashboard />);
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+
+    await userEvent.click(screen.getByText('ولي أمر'));
+    expect(await screen.findByLabelText('sent')).toBeInTheDocument();
+
+    act(() => {
+      eventHandlers['whatsapp:status']({
+        conversationId: 'conv-1',
+        providerMessageId: 'prov-1',
+        status: 'delivered',
+      });
+    });
+
+    expect(await screen.findByLabelText('delivered')).toBeInTheDocument();
+  });
+
+  test('shows browser notification on escalation when tab is hidden', async () => {
+    const originalVisibility = document.visibilityState;
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+
+    const notificationMock = jest.fn();
+    global.Notification = notificationMock;
+    global.Notification.permission = 'granted';
+
+    const existingConv = {
+      _id: 'conv-1',
+      phone: '+966500000001',
+      senderName: 'ولي أمر',
+      messages: [],
+    };
+    setupMocks({
+      user: { _id: 'user-1', branchId: 'branch-1' },
+      conversations: [existingConv],
+    });
+
+    render(<WhatsAppDashboard />);
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+
+    act(() => {
+      eventHandlers['whatsapp:escalation']({
+        conversationId: 'conv-1',
+        reason: 'critical_emergency',
+        conversation: { senderName: 'ولي أمر', phone: '+966500000001' },
+      });
+    });
+
+    expect(notificationMock).toHaveBeenCalledTimes(1);
+    expect(notificationMock).toHaveBeenCalledWith(
+      '⚠️ تصعيد واتساب',
+      expect.objectContaining({
+        body: expect.stringContaining('ولي أمر'),
+      })
+    );
+
+    Object.defineProperty(document, 'visibilityState', { value: originalVisibility, configurable: true });
+    delete global.Notification;
   });
 });

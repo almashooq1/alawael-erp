@@ -331,7 +331,7 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "module-alias": "2.3.4",
-    "mongoose": "^9.6.3",
+    "mongoose": "^9.7.2",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "node-cron": "4.2.1",

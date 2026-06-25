@@ -151,7 +151,16 @@ async function buildSentimentInsight(opts = {}) {
     const rank = a => (a.mood === 'negative' ? 2 : 0) + (a.trend === 'declining' ? 1 : 0);
     attention.sort((a, b) => rank(b) - rank(a) || a.avgScore - b.avgScore);
 
-    return { windowDays, moods, trends, total, attentionList: attention, scanned: scan.length, scanCapped, sources: { conversations: 'ok' } };
+    return {
+      windowDays,
+      moods,
+      trends,
+      total,
+      attentionList: attention,
+      scanned: scan.length,
+      scanCapped,
+      sources: { conversations: 'ok' },
+    };
   } catch (err) {
     logger?.warn?.(`[wa-sentiment] insight failed: ${err.message}`);
     return emptyInsight({ conversations: 'error' }, windowDays);

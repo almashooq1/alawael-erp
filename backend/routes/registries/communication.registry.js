@@ -31,6 +31,7 @@ module.exports = function registerCommunicationRoutes(
   const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
   const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
   const whatsappAutomationRoutes = safeRequire('../routes/whatsapp-automation.routes');
+  const whatsappReminderRoutes = safeRequire('../routes/whatsapp-reminders.routes');
   // PHANTOM: const adminCommRoutes = safeRequire('../routes/admin-communications.routes');
   // PHANTOM: const adminCommEnhancedRoutes = safeRequire('../routes/admin-comm-enhanced.routes');
   // PHANTOM: const electronicDirectivesRoutes = safeRequire('../routes/electronic-directives.routes');
@@ -75,6 +76,11 @@ module.exports = function registerCommunicationRoutes(
   }
   // W1517: configurable event→message bindings (admin CRUD). Router gates itself
   // with authenticate; writes require an admin/manager role.
+  if (whatsappReminderRoutes) {
+    dualMount(app, 'whatsapp-reminders', whatsappReminderRoutes);
+    logger.info('[Comm] WhatsApp Reminder routes mounted (/api/(v1/)whatsapp-reminders)');
+  }
+
   if (whatsappAutomationRoutes) {
     dualMount(app, 'whatsapp-automation', whatsappAutomationRoutes);
     logger.info('[Comm] WhatsApp Automation routes mounted (/api/(v1/)whatsapp-automation)');

@@ -14,6 +14,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 
 const router = express.Router();
 router.use(authenticate);
@@ -28,9 +29,10 @@ function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
 
-// Map a service httpError (statusCode) to a clean JSON response.
+// Map a service httpError (statusCode) or a branch-guard error (status) to a
+// clean JSON response.
 function handleServiceError(res, err) {
-  const code = err && err.statusCode;
+  const code = err && (err.statusCode || err.status);
   if (code && code >= 400 && code < 500) {
     return res.status(code).json({ success: false, message: err.message });
   }
@@ -44,6 +46,9 @@ router.post(
   asyncHandler(async (req, res) => {
     const { appointmentId, beneficiaryId, recipientPhone, when, types } = req.body || {};
     try {
+      // Branch isolation (W441): a restricted caller may only enqueue reminders
+      // for a beneficiary in their own branch. No-op for cross-branch roles.
+      if (beneficiaryId) await enforceBeneficiaryBranch(req, beneficiaryId);
       const result = await svc().enqueueReminders({
         appointmentId,
         beneficiaryId,

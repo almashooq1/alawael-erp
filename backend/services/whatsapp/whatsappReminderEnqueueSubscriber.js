@@ -49,10 +49,19 @@ async function handleAppointmentBooked(payload, deps = {}) {
 
   const enqueue =
     deps.enqueueReminders || require('./whatsappAppointmentReminder.service').enqueueReminders;
+
+  // W1537: risk-aware intensity — when enabled, the no-show predictor decides the
+  // reminder set (reliable family → one reminder). null → default two-touch.
+  const riskTypes =
+    deps.riskAwareReminderTypes ||
+    require('./whatsappReminderRiskPolicy').riskAwareReminderTypes;
+  const types = await riskTypes(payload.appointmentId, { logger: deps.log });
+
   const res = await enqueue({
     appointmentId: payload.appointmentId,
     beneficiaryId: payload.beneficiaryId,
     when,
+    ...(types ? { types } : {}),
   });
   return { enqueued: (res && res.created) || 0, reason: 'ok' };
 }

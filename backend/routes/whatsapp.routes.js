@@ -143,6 +143,14 @@ function getConversationModel() {
   }
 }
 
+function getUserModel() {
+  try {
+    return mongoose.model('User');
+  } catch {
+    return require('../models/User');
+  }
+}
+
 function validate(fields, body) {
   const missing = fields.filter(f => !body[f]);
   if (missing.length)
@@ -252,6 +260,28 @@ router.get(
   asyncHandler(async (req, res) => {
     const Conversation = getConversationModel();
     const data = await Conversation.findPendingReview(effectiveBranchScope(req));
+    res.json({ success: true, data, total: data.length });
+  })
+);
+
+/**
+ * GET /assignable-staff — branch-scoped roster of active staff a conversation
+ * can be transferred/assigned to (W1505). Powers the Inbox transfer picker.
+ * Authenticate-only (any staff member can see their branch's colleagues);
+ * returns ONLY the minimal display fields — never password / MFA / tokens.
+ */
+router.get(
+  '/assignable-staff',
+  asyncHandler(async (req, res) => {
+    const User = getUserModel();
+    const branchScope = effectiveBranchScope(req);
+    const filter = { isActive: true };
+    if (branchScope) filter.branchId = branchScope;
+    const data = await User.find(filter)
+      .select('_id fullName role') // safe projection — no sensitive fields
+      .sort({ fullName: 1 })
+      .limit(500)
+      .lean();
     res.json({ success: true, data, total: data.length });
   })
 );

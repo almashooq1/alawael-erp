@@ -76,7 +76,7 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
     // Verify token with backend
     const response: any = await ApiService.get('/auth/me');
     return { user: response, token };
-  } catch (error) {
+  } catch {
     return rejectWithValue('Auth check failed');
   }
 });

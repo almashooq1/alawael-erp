@@ -150,18 +150,23 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ══════════════════════════════════════════════════════════════════════════
   // ── HR Webhook subscriptions (W825 — admin CRUD, manager tier) ───────────
   // ══════════════════════════════════════════════════════════════════════════
-  const hrWebhooksMod = safeRequire('../routes/hr/hr-webhooks.routes');
-  const HrWebhookSubscription = safeRequire('../models/HR/HrWebhookSubscription');
-  if (hrWebhooksMod?.createHrWebhooksRouter && HrWebhookSubscription) {
-    const hrWebhooksRouter = hrWebhooksMod.createHrWebhooksRouter({
-      subscriptionModel: HrWebhookSubscription,
-      logger,
-    });
-    app.use('/api/hr', hrWebhooksRouter);
-    app.use('/api/v1/hr', hrWebhooksRouter);
-    logger.info('[HR] HR webhooks admin mounted (/api/hr/webhooks/*, manager tier)');
+  const hrWebhooksEnabled = process.env.ENABLE_HR_WEBHOOKS === 'true';
+  if (hrWebhooksEnabled) {
+    const hrWebhooksMod = safeRequire('../routes/hr/hr-webhooks.routes');
+    const HrWebhookSubscription = safeRequire('../models/HR/HrWebhookSubscription');
+    if (hrWebhooksMod?.createHrWebhooksRouter && HrWebhookSubscription) {
+      const hrWebhooksRouter = hrWebhooksMod.createHrWebhooksRouter({
+        subscriptionModel: HrWebhookSubscription,
+        logger,
+      });
+      app.use('/api/hr', hrWebhooksRouter);
+      app.use('/api/v1/hr', hrWebhooksRouter);
+      logger.info('[HR] HR webhooks admin mounted (/api/hr/webhooks/*, manager tier)');
+    } else {
+      logger.warn('[HR] HR webhooks not mounted (factory or HrWebhookSubscription missing)');
+    }
   } else {
-    logger.warn('[HR] HR webhooks not mounted (factory or HrWebhookSubscription missing)');
+    logger.info('[HR] HR webhooks admin skipped (ENABLE_HR_WEBHOOKS is not true)');
   }
 
   // ══════════════════════════════════════════════════════════════════════════

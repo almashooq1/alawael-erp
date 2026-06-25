@@ -57,7 +57,7 @@ describe('W669 taxonomy map — refinement shape (behavioral)', () => {
   it('the seed→rbac mapping is many-to-one (more mapped keys than distinct targets)', () => {
     const withTarget = taxonomy.map.filter(e => e.rbac);
     const targets = new Set(withTarget.map(e => `${e.rbac.resource}:${e.rbac.action}`));
-    expect(taxonomy.map.length).toBe(75);
+    expect(taxonomy.map.length).toBe(77); // W1509: +whatsapp:beneficiary:context +whatsapp:notes:internal
     expect(targets.size).toBeLessThan(withTarget.length); // refinement → collisions exist
     expect(targets.size).toBeGreaterThanOrEqual(40);
   });

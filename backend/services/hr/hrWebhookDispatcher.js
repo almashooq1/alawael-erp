@@ -45,6 +45,7 @@
  */
 
 const crypto = require('crypto');
+const { validateOutboundUrl } = require('../../utils/urlValidator');
 
 const DEFAULT_TIMEOUT_MS = 5000;
 
@@ -59,11 +60,34 @@ function createHrWebhookDispatcher(deps = {}) {
   const nowFn = deps.now || (() => new Date());
   const timeoutMs = deps.timeoutMs || DEFAULT_TIMEOUT_MS;
 
+  if (process.env.ENABLE_HR_WEBHOOKS !== 'true') {
+    throw new Error('hrWebhookDispatcher: ENABLE_HR_WEBHOOKS is not enabled');
+  }
   if (HrWebhookSubscription == null) {
     throw new Error('hrWebhookDispatcher: subscriptionModel is required');
   }
   if (typeof httpClient !== 'function') {
     throw new Error('hrWebhookDispatcher: httpClient function is required');
+  }
+
+  function isHttpAllowed() {
+    return process.env.NODE_ENV !== 'production' || process.env.HR_WEBHOOK_ALLOW_HTTP === 'true';
+  }
+
+  function getAllowedDomains() {
+    const raw = process.env.HR_WEBHOOK_ALLOWED_DOMAINS;
+    if (!raw || typeof raw !== 'string') return [];
+    return raw
+      .split(',')
+      .map(d => d.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  function isAllowedDomain(hostname) {
+    const allowed = getAllowedDomains();
+    if (allowed.length === 0) return true;
+    const h = hostname.toLowerCase();
+    return allowed.some(domain => h === domain || h.endsWith('.' + domain));
   }
 
   function sign(body, secret) {
@@ -133,6 +157,29 @@ function createHrWebhookDispatcher(deps = {}) {
     const results = [];
     await Promise.all(
       subs.map(async sub => {
+        // Re-validate stored URL at dispatch time (defense against DNS rebinding
+        // or config drift). Skip subscription on validation failure.
+        let validatedUrl;
+        try {
+          validatedUrl = await validateOutboundUrl(sub.target_url);
+          if (validatedUrl.protocol !== 'https:' && !isHttpAllowed()) {
+            throw new Error('Only HTTPS URLs are allowed in production');
+          }
+          if (!isAllowedDomain(validatedUrl.hostname)) {
+            throw new Error(`Domain "${validatedUrl.hostname}" is not in HR_WEBHOOK_ALLOWED_DOMAINS`);
+          }
+        } catch (validationErr) {
+          logger.warn && logger.warn('[HrWebhookDispatcher] URL validation failed:', validationErr.message);
+          await updateSubscriptionStatus(sub._id, { status: 'failed', error: validationErr.message });
+          results.push({
+            subscription_id: String(sub._id),
+            target_url: sub.target_url,
+            status: 'failed',
+            error: validationErr.message,
+          });
+          return;
+        }
+
         const signature = sign(body, sub.hmac_secret);
         const headers = {
           'Content-Type': 'application/json',
@@ -142,7 +189,7 @@ function createHrWebhookDispatcher(deps = {}) {
         };
         try {
           const res = await Promise.race([
-            httpClient(sub.target_url, { method: 'POST', body, headers }),
+            httpClient(validatedUrl.href, { method: 'POST', body, headers }),
             new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
           ]);
           const ok = res && res.ok === true;

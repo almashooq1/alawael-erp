@@ -214,6 +214,23 @@ async function dispatchDueReminders(opts = {}) {
   return { due: due.length, sent, failed, skipped };
 }
 
+/**
+ * Cancel the still-pending WhatsApp reminders for an appointment — used when the
+ * appointment is cancelled (or rescheduled) so the sweeper never sends "your
+ * appointment is tomorrow" for an appointment that won't happen. Only 'pending'
+ * rows are touched; already sent/failed/cancelled rows are left as-is.
+ * @returns {Promise<{cancelled:number}>}
+ */
+async function cancelRemindersForAppointment(appointmentId, deps = {}) {
+  if (!appointmentId || !mongoose.isValidObjectId(appointmentId)) return { cancelled: 0 };
+  const Reminder = deps.Reminder || getModel('AppointmentReminder');
+  const res = await Reminder.updateMany(
+    { appointment: appointmentId, channel: CHANNEL, status: 'pending' },
+    { $set: { status: 'cancelled', failureReason: 'appointment_cancelled' } }
+  );
+  return { cancelled: (res && (res.modifiedCount ?? res.nModified)) || 0 };
+}
+
 async function getReminderStats(opts = {}) {
   const Reminder = (opts.deps && opts.deps.Reminder) || getModel('AppointmentReminder');
   const rows = await Reminder.aggregate([
@@ -227,6 +244,7 @@ async function getReminderStats(opts = {}) {
 
 module.exports = {
   enqueueReminders,
+  cancelRemindersForAppointment,
   dispatchDueReminders,
   getReminderStats,
   // Pure helpers exported for the drift guard.

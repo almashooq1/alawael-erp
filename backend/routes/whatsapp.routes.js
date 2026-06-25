@@ -585,6 +585,23 @@ router.post(
   })
 );
 
+/**
+ * POST /campaigns/run-due — launch all scheduled campaigns whose time has
+ * passed, within the caller's branch (W1501). Declared BEFORE /campaigns/:id so
+ * the literal isn't cast as an :id (route-shadowing). The env-gated cron does
+ * the same cross-branch; this is the manual / external-trigger entry point.
+ */
+router.post(
+  '/campaigns/run-due',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.runDueCampaigns({
+      branchScope: effectiveBranchScope(req),
+      logger,
+    });
+    res.json({ success: true, data });
+  })
+);
+
 /** GET /campaigns/:id */
 router.get(
   '/campaigns/:id',

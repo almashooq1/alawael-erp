@@ -1,13 +1,10 @@
 /**
  * WhatsApp guardian resolver — shared helper for guardian-notification subscribers
  * ═══════════════════════════════════════════════════════════════════════════
- * Given a beneficiaryId, find the best contactable guardian phone. Used by the
- * event→WhatsApp subscribers (post-session W1511, complaint-resolved W1513, …).
- * Pure `pickGuardian` + a thin DB read; no consent/send here (the subscriber
- * owns those).
- *
- * NOTE: the W1511 post-session subscriber currently inlines an identical
- * resolver; a trivial follow-up should point it at this module (rule of three).
+ * Given a beneficiaryId, find the best contactable guardian phone. The single
+ * source of truth for the event→WhatsApp subscribers (post-session W1511,
+ * complaint-resolved W1513, configurable bindings W1517). Pure `pickGuardian` +
+ * a thin DB read; no consent/send here (the subscriber owns those).
  *
  * @module services/whatsapp/whatsappGuardianResolver
  */
@@ -15,6 +12,11 @@
 'use strict';
 
 const mongoose = require('mongoose');
+
+// Relationships that indicate a responsible adult — preferred over an arbitrary
+// first-with-phone (e.g. a sibling) when no explicit guardian/caregiver flag is
+// set. Mirrors the Beneficiary.familyMembers relationship enum.
+const GUARDIAN_RELATIONSHIPS = ['father', 'mother', 'guardian', 'grandfather', 'grandmother'];
 
 function getModel(name) {
   try {
@@ -24,13 +26,15 @@ function getModel(name) {
   }
 }
 
-// Pick the best contactable guardian: legal guardian → primary caregiver →
-// first member with a phone. Returns the member or null. Pure + testable.
+// Pick the best contactable guardian, in priority order:
+//   1. legal guardian → 2. primary caregiver → 3. a parent/guardian/grandparent
+//   → 4. any member with a phone. Returns the member or null. Pure + testable.
 function pickGuardian(familyMembers) {
   if (!Array.isArray(familyMembers) || !familyMembers.length) return null;
   return (
     familyMembers.find(m => m && m.hasLegalGuardianship && m.phone) ||
     familyMembers.find(m => m && m.isPrimaryCaregiver && m.phone) ||
+    familyMembers.find(m => m && m.phone && GUARDIAN_RELATIONSHIPS.includes(m.relationship)) ||
     familyMembers.find(m => m && m.phone) ||
     null
   );
@@ -44,4 +48,4 @@ async function getGuardianPhone(beneficiaryId) {
   return g ? { phone: g.phone, beneficiaryName: (ben && ben.firstName) || null } : null;
 }
 
-module.exports = { pickGuardian, getGuardianPhone };
+module.exports = { pickGuardian, getGuardianPhone, GUARDIAN_RELATIONSHIPS };

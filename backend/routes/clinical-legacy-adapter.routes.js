@@ -39,6 +39,8 @@ const { authenticate: authenticateToken } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
+const authStack = [authenticateToken, requireBranchAccess, bodyScopedBeneficiaryGuard];
+
 // ── Lazy model loaders ────────────────────────────────────────────
 function getModel(name, fallbackPaths = []) {
   try {
@@ -457,9 +459,8 @@ async function listBranchOutcomes(branchId, opts = {}) {
 }
 
 // ── Authentication + branch isolation ─────────────────────────────
-router.use(authenticateToken);
-router.use(requireBranchAccess);
-router.use(bodyScopedBeneficiaryGuard);
+// NOTE: auth is applied per-route so /api/v1/* public routes (e.g. auth/login)
+// are not blocked by this legacy adapter's router.
 
 // ═══════════════════════════════════════════════════════════════════
 // Measures
@@ -468,6 +469,7 @@ router.use(bodyScopedBeneficiaryGuard);
 // GET /api/v1/measures
 router.get(
   '/measures',
+  authStack,
   wrap(async (req, res) => {
     const {
       domain,
@@ -539,6 +541,7 @@ router.get(
 // GET /api/v1/measure-categories
 router.get(
   '/measure-categories',
+  authStack,
   wrap(async (req, res) => {
     const data = await measuresLibrarySvc.list({ limit: 1000 });
     const categories = new Map();
@@ -569,6 +572,7 @@ router.get(
 // GET /api/v1/measures/:id
 router.get(
   '/measures/:id',
+  authStack,
   wrap(async (req, res) => {
     const raw = await measuresLibrarySvc.getOne(req.params.id);
     if (!raw) {
@@ -584,6 +588,7 @@ router.get(
 // GET /api/v1/measures/:id/items
 router.get(
   '/measures/:id/items',
+  authStack,
   wrap(async (req, res) => {
     const raw = await measuresLibrarySvc.getScoringGuide(req.params.id);
     if (!raw) {
@@ -616,6 +621,7 @@ router.get(
 // GET /api/v1/measures/:id/cutoffs
 router.get(
   '/measures/:id/cutoffs',
+  authStack,
   wrap(async (req, res) => {
     const raw = await measuresLibrarySvc.getScoringGuide(req.params.id);
     if (!raw) return res.json([]);
@@ -628,6 +634,7 @@ router.get(
 // GET /api/v1/measure-recommendations
 router.get(
   '/measure-recommendations',
+  authStack,
   wrap(async (req, res) => {
     const { beneficiaryId, maxPriority } = req.query;
     const suggestions = await measuresLibrarySvc.suggest({ beneficiaryId });
@@ -654,6 +661,7 @@ router.get(
 // GET /api/v1/outcomes
 router.get(
   '/outcomes',
+  authStack,
   wrap(async (req, res) => {
     const { beneficiaryId, measureId, isActive, trend, branchId } = req.query;
     let outcomes = [];
@@ -708,6 +716,7 @@ router.get(
 // GET /api/v1/outcomes/:id
 router.get(
   '/outcomes/:id',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) {
@@ -764,6 +773,7 @@ router.get(
 // GET /api/v1/outcomes/:id/timeline
 router.get(
   '/outcomes/:id/timeline',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) return res.json([]);
@@ -807,6 +817,7 @@ router.get(
 // POST /api/v1/outcomes (initialize)
 router.post(
   '/outcomes',
+  authStack,
   wrap(async (req, res) => {
     const { beneficiaryId, measureId, baselineAssessmentId, targetScore, targetDate } = req.body;
     if (!beneficiaryId || !measureId) {
@@ -943,6 +954,7 @@ router.post(
 // PATCH /api/v1/outcomes/:id/target
 router.patch(
   '/outcomes/:id/target',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) {
@@ -996,6 +1008,7 @@ router.patch(
 // POST /api/v1/outcomes/:id/notes
 router.post(
   '/outcomes/:id/notes',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) {
@@ -1057,6 +1070,7 @@ router.post(
 // PATCH /api/v1/outcomes/:id/archive
 router.patch(
   '/outcomes/:id/archive',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) {
@@ -1110,6 +1124,7 @@ router.patch(
 // PATCH /api/v1/outcomes/:id/reactivate
 router.patch(
   '/outcomes/:id/reactivate',
+  authStack,
   wrap(async (req, res) => {
     const id = req.params.id;
     if (!id.includes(':')) {

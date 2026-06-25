@@ -948,7 +948,6 @@ __tests__/therapist-utilization-service.test.js
 __tests__/therapist-workbench-admin-viewer-wave232.test.js
 __tests__/therapy-activity-wave697.test.js
 __tests__/therapy-sessions-admin-branch-isolation-wave887.test.js
-__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js
 __tests__/timeline-routes-branch-isolation-wave1138.test.js
 __tests__/timing-unsafe-secret-compare-wave1181.test.js
 __tests__/toileting-routes-branch-isolation-wave879.test.js

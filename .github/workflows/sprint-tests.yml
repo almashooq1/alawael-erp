@@ -1952,7 +1952,10 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-beneficiary-branch-isolation-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-risk-aware-reminders-wave1537.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-reminder-replies-wave1536.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-reminder-cancel-on-cancel-wave1534.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3888,7 +3891,10 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/check-beneficiary-branch-isolation-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-risk-aware-reminders-wave1537.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-reminder-replies-wave1536.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-reminder-cancel-on-cancel-wave1534.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js

@@ -22,12 +22,41 @@ const ENV_FLAG = 'ENABLE_WHATSAPP_REMINDER_REPLIES';
 
 // Conservative keyword lists — a reminder reply is normally a single word.
 const CONFIRM_WORDS = [
-  'نعم', 'اكيد', 'أكيد', 'اكد', 'أكد', 'تاكيد', 'تأكيد', 'مؤكد', 'موافق', 'حاضر',
-  'تمام', 'اوكي', 'أوكي', 'ايوه', 'أيوه', 'yes', 'ok', 'okay', 'confirm', 'y',
+  'نعم',
+  'اكيد',
+  'أكيد',
+  'اكد',
+  'أكد',
+  'تاكيد',
+  'تأكيد',
+  'مؤكد',
+  'موافق',
+  'حاضر',
+  'تمام',
+  'اوكي',
+  'أوكي',
+  'ايوه',
+  'أيوه',
+  'yes',
+  'ok',
+  'okay',
+  'confirm',
+  'y',
 ];
 const CANCEL_WORDS = [
-  'لا', 'الغاء', 'إلغاء', 'الغ', 'إلغ', 'اعتذر', 'أعتذر', 'اعتذار', 'معذره',
-  'معذرة', 'cancel', 'no', 'n',
+  'لا',
+  'الغاء',
+  'إلغاء',
+  'الغ',
+  'إلغ',
+  'اعتذر',
+  'أعتذر',
+  'اعتذار',
+  'معذره',
+  'معذرة',
+  'cancel',
+  'no',
+  'n',
 ];
 
 function getModel(name) {
@@ -40,7 +69,9 @@ function getModel(name) {
 
 // Strip everything but Arabic letters + ASCII letters (drop punctuation/emoji).
 function normToken(s) {
-  return String(s || '').replace(/[^؀-ۿa-z]/gi, '').toLowerCase();
+  return String(s || '')
+    .replace(/[^؀-ۿa-z]/gi, '')
+    .toLowerCase();
 }
 
 /**
@@ -53,7 +84,7 @@ function classifyReply(text) {
   if (!raw) return null;
   const first = normToken(raw.split(/\s+/)[0]);
   const whole = normToken(raw);
-  const hit = (list) => list.includes(first) || (whole.length <= 12 && list.includes(whole));
+  const hit = list => list.includes(first) || (whole.length <= 12 && list.includes(whole));
   if (hit(CONFIRM_WORDS)) return 'confirm';
   if (hit(CANCEL_WORDS)) return 'cancel';
   return null;
@@ -124,7 +155,11 @@ async function handleReminderReply({ phone, text, beneficiaryId }, deps = {}) {
   appt.cancellationReason = 'cancelled_by_family_whatsapp';
   await appt.save();
   await whatsappService
-    .sendNotification(phone, 'إلغاء الموعد', 'تم إلغاء موعدكم بناءً على طلبكم. للحجز من جديد تواصلوا معنا.')
+    .sendNotification(
+      phone,
+      'إلغاء الموعد',
+      'تم إلغاء موعدكم بناءً على طلبكم. للحجز من جديد تواصلوا معنا.'
+    )
     .catch(() => {});
   log?.info?.(`[whatsapp-reminder-reply] cancelled appt=${appt._id}`);
   return { action, matched: true, applied: true, appointmentId: String(appt._id) };

@@ -76,7 +76,9 @@ describe('W1536 handleReminderReply (behavioral)', () => {
   test('non confirm/cancel text → none, no model touched', async () => {
     const deps = baseDeps();
     deps.Reminder.find = jest.fn();
-    expect(await h.handleReminderReply({ phone: 'x', text: 'شكرا' }, deps)).toEqual({ action: 'none' });
+    expect(await h.handleReminderReply({ phone: 'x', text: 'شكرا' }, deps)).toEqual({
+      action: 'none',
+    });
     expect(deps.Reminder.find).not.toHaveBeenCalled();
   });
 
@@ -101,7 +103,9 @@ describe('W1536 static — webhook wires it env-gated + defensively', () => {
   test('webhook calls handleReminderReply behind the env flag, inside try/catch', () => {
     expect(WEBHOOK_SRC).toMatch(/ENABLE_WHATSAPP_REMINDER_REPLIES/);
     expect(WEBHOOK_SRC).toMatch(/handleReminderReply/);
-    expect(WEBHOOK_SRC).toMatch(/whatsapp-reminder-reply'\]\s*\.warn|\[whatsapp-reminder-reply\] skipped/);
+    expect(WEBHOOK_SRC).toMatch(
+      /whatsapp-reminder-reply'\]\s*\.warn|\[whatsapp-reminder-reply\] skipped/
+    );
     expect(h.ENV_FLAG).toBe('ENABLE_WHATSAPP_REMINDER_REPLIES');
   });
 });

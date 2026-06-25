@@ -986,10 +986,12 @@ __tests__/waitlist-schedule-suggestions-wave894.test.js
 __tests__/warehouse-routes-branch-isolation-wave877.test.js
 __tests__/wbci-trigger-engine-wave471.test.js
 __tests__/weighted-progress-link-index-wave243.test.js
+__tests__/whatsapp-appointment-sync-behavioral-wave1522.test.js
 __tests__/whatsapp-appointment-sync-wave1497.test.js
 __tests__/whatsapp-appsecret-proof-wave1425.test.js
 __tests__/whatsapp-assignable-staff-wave1505.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
+__tests__/whatsapp-beneficiary-context-behavioral-wave1523.test.js
 __tests__/whatsapp-beneficiary-context-wave1491.test.js
 __tests__/whatsapp-bot-backnav-wave1423.test.js
 __tests__/whatsapp-bot-core-linkage-wave1408.test.js
@@ -1000,6 +1002,7 @@ __tests__/whatsapp-bot-unmatched-intents-wave1417.test.js
 __tests__/whatsapp-bot-usage-wave1419.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js
+__tests__/whatsapp-campaign-behavioral-wave1521.test.js
 __tests__/whatsapp-campaign-scheduler-wave1501.test.js
 __tests__/whatsapp-campaigns-wave1495.test.js
 __tests__/whatsapp-canonical-consolidation-wave725.test.js
@@ -1032,6 +1035,7 @@ __tests__/whatsapp-pending-review-sort-wave741.test.js
 __tests__/whatsapp-post-session-subscriber-wave1511.test.js
 __tests__/whatsapp-queue-count-filters-wave743.test.js
 __tests__/whatsapp-rbac-gating-wave1509.test.js
+__tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js
 __tests__/whatsapp-rehab-outcomes-wave1499.test.js
 __tests__/whatsapp-urgency-breakdown-wave745.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js

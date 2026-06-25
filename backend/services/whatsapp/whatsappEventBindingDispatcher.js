@@ -22,6 +22,8 @@
 
 const mongoose = require('mongoose');
 const logger = require('../../utils/logger');
+// W1519: shared guardian resolver (was a local copy) — single source of truth.
+const { pickGuardian, getGuardianPhone } = require('./whatsappGuardianResolver');
 
 const ENV_FLAG = 'ENABLE_WHATSAPP_EVENT_BINDINGS';
 
@@ -43,27 +45,6 @@ function renderMessage(template, ctx = {}) {
     .replace(/\{beneficiaryName\}/g, name)
     .replace(/\{sessionType\}/g, ctx.sessionType || '')
     .slice(0, 1024);
-}
-
-// Guardian picker — legal guardian → primary caregiver → first with phone.
-// (Temporary local copy; consolidate to services/whatsapp/whatsappGuardianResolver
-// once that module lands on main — see W1513.)
-function pickGuardian(familyMembers) {
-  if (!Array.isArray(familyMembers) || !familyMembers.length) return null;
-  return (
-    familyMembers.find(m => m && m.hasLegalGuardianship && m.phone) ||
-    familyMembers.find(m => m && m.isPrimaryCaregiver && m.phone) ||
-    familyMembers.find(m => m && m.phone) ||
-    null
-  );
-}
-
-async function getGuardianPhone(beneficiaryId) {
-  const Beneficiary = getModel('Beneficiary');
-  if (!Beneficiary || !beneficiaryId) return null;
-  const ben = await Beneficiary.findById(beneficiaryId).select('familyMembers firstName').lean();
-  const g = pickGuardian(ben && ben.familyMembers);
-  return g ? { phone: g.phone, beneficiaryName: (ben && ben.firstName) || null } : null;
 }
 
 /**

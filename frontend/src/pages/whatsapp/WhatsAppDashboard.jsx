@@ -495,7 +495,10 @@ export default function WhatsAppDashboard() {
   const [statusEnabled, setStatusEnabled] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const notify = useCallback((msg, severity = 'success') => setSnackbar({ open: true, msg, severity }), []);
+  const notify = useCallback(
+    (msg, severity = 'success') => setSnackbar({ open: true, msg, severity }),
+    []
+  );
 
   // ── Document title unread badge ────────────────────────────────────────────
   const totalUnread = useMemo(
@@ -579,20 +582,25 @@ export default function WhatsAppDashboard() {
   }, [tab, loadAnalytics]);
 
   // ── Open conversation ──────────────────────────────────────────────────────
-  const openConversation = useCallback(async conv => {
-    setSelectedConv(null);
-    setLoadingConv(true);
-    try {
-      const { data } = await apiClient.get(`/whatsapp/conversations/${conv._id}?withInsights=true`);
-      setSelectedConv(data.data);
-      // Mark read
-      await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
-    } catch {
-      notify('فشل تحميل المحادثة', 'error');
-    } finally {
-      setLoadingConv(false);
-    }
-  }, [notify]);
+  const openConversation = useCallback(
+    async conv => {
+      setSelectedConv(null);
+      setLoadingConv(true);
+      try {
+        const { data } = await apiClient.get(
+          `/whatsapp/conversations/${conv._id}?withInsights=true`
+        );
+        setSelectedConv(data.data);
+        // Mark read
+        await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
+      } catch {
+        notify('فشل تحميل المحادثة', 'error');
+      } finally {
+        setLoadingConv(false);
+      }
+    },
+    [notify]
+  );
 
   // Scroll to bottom when messages change
   useEffect(() => {

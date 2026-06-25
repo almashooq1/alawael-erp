@@ -1920,6 +1920,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-beneficiary-context-wave1491.test.js'
@@ -3824,6 +3826,8 @@ on:
       - 'backend/__tests__/check-enum-literal-queries-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js

@@ -388,7 +388,10 @@ router.post(
     const data = await Conversation.findOneAndUpdate(
       Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
       { unreadCount: 0 },
-      { returnDocument: 'after', projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 } }
+      {
+        returnDocument: 'after',
+        projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 },
+      }
     ).lean();
 
     if (data) {
@@ -427,7 +430,9 @@ router.post(
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
     const notes = data.internalNotes || [];
-    res.status(201).json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
+    res
+      .status(201)
+      .json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
   })
 );
 

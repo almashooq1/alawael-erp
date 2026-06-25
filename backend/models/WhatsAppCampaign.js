@@ -116,8 +116,7 @@ whatsappCampaignSchema.statics.isRunnable = isRunnable;
 whatsappCampaignSchema.statics.isCancellable = isCancellable;
 
 module.exports =
-  mongoose.models.WhatsAppCampaign ||
-  mongoose.model('WhatsAppCampaign', whatsappCampaignSchema);
+  mongoose.models.WhatsAppCampaign || mongoose.model('WhatsAppCampaign', whatsappCampaignSchema);
 
 // Exported for the drift guard (pure helpers must stay testable).
 module.exports.CAMPAIGN_STATUSES = CAMPAIGN_STATUSES;

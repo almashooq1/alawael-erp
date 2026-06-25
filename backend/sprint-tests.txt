@@ -1030,5 +1030,6 @@ __tests__/case-management-create-mapping-wave1482.test.js
 __tests__/enum-query-fixes-wave1486.test.js
 __tests__/check-enum-literal-queries-script.test.js
 __tests__/whatsapp-inbound-fixes-wave1488.test.js
+__tests__/document-lifecycle-core-linkage-wave1498.test.js
 __tests__/whatsapp-open-status-fix-wave1488.test.js
 __tests__/whatsapp-internal-notes-wave1493.test.js

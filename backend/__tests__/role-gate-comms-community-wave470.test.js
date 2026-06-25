@@ -51,11 +51,11 @@ describe('W470 — communication-module + community-service role gates', () => {
       );
       // PUT /announcements/:id
       expect(src).toMatch(
-        /router\.put\(['"]\/announcements\/:id['"],\s*authorize\(ANNOUNCEMENT_WRITE_ROLES\)/
+        /router\.put\(\s*['"]\/announcements\/:id['"],\s*authorize\(ANNOUNCEMENT_WRITE_ROLES\)/
       );
       // POST /announcements/:id/publish
       expect(src).toMatch(
-        /router\.post\(['"]\/announcements\/:id\/publish['"],\s*authorize\(ANNOUNCEMENT_WRITE_ROLES\)/
+        /router\.post\(\s*['"]\/announcements\/:id\/publish['"],\s*authorize\(ANNOUNCEMENT_WRITE_ROLES\)/
       );
     });
 

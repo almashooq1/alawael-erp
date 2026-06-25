@@ -58,6 +58,7 @@ const EXPECTED_DOMAINS = Object.freeze([
   'attendance',
   'notification',
   'system',
+  'documents',
 ]);
 
 const DOMAIN_EXPORT_MAP = Object.freeze({
@@ -68,6 +69,7 @@ const DOMAIN_EXPORT_MAP = Object.freeze({
   attendance: 'ATTENDANCE_EVENTS',
   notification: 'NOTIFICATION_EVENTS',
   system: 'SYSTEM_EVENTS',
+  documents: 'DOCUMENT_EVENTS',
 });
 
 const ALLOWED_EVENT_PREFIXES = Object.freeze(
@@ -96,6 +98,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'error', // W397 — ERROR_OCCURRED renamed from 'system.error' to 'error.occurred'
     'measure_alert', // W970 — MEASURE_ALERT_RAISED/REASSIGNED (W506/W514) prefix; allowlist was stale and failing on main
     'lifecycle', // beneficiary auto-transition lifecycle events
+    'document', // documents domain lifecycle events (W392)
   ])
 );
 

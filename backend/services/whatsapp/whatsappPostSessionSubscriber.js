@@ -77,7 +77,9 @@ async function handleSessionCompleted(payload, deps = {}) {
     `تم إكمال جلسة ${payload.sessionType || ''} اليوم. شكراً لمتابعتكم — لأي استفسار راسلونا هنا.`.trim();
   const r = await whatsappService.sendNotification(resolved.phone, title, body);
   if (r && r.success) {
-    log?.info?.(`[whatsapp-post-session] ${r.stub ? 'stub' : 'sent'} for beneficiary=${payload.beneficiaryId}`);
+    log?.info?.(
+      `[whatsapp-post-session] ${r.stub ? 'stub' : 'sent'} for beneficiary=${payload.beneficiaryId}`
+    );
     return { sent: true, reason: r.stub ? 'stub' : 'sent' };
   }
   return { sent: false, reason: 'send_failed' };
@@ -96,7 +98,8 @@ function wireWhatsappPostSessionSummary(bus, deps = {}) {
   if (!bus || typeof bus.subscribe !== 'function') return null;
 
   const whatsappService = deps.whatsappService || require('./whatsappService');
-  const Consent = deps.Consent || getModel('WhatsAppConsent') || require('../../models/WhatsAppConsent');
+  const Consent =
+    deps.Consent || getModel('WhatsAppConsent') || require('../../models/WhatsAppConsent');
   const handlerDeps = {
     whatsappService,
     Consent,

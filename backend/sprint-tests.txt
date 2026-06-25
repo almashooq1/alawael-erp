@@ -1028,6 +1028,7 @@ __tests__/whatsapp-open-status-fix-wave1488.test.js
 __tests__/whatsapp-pending-review-sort-wave741.test.js
 __tests__/whatsapp-post-session-subscriber-wave1511.test.js
 __tests__/whatsapp-queue-count-filters-wave743.test.js
+__tests__/whatsapp-rbac-gating-wave1509.test.js
 __tests__/whatsapp-rehab-outcomes-wave1499.test.js
 __tests__/whatsapp-urgency-breakdown-wave745.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js

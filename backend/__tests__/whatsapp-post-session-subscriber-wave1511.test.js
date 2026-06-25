@@ -29,7 +29,9 @@ describe('W1511 pickGuardian (pure)', () => {
         { isPrimaryCaregiver: true, phone: '3' },
       ]).phone
     ).toBe('2');
-    expect(sub.pickGuardian([{ phone: '1' }, { isPrimaryCaregiver: true, phone: '3' }]).phone).toBe('3');
+    expect(sub.pickGuardian([{ phone: '1' }, { isPrimaryCaregiver: true, phone: '3' }]).phone).toBe(
+      '3'
+    );
     expect(sub.pickGuardian([{ relationship: 'father', phone: '9' }]).phone).toBe('9');
   });
 
@@ -56,7 +58,9 @@ describe('W1511 handleSessionCompleted (behavioral, mocked deps)', () => {
   });
 
   test('no send when consent denied', async () => {
-    const deps = baseDeps({ Consent: { canMessage: async () => ({ allowed: false, reason: 'opted_out' }) } });
+    const deps = baseDeps({
+      Consent: { canMessage: async () => ({ allowed: false, reason: 'opted_out' }) },
+    });
     const r = await sub.handleSessionCompleted({ beneficiaryId: 'b1' }, deps);
     expect(r.sent).toBe(false);
     expect(r.reason).toMatch(/consent:opted_out/);

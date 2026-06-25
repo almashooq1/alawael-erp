@@ -980,6 +980,7 @@ __tests__/waitlist-schedule-suggestions-wave894.test.js
 __tests__/warehouse-routes-branch-isolation-wave877.test.js
 __tests__/wbci-trigger-engine-wave471.test.js
 __tests__/weighted-progress-link-index-wave243.test.js
+__tests__/whatsapp-appointment-sync-wave1497.test.js
 __tests__/whatsapp-appsecret-proof-wave1425.test.js
 __tests__/whatsapp-autoreply-template-gate-wave738.test.js
 __tests__/whatsapp-beneficiary-context-wave1491.test.js
@@ -1031,5 +1032,6 @@ __tests__/case-management-create-mapping-wave1482.test.js
 __tests__/enum-query-fixes-wave1486.test.js
 __tests__/check-enum-literal-queries-script.test.js
 __tests__/whatsapp-inbound-fixes-wave1488.test.js
+__tests__/document-lifecycle-core-linkage-wave1498.test.js
 __tests__/whatsapp-open-status-fix-wave1488.test.js
 __tests__/whatsapp-internal-notes-wave1493.test.js

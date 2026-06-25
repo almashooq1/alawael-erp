@@ -19,12 +19,7 @@ const SVC_SRC = fs.readFileSync(
   'utf8'
 );
 
-const ROUTES = [
-  '/campaigns',
-  '/campaigns/:id',
-  '/campaigns/:id/run',
-  '/campaigns/:id/cancel',
-];
+const ROUTES = ['/campaigns', '/campaigns/:id', '/campaigns/:id/run', '/campaigns/:id/cancel'];
 
 describe('W1495 campaign routes — declared + branch-scoped', () => {
   test.each(ROUTES)('declares route %s', route => {
@@ -48,7 +43,9 @@ describe('W1495 campaign routes — declared + branch-scoped', () => {
   });
 
   test('routes delegate to whatsappCampaign service (no inline send loop)', () => {
-    expect(ROUTE_SRC).toMatch(/require\(['"]\.\.\/services\/whatsapp\/whatsappCampaign\.service['"]\)/);
+    expect(ROUTE_SRC).toMatch(
+      /require\(['"]\.\.\/services\/whatsapp\/whatsappCampaign\.service['"]\)/
+    );
     expect(ROUTE_SRC).toMatch(/whatsappCampaign\.(createCampaign|runCampaign|listCampaigns)/);
   });
 });
@@ -77,7 +74,13 @@ describe('W1495 service — reuses send primitives, no duplication', () => {
   });
 
   test('exposes the campaign lifecycle operations', () => {
-    for (const fn of ['createCampaign', 'listCampaigns', 'getCampaign', 'cancelCampaign', 'runCampaign']) {
+    for (const fn of [
+      'createCampaign',
+      'listCampaigns',
+      'getCampaign',
+      'cancelCampaign',
+      'runCampaign',
+    ]) {
       expect(typeof campaignService[fn]).toBe('function');
     }
   });
@@ -97,7 +100,9 @@ describe('W1495 WhatsAppCampaign model — shape (static)', () => {
   });
 
   test('contactGroupId is required + refs WhatsAppContactGroup', () => {
-    expect(MODEL_SRC).toMatch(/contactGroupId:\s*\{[\s\S]*?ref:\s*'WhatsAppContactGroup'[\s\S]*?required:\s*true/);
+    expect(MODEL_SRC).toMatch(
+      /contactGroupId:\s*\{[\s\S]*?ref:\s*'WhatsAppContactGroup'[\s\S]*?required:\s*true/
+    );
   });
 
   test('run/cancel are gated by lifecycle (isRunnable / isCancellable)', () => {

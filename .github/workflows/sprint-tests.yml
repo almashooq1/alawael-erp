@@ -1920,6 +1920,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-beneficiary-context-wave1491.test.js'
@@ -1929,6 +1931,8 @@ on:
       - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3827,6 +3831,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-beneficiary-context-wave1491.test.js'
@@ -3836,6 +3842,8 @@ on:
       - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

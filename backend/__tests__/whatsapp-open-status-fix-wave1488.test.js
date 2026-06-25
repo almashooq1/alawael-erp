@@ -18,11 +18,17 @@
 const fs = require('fs');
 const path = require('path');
 
-const route = fs.readFileSync(path.join(__dirname, '..', 'routes', 'whatsapp-enhanced.routes.js'), 'utf8');
-const model = fs.readFileSync(path.join(__dirname, '..', 'models', 'WhatsAppConversation.js'), 'utf8');
+const route = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'whatsapp-enhanced.routes.js'),
+  'utf8'
+);
+const model = fs.readFileSync(
+  path.join(__dirname, '..', 'models', 'WhatsAppConversation.js'),
+  'utf8'
+);
 
 describe('W1488 whatsapp open-conversations KPI fix', () => {
-  test('open count no longer uses the non-enum literal status:\'open\'', () => {
+  test("open count no longer uses the non-enum literal status:'open'", () => {
     expect(route).not.toMatch(/status:\s*'open'/);
   });
 

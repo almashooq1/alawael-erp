@@ -63,6 +63,7 @@ const whatsappDlq = require('../services/whatsapp/dlq.service');
 const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
 const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
 const whatsappRehabOutcomes = require('../services/whatsapp/whatsappRehabOutcomes.service');
+const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const socketEmitter = require('../utils/socketEmitter');
@@ -389,7 +390,10 @@ router.post(
     const data = await Conversation.findOneAndUpdate(
       Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req)),
       { unreadCount: 0 },
-      { returnDocument: 'after', projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 } }
+      {
+        returnDocument: 'after',
+        projection: { _id: 1, branchId: 1, organizationId: 1, unreadCount: 1 },
+      }
     ).lean();
 
     if (data) {
@@ -428,7 +432,9 @@ router.post(
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
     const notes = data.internalNotes || [];
-    res.status(201).json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
+    res
+      .status(201)
+      .json({ success: true, data: { note: notes[notes.length - 1], total: notes.length } });
   })
 );
 
@@ -513,6 +519,38 @@ router.post(
       { returnDocument: 'after', projection: { linkedTicketId: 1, linkedSessionId: 1 } }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data });
+  })
+);
+
+/**
+ * POST /conversations/:id/appointment-action — staff-mediated two-way sync (W1497)
+ *
+ * Body: { sessionId, action: 'cancel' | 'no_show', reason? }. Cancels or marks
+ * a session as a no-show from the Inbox while chatting with the family. The
+ * mutation is delegated to the sessions domain facade (canonical events fire);
+ * branch-isolated, and the session must belong to this conversation's
+ * beneficiary.
+ */
+router.post(
+  '/conversations/:id/appointment-action',
+  asyncHandler(async (req, res) => {
+    const Conversation = getConversationModel();
+    const conv = await Conversation.findOne(
+      Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
+    )
+      .select('_id beneficiaryId branchId')
+      .lean();
+    if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+    const data = await whatsappAppointmentSync.applyAppointmentAction({
+      beneficiaryId: conv.beneficiaryId,
+      sessionId: req.body.sessionId,
+      action: req.body.action,
+      reason: req.body.reason,
+      branchScope: effectiveBranchScope(req),
+      actorId: req.user?._id || req.user?.id || null,
+    });
     res.json({ success: true, data });
   })
 );

@@ -27,7 +27,7 @@ describe('W1193 pay-equity routes — auth + branch isolation', () => {
 
   test('every route is role-gated (requireRole on each verb)', () => {
     const verbs = [...src.matchAll(/router\.(get|post)\(\s*'[^']+'\s*,\s*([A-Za-z_$][\w$]*)/g)];
-    expect(verbs.length).toBe(5); // analysis, flagged, snapshot, snapshots, trends
+    expect(verbs.length).toBe(9); // analysis, flagged, snapshot, snapshots, trends, compa-ratio, below-band, band-mappings (get+post)
     for (const m of verbs) {
       expect(m[2]).toBe('requireRole');
     }
@@ -40,13 +40,17 @@ describe('W1193 pay-equity routes — auth + branch isolation', () => {
 });
 
 describe('W1193 pay-equity routes — endpoint set + mount', () => {
-  test('exposes the 5 documented endpoints', () => {
+  test('exposes the documented endpoints', () => {
     for (const [verb, p] of [
       ['get', '/analysis'],
       ['get', '/flagged'],
       ['post', '/snapshot'],
       ['get', '/snapshots'],
       ['get', '/trends'],
+      ['get', '/compa-ratio'],
+      ['get', '/below-band'],
+      ['get', '/band-mappings'],
+      ['post', '/band-mappings'],
     ]) {
       expect(src).toMatch(new RegExp(`router\\.${verb}\\(\\s*'${p}'`));
     }

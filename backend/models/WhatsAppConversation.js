@@ -108,6 +108,31 @@ const insightSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ─── W1493: Internal note + transfer-log sub-schemas ─────────────────────────
+// Internal notes are private staff annotations on a conversation — they are
+// NEVER sent to WhatsApp (families only reach the authenticate-gated admin API,
+// never this collection). transferLog is the audit trail of staff hand-offs
+// (reception → therapist → supervisor) carrying the reason.
+const internalNoteSchema = new mongoose.Schema(
+  {
+    text: { type: String, required: true, maxlength: 4000, trim: true },
+    authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    authorName: String,
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
+const transferLogSchema = new mongoose.Schema(
+  {
+    fromUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    toUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    reason: { type: String, maxlength: 1000, trim: true },
+    at: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
 // ─── Main Schema ─────────────────────────────────────────────────────────────
 const whatsappConversationSchema = new mongoose.Schema(
   {
@@ -196,6 +221,15 @@ const whatsappConversationSchema = new mongoose.Schema(
       lang: { type: String, enum: ['ar', 'en'], default: 'ar' },
       updatedAt: Date,
     },
+
+    // ── W1493: staff-only operational layer (not visible to families) ────
+    // internalNotes: private staff annotations (never sent to WhatsApp).
+    // transferLog: audit trail of staff hand-offs (paired with `assignedTo`).
+    // linked*: cross-reference to the ticket / session this thread concerns.
+    internalNotes: [internalNoteSchema],
+    transferLog: [transferLogSchema],
+    linkedTicketId: { type: mongoose.Schema.Types.ObjectId, ref: 'Complaint' },
+    linkedSessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClinicalSession' },
 
     // Embedded data
     messages: [messageSchema],

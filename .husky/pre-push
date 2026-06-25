@@ -91,6 +91,16 @@ echo "[pre-push] route-shadowing check (literal route after :param sibling)…"
 cd backend && npm run check:route-shadowing
 cd ..
 
+# W1529: branch-isolation gate. Same cross-branch PHI-leak class as the
+# W440/W441/W442 CI guard, but as a fast (<1s) pre-push check so a new route
+# that reads a beneficiary id from params/body without a branch-enforcement
+# signal is caught BEFORE push (it previously only failed 30 min later in the
+# full sprint suite — exactly how W1525's /enqueue shipped a gap). Fix message
+# names the file + the enforcement options.
+echo "[pre-push] branch-isolation check (beneficiary-keyed routes)…"
+cd backend && npm run check:branch-isolation
+cd ..
+
 # 2026-05-30: heavy `quality:push` (test:guard + test:domains + test:phase2,
 # ~10–13 min) MOVED to the "CI Pipeline" GitHub Actions job — it already
 # runs the full test:sprint on every push to main. Keeping it locally

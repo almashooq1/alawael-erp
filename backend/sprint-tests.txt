@@ -186,6 +186,7 @@ __tests__/caregiver-support-program-behavioral-wave384.test.js
 __tests__/caregiver-support-program-wave384.test.js
 __tests__/careplan-branch-tenancy-wave654.test.js
 __tests__/careteam-core-linkage-wave1005.test.js
+__tests__/case-management-create-mapping-wave1482.test.js
 __tests__/caseload-assignment-wave436.test.js
 __tests__/caseload-matcher-wave432.test.js
 __tests__/caseload-rebalance-apply-wave512.test.js
@@ -205,6 +206,7 @@ __tests__/changephone-otp-limiter-wave1460.test.js
 __tests__/check-authz-consolidation-script.test.js
 __tests__/check-can-scope-contract-script.test.js
 __tests__/check-dormant-modules-script.test.js
+__tests__/check-enum-literal-queries-script.test.js
 __tests__/check-gitignored-sources-script.test.js
 __tests__/check-memory-health-script.test.js
 __tests__/check-mfa-tier-lib-wave275c.test.js
@@ -304,7 +306,9 @@ __tests__/doc-expiry-digest-script.test.js
 __tests__/doc-test-count-consistency.test.js
 __tests__/docs-links-exist.test.js
 __tests__/document-expiry-radar-service.test.js
+__tests__/document-lifecycle-core-linkage-wave1498.test.js
 __tests__/document-link.service.test.js
+__tests__/document-model-hooks-producer-wave1510.test.js
 __tests__/document-upload.service.test.js
 __tests__/documents-json-create-wave933.test.js
 __tests__/domain-mounts-auth-branch-scope-wave1168.test.js
@@ -331,6 +335,7 @@ __tests__/employee-create-route-hook-wave933.test.js
 __tests__/emr-routes-branch-isolation-wave901.test.js
 __tests__/enforce-mfa-at-construction-wave276.test.js
 __tests__/engines-aligned.test.js
+__tests__/enum-query-fixes-wave1486.test.js
 __tests__/env-minimum-template-wave1395.test.js
 __tests__/env-preflight-check-documentation-wave1398.test.js
 __tests__/environment-setup-documentation-wave1400.test.js
@@ -945,6 +950,7 @@ __tests__/therapy-sessions-admin-branch-isolation-wave887.test.js
 __tests__/timeline-routes-branch-isolation-wave1138.test.js
 __tests__/timing-unsafe-secret-compare-wave1181.test.js
 __tests__/toileting-routes-branch-isolation-wave879.test.js
+__tests__/traffic-accidents-stats-fix-wave1481.test.js
 __tests__/transition-completion-core-linkage-wave1030.test.js
 __tests__/transition-plan-behavioral-wave361.test.js
 __tests__/transition-plan-routes-behavioral-wave862b.test.js
@@ -1016,6 +1022,9 @@ __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-event-bindings-wave727.test.js
 __tests__/whatsapp-group-branch-isolation-wave1412.test.js
 __tests__/whatsapp-group-broadcast-wave748.test.js
+__tests__/whatsapp-inbound-fixes-wave1488.test.js
+__tests__/whatsapp-internal-notes-wave1493.test.js
+__tests__/whatsapp-open-status-fix-wave1488.test.js
 __tests__/whatsapp-pending-review-sort-wave741.test.js
 __tests__/whatsapp-post-session-subscriber-wave1511.test.js
 __tests__/whatsapp-queue-count-filters-wave743.test.js
@@ -1030,12 +1039,3 @@ __tests__/zatca-xml-signer.e2e.test.js
 __tests__/zkteco-device-merge-script.test.js
 __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 tests/unit/ops-alerter.test.js
-__tests__/traffic-accidents-stats-fix-wave1481.test.js
-__tests__/case-management-create-mapping-wave1482.test.js
-__tests__/enum-query-fixes-wave1486.test.js
-__tests__/check-enum-literal-queries-script.test.js
-__tests__/whatsapp-inbound-fixes-wave1488.test.js
-__tests__/document-lifecycle-core-linkage-wave1498.test.js
-__tests__/whatsapp-open-status-fix-wave1488.test.js
-__tests__/whatsapp-internal-notes-wave1493.test.js
-__tests__/document-model-hooks-producer-wave1510.test.js

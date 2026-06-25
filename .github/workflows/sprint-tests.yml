@@ -1925,6 +1925,11 @@ on:
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/whatsapp-campaign-scheduler-wave1501.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/document-model-hooks-producer-wave1510.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3829,6 +3834,11 @@ on:
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/whatsapp-campaign-scheduler-wave1501.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/document-model-hooks-producer-wave1510.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3850,7 +3860,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -3871,7 +3881,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v6
@@ -3898,7 +3908,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v6
@@ -3925,7 +3935,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v6
@@ -3950,7 +3960,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v6

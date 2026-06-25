@@ -13,7 +13,7 @@
  * @module pages/whatsapp/WhatsAppDashboard
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Box,
   Grid,
@@ -495,7 +495,46 @@ export default function WhatsAppDashboard() {
   const [statusEnabled, setStatusEnabled] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const notify = useCallback((msg, severity = 'success') => setSnackbar({ open: true, msg, severity }), []);
+  const notify = useCallback(
+    (msg, severity = 'success') => setSnackbar({ open: true, msg, severity }),
+    []
+  );
+
+  // ── Document title unread badge ────────────────────────────────────────────
+  const totalUnread = useMemo(
+    () => conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0),
+    [conversations]
+  );
+
+  useEffect(() => {
+    const originalTitle = document.title;
+    const base = 'واتساب — مركز التواصل الذكي';
+    document.title = totalUnread > 0 ? `(${totalUnread}) ${base}` : base;
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [totalUnread]);
+
+  // ── Escalation sound alert (best-effort; browsers may block until user interaction)
+  const playEscalationBeep = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch {
+      // ignore audio errors
+    }
+  }, []);
 
   // ── Fetch status ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -543,20 +582,25 @@ export default function WhatsAppDashboard() {
   }, [tab, loadAnalytics]);
 
   // ── Open conversation ──────────────────────────────────────────────────────
-  const openConversation = useCallback(async conv => {
-    setSelectedConv(null);
-    setLoadingConv(true);
-    try {
-      const { data } = await apiClient.get(`/whatsapp/conversations/${conv._id}?withInsights=true`);
-      setSelectedConv(data.data);
-      // Mark read
-      await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
-    } catch {
-      notify('فشل تحميل المحادثة', 'error');
-    } finally {
-      setLoadingConv(false);
-    }
-  }, [notify]);
+  const openConversation = useCallback(
+    async conv => {
+      setSelectedConv(null);
+      setLoadingConv(true);
+      try {
+        const { data } = await apiClient.get(
+          `/whatsapp/conversations/${conv._id}?withInsights=true`
+        );
+        setSelectedConv(data.data);
+        // Mark read
+        await apiClient.post(`/whatsapp/conversations/${conv._id}/mark-read`).catch(() => {});
+      } catch {
+        notify('فشل تحميل المحادثة', 'error');
+      } finally {
+        setLoadingConv(false);
+      }
+    },
+    [notify]
+  );
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -655,6 +699,7 @@ export default function WhatsAppDashboard() {
         `⚠️ محادثة واتساب مصعّدة: ${payload.conversation?.senderName || payload.conversation?.phone || ''}`,
         'warning'
       );
+      playEscalationBeep();
     };
 
     socket.on('whatsapp:message', handleMessage);
@@ -669,7 +714,7 @@ export default function WhatsAppDashboard() {
       socket.off('whatsapp:escalation', handleEscalation);
       socket.emit('whatsapp:unsubscribe');
     };
-  }, [socket, currentUser, notify]);
+  }, [socket, currentUser, notify, playEscalationBeep]);
 
   // ── Send message ───────────────────────────────────────────────────────────
   const sendMessage = async () => {

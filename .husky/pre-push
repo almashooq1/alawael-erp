@@ -56,6 +56,12 @@ echo "[pre-push] wave-number collision check…"
 cd backend && npm run check:wave-collision
 cd ..
 
+# 2026-06-23 (W1500): block new beneficiary-keyed models that have no
+# unified-core producer. v1 covers models; routes are a future ratchet.
+echo "[pre-push] core-linkage coverage drift check…"
+cd backend && npm run check:core-linkage
+cd ..
+
 # 2026-06-11 (W1217): block phantom-schema-write classes at the push gate.
 # Three killer classes, all proven repeatedly in the W1189→W1216 burn-down
 # (14 LIVE surfaces had thrown-or-returned-empty since shipping):

@@ -62,6 +62,7 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
 const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
+const whatsappRehabOutcomes = require('../services/whatsapp/whatsappRehabOutcomes.service');
 const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -1147,6 +1148,24 @@ router.get(
         critical,
       },
     });
+  })
+);
+
+/**
+ * GET /analytics/rehab-outcomes — WhatsApp ↔ rehab-outcome KPIs (W1499)
+ *
+ * Read-only correlation analytics: channel adoption + no-show rate +
+ * goal-achievement rate for WhatsApp-active beneficiaries vs the rest + family
+ * NPS. Branch-isolated; best-effort (a missing collection degrades to nulls in
+ * `sources`). `?windowDays=` overrides the 90-day session window.
+ */
+router.get(
+  '/analytics/rehab-outcomes',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappRehabOutcomes.buildRehabOutcomes(effectiveBranchScope(req), {
+      windowDays: req.query.windowDays,
+    });
+    res.json({ success: true, data });
   })
 );
 

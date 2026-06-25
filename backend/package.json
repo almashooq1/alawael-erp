@@ -287,7 +287,9 @@
     "cleanup": "node scripts/cleanup.js",
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js",
-    "check:phantom-writes": "node scripts/check-phantom-schema-writes.js"
+    "check:phantom-writes": "node scripts/check-phantom-schema-writes.js",
+    "check:core-linkage": "node scripts/check-core-linkage.js",
+    "check:core-linkage:json": "node scripts/check-core-linkage.js --json"
   },
   "_moduleAliases": {
     "@": ".",

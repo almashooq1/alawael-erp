@@ -96,7 +96,34 @@ function setupIntegrationBus(app) {
       } = require('../services/whatsapp/whatsappComplaintResolvedSubscriber');
       wireWhatsappComplaintResolved(integrationBus, { logger });
     } catch (waCmpErr) {
-      logger.warn('[Integration] WhatsApp complaint-resolved subscriber skipped:', waCmpErr.message);
+      logger.warn(
+        '[Integration] WhatsApp complaint-resolved subscriber skipped:',
+        waCmpErr.message
+      );
+    }
+
+    // W1517: configurable WhatsApp event→message bindings (admin-managed). One
+    // generic dispatcher over the bindable producer events. Env-gated
+    // (ENABLE_WHATSAPP_EVENT_BINDINGS); off by default + consent-gated.
+    try {
+      const {
+        wireEventBindingDispatcher,
+      } = require('../services/whatsapp/whatsappEventBindingDispatcher');
+      wireEventBindingDispatcher(integrationBus, { logger });
+    } catch (waBindErr) {
+      logger.warn('[Integration] WhatsApp event-binding dispatcher skipped:', waBindErr.message);
+    }
+
+    // W1527: auto-enqueue WhatsApp appointment reminders on appointment.booked
+    // (makes the W1525 reminder queue self-driving). Env-gated
+    // (ENABLE_WHATSAPP_REMINDER_AUTO_ENQUEUE); off by default + idempotent.
+    try {
+      const {
+        wireWhatsappReminderAutoEnqueue,
+      } = require('../services/whatsapp/whatsappReminderEnqueueSubscriber');
+      wireWhatsappReminderAutoEnqueue(integrationBus, { logger });
+    } catch (waEnqErr) {
+      logger.warn('[Integration] WhatsApp reminder auto-enqueue skipped:', waEnqErr.message);
     }
 
     // W387: bridge service-local EventEmitter emits (W379-W386 wires) to

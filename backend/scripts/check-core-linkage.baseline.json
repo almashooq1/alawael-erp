@@ -1,0 +1,570 @@
+[
+  {
+    "name": "Recommendation",
+    "file": "domains/ai-recommendations/models/Recommendation.js"
+  },
+  {
+    "name": "UnifiedCarePlan",
+    "file": "domains/care-plans/models/UnifiedCarePlan.js"
+  },
+  {
+    "name": "ExtensionRecord",
+    "file": "domains/extensions/models/ExtensionRecord.js"
+  },
+  {
+    "name": "TraineeRecord",
+    "file": "domains/field-training/models/TraineeRecord.js"
+  },
+  {
+    "name": "MeasureApplication",
+    "file": "domains/goals/models/MeasureApplication.js"
+  },
+  {
+    "name": "TherapeuticGoal",
+    "file": "domains/goals/models/TherapeuticGoal.js"
+  },
+  {
+    "name": "GroupSession",
+    "file": "domains/group-therapy/models/GroupSession.js"
+  },
+  {
+    "name": "TherapyGroup",
+    "file": "domains/group-therapy/models/TherapyGroup.js"
+  },
+  {
+    "name": "TeleSession",
+    "file": "domains/tele-rehab/models/TeleSession.js"
+  },
+  {
+    "name": "AiPrediction",
+    "file": "models/AiPrediction.js"
+  },
+  {
+    "name": "AiRecommendationBundle",
+    "file": "models/AiRecommendationBundle.js"
+  },
+  {
+    "name": "AiSuggestion",
+    "file": "models/AiSuggestion.js"
+  },
+  {
+    "name": "appointmentScheduling.model",
+    "file": "models/appointmentScheduling.model.js"
+  },
+  {
+    "name": "Assessment",
+    "file": "models/Assessment.js"
+  },
+  {
+    "name": "AssessmentComparison",
+    "file": "models/AssessmentComparison.js"
+  },
+  {
+    "name": "AssessmentRecommendationBundle",
+    "file": "models/AssessmentRecommendationBundle.js"
+  },
+  {
+    "name": "BehaviorIncident",
+    "file": "models/BehaviorIncident.js"
+  },
+  {
+    "name": "BeneficiaryJourneyScore",
+    "file": "models/BeneficiaryJourneyScore.js"
+  },
+  {
+    "name": "BeneficiaryLifecycleTransition",
+    "file": "models/BeneficiaryLifecycleTransition.js"
+  },
+  {
+    "name": "AcademicRecord",
+    "file": "models/BeneficiaryManagement/AcademicRecord.js"
+  },
+  {
+    "name": "Achievement",
+    "file": "models/BeneficiaryManagement/Achievement.js"
+  },
+  {
+    "name": "CounselingSession",
+    "file": "models/BeneficiaryManagement/CounselingSession.js"
+  },
+  {
+    "name": "FinancialSupport",
+    "file": "models/BeneficiaryManagement/FinancialSupport.js"
+  },
+  {
+    "name": "Scholarship",
+    "file": "models/BeneficiaryManagement/Scholarship.js"
+  },
+  {
+    "name": "SkillsDevelopment",
+    "file": "models/BeneficiaryManagement/SkillsDevelopment.js"
+  },
+  {
+    "name": "SupportPlan",
+    "file": "models/BeneficiaryManagement/SupportPlan.js"
+  },
+  {
+    "name": "BeneficiaryPortal",
+    "file": "models/BeneficiaryPortal.js"
+  },
+  {
+    "name": "BeneficiaryVoiceLog",
+    "file": "models/BeneficiaryVoiceLog.js"
+  },
+  {
+    "name": "CommunityLinkage.model",
+    "file": "models/care/CommunityLinkage.model.js"
+  },
+  {
+    "name": "CommunityParticipationLog.model",
+    "file": "models/care/CommunityParticipationLog.model.js"
+  },
+  {
+    "name": "IadlAssessment.model",
+    "file": "models/care/IadlAssessment.model.js"
+  },
+  {
+    "name": "Lead.model",
+    "file": "models/care/Lead.model.js"
+  },
+  {
+    "name": "PsychRiskFlag.model",
+    "file": "models/care/PsychRiskFlag.model.js"
+  },
+  {
+    "name": "PsychScaleAssessment.model",
+    "file": "models/care/PsychScaleAssessment.model.js"
+  },
+  {
+    "name": "RetentionAssessment.model",
+    "file": "models/care/RetentionAssessment.model.js"
+  },
+  {
+    "name": "SocialCase.model",
+    "file": "models/care/SocialCase.model.js"
+  },
+  {
+    "name": "TransitionReadinessAssessment.model",
+    "file": "models/care/TransitionReadinessAssessment.model.js"
+  },
+  {
+    "name": "WelfareApplication.model",
+    "file": "models/care/WelfareApplication.model.js"
+  },
+  {
+    "name": "CarePlan",
+    "file": "models/CarePlan.js"
+  },
+  {
+    "name": "CarePlanVersion",
+    "file": "models/CarePlanVersion.js"
+  },
+  {
+    "name": "CctvAccessGrant",
+    "file": "models/cctv/CctvAccessGrant.js"
+  },
+  {
+    "name": "CctvFaceIdentity",
+    "file": "models/cctv/CctvFaceIdentity.js"
+  },
+  {
+    "name": "CctvViewAudit",
+    "file": "models/cctv/CctvViewAudit.js"
+  },
+  {
+    "name": "CdssDecisionLog",
+    "file": "models/CdssDecisionLog.js"
+  },
+  {
+    "name": "abc-data-collection.model",
+    "file": "models/clinical-assessment/abc-data-collection.model.js"
+  },
+  {
+    "name": "behavioral-function-assessment.model",
+    "file": "models/clinical-assessment/behavioral-function-assessment.model.js"
+  },
+  {
+    "name": "brief2-assessment.model",
+    "file": "models/clinical-assessment/brief2-assessment.model.js"
+  },
+  {
+    "name": "caregiver-burden-assessment.model",
+    "file": "models/clinical-assessment/caregiver-burden-assessment.model.js"
+  },
+  {
+    "name": "family-needs-survey.model",
+    "file": "models/clinical-assessment/family-needs-survey.model.js"
+  },
+  {
+    "name": "mchat-assessment.model",
+    "file": "models/clinical-assessment/mchat-assessment.model.js"
+  },
+  {
+    "name": "portage-assessment.model",
+    "file": "models/clinical-assessment/portage-assessment.model.js"
+  },
+  {
+    "name": "quality-of-life-assessment.model",
+    "file": "models/clinical-assessment/quality-of-life-assessment.model.js"
+  },
+  {
+    "name": "saudi-developmental-screening.model",
+    "file": "models/clinical-assessment/saudi-developmental-screening.model.js"
+  },
+  {
+    "name": "sensory-profile-assessment.model",
+    "file": "models/clinical-assessment/sensory-profile-assessment.model.js"
+  },
+  {
+    "name": "srs2-assessment.model",
+    "file": "models/clinical-assessment/srs2-assessment.model.js"
+  },
+  {
+    "name": "transition-readiness-assessment.model",
+    "file": "models/clinical-assessment/transition-readiness-assessment.model.js"
+  },
+  {
+    "name": "CulturalProfile",
+    "file": "models/CulturalProfile.js"
+  },
+  {
+    "name": "disability-assessment.model",
+    "file": "models/disability-assessment.model.js"
+  },
+  {
+    "name": "EmergencyContact",
+    "file": "models/EmergencyContact.js"
+  },
+  {
+    "name": "emr.model",
+    "file": "models/emr.model.js"
+  },
+  {
+    "name": "EventParticipation",
+    "file": "models/EventParticipation.js"
+  },
+  {
+    "name": "familySatisfaction.models",
+    "file": "models/familySatisfaction.models.js"
+  },
+  {
+    "name": "FamilyWellbeingSnapshot",
+    "file": "models/FamilyWellbeingSnapshot.js"
+  },
+  {
+    "name": "Feedback",
+    "file": "models/Feedback.js"
+  },
+  {
+    "name": "FieldTrip",
+    "file": "models/FieldTrip.js"
+  },
+  {
+    "name": "FinancialNavigationPlan",
+    "file": "models/FinancialNavigationPlan.js"
+  },
+  {
+    "name": "Gamification",
+    "file": "models/Gamification.js"
+  },
+  {
+    "name": "IndependentLivingProgress",
+    "file": "models/IndependentLivingProgress.js"
+  },
+  {
+    "name": "kitchen.model",
+    "file": "models/kitchen.model.js"
+  },
+  {
+    "name": "laundry.model",
+    "file": "models/laundry.model.js"
+  },
+  {
+    "name": "MDTCoordination",
+    "file": "models/MDTCoordination.js"
+  },
+  {
+    "name": "IndividualRehabPlan.model",
+    "file": "models/measurement/IndividualRehabPlan.model.js"
+  },
+  {
+    "name": "QuickAssessment.model",
+    "file": "models/measurement/QuickAssessment.model.js"
+  },
+  {
+    "name": "MedicalHistory",
+    "file": "models/MedicalHistory.js"
+  },
+  {
+    "name": "MentalHealth",
+    "file": "models/MentalHealth.js"
+  },
+  {
+    "name": "noor.models",
+    "file": "models/noor.models.js"
+  },
+  {
+    "name": "EligibilityCheck",
+    "file": "models/nphies/EligibilityCheck.js"
+  },
+  {
+    "name": "NphiesClaim",
+    "file": "models/NphiesClaim.js"
+  },
+  {
+    "name": "OfficialLetter",
+    "file": "models/OfficialLetter.js"
+  },
+  {
+    "name": "RouteOptimizationJob.model",
+    "file": "models/operations/RouteOptimizationJob.model.js"
+  },
+  {
+    "name": "ParentChatbotSession",
+    "file": "models/ParentChatbotSession.js"
+  },
+  {
+    "name": "ParentMessage",
+    "file": "models/ParentMessage.js"
+  },
+  {
+    "name": "ParentPortal",
+    "file": "models/ParentPortal.js"
+  },
+  {
+    "name": "PaymentTransaction",
+    "file": "models/PaymentTransaction.js"
+  },
+  {
+    "name": "pharmacy.model",
+    "file": "models/pharmacy.model.js"
+  },
+  {
+    "name": "phase37.model",
+    "file": "models/phase37.model.js"
+  },
+  {
+    "name": "PlanReviewAck",
+    "file": "models/PlanReviewAck.js"
+  },
+  {
+    "name": "PortalNotification",
+    "file": "models/PortalNotification.js"
+  },
+  {
+    "name": "ImpactMeasurement.model",
+    "file": "models/post-rehab/ImpactMeasurement.model.js"
+  },
+  {
+    "name": "PostRehabSurvey.model",
+    "file": "models/post-rehab/PostRehabSurvey.model.js"
+  },
+  {
+    "name": "ReEnrollmentRequest.model",
+    "file": "models/post-rehab/ReEnrollmentRequest.model.js"
+  },
+  {
+    "name": "PrescriptionValidation",
+    "file": "models/PrescriptionValidation.js"
+  },
+  {
+    "name": "AutismProfile.model",
+    "file": "models/rehab-advanced/AutismProfile.model.js"
+  },
+  {
+    "name": "BehaviorIncident.model",
+    "file": "models/rehab-advanced/BehaviorIncident.model.js"
+  },
+  {
+    "name": "BehaviorPlan.model",
+    "file": "models/rehab-advanced/BehaviorPlan.model.js"
+  },
+  {
+    "name": "HomeProgram.model",
+    "file": "models/rehab-advanced/HomeProgram.model.js"
+  },
+  {
+    "name": "JobCoachLog.model",
+    "file": "models/rehab-advanced/JobCoachLog.model.js"
+  },
+  {
+    "name": "MedicationRecord.model",
+    "file": "models/rehab-advanced/MedicationRecord.model.js"
+  },
+  {
+    "name": "NutritionPlan.model",
+    "file": "models/rehab-advanced/NutritionPlan.model.js"
+  },
+  {
+    "name": "TherapySession.model",
+    "file": "models/rehab-advanced/TherapySession.model.js"
+  },
+  {
+    "name": "VocationalProfile.model",
+    "file": "models/rehab-advanced/VocationalProfile.model.js"
+  },
+  {
+    "name": "assistive-equipment.model",
+    "file": "models/rehab-center/assistive-equipment.model.js"
+  },
+  {
+    "name": "beneficiary-assessment.model",
+    "file": "models/rehab-center/beneficiary-assessment.model.js"
+  },
+  {
+    "name": "family-communication.model",
+    "file": "models/rehab-center/family-communication.model.js"
+  },
+  {
+    "name": "group-session.model",
+    "file": "models/rehab-center/group-session.model.js"
+  },
+  {
+    "name": "individualized-plan.model",
+    "file": "models/rehab-center/individualized-plan.model.js"
+  },
+  {
+    "name": "referral.model",
+    "file": "models/rehab-center/referral.model.js"
+  },
+  {
+    "name": "schedule.model",
+    "file": "models/rehab-center/schedule.model.js"
+  },
+  {
+    "name": "survey-response.model",
+    "file": "models/rehab-center/survey-response.model.js"
+  },
+  {
+    "name": "waitlist.model",
+    "file": "models/rehab-center/waitlist.model.js"
+  },
+  {
+    "name": "ProgramProgress.model",
+    "file": "models/rehab-program/ProgramProgress.model.js"
+  },
+  {
+    "name": "ProgramSession.model",
+    "file": "models/rehab-program/ProgramSession.model.js"
+  },
+  {
+    "name": "rehabilitation-advanced.model",
+    "file": "models/rehabilitation-advanced.model.js"
+  },
+  {
+    "name": "rehabilitation-intelligent.model",
+    "file": "models/rehabilitation-intelligent.model.js"
+  },
+  {
+    "name": "rehabilitation-program.model",
+    "file": "models/rehabilitation-program.model.js"
+  },
+  {
+    "name": "rehabilitation-specialized.model",
+    "file": "models/rehabilitation-specialized.model.js"
+  },
+  {
+    "name": "RehabPlan",
+    "file": "models/rehabilitation/RehabPlan.js"
+  },
+  {
+    "name": "RehabSession",
+    "file": "models/rehabilitation/RehabSession.js"
+  },
+  {
+    "name": "RehabPlanSuggestion",
+    "file": "models/RehabPlanSuggestion.js"
+  },
+  {
+    "name": "AppointmentRecurrence",
+    "file": "models/scheduling/AppointmentRecurrence.js"
+  },
+  {
+    "name": "SessionDocumentation",
+    "file": "models/SessionDocumentation.js"
+  },
+  {
+    "name": "SiblingAdjustmentRecord",
+    "file": "models/SiblingAdjustmentRecord.js"
+  },
+  {
+    "name": "SmartGoal",
+    "file": "models/SmartGoal.js"
+  },
+  {
+    "name": "SmartIEP",
+    "file": "models/SmartIEP.js"
+  },
+  {
+    "name": "SmartInsuranceClaim",
+    "file": "models/SmartInsuranceClaim.js"
+  },
+  {
+    "name": "SmartIRP",
+    "file": "models/SmartIRP.js"
+  },
+  {
+    "name": "StandardizedAssessment",
+    "file": "models/StandardizedAssessment.js"
+  },
+  {
+    "name": "SupportedHousing",
+    "file": "models/SupportedHousing.js"
+  },
+  {
+    "name": "taqat.models",
+    "file": "models/taqat.models.js"
+  },
+  {
+    "name": "TherapeuticPlan",
+    "file": "models/TherapeuticPlan.js"
+  },
+  {
+    "name": "TherapistProgressRecord",
+    "file": "models/TherapistProgressRecord.js"
+  },
+  {
+    "name": "TherapyAssessment",
+    "file": "models/TherapyAssessment.js"
+  },
+  {
+    "name": "TherapyPrescription",
+    "file": "models/TherapyPrescription.js"
+  },
+  {
+    "name": "TherapySession",
+    "file": "models/TherapySession.js"
+  },
+  {
+    "name": "TransportRoute",
+    "file": "models/transport/TransportRoute.js"
+  },
+  {
+    "name": "Trip",
+    "file": "models/transport/Trip.js"
+  },
+  {
+    "name": "UploadedFile",
+    "file": "models/UploadedFile.js"
+  },
+  {
+    "name": "VitalSign",
+    "file": "models/VitalSign.js"
+  },
+  {
+    "name": "WhatsAppConsent",
+    "file": "models/WhatsAppConsent.js"
+  },
+  {
+    "name": "WhatsAppContactGroup",
+    "file": "models/WhatsAppContactGroup.js"
+  },
+  {
+    "name": "WhatsAppConversation",
+    "file": "models/WhatsAppConversation.js"
+  },
+  {
+    "name": "WhatsAppDlq",
+    "file": "models/WhatsAppDlq.js"
+  }
+]

@@ -204,6 +204,7 @@ __tests__/center-ops-wave1269.test.js
 __tests__/changelog-structure.test.js
 __tests__/changephone-otp-limiter-wave1460.test.js
 __tests__/check-authz-consolidation-script.test.js
+__tests__/check-beneficiary-branch-isolation-script.test.js
 __tests__/check-can-scope-contract-script.test.js
 __tests__/check-dormant-modules-script.test.js
 __tests__/check-enum-literal-queries-script.test.js

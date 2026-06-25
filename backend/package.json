@@ -251,6 +251,7 @@
     "check:wave-collision": "node scripts/check-wave-collision.js",
     "check:wave-collision:json": "node scripts/check-wave-collision.js --json",
     "check:route-shadowing": "node scripts/check-route-shadowing.js",
+    "check:branch-isolation": "node scripts/check-beneficiary-branch-isolation.js",
     "check:dormant-modules": "node scripts/check-dormant-modules.js",
     "check:enum-literal-queries": "node scripts/check-enum-literal-queries.js",
     "check:dormant-modules:json": "node scripts/check-dormant-modules.js --json",

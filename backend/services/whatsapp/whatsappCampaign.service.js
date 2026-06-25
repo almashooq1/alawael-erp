@@ -199,12 +199,61 @@ async function runCampaign(id, branchScope) {
   }
 }
 
+// How many due campaigns one sweep launches (a backstop against a flood).
+const MAX_DUE_PER_SWEEP = 50;
+
+/**
+ * Launch every scheduled campaign whose scheduledAt has passed (W1501).
+ * Used by both the env-gated cron sweeper (branchScope=null → all branches) and
+ * the manual POST /campaigns/run-due endpoint (branchScope=req → one branch).
+ * runCampaign claims status=running, so a campaign already launched by a prior
+ * tick is skipped (no double-send). Per-campaign failures are isolated.
+ *
+ * @param {object} [opts] - { branchScope, now, limit, logger }
+ * @returns {Promise<{due:number, processed:number, failed:number}>}
+ */
+async function runDueCampaigns(opts = {}) {
+  const { branchScope = null, now = Date.now(), logger } = opts;
+  const limit = Math.min(Number(opts.limit) || MAX_DUE_PER_SWEEP, MAX_DUE_PER_SWEEP);
+  const Campaign = getModel('WhatsAppCampaign');
+
+  const filter = {
+    status: 'scheduled',
+    scheduledAt: { $lte: new Date(now) },
+    isDeleted: false,
+  };
+  if (branchScope) filter.branchId = branchScope;
+
+  const due = await Campaign.find(filter)
+    .select('_id branchId')
+    .sort({ scheduledAt: 1 })
+    .limit(limit)
+    .lean();
+
+  let processed = 0;
+  let failed = 0;
+  for (const c of due) {
+    try {
+      // Pass the campaign's own branch so the branch-scoped runCampaign filter
+      // still resolves it when the sweeper runs cross-branch (branchScope=null).
+      await runCampaign(String(c._id), branchScope || (c.branchId ? String(c.branchId) : null));
+      processed += 1;
+    } catch (err) {
+      failed += 1;
+      logger?.warn?.(`[wa-campaign] due-run failed ${c._id}: ${err.message}`);
+    }
+  }
+  return { due: due.length, processed, failed };
+}
+
 module.exports = {
   createCampaign,
   listCampaigns,
   getCampaign,
   cancelCampaign,
   runCampaign,
+  runDueCampaigns,
   summarizeOutcomes,
   MAX_PER_RUN,
+  MAX_DUE_PER_SWEEP,
 };

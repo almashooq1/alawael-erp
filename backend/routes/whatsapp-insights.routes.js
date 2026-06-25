@@ -48,4 +48,22 @@ router.get(
   })
 );
 
+/**
+ * GET /sentiment — family-mood health for the caller's branch: per-mood counts
+ * (positive/neutral/negative) + trend counts + a ranked "needs attention" list
+ * (negative or declining tone). Optional ?windowDays&limit. (W1538)
+ */
+router.get(
+  '/sentiment',
+  asyncHandler(async (req, res) => {
+    const svc = require('../services/whatsapp/whatsappSentimentInsight.service');
+    const data = await svc.buildSentimentInsight({
+      branchScope: effectiveBranchScope(req),
+      ...(req.query.windowDays ? { windowDays: Number(req.query.windowDays) } : {}),
+      ...(req.query.limit ? { listLimit: Number(req.query.limit) } : {}),
+    });
+    res.json({ success: true, data });
+  })
+);
+
 module.exports = router;

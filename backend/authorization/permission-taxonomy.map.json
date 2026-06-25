@@ -40,6 +40,16 @@
       "note": "REFINEMENT: PHI-gated read; rbac cannot distinguish from demographics:read"
     },
     {
+      "key": "whatsapp:beneficiary:context",
+      "rbac": { "resource": "beneficiaries", "action": "read" },
+      "note": "REFINEMENT (W1509): clinical context shown in the WhatsApp Inbox sidebar — collapses with beneficiary:clinical:read onto beneficiaries:read"
+    },
+    {
+      "key": "whatsapp:notes:internal",
+      "rbac": { "resource": "beneficiaries", "action": "read" },
+      "note": "REFINEMENT (W1509): clinical internal notes on a WhatsApp conversation — rbac (2-seg) collapses onto beneficiaries:read; can() (3-seg) gates write/read precisely"
+    },
+    {
       "key": "beneficiary:billing:read",
       "rbac": { "resource": "invoices", "action": "read" },
       "note": "seed 'billing' = live 'invoices' (also 'finance' exists — invoices is the per-beneficiary billing resource)"

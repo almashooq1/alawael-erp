@@ -64,6 +64,7 @@ const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBenefic
 const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
 const whatsappRehabOutcomes = require('../services/whatsapp/whatsappRehabOutcomes.service');
 const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
+const { can } = require('../authorization/can');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const socketEmitter = require('../utils/socketEmitter');
@@ -144,10 +145,37 @@ function getConversationModel() {
   }
 }
 
+function getUserModel() {
+  try {
+    return mongoose.model('User');
+  } catch {
+    return require('../models/User');
+  }
+}
+
 function validate(fields, body) {
   const missing = fields.filter(f => !body[f]);
   if (missing.length)
     throw Object.assign(new Error(`Missing: ${missing.join(', ')}`), { statusCode: 400 });
+}
+
+// W1509 — least-privilege gate for clinical WhatsApp surfaces. Returns true (and
+// sends 403) when the caller's archetype is denied `permKey`; clinical staff
+// (THERAPIST/UNIT_SUPERVISOR/BRANCH_MANAGER/EXECUTIVE_DIRECTOR/AUDITOR) are
+// granted, reception/finance/HR/HQ-admin are denied — mirrors the existing
+// beneficiary:clinical:read policy.
+function denyIfNoPerm(req, res, permKey) {
+  const verdict = can(req.user, permKey);
+  if (!verdict.allow) {
+    res.status(403).json({
+      success: false,
+      code: 'FORBIDDEN',
+      message: 'ليس لديك صلاحية الاطّلاع على هذا المحتوى السريري',
+      reason: verdict.reason,
+    });
+    return true;
+  }
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -257,6 +285,28 @@ router.get(
   })
 );
 
+/**
+ * GET /assignable-staff — branch-scoped roster of active staff a conversation
+ * can be transferred/assigned to (W1505). Powers the Inbox transfer picker.
+ * Authenticate-only (any staff member can see their branch's colleagues);
+ * returns ONLY the minimal display fields — never password / MFA / tokens.
+ */
+router.get(
+  '/assignable-staff',
+  asyncHandler(async (req, res) => {
+    const User = getUserModel();
+    const branchScope = effectiveBranchScope(req);
+    const filter = { isActive: true };
+    if (branchScope) filter.branchId = branchScope;
+    const data = await User.find(filter)
+      .select('_id fullName role') // safe projection — no sensitive fields
+      .sort({ fullName: 1 })
+      .limit(500)
+      .lean();
+    res.json({ success: true, data, total: data.length });
+  })
+);
+
 /** GET /conversations/:id */
 router.get(
   '/conversations/:id',
@@ -288,6 +338,12 @@ router.get(
       conv.liveInsight = insight;
     }
 
+    // W1509: hide internal clinical notes from non-clinical staff
+    // (reception/finance/HR/HQ-admin). The thread + ops state stay visible.
+    if (conv.internalNotes && conv.internalNotes.length && !can(req.user, 'whatsapp:notes:internal').allow) {
+      conv.internalNotes = [];
+    }
+
     res.json({ success: true, data: conv });
   })
 );
@@ -305,6 +361,8 @@ router.get(
 router.get(
   '/conversations/:id/context',
   asyncHandler(async (req, res) => {
+    // W1509: clinical context is clinical-staff-only (least privilege).
+    if (denyIfNoPerm(req, res, 'whatsapp:beneficiary:context')) return;
     const Conversation = getConversationModel();
     const conv = await Conversation.findOne(
       Conversation.byIdScopedFilter(req.params.id, effectiveBranchScope(req))
@@ -417,6 +475,8 @@ router.post(
 router.post(
   '/conversations/:id/notes',
   asyncHandler(async (req, res) => {
+    // W1509: internal clinical notes are clinical-staff-only.
+    if (denyIfNoPerm(req, res, 'whatsapp:notes:internal')) return;
     const Conversation = getConversationModel();
     validate(['text'], req.body);
     const note = {

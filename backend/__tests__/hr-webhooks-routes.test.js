@@ -25,8 +25,11 @@ const { ROLES } = require('../config/rbac.config');
 
 let ownServer = null;
 let HrWebhookSubscription;
+let originalHrWebhookEnv;
 
 beforeAll(async () => {
+  originalHrWebhookEnv = process.env.ENABLE_HR_WEBHOOKS;
+  process.env.ENABLE_HR_WEBHOOKS = 'true';
   let uri;
   if (fs.existsSync(URI_FILE)) {
     uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
@@ -47,6 +50,11 @@ beforeAll(async () => {
 }, 60_000);
 
 afterAll(async () => {
+  if (originalHrWebhookEnv !== undefined) {
+    process.env.ENABLE_HR_WEBHOOKS = originalHrWebhookEnv;
+  } else {
+    delete process.env.ENABLE_HR_WEBHOOKS;
+  }
   try {
     await mongoose.disconnect();
   } catch {
@@ -56,6 +64,8 @@ afterAll(async () => {
 }, 60_000);
 
 beforeEach(async () => {
+  process.env.ENABLE_HR_WEBHOOKS = 'true';
+  delete process.env.HR_WEBHOOK_ALLOWED_DOMAINS;
   await HrWebhookSubscription.deleteMany({});
 });
 
@@ -108,6 +118,14 @@ describe('auth gating', () => {
     const r = await request(app).get('/webhooks/subscriptions');
     expect(r.status).toBe(200);
   });
+
+  it('503 when ENABLE_HR_WEBHOOKS is not true', async () => {
+    process.env.ENABLE_HR_WEBHOOKS = 'false';
+    const app = buildApp(managerUser);
+    const r = await request(app).get('/webhooks/subscriptions');
+    expect(r.status).toBe(503);
+    expect(r.body.error).toMatch(/disabled/);
+  });
 });
 
 // ─── POST create ───────────────────────────────────────────────
@@ -128,6 +146,43 @@ describe('POST /webhooks/subscriptions', () => {
       .post('/webhooks/subscriptions')
       .send({ name: 'x', target_url: 'not-a-url' });
     expect(r.status).toBe(400);
+  });
+
+  it('rejects SSRF target_url (private IP)', async () => {
+    const app = buildApp(managerUser);
+    const r = await request(app)
+      .post('/webhooks/subscriptions')
+      .send({ name: 'x', target_url: 'http://127.0.0.1:8080/hook' });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/private|internal|blocked/i);
+  });
+
+  it('rejects SSRF target_url (cloud metadata)', async () => {
+    const app = buildApp(managerUser);
+    const r = await request(app)
+      .post('/webhooks/subscriptions')
+      .send({ name: 'x', target_url: 'http://169.254.169.254/latest/meta-data/' });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/private|internal|blocked/i);
+  });
+
+  it('rejects target_url outside allowed domain list', async () => {
+    process.env.HR_WEBHOOK_ALLOWED_DOMAINS = 'trusted.example.com,siem.example.com';
+    const app = buildApp(managerUser);
+    const r = await request(app)
+      .post('/webhooks/subscriptions')
+      .send({ name: 'x', target_url: 'https://untrusted.test/hook' });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/not in HR_WEBHOOK_ALLOWED_DOMAINS/);
+  });
+
+  it('accepts target_url inside allowed domain list', async () => {
+    process.env.HR_WEBHOOK_ALLOWED_DOMAINS = 'trusted.example.com,siem.example.com';
+    const app = buildApp(managerUser);
+    const r = await request(app)
+      .post('/webhooks/subscriptions')
+      .send({ name: 'x', target_url: 'https://siem.example.com/hook' });
+    expect(r.status).toBe(201);
   });
 
   it('rejects short caller-supplied hmac_secret', async () => {

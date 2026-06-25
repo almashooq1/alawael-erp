@@ -51,22 +51,56 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 const { writeTierForRole } = require('../../config/hr-admin-editable-fields');
+const { validateOutboundUrlSync } = require('../../utils/urlValidator');
 
 const MIN_SECRET_LEN = 16;
 const DEFAULT_SECRET_BYTES = 32; // 64 hex chars
+const ENV_ENABLE_HR_WEBHOOKS = 'ENABLE_HR_WEBHOOKS';
+const ENV_HR_WEBHOOK_ALLOW_HTTP = 'HR_WEBHOOK_ALLOW_HTTP';
+const ENV_HR_WEBHOOK_ALLOWED_DOMAINS = 'HR_WEBHOOK_ALLOWED_DOMAINS';
 
 function generateSecret() {
   return crypto.randomBytes(DEFAULT_SECRET_BYTES).toString('hex');
 }
 
-function isValidUrl(s) {
-  if (typeof s !== 'string' || !s) return false;
-  try {
-    const u = new URL(s);
-    return u.protocol === 'http:' || u.protocol === 'https:';
-  } catch {
-    return false;
+function isHrWebhooksEnabled() {
+  return process.env[ENV_ENABLE_HR_WEBHOOKS] === 'true';
+}
+
+function isHttpAllowed() {
+  // http is permitted in non-production, or when explicitly opted-in.
+  return process.env.NODE_ENV !== 'production' || process.env[ENV_HR_WEBHOOK_ALLOW_HTTP] === 'true';
+}
+
+function getAllowedDomains() {
+  const raw = process.env[ENV_HR_WEBHOOK_ALLOWED_DOMAINS];
+  if (!raw || typeof raw !== 'string') return [];
+  return raw
+    .split(',')
+    .map(d => d.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAllowedDomain(hostname) {
+  const allowed = getAllowedDomains();
+  if (allowed.length === 0) return true;
+  const h = hostname.toLowerCase();
+  return allowed.some(domain => h === domain || h.endsWith('.' + domain));
+}
+
+function validateTargetUrl(s) {
+  if (typeof s !== 'string' || !s) return { valid: false, reason: 'target_url is required' };
+  const sync = validateOutboundUrlSync(s);
+  if (!sync.valid) return sync;
+
+  const { protocol, hostname } = sync.url;
+  if (protocol !== 'https:' && !isHttpAllowed()) {
+    return { valid: false, reason: 'Only HTTPS URLs are allowed in production' };
   }
+  if (!isAllowedDomain(hostname)) {
+    return { valid: false, reason: `Domain "${hostname}" is not in HR_WEBHOOK_ALLOWED_DOMAINS` };
+  }
+  return { valid: true, url: sync.url };
 }
 
 function toPublicView(sub) {
@@ -82,6 +116,16 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
     throw new Error('createHrWebhooksRouter: subscriptionModel is required');
   }
   const router = express.Router();
+
+  // Env gate: the HR webhook admin surface is default-OFF. Producers are also
+  // un-wired, but this gate prevents accidental exposure if the dispatcher is
+  // ever connected while ops have not explicitly enabled the feature.
+  router.use((req, res, next) => {
+    if (!isHrWebhooksEnabled()) {
+      return res.status(503).json({ error: 'HR webhooks are disabled (ENABLE_HR_WEBHOOKS)' });
+    }
+    next();
+  });
 
   function requireManager(req, res) {
     if (!req.user) {
@@ -144,8 +188,9 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
       let hmac_secret = typeof body.hmac_secret === 'string' ? body.hmac_secret : null;
 
       if (!name) return res.status(400).json({ error: 'name required' });
-      if (!isValidUrl(target_url)) {
-        return res.status(400).json({ error: 'target_url must be http(s) URL' });
+      const urlCheck = validateTargetUrl(target_url);
+      if (!urlCheck.valid) {
+        return res.status(400).json({ error: urlCheck.reason });
       }
       if (hmac_secret != null) {
         if (hmac_secret.length < MIN_SECRET_LEN) {
@@ -212,8 +257,9 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
         update.name = body.name.trim();
       }
       if (body.target_url !== undefined) {
-        if (!isValidUrl(body.target_url)) {
-          return res.status(400).json({ error: 'target_url must be http(s) URL' });
+        const urlCheck = validateTargetUrl(body.target_url);
+        if (!urlCheck.valid) {
+          return res.status(400).json({ error: urlCheck.reason });
         }
         update.target_url = body.target_url.trim();
       }

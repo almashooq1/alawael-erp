@@ -584,9 +584,8 @@ try {
 // lifecycle events in CareTimeline. Fire-and-forget: failures must not break
 // the save/delete path.
 
-DocumentSchema.pre('save', function (next) {
+DocumentSchema.pre('save', async function () {
   this.$locals.wasNew = this.isNew;
-  next();
 });
 
 DocumentSchema.post('save', async function (doc) {

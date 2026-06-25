@@ -1923,14 +1923,15 @@ on:
       - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
+      - 'backend/__tests__/whatsapp-rbac-gating-wave1509.test.js'
       - 'backend/__tests__/whatsapp-campaign-scheduler-wave1501.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/document-model-hooks-producer-wave1510.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-complaint-resolved-subscriber-wave1513.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3832,14 +3833,15 @@ on:
       - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
+      - 'backend/__tests__/whatsapp-rbac-gating-wave1509.test.js'
       - 'backend/__tests__/whatsapp-campaign-scheduler-wave1501.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-rehab-outcomes-wave1499.test.js'
       - 'backend/__tests__/whatsapp-post-session-subscriber-wave1511.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-assignable-staff-wave1505.test.js'
       - 'backend/__tests__/document-model-hooks-producer-wave1510.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-complaint-resolved-subscriber-wave1513.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

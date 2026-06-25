@@ -1022,6 +1022,8 @@ __tests__/whatsapp-contact-group-sort-wave760.test.js
 __tests__/whatsapp-contact-group-stats-wave749.test.js
 __tests__/whatsapp-contact-group-wave746.test.js
 __tests__/whatsapp-conversation-branch-isolation-wave1411.test.js
+__tests__/whatsapp-engagement-insight-behavioral-wave1526.test.js
+__tests__/whatsapp-engagement-insight-wave1526.test.js
 __tests__/whatsapp-event-bindings-route-wave737.test.js
 __tests__/whatsapp-event-bindings-wave1517.test.js
 __tests__/whatsapp-event-bindings-wave727.test.js

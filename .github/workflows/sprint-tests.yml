@@ -1945,12 +1945,14 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-complaint-resolved-subscriber-wave1513.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/whatsapp-campaign-behavioral-wave1521.test.js'
+      - 'backend/__tests__/whatsapp-guardian-resolver-wave1519.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-engagement-insight-behavioral-wave1526.test.js'
+      - 'backend/__tests__/whatsapp-engagement-insight-wave1526.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-appointment-sync-behavioral-wave1522.test.js'
       - 'backend/__tests__/whatsapp-beneficiary-context-behavioral-wave1523.test.js'
-      - 'backend/__tests__/whatsapp-guardian-resolver-wave1519.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-campaign-behavioral-wave1521.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3875,12 +3877,14 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-complaint-resolved-subscriber-wave1513.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/whatsapp-campaign-behavioral-wave1521.test.js'
+      - 'backend/__tests__/whatsapp-guardian-resolver-wave1519.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-engagement-insight-behavioral-wave1526.test.js'
+      - 'backend/__tests__/whatsapp-engagement-insight-wave1526.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-appointment-sync-behavioral-wave1522.test.js'
       - 'backend/__tests__/whatsapp-beneficiary-context-behavioral-wave1523.test.js'
-      - 'backend/__tests__/whatsapp-guardian-resolver-wave1519.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-campaign-behavioral-wave1521.test.js'
       - 'backend/__tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'

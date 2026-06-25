@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -21,17 +23,6 @@ let mongod;
 let DifferentialDiagnosis;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseDx(overrides = {}) {
   return {
@@ -76,10 +67,14 @@ describe('W1060 — confirmed differential diagnoses reach the unified-core time
     dx.confirmedAt = new Date();
     await dx.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'differential_diagnosis_confirmed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'differential_diagnosis_confirmed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -90,13 +85,13 @@ describe('W1060 — confirmed differential diagnoses reach the unified-core time
     const beneficiaryId = new mongoose.Types.ObjectId();
     await DifferentialDiagnosis.create(baseDx({ beneficiaryId, status: 'active' }));
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'differential_diagnosis_confirmed',
-      })
-    ).toBe(0);
+      },
+      0
+    );
   });
 
   it('re-saving a confirmed diagnosis does not re-fire the event', async () => {
@@ -106,21 +101,25 @@ describe('W1060 — confirmed differential diagnoses reach the unified-core time
     dx.confirmedAt = new Date();
     await dx.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'differential_diagnosis_confirmed',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'differential_diagnosis_confirmed',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await DifferentialDiagnosis.findById(dx._id);
     again.clinicianAssessment = 'reviewed';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'differential_diagnosis_confirmed',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

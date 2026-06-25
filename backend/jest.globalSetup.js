@@ -12,6 +12,7 @@ const fs = require('fs');
 
 const URI_FILE = path.join(__dirname, '.test-mongo-uri');
 const DBPATH_FILE = path.join(__dirname, '.test-mongo-dbpath');
+const MAINTENANCE_FLAG = path.join(__dirname, '..', 'maintenance.flag');
 
 module.exports = async () => {
   // Always delete any stale URI/DBPATH files from a previous interrupted run FIRST.
@@ -23,6 +24,14 @@ module.exports = async () => {
     } catch {
       // file didn't exist — that's fine
     }
+  }
+
+  // Remove any stale maintenance flag left by a previous crashed/abort run.
+  // Its presence makes the maintenance middleware return 503 globally.
+  try {
+    if (fs.existsSync(MAINTENANCE_FLAG)) fs.unlinkSync(MAINTENANCE_FLAG);
+  } catch {
+    // ignore permission errors
   }
 
   // Skip MongoMemoryServer in CI - tests use mocked mongoose

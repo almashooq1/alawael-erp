@@ -658,9 +658,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/self-advocacy-routes-wave518.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/notify-channel-email-wave519.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notify-channel-sms-wave520.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/phase-b-routes-e2e-smoke-wave521.test.js'
@@ -722,7 +719,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-grant-model-canonical-wave599.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiaries-statistics-branch-scope-wave605.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crisis-incident-aggregate-branch-scope-wave608.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -745,8 +741,6 @@ on:
       - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -797,10 +791,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/dtt-session-wave689.test.js'
-      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sensory-diet-wave691.test.js'
       - 'backend/__tests__/sensory-diet-behavioral-wave691.test.js'
@@ -1153,7 +1143,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-routes-branch-isolation-wave904.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/episodes-routes-branch-isolation-wave905.test.js'
       - 'backend/__tests__/icf-assessments-branch-isolation-wave906.test.js'
       - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -1179,7 +1168,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/morning-health-check-branch-isolation-wave924.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-create-branchid-wave926.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-inmemory-route-store.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -1506,10 +1494,6 @@ on:
       - 'backend/__tests__/hr-extensions-branch-isolation-wave1154.test.js'
       - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/golden-thread-service-behavioral-wave1156.test.js'
-      - 'backend/__tests__/golden-thread-service-wave1156.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-goal-linkage-behavioral-wave1154.test.js'
@@ -1521,10 +1505,6 @@ on:
       - 'backend/__tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
-      - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notifications-security-reports-workflow-isolation-wave1166.test.js'
@@ -1569,9 +1549,6 @@ on:
       - 'backend/__tests__/smartgoal-consolidation-wave1185.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/timing-unsafe-secret-compare-wave1181.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/unbounded-query-limit-wave1182.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/operations-health-wave1195.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -1838,9 +1815,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/go-live-checklist-doc-wave1392.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/security-compliance-audit-wave1393.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dast-workflow-wave1394.test.js'
@@ -1862,35 +1836,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/go-live-deployment-readiness-wave1404.test.js'
       - 'backend/__tests__/monitoring-infrastructure-wave1405.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-- 'backend/__tests__/access-console-wave1420.test.js'
-- 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/beneficiary-lifecycle-model-alignment-wave0.test.js'
-- 'backend/__tests__/clinical-session-path-wave1379.test.js'
-- 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
-- 'backend/__tests__/compa-ratio-lib-wave1385.test.js'
-- 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
-- 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
-- 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
-- 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
-- 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
-- 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
-- 'backend/__tests__/session-completed-bus-wave1381.test.js'
-- 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/unifiedNotifier-in-app-channel-wave0.test.js'
-- 'backend/__tests__/whatsapp-appsecret-proof-wave1425.test.js'
-- 'backend/__tests__/whatsapp-bot-backnav-wave1423.test.js'
-- 'backend/__tests__/whatsapp-bot-core-linkage-wave1408.test.js'
-- 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
-- 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
-- 'backend/__tests__/whatsapp-bot-records-wave1384.test.js'
-- 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
-- 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
-- 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
-- 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
-- 'backend/__tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/input-validation-hardening-wave1448.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -1914,9 +1859,68 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/export-branch-scope-wave1459.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/access-console-wave1420.test.js'
+      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
+      - 'backend/__tests__/dtt-session-wave689.test.js'
+      - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
+      - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
+      - 'backend/__tests__/golden-thread-service-behavioral-wave1156.test.js'
+      - 'backend/__tests__/golden-thread-service-wave1156.test.js'
+      - 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
+      - 'backend/__tests__/notify-channel-email-wave519.test.js'
+      - 'backend/__tests__/unbounded-query-limit-wave1182.test.js'
+      - 'backend/__tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js'
+      - 'backend/__tests__/whatsapp-appsecret-proof-wave1425.test.js'
+      - 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
+      - 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
+      - 'backend/__tests__/go-live-checklist-doc-wave1392.test.js'
+      - 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
+      - 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-model-alignment-wave0.test.js'
+      - 'backend/__tests__/clinical-session-path-wave1379.test.js'
+      - 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
+      - 'backend/__tests__/compa-ratio-lib-wave1385.test.js'
+      - 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
+      - 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
+      - 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
+      - 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
+      - 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
+      - 'backend/__tests__/session-completed-bus-wave1381.test.js'
+      - 'backend/__tests__/unifiedNotifier-in-app-channel-wave0.test.js'
+      - 'backend/__tests__/whatsapp-bot-backnav-wave1423.test.js'
+      - 'backend/__tests__/whatsapp-bot-core-linkage-wave1408.test.js'
+      - 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
+      - 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
+      - 'backend/__tests__/whatsapp-bot-records-wave1384.test.js'
+      - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
+      - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sessions-session-center-branch-isolation.test.js'
+      - 'backend/__tests__/document-link.service.test.js'
+      - 'backend/__tests__/document-upload.service.test.js'
+      - 'backend/__tests__/storage.service.test.js'
+      - 'backend/__tests__/sessions-analytics-branch-isolation.test.js'
       - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-mfa-tier-wave1461.test.js'
+      - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
+      - 'backend/__tests__/access-review-mfa-wave1464.test.js'
+      - 'backend/__tests__/migrate-embedded-files-to-documents.test.js'
+      - 'backend/__tests__/sessions-admin-compat-mount.test.js'
+      - 'backend/__tests__/sessions-therapist-compat-mount.test.js'
+      - 'backend/__tests__/traffic-accidents-stats-fix-wave1481.test.js'
+      - 'backend/__tests__/case-management-create-mapping-wave1482.test.js'
+      - 'backend/__tests__/enum-query-fixes-wave1486.test.js'
+      - 'backend/__tests__/check-enum-literal-queries-script.test.js'
+      - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
+      - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
+      - 'backend/__tests__/whatsapp-beneficiary-context-wave1491.test.js'
+      - 'backend/__tests__/whatsapp-internal-notes-wave1493.test.js'
+      - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
+      - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2553,9 +2557,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/self-advocacy-routes-wave518.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/notify-channel-email-wave519.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notify-channel-sms-wave520.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/phase-b-routes-e2e-smoke-wave521.test.js'
@@ -2617,7 +2618,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/access-grant-model-canonical-wave599.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiaries-statistics-branch-scope-wave605.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crisis-incident-aggregate-branch-scope-wave608.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -2640,8 +2640,6 @@ on:
       - 'backend/__tests__/careplan-branch-tenancy-wave654.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/bi-analytics-branch-scope-wave656.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/therapy-sessions-analytics-branch-scope-wave657.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/unauthenticated-routes-wave658.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -2692,10 +2690,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/arts-therapy-wave685.test.js'
       - 'backend/__tests__/arts-therapy-behavioral-wave685.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/dtt-session-wave689.test.js'
-      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sensory-diet-wave691.test.js'
       - 'backend/__tests__/sensory-diet-behavioral-wave691.test.js'
@@ -3048,7 +3042,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-routes-branch-isolation-wave904.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/episodes-routes-branch-isolation-wave905.test.js'
       - 'backend/__tests__/icf-assessments-branch-isolation-wave906.test.js'
       - 'backend/__tests__/smart-assessment-routes-branch-isolation-wave907.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3074,7 +3067,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/morning-health-check-branch-isolation-wave924.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/beneficiary-create-branchid-wave926.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-inmemory-route-store.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3401,10 +3393,6 @@ on:
       - 'backend/__tests__/hr-extensions-branch-isolation-wave1154.test.js'
       - 'backend/__tests__/hr-extensions-branch-isolation-behavioral-wave1154.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/golden-thread-service-behavioral-wave1156.test.js'
-      - 'backend/__tests__/golden-thread-service-wave1156.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/telerehab-programs-grouptherapy-branch-isolation-wave1157.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/plan-goal-linkage-behavioral-wave1154.test.js'
@@ -3416,10 +3404,6 @@ on:
       - 'backend/__tests__/nitaqat-contract-branch-isolation-behavioral-wave1159.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/core-dashboards-fieldtraining-branch-isolation-wave1160.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
-      - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notifications-security-reports-workflow-isolation-wave1166.test.js'
@@ -3464,9 +3448,6 @@ on:
       - 'backend/__tests__/smartgoal-consolidation-wave1185.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/timing-unsafe-secret-compare-wave1181.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/unbounded-query-limit-wave1182.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/operations-health-wave1195.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3733,9 +3714,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/go-live-checklist-doc-wave1392.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/security-compliance-audit-wave1393.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dast-workflow-wave1394.test.js'
@@ -3757,35 +3735,6 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/go-live-deployment-readiness-wave1404.test.js'
       - 'backend/__tests__/monitoring-infrastructure-wave1405.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-- 'backend/__tests__/access-console-wave1420.test.js'
-- 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/beneficiary-lifecycle-model-alignment-wave0.test.js'
-- 'backend/__tests__/clinical-session-path-wave1379.test.js'
-- 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
-- 'backend/__tests__/compa-ratio-lib-wave1385.test.js'
-- 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
-- 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
-- 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
-- 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
-- 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
-- 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
-- 'backend/__tests__/session-completed-bus-wave1381.test.js'
-- 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
-- 'backend/__tests__/unifiedNotifier-in-app-channel-wave0.test.js'
-- 'backend/__tests__/whatsapp-appsecret-proof-wave1425.test.js'
-- 'backend/__tests__/whatsapp-bot-backnav-wave1423.test.js'
-- 'backend/__tests__/whatsapp-bot-core-linkage-wave1408.test.js'
-- 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
-- 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
-- 'backend/__tests__/whatsapp-bot-records-wave1384.test.js'
-- 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
-- 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
-- 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
-- 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
-- 'backend/__tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/input-validation-hardening-wave1448.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3809,9 +3758,68 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/export-branch-scope-wave1459.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/access-console-wave1420.test.js'
+      - 'backend/__tests__/dtt-session-behavioral-wave689.test.js'
+      - 'backend/__tests__/dtt-session-wave689.test.js'
+      - 'backend/__tests__/golden-thread-attention-behavioral-wave1165.test.js'
+      - 'backend/__tests__/golden-thread-attention-wave1165.test.js'
+      - 'backend/__tests__/golden-thread-service-behavioral-wave1156.test.js'
+      - 'backend/__tests__/golden-thread-service-wave1156.test.js'
+      - 'backend/__tests__/nphies-claim-model-behavioral-wave1437.test.js'
+      - 'backend/__tests__/notify-channel-email-wave519.test.js'
+      - 'backend/__tests__/unbounded-query-limit-wave1182.test.js'
+      - 'backend/__tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js'
+      - 'backend/__tests__/whatsapp-appsecret-proof-wave1425.test.js'
+      - 'backend/__tests__/whatsapp-conversation-branch-isolation-wave1411.test.js'
+      - 'backend/__tests__/whatsapp-group-branch-isolation-wave1412.test.js'
+      - 'backend/__tests__/go-live-checklist-doc-wave1392.test.js'
+      - 'backend/__tests__/ai-recommendations-branch-isolation-wave1409.test.js'
+      - 'backend/__tests__/alerts-workflow-branch-isolation-wave1409.test.js'
+      - 'backend/__tests__/beneficiary-lifecycle-model-alignment-wave0.test.js'
+      - 'backend/__tests__/clinical-session-path-wave1379.test.js'
+      - 'backend/__tests__/clinical-session-ref-drift-wave1424.test.js'
+      - 'backend/__tests__/compa-ratio-lib-wave1385.test.js'
+      - 'backend/__tests__/compa-ratio-service-behavioral-wave1385.test.js'
+      - 'backend/__tests__/dead-scope-axis-read-filter-wave1408.test.js'
+      - 'backend/__tests__/job-band-mapping-behavioral-wave1385.test.js'
+      - 'backend/__tests__/pay-equity-compa-ratio-routes-wave1385.test.js'
+      - 'backend/__tests__/phantom-imports-fixes-wave1384.test.js'
+      - 'backend/__tests__/session-completed-bus-wave1381.test.js'
+      - 'backend/__tests__/unifiedNotifier-in-app-channel-wave0.test.js'
+      - 'backend/__tests__/whatsapp-bot-backnav-wave1423.test.js'
+      - 'backend/__tests__/whatsapp-bot-core-linkage-wave1408.test.js'
+      - 'backend/__tests__/whatsapp-bot-handoff-summary-wave1418.test.js'
+      - 'backend/__tests__/whatsapp-bot-nlu-wave1416.test.js'
+      - 'backend/__tests__/whatsapp-bot-records-wave1384.test.js'
+      - 'backend/__tests__/whatsapp-bot-unmatched-intents-wave1417.test.js'
+      - 'backend/__tests__/whatsapp-bot-usage-wave1419.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/sessions-session-center-branch-isolation.test.js'
+      - 'backend/__tests__/document-link.service.test.js'
+      - 'backend/__tests__/document-upload.service.test.js'
+      - 'backend/__tests__/storage.service.test.js'
+      - 'backend/__tests__/sessions-analytics-branch-isolation.test.js'
       - 'backend/__tests__/changephone-otp-limiter-wave1460.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-mfa-tier-wave1461.test.js'
+      - 'backend/__tests__/uploads-svg-xss-wave1462.test.js'
+      - 'backend/__tests__/access-review-mfa-wave1464.test.js'
+      - 'backend/__tests__/migrate-embedded-files-to-documents.test.js'
+      - 'backend/__tests__/sessions-admin-compat-mount.test.js'
+      - 'backend/__tests__/sessions-therapist-compat-mount.test.js'
+      - 'backend/__tests__/traffic-accidents-stats-fix-wave1481.test.js'
+      - 'backend/__tests__/case-management-create-mapping-wave1482.test.js'
+      - 'backend/__tests__/enum-query-fixes-wave1486.test.js'
+      - 'backend/__tests__/check-enum-literal-queries-script.test.js'
+      - 'backend/__tests__/whatsapp-inbound-fixes-wave1488.test.js'
+      - 'backend/__tests__/document-lifecycle-core-linkage-wave1498.test.js'
+      - 'backend/__tests__/whatsapp-open-status-fix-wave1488.test.js'
+      - 'backend/__tests__/whatsapp-beneficiary-context-wave1491.test.js'
+      - 'backend/__tests__/whatsapp-internal-notes-wave1493.test.js'
+      - 'backend/__tests__/whatsapp-campaigns-wave1495.test.js'
+      - 'backend/__tests__/whatsapp-appointment-sync-wave1497.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-sessions-documentation-branch-isolation-wave1409.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

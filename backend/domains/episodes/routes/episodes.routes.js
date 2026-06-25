@@ -39,6 +39,7 @@ const {
   validateAddTeamMember,
   validate,
 } = require('../validators/episodes.validator');
+const episodeCenterSvc = require('../../../services/episodeCenter.service');
 
 // ─── Service (lazy-load to avoid circular deps at startup) ───────────────────
 
@@ -95,6 +96,27 @@ router.get(
     // W1150 — effectiveBranchScope first: restricted users cannot spoof ?branchId=
     const stats = await svc().getStatistics(effectiveBranchScope(req) || req.user?.branchId);
     res.json({ success: true, data: stats });
+  })
+);
+
+/** GET /stats — alias للتوافق مع الواجهة القديمة (/api/v1/episodes/stats) */
+router.get(
+  '/stats',
+  requireDomain,
+  asyncHandler(async (req, res) => {
+    const stats = await svc().getStatistics(effectiveBranchScope(req) || req.user?.branchId);
+    res.json({ success: true, data: stats });
+  })
+);
+
+/** GET /dashboard — لوحة مركز الحلقات (توافق /api/v1/episode-center/dashboard) */
+router.get(
+  '/dashboard',
+  requireDomain,
+  asyncHandler(async (req, res) => {
+    const branchId = effectiveBranchScope(req);
+    const data = await episodeCenterSvc.getDashboard({ ...req.query, branchId });
+    res.json({ success: true, data });
   })
 );
 
@@ -197,6 +219,32 @@ router.put(
   })
 );
 
+/** PATCH /:episodeId/status — تحديث الحالة العامة (توافق /api/v1/episode-center/:id/status) */
+router.patch(
+  '/:episodeId/status',
+  requireDomain,
+  asyncHandler(async (req, res) => {
+    const actorId = req.user?._id || req.user?.id;
+    const { status, reason } = req.body;
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'status مطلوب' });
+    }
+    const data = await episodeCenterSvc.updateStatus(req.params.episodeId, status, reason, actorId);
+    res.json({ success: true, data });
+  })
+);
+
+/** DELETE /:episodeId — أرشفة الحلقة (soft delete) */
+router.delete(
+  '/:episodeId',
+  requireDomain,
+  asyncHandler(async (req, res) => {
+    const context = { userId: req.user?._id || req.user?.id };
+    await svc().delete(req.params.episodeId, context);
+    res.json({ success: true, message: 'تم أرشفة الحلقة بنجاح' });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Workflow transitions
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -206,7 +254,8 @@ router.post(
   '/:episodeId/advance-phase',
   requireDomain,
   asyncHandler(async (req, res) => {
-    const result = await svc().advancePhase(req.params.episodeId, req.user?._id);
+    const { notes } = req.body || {};
+    const result = await svc().advancePhase(req.params.episodeId, req.user?._id, notes);
     res.json({ success: true, data: result });
   })
 );

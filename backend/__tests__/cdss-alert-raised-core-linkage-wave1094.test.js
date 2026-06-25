@@ -12,6 +12,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -42,15 +44,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function alert(overrides = {}) {
   return {
     branchId: new mongoose.Types.ObjectId(),
@@ -72,7 +65,8 @@ describe('W1094 — CdssAlert → CareTimeline linkage', () => {
       alert({ beneficiaryId, branchId, severity: 'critical', alertType: 'drug_interaction' })
     );
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('cdss_alert_raised');
     expect(row.category).toBe('clinical');
@@ -87,7 +81,8 @@ describe('W1094 — CdssAlert → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CdssAlert.create(alert({ beneficiaryId, severity: 'emergency' }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('critical'); // emergency → critical
   });
@@ -96,23 +91,18 @@ describe('W1094 — CdssAlert → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CdssAlert.create(alert({ beneficiaryId, severity: 'warning' }));
 
-    await new Promise(r => setTimeout(r, 300));
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   it('does not duplicate the timeline row when the alert is acknowledged', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await CdssAlert.create(alert({ beneficiaryId, severity: 'critical' }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.status = 'acknowledged';
     doc.acknowledgedAt = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

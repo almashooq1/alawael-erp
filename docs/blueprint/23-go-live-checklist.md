@@ -68,7 +68,7 @@ Verify:
 - [ ] `curl /api/v1/webhooks/nphies` responds 405 (method not allowed) —
       route is mounted (post-deploy smoke catches this)
 - [ ] Send a sample eligibility check via `POST /api/nphies/eligibility/check`
-- [ ] First claim flow: `POST /api/admin/therapy-sessions/:id/create-claim`
+- [ ] First claim flow: `POST /api/v1/sessions/admin/:id/create-claim`
       then `POST /api/admin/nphies-claims/:id/submit`
 - [ ] Tariff seed applied: `node backend/scripts/seed-insurance-tariffs.js`
 - [ ] Insurance Tariffs admin page reachable at `/insurance-tariffs`
@@ -157,7 +157,7 @@ Critical probes (a 404 here is the gating signal):
 - `/api/admin/insurance-tariffs`
 - `/api/admin/zatca-credentials`
 - `/api/admin/nphies-claims`
-- `/api/admin/therapy-sessions`
+- `/api/v1/sessions/admin`
 
 ## 6. Schedulers in production
 

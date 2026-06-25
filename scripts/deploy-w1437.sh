@@ -15,13 +15,13 @@
 # Without --force the script aborts if the working tree is dirty.
 #
 
-set -euo pipefail
+set +H -euo pipefail
 
 # --- Configuration -----------------------------------------------------------
 DEPLOY_ROOT="${DEPLOY_ROOT:-/opt/alawael-erp}"
 MONGODB_URI="${MONGODB_URI:-${MONGO_URI:-}}"
 NODE_ENV="${NODE_ENV:-production}"
-REQUIRED_NODE_VERSION="22"
+REQUIRED_NODE_VERSION="${REQUIRED_NODE_VERSION:-22}"
 FORCE_RESET=false
 BACKUP_MAX_AGE_HOURS="${BACKUP_MAX_AGE_HOURS:-24}"
 SLACK_WEBHOOK="${SLACK_WEBHOOK:-}"

@@ -555,6 +555,10 @@ describe('W221 — scanBeneficiary() walks every measure', () => {
 // ─── Off-switch ─────────────────────────────────────────────────────
 
 describe('W221 — env off-switch', () => {
+  afterEach(() => {
+    delete process.env.MEASURE_ALERT_ENGINE;
+  });
+
   test('MEASURE_ALERT_ENGINE=off → disabled, no DB work', async () => {
     process.env.MEASURE_ALERT_ENGINE = 'off';
     const measure = await makeBerg();
@@ -573,6 +577,9 @@ describe('W221 — env off-switch', () => {
     }
     const r = await alertEngine.scanBeneficiaryMeasure(benId, measure._id);
     expect(r.disabled).toBe(true);
-    expect(await MeasureAlert.countDocuments()).toBe(0);
+    expect(r.alerts || []).toHaveLength(0);
+    expect(
+      await MeasureAlert.countDocuments({ beneficiaryId: benId, measureId: measure._id })
+    ).toBe(0);
   });
 });

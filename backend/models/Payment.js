@@ -74,7 +74,16 @@ const paymentSchema = new mongoose.Schema(
       {
         name: String,
         url: String,
+        documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
         uploadedAt: Date,
+      },
+    ],
+
+    // مراجع المستندات الموحدة
+    attachmentIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Document',
       },
     ],
 

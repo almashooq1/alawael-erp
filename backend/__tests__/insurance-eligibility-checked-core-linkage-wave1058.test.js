@@ -14,6 +14,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let InsuranceEligibilityCheck;
 let CareTimeline;
 let integrationBus;
 let seq = 0;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseCheck(overrides = {}) {
   seq += 1;
@@ -76,10 +67,14 @@ describe('W1058 — insurance eligibility checks reach the unified-core timeline
       baseCheck({ beneficiaryId, isEligible: true })
     );
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'insurance_eligibility_checked',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'insurance_eligibility_checked',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -90,10 +85,14 @@ describe('W1058 — insurance eligibility checks reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     await InsuranceEligibilityCheck.create(baseCheck({ beneficiaryId, isEligible: false }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'insurance_eligibility_checked',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'insurance_eligibility_checked',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning');
   });
@@ -102,21 +101,25 @@ describe('W1058 — insurance eligibility checks reach the unified-core timeline
     const beneficiaryId = new mongoose.Types.ObjectId();
     const c = await InsuranceEligibilityCheck.create(baseCheck({ beneficiaryId }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'insurance_eligibility_checked',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'insurance_eligibility_checked',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await InsuranceEligibilityCheck.findById(c._id);
     again.responseTimeMs = 240;
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'insurance_eligibility_checked',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

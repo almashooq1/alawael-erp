@@ -1,5 +1,5 @@
 /**
- * AdminTherapySessions — /admin/therapy-sessions page.
+ * AdminTherapySessions — /admin/therapy-sessions page (UI route); API now uses /api/v1/sessions/admin.
  *
  * Manage clinical therapy sessions: calendar view + list, create with
  * conflict detection, status transitions, check-in, recurrence.
@@ -177,7 +177,7 @@ export default function AdminTherapySessions() {
 
   const loadStats = useCallback(async () => {
     try {
-      const { data } = await api.get('/admin/therapy-sessions/stats');
+      const { data } = await api.get('/api/v1/sessions/admin/stats');
       setStats(data);
     } catch {
       setStats(null);
@@ -196,7 +196,7 @@ export default function AdminTherapySessions() {
       if (to) params.set('to', to);
       params.set('page', pagination.page);
       params.set('limit', pagination.limit);
-      const { data } = await api.get(`/admin/therapy-sessions?${params.toString()}`);
+      const { data } = await api.get(`/api/v1/sessions/admin?${params.toString()}`);
       setItems(data?.items || []);
       if (data?.pagination) setPagination(p => ({ ...p, ...data.pagination }));
     } catch (err) {
@@ -213,7 +213,7 @@ export default function AdminTherapySessions() {
       const params = new URLSearchParams();
       if (from) params.set('from', from);
       if (to) params.set('to', to);
-      const { data } = await api.get(`/admin/therapy-sessions/calendar?${params.toString()}`);
+      const { data } = await api.get(`/api/v1/sessions/admin/calendar?${params.toString()}`);
       setCalendarGrouped(data?.grouped || {});
     } catch (err) {
       setErrMsg(err?.response?.data?.message || err?.message || 'فشل التحميل');
@@ -248,7 +248,7 @@ export default function AdminTherapySessions() {
 
   const openEdit = async session => {
     try {
-      const { data } = await api.get(`/admin/therapy-sessions/${session._id}`);
+      const { data } = await api.get(`/api/v1/sessions/admin/${session._id}`);
       const s = data?.data || session;
       setForm({
         _id: s._id,
@@ -307,9 +307,9 @@ export default function AdminTherapySessions() {
         force: forceCreate,
       };
       if (editMode) {
-        await api.patch(`/admin/therapy-sessions/${form._id}`, payload);
+        await api.patch(`/api/v1/sessions/admin/${form._id}`, payload);
       } else {
-        await api.post('/admin/therapy-sessions', payload);
+        await api.post('/api/v1/sessions/admin', payload);
       }
       setDialogOpen(false);
       resetForm();
@@ -331,7 +331,7 @@ export default function AdminTherapySessions() {
 
   const doCheckIn = async session => {
     try {
-      await api.post(`/admin/therapy-sessions/${session._id}/check-in`, {});
+      await api.post(`/api/v1/sessions/admin/${session._id}/check-in`, {});
       loadStats();
       if (tab === 0) loadList();
       else loadCalendar();
@@ -344,7 +344,7 @@ export default function AdminTherapySessions() {
     const { session, newStatus, reason } = statusDialog;
     if (!session || !newStatus) return;
     try {
-      await api.post(`/admin/therapy-sessions/${session._id}/status`, {
+      await api.post(`/api/v1/sessions/admin/${session._id}/status`, {
         status: newStatus,
         reason,
       });
@@ -361,7 +361,7 @@ export default function AdminTherapySessions() {
     const reason = window.prompt('سبب الإلغاء؟', 'ظروف تشغيلية');
     if (reason === null) return;
     try {
-      await api.delete(`/admin/therapy-sessions/${session._id}`, { data: { reason } });
+      await api.delete(`/api/v1/sessions/admin/${session._id}`, { data: { reason } });
       loadStats();
       if (tab === 0) loadList();
       else loadCalendar();

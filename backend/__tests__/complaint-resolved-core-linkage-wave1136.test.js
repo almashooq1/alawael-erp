@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -47,23 +49,16 @@ function complaint(overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1136 — beneficiary-linked Complaint resolved → unified-core CareTimeline linkage', () => {
   test('records a complaint_resolved row when resolved via doc.save()', async () => {
     const doc = await Complaint.create(complaint({ status: 'in_progress' }));
-    await settle();
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
 
     doc.status = 'resolved';
     doc.advocateInvolved = true; // W465 CRPD Art. 12 invariant requirement
     doc.resolvedAt = new Date();
     await doc.save();
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId: doc.beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId: doc.beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('complaint_resolved');
@@ -77,7 +72,6 @@ describe('W1136 — beneficiary-linked Complaint resolved → unified-core CareT
 
   test('records a row when resolved via findOneAndUpdate (PUT /:id route path)', async () => {
     const doc = await Complaint.create(complaint({ status: 'under_review' }));
-    await settle();
 
     const resolvedAt = new Date();
     await Complaint.findOneAndUpdate(
@@ -85,9 +79,8 @@ describe('W1136 — beneficiary-linked Complaint resolved → unified-core CareT
       { status: 'resolved', resolvedAt, advocateInvolved: true },
       { returnDocument: 'after', runValidators: true }
     );
-    await settle();
-
-    const row = await CareTimeline.findOne({ beneficiaryId: doc.beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId: doc.beneficiaryId }, 1);
+    const row = rows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('complaint_resolved');
     expect(new Date(row.metadata.resolvedAt).getTime()).toBe(resolvedAt.getTime());
@@ -110,23 +103,18 @@ describe('W1136 — beneficiary-linked Complaint resolved → unified-core CareT
       beneficiaryId: undefined,
       branchId: undefined,
     });
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
   });
 
   test('does not double-record on a later non-status save', async () => {
     const doc = await Complaint.create(
       complaint({ status: 'resolved', advocateInvolved: true, resolvedAt: new Date() })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId: doc.beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId: doc.beneficiaryId }, 1);
 
     doc.priority = 'low';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId: doc.beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId: doc.beneficiaryId }, 1);
   });
 
   test('W465 invariant still blocks beneficiary resolution without advocate (no orphan rows)', async () => {
@@ -134,8 +122,6 @@ describe('W1136 — beneficiary-linked Complaint resolved → unified-core CareT
     doc.status = 'resolved';
     doc.advocateInvolved = false;
     await expect(doc.save()).rejects.toThrow(/advocateInvolved/);
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
   });
 });

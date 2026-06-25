@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -24,17 +26,6 @@ let mongod;
 let CommunicationAidProfile;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseProfile(overrides = {}) {
   return {
@@ -88,7 +79,11 @@ describe('W1042 — AAC communication aid activation reaches the unified-core ti
       await CommunicationAidProfile.create(baseProfile({ beneficiaryId }))
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'communication_aid_activated' });
+    const tlRows = await waitForRows(
+      { beneficiaryId, eventType: 'communication_aid_activated' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -100,8 +95,7 @@ describe('W1042 — AAC communication aid activation reaches the unified-core ti
     const beneficiaryId = new mongoose.Types.ObjectId();
     await CommunicationAidProfile.create(baseProfile({ beneficiaryId, lifecycleStatus: 'draft' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'communication_aid_activated' })).toBe(0);
+    await waitForCount({ eventType: 'communication_aid_activated' }, 0);
   });
 
   it('re-saving an already-active profile does not re-fire the event', async () => {
@@ -110,15 +104,16 @@ describe('W1042 — AAC communication aid activation reaches the unified-core ti
       await CommunicationAidProfile.create(baseProfile({ beneficiaryId }))
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'communication_aid_activated' });
+    const tlRows = await waitForRows(
+      { beneficiaryId, eventType: 'communication_aid_activated' },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await CommunicationAidProfile.findById(profile._id);
     again.receptiveLevelDescription = 'Follows 1-step instructions.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'communication_aid_activated' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'communication_aid_activated' }, 1);
   });
 });

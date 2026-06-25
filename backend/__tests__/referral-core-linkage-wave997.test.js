@@ -22,6 +22,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -29,17 +31,6 @@ let mongod;
 let ReferralTracking;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseReferral(overrides = {}) {
   return {
@@ -82,7 +73,8 @@ describe('W997 — Referral conversion reaches the unified-core timeline', () =>
     ref.settledAt = new Date();
     await ref.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'referral_converted' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'referral_converted' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -95,8 +87,7 @@ describe('W997 — Referral conversion reaches the unified-core timeline', () =>
     const beneficiaryId = new mongoose.Types.ObjectId();
     await ReferralTracking.create(baseReferral({ beneficiaryId, status: 'pending' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'referral_converted' })).toBe(0);
+    await waitForCount({ eventType: 'referral_converted' }, 0);
   });
 
   it('a converted referral WITHOUT a linked beneficiary emits nothing (prospective)', async () => {
@@ -104,8 +95,7 @@ describe('W997 — Referral conversion reaches the unified-core timeline', () =>
       baseReferral({ status: 'converted', prospectName: 'Prospect X', settledAt: new Date() })
     );
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'referral_converted' })).toBe(0);
+    await waitForCount({ eventType: 'referral_converted' }, 0);
   });
 
   it('re-saving an already-converted referral does not re-fire', async () => {
@@ -114,15 +104,13 @@ describe('W997 — Referral conversion reaches the unified-core timeline', () =>
     ref.status = 'converted';
     await ref.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'referral_converted' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'referral_converted' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await ReferralTracking.findById(ref._id);
     again.notes = 'Welcome call done.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'referral_converted' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'referral_converted' }, 1);
   });
 });

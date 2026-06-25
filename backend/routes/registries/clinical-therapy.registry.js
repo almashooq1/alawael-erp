@@ -34,6 +34,10 @@ module.exports = function registerClinicalTherapyRoutes(
   const therapistElite = safeRequire('../routes/therapistElite.routes');
 
   // Primary — all 5 feature sets reachable under /api/therapist
+  // NOTE: sessions + schedule surfaces from therapistBase are superseded by
+  // the DDD Sessions compat router at /api/v1/sessions/therapist/*. Keep the
+  // base mount for dashboard/patients/plans/cases/etc., but new callers should
+  // use the unified sessions surface.
   dualMount(app, 'therapist', therapistBase);
   dualMount(app, 'therapist', therapistExtended);
   dualMount(app, 'therapist', therapistPro);

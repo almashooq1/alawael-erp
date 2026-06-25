@@ -26,6 +26,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -33,17 +35,6 @@ let mongod;
 let WaitlistEntry;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseEntry(overrides = {}) {
   return {
@@ -86,7 +77,8 @@ describe('W996 — Waitlist enrollment reaches the unified-core timeline', () =>
     // enroll() sets status='enrolled', enrolledAt, beneficiary, then saves.
     await entry.enroll(beneficiaryId);
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'admission_enrolled' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'admission_enrolled' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -98,18 +90,14 @@ describe('W996 — Waitlist enrollment reaches the unified-core timeline', () =>
   it('a pending applicant produces NO timeline row', async () => {
     await WaitlistEntry.create(baseEntry({ status: 'pending' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({ eventType: 'admission_enrolled' });
-    expect(count).toBe(0);
+    await waitForCount({ eventType: 'admission_enrolled' }, 0);
   });
 
   it('a new-as-enrolled entry without a linked beneficiary emits nothing', async () => {
     // beneficiary stays null → producer guards and skips (no timeline target).
     await WaitlistEntry.create(baseEntry({ status: 'enrolled', enrolledAt: new Date() }));
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({ eventType: 'admission_enrolled' });
-    expect(count).toBe(0);
+    await waitForCount({ eventType: 'admission_enrolled' }, 0);
   });
 
   it('re-saving an already-enrolled entry does not re-fire', async () => {
@@ -117,15 +105,13 @@ describe('W996 — Waitlist enrollment reaches the unified-core timeline', () =>
     const entry = await WaitlistEntry.create(baseEntry({ status: 'pending' }));
     await entry.enroll(beneficiaryId);
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'admission_enrolled' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'admission_enrolled' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await WaitlistEntry.findById(entry._id);
     again.notes = 'Welcome packet handed over.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'admission_enrolled' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'admission_enrolled' }, 1);
   });
 });

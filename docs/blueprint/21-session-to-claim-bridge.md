@@ -73,10 +73,10 @@ unmapped value) gets the fallback CPT `99999` and a
 
 ## HTTP
 
-Mounted on the existing therapy-sessions admin router:
+Mounted on the unified DDD Sessions admin compat router:
 
 ```text
-POST /api/admin/therapy-sessions/:id/create-claim
+POST /api/v1/sessions/admin/:id/create-claim
 ```
 
 Body (all optional):
@@ -261,7 +261,7 @@ month-end use case: turn 100+ completed-but-unbilled sessions into
 NPHIES claim drafts in one call.
 
 ```text
-POST /api/admin/therapy-sessions/bulk-create-claims
+POST /api/v1/sessions/admin/bulk-create-claims
 body: { from: '2026-04-01', to: '2026-04-30', dryRun?, maxBatch? }
 ```
 

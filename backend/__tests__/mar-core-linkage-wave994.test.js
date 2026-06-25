@@ -29,6 +29,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -36,17 +38,6 @@ let mongod;
 let Mar;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w994-mar-core' } });
@@ -85,7 +76,8 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
       administeredByName: 'Nurse A',
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_dose_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_dose_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('info'); // administered → info
@@ -106,7 +98,8 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
       refusalReason: 'Beneficiary declined the dose.',
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_dose_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_dose_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning'); // refused → warning
     expect(tl.metadata.status).toBe('refused');
@@ -123,7 +116,8 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
       status: 'missed',
     });
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_dose_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_dose_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('warning'); // missed → warning
   });
@@ -139,12 +133,13 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
       status: 'scheduled',
     });
 
-    await new Promise(r => setTimeout(r, 200));
-    const count = await CareTimeline.countDocuments({
-      beneficiaryId,
-      eventType: 'medication_dose_recorded',
-    });
-    expect(count).toBe(0);
+    await waitForCount(
+      {
+        beneficiaryId,
+        eventType: 'medication_dose_recorded',
+      },
+      0
+    );
   });
 
   it('transitioning scheduled→administered fires exactly once', async () => {
@@ -157,10 +152,7 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
       scheduledTime: new Date(),
       status: 'scheduled',
     });
-    await new Promise(r => setTimeout(r, 100));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'medication_dose_recorded' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'medication_dose_recorded' }, 0);
 
     const reloaded = await Mar.findById(ev._id);
     reloaded.status = 'administered';
@@ -168,16 +160,14 @@ describe('W994 — Medication dose outcomes reach the unified-core timeline', ()
     reloaded.administeredByName = 'Nurse B';
     await reloaded.save();
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'medication_dose_recorded' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'medication_dose_recorded' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     // Re-saving without a status change must NOT re-fire.
     const again = await Mar.findById(ev._id);
     again.notes = 'Tolerated well.';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'medication_dose_recorded' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'medication_dose_recorded' }, 1);
   });
 });

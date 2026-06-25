@@ -17,6 +17,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -24,17 +26,6 @@ let mongod;
 let MeasurementResult;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function baseResult(overrides = {}) {
   return {
@@ -80,10 +71,14 @@ describe('W1022 — Measurement result approval reaches the unified-core timelin
     res.status = 'APPROVED';
     await res.save();
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'measurement_result_approved',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'measurement_result_approved',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('success');
@@ -96,18 +91,21 @@ describe('W1022 — Measurement result approval reaches the unified-core timelin
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MeasurementResult.create(baseResult({ beneficiaryId, status: 'DRAFT' }));
 
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ eventType: 'measurement_result_approved' })).toBe(0);
+    await waitForCount({ eventType: 'measurement_result_approved' }, 0);
   });
 
   it('a result created directly as APPROVED also fires once', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await MeasurementResult.create(baseResult({ beneficiaryId, status: 'APPROVED' }));
 
-    const tl = await waitForTimeline({
-      beneficiaryId,
-      eventType: 'measurement_result_approved',
-    });
+    const tlRows = await waitForRows(
+      {
+        beneficiaryId,
+        eventType: 'measurement_result_approved',
+      },
+      1
+    );
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(
       await CareTimeline.countDocuments({
@@ -121,17 +119,17 @@ describe('W1022 — Measurement result approval reaches the unified-core timelin
     const beneficiaryId = new mongoose.Types.ObjectId();
     const res = await MeasurementResult.create(baseResult({ beneficiaryId, status: 'APPROVED' }));
 
-    await waitForTimeline({ beneficiaryId, eventType: 'measurement_result_approved' });
+    await waitForRows({ beneficiaryId, eventType: 'measurement_result_approved' }, 1);
 
     const again = await MeasurementResult.findById(res._id);
     again.standardScore = 95;
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({
+    await waitForCount(
+      {
         beneficiaryId,
         eventType: 'measurement_result_approved',
-      })
-    ).toBe(1);
+      },
+      1
+    );
   });
 });

@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -45,10 +47,6 @@ function arvrSession(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1110 — ARVRSession completion → unified-core CareTimeline linkage', () => {
   test('records a clinical/success timeline row when a session reaches completed', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -58,15 +56,12 @@ describe('W1110 — ARVRSession completion → unified-core CareTimeline linkage
     );
 
     // Not completed yet → no row
-    await settle();
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
 
     doc.status = 'completed';
     doc.endedAt = new Date();
     await doc.save();
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('arvr_session_completed');
@@ -83,9 +78,7 @@ describe('W1110 — ARVRSession completion → unified-core CareTimeline linkage
     await ARVRSession.create(
       arvrSession(beneficiaryId, { status: 'completed', endedAt: new Date() })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     expect(rows[0].eventType).toBe('arvr_session_completed');
   });
@@ -96,9 +89,7 @@ describe('W1110 — ARVRSession completion → unified-core CareTimeline linkage
 
     doc.status = 'in_progress';
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(0);
+    await waitForCount({ beneficiaryId }, 0);
   });
 
   test('does not double-record on a later unrelated save', async () => {
@@ -106,13 +97,10 @@ describe('W1110 — ARVRSession completion → unified-core CareTimeline linkage
     const doc = await ARVRSession.create(
       arvrSession(beneficiaryId, { status: 'completed', endedAt: new Date() })
     );
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.plannedDurationMinutes = 45;
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

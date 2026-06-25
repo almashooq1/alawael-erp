@@ -660,13 +660,15 @@ All 7 pre-push gates passed locally; PR #594 CI passed including `Tests & Code Q
 - Always pair schema enum/range constraints with `runValidators: true` on `findByIdAndUpdate` / `updateOne` / generic CRUD patches.
 - Keep model PII symmetry: if one schema marks a sensitive field `select: false`, siblings storing equivalent data should do the same.
 
-## Beneficiaries DDD unification W1458 — 2026-06-23
+## Beneficiaries DDD unification W1457 — 2026-06-23
 
-Consolidated the remaining Beneficiaries admin and Episode Center surfaces under the `domains/core` DDD service and retired the legacy `/api/v1/beneficiary-core` facade. Shipped on `feat/medical-upload` as PR #601 and renumbered from W1456 → W1457 → W1458 to avoid collisions with PR #600 (W1456 NoSQL operator injection) and PR #602 (W1457 user-management privilege ceiling).
+Consolidated the remaining Beneficiaries admin and Episode Center surfaces under the `domains/core` DDD service and retired the legacy `/api/v1/beneficiary-core` facade. Shipped on `feat/medical-upload` as PR #601.
 
-### W1458 — DDD migration, facade retirement, and deep-link cleanup
+**Wave-number note:** the internal commits were renumbered from W1456 → W1457 → W1458 to avoid collisions with PR #600 (W1456 NoSQL operator injection) and PR #602 (W1457 user-management privilege ceiling). However, the squash-merge title retained `W1457`, so the merge commit on `main` is W1457. This created an unavoidable wave collision with PR #602 in the commit history; CLAUDE.md records both under W1457.
 
-**Commit:** `0304ba10d`
+### W1457 — DDD migration, facade retirement, and deep-link cleanup
+
+**Merge commit:** `0edc735b9`
 
 - `backend/domains/core/services/beneficiary.service.js`: added admin operations `listWithFilters`, `updateStatus`, `bulkAction`, `getRecent`, `getExportData`, `getAtRisk`, `getCities`, and `listEpisodeCenter`.
 - `backend/domains/core/routes/beneficiary.routes.js`: added `/api/v1/core/beneficiaries` endpoints for recent, at-risk, cities, CSV export, status patch, bulk-action, dashboard, episode-center list/profile; enhanced list with search/status/category/gender/city/age/archived filters.
@@ -687,3 +689,52 @@ All 7 pre-push gates passed locally; push used `CHECK_WAVE_SKIP=1` because the m
 - When migrating a facade to DDD, move the endpoints first, then switch each consumer, then delete the old service/route pair in the same PR to avoid half-cutover drift.
 - Keep deep-links in sync across registries, generators, and tests — a single changed route surface breaks intelligence drilldowns and care-gap actions silently.
 - After merging `origin/main` into a long-lived PR branch, re-run `check:wave-collision`; the upstream branch may have claimed the wave number you intended.
+
+## Session Center / document upload follow-up W1465 — 2026-06-23
+
+Pushed as the next commit on `feat/medical-upload` (PR #605).
+
+### W1465 — Session Center DDD unification + document-upload plumbing
+
+**Commit:** `ff518c32d`
+
+- `backend/domains/sessions/index.js`: override `mount()` so the secure
+  branch-isolated router owns `/api/(v1/v2/)sessions`; retire legacy
+  `/api/v1/therapy-sessions` and `/api/v1/session-center` registry mounts.
+- `backend/domains/sessions/routes/sessions.routes.js`: add `/stats`, `/today`,
+  `/statistics` and `/session-center/*` analytics aliases.
+- Retire remaining beneficiaries admin surface: delete
+  `backend/routes/beneficiaries.js`, `backend/tests/unit/beneficiaries.route.test.js`,
+  obsolete `__tests__` guards, and `frontend/src/services/beneficiaryService.js`.
+- Document upload/storage plumbing: add `backend/services/storage/*`,
+  `backend/services/documents/*`, `backend/middleware/document{Upload,Access}.middleware.js`,
+  `backend/integration/subscribers/*`, migration script, and route/model wiring
+  for documents across clinical/finance/HR surfaces.
+- Frontend: document hub components, `documentHubApi.js`, and session/therapy
+  callers switched to `/api/v1/sessions` via `services/ddd`.
+- Sprint gate: prune deleted test files from `sprint-tests.txt`/`sprint-tests.yml`,
+  add `sessions-session-center-branch-isolation.test.js`, and update
+  `auth-gate-mount-sweep-wave502` + `dual-mount-auth-locked` to allow
+  DDD-domain mounts for `sessions` and `episodes`.
+
+### Verified green locally
+
+- `check:sprint-paths`, `check:routes-load`, `check:gitignored-sources`,
+  `check:hook-style`, `check:phantom-writes`, `check:route-shadowing`,
+  `check:wave-collision`.
+- `frontend`, `supply-chain-management/frontend`, and `mobile` lints all zero-warning.
+- Targeted tests: `auth-gate-mount-sweep-wave502`, `dual-mount-auth-locked`,
+  `sessions-session-center-branch-isolation`, `ci-path-triggers-exist`,
+  `sprint-test-files-exist`.
+
+### Pattern recap
+
+- When a DDD domain takes over a surface, remove the registry `dualMountAuth`
+  entry and add a static test proving the domain `mount()` applies
+  `authenticate` + `requireBranchAccess`; otherwise the `dual-mount-auth-locked`
+  invariant test will rightfully fail.
+- Deleting a test file must be paired with pruning it from
+  `sprint-tests.txt` (and therefore `.github/workflows/sprint-tests.yml`);
+  otherwise `sprint-test-files-exist` and `ci-path-triggers-exist` go red.
+- Keep untracked feature files in the same commit as their consumers to avoid
+  half-merged pushes that break `require` chains in CI.

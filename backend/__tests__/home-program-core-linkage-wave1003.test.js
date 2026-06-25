@@ -16,22 +16,13 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongod;
 let FamilyHomeProgram, HomeAssignment, CareTimeline;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create({ instance: { dbName: 'w1003-homeprog' } });
@@ -78,10 +69,14 @@ describe('W1003 — home programs reach the unified-core timeline', () => {
       title: 'Daily stretching',
       startDate: new Date(),
     });
-    const assigned = await waitForTimeline({
-      beneficiaryId: ben,
-      eventType: 'home_program_assigned',
-    });
+    const assignedRows = await waitForRows(
+      {
+        beneficiaryId: ben,
+        eventType: 'home_program_assigned',
+      },
+      1
+    );
+    const assigned = assignedRows[0];
     expect(assigned).toBeTruthy();
     expect(assigned.category).toBe('clinical');
     expect(assigned.severity).toBe('info');
@@ -90,10 +85,14 @@ describe('W1003 — home programs reach the unified-core timeline', () => {
     const loaded = await FamilyHomeProgram.findById(p._id);
     loaded.status = 'COMPLETED';
     await loaded.save();
-    const completed = await waitForTimeline({
-      beneficiaryId: ben,
-      eventType: 'home_program_completed',
-    });
+    const completedRows = await waitForRows(
+      {
+        beneficiaryId: ben,
+        eventType: 'home_program_completed',
+      },
+      1
+    );
+    const completed = completedRows[0];
     expect(completed).toBeTruthy();
     expect(completed.severity).toBe('success');
   });
@@ -106,20 +105,28 @@ describe('W1003 — home programs reach the unified-core timeline', () => {
       title: 'Balance drills',
       description: 'Stand on one leg 30s x3',
     });
-    const assigned = await waitForTimeline({
-      beneficiaryId: ben,
-      eventType: 'home_program_assigned',
-    });
+    const assignedRows = await waitForRows(
+      {
+        beneficiaryId: ben,
+        eventType: 'home_program_assigned',
+      },
+      1
+    );
+    const assigned = assignedRows[0];
     expect(assigned).toBeTruthy();
     expect(assigned.metadata.programType).toBe('assignment');
 
     const loaded = await HomeAssignment.findById(a._id);
     loaded.status = 'COMPLETED';
     await loaded.save();
-    const completed = await waitForTimeline({
-      beneficiaryId: ben,
-      eventType: 'home_program_completed',
-    });
+    const completedRows = await waitForRows(
+      {
+        beneficiaryId: ben,
+        eventType: 'home_program_completed',
+      },
+      1
+    );
+    const completed = completedRows[0];
     expect(completed).toBeTruthy();
     expect(completed.severity).toBe('success');
   });
@@ -132,11 +139,10 @@ describe('W1003 — home programs reach the unified-core timeline', () => {
       title: 'x',
       description: 'y',
     });
-    await waitForTimeline({ beneficiaryId: ben, eventType: 'home_program_assigned' });
+    await waitForRows({ beneficiaryId: ben, eventType: 'home_program_assigned' }, 1);
     const loaded = await HomeAssignment.findById(a._id);
     loaded.videoUrl = 'http://example/v';
     await loaded.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(await CareTimeline.countDocuments({ beneficiaryId: ben })).toBe(1);
+    await waitForCount({ beneficiaryId: ben }, 1);
   });
 });

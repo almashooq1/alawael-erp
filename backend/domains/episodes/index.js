@@ -126,7 +126,7 @@ class EpisodeService extends BaseService {
     return this.repository.findByPhase(phase, branchId);
   }
 
-  async advancePhase(episodeId, userId) {
+  async advancePhase(episodeId, userId, notes) {
     const episode = await this.repository.model.findById(episodeId);
     if (!episode) {
       const error = new Error('الحلقة العلاجية غير موجودة');
@@ -134,7 +134,7 @@ class EpisodeService extends BaseService {
       throw error;
     }
     const fromPhase = episode.currentPhase;
-    const result = await episode.advancePhase(userId);
+    const result = await episode.advancePhase(userId, notes);
     this._invalidateCache();
     // W379: emit canonical contract event (was ad-hoc 'phaseAdvanced' pre-W379).
     // Envelope per EPISODE_EVENTS.PHASE_TRANSITIONED.
@@ -250,6 +250,32 @@ class EpisodesDomain extends BaseDomainModule {
     });
 
     await super.initialize();
+  }
+
+  /**
+   * Override the default domain mount so the secure branch-isolated router
+   * (`domains/episodes/routes/episodes.routes.js`) is the ONLY HTTP surface
+   * for episodes. The inline routes registered below provide the service API
+   * for tests/event subscribers but are NOT mounted directly — this prevents
+   * the un-isolated index.js routes from shadowing the secure router on
+   * /api/v1/episodes.
+   */
+  mount(app) {
+    if (!this._initialized) {
+      throw new Error(`[Domain:${this.name}] Must be initialized before mounting`);
+    }
+
+    const { authenticate } = require('../../middleware/auth');
+    const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+    const secureRouter = require('./routes/episodes.routes');
+
+    app.use(`/api/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+    app.use(`/api/v1/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+    app.use(`/api/v2/${this.name}`, authenticate, requireBranchAccess, secureRouter);
+
+    logger.info(
+      `[Domain:${this.name}] Mounted secure branch-isolated episodes router on /api/${this.name}, /api/v1/${this.name}, /api/v2/${this.name}`
+    );
   }
 
   registerRoutes(router) {
@@ -368,7 +394,8 @@ class EpisodesDomain extends BaseDomainModule {
     // تقدم المرحلة
     router.post('/:id/advance-phase', async (req, res, next) => {
       try {
-        const result = await svc.advancePhase(req.params.id, req.user?._id);
+        const { notes } = req.body || {};
+        const result = await svc.advancePhase(req.params.id, req.user?._id, notes);
         res.json({ success: true, data: result });
       } catch (e) {
         next(e);

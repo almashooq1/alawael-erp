@@ -5,6 +5,7 @@
  */
 import apiClient from './api.client';
 import logger from 'utils/logger';
+import { sessionsAPI } from './ddd';
 
 const safe =
   fn =>
@@ -83,19 +84,19 @@ export const rehabProgramService = {
 // ═══════════════════════════════════════════
 export const therapySessionService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/api/v1/therapist/sessions', { params });
+    const r = await sessionsAPI.therapist.list(params);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/api/v1/therapist/sessions', data);
+    const r = await sessionsAPI.therapist.create(data);
     return r.data;
   }),
   getSchedule: safe(async (params = {}) => {
-    const r = await apiClient.get('/api/v1/therapist/schedule', { params });
+    const r = await sessionsAPI.therapist.getSchedule(params);
     return r.data;
   }),
   createSchedule: safe(async data => {
-    const r = await apiClient.post('/api/v1/therapist/schedule', data);
+    const r = await sessionsAPI.therapist.createSchedule(data);
     return r.data;
   }),
 

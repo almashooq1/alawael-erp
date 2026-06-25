@@ -85,6 +85,7 @@ const sessionDocumentationSchema = new mongoose.Schema(
     attachments: [
       {
         type: String, // File path/URL
+        documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
         mediaType: String, // "image", "video", "audio", "document"
         description: String,
         uploadedAt: { type: Date, default: Date.now },

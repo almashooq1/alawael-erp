@@ -1,11 +1,12 @@
 /**
  * Therapy Sessions Service — خدمة الجلسات العلاجية
  *
- * Full API layer for the Sessions Management module.
- * Connects to /api/therapy-sessions endpoints with mock fallback.
+ * Compatibility adapter over the unified DDD Sessions API
+ * (/api/v1/sessions). Keeps the existing method signatures so callers
+ * in SessionsDashboard / useSessionsManagement keep working.
  */
 
-import apiClient from './api.client';
+import { sessionsAPI } from './ddd';
 import logger from 'utils/logger';
 
 // ─── Mock Fallback Data ────────────────────────────────────────────
@@ -113,6 +114,8 @@ const MOCK_STATS = {
   therapistLoad: [],
 };
 
+const unwrap = res => res?.data?.data ?? res?.data;
+
 // ─── Service ───────────────────────────────────────────────────────
 
 const therapySessionsService = {
@@ -121,11 +124,17 @@ const therapySessionsService = {
    */
   async getSessions(params = {}) {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions', { params });
-      return res?.data || res;
+      const res = await sessionsAPI.list(params);
+      const { data, total, skip = 0, limit = 20 } = res?.data ?? res ?? {};
+      const page = limit ? Math.floor(skip / limit) + 1 : 1;
+      const pages = limit ? Math.ceil(total / limit) : 1;
+      return {
+        success: true,
+        data: data ?? [],
+        pagination: { total: total ?? 0, page, limit, pages },
+      };
     } catch (err) {
       logger.warn('therapySessionsService.getSessions fallback', err?.message);
-      // Return mock structure
       const mock = MOCK_SESSIONS;
       return {
         success: true,
@@ -151,8 +160,8 @@ const therapySessionsService = {
    */
   async getSession(id) {
     try {
-      const res = await apiClient.get(`/api/v1/therapy-sessions/${id}`);
-      return res?.data || res;
+      const res = await sessionsAPI.get(id);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.getSession', err?.message);
       return MOCK_SESSIONS.find(s => s._id === id) || null;
@@ -164,8 +173,8 @@ const therapySessionsService = {
    */
   async createSession(data) {
     try {
-      const res = await apiClient.post('/api/v1/therapy-sessions', data);
-      return res?.data || res;
+      const res = await sessionsAPI.create(data);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.createSession', err?.message);
       throw err;
@@ -177,8 +186,8 @@ const therapySessionsService = {
    */
   async updateSession(id, data) {
     try {
-      const res = await apiClient.put(`/api/v1/therapy-sessions/${id}`, data);
-      return res?.data || res;
+      const res = await sessionsAPI.update(id, data);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.updateSession', err?.message);
       throw err;
@@ -190,8 +199,8 @@ const therapySessionsService = {
    */
   async deleteSession(id) {
     try {
-      const res = await apiClient.delete(`/api/v1/therapy-sessions/${id}`);
-      return res?.data || res;
+      const res = await sessionsAPI.remove(id);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.deleteSession', err?.message);
       throw err;
@@ -203,8 +212,8 @@ const therapySessionsService = {
    */
   async updateStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/api/v1/therapy-sessions/${id}/status`, { status });
-      return res?.data || res;
+      const res = await sessionsAPI.updateStatus(id, status);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.updateStatus', err?.message);
       throw err;
@@ -216,11 +225,8 @@ const therapySessionsService = {
    */
   async cancelSession(id, reason, cancelledBy = 'CENTER') {
     try {
-      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/cancel`, {
-        reason,
-        cancelledBy,
-      });
-      return res?.data || res;
+      const res = await sessionsAPI.cancel(id, { reason, cancelledBy });
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.cancelSession', err?.message);
       throw err;
@@ -230,10 +236,10 @@ const therapySessionsService = {
   /**
    * Mark attendance
    */
-  async markAttendance(id, data = {}) {
+  async markAttendance(id, _data = {}) {
     try {
-      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/attend`, data);
-      return res?.data || res;
+      const res = await sessionsAPI.attend(id);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.markAttendance', err?.message);
       throw err;
@@ -245,8 +251,8 @@ const therapySessionsService = {
    */
   async markNoShow(id, reason) {
     try {
-      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/no-show`, { reason });
-      return res?.data || res;
+      const res = await sessionsAPI.noShow(id, reason);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.markNoShow', err?.message);
       throw err;
@@ -258,12 +264,8 @@ const therapySessionsService = {
    */
   async rescheduleSession(id, date, startTime, endTime) {
     try {
-      const res = await apiClient.patch(`/api/v1/therapy-sessions/${id}/reschedule`, {
-        date,
-        startTime,
-        endTime,
-      });
-      return res?.data || res;
+      const res = await sessionsAPI.reschedule(id, { date, startTime, endTime });
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.rescheduleSession', err?.message);
       throw err;
@@ -275,8 +277,8 @@ const therapySessionsService = {
    */
   async getDocumentation(sessionId) {
     try {
-      const res = await apiClient.get(`/api/v1/therapy-sessions/${sessionId}/documentation`);
-      return res?.data || res;
+      const res = await sessionsAPI.getDocumentation(sessionId);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.getDocumentation', err?.message);
       return null;
@@ -288,8 +290,8 @@ const therapySessionsService = {
    */
   async saveDocumentation(sessionId, data) {
     try {
-      const res = await apiClient.post(`/api/v1/therapy-sessions/${sessionId}/documentation`, data);
-      return res?.data || res;
+      const res = await sessionsAPI.saveDocumentation(sessionId, data);
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.saveDocumentation', err?.message);
       throw err;
@@ -301,8 +303,27 @@ const therapySessionsService = {
    */
   async getStats() {
     try {
-      const res = await apiClient.get('/api/v1/therapy-sessions/stats');
-      return res?.data?.data || res?.data || MOCK_STATS;
+      const res = await sessionsAPI.getStats();
+      const d = unwrap(res) || {};
+      const byStatus = d.byStatus || {};
+      const total = d.total ?? 0;
+      const todaySessions = d.todaySessions ?? 0;
+      const completed = byStatus.completed ?? 0;
+      const scheduled = byStatus.scheduled ?? 0;
+      const noShow = byStatus.no_show ?? 0;
+      const cancelled = byStatus.cancelled ?? 0;
+      return {
+        todayTotal: todaySessions,
+        todayCompleted: completed,
+        todayCancelled: cancelled,
+        todayNoShow: noShow,
+        todayScheduled: scheduled,
+        total,
+        totalWeek: total,
+        completionRate: todaySessions ? Math.round((completed / todaySessions) * 100) : 0,
+        byStatus,
+        byModality: d.byModality,
+      };
     } catch (err) {
       logger.warn('therapySessionsService.getStats fallback', err?.message);
       return MOCK_STATS;
@@ -314,10 +335,9 @@ const therapySessionsService = {
    */
   async checkAvailability(therapistId, date, startTime, endTime) {
     try {
-      const res = await apiClient.get(`/api/v1/therapy-sessions/availability/${therapistId}`, {
-        params: { date, startTime, endTime },
-      });
-      return res?.data || res;
+      const res = await sessionsAPI.getAvailability(therapistId, { date, startTime, endTime });
+      const sessions = unwrap(res) || [];
+      return { available: sessions.length === 0, conflicts: sessions };
     } catch (err) {
       logger.warn('therapySessionsService.checkAvailability', err?.message);
       return { available: true };
@@ -329,10 +349,8 @@ const therapySessionsService = {
    */
   async getUpcoming(beneficiaryId, daysAhead = 30) {
     try {
-      const res = await apiClient.get(`/api/v1/therapy-sessions/upcoming/${beneficiaryId}`, {
-        params: { daysAhead },
-      });
-      return res?.data || res;
+      const res = await sessionsAPI.getUpcoming(beneficiaryId, { daysAhead });
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.getUpcoming', err?.message);
       return [];
@@ -342,15 +360,14 @@ const therapySessionsService = {
   /**
    * Bulk reschedule sessions
    */
-  async bulkReschedule(sessionIds, newDate, newStartTime, newEndTime) {
+  async bulkReschedule(sessionIds, newDate, _newStartTime, _newEndTime) {
     try {
-      const res = await apiClient.post('/api/v1/therapy-sessions/bulk-reschedule', {
+      const res = await sessionsAPI.bulkReschedule({
         sessionIds,
-        newDate,
-        newStartTime,
-        newEndTime,
+        newDates: sessionIds.map(() => newDate),
+        reason: '',
       });
-      return res?.data || res;
+      return unwrap(res);
     } catch (err) {
       logger.warn('therapySessionsService.bulkReschedule', err?.message);
       throw err;

@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let Consent;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function consent(beneficiaryId, type, overrides = {}) {
   return {
@@ -74,7 +65,8 @@ describe('W1087 — granted consents reach the unified-core timeline', () => {
       })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'consent_record_granted' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'consent_record_granted' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('administrative');
     expect(tl.severity).toBe('success');
@@ -93,27 +85,22 @@ describe('W1087 — granted consents reach the unified-core timeline', () => {
       })
     );
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'consent_record_granted' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'consent_record_granted' }, 0);
   });
 
   it('revoking an existing consent later does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const c = await Consent.create(consent(beneficiaryId, 'data_sharing'));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'consent_record_granted' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'consent_record_granted' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await Consent.findById(c._id);
     again.revokedAt = new Date();
     again.revokedReason = 'guardian withdrew';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'consent_record_granted' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'consent_record_granted' }, 1);
   });
 
   it('records grants per beneficiary independently', async () => {
@@ -122,8 +109,10 @@ describe('W1087 — granted consents reach the unified-core timeline', () => {
     await Consent.create(consent(a, 'treatment'));
     await Consent.create(consent(b, 'research'));
 
-    const tlA = await waitForTimeline({ beneficiaryId: a, eventType: 'consent_record_granted' });
-    const tlB = await waitForTimeline({ beneficiaryId: b, eventType: 'consent_record_granted' });
+    const tlARows = await waitForRows({ beneficiaryId: a, eventType: 'consent_record_granted' }, 1);
+    const tlA = tlARows[0];
+    const tlBRows = await waitForRows({ beneficiaryId: b, eventType: 'consent_record_granted' }, 1);
+    const tlB = tlBRows[0];
     expect(tlA).toBeTruthy();
     expect(tlB).toBeTruthy();
     expect(tlB.metadata.type).toBe('research');

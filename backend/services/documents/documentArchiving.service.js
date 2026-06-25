@@ -10,6 +10,9 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const Document = require('../../models/Document');
+const documentEventPublisher = require('./documentEventPublisher.service');
+const logger = require('../../utils/logger');
 
 /* ─── Archive Record Model ───────────────────────────────────── */
 const archiveRecordSchema = new mongoose.Schema(
@@ -251,6 +254,22 @@ class DocumentArchivingService extends EventEmitter {
 
     await record.save();
     this.emit('archived', { archiveId, documentId, category });
+
+    try {
+      const doc = await Document.findById(documentId)
+        .select('sourceModule entityType entityId')
+        .lean();
+      await documentEventPublisher.publish('archived', {
+        documentId,
+        sourceModule: doc?.sourceModule || 'archive',
+        entityType: doc?.entityType || null,
+        entityId: doc?.entityId || null,
+        archivedBy: userId,
+      });
+    } catch (err) {
+      logger.warn(`[DocumentArchiving] Event publish failed: ${err.message}`);
+    }
+
     return { success: true, record };
   }
 

@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -22,17 +24,6 @@ let mongod;
 let SessionAttendance;
 let CareTimeline;
 let integrationBus;
-
-async function waitForTimeline(query, { timeout = 4000, interval = 25 } = {}) {
-  const start = Date.now();
-
-  while (true) {
-    const row = await CareTimeline.findOne(query);
-    if (row) return row;
-    if (Date.now() - start > timeout) return null;
-    await new Promise(r => setTimeout(r, interval));
-  }
-}
 
 function attendance(beneficiaryId, status, overrides = {}) {
   return {
@@ -74,7 +65,8 @@ describe('W1084 — missed therapy sessions reach the unified-core timeline', ()
       attendance(beneficiaryId, 'no_show', { billable: true })
     );
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'session_attendance_missed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'session_attendance_missed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.category).toBe('clinical');
     expect(tl.severity).toBe('warning');
@@ -88,7 +80,8 @@ describe('W1084 — missed therapy sessions reach the unified-core timeline', ()
     const beneficiaryId = new mongoose.Types.ObjectId();
     await SessionAttendance.create(attendance(beneficiaryId, 'absent'));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'session_attendance_missed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'session_attendance_missed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
     expect(tl.severity).toBe('info');
     expect(tl.metadata.status).toBe('absent');
@@ -100,25 +93,20 @@ describe('W1084 — missed therapy sessions reach the unified-core timeline', ()
       attendance(beneficiaryId, 'present', { checkInTime: new Date() })
     );
 
-    await new Promise(r => setTimeout(r, 250));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'session_attendance_missed' })
-    ).toBe(0);
+    await waitForCount({ beneficiaryId, eventType: 'session_attendance_missed' }, 0);
   });
 
   it('editing an existing missed row does not re-fire the event', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const a = await SessionAttendance.create(attendance(beneficiaryId, 'no_show'));
 
-    const tl = await waitForTimeline({ beneficiaryId, eventType: 'session_attendance_missed' });
+    const tlRows = await waitForRows({ beneficiaryId, eventType: 'session_attendance_missed' }, 1);
+    const tl = tlRows[0];
     expect(tl).toBeTruthy();
 
     const again = await SessionAttendance.findById(a._id);
     again.reason = 'family travel';
     await again.save();
-    await new Promise(r => setTimeout(r, 200));
-    expect(
-      await CareTimeline.countDocuments({ beneficiaryId, eventType: 'session_attendance_missed' })
-    ).toBe(1);
+    await waitForCount({ beneficiaryId, eventType: 'session_attendance_missed' }, 1);
   });
 });

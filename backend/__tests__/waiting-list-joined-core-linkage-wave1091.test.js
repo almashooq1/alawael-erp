@@ -15,6 +15,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -45,15 +47,6 @@ afterEach(async () => {
   await CareTimeline.deleteMany({});
 });
 
-async function waitForTimeline(filter, { tries = 40, gap = 50 } = {}) {
-  for (let i = 0; i < tries; i += 1) {
-    const row = await CareTimeline.findOne(filter).lean();
-    if (row) return row;
-    await new Promise(r => setTimeout(r, gap));
-  }
-  return null;
-}
-
 function entry(overrides = {}) {
   return {
     beneficiaryId: new mongoose.Types.ObjectId(),
@@ -71,7 +64,8 @@ describe('W1091 — WaitingListEntry → CareTimeline linkage', () => {
     const branchId = new mongoose.Types.ObjectId();
     const doc = await WaitingListEntry.create(entry({ beneficiaryId, branchId }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.eventType).toBe('waiting_list_joined');
     expect(row.category).toBe('administrative');
@@ -85,7 +79,8 @@ describe('W1091 — WaitingListEntry → CareTimeline linkage', () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     await WaitingListEntry.create(entry({ beneficiaryId, priority: 1 }));
 
-    const row = await waitForTimeline({ beneficiaryId });
+    const rowRows = await waitForRows({ beneficiaryId }, 1);
+    const row = rowRows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('warning');
   });
@@ -99,23 +94,18 @@ describe('W1091 — WaitingListEntry → CareTimeline linkage', () => {
       status: 'waiting',
     });
 
-    await new Promise(r => setTimeout(r, 300));
-    const count = await CareTimeline.countDocuments({ eventType: 'waiting_list_joined' });
-    expect(count).toBe(0);
+    await waitForCount({ eventType: 'waiting_list_joined' }, 0);
   });
 
   it('does not duplicate the timeline row when the entry is later offered', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await WaitingListEntry.create(entry({ beneficiaryId }));
 
-    await waitForTimeline({ beneficiaryId });
+    await waitForRows({ beneficiaryId }, 1);
 
     doc.status = 'offered';
     doc.offeredAt = new Date();
     await doc.save();
-    await new Promise(r => setTimeout(r, 300));
-
-    const count = await CareTimeline.countDocuments({ beneficiaryId });
-    expect(count).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 });

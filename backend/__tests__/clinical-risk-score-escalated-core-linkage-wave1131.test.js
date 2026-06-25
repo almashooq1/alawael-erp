@@ -3,6 +3,8 @@
 jest.unmock('mongoose');
 jest.setTimeout(90000);
 
+const { waitForRows, waitForCount } = require('./helpers/waitForTimelineRows');
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
@@ -43,10 +45,6 @@ function score(beneficiaryId, overrides = {}) {
   };
 }
 
-async function settle() {
-  await new Promise(r => setTimeout(r, 60));
-}
-
 describe('W1131 — ClinicalRiskScore escalated → unified-core CareTimeline linkage', () => {
   test('records a critical clinical row for a new critical score', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
@@ -55,9 +53,7 @@ describe('W1131 — ClinicalRiskScore escalated → unified-core CareTimeline li
     const doc = await ClinicalRiskScore.create(
       score(beneficiaryId, { branchId, episodeId, totalScore: 82 })
     );
-    await settle();
-
-    const rows = await CareTimeline.find({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.eventType).toBe('clinical_risk_score_escalated');
@@ -81,9 +77,8 @@ describe('W1131 — ClinicalRiskScore escalated → unified-core CareTimeline li
         previousScore: 40,
       })
     );
-    await settle();
-
-    const row = await CareTimeline.findOne({ beneficiaryId }).lean();
+    const rows = await waitForRows({ beneficiaryId }, 1);
+    const row = rows[0];
     expect(row).toBeTruthy();
     expect(row.severity).toBe('error');
     expect(row.metadata.previousScore).toBe(40);
@@ -95,9 +90,7 @@ describe('W1131 — ClinicalRiskScore escalated → unified-core CareTimeline li
     await ClinicalRiskScore.create(
       score(beneficiaryId, { totalScore: 30, riskLevel: 'moderate', trend: 'new' })
     );
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
   });
 
   test('does NOT link a stable/improving high score (escalation only)', async () => {
@@ -105,22 +98,17 @@ describe('W1131 — ClinicalRiskScore escalated → unified-core CareTimeline li
     await ClinicalRiskScore.create(
       score(beneficiaryId, { totalScore: 60, riskLevel: 'high', trend: 'stable' })
     );
-    await settle();
-
-    expect(await CareTimeline.countDocuments({})).toBe(0);
+    await waitForCount({}, 0);
   });
 
   test('does not double-record on a later save', async () => {
     const beneficiaryId = new mongoose.Types.ObjectId();
     const doc = await ClinicalRiskScore.create(score(beneficiaryId));
-    await settle();
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
 
     doc.recommendationIds = [new mongoose.Types.ObjectId()];
     await doc.save();
-    await settle();
-
-    expect(await CareTimeline.countDocuments({ beneficiaryId })).toBe(1);
+    await waitForCount({ beneficiaryId }, 1);
   });
 
   test('pre-save weighted/category aggregation still runs after async-style conversion', async () => {

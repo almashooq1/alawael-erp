@@ -1000,6 +1000,7 @@ __tests__/whatsapp-bot-unmatched-intents-wave1417.test.js
 __tests__/whatsapp-bot-usage-wave1419.test.js
 __tests__/whatsapp-broadcast-preview-wave747.test.js
 __tests__/whatsapp-byid-org-scope-wave744.test.js
+__tests__/whatsapp-campaign-scheduler-wave1501.test.js
 __tests__/whatsapp-campaigns-wave1495.test.js
 __tests__/whatsapp-canonical-consolidation-wave725.test.js
 __tests__/whatsapp-contact-group-add-wave756.test.js
@@ -1026,6 +1027,7 @@ __tests__/whatsapp-internal-notes-wave1493.test.js
 __tests__/whatsapp-open-status-fix-wave1488.test.js
 __tests__/whatsapp-pending-review-sort-wave741.test.js
 __tests__/whatsapp-queue-count-filters-wave743.test.js
+__tests__/whatsapp-rehab-outcomes-wave1499.test.js
 __tests__/whatsapp-urgency-breakdown-wave745.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js
 __tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js

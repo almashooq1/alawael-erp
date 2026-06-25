@@ -62,6 +62,7 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const whatsappBeneficiaryContext = require('../services/whatsapp/whatsappBeneficiaryContext.service');
 const whatsappCampaign = require('../services/whatsapp/whatsappCampaign.service');
+const whatsappRehabOutcomes = require('../services/whatsapp/whatsappRehabOutcomes.service');
 const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -581,6 +582,23 @@ router.post(
       actorId: req.user?._id || req.user?.id || null,
     });
     res.status(201).json({ success: true, data });
+  })
+);
+
+/**
+ * POST /campaigns/run-due — launch all scheduled campaigns whose time has
+ * passed, within the caller's branch (W1501). Declared BEFORE /campaigns/:id so
+ * the literal isn't cast as an :id (route-shadowing). The env-gated cron does
+ * the same cross-branch; this is the manual / external-trigger entry point.
+ */
+router.post(
+  '/campaigns/run-due',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappCampaign.runDueCampaigns({
+      branchScope: effectiveBranchScope(req),
+      logger,
+    });
+    res.json({ success: true, data });
   })
 );
 
@@ -1147,6 +1165,24 @@ router.get(
         critical,
       },
     });
+  })
+);
+
+/**
+ * GET /analytics/rehab-outcomes — WhatsApp ↔ rehab-outcome KPIs (W1499)
+ *
+ * Read-only correlation analytics: channel adoption + no-show rate +
+ * goal-achievement rate for WhatsApp-active beneficiaries vs the rest + family
+ * NPS. Branch-isolated; best-effort (a missing collection degrades to nulls in
+ * `sources`). `?windowDays=` overrides the 90-day session window.
+ */
+router.get(
+  '/analytics/rehab-outcomes',
+  asyncHandler(async (req, res) => {
+    const data = await whatsappRehabOutcomes.buildRehabOutcomes(effectiveBranchScope(req), {
+      windowDays: req.query.windowDays,
+    });
+    res.json({ success: true, data });
   })
 );
 

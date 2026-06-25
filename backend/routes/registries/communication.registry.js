@@ -32,6 +32,7 @@ module.exports = function registerCommunicationRoutes(
   const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
   const whatsappAutomationRoutes = safeRequire('../routes/whatsapp-automation.routes');
   const whatsappInsightsRoutes = safeRequire('../routes/whatsapp-insights.routes');
+  const whatsappReminderRoutes = safeRequire('../routes/whatsapp-reminders.routes');
   // PHANTOM: const adminCommRoutes = safeRequire('../routes/admin-communications.routes');
   // PHANTOM: const adminCommEnhancedRoutes = safeRequire('../routes/admin-comm-enhanced.routes');
   // PHANTOM: const electronicDirectivesRoutes = safeRequire('../routes/electronic-directives.routes');
@@ -79,6 +80,11 @@ module.exports = function registerCommunicationRoutes(
   if (whatsappInsightsRoutes) {
     dualMount(app, 'whatsapp-insights', whatsappInsightsRoutes);
     logger.info('[Comm] WhatsApp Insights routes mounted (/api/(v1/)whatsapp-insights)');
+  }
+
+  if (whatsappReminderRoutes) {
+    dualMount(app, 'whatsapp-reminders', whatsappReminderRoutes);
+    logger.info('[Comm] WhatsApp Reminder routes mounted (/api/(v1/)whatsapp-reminders)');
   }
 
   if (whatsappAutomationRoutes) {

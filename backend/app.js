@@ -440,6 +440,16 @@ try {
   logger.warn('[WhatsappCampaign] bootstrap skipped:', err.message);
 }
 
+// W1525: deliver due WhatsApp appointment reminders (completes the dormant
+// AppointmentReminder queue). Env-gated (ENABLE_WHATSAPP_APPOINTMENT_REMINDERS);
+// off by default + consent-gated.
+try {
+  const { bootstrapWhatsappReminder } = require('./startup/whatsappReminderBootstrap');
+  bootstrapWhatsappReminder({ logger, isTestEnv });
+} catch (err) {
+  logger.warn('[WhatsappReminder] bootstrap skipped:', err.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 7.5 BENEFICIARY-360 RED-FLAG SYSTEM
 //     (registry → engine → store → routes — Commits 1–10)

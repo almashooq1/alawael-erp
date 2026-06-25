@@ -119,7 +119,9 @@ async function buildRehabOutcomes(branchScope, opts = {}) {
   const windowDays = Number(opts.windowDays) > 0 ? Number(opts.windowDays) : DEFAULT_WINDOW_DAYS;
   const nowMs = opts.now || Date.now();
   const cutoff = new Date(nowMs - windowDays * 24 * 60 * 60 * 1000);
-  const branchMatch = branchScope ? { branchId: new mongoose.Types.ObjectId(String(branchScope)) } : {};
+  const branchMatch = branchScope
+    ? { branchId: new mongoose.Types.ObjectId(String(branchScope)) }
+    : {};
   const branchPlain = branchScope ? { branchId: branchScope } : {};
 
   const Conversation = tryModel('WhatsAppConversation');
@@ -173,7 +175,11 @@ async function buildRehabOutcomes(branchScope, opts = {}) {
           Session.countDocuments(baseFilter),
           Session.countDocuments({ ...baseFilter, status: 'no_show' }),
           Session.countDocuments({ ...baseFilter, beneficiaryId: { $in: waIds } }),
-          Session.countDocuments({ ...baseFilter, status: 'no_show', beneficiaryId: { $in: waIds } }),
+          Session.countDocuments({
+            ...baseFilter,
+            status: 'no_show',
+            beneficiaryId: { $in: waIds },
+          }),
         ]);
         return noShowBlock(splitSegments({ overallTotal, overallHit, withinTotal, withinHit }));
       },
@@ -221,7 +227,10 @@ async function buildRehabOutcomes(branchScope, opts = {}) {
       'engagement',
       Conversation,
       async () => {
-        const conversations = await Conversation.countDocuments({ ...branchPlain, isDeleted: false });
+        const conversations = await Conversation.countDocuments({
+          ...branchPlain,
+          isDeleted: false,
+        });
         return { conversations, familiesEngaged: waIds.length };
       },
     ],

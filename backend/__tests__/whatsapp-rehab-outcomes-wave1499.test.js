@@ -53,17 +53,26 @@ describe('W1499 pure helpers', () => {
     expect(s.withWhatsApp).toEqual({ total: 6, hit: 1 });
     expect(s.withoutWhatsApp).toEqual({ total: 4, hit: 3 });
     // within can never exceed overall
-    const capped = svc.splitSegments({ overallTotal: 2, overallHit: 1, withinTotal: 9, withinHit: 9 });
+    const capped = svc.splitSegments({
+      overallTotal: 2,
+      overallHit: 1,
+      withinTotal: 9,
+      withinHit: 9,
+    });
     expect(capped.withWhatsApp).toEqual({ total: 2, hit: 1 });
     expect(capped.withoutWhatsApp).toEqual({ total: 0, hit: 0 });
   });
 
   test('noShowBlock / goalBlock compute rates per segment', () => {
-    const ns = svc.noShowBlock(svc.splitSegments({ overallTotal: 10, overallHit: 4, withinTotal: 6, withinHit: 1 }));
+    const ns = svc.noShowBlock(
+      svc.splitSegments({ overallTotal: 10, overallHit: 4, withinTotal: 6, withinHit: 1 })
+    );
     expect(ns.withWhatsApp).toEqual({ total: 6, noShow: 1, ratePct: 16.7 });
     expect(ns.withoutWhatsApp).toEqual({ total: 4, noShow: 3, ratePct: 75 });
 
-    const g = svc.goalBlock(svc.splitSegments({ overallTotal: 8, overallHit: 5, withinTotal: 5, withinHit: 4 }));
+    const g = svc.goalBlock(
+      svc.splitSegments({ overallTotal: 8, overallHit: 5, withinTotal: 5, withinHit: 4 })
+    );
     expect(g.withWhatsApp).toEqual({ total: 5, achieved: 4, achievedPct: 80 });
     expect(g.withoutWhatsApp).toEqual({ total: 3, achieved: 1, achievedPct: 33.3 });
   });

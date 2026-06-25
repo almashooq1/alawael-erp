@@ -212,6 +212,13 @@ const careTimelineSchema = new mongoose.Schema(
         // Communication
         'note_added',
         'document_uploaded',
+        'document_linked',
+        'document_updated',
+        'document_deleted',
+        'document_archived',
+        'document_restored',
+        'document_expiring',
+        'document_shared',
         'message_sent',
         'notification_sent',
         // AI

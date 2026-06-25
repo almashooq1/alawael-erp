@@ -171,7 +171,7 @@ const KNOWN_LIVE_ORPHAN_SUBSCRIBERS = new Set([]);
 
 // Wildcards: subscriber listens for any matching prefix. Producer-existence
 // check uses prefix-match against any concrete producer in the set.
-const WILDCARD_PATTERNS = new Set(['system.error.*']);
+const WILDCARD_PATTERNS = new Set(['system.error.*', 'documents.document.*']);
 
 describe('W392 subscriber drift guard for LIVE registry (domainEventContracts)', () => {
   describe('typo detection — pattern must resolve to a real contract', () => {

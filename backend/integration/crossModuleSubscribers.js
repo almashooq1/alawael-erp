@@ -602,6 +602,58 @@ function createSubscribers(integrationBus, moduleConnector) {
     },
   });
 
+  // ─── Documents → CareTimeline: beneficiary-linked document lifecycle ──
+  subscribers.push({
+    name: 'documents:* → caretimeline:record',
+    pattern: 'documents.document.*',
+    handler: async event => {
+      const payload = event.payload || {};
+      const { entityType, entityId, documentId, fileName, title } = payload;
+      if (entityType !== 'beneficiary' || !entityId || !documentId) return;
+
+      try {
+        const mongoose = require('mongoose');
+        const { CareTimeline } = require('../domains/timeline/models/CareTimeline');
+        const sourceEventType = event.eventType || payload.eventType || 'document.uploaded';
+        const enumMap = {
+          'document.uploaded': 'document_uploaded',
+          'document.linked': 'document_linked',
+          'document.updated': 'document_updated',
+          'document.deleted': 'document_deleted',
+          'document.archived': 'document_archived',
+          'document.restored': 'document_restored',
+          'document.expiring': 'document_expiring',
+          'document.shared': 'document_shared',
+        };
+        const timelineEventType = enumMap[sourceEventType] || 'document_uploaded';
+        const actionLabel = sourceEventType.replace('document.', '');
+        const docLabel = fileName || title || 'Document';
+
+        await CareTimeline.recordEvent({
+          beneficiaryId: new mongoose.Types.ObjectId(String(entityId)),
+          eventType: timelineEventType,
+          category: 'communication',
+          severity: 'info',
+          title: `${docLabel} ${actionLabel}`,
+          title_ar: `وثيقة ${docLabel} — ${actionLabel}`,
+          relatedEntity: {
+            type: 'Document',
+            id: new mongoose.Types.ObjectId(String(documentId)),
+            label: docLabel,
+          },
+          metadata: { sourceEventType, ...payload },
+        });
+        logger.info(
+          `[CrossModule] Document event ${sourceEventType} recorded in CareTimeline for beneficiary ${entityId}`
+        );
+      } catch (err) {
+        logger.warn(
+          `[CrossModule] Failed to record document event in CareTimeline: ${err.message}`
+        );
+      }
+    },
+  });
+
   return subscribers;
 }
 

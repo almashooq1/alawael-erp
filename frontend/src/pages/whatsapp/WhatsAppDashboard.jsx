@@ -13,7 +13,7 @@
  * @module pages/whatsapp/WhatsAppDashboard
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Box,
   Grid,
@@ -62,10 +62,15 @@ import {
   Person as PersonIcon,
   Inbox as InboxIcon,
   AutoAwesome as AutoAwesomeIcon,
+  Check as CheckIcon,
+  DoneAll as DoneAllIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import apiClient from 'services/api.client';
+import { useAuth } from 'contexts/AuthContext';
+import { useSocket } from 'contexts/SocketContext';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -134,6 +139,24 @@ function AnalyticsCard({ label, value, icon, color = 'primary', loading }) {
   );
 }
 
+// ─── Delivery status icon ───────────────────────────────────────────────────
+function DeliveryStatusIcon({ status }) {
+  const sx = { fontSize: 12, opacity: 0.8, ml: 0.25 };
+  switch (status) {
+    case 'failed':
+      return <ErrorIcon aria-label="failed" sx={{ ...sx, color: 'error.light' }} />;
+    case 'read':
+      return <DoneAllIcon aria-label="read" sx={{ ...sx, color: 'info.light' }} />;
+    case 'delivered':
+      return <DoneAllIcon aria-label="delivered" sx={sx} />;
+    case 'sent':
+    case 'accepted':
+      return <CheckIcon aria-label="sent" sx={sx} />;
+    default:
+      return null;
+  }
+}
+
 // ─── Message Bubble ──────────────────────────────────────────────────────────
 function MessageBubble({ msg }) {
   const isOut = msg.direction === 'outgoing';
@@ -183,6 +206,7 @@ function MessageBubble({ msg }) {
           <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.65rem' }}>
             {msg.timestamp ? format(new Date(msg.timestamp), 'HH:mm') : ''}
           </Typography>
+          {isOut && <DeliveryStatusIcon status={msg.deliveryStatus} />}
           {msg.isAutoReply && (
             <Tooltip title="رد تلقائي بالذكاء الاصطناعي">
               <AIIcon sx={{ fontSize: 12, opacity: 0.8 }} />
@@ -493,7 +517,69 @@ export default function WhatsAppDashboard() {
   const [statusEnabled, setStatusEnabled] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const notify = (msg, severity = 'success') => setSnackbar({ open: true, msg, severity });
+  const notify = useCallback((msg, severity = 'success') => setSnackbar({ open: true, msg, severity }), []);
+
+  // ── Document title unread badge ────────────────────────────────────────────
+  const totalUnread = useMemo(
+    () => conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0),
+    [conversations]
+  );
+
+  useEffect(() => {
+    const originalTitle = document.title;
+    const base = 'واتساب — مركز التواصل الذكي';
+    document.title = totalUnread > 0 ? `(${totalUnread}) ${base}` : base;
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [totalUnread]);
+
+  // ── Escalation sound alert (best-effort; browsers may block until user interaction)
+  const playEscalationBeep = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch {
+      // ignore audio errors
+    }
+  }, []);
+
+  // ── Browser notification for escalations when tab is hidden
+  const showEscalationNotification = useCallback(({ senderName, phone, reason }) => {
+    if (typeof Notification === 'undefined' || document.visibilityState === 'visible') return;
+    const title = '⚠️ تصعيد واتساب';
+    const body = `${senderName || phone || 'محادثة جديدة'} — ${reason || 'تحتاج مراجعة بشرية'}`;
+    const show = () => {
+      const n = new Notification(title, {
+        body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: `whatsapp-escalation-${Date.now()}`,
+      });
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+    };
+    if (Notification.permission === 'granted') {
+      show();
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') show();
+      });
+    }
+  }, []);
 
   // ── Fetch status ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -501,7 +587,7 @@ export default function WhatsAppDashboard() {
       .get('/whatsapp/status')
       .then(({ data }) => setStatusEnabled(data.data?.enabled))
       .catch(() => setStatusEnabled(false));
-  }, []);
+  }, [notify]);
 
   // ── Fetch conversations ────────────────────────────────────────────────────
   const loadConversations = useCallback(async () => {
@@ -517,7 +603,7 @@ export default function WhatsAppDashboard() {
     } finally {
       setLoadingList(false);
     }
-  }, [filterStatus, filterUrgency]);
+  }, [filterStatus, filterUrgency, notify]);
 
   useEffect(() => {
     void loadConversations();
@@ -554,7 +640,7 @@ export default function WhatsAppDashboard() {
     } finally {
       setLoadingConv(false);
     }
-  }, []);
+  }, [notify]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -562,6 +648,118 @@ export default function WhatsAppDashboard() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [selectedConv?.messages?.length]);
+
+  // ── Real-time WhatsApp socket updates ──────────────────────────────────────
+  const { currentUser } = useAuth();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket || !currentUser) return;
+
+    const branchId = currentUser.branchId || currentUser.branch;
+    const organizationId = currentUser.organizationId || currentUser.organization;
+    const scopes = {};
+    if (branchId) scopes.branchId = String(branchId);
+    if (organizationId) scopes.organizationId = String(organizationId);
+    if (!scopes.branchId && !scopes.organizationId) return;
+
+    socket.emit('whatsapp:subscribe', scopes);
+
+    const handleMessage = payload => {
+      if (!payload?.conversationId || !payload.message) return;
+      const conversationId = payload.conversationId;
+      const incoming = payload.message;
+
+      setConversations(prev => {
+        const existingIndex = prev.findIndex(c => c._id === conversationId);
+        let next;
+        if (existingIndex >= 0) {
+          const updated = { ...prev[existingIndex] };
+          updated.messages = [...(updated.messages || []), incoming];
+          updated.lastMessageAt = incoming.timestamp || new Date().toISOString();
+          updated.lastIntent = incoming.intent || updated.lastIntent;
+          updated.lastSentiment = incoming.sentiment || updated.lastSentiment;
+          updated.unreadCount = (updated.unreadCount || 0) + 1;
+          if (incoming.urgencyLevel) updated.urgencyLevel = incoming.urgencyLevel;
+          next = [updated, ...prev.slice(0, existingIndex), ...prev.slice(existingIndex + 1)];
+        } else if (payload.conversation) {
+          next = [payload.conversation, ...prev];
+        } else {
+          return prev;
+        }
+        return next;
+      });
+
+      setSelectedConv(prev => {
+        if (!prev || prev._id !== conversationId) return prev;
+        return {
+          ...prev,
+          messages: [...(prev.messages || []), incoming],
+          unreadCount: 0,
+        };
+      });
+    };
+
+    const handleStatus = payload => {
+      if (!payload?.conversationId || !payload?.providerMessageId) return;
+      const { providerMessageId, status } = payload;
+
+      const updateMessages = messages =>
+        messages?.map(m =>
+          m.providerMessageId === providerMessageId ? { ...m, deliveryStatus: status } : m
+        );
+
+      setConversations(prev =>
+        prev.map(c =>
+          c._id === payload.conversationId ? { ...c, messages: updateMessages(c.messages) } : c
+        )
+      );
+
+      setSelectedConv(prev => {
+        if (!prev || prev._id !== payload.conversationId) return prev;
+        return { ...prev, messages: updateMessages(prev.messages) };
+      });
+    };
+
+    const handleConversation = payload => {
+      if (!payload?.conversationId || !payload?.changes) return;
+      setConversations(prev =>
+        prev.map(c => (c._id === payload.conversationId ? { ...c, ...payload.changes } : c))
+      );
+      setSelectedConv(prev => {
+        if (!prev || prev._id !== payload.conversationId) return prev;
+        return { ...prev, ...payload.changes };
+      });
+    };
+
+    const handleEscalation = payload => {
+      if (!payload?.conversationId) return;
+      handleConversation({ conversationId: payload.conversationId, changes: payload.conversation });
+      notify(
+        `⚠️ محادثة واتساب مصعّدة: ${payload.conversation?.senderName || payload.conversation?.phone || ''}`,
+        'warning'
+      );
+      playEscalationBeep();
+      showEscalationNotification({
+        senderName: payload.conversation?.senderName,
+        phone: payload.conversation?.phone,
+        reason: payload.reason,
+      });
+    };
+
+    socket.on('whatsapp:message', handleMessage);
+    socket.on('whatsapp:status', handleStatus);
+    socket.on('whatsapp:conversation', handleConversation);
+    socket.on('whatsapp:escalation', handleEscalation);
+
+    return () => {
+      socket.off('whatsapp:message', handleMessage);
+      socket.off('whatsapp:status', handleStatus);
+      socket.off('whatsapp:conversation', handleConversation);
+      socket.off('whatsapp:escalation', handleEscalation);
+      socket.emit('whatsapp:unsubscribe');
+    };
+  }, [socket, currentUser, notify, playEscalationBeep, showEscalationNotification]);
 
   // ── Send message ───────────────────────────────────────────────────────────
   const sendMessage = async () => {

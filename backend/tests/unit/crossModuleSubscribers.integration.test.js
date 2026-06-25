@@ -25,9 +25,9 @@ describe('integration/crossModuleSubscribers.js', () => {
     expect(() => new vm.Script(source, { filename: 'crossModuleSubscribers.js' })).not.toThrow();
   });
 
-  test('has local dependencies (2)', () => {
+  test('has local dependencies (3)', () => {
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(2);
+    expect(locals.length).toBe(3);
   });
 
   test('has module.exports', () => {

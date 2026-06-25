@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * document-lifecycle-core-linkage-wave1487.test.js — W1487.
+ * document-lifecycle-core-linkage-wave1498.test.js — W1498.
  *
  * Runtime guard for the document-domain → unified-core wiring added in the
  * document-subscriber follow-up. The W392 / W998 drift guards prove the
@@ -45,7 +45,7 @@ function findDocumentSubscriber() {
   return subscriber;
 }
 
-describe('W1487 — Beneficiary-linked document events reach the unified-core timeline', () => {
+describe('W1498 — Beneficiary-linked document events reach the unified-core timeline', () => {
   it('document.uploaded writes a document_uploaded CareTimeline row', async () => {
     const subscriber = findDocumentSubscriber();
     const beneficiaryId = new mongoose.Types.ObjectId();

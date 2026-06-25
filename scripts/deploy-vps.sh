@@ -174,7 +174,7 @@ if $DEPLOY_BACKEND; then
   say "Tar backend (excluding node_modules, logs, .env, tests)"
   tar --exclude='node_modules' --exclude='logs' --exclude='coverage' \
       --exclude='.env*' --exclude='_archived' --exclude='__mocks__' \
-      --exclude='tests' --exclude='__tests__' \
+      --exclude='tests' --exclude='__tests__' --exclude='.jest-cache' \
       -czf "$BACKEND_TAR" -C backend .
   ok "Backend tar: $(du -h "$BACKEND_TAR" | cut -f1)"
 fi

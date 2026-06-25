@@ -44,6 +44,34 @@ function verifyLinkPassword(password, stored) {
   );
 }
 
+// ─── Unified-core producer (W1501) ─────────────────────────────────────────
+async function publishDocumentShared(documentId, share) {
+  try {
+    const Document = require('../../models/Document');
+    const eventPublisher = require('./documentEventPublisher.service');
+    const doc = await Document.findById(documentId)
+      .select('sourceModule entityType entityId fileName title')
+      .lean();
+    await eventPublisher.publish('shared', {
+      documentId: String(documentId),
+      sourceModule: doc?.sourceModule || 'documents',
+      entityType: doc?.entityType || null,
+      entityId: doc?.entityId || null,
+      fileName: doc?.fileName || doc?.title || null,
+      shareType: share.shareType,
+      sharedWith:
+        share.recipientId ||
+        share.recipientEmail ||
+        share.recipientDepartment ||
+        share.shareLink ||
+        null,
+      sharedBy: String(share.sharedBy),
+    });
+  } catch (_err) {
+    // Fire-and-forget: sharing must succeed even if event bus is unavailable.
+  }
+}
+
 // ─────────────────────────────────────────────
 // مخطط المشاركة
 // ─────────────────────────────────────────────
@@ -179,6 +207,7 @@ class DocumentSharingService {
         existing.expiresAt = data.expiresAt || existing.expiresAt;
         existing.message = data.message || existing.message;
         await existing.save();
+        await publishDocumentShared(documentId, existing);
         return { success: true, share: this._format(existing.toObject()), updated: true };
       }
 
@@ -196,6 +225,7 @@ class DocumentSharingService {
       });
 
       await share.save();
+      await publishDocumentShared(documentId, share);
       logger.info(`[Sharing] مشاركة مستند ${documentId} مع مستخدم ${data.recipientId}`);
       return { success: true, share: this._format(share.toObject()) };
     } catch (err) {
@@ -221,6 +251,7 @@ class DocumentSharingService {
       });
 
       await share.save();
+      await publishDocumentShared(documentId, share);
       return { success: true, share: this._format(share.toObject()) };
     } catch (err) {
       logger.error(`[Sharing] خطأ: ${err.message}`);
@@ -249,6 +280,7 @@ class DocumentSharingService {
       });
 
       await share.save();
+      await publishDocumentShared(documentId, share);
       logger.info(`[Sharing] إنشاء رابط عام لمستند ${documentId}`);
       return { success: true, share: this._format(share.toObject()), link: shareLink };
     } catch (err) {

@@ -1045,6 +1045,7 @@ __tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js
 __tests__/whatsapp-rehab-outcomes-wave1499.test.js
 __tests__/whatsapp-reminder-auto-enqueue-wave1527.test.js
 __tests__/whatsapp-reminder-cancel-on-cancel-wave1534.test.js
+__tests__/whatsapp-sentiment-insight-wave1538.test.js
 __tests__/whatsapp-urgency-breakdown-wave745.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js
 __tests__/whatsapp-webhook-verify-queryparse-wave1424.test.js

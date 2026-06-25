@@ -404,6 +404,23 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     }
   }
 
+  // ─── W1536: reminder confirmation/cancellation replies (env-gated, OFF) ──
+  // If the family replies to an appointment reminder with نعم/إلغاء, update the
+  // linked appointment (CONFIRMED / CANCELLED) + acknowledge. All logic lives in
+  // whatsappReminderReplyHandler; this is a single defensive call so the hot
+  // webhook path is unchanged. Any error falls through (never breaks intake).
+  if (process.env.ENABLE_WHATSAPP_REMINDER_REPLIES === 'true' && content.text) {
+    try {
+      const { handleReminderReply } = require('./whatsappReminderReplyHandler');
+      await handleReminderReply(
+        { phone: fromPhone, text: content.text, beneficiaryId },
+        { logger }
+      );
+    } catch (replyErr) {
+      logger.warn?.('[whatsapp-reminder-reply] skipped', { error: replyErr.message });
+    }
+  }
+
   // ─── Auto-reply decision ────────────────────────────────────────────────
   // The decision engine (services/whatsapp/autoReply.service.js) is pure —
   // it returns one of: template / text / escalate / none, and we dispatch

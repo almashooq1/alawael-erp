@@ -57,10 +57,34 @@ describe('W1534 cancelRemindersForAppointment (service, MMS)', () => {
     const appointment = APPT();
     const other = APPT();
     await Reminder.create([
-      { appointment, channel: 'whatsapp', type: 'reminder_24h', scheduledAt: new Date(), status: 'pending' },
-      { appointment, channel: 'whatsapp', type: 'reminder_2h', scheduledAt: new Date(), status: 'pending' },
-      { appointment, channel: 'whatsapp', type: 'reminder_24h', scheduledAt: new Date(), status: 'sent' }, // already sent — keep
-      { appointment: other, channel: 'whatsapp', type: 'reminder_24h', scheduledAt: new Date(), status: 'pending' }, // other appt — keep
+      {
+        appointment,
+        channel: 'whatsapp',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'pending',
+      },
+      {
+        appointment,
+        channel: 'whatsapp',
+        type: 'reminder_2h',
+        scheduledAt: new Date(),
+        status: 'pending',
+      },
+      {
+        appointment,
+        channel: 'whatsapp',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'sent',
+      }, // already sent — keep
+      {
+        appointment: other,
+        channel: 'whatsapp',
+        type: 'reminder_24h',
+        scheduledAt: new Date(),
+        status: 'pending',
+      }, // other appt — keep
     ]);
 
     const res = await svc.cancelRemindersForAppointment(String(appointment));
@@ -115,7 +139,9 @@ describe('W1534 in-process integration (REAL bus)', () => {
       cancelRemindersForAppointment,
     });
     try {
-      await integrationBus.publish('appointments', 'appointment.cancelled', { appointmentId: 'a7' });
+      await integrationBus.publish('appointments', 'appointment.cancelled', {
+        appointmentId: 'a7',
+      });
       await new Promise(r => setImmediate(r));
       await new Promise(r => setImmediate(r));
       expect(cancelRemindersForAppointment).toHaveBeenCalledWith('a7');

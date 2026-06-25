@@ -14,7 +14,10 @@ const path = require('path');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const svc = require('../services/whatsapp/whatsappSentimentInsight.service');
-const ROUTE_SRC = fs.readFileSync(path.join(__dirname, '../routes/whatsapp-insights.routes.js'), 'utf8');
+const ROUTE_SRC = fs.readFileSync(
+  path.join(__dirname, '../routes/whatsapp-insights.routes.js'),
+  'utf8'
+);
 
 let mongod;
 let Conversation;
@@ -109,7 +112,11 @@ describe('W1538 buildSentimentInsight', () => {
         { direction: 'incoming', sentiment: 'negative', text: 'z', timestamp: daysAgo(400) }, // out of window
       ],
     });
-    const out = await svc.buildSentimentInsight({ branchScope: String(BRANCH_A), now: NOW, windowDays: 30 });
+    const out = await svc.buildSentimentInsight({
+      branchScope: String(BRANCH_A),
+      now: NOW,
+      windowDays: 30,
+    });
     expect(out.total).toBe(0); // nothing qualifies
   });
 

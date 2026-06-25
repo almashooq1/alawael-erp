@@ -111,6 +111,18 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] WhatsApp event-binding dispatcher skipped:', waBindErr.message);
     }
 
+    // W1527: auto-enqueue WhatsApp appointment reminders on appointment.booked
+    // (makes the W1525 reminder queue self-driving). Env-gated
+    // (ENABLE_WHATSAPP_REMINDER_AUTO_ENQUEUE); off by default + idempotent.
+    try {
+      const {
+        wireWhatsappReminderAutoEnqueue,
+      } = require('../services/whatsapp/whatsappReminderEnqueueSubscriber');
+      wireWhatsappReminderAutoEnqueue(integrationBus, { logger });
+    } catch (waEnqErr) {
+      logger.warn('[Integration] WhatsApp reminder auto-enqueue skipped:', waEnqErr.message);
+    }
+
     // W387: bridge service-local EventEmitter emits (W379-W386 wires) to
     // integrationBus.publish so subscribers actually receive them. Pre-W387
     // the W379-W386 producers fired on local BaseService EventEmitter while

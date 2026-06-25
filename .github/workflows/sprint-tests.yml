@@ -1955,6 +1955,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-appointment-reminder-wave1525.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-reminder-auto-enqueue-wave1527.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -3888,6 +3890,8 @@ on:
       - 'backend/__tests__/whatsapp-appointment-reminder-behavioral-wave1525.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-appointment-reminder-wave1525.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-reminder-auto-enqueue-wave1527.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-rehab-outcomes-behavioral-wave1524.test.js'
       - 'backend/package.json'

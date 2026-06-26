@@ -1058,3 +1058,10 @@ __tests__/zatca-xml-signer.e2e.test.js
 __tests__/zkteco-device-merge-script.test.js
 __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 tests/unit/ops-alerter.test.js
+
+__tests__/disability-assessment-model-enhanced.test.js
+__tests__/individualized-rehabilitation-plan-behavioral.test.js
+__tests__/rehabilitation-kpis.test.js
+__tests__/rehabilitation-metrics-behavioral.test.js
+__tests__/rehabilitation-reports-behavioral.test.js
+__tests__/smart-assessment-engine-behavioral.test.js

@@ -100,6 +100,13 @@ const ScoringAlgorithms = {
     };
   },
 
+  sumCARS2Ratings(responses, items) {
+    if (responses.total !== undefined && responses.total !== null) {
+      return { total: Number(responses.total), itemScores: {} };
+    }
+    return ScoringAlgorithms.sumRatings(responses, items);
+  },
+
   /**
    * Binary sum (SCQ, CSI) — count of "yes" responses.
    * @param {Object} responses  { itemId: 0|1 }
@@ -367,12 +374,14 @@ class SmartAssessmentEngine {
     let raw = null;
     let domainScores = null;
     let classification = null;
+    let isValid = null;
 
     switch (measure.scoringType) {
       case 'ordinal_classification': {
         const level = responses.level ?? responses.LEVEL ?? null;
         const result = ScoringAlgorithms.ordinalClassification(level, measure.levels || []);
         classification = result.classification;
+        isValid = result.isValid;
         raw = level;
         break;
       }
@@ -413,13 +422,23 @@ class SmartAssessmentEngine {
       domainScores = pedsResult.domainScores;
     }
 
+    // Special handling: CARS2
+    if (measureKey === 'CARS2') {
+      const form = meta.form || 'ST';
+      const items = measure[`items_${form}`] || measure.items_ST || [];
+      raw = ScoringAlgorithms.sumCARS2Ratings(responses, items).total;
+    }
+
     // Interpretation
-    const interpretationArray =
-      measure.scoringType === 'ordinal_classification'
-        ? null
-        : measure.interpretation instanceof Array
-          ? measure.interpretation
-          : null;
+    let interpretationArray = null;
+    if (measure.scoringType !== 'ordinal_classification') {
+      if (measureKey === 'CARS2' && measure.interpretation) {
+        const form = meta.form || 'ST';
+        interpretationArray = measure.interpretation[form] || measure.interpretation.ST || null;
+      } else if (measure.interpretation instanceof Array) {
+        interpretationArray = measure.interpretation;
+      }
+    }
 
     const interpretation = interpretationArray ? interpretScore(raw, interpretationArray) : null;
     const tier = interpretation?.tier || classification?.level || null;
@@ -457,6 +476,7 @@ class SmartAssessmentEngine {
       recommendations,
       smartGoals,
       flags,
+      isValid,
       scoredAt: new Date().toISOString(),
     };
   }

@@ -7,7 +7,7 @@
  * بما يتوافق مع أفضل الممارسات العالمية والمعايير السعودية
  */
 
-const { v4: uuidv4 } = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
 class IndividualizedRehabilitationPlanService {
   constructor() {

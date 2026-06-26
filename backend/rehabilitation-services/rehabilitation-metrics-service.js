@@ -797,6 +797,14 @@ class RehabilitationMetricsService {
           for (const activity of domain.activities) {
             domainScore += responses[activity.name] || 0;
           }
+        } else if (domain.competencies) {
+          for (const competency of domain.competencies) {
+            domainScore += responses[competency] || 0;
+          }
+        } else if (domain.skills) {
+          for (const skill of Object.values(domain.skills)) {
+            domainScore += responses[skill.name] || 0;
+          }
         }
 
         scores[domainKey] = {

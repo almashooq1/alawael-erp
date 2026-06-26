@@ -408,10 +408,10 @@ disabilityAssessmentSchema.statics.getAssessmentStatistics = async function () {
         _id: null,
         avg_score: {
           $avg: {
-            $add: [
-              { $ifNull: ['$scales.who_disability_assessment.score', 0] },
-              { $ifNull: ['$scales.quality_of_life_score.total', 0] },
-              { $ifNull: ['$scales.barthel_index.score', 0] },
+            $avg: [
+              { $ifNull: ['$scales.who_disability_assessment.score', null] },
+              { $ifNull: ['$scales.quality_of_life_score.total', null] },
+              { $ifNull: ['$scales.barthel_index.score', null] },
             ],
           },
         },

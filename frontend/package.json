@@ -64,7 +64,7 @@
     "autoprefixer": "^10.5.0",
     "axe-core": "^4.12.1",
     "babel-jest": "^29.7.0",
-    "cypress": "^15.17.0",
+    "cypress": "^15.18.0",
     "cypress-axe": "^1.7.0",
     "eslint": "^9.26.0",
     "@eslint/js": "^9.26.0",

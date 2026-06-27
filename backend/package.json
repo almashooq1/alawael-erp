@@ -304,7 +304,7 @@
     "@routes": "routes"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.105.0",
+    "@anthropic-ai/sdk": "0.106.0",
     "@aws-sdk/client-s3": "3.1066.0",
     "@sendgrid/mail": "^8.1.6",
     "archiver": "7.0.1",

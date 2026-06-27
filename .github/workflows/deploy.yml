@@ -1,34 +1,39 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# Al-Awael ERP — Deploy to Production VPS
-# ═══════════════════════════════════════════════════════════════════════════
-# Triggered ONLY on pushes to `main`.
-# SSH into the VPS and executes the deployment script.
+#  Al-Awael ERP — Deploy to Production VPS (Docker Compose)
+#  ينشر تلقائياً عند كل push إلى main (CD)
 #
-# Required GitHub Secrets:
-#   VPS_HOST      → hostname or IP of the production server
-#   VPS_USER      → SSH username
-#   VPS_SSH_KEY   → private key (add as a Deploy Key or Repository Secret)
-#   APP_DIR       → absolute path on the server where the app lives
+#  المطلوب من GitHub Secrets:
+#    VPS_HOST      → IP أو hostname السيرفر
+#    VPS_USER      → اسم المستخدم (root أو deploy)
+#    VPS_SSH_KEY   → مفتاح SSH خاص (private key)
+#    APP_DIR       → مسار المشروع على السيرفر (افتراضي: /opt/alawael-erp)
+#
+#  قبل أول نشر، يجب إعداد .env يدوياً على السيرفر (انظر VPS_SETUP_GUIDE.md)
 # ═══════════════════════════════════════════════════════════════════════════
 
-name: Deploy
+name: 🚀 Deploy to VPS
 
 permissions:
   contents: read
 
-# ── Triggers ──────────────────────────────────────────────────────────────
+# ── Triggers ──────────────────────────────────────────────────────────
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "اكتب 'deploy' للتشغيل اليدوي"
+        required: true
+        default: ""
 
-# ── Shared Environment ──────────────────────────────────────────────────
 env:
-  NODE_VERSION: '20'
+  APP_DIR: /opt/alawael-erp
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════
-  # Deploy — SSH to VPS and run the deploy script
+  # Deploy — SSH to VPS and run Docker Compose deployment
   # ═══════════════════════════════════════════════════════════════════
   deploy:
     name: Deploy to VPS
@@ -36,46 +41,108 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout code
+      - name: Confirm manual deployment
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "❌ You must type 'deploy' to confirm manual deployment"
+            exit 1
+          fi
+
+      - name: Check out code
         uses: actions/checkout@v4
 
-      # ── SSH Deploy ───────────────────────────────────────────────
+      # ── Check required secrets ───────────────────────────────────
+      - name: Check required secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ] && echo "❌ Missing: VPS_HOST" && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ] && echo "❌ Missing: VPS_USER" && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
+          if [ "$MISSING" = "1" ]; then
+            echo ""
+            echo "⚙️  Add these secrets at:"
+            echo "   Settings → Secrets and variables → Actions → New repository secret"
+            exit 1
+          fi
+          echo "✅ All required secrets present"
+
+      # ── Setup SSH ────────────────────────────────────────────────
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "✅ SSH key configured"
+
+      # ── Deploy via SSH ───────────────────────────────────────────
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          # port: 22          # uncomment if your SSH listens on a non-standard port
-          script_stop: true   # abort on first failed command
+          # port: 22
+          script_stop: true
           script: |
-            echo "=== Al-Awael ERP Deploy — $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
-            cd ${{ secrets.APP_DIR }}
+            echo "══════════════════════════════════════════════════════════════════"
+            echo "  Al-Awael ERP — Deploy $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "  Commit: ${{ github.sha }}"
+            echo "══════════════════════════════════════════════════════════════════"
 
-            # Pull latest code
+            APP_DIR="${{ env.APP_DIR }}"
+
+            # ─── Ensure app directory exists ─────────────────────────
+            if [ ! -d "$APP_DIR" ]; then
+              echo "❌ App directory not found: $APP_DIR"
+              echo "   Clone the repo first: git clone https://github.com/almashooq1/alawael-erp.git $APP_DIR"
+              exit 1
+            fi
+            cd "$APP_DIR"
+
+            # ─── Check .env exists ───────────────────────────────────
+            if [ ! -f ".env" ]; then
+              echo "❌ .env file not found at $APP_DIR/.env"
+              echo "   Create it first: cp .env.example .env && nano .env"
+              exit 1
+            fi
+            echo "✅ .env found"
+
+            # ─── Pull latest code ────────────────────────────────────
+            echo "📥 Pulling latest code..."
             git fetch origin
             git reset --hard origin/main
+            echo "✅ Code updated to $(git rev-parse --short HEAD)"
 
-            # Install & restart (adjust to your actual deploy script)
-            # Option A: if you have a deploy script on the VPS
-            # bash scripts/deploy-vps.sh
+            # ─── Build & deploy with Docker Compose ─────────────────
+            echo "🐳 Building and deploying with Docker Compose..."
+            docker compose -f docker-compose.yml -f docker-compose.production.yml pull || true
+            docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --build --remove-orphans
 
-            # Option B: docker compose rebuild (recommended for this project)
-            docker compose -f docker-compose.production.yml pull
-            docker compose -f docker-compose.production.yml up -d --build --remove-orphans
+            # ─── Cleanup old images ──────────────────────────────────
+            echo "🧹 Cleaning up old Docker images..."
+            docker image prune -af --filter "until=168h" || true
 
-            # Prune old images to keep disk space healthy
-            docker image prune -af --filter "until=168h"
+            echo "✅ Deploy completed"
 
-            echo "=== Deploy completed ==="
-
-      # ── Optional: Smoke test after deploy ──────────────────────
+      # ── Smoke test ───────────────────────────────────────────────
       - name: Smoke test /health endpoint
         run: |
-          echo "Waiting 20s for containers to warm up..."
-          sleep 20
-          curl -fsS --max-time 30 \
-            "http://${{ secrets.VPS_HOST }}:3001/health" \
-            || (echo "Health check failed!" && exit 1)
-        # Note: if your health endpoint is behind HTTPS or a different port,
-        # adjust the URL above accordingly.
+          echo "⏳ Waiting 30s for containers to warm up..."
+          sleep 30
+
+          MAX_RETRIES=5
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "🩺 Health check attempt $i/$MAX_RETRIES..."
+            HEALTH=$(curl -fsS --max-time 10 "http://${{ secrets.VPS_HOST }}:3001/health" 2>/dev/null || echo "")
+            if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
+              echo "✅ Health check PASSED: $HEALTH"
+              exit 0
+            fi
+            echo "⚠️  Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1

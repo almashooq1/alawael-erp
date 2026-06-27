@@ -1,0 +1,260 @@
+version: "3.9"
+
+###############################################################################
+# Al-Awael ERP — Docker Compose المبسّط (Streamlined)
+# ═══════════════════════════════════════════════════════════════════════════
+# أُزيلت الخدمات غير المستخدمة فعلياً في الكود:
+#   • Elasticsearch + Kibana — لا توجد إشارات لها في backend
+#   • PostgreSQL — غير مستخدم (MongoDB فقط)
+#   • خدمات Phase 5 Microservices — ليست لها Dockerfiles أو build contexts
+#
+# الخدمات المتبقية: الأساسية + المراقبة + أدوات التطوير
+###############################################################################
+
+# ─── Shared Configuration ─────────────────────────────────────────────────────
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-backend-env: &backend-env
+  MONGODB_URI: mongodb://mongodb:27017/alawael
+  REDIS_ENABLED: "true"
+  REDIS_URL: redis://redis:6379
+  NODE_ENV: production
+  PORT: "3001"
+  STORAGE_PROVIDER: local
+  # إزالة: ELASTICSEARCH_URL, KIBANA_URL, MINIO_ENDPOINT
+  # إضافة: سجل البيئة المطلوبة فقط
+
+# ─── Core Services (مطلوبة دائماً) ────────────────────────────────────────────
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: alawael-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ./backend/scripts/init-mongodb.js:/docker-entrypoint-initdb.d/init-mongodb.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-alawael}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-alawael123}
+      MONGO_INITDB_DATABASE: alawael
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: alawael-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging: *default-logging
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: alawael-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      <<: *backend-env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: alawael-frontend
+    restart: unless-stopped
+    ports:
+      - "3004:80"
+    environment:
+      - API_BASE_URL=http://backend:3001
+    depends_on:
+      - backend
+    logging: *default-logging
+
+  nginx:
+    image: nginx:alpine
+    container_name: alawael-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    logging: *default-logging
+
+# ─── Monitoring (profile: monitoring) ───────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alawael-prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alawael-grafana
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
+    ports:
+      - "3060:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    depends_on:
+      - prometheus
+    logging: *default-logging
+
+  loki:
+    image: grafana/loki:latest
+    container_name: alawael-loki
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    logging: *default-logging
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alawael-alertmanager
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    logging: *default-logging
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: alawael-jaeger
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    logging: *default-logging
+
+# ─── Dev Tools (profile: dev) ─────────────────────────────────────────────────
+  mongo-express:
+    image: mongo-express:latest
+    container_name: alawael-mongo-express
+    restart: unless-stopped
+    profiles:
+      - dev
+      - all
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://alawael:alawael123@mongodb:27017/alawael
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER:-admin}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-admin}
+    depends_on:
+      - mongodb
+    logging: *default-logging
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: alawael-mailhog
+    restart: unless-stopped
+    profiles:
+      - dev
+      - all
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    logging: *default-logging
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: alawael-redis-commander
+    restart: unless-stopped
+    profiles:
+      - dev
+      - all
+    ports:
+      - "8082:8082"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    logging: *default-logging
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  mongodb-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  # إزالة: elasticsearch-data
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  default:
+    name: alawael-network
+    driver: bridge

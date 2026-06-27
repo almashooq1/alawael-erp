@@ -65,24 +65,24 @@ function extractFieldEnums(src) {
   for (const field of FIELDS) {
     const re = new RegExp(
       `\\b${field}\\s*:\\s*\\{[\\s\\S]{0,250}?enum\\s*:\\s*(\\[[\\s\\S]{0,400}?\\]|[A-Z_][A-Z0-9_]*)`,
-      'g',
+      'g'
     );
     let m;
     while ((m = re.exec(src))) {
       const raw = m[1];
       let vals = [];
       if (raw.startsWith('[')) {
-        vals = [...raw.matchAll(/'([^']+)'|"([^"]+)"/g)].map((x) => x[1] ?? x[2]);
+        vals = [...raw.matchAll(/'([^']+)'|"([^"]+)"/g)].map(x => x[1] ?? x[2]);
       } else {
         const cre = new RegExp(
-          `(?:const|var|let)\\s+${raw}\\s*=\\s*(?:Object\\.freeze\\()?\\s*\\[([\\s\\S]{0,500}?)\\]`,
+          `(?:const|var|let)\\s+${raw}\\s*=\\s*(?:Object\\.freeze\\()?\\s*\\[([\\s\\S]{0,500}?)\\]`
         );
         const cm = cre.exec(src);
-        if (cm) vals = [...cm[1].matchAll(/'([^']+)'|"([^"]+)"/g)].map((x) => x[1] ?? x[2]);
+        if (cm) vals = [...cm[1].matchAll(/'([^']+)'|"([^"]+)"/g)].map(x => x[1] ?? x[2]);
       }
       if (vals.length) {
         perField[field] = perField[field] || new Set();
-        vals.forEach((v) => perField[field].add(v));
+        vals.forEach(v => perField[field].add(v));
       }
     }
   }
@@ -111,18 +111,18 @@ function scanRoutes(routesDir, { pathEnums, nameEnums }, rootForRel) {
     const src = fs.readFileSync(rf, 'utf8');
     const recv = {};
     for (const m of src.matchAll(
-      /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\([^)]*models\/([A-Za-z0-9_./-]+)['"]\)/g,
+      /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\([^)]*models\/([A-Za-z0-9_./-]+)['"]\)/g
     )) {
       const relKey = m[2].replace(/\\/g, '/').replace(/\.js$/, '');
       if (pathEnums[relKey]) recv[m[1]] = pathEnums[relKey];
     }
     for (const m of src.matchAll(
-      /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:mongoose\.model|safeModel|safeRequire)\(\s*['"]([^'"]+)['"]/g,
+      /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:mongoose\.model|safeModel|safeRequire)\(\s*['"]([^'"]+)['"]/g
     )) {
       if (nameEnums[m[2]]) recv[m[1]] = nameEnums[m[2]];
     }
     for (const m of src.matchAll(
-      /([A-Za-z_$][\w$]*)\.(?:countDocuments|find|findOne|updateMany|updateOne|deleteMany)\(\s*\{([^{}]{0,300}?)\}/g,
+      /([A-Za-z_$][\w$]*)\.(?:countDocuments|find|findOne|updateMany|updateOne|deleteMany)\(\s*\{([^{}]{0,300}?)\}/g
     )) {
       const enums = recv[m[1]];
       if (!enums) continue;
@@ -158,15 +158,21 @@ if (require.main === module) {
   const root = path.resolve(__dirname, '..');
   const { modelsIndexed, findings } = audit(root);
   if (json) {
-    process.stdout.write(JSON.stringify({ modelsIndexed, count: findings.length, findings }, null, 2) + '\n');
+    process.stdout.write(
+      JSON.stringify({ modelsIndexed, count: findings.length, findings }, null, 2) + '\n'
+    );
   } else if (!findings.length) {
     console.log(`check-enum-literal-queries — models indexed: ${modelsIndexed}`);
     console.log('  ✓ no enum-literal query mismatches detected (W1481 class clean).');
   } else {
     console.log(`check-enum-literal-queries — models indexed: ${modelsIndexed}`);
-    console.log(`  ✗ ${findings.length} enum-literal query mismatch(es) (query silently matches 0 docs):`);
+    console.log(
+      `  ✗ ${findings.length} enum-literal query mismatch(es) (query silently matches 0 docs):`
+    );
     for (const f of findings) {
-      console.log(`    ${f.file}:${f.line}  ${f.receiver}.{${f.field}:'${f.value}'} — enum=[${f.enum.join(',')}]`);
+      console.log(
+        `    ${f.file}:${f.line}  ${f.receiver}.{${f.field}:'${f.value}'} — enum=[${f.enum.join(',')}]`
+      );
     }
   }
   process.exit(findings.length ? 1 : 0);

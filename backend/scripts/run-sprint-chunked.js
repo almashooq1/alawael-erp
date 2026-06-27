@@ -182,7 +182,9 @@ async function main() {
   }
 
   console.log('\n===== run-sprint-chunked summary =====');
-  console.log(`chunks run : ${results.length}/${chunks.length}${stopped ? ' (stopped early)' : ''}`);
+  console.log(
+    `chunks run : ${results.length}/${chunks.length}${stopped ? ' (stopped early)' : ''}`
+  );
   console.log(`chunks ok  : ${results.filter(r => r.ok).length}`);
   console.log(`chunks fail: ${results.filter(r => !r.ok).length}`);
   for (const r of results) {

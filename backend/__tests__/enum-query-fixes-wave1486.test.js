@@ -19,8 +19,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const facilities = fs.readFileSync(path.join(__dirname, '..', 'routes', 'facilities.routes.js'), 'utf8');
-const warehouse = fs.readFileSync(path.join(__dirname, '..', 'routes', 'warehouse.routes.js'), 'utf8');
+const facilities = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'facilities.routes.js'),
+  'utf8'
+);
+const warehouse = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'warehouse.routes.js'),
+  'utf8'
+);
 const roomModel = fs.readFileSync(path.join(__dirname, '..', 'models', 'Room.js'), 'utf8');
 
 describe('W1486 enum-literal query fixes', () => {

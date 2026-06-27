@@ -60,8 +60,12 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     useSocket.mockReturnValue({ socket: socketMock, isConnected: true });
     apiClient.get.mockImplementation(url => {
       if (url === '/whatsapp/status') return Promise.resolve({ data: { data: { enabled: true } } });
-      if (url === '/whatsapp/conversations') return Promise.resolve({ data: { data: conversations } });
-      if (selectedConversation && url.startsWith(`/whatsapp/conversations/${selectedConversation._id}?withInsights=true`)) {
+      if (url === '/whatsapp/conversations')
+        return Promise.resolve({ data: { data: conversations } });
+      if (
+        selectedConversation &&
+        url.startsWith(`/whatsapp/conversations/${selectedConversation._id}?withInsights=true`)
+      ) {
         return Promise.resolve({ data: { data: selectedConversation } });
       }
       return Promise.resolve({ data: { data: null } });
@@ -105,7 +109,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
 
     render(<WhatsAppDashboard />);
 
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     const incomingMessage = {
       _id: 'msg-1',
@@ -131,7 +137,13 @@ describe('WhatsAppDashboard — real-time sockets', () => {
       phone: '+966500000001',
       senderName: 'ولي أمر',
       messages: [
-        { _id: 'msg-1', direction: 'outgoing', text: 'تمام', providerMessageId: 'prov-1', deliveryStatus: 'sent' },
+        {
+          _id: 'msg-1',
+          direction: 'outgoing',
+          text: 'تمام',
+          providerMessageId: 'prov-1',
+          deliveryStatus: 'sent',
+        },
       ],
     };
     setupMocks({
@@ -140,7 +152,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     act(() => {
       eventHandlers['whatsapp:status']({
@@ -168,7 +182,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     act(() => {
       eventHandlers['whatsapp:conversation']({
@@ -194,7 +210,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     act(() => {
       eventHandlers['whatsapp:escalation']({
@@ -214,7 +232,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     const { unmount } = render(<WhatsAppDashboard />);
-    await waitFor(() => expect(socketMock.emit).toHaveBeenCalledWith('whatsapp:subscribe', expect.any(Object)));
+    await waitFor(() =>
+      expect(socketMock.emit).toHaveBeenCalledWith('whatsapp:subscribe', expect.any(Object))
+    );
 
     unmount();
 
@@ -237,7 +257,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     const { unmount } = render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
     await waitFor(() => expect(document.title).toBe('(5) واتساب — مركز التواصل الذكي'));
 
     unmount();
@@ -277,7 +299,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     act(() => {
       eventHandlers['whatsapp:escalation']({
@@ -301,7 +325,13 @@ describe('WhatsAppDashboard — real-time sockets', () => {
       phone: '+966500000001',
       senderName: 'ولي أمر',
       messages: [
-        { _id: 'msg-1', direction: 'outgoing', text: 'مرحباً', providerMessageId: 'prov-1', deliveryStatus: 'sent' },
+        {
+          _id: 'msg-1',
+          direction: 'outgoing',
+          text: 'مرحباً',
+          providerMessageId: 'prov-1',
+          deliveryStatus: 'sent',
+        },
       ],
     };
     setupMocks({
@@ -311,7 +341,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     await userEvent.click(screen.getByText('ولي أمر'));
     expect(await screen.findByLabelText('sent')).toBeInTheDocument();
@@ -347,7 +379,9 @@ describe('WhatsAppDashboard — real-time sockets', () => {
     });
 
     render(<WhatsAppDashboard />);
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} }));
+    await waitFor(() =>
+      expect(apiClient.get).toHaveBeenCalledWith('/whatsapp/conversations', { params: {} })
+    );
 
     act(() => {
       eventHandlers['whatsapp:escalation']({
@@ -365,7 +399,10 @@ describe('WhatsAppDashboard — real-time sockets', () => {
       })
     );
 
-    Object.defineProperty(document, 'visibilityState', { value: originalVisibility, configurable: true });
+    Object.defineProperty(document, 'visibilityState', {
+      value: originalVisibility,
+      configurable: true,
+    });
     delete global.Notification;
   });
 });

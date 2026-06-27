@@ -270,7 +270,14 @@ function emitWhatsAppMessage({ branchId, organizationId, conversationId, message
  * Emit WhatsApp status update (delivered/read/failed)
  * إرسال تحديث حالة رسالة واتساب
  */
-function emitWhatsAppStatusUpdate({ branchId, organizationId, conversationId, providerMessageId, status, errorCode }) {
+function emitWhatsAppStatusUpdate({
+  branchId,
+  organizationId,
+  conversationId,
+  providerMessageId,
+  status,
+  errorCode,
+}) {
   const io = getIO();
   if (!io) return false;
 
@@ -332,7 +339,14 @@ function emitWhatsAppConversationUpdate({ branchId, organizationId, conversation
  * Emit WhatsApp escalation to human staff
  * إرسال تنبيه تصعيد محادثة واتساب لموظف
  */
-function emitWhatsAppEscalation({ branchId, organizationId, conversationId, reason, conversation, metadata }) {
+function emitWhatsAppEscalation({
+  branchId,
+  organizationId,
+  conversationId,
+  reason,
+  conversation,
+  metadata,
+}) {
   const io = getIO();
   if (!io) return false;
 

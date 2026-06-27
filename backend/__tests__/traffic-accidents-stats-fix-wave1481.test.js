@@ -45,7 +45,9 @@ describe('W1481 traffic-accidents /stats/overview fix', () => {
 
   test('the model status enum confirms the corrected values (no "open")', () => {
     const model = fs.readFileSync(MODEL, 'utf8');
-    expect(model).toMatch(/ACCIDENT_STATUS_TYPES\s*=\s*\[\s*'pending',\s*'investigating',\s*'resolved',\s*'disputed'\s*\]/);
+    expect(model).toMatch(
+      /ACCIDENT_STATUS_TYPES\s*=\s*\[\s*'pending',\s*'investigating',\s*'resolved',\s*'disputed'\s*\]/
+    );
     // sanity: 'open' is not a declared accident status
     expect(model).not.toMatch(/ACCIDENT_STATUS_TYPES\s*=\s*\[[^\]]*'open'/);
   });

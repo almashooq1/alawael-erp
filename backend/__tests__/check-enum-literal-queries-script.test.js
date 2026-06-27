@@ -49,12 +49,12 @@ describe('check-enum-literal-queries — end-to-end on fixtures', () => {
     // Root model Thing: status enum [open, closed]
     fs.writeFileSync(
       path.join(dir, 'models', 'Thing.js'),
-      `const mongoose=require('mongoose');\nconst s=new mongoose.Schema({status:{type:String,enum:['open','closed']}});\nmodule.exports=mongoose.model('Thing',s);`,
+      `const mongoose=require('mongoose');\nconst s=new mongoose.Schema({status:{type:String,enum:['open','closed']}});\nmodule.exports=mongoose.model('Thing',s);`
     );
     // Basename-collision: sub/Thing has a DIFFERENT enum — must NOT bleed into root Thing.
     fs.writeFileSync(
       path.join(dir, 'models', 'sub', 'Thing.js'),
-      `const mongoose=require('mongoose');\nnew mongoose.Schema({status:{type:String,enum:['scheduled','done']}});`,
+      `const mongoose=require('mongoose');\nnew mongoose.Schema({status:{type:String,enum:['scheduled','done']}});`
     );
   });
   afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
@@ -62,10 +62,10 @@ describe('check-enum-literal-queries — end-to-end on fixtures', () => {
   test('flags a literal NOT in the resolved (path-exact) enum', () => {
     fs.writeFileSync(
       path.join(dir, 'routes', 'bad.routes.js'),
-      `const T=require('../models/Thing');\nT.countDocuments({ status: 'archived' });`,
+      `const T=require('../models/Thing');\nT.countDocuments({ status: 'archived' });`
     );
     const { findings } = audit(dir);
-    const f = findings.find((x) => x.file.endsWith('bad.routes.js'));
+    const f = findings.find(x => x.file.endsWith('bad.routes.js'));
     expect(f).toBeTruthy();
     expect(f.value).toBe('archived');
     expect(f.field).toBe('status');
@@ -75,32 +75,32 @@ describe('check-enum-literal-queries — end-to-end on fixtures', () => {
   test('does NOT flag a valid literal', () => {
     fs.writeFileSync(
       path.join(dir, 'routes', 'ok.routes.js'),
-      `const T=require('../models/Thing');\nT.countDocuments({ status: 'open' });`,
+      `const T=require('../models/Thing');\nT.countDocuments({ status: 'open' });`
     );
     const { findings } = audit(dir);
-    expect(findings.find((x) => x.file.endsWith('ok.routes.js'))).toBeFalsy();
+    expect(findings.find(x => x.file.endsWith('ok.routes.js'))).toBeFalsy();
     fs.unlinkSync(path.join(dir, 'routes', 'ok.routes.js'));
   });
 
   test('path-exact resolution: require("../models/sub/Thing") uses sub enum, not root', () => {
     fs.writeFileSync(
       path.join(dir, 'routes', 'sub.routes.js'),
-      `const T=require('../models/sub/Thing');\nT.countDocuments({ status: 'scheduled' });`,
+      `const T=require('../models/sub/Thing');\nT.countDocuments({ status: 'scheduled' });`
     );
     const { findings } = audit(dir);
     // 'scheduled' is valid for sub/Thing → must NOT be flagged (would be flagged if it
     // wrongly resolved to root Thing's [open,closed]).
-    expect(findings.find((x) => x.file.endsWith('sub.routes.js'))).toBeFalsy();
+    expect(findings.find(x => x.file.endsWith('sub.routes.js'))).toBeFalsy();
     fs.unlinkSync(path.join(dir, 'routes', 'sub.routes.js'));
   });
 
   test('skips unresolved receivers (no false positive)', () => {
     fs.writeFileSync(
       path.join(dir, 'routes', 'dyn.routes.js'),
-      `const M = getModel();\nM.countDocuments({ status: 'whatever' });`,
+      `const M = getModel();\nM.countDocuments({ status: 'whatever' });`
     );
     const { findings } = audit(dir);
-    expect(findings.find((x) => x.file.endsWith('dyn.routes.js'))).toBeFalsy();
+    expect(findings.find(x => x.file.endsWith('dyn.routes.js'))).toBeFalsy();
     fs.unlinkSync(path.join(dir, 'routes', 'dyn.routes.js'));
   });
 

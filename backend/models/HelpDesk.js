@@ -69,8 +69,9 @@ ticketSchema.index({ assignedTo: 1 });
 // Auto-generate ticket number
 ticketSchema.pre('validate', async function () {
   if (!this.ticketNumber) {
-    const count = await mongoose.model('HelpDeskTicket').countDocuments();
-    this.ticketNumber = `HD-${String(count + 1).padStart(5, '0')}`;
+    // W1463: atomic sequence (was countDocuments()+1 → race → duplicate HD-NNNNN / E11000)
+    const seq = await require('../database/utils/counter').nextSequence('helpdesk_ticket');
+    this.ticketNumber = `HD-${String(seq).padStart(5, '0')}`;
   }
 });
 

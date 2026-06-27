@@ -12,7 +12,10 @@ const fs = require('fs');
 const path = require('path');
 
 const DOMAIN_SRC = path.join(__dirname, '../domains/sessions/index.js');
-const ANALYTICS_SRC = path.join(__dirname, '../domains/sessions/routes/sessions-analytics-compat.routes.js');
+const ANALYTICS_SRC = path.join(
+  __dirname,
+  '../domains/sessions/routes/sessions-analytics-compat.routes.js'
+);
 const REGISTRY_SRC = path.join(__dirname, '../routes/_registry.js');
 
 const domainSrc = fs.readFileSync(DOMAIN_SRC, 'utf8');
@@ -91,7 +94,7 @@ describe('Phase 6 — Sessions Analytics unification + branch isolation', () => 
   });
 
   test('bulk billing update applies branchId filter', () => {
-    const bulkIdx = analyticsNorm.indexOf("/billing/bulk");
+    const bulkIdx = analyticsNorm.indexOf('/billing/bulk');
     const bulkBlock = analyticsNorm.slice(bulkIdx, bulkIdx + 1200);
     expect(bulkBlock).toMatch(/effectiveBranchScope\s*\(\s*req\s*\)/);
   });

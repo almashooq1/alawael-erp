@@ -22,8 +22,16 @@ const { mapCaseCreateBody, mapCaseUpdateBody } = require('../routes/caseManageme
 describe('W1482 case-management create/update mapping', () => {
   test('mapCaseCreateBody sets the REQUIRED beneficiary.name from patientName', () => {
     const out = mapCaseCreateBody(
-      { patientName: 'أحمد', nationalId: '1100000001', gender: 'ذكر', phone: '0500000000', status: 'جديدة', priority: 'عالية', caseType: 'X' },
-      'uid1',
+      {
+        patientName: 'أحمد',
+        nationalId: '1100000001',
+        gender: 'ذكر',
+        phone: '0500000000',
+        status: 'جديدة',
+        priority: 'عالية',
+        caseType: 'X',
+      },
+      'uid1'
     );
     expect(out.beneficiary).toBeDefined();
     expect(out.beneficiary.name).toBe('أحمد');
@@ -48,7 +56,10 @@ describe('W1482 case-management create/update mapping', () => {
   });
 
   test('mapCaseUpdateBody uses dot-notation (partial), never replaces the whole beneficiary subdoc', () => {
-    const out = mapCaseUpdateBody({ patientName: 'محمد', phone: '0511111111', status: 'نشطة' }, 'u2');
+    const out = mapCaseUpdateBody(
+      { patientName: 'محمد', phone: '0511111111', status: 'نشطة' },
+      'u2'
+    );
     expect(out['beneficiary.name']).toBe('محمد');
     expect(out['beneficiary.phone']).toBe('0511111111');
     expect(out.status).toBe('نشطة');

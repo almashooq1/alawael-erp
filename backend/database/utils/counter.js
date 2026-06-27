@@ -164,6 +164,75 @@ const COUNTER_DEFINITIONS = {
     description: 'رقم أمر الشراء',
     startAt: 1000,
   },
+  // ── W1463 atomic-numbering wave ──────────────────────────────────────────────
+  // These back EXISTING human-facing formats whose strings are assembled CALLER-SIDE
+  // (year + dashes + per-site padding) via nextSequence(); prefix/padding here are
+  // documentation + used by the seed-numbering-counters script. startAt:1 matches the
+  // legacy count+1 behaviour (first of the period = N=1). Replaces racy countDocuments()+1.
+  journal_entry: {
+    prefix: 'JE-',
+    padding: 3,
+    step: 1,
+    resetOn: 'never',
+    description: 'رقم القيد اليومي (JE-NNN)',
+    startAt: 1,
+  },
+  helpdesk_ticket: {
+    prefix: 'HD-',
+    padding: 5,
+    step: 1,
+    resetOn: 'never',
+    description: 'رقم تذكرة الدعم (HD-NNNNN)',
+    startAt: 1,
+  },
+  insurance_claim: {
+    prefix: 'CLM',
+    padding: 6,
+    step: 1,
+    resetOn: 'yearly',
+    description: 'رقم مطالبة التأمين (CLM-YYYY-NNNNNN)',
+    startAt: 1,
+  },
+  finance_invoice: {
+    prefix: 'INV',
+    padding: 7,
+    step: 1,
+    resetOn: 'yearly',
+    description: 'رقم فاتورة المالية (INV-YYYY-NNNNNNN)',
+    startAt: 1,
+  },
+  inv_purchase_order: {
+    prefix: 'PO',
+    padding: 4,
+    step: 1,
+    resetOn: 'yearly',
+    description: 'رقم أمر شراء المخزون (PO-YYYY-NNNN)',
+    startAt: 1,
+  },
+  inv_stock_count: {
+    prefix: 'SC',
+    padding: 3,
+    step: 1,
+    resetOn: 'yearly',
+    description: 'رقم جرد المخزون (SC-YYYY-NNN)',
+    startAt: 1,
+  },
+  inv_item: {
+    prefix: 'ITM-',
+    padding: 4,
+    step: 1,
+    resetOn: 'never',
+    description: 'رمز صنف المخزون (ITM-NNNN)',
+    startAt: 1,
+  },
+  inv_supplier: {
+    prefix: 'SUP-',
+    padding: 3,
+    step: 1,
+    resetOn: 'never',
+    description: 'رمز المورّد (SUP-NNN)',
+    startAt: 1,
+  },
 };
 
 // ─── Core Functions ─────────────────────────────────────────────────────────
@@ -218,6 +287,53 @@ async function getNextNumber(counterName, overrides = {}) {
   }
 
   return formatNumber(prefix, seq, padding, suffix);
+}
+
+/**
+ * Get the next RAW sequence number (atomic, thread-safe) WITHOUT formatting.
+ *
+ * Use this when the human-facing string must be assembled caller-side to preserve an
+ * existing bespoke format (year + dashes + custom padding) that formatNumber() can't
+ * produce — e.g. `INV-${year}-${String(seq).padStart(7,'0')}`. Returns a plain integer.
+ * For yearly/monthly counters the period is encoded in the counter key, so a fresh
+ * period starts at the definition's startAt. (W1463)
+ *
+ * @param {string} counterName - a key in COUNTER_DEFINITIONS
+ * @returns {Promise<number>} the next sequence integer
+ */
+async function nextSequence(counterName) {
+  const def = COUNTER_DEFINITIONS[counterName];
+  if (!def) throw new Error(`Unknown counter: ${counterName}`);
+
+  const key = buildCounterKey(counterName);
+  const step = def.step ?? 1;
+  const startAt = def.startAt ?? 1;
+
+  const result = await Counter.findOneAndUpdate(
+    { _id: key },
+    {
+      $inc: { seq: step },
+      $setOnInsert: {
+        prefix: def.prefix || '',
+        suffix: def.suffix || '',
+        padding: def.padding || 6,
+        resetOn: def.resetOn || 'never',
+        description: def.description || counterName,
+      },
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+
+  let seq = result.seq;
+  if (seq < startAt) {
+    const corrected = await Counter.findOneAndUpdate(
+      { _id: key, seq: { $lt: startAt } },
+      { $set: { seq: startAt } },
+      { returnDocument: 'after' }
+    );
+    if (corrected) seq = startAt;
+  }
+  return seq;
 }
 
 /**
@@ -365,6 +481,7 @@ function autoNumberPlugin(schema, options = {}) {
 
 module.exports = {
   getNextNumber,
+  nextSequence,
   peekCurrent,
   resetCounter,
   initializeCounters,

@@ -86,11 +86,10 @@ const insuranceClaimSchema = new mongoose.Schema(
 
 insuranceClaimSchema.pre('save', async function () {
   if (!this.claim_number) {
+    // W1463: atomic year-scoped sequence (was countDocuments()+1 → race → dup CLM / E11000)
     const year = new Date().getFullYear();
-    const count = await this.constructor.countDocuments({
-      claim_number: new RegExp(`^CLM-${year}-`),
-    });
-    this.claim_number = `CLM-${year}-${String(count + 1).padStart(6, '0')}`;
+    const seq = await require('../../database/utils/counter').nextSequence('insurance_claim');
+    this.claim_number = `CLM-${year}-${String(seq).padStart(6, '0')}`;
   }
   // W1451: derive header totals from items ONLY when items change, so an explicitly
   // set total (e.g. a lump-sum insurer remittance via processClaimResponse, with no

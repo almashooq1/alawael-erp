@@ -252,7 +252,8 @@ router.get('/items/:id', async (req, res) => {
     const WHItem = safeModel('WarehouseItem');
     if (!WHItem) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     const item = await WHItem.findById(req.params.id).lean();
-    if (!item?.warehouse) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+    if (!item?.warehouse)
+      return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     const wh = await assertWarehouseInScope(req, item.warehouse);
     if (!wh) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data: item });

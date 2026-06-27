@@ -15,7 +15,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'routes', 'access-review.routes.js'), 'utf8');
+const src = fs.readFileSync(
+  path.join(__dirname, '..', 'routes', 'access-review.routes.js'),
+  'utf8'
+);
 
 describe('W1464 access-review attestation MFA gate', () => {
   test('imports attachMfaActor + requireMfaTier', () => {

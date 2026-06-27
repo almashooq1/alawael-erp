@@ -62,6 +62,7 @@ __tests__/assistive-device-behavioral-wave359.test.js
 __tests__/assistive-device-return-core-linkage-wave1028.test.js
 __tests__/assistive-device-routes-behavioral-wave860.test.js
 __tests__/assistive-device-wave359.test.js
+__tests__/atomic-numbering-wave1463.test.js
 __tests__/attendance-clinical-day-care-behavioral-wave136-176-177.test.js
 __tests__/attendance-day-rollup-behavioral-wave131-132-174.test.js
 __tests__/attendance-device-models-behavioral-wave122.test.js
@@ -1057,3 +1058,10 @@ __tests__/zatca-xml-signer.e2e.test.js
 __tests__/zkteco-device-merge-script.test.js
 __tests__/zkteco-sync-mfa-service-layer-wave275s.test.js
 tests/unit/ops-alerter.test.js
+
+__tests__/disability-assessment-model-enhanced.test.js
+__tests__/individualized-rehabilitation-plan-behavioral.test.js
+__tests__/rehabilitation-kpis.test.js
+__tests__/rehabilitation-metrics-behavioral.test.js
+__tests__/rehabilitation-reports-behavioral.test.js
+__tests__/smart-assessment-engine-behavioral.test.js

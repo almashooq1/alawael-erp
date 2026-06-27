@@ -576,7 +576,7 @@ async function buildDailySnapshot(branchCode, data = {}) {
   return BranchPerformanceLog.findOneAndUpdate(
     { branch_code: branchCode, snapshot_date_str: dateStr },
     { $set: snapshot },
-    { upsert: true, new: true, runValidators: true }
+    { upsert: true, returnDocument: 'after', runValidators: true }
   );
 }
 

@@ -418,8 +418,7 @@ class KPICalculator {
       kpiData.improvement_areas.push('رفع متوسط التقدم من خلال تدخلات أكثر تكثيفاً');
 
     const kpi = await QualityKPI.findOneAndUpdate({ branch_id: branchId, period }, kpiData, {
-      upsert: true,
-      new: true,
+      upsert: true, returnDocument: 'after',
     });
     return kpi;
   }

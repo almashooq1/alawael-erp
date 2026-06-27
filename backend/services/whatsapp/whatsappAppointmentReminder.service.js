@@ -152,7 +152,7 @@ async function dispatchDueReminders(opts = {}) {
     const claimed = await Reminder.findOneAndUpdate(
       { _id: row._id, status: { $in: ['pending', 'failed'] }, attempts: { $lt: MAX_ATTEMPTS } },
       { $inc: { attempts: 1 } },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!claimed) {
       skipped += 1;

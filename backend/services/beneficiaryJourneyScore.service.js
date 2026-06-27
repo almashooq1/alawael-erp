@@ -382,7 +382,7 @@ async function computeAndSaveJourneyScore({
       computedAt: now(),
       computedBy,
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after'}
   );
 
   return doc;

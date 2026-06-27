@@ -73,14 +73,11 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       });
     }
 
-    // Hash password before creating user (cost factor 12 per security audit)
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // Create user — role is always 'user'; admin roles must be assigned by an admin
+    // Password will be hashed by User model pre-save hook
     const user = await User.create({
       email,
-      password: hashedPassword,
+      password,
       fullName,
       role: 'user',
     });
@@ -100,13 +97,13 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
 
     // Generate tokens
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
+      { id: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const refreshToken = jwt.sign(
       {
-        userId: user.id,
+        id: user.id,
         email: user.email,
         role: user.role,
         type: 'refresh',
@@ -225,7 +222,7 @@ router.post('/login', authLimiter, async (req, res) => {
     // Generate token with unique jti for per-token revocation
     const accessJti = crypto.randomUUID();
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, jti: accessJti },
+      { id: user.id, email: user.email, role: user.role, jti: accessJti },
       JWT_SECRET,
       {
         expiresIn: ACCESS_TOKEN_EXPIRY,
@@ -235,7 +232,7 @@ router.post('/login', authLimiter, async (req, res) => {
     // Generate refresh token with unique jti
     const refreshJti = crypto.randomUUID();
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: refreshJti },
+      { id: user.id, email: user.email, role: user.role, type: 'refresh', jti: refreshJti },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
@@ -347,20 +344,19 @@ router.post('/refresh', async (req, res) => {
     }
 
     // Blacklist the old refresh token (rotation)
-    const oldTtl = decoded.exp ? decoded.exp - Math.floor(Date.now() / 1000) : 604800;
-    if (oldTtl > 0) {
-      await tokenBlacklist.add(refreshToken, oldTtl);
+    if (decoded && decoded.exp) {
+      await tokenBlacklist.add(refreshToken, decoded);
     }
 
     // Generate new token pair with unique jti claims
     const newAccessToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() },
+      { id: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const newRefreshToken = jwt.sign(
       {
-        userId: user._id,
+        id: user._id,
         email: user.email,
         role: user.role,
         type: 'refresh',
@@ -402,14 +398,13 @@ router.post('/logout', authenticateToken, async (req, res) => {
     if (authHeader) {
       const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
       const decoded = jwt.decode(token);
-      const ttl = decoded && decoded.exp ? decoded.exp - Math.floor(Date.now() / 1000) : 86400;
-      if (ttl > 0) {
-        await tokenBlacklist.add(token, ttl);
+      if (decoded && decoded.exp) {
+        await tokenBlacklist.add(token, decoded);
       }
     }
 
     logSecurityEvent('USER_LOGOUT', {
-      userId: req.user.userId,
+      userId: req.user.id,
       ip: getClientIP(req),
     });
 
@@ -434,7 +429,7 @@ router.post('/logout', authenticateToken, async (req, res) => {
  */
 const getProfileHandler = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -482,7 +477,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       }
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -527,7 +522,7 @@ router.post(
     try {
       const { currentPassword, newPassword } = req.body;
 
-      const user = await User.findById(req.user.userId).select('+password');
+      const user = await User.findById(req.user.id).select('+password');
       if (!user) {
         return res.status(404).json({
           success: false,
@@ -539,7 +534,7 @@ router.post(
       const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
       if (!isPasswordValid) {
         logSecurityEvent('PASSWORD_CHANGE_FAILED', {
-          userId: user.id,
+          id: user.id,
           ip: getClientIP(req),
         });
         return res.status(401).json({
@@ -567,7 +562,7 @@ router.post(
       }
 
       logSecurityEvent('PASSWORD_CHANGED', {
-        userId: user.id,
+        id: user.id,
         ip: getClientIP(req),
       });
 
@@ -586,13 +581,13 @@ router.post(
 
       // Issue fresh tokens so the user stays logged in with the new password
       const newAccessToken = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
+        { id: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
         JWT_SECRET,
         { expiresIn: ACCESS_TOKEN_EXPIRY }
       );
       const newRefreshToken = jwt.sign(
         {
-          userId: user.id,
+          id: user.id,
           email: user.email,
           role: user.role,
           type: 'refresh',
@@ -761,7 +756,7 @@ router.get('/sessions', authenticateToken, async (req, res) => {
     if (!Session) {
       return res.json({ success: true, data: [] });
     }
-    const sessions = await Session.getActiveSessions(req.user.userId);
+    const sessions = await Session.getActiveSessions(req.user.id);
     return res.json({
       success: true,
       data: sessions.map(s => ({
@@ -787,17 +782,17 @@ router.delete('/sessions/:id', authenticateToken, async (req, res) => {
     if (!Session) {
       return res.json({ success: true, message: 'Session revoked' });
     }
-    const session = await Session.findOne({ _id: req.params.id, userId: req.user.userId });
+    const session = await Session.findOne({ _id: req.params.id, userId: req.user.id });
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found' });
     }
     await session.terminate();
     // Blacklist the token so it cannot be reused
     if (session.token) {
-      await tokenBlacklist.add(`jti:${session.token}`, 86400).catch(() => {});
+      await tokenBlacklist.add(`jti:${session.token}`, { exp: Math.floor(Date.now() / 1000) + 86400 }).catch(() => {});
     }
     logSecurityEvent('SESSION_REVOKED', {
-      userId: req.user.userId,
+      userId: req.user.id,
       sessionId: req.params.id,
       ip: getClientIP(req),
     });

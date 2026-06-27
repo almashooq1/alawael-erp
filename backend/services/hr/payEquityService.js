@@ -295,7 +295,7 @@ async function upsertJobBandMapping({
     {
       $set: { bandCode: code, active: !!active, note: note || null, createdBy: createdBy || null },
     },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
+    {returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
   ).lean();
 }
 

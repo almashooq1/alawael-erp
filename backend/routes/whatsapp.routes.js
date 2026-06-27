@@ -1447,7 +1447,7 @@ router.patch(
     const doc = await Group.findOneAndUpdate(
       Group.groupScopedFilter(req.params.id, branchScope),
       { $set: update },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     res.json({ success: true, data: doc });
@@ -1463,7 +1463,7 @@ router.delete(
     const doc = await Group.findOneAndUpdate(
       Group.groupScopedFilter(req.params.id, branchScope),
       { $set: { isDeleted: true, deletedAt: new Date() } },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Group not found' });
     res.json({ success: true, data: { id: req.params.id, deleted: true } });

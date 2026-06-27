@@ -18,6 +18,8 @@ import {
   clearAuthData,
   getRefreshToken,
 } from '../utils/tokenStorage';
+import { attachCsrfToken, refreshCsrfTokenFromHeaders } from '../utils/csrf';
+import { requestCache } from '../utils/cache';
 
 // تكوين قاعدة الـ API
 // Runtime detection: force relative /api/v1 on production (HTTPS) to avoid mixed-content
@@ -120,6 +122,18 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Add CSRF token for state-changing requests (POST, PUT, DELETE, PATCH)
+    const method = (config.method || 'get').toLowerCase();
+    if (['post', 'put', 'delete', 'patch'].includes(method)) {
+      attachCsrfToken(config);
+      // Sanitize request data to prevent XSS
+      if (config.data && typeof config.data === 'object') {
+        config.data = sanitizeObject(config.data);
+      }
+      // Invalidate cache for mutations
+      requestCache.invalidate(config.url || '');
+    }
+
     // إضافة معلومات إضافية
     config.headers['X-Requested-With'] = 'XMLHttpRequest';
     config.headers['Accept-Language'] = localStorage.getItem('language') || 'ar';
@@ -156,6 +170,7 @@ apiClient.interceptors.request.use(
  * Response Interceptor
  * معالجة الاستجابات و الأخطاء
  */
+
 apiClient.interceptors.response.use(
   response => {
     // Track timing
@@ -164,6 +179,11 @@ apiClient.interceptors.response.use(
     // Log slow requests in development only
     if (process.env.NODE_ENV === 'development' && duration > 3000) {
       console.warn(`⏱️ Slow API call: ${response.config.url} (${duration}ms)`);
+    }
+
+    // Refresh CSRF token from response headers if present
+    if (response.headers) {
+      refreshCsrfTokenFromHeaders(response.headers);
     }
 
     // Clean up deduplication tracking

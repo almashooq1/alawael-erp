@@ -576,7 +576,7 @@ class PaymentGatewayService {
               },
             },
           ],
-          { new: true }
+          {returnDocument: 'after'}
         );
 
         if (!updatedTx) {

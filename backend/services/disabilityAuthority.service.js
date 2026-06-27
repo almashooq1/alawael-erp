@@ -154,8 +154,7 @@ class DisabilityAuthorityService {
    */
   static async upsertStandard(data) {
     return CBAHIStandard.findOneAndUpdate({ standardCode: data.standardCode }, data, {
-      upsert: true,
-      new: true,
+      upsert: true, returnDocument: 'after',
       setDefaultsOnInsert: true,
     });
   }

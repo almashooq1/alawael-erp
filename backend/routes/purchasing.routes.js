@@ -302,7 +302,7 @@ router.patch(
     const doc = await Po.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { status: req.body.status, updated_by: id },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!doc) {
       return res.status(404).json({ success: false, message: 'order_not_found' });
@@ -352,8 +352,7 @@ router.put(
     if (req.body.supplierName != null) patch.supplier_name = req.body.supplierName;
     if (req.body.deliveryDate != null) patch.expected_delivery_date = req.body.deliveryDate;
     if (req.body.notes != null) patch.notes = req.body.notes;
-    const doc = await Po.findOneAndUpdate({ _id: req.params.id, deleted_at: null }, patch, {
-      new: true,
+    const doc = await Po.findOneAndUpdate({ _id: req.params.id, deleted_at: null }, patch, {returnDocument: 'after',
     });
     if (!doc) {
       return res.status(404).json({ success: false, message: 'order_not_found' });
@@ -374,7 +373,7 @@ router.delete(
     const doc = await Po.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date() },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!doc) {
       return res.status(404).json({ success: false, message: 'order_not_found' });

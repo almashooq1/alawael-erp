@@ -41,7 +41,7 @@ const bulkJobSchema = new mongoose.Schema(
     },
     progress: { type: progressSchema, default: () => ({}) },
     results: { type: [mongoose.Schema.Types.Mixed], default: [] },
-    errors: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    jobErrors: { type: [mongoose.Schema.Types.Mixed], default: [] },
     startedAt: { type: Date, default: null },
     completedAt: { type: Date, default: null },
     durationMs: { type: Number, default: null },

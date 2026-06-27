@@ -1,0 +1,316 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Al-Awael ERP v3.5.0 — نظام إدارة مراكز تأهيل ذوي الإعاقة",
+    "version": "3.5.0",
+    "description": "توثيق شامل لـ 20 نظاماً فرعياً في منصة التأهيل المتكاملة",
+    "contact": { "name": "فريق التطوير", "email": "dev@alawael.sa" }
+  },
+  "servers": [
+    { "url": "http://localhost:3001/api/v1", "description": "Development" },
+    { "url": "https://api.alawael.sa/api/v1", "description": "Production" }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/icf-assessments": {
+      "get": {
+        "tags": ["ICF Assessment"],
+        "summary": "قائمة تقييمات ICF",
+        "description": "جلب جميع تقييمات ICF-CY للمستفيدين",
+        "responses": {
+          "200": { "description": "قائمة التقييمات", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } },
+          "401": { "description": "غير مصرح" }
+        }
+      },
+      "post": {
+        "tags": ["ICF Assessment"],
+        "summary": "إنشاء تقييم ICF جديد",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ICFAssessment" } } }
+        },
+        "responses": { "201": { "description": "تم الإنشاء" }, "400": { "description": "بيانات غير صالحة" } }
+      }
+    },
+    "/icf-assessments/{id}": {
+      "get": {
+        "tags": ["ICF Assessment"],
+        "summary": "تفاصيل تقييم ICF",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "التقييم" }, "404": { "description": "غير موجود" } }
+      }
+    },
+    "/icf-assessments/{id}/goals": {
+      "post": {
+        "tags": ["ICF Assessment"],
+        "summary": "توليد أهداف من تقييم ICF",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "الأهداف المولدة" }, "404": { "description": "التقييم غير موجود" } }
+      }
+    },
+    "/icf-assessments/{id}/report": {
+      "get": {
+        "tags": ["ICF Assessment"],
+        "summary": "تصدير تقرير ICF",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["pdf", "docx", "json"], "default": "pdf" } }
+        ],
+        "responses": { "200": { "description": "ملف التقرير" } }
+      }
+    },
+    "/clinical/dashboard/{beneficiaryId}": {
+      "get": {
+        "tags": ["Clinical Dashboard"],
+        "summary": "لوحة القيادة السريرية",
+        "description": "تجميع بيانات ICF + الخطط + الجلسات + MDT في لوحة واحدة",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "بيانات اللوحة", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClinicalDashboard" } } } } }
+      }
+    },
+    "/clinical/reports/integrated": {
+      "post": {
+        "tags": ["Clinical Dashboard"],
+        "summary": "تقرير متكامل",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "beneficiaryId": { "type": "string" }, "sections": { "type": "array", "items": { "type": "string" } }, "format": { "type": "string", "enum": ["pdf", "word", "json"], "default": "pdf" } } } } }
+        },
+        "responses": { "200": { "description": "رابط التقرير" } }
+      }
+    },
+    "/sessions/{sessionId}/icf-progress": {
+      "post": {
+        "tags": ["Clinical Dashboard"],
+        "summary": "تسجيل تقدم ICF خلال الجلسة",
+        "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "domainCode": { "type": "string" }, "performanceScore": { "type": "number", "minimum": 0, "maximum": 5 }, "capacityScore": { "type": "number", "minimum": 0, "maximum": 5 }, "notes": { "type": "string" } } } } }
+        },
+        "responses": { "200": { "description": "تم التسجيل" } }
+      }
+    },
+    "/ai-predictive/goal-prediction/{goalId}": {
+      "get": {
+        "tags": ["AI Predictive"],
+        "summary": "التنبؤ بإنجاز الهدف",
+        "parameters": [{ "name": "goalId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "التنبؤ", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GoalPrediction" } } } } }
+      }
+    },
+    "/ai-predictive/discharge-readiness/{beneficiaryId}": {
+      "get": {
+        "tags": ["AI Predictive"],
+        "summary": "جاهزية الخروج",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "الجاهزية", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DischargeReadiness" } } } } }
+      }
+    },
+    "/ai-predictive/risk-flags/{beneficiaryId}": {
+      "get": {
+        "tags": ["AI Predictive"],
+        "summary": "أعلام المخاطر",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "قائمة المخاطر" } }
+      }
+    },
+    "/telehealth/sessions": {
+      "get": {
+        "tags": ["Telehealth"],
+        "summary": "جلسات التأهيل عن بُعد",
+        "responses": { "200": { "description": "الجلسات", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TelehealthSession" } } } } } }
+      },
+      "post": {
+        "tags": ["Telehealth"],
+        "summary": "جدولة جلسة جديدة",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TelehealthSession" } } } },
+        "responses": { "201": { "description": "تم الجدولة" } }
+      }
+    },
+    "/telehealth/sessions/{id}/join": {
+      "post": {
+        "tags": ["Telehealth"],
+        "summary": "الانضمام للجلسة",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "رابط الجلسة" } }
+      }
+    },
+    "/parent-portal/overview/{beneficiaryId}": {
+      "get": {
+        "tags": ["Parent Portal"],
+        "summary": "نظرة عامة على المستفيد",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "البيانات", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ParentPortal" } } } } }
+      }
+    },
+    "/parent-portal/progress/{beneficiaryId}": {
+      "get": {
+        "tags": ["Parent Portal"],
+        "summary": "تقدم المستفيد",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "بيانات التقدم" } }
+      }
+    },
+    "/executive/kpis": {
+      "get": {
+        "tags": ["Executive Dashboard"],
+        "summary": "مؤشرات الأداء الرئيسية",
+        "responses": { "200": { "description": "KPIs", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ExecutiveKPI" } } } } }
+      }
+    },
+    "/executive/branches": {
+      "get": {
+        "tags": ["Executive Dashboard"],
+        "summary": "مقارنة الفروع",
+        "responses": { "200": { "description": "بيانات الفروع" } }
+      }
+    },
+    "/executive/therapists-leaderboard": {
+      "get": {
+        "tags": ["Executive Dashboard"],
+        "summary": "ترتيب المعالجين",
+        "responses": { "200": { "description": "الترتيب" } }
+      }
+    },
+    "/gamification/profile/{beneficiaryId}": {
+      "get": {
+        "tags": ["Gamification"],
+        "summary": "ملف التحفيز",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "الملف", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GameProfile" } } } } }
+      }
+    },
+    "/gamification/leaderboard": {
+      "get": {
+        "tags": ["Gamification"],
+        "summary": "لوحة المتصدرين",
+        "responses": { "200": { "description": "المتصدرين" } }
+      }
+    },
+    "/whatsapp-chatbot/webhook": {
+      "post": {
+        "tags": ["WhatsApp Chatbot"],
+        "summary": "استقبال رسائل واتساب",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WhatsAppMessage" } } } },
+        "responses": { "200": { "description": "رد تلقائي" } }
+      }
+    },
+    "/whatsapp-chatbot/templates": {
+      "get": {
+        "tags": ["WhatsApp Chatbot"],
+        "summary": "قوالب الرسائل",
+        "responses": { "200": { "description": "القوالب" } }
+      }
+    },
+    "/whatsapp-chatbot/analytics": {
+      "get": {
+        "tags": ["WhatsApp Chatbot"],
+        "summary": "إحصائيات الروبوت",
+        "responses": { "200": { "description": "الإحصائيات" } }
+      }
+    },
+    "/cctv/cameras": {
+      "get": {
+        "tags": ["CCTV"],
+        "summary": "قائمة الكاميرات",
+        "responses": { "200": { "description": "الكاميرات", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Camera" } } } } } }
+      }
+    },
+    "/cctv/cameras/{id}/stream": {
+      "get": {
+        "tags": ["CCTV"],
+        "summary": "بث الكاميرا",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "رابط البث" } }
+      }
+    },
+    "/cctv/alerts": {
+      "get": {
+        "tags": ["CCTV"],
+        "summary": "تنبيهات الأمان",
+        "responses": { "200": { "description": "التنبيهات" } }
+      }
+    },
+    "/compliance/audits": {
+      "get": {
+        "tags": ["Compliance"],
+        "summary": "تدقيقات الامتثال",
+        "responses": { "200": { "description": "التدقيقات", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ComplianceAudit" } } } } } }
+      },
+      "post": {
+        "tags": ["Compliance"],
+        "summary": "إنشاء تدقيق جديد",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ComplianceAudit" } } } },
+        "responses": { "201": { "description": "تم الإنشاء" } }
+      }
+    },
+    "/compliance/audits/{id}/corrective-actions": {
+      "post": {
+        "tags": ["Compliance"],
+        "summary": "إضافة إجراء تصحيحي",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "تم الإضافة" } }
+      }
+    },
+    "/emr/prescriptions": {
+      "get": {
+        "tags": ["EMR"],
+        "summary": "الوصفات الطبية",
+        "responses": { "200": { "description": "الوصفات", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Prescription" } } } } } }
+      },
+      "post": {
+        "tags": ["EMR"],
+        "summary": "إنشاء وصفة طبية",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Prescription" } } } },
+        "responses": { "201": { "description": "تم الإنشاء" } }
+      }
+    },
+    "/emr/vital-signs/{beneficiaryId}": {
+      "get": {
+        "tags": ["EMR"],
+        "summary": "العلامات الحيوية",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "العلامات", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/VitalSigns" } } } } } }
+      },
+      "post": {
+        "tags": ["EMR"],
+        "summary": "تسجيل علامات حيوية",
+        "parameters": [{ "name": "beneficiaryId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VitalSigns" } } } },
+        "responses": { "201": { "description": "تم التسجيل" } }
+      }
+    },
+    "/bi/reports": {
+      "get": {
+        "tags": ["BI Analytics"],
+        "summary": "قوالب التقارير",
+        "responses": { "200": { "description": "القوالب", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ReportTemplate" } } } } } }
+      }
+    },
+    "/bi/reports/build": {
+      "post": {
+        "tags": ["BI Analytics"],
+        "summary": "بناء تقرير مخصص",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "templateId": { "type": "string" }, "filters": { "type": "object" }, "format": { "type": "string", "enum": ["pdf", "excel", "csv", "json"], "default": "pdf" } } } } } },
+        "responses": { "200": { "description": "رابط التقرير" } }
+      }
+    },
+    "/bi/predictions": {
+      "get": {
+        "tags": ["BI Analytics"],
+        "summary": "التنبؤات المتقدمة",
+        "responses": { "200": { "description": "التنبؤات" } }
+      }
+    }
+  }
+}

@@ -65,7 +65,7 @@ class MudadService {
           organizationId,
           updatedBy: userId,
         },
-        { upsert: true, new: true, runValidators: true }
+        { upsert: true, returnDocument: 'after', runValidators: true }
       );
       logger.info(`Mudad config saved for org: ${organizationId}`);
       return config;

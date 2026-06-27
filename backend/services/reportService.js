@@ -2,6 +2,7 @@
 const Report = require('../models/Report');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const PDFDocument = require('pdfkit');
 
 class ReportService {
   /**
@@ -167,7 +168,7 @@ class ReportService {
         extension = 'csv';
       } else if (format === 'pdf') {
         mimeType = 'application/pdf';
-        data = Buffer.from(`PDF Report: ${report.title}`);
+        data = await this._generatePdfBuffer(report);
         extension = 'pdf';
       }
 
@@ -202,6 +203,51 @@ class ReportService {
     });
 
     return csv;
+  }
+
+  /**
+   * Generate PDF buffer from report content
+   */
+  async _generatePdfBuffer(report) {
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        const chunks = [];
+
+        doc.on('data', chunk => chunks.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+
+        // Header
+        doc.fontSize(20).text('تقرير النظام - الأوائل', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(14).text(`عنوان التقرير: ${report.title || 'Untitled'}`, { align: 'right' });
+        doc.fontSize(12).text(`نوع التقرير: ${report.type || 'N/A'}`, { align: 'right' });
+        doc.fontSize(12).text(`تاريخ الإنشاء: ${report.createdAt ? new Date(report.createdAt).toLocaleString('ar-SA') : new Date().toLocaleString('ar-SA')}`, { align: 'right' });
+        doc.moveDown(2);
+
+        // Content sections
+        if (report.content && report.content.sections) {
+          report.content.sections.forEach(section => {
+            doc.fontSize(16).text(section.title || 'Section', { align: 'right', underline: true });
+            doc.moveDown(0.5);
+            if (section.data && typeof section.data === 'object') {
+              Object.entries(section.data).forEach(([key, value]) => {
+                doc.fontSize(12).text(`${key}: ${JSON.stringify(value)}`, { align: 'right' });
+              });
+            }
+            doc.moveDown();
+          });
+        }
+
+        // Footer
+        doc.moveDown(2);
+        doc.fontSize(10).fillColor('gray').text(`تم إنشاء هذا التقرير تلقائياً من نظام الأوائل ERP`, { align: 'center' });
+
+        doc.end();
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   /**

@@ -392,7 +392,7 @@ async function applyMove({
   const updated = await MeasureAlert.findOneAndUpdate(
     { _id: alertId, assigneeId: fromTherapistId, status: 'open' },
     { $set: { assigneeId: new mongoose.Types.ObjectId(String(toTherapistId)) } },
-    { new: true }
+    {returnDocument: 'after'}
   ).lean();
 
   if (!updated) {

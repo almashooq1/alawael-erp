@@ -20,6 +20,7 @@ const _logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
+const ICFAssessment = require('../models/assessment/ICFAssessment');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -77,6 +78,30 @@ router.get('/meetings/:id', async (req, res) => {
       .populate('cases.presentedBy', 'name')
       .lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
+
+    // Enhance cases with latest ICF assessment data
+    if (meeting.cases && meeting.cases.length > 0) {
+      try {
+        for (const caseItem of meeting.cases) {
+          const beneficiaryId = caseItem.beneficiary?._id || caseItem.beneficiary;
+          if (beneficiaryId) {
+            const latestICF = await ICFAssessment.findLatestByPatient(beneficiaryId);
+            if (latestICF) {
+              caseItem.icfSummary = {
+                overallScore: latestICF.overallScore,
+                domainScores: latestICF.domainScores,
+                assessmentDate: latestICF.assessmentDate,
+                coreSetType: latestICF.coreSetType,
+                status: latestICF.status,
+              };
+            }
+          }
+        }
+      } catch (icfError) {
+        console.error('Error fetching ICF assessments for meeting:', icfError);
+      }
+    }
+
     res.json({ success: true, data: meeting, message: 'بيانات الاجتماع' });
   } catch (error) {
     safeError(res, error, 'fetching MDT meeting');
@@ -1610,6 +1635,49 @@ router.get('/stats', authorize(['admin', 'manager']), async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'fetching coordination stats');
+  }
+});
+
+// ─── Get ICF Summary for Meeting Cases ───────────────────────────────────────
+router.get('/meetings/:id/icf-summary', async (req, res) => {
+  try {
+    const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) })
+      .populate('cases.beneficiary', 'name mrn')
+      .lean();
+    if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
+
+    const icfSummaries = [];
+    if (meeting.cases && meeting.cases.length > 0) {
+      try {
+        for (const caseItem of meeting.cases) {
+          const beneficiaryId = caseItem.beneficiary?._id || caseItem.beneficiary;
+          if (beneficiaryId) {
+            const latestICF = await ICFAssessment.findLatestByPatient(beneficiaryId);
+            icfSummaries.push({
+              caseId: caseItem._id,
+              beneficiaryId,
+              beneficiaryName: caseItem.beneficiary?.name,
+              mrn: caseItem.beneficiary?.mrn,
+              icfSummary: latestICF
+                ? {
+                    overallScore: latestICF.overallScore,
+                    domainScores: latestICF.domainScores,
+                    assessmentDate: latestICF.assessmentDate,
+                    coreSetType: latestICF.coreSetType,
+                    status: latestICF.status,
+                  }
+                : null,
+            });
+          }
+        }
+      } catch (icfError) {
+        console.error('Error fetching ICF summaries for meeting:', icfError);
+      }
+    }
+
+    res.json({ success: true, data: icfSummaries, message: 'ملخص تقييمات ICF للحالات' });
+  } catch (error) {
+    safeError(res, error, 'fetching ICF summary');
   }
 });
 

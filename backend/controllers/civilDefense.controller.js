@@ -384,8 +384,7 @@ class CivilDefenseController {
 
       // Save/Update in database
       await ComplianceStatus.findOneAndUpdate({ facilityId }, complianceStatus, {
-        upsert: true,
-        new: true,
+        upsert: true, returnDocument: 'after',
       });
 
       res.json({
@@ -518,8 +517,7 @@ class CivilDefenseController {
 
       // Save/Update in database
       await FireSafety.findOneAndUpdate({ facilityId }, fireSafetyStatus, {
-        upsert: true,
-        new: true,
+        upsert: true, returnDocument: 'after',
       });
 
       res.json({

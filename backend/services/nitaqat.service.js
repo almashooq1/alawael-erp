@@ -194,8 +194,7 @@ class NitaqatService {
   async upsertActivityParams(params) {
     const { activityCode, subActivityCode = 'default', year } = params;
     return NitaqatActivityParam.findOneAndUpdate({ activityCode, subActivityCode, year }, params, {
-      upsert: true,
-      new: true,
+      upsert: true, returnDocument: 'after',
     });
   }
 

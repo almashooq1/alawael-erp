@@ -193,7 +193,7 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
       const doc = await HrWorkflowRuleConfig.findOneAndUpdate(
         { ruleId },
         { $set: update },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
       ).lean();
 
       // Bust the engine's in-memory config + refresh.

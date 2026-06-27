@@ -375,8 +375,7 @@ router.post(
           },
         },
         {
-          arrayFilters: [{ 'elem.candidateId': req.params.successorId }],
-          new: true,
+          arrayFilters: [{ 'elem.candidateId': req.params.successorId }], returnDocument: 'after',
         }
       );
 

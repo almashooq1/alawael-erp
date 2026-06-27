@@ -1,368 +1,220 @@
 /**
- * bi-analytics.routes.js — cross-module executive BI dashboard.
- *
- * Mount at /api/admin/bi. Aggregates KPIs from the modules shipped today:
- * Beneficiaries · TherapySessions · Assessments · CarePlans.
- *
- * Endpoints:
- *   GET /overview      — top-line KPIs
- *   GET /sessions      — sessions trend + by type + by status
- *   GET /beneficiaries — demographics + disability distribution
- *   GET /goals         — goal progress across active plans
- *   GET /branches      — per-branch activity comparison
+ * bi-analytics.routes.js — مسارات التحليلات المتقدمة وذكاء الأعمال
+ * ═══════════════════════════════════════════════════════════════════
+ * نقاط نهاية BI Analytics:
+ *   GET  /api/v1/bi/config          — إعدادات منشئ التقارير
+ *   POST /api/v1/bi/reports          — بناء تقرير مخصص
+ *   GET  /api/v1/bi/reports/:id      — جلب بيانات التقرير
+ *   POST /api/v1/bi/reports/:id/export — تصدير (excel | pdf | powerbi)
+ *   POST /api/v1/bi/schedule         — جدولة تقرير
+ *   GET  /api/v1/bi/scheduled        — قائمة التقارير المجدولة
+ *   GET  /api/v1/bi/warehouse        — ملخص مستودع البيانات
+ *   POST /api/v1/bi/predictive      — تحليلات تنبؤية
  */
 
 'use strict';
 
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, requireRole } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const biAnalyticsService = require('../services/biAnalytics.service');
+const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
-const Beneficiary = require('../models/Beneficiary');
-const TherapySession = require('../models/TherapySession');
-const ClinicalAssessment = require('../models/ClinicalAssessment');
-const CarePlan = require('../models/CarePlan');
+const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 
-router.use(authenticateToken);
-// W647 — populate req.branchScope so branchFilter(req) works below. = {} for
-// cross-branch/HQ analysts (org-wide BI preserved); branch-id for branch users.
+const BI_ANALYTICS_ROLES = [
+  'admin', 'super_admin', 'superadmin', 'manager',
+  'branch_manager', 'analyst', 'finance', 'finance_manager', 'hr_manager',
+];
+
+router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(BI_ANALYTICS_ROLES));
 
-const READ_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'clinical_supervisor'];
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-// ── GET /overview ────────────────────────────────────────────────────────
-router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════
+// 1. GET /api/v1/bi/config — إعدادات منشئ التقارير
+// ═══════════════════════════════════════════════════════════════════
+router.get('/config', async (req, res) => {
   try {
-    const m30 = daysAgo(30);
-    const m7 = daysAgo(7);
-
-    const [
-      totalBeneficiaries,
-      activeBeneficiaries,
-      newBeneficiaries30d,
-      totalSessions,
-      sessionsThisWeek,
-      sessionsToday,
-      completedThisMonth,
-      totalAssessments,
-      activeCarePlans,
-    ] = await Promise.all([
-      Beneficiary.countDocuments({}),
-      Beneficiary.countDocuments({ status: { $in: ['active', 'enrolled'] } }),
-      Beneficiary.countDocuments({ createdAt: { $gte: m30 } }),
-      TherapySession.countDocuments({}),
-      TherapySession.countDocuments({ date: { $gte: m7 } }),
-      TherapySession.countDocuments({
-        date: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lte: new Date(new Date().setHours(23, 59, 59, 999)),
-        },
-      }),
-      TherapySession.countDocuments({ date: { $gte: m30 }, status: 'COMPLETED' }),
-      ClinicalAssessment.countDocuments({}),
-      CarePlan.countDocuments({ status: 'ACTIVE' }),
-    ]);
-
-    // completion rate over last 30d
-    const [comp30, noShow30, cancel30] = await Promise.all([
-      TherapySession.countDocuments({ date: { $gte: m30 }, status: 'COMPLETED' }),
-      TherapySession.countDocuments({ date: { $gte: m30 }, status: 'NO_SHOW' }),
-      TherapySession.countDocuments({
-        date: { $gte: m30 },
-        status: { $in: ['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER'] },
-      }),
-    ]);
-    const denom = comp30 + noShow30 + cancel30;
-    const completionRate30d = denom > 0 ? Math.round((comp30 / denom) * 100) : null;
-
-    res.json({
-      success: true,
-      kpis: {
-        totalBeneficiaries,
-        activeBeneficiaries,
-        newBeneficiaries30d,
-        totalSessions,
-        sessionsThisWeek,
-        sessionsToday,
-        completedThisMonth,
-        totalAssessments,
-        activeCarePlans,
-        completionRate30d,
-        noShowRate30d: denom > 0 ? Math.round((noShow30 / denom) * 100) : null,
-      },
-    });
+    const config = biAnalyticsService.getReportBuilderConfig();
+    res.json({ success: true, data: config });
   } catch (err) {
-    return safeError(res, err, 'bi.overview');
+    logger.error('[BI-Analytics] config error:', err);
+    safeError(res, 500, 'فشل في جلب إعدادات منشئ التقارير', err.message);
   }
 });
 
-// ── GET /sessions — trend + by type + by status ──────────────────────────
-router.get('/sessions', requireRole(READ_ROLES), async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════
+// 2. POST /api/v1/bi/reports — بناء تقرير مخصص
+// ═══════════════════════════════════════════════════════════════════
+router.post('/reports', async (req, res) => {
   try {
-    const days = Math.min(365, Math.max(7, parseInt(req.query.days, 10) || 30));
-    const since = daysAgo(days);
-
-    // W647 — branch-scope the session aggregates (TherapySession carries
-    // branchId). branchFilter(req) = {} for cross-branch/HQ analysts.
-    const scope = branchFilter(req);
-    const [daily, byType, byStatus, peakHours] = await Promise.all([
-      TherapySession.aggregate([
-        { $match: { ...scope, date: { $gte: since } } },
-        {
-          $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-            total: { $sum: 1 },
-            completed: { $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] } },
-            noShow: { $sum: { $cond: [{ $eq: ['$status', 'NO_SHOW'] }, 1, 0] } },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]),
-      TherapySession.aggregate([
-        { $match: { ...scope, date: { $gte: since } } },
-        { $group: { _id: '$sessionType', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-      TherapySession.aggregate([
-        { $match: { ...scope, date: { $gte: since } } },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]),
-      TherapySession.aggregate([
-        { $match: { ...scope, date: { $gte: since }, startTime: { $exists: true, $ne: null } } },
-        {
-          $group: {
-            _id: { $substr: ['$startTime', 0, 2] },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]),
-    ]);
-
-    res.json({
-      success: true,
-      windowDays: days,
-      daily: daily.map(d => ({
-        date: d._id,
-        total: d.total,
-        completed: d.completed,
-        noShow: d.noShow,
-      })),
-      byType: byType.map(d => ({ type: d._id, count: d.count })),
-      byStatus: byStatus.map(d => ({ status: d._id, count: d.count })),
-      peakHours: peakHours.map(d => ({ hour: d._id, count: d.count })),
-    });
+    const config = req.body;
+    if (!config?.sourceId) {
+      return safeError(res, 400, 'مصدر البيانات مطلوب (sourceId)');
+    }
+    const report = await biAnalyticsService.buildCustomReport(config);
+    res.json({ success: true, data: report });
   } catch (err) {
-    return safeError(res, err, 'bi.sessions');
+    logger.error('[BI-Analytics] build report error:', err);
+    safeError(res, 500, 'فشل في بناء التقرير', err.message);
   }
 });
 
-// ── GET /beneficiaries — demographics ────────────────────────────────────
-router.get('/beneficiaries', requireRole(READ_ROLES), async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════
+// 3. GET /api/v1/bi/reports/:templateId — جلب بيانات التقرير
+// ═══════════════════════════════════════════════════════════════════
+router.get('/reports/:templateId', async (req, res) => {
   try {
-    // W656 — branch-scope demographics (Beneficiary carries branchId).
-    // branchFilter(req) = {} for cross-branch/HQ analysts → org-wide preserved.
-    const scope = branchFilter(req);
-    const [byGender, byDisability, byStatus, byAgeGroup, enrollment90d] = await Promise.all([
-      Beneficiary.aggregate([
-        { $match: { ...scope } },
-        { $group: { _id: '$gender', count: { $sum: 1 } } },
-      ]),
-      Beneficiary.aggregate([
-        { $match: { ...scope } },
-        { $group: { _id: '$disability.primaryType', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 15 },
-      ]),
-      Beneficiary.aggregate([
-        { $match: { ...scope } },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]),
-      Beneficiary.aggregate([
-        { $match: { ...scope, dateOfBirth: { $exists: true, $ne: null } } },
-        {
-          $project: {
-            ageYears: {
-              $floor: {
-                $divide: [
-                  { $subtract: [new Date(), '$dateOfBirth'] },
-                  1000 * 60 * 60 * 24 * 365.25,
-                ],
-              },
-            },
-          },
-        },
-        {
-          $bucket: {
-            groupBy: '$ageYears',
-            boundaries: [0, 3, 6, 9, 12, 15, 18, 25, 40, 100],
-            default: 'Unknown',
-            output: { count: { $sum: 1 } },
-          },
-        },
-      ]),
-      Beneficiary.aggregate([
-        { $match: { ...scope, createdAt: { $gte: daysAgo(90) } } },
-        {
-          $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]),
-    ]);
-
-    const ageLabels = ['0–3', '3–6', '6–9', '9–12', '12–15', '15–18', '18–25', '25–40', '40+'];
-
-    res.json({
-      success: true,
-      byGender: byGender.map(d => ({ gender: d._id || 'غير محدد', count: d.count })),
-      byDisability: byDisability.map(d => ({ type: d._id || 'غير محدد', count: d.count })),
-      byStatus: byStatus.map(d => ({ status: d._id || 'غير محدد', count: d.count })),
-      byAgeGroup: byAgeGroup
-        .filter(d => d._id !== 'Unknown')
-        .map((d, i) => ({ group: ageLabels[i] || String(d._id), count: d.count })),
-      enrollment90d: enrollment90d.map(d => ({ date: d._id, count: d.count })),
-    });
+    const { templateId } = req.params;
+    const { startDate, endDate, ...filters } = req.query;
+    const report = await biAnalyticsService.getReportData(
+      templateId,
+      filters,
+      startDate,
+      endDate
+    );
+    res.json({ success: true, data: report });
   } catch (err) {
-    return safeError(res, err, 'bi.beneficiaries');
+    logger.error('[BI-Analytics] get report error:', err);
+    safeError(res, 500, 'فشل في جلب بيانات التقرير', err.message);
   }
 });
 
-// ── GET /goals — goal progress aggregated ────────────────────────────────
-router.get('/goals', requireRole(READ_ROLES), async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════
+// 4. POST /api/v1/bi/reports/:templateId/export — تصدير التقرير
+// ═══════════════════════════════════════════════════════════════════
+router.post('/reports/:templateId/export', async (req, res) => {
   try {
-    const result = await CarePlan.aggregate([
-      // W654 — branch-scope (CarePlan now carries branchId).
-      { $match: { ...branchFilter(req), status: 'ACTIVE' } },
-      {
-        $project: {
-          allGoals: {
-            $concatArrays: [
-              { $ifNull: ['$educational.domains.academic.goals', []] },
-              { $ifNull: ['$educational.domains.classroom.goals', []] },
-              { $ifNull: ['$educational.domains.communication.goals', []] },
-              { $ifNull: ['$therapeutic.domains.speech.goals', []] },
-              { $ifNull: ['$therapeutic.domains.occupational.goals', []] },
-              { $ifNull: ['$therapeutic.domains.physical.goals', []] },
-              { $ifNull: ['$therapeutic.domains.behavioral.goals', []] },
-              { $ifNull: ['$therapeutic.domains.psychological.goals', []] },
-              { $ifNull: ['$lifeSkills.domains.selfCare.goals', []] },
-              { $ifNull: ['$lifeSkills.domains.homeSkills.goals', []] },
-              { $ifNull: ['$lifeSkills.domains.social.goals', []] },
-              { $ifNull: ['$lifeSkills.domains.transport.goals', []] },
-              { $ifNull: ['$lifeSkills.domains.financial.goals', []] },
-            ],
-          },
-        },
-      },
-      { $unwind: '$allGoals' },
-      {
-        $facet: {
-          byStatus: [{ $group: { _id: '$allGoals.status', count: { $sum: 1 } } }],
-          byType: [
-            {
-              $group: {
-                _id: '$allGoals.type',
-                count: { $sum: 1 },
-                avgProgress: { $avg: '$allGoals.progress' },
-              },
-            },
-            { $sort: { count: -1 } },
-          ],
-          progressDist: [
-            {
-              $bucket: {
-                groupBy: '$allGoals.progress',
-                boundaries: [0, 25, 50, 75, 100, 101],
-                default: 'n/a',
-                output: { count: { $sum: 1 } },
-              },
-            },
-          ],
-          totals: [
-            {
-              $group: {
-                _id: null,
-                total: { $sum: 1 },
-                achieved: {
-                  $sum: { $cond: [{ $eq: ['$allGoals.status', 'ACHIEVED'] }, 1, 0] },
-                },
-                avgProgress: { $avg: '$allGoals.progress' },
-              },
-            },
-          ],
-        },
-      },
-    ]);
+    const { templateId } = req.params;
+    const { format = 'excel', startDate, endDate, ...filters } = req.body;
 
-    const data = result[0] || {};
-    const totals = data.totals?.[0] || {};
-    res.json({
-      success: true,
-      total: totals.total || 0,
-      achieved: totals.achieved || 0,
-      avgProgress: totals.avgProgress ? Math.round(totals.avgProgress) : 0,
-      achievementRate: totals.total ? Math.round((totals.achieved / totals.total) * 100) : null,
-      byStatus: (data.byStatus || []).map(d => ({ status: d._id, count: d.count })),
-      byType: (data.byType || []).map(d => ({
-        type: d._id,
-        count: d.count,
-        avgProgress: d.avgProgress ? Math.round(d.avgProgress) : 0,
-      })),
-      progressDist: (data.progressDist || []).map((d, i) => ({
-        bucket: ['0-25%', '25-50%', '50-75%', '75-100%', '100%'][i] || String(d._id),
-        count: d.count,
-      })),
-    });
+    const report = await biAnalyticsService.getReportData(
+      templateId,
+      filters,
+      startDate,
+      endDate
+    );
+
+    let result;
+    switch (format.toLowerCase()) {
+      case 'excel':
+      case 'xlsx':
+        result = await biAnalyticsService.exportToExcel(report);
+        break;
+      case 'pdf':
+        result = await biAnalyticsService.exportToPDF(report);
+        break;
+      case 'powerbi':
+      case 'json':
+        result = await biAnalyticsService.exportToPowerBI(report);
+        break;
+      default:
+        return safeError(res, 400, 'صيغة التصدير غير مدعومة');
+    }
+
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.send(result.buffer);
   } catch (err) {
-    return safeError(res, err, 'bi.goals');
+    logger.error('[BI-Analytics] export error:', err);
+    safeError(res, 500, 'فشل في تصدير التقرير', err.message);
   }
 });
 
-// ── GET /branches — per-branch comparison ────────────────────────────────
-router.get('/branches', requireRole(READ_ROLES), async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════
+// 5. POST /api/v1/bi/schedule — جدولة تقرير
+// ═══════════════════════════════════════════════════════════════════
+router.post('/schedule', async (req, res) => {
   try {
-    const Branch = require('../models/Branch');
-    const branches = await Branch.find({}).select('name nameEn code').lean();
-    const branchIds = branches.map(b => b._id);
-
-    const [benCounts, assessCounts] = await Promise.all([
-      Beneficiary.aggregate([
-        // W656 — restricted user → only their branch in the comparison; HQ ({}) → all.
-        { $match: { branchId: { $in: branchIds }, ...branchFilter(req) } },
-        { $group: { _id: '$branchId', count: { $sum: 1 } } },
-      ]),
-      ClinicalAssessment.aggregate([
-        // W656 — restricted user → only their branch in the comparison; HQ ({}) → all.
-        { $match: { branchId: { $in: branchIds }, ...branchFilter(req) } },
-        { $group: { _id: '$branchId', count: { $sum: 1 } } },
-      ]),
-    ]);
-    const benMap = Object.fromEntries(benCounts.map(b => [String(b._id), b.count]));
-    const assessMap = Object.fromEntries(assessCounts.map(a => [String(a._id), a.count]));
-
-    const rows = branches.map(b => ({
-      id: b._id,
-      name: b.name || b.nameEn,
-      code: b.code,
-      beneficiaries: benMap[String(b._id)] || 0,
-      assessments: assessMap[String(b._id)] || 0,
-    }));
-    rows.sort((a, b) => b.beneficiaries - a.beneficiaries);
-    res.json({ success: true, items: rows });
+    const { templateId, schedule } = req.body;
+    if (!templateId || !schedule) {
+      return safeError(res, 400, 'معرف القالب وإعدادات الجدولة مطلوبة');
+    }
+    const result = await biAnalyticsService.scheduleReport(templateId, schedule);
+    res.json({ success: true, data: result });
   } catch (err) {
-    return safeError(res, err, 'bi.branches');
+    logger.error('[BI-Analytics] schedule error:', err);
+    safeError(res, 500, 'فشل في جدولة التقرير', err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 6. GET /api/v1/bi/scheduled — قائمة التقارير المجدولة
+// ═══════════════════════════════════════════════════════════════════
+router.get('/scheduled', async (req, res) => {
+  try {
+    const reports = await biAnalyticsService.getScheduledReports();
+    res.json({ success: true, data: reports, count: reports.length });
+  } catch (err) {
+    logger.error('[BI-Analytics] scheduled reports error:', err);
+    safeError(res, 500, 'فشل في جلب التقارير المجدولة', err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 7. GET /api/v1/bi/warehouse — ملخص مستودع البيانات
+// ═══════════════════════════════════════════════════════════════════
+router.get('/warehouse', async (req, res) => {
+  try {
+    const summary = await biAnalyticsService.getDataWarehouseSummary();
+    res.json({ success: true, data: summary });
+  } catch (err) {
+    logger.error('[BI-Analytics] warehouse error:', err);
+    safeError(res, 500, 'فشل في جلب ملخص مستودع البيانات', err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 8. POST /api/v1/bi/predictive — تحليلات تنبؤية
+// ═══════════════════════════════════════════════════════════════════
+router.post('/predictive', async (req, res) => {
+  try {
+    const { type = 'revenue', params = {} } = req.body;
+    const result = await biAnalyticsService.getPredictiveAnalytics(type, params);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    logger.error('[BI-Analytics] predictive error:', err);
+    safeError(res, 500, 'فشل في التحليل التنبؤي', err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 9. POST /api/v1/bi/reports/custom/export — تصدير تقرير مبني (بدون template)
+// ═══════════════════════════════════════════════════════════════════
+router.post('/reports/custom/export', async (req, res) => {
+  try {
+    const { config, format = 'excel' } = req.body;
+    if (!config?.sourceId) {
+      return safeError(res, 400, 'تكوين التقرير مطلوب');
+    }
+
+    const report = await biAnalyticsService.buildCustomReport(config);
+
+    let result;
+    switch (format.toLowerCase()) {
+      case 'excel':
+      case 'xlsx':
+        result = await biAnalyticsService.exportToExcel(report);
+        break;
+      case 'pdf':
+        result = await biAnalyticsService.exportToPDF(report);
+        break;
+      case 'powerbi':
+      case 'json':
+        result = await biAnalyticsService.exportToPowerBI(report);
+        break;
+      default:
+        return safeError(res, 400, 'صيغة التصدير غير مدعومة');
+    }
+
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.send(result.buffer);
+  } catch (err) {
+    logger.error('[BI-Analytics] custom export error:', err);
+    safeError(res, 500, 'فشل في تصدير التقرير', err.message);
   }
 });
 

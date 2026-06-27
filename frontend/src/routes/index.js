@@ -103,6 +103,7 @@ export { default as ChatRoutes } from './ChatRoutes';
 
 // === Phase 17: AI Diagnostic Intelligence (ذكاء اصطناعي للتشخيص) ===
 export { default as AIDiagnosticRoutes } from './AIDiagnosticRoutes';
+export { default as AIPredictiveRoutes } from './AIPredictiveRoutes';
 
 // === Phase 18: OCR Document Processing (معالجة مستندات بالتعرف الضوئي) ===
 export { default as OCRDocumentRoutes } from './OCRDocumentRoutes';
@@ -172,7 +173,12 @@ export { default as FamilyEngagementRoutes } from './FamilyEngagementRoutes';
 
 // === Post-Rehab Follow-Up (متابعة ما بعد التأهيل) ===
 export { default as PostRehabRoutes } from './PostRehabRoutes';
+export { default as ParentPortalRoutes } from './ParentPortalRoutes';
+export { default as GamificationRoutes } from './GamificationRoutes';
 
 // === Social Media Management (إدارة منصات التواصل الاجتماعي) ===
 export { default as SocialMediaRoutes } from './SocialMediaRoutes';
 export { default as CDSSRoutes } from './CDSSRoutes';
+export { default as WhatsAppChatbotRoutes } from './WhatsAppChatbotRoutes';
+export { default as CCTVRoutes } from './CCTVRoutes';
+export { default as EMRRoutes } from './EMRRoutes';

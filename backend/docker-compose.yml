@@ -1,18 +1,30 @@
 services:
-  # Main backend application (development mode)
-  app:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Al-Awael ERP — Development Stack (Backend + MongoDB + Redis)
+  # Run: docker compose up -d
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  backend:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
     container_name: alawael-backend-dev
     ports:
       - "3001:3001"
     environment:
       PORT: "3001"
       NODE_ENV: development
-      USE_MOCK_DB: "true"
-      SKIP_SOCKET_IO: "true"
-      DISABLE_REDIS: "true"
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/alawael_erp?authSource=admin&directConnection=true
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-32-chars-long!!
+      SESSION_SECRET: dev-session-secret-16-chars
+      ENCRYPTION_KEY: dev-encryption-key-32-chars-long!!
+      ALLOW_DEV_SECRETS: "1"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:3001/health || exit 1"]
@@ -21,12 +33,62 @@ services:
       retries: 3
       start_period: 60s
     volumes:
-      # Mount source for live development
       - ./:/app
-      - /app/node_modules  # Prevent overwriting container node_modules
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - alawael-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: alawael-mongodb-dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: alawael_erp
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - alawael-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "-u", "admin", "-p", "admin123", "--authenticationDatabase", "admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: alawael-redis-dev
+    command: >
+      redis-server
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - alawael-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   alawael-network:
     driver: bridge
+
+volumes:
+  mongodb-data:
+    name: alawael-mongodb-dev-data
+  redis-data:
+    name: alawael-redis-dev-data

@@ -84,7 +84,7 @@ class BeneficiaryLifecycleBulkProcessor {
       const job = await this.bulkJobModel.findOneAndUpdate(
         { status: 'queued' },
         { $set: { status: 'running', startedAt: new Date() } },
-        { sort: { createdAt: 1 }, new: true }
+        { sort: { createdAt: 1 }, returnDocument: 'after'}
       );
 
       if (!job) {

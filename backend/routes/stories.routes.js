@@ -268,7 +268,7 @@ router.post(
                 isSensitive: v.isSensitive,
               },
             },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
           ).lean();
           created.push(doc);
         } catch (err) {

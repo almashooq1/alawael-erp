@@ -1,108 +1,27 @@
-###############################################################################
-# Al-Awael ERP — Docker Compose الرئيسي لجميع خدمات المشروع
-# نظام الأوائل ERP — Main Docker Compose for All Project Services
-#
 # ═══════════════════════════════════════════════════════════════════════════════
-# الخدمات الأساسية (Core Infrastructure):
-#   mongodb          : MongoDB 7.0            (port 27017)
-#   redis            : Redis 7                (port 6379)
-#   nats             : NATS Message Broker    (port 4222/8222)
-#   minio            : MinIO Object Storage   (port 9000/9001)
-#
-# خدمات التطبيق (Application Services):
-#   api-gateway      : API Gateway            (port 8080)
-#   backend          : Main Express API       (port 3001)
-#   frontend         : React SPA via Nginx    (port 3004)
-#   graphql          : GraphQL Apollo Server  (port 4000)
-#   nginx            : Reverse Proxy          (port 80/443)
-#
-# الوحدات التجارية (Business Modules):
-#   finance-backend  : Finance Module         (port 3030)
-#   scm-backend      : Supply Chain Backend   (port 3040)
-#   scm-frontend     : Supply Chain Frontend  (port 3045)
-#   dashboard-api    : Dashboard Backend      (port 3006)
-#   dashboard-ui     : Dashboard Frontend     (port 3007)
-#
-# خدمات الذكاء الاصطناعي (AI Services):
-#   intelligent-agent: AI Agent Service       (port 3020)
-#   secretary-ai     : Smart Secretary Python (port 3050)
-#   python-ml        : ML Prediction Service  (port 5001)
-#
-# خدمات التواصل (Communication):
-#   whatsapp         : WhatsApp Service       (port 3010)
-#   notification-svc : Notification Service   (port 3070)
-#   communication-hub: Unified Messaging Hub  (port 3210)
-#
-# خدمات الخلفية (Background Workers):
-#   queue-worker     : BullMQ Job Processor   (port 3080)
-#   backup-service   : Automated Backups      (port 3090)
-#   log-aggregator   : Centralized Logging    (port 3095)
-#   report-worker    : PDF/Excel/CSV Reports  (port 3220)
-#   webhook-worker   : Webhook Delivery       (port 3250)
-#   scheduler        : Cron & Task Scheduling (port 3260)
-#   file-processor   : Image/Doc Processing   (port 3270)
-#
-# خدمات الأعمال المتقدمة (Advanced Business Services):
-#   payment-gateway  : Payment Processing     (port 3200)
-#   audit-service    : Immutable Audit Trail  (port 3230)
-#   search-service   : Elasticsearch Search   (port 3240)
-#   saudi-gov-gateway: Saudi Gov Integrations (port 3280)
-#   iot-gateway      : IoT & Biometric Hub    (port 3290)
-#
-# الخدمات المتخصصة — المرحلة 5 (Phase 5 Microservices):
-#   hr-payroll-service          : HR & Payroll        (port 3300)
-#   crm-service                 : CRM & Enrollment    (port 3310)
-#   attendance-biometric-service: Biometric Attendance (port 3320)
-#   fleet-transport-service     : Fleet & GPS          (port 3330)
-#   document-management-service : DMS & e-Signatures   (port 3340)
-#   workflow-engine-service     : Workflow & Approvals  (port 3350)
-#   identity-service            : Auth & RBAC          (port 3360)
-#   analytics-bi-service        : Analytics & BI       (port 3370)
-#   e-learning-service          : LMS & Gamification   (port 3380)
-#   parent-portal-service       : Parent Portal BFF    (port 3390)
-#   rehabilitation-care-service : Rehab & Therapy      (port 3400)
-#   fee-billing-service         : Fees & ZATCA         (port 3410)
-#   multi-tenant-service        : Multi-Tenancy        (port 3420)
-#   realtime-collaboration-svc  : WebSocket Gateway    (port 3430)
-#   kitchen-laundry-facility-svc: Kitchen & Facility   (port 3440)
-#
-# المراقبة (Monitoring — profile: monitoring):
-#   prometheus       : Metrics Collector      (port 9090)
-#   grafana          : Dashboards             (port 3060)
-#   loki             : Log Aggregation        (port 3100)
-#   alertmanager     : Alert Manager          (port 9093)
-#   node-exporter    : System Metrics         (port 9100)
-#   redis-exporter   : Redis Metrics          (port 9121)
-#   jaeger           : Distributed Tracing    (port 16686)
-#
-# بنية تحتية اختيارية (Optional — profile: optional):
-#   postgres         : PostgreSQL 16          (port 5432)
-#   elasticsearch    : Elasticsearch 8        (port 9200)
-#   kibana           : Elasticsearch UI       (port 5601)
-#
-# أدوات التطوير (Dev Tools — profile: dev):
-#   mongo-express    : MongoDB Admin UI       (port 8081)
-#   mailhog          : Email Test Server      (port 1025/8025)
-#   redis-commander  : Redis Admin UI         (port 8082)
-#
+# Al-Awael ERP — Production Docker Compose (Backend + MongoDB + Redis + NGINX)
 # ═══════════════════════════════════════════════════════════════════════════════
-# الاستخدام (Usage):
-#   docker compose up -d                          # تشغيل الخدمات الأساسية
-#   docker compose up backend frontend -d         # تشغيل خدمات محددة
-#   docker compose --profile monitoring up -d     # تشغيل مع المراقبة
-#   docker compose --profile optional up -d       # تشغيل مع الخدمات الاختيارية
-#   docker compose --profile dev up -d            # تشغيل مع أدوات التطوير
-#   docker compose --profile all up -d            # تشغيل الكل
-#   docker compose logs -f backend                # متابعة سجلات الخلفية
-#   docker compose down                           # إيقاف جميع الخدمات
-###############################################################################
+#
+# Services:
+#   mongodb  : MongoDB 7.0          (port 27017)
+#   redis    : Redis 7-alpine       (port 6379)
+#   backend  : Express API (Node 20) (port 3001)
+#   nginx    : Reverse proxy        (port 80 / 443)
+#
+# Usage:
+#   cp backend/.env.example .env        # Fill in secrets
+#   docker compose up -d --build        # Start all services
+#   docker compose logs -f backend      # Tail backend logs
+#   docker compose down                 # Stop all services
+#   docker compose down -v              # Stop + remove volumes (⚠️ data loss)
+#
+# Health endpoints:
+#   http://localhost/health
+#   http://localhost/api/health
+#   http://localhost:3001/health
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# ─── Shared Configuration ─────────────────────────────────────────────────────
-x-common-env: &common-env
-  NODE_ENV: ${NODE_ENV:-development}
-  TZ: Asia/Riyadh
-  LOG_LEVEL: ${LOG_LEVEL:-info}
-
+# ─── Shared YAML Anchors ──────────────────────────────────────────────────────
 x-healthcheck-defaults: &healthcheck-defaults
   interval: 30s
   timeout: 10s
@@ -117,53 +36,24 @@ networks:
   alawael-net:
     driver: bridge
     name: alawael-network
-  monitoring-net:
-    driver: bridge
-    name: monitoring-network
 
 # ─── Volumes ──────────────────────────────────────────────────────────────────
 volumes:
   mongodb-data:
-    name: alawael-mongodb-data
+    name: alawael-mongodb-prod-data
   redis-data:
-    name: alawael-redis-data
-  postgres-data:
-    name: alawael-postgres-data
-  elasticsearch-data:
-    name: alawael-elasticsearch-data
-  upload-data:
-    name: alawael-uploads
+    name: alawael-redis-prod-data
+  uploads-data:
+    name: alawael-uploads-prod-data
   logs-data:
-    name: alawael-logs
-  prometheus-data:
-    name: alawael-prometheus-data
-  grafana-data:
-    name: alawael-grafana-data
-  alertmanager-data:
-    name: alawael-alertmanager-data
-  minio-data:
-    name: alawael-minio-data
-  nats-data:
-    name: alawael-nats-data
-  backup-data:
-    name: alawael-backup-data
-  file-processor-data:
-    name: alawael-file-processor-data
-  file-uploads:
-    name: alawael-file-uploads
-  report-exports:
-    name: alawael-report-exports
+    name: alawael-logs-prod-data
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  الخدمات — SERVICES
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Services ─────────────────────────────────────────────────────────────────
 services:
 
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  البنية التحتية الأساسية — CORE INFRASTRUCTURE                       ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── MongoDB 7.0 ─────────────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MongoDB 7.0 — Primary Database
+  # ═══════════════════════════════════════════════════════════════════════════
   mongodb:
     image: mongo:7.0
     container_name: alawael-mongodb
@@ -171,13 +61,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
-      MONGO_INITDB_DATABASE: alawael_erp
+      MONGO_INITDB_DATABASE: alawael-erp
     ports:
-      # DB port exposed for dev only — remove or bind to 127.0.0.1 in production
-      - "${MONGO_PORT:-127.0.0.1:27017}:27017"
+      - "27017:27017"
     volumes:
       - mongodb-data:/data/db
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     networks:
       - alawael-net
     healthcheck:
@@ -189,7 +77,9 @@ services:
           memory: 2G
           cpus: "1.5"
 
-  # ─── Redis 7 ─────────────────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Redis 7 — Cache & Session Store
+  # ═══════════════════════════════════════════════════════════════════════════
   redis:
     image: redis:7-alpine
     container_name: alawael-redis
@@ -199,16 +89,14 @@ services:
         --maxmemory 256mb
         --maxmemory-policy allkeys-lru
         --appendonly yes
-        --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
     ports:
-      # Redis port exposed for dev only — remove or bind to 127.0.0.1 in production
-      - "${REDIS_PORT:-127.0.0.1:6379}:6379"
+      - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
+      test: ["CMD-SHELL", "redis-cli ping"]
       <<: *healthcheck-defaults
     deploy:
       resources:
@@ -216,109 +104,40 @@ services:
           memory: 512M
           cpus: "0.5"
 
-  # ─── NATS Message Broker ─────────────────────────────────────────────────
-  nats:
-    image: nats:2.10-alpine
-    container_name: alawael-nats
-    <<: *restart-policy
-    command: >
-      --jetstream
-      --store_dir /data
-      --http_port 8222
-    ports:
-      - "${NATS_PORT:-4222}:4222"
-      - "${NATS_MONITOR_PORT:-8222}:8222"
-    volumes:
-      - nats-data:/data
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.5"
-
-  # ─── MinIO Object Storage ───────────────────────────────────────────────
-  minio:
-    image: minio/minio:latest
-    container_name: alawael-minio
-    <<: *restart-policy
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in .env}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in .env}
-    ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
-    volumes:
-      - minio-data:/data
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  خدمات التطبيق الأساسية — CORE APPLICATION SERVICES                  ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── API Gateway ─────────────────────────────────────────────────────────
-  # api-gateway: # DISABLED — pure pass-through proxy, redundant with NGINX
-  # ─── Backend (Main API) ──────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Backend — Express API (Node 20+)
+  # ═══════════════════════════════════════════════════════════════════════════
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
       args:
-        NODE_ENV: ${NODE_ENV:-development}
+        GIT_SHA: ${GIT_SHA:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     container_name: alawael-backend
     <<: *restart-policy
     environment:
-      <<: *common-env
+      NODE_ENV: production
+      TZ: Asia/Riyadh
       PORT: 3001
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin&directConnection=true
-      REDIS_HOST: redis
-      SESSION_SECRET: ${SESSION_SECRET}
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael-erp?authSource=admin&directConnection=true
+      REDIS_URL: redis://redis:6379
       REDIS_ENABLED: "true"
       DISABLE_REDIS: "false"
-      USE_MOCK_DB: "false"
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      MONGO_SSL: "false"
-      DB_TLS: "false"
-      MONGO_TLS: "false"
-      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:${FRONTEND_PORT:-3004}}
-      # CORS_ORIGINS — تشمل الوصول من الكمبيوتر عبر localhost وعبر الـ IP والـ domain الرسمي
-      # يمكن تخصيصها في ملف .env بإضافة: CORS_ORIGINS=http://IP_ADDRESS,https://alawael.org
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3004,http://localhost:3000,http://localhost:8080,http://localhost:80,http://localhost,https://alawael.org,https://alaweal.org}
-      ENABLE_AUTO_BACKUP: "true"
-      GRAPHQL_URL: http://graphql:4000
-      PYTHON_ML_URL: http://python-ml:5001
-      # ── DDD Platform (Unified Rehabilitation) ──────────────────────────
-      DDD_DOMAINS_ENABLED: "true"
-      DDD_SEED_ON_START: ${DDD_SEED_ON_START:-false}
-      DDD_REALTIME_ENABLED: "true"
-      DDD_KPI_BROADCAST_INTERVAL: ${DDD_KPI_BROADCAST_INTERVAL:-60000}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      SETUP_SECRET_KEY: ${SETUP_SECRET_KEY:?Set SETUP_SECRET_KEY in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@alawael.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,https://alawael.org,https://alaweal.org}
+      USE_MOCK_DB: "false"
     ports:
-      - "${BACKEND_PORT:-3001}:3001"
+      - "3001:3001"
     volumes:
-      - upload-data:/app/uploads
+      - uploads-data:/app/uploads
       - logs-data:/app/logs
     depends_on:
       mongodb:
@@ -328,7 +147,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/health || exit 1"]
       <<: *healthcheck-defaults
     deploy:
       resources:
@@ -336,876 +155,29 @@ services:
           memory: 1G
           cpus: "1.0"
 
-  # ─── Frontend (React SPA) ────────────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
-    container_name: alawael-frontend
-    <<: *restart-policy
-    environment:
-      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
-    ports:
-      - "${FRONTEND_PORT:-3004}:80"
-    depends_on:
-      - backend
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
-
-  # ─── GraphQL Server (Apollo) ── ARCHIVED (extra layer, no consumers) ─────
-  # graphql: # ARCHIVED → _archived/dead-subprojects/graphql/
-
-  # ─── Nginx Reverse Proxy ────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NGINX — Reverse Proxy
+  # ═══════════════════════════════════════════════════════════════════════════
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: nginx:1.25-alpine
     container_name: alawael-nginx
     <<: *restart-policy
     ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "80:80"
+      - "443:443"
     volumes:
+      - ./nginx/backend-proxy.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certs:/etc/nginx/ssl:ro
     depends_on:
       backend:
         condition: service_healthy
-      frontend:
-        condition: service_healthy
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/health || exit 1"]
       <<: *healthcheck-defaults
     deploy:
       resources:
         limits:
           memory: 128M
           cpus: "0.25"
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  الوحدات التجارية — BUSINESS MODULES                                 ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── Finance Module ── ARCHIVED ────────────────────────────────────────
-  # finance-backend: # ARCHIVED → _archived/dead-subprojects/finance-module/
-
-  # ─── Supply Chain Backend ────────────────────────────────────────────────
-  scm-backend:
-    build:
-      context: ./supply-chain-management/backend
-      dockerfile: Dockerfile
-    container_name: alawael-scm-backend
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3040
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_scm?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      BACKEND_URL: http://alawael-backend:3001
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - "${SCM_BACKEND_PORT:-3040}:3040"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3040/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Supply Chain Frontend ───────────────────────────────────────────────
-  scm-frontend:
-    build:
-      context: ./supply-chain-management/frontend
-      dockerfile: Dockerfile
-    container_name: alawael-scm-frontend
-    <<: *restart-policy
-    environment:
-      REACT_APP_API_URL: http://scm-backend:3040
-    ports:
-      - "${SCM_FRONTEND_PORT:-3045}:3000"
-    depends_on:
-      - scm-backend
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
-
-  # ─── Dashboard API ── ARCHIVED (duplicate of frontend) ──────────────────
-  # dashboard-api: # ARCHIVED → _archived/dead-subprojects/dashboard/
-
-  # ─── Dashboard UI ── ARCHIVED (duplicate of frontend) ───────────────────
-  # dashboard-ui: # ARCHIVED → _archived/dead-subprojects/dashboard/
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  خدمات الذكاء الاصطناعي — AI / ML SERVICES                          ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── Intelligent Agent (Node.js) ─── DISABLED ────────────────────────────
-  # intelligent-agent: # DISABLED — no Dockerfile / package.json yet (only 2 stub TS files in intelligent-agent/).
-  # Re-enable when the service is implemented. Original config preserved below for reference.
-  # intelligent-agent:
-  #   build:
-  #     context: ./intelligent-agent
-  #     dockerfile: Dockerfile
-  #   container_name: alawael-intelligent-agent
-  #   <<: *restart-policy
-  #   environment:
-  #     <<: *common-env
-  #     PORT: 3020
-  #     MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_agent?authSource=admin
-  #     REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-  #     OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-  #     BACKEND_URL: http://alawael-backend:3001
-  #   ports:
-  #     - "${AGENT_PORT:-3020}:3020"
-  #   depends_on:
-  #     mongodb:
-  #       condition: service_healthy
-  #   networks:
-  #     - alawael-net
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         memory: 2G
-  #         cpus: "1.0"
-
-  # ─── Secretary AI (Python) ── ARCHIVED (merged into python-ml) ──────────
-  # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/
-
-  # ─── Python ML Service (Flask) ──────────────────────────────────────────
-  python-ml:
-    build:
-      context: ./services/python-ml
-      dockerfile: Dockerfile
-    container_name: alawael-python-ml
-    <<: *restart-policy
-    environment:
-      PYTHON_ML_PORT: 5001
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_ml?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      CORS_ORIGINS: http://alawael-backend:3001,http://localhost:3001
-      BACKEND_URL: http://alawael-backend:3001
-    ports:
-      - "${PYTHON_ML_PORT:-5001}:5001"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:5001/health || exit 1"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "1.0"
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  خدمات التواصل — COMMUNICATION SERVICES                              ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── WhatsApp Service ── ARCHIVED (duplicate of backend/communication) ───
-  # whatsapp: # ARCHIVED → _archived/dead-subprojects/whatsapp/
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  خدمات الإشعارات والخلفية — NOTIFICATION & BACKGROUND SERVICES       ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── Notification Service ────────────────────────────────────────────────
-  # notification-service: # ARCHIVED → _archived/dead-microservices-bulk/
-  # context: ./services/notification-service
-  # dockerfile: Dockerfile
-  queue-worker:
-    build:
-      context: ./services/queue-worker
-      dockerfile: Dockerfile
-    container_name: alawael-queue-worker
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3080
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      SMTP_HOST: ${SMTP_HOST:-mailhog}
-      SMTP_PORT: ${SMTP_PORT:-1025}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-    ports:
-      - "${QUEUE_WORKER_PORT:-3080}:3080"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3080/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "1.0"
-
-  # ─── Backup Service ─────────────────────────────────────────────────────
-  backup-service:
-    build:
-      context: ./services/backup-service
-      dockerfile: Dockerfile
-    container_name: alawael-backup-service
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3090
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin
-      BACKUP_DIR: /backups
-      BACKUP_SCHEDULE: "${BACKUP_SCHEDULE:-0 2 * * *}"
-      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in .env}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in .env}
-      MINIO_BUCKET: ${MINIO_BACKUP_BUCKET:-alawael-backups}
-    ports:
-      - "${BACKUP_PORT:-3090}:3090"
-    volumes:
-      - backup-data:/backups
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3090/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Log Aggregator ─────────────────────────────────────────────────────
-  log-aggregator:
-    build:
-      context: ./services/log-aggregator
-      dockerfile: Dockerfile
-    container_name: alawael-log-aggregator
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3095
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_logs?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-    ports:
-      - "${LOG_AGGREGATOR_PORT:-3095}:3095"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3095/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  خدمات الأعمال المتقدمة — ADVANCED BUSINESS SERVICES (Phase 4)       ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── Payment Gateway (بوابة الدفع) ──────────────────────────────────────
-  # payment-gateway: # ARCHIVED → _archived/dead-microservices-bulk/
-  # context: ./services/payment-gateway
-  # dockerfile: Dockerfile
-  report-worker:
-    build:
-      context: ./services/report-worker
-      dockerfile: Dockerfile
-    container_name: alawael-report-worker
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3220
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      REDIS_HOST: redis
-    ports:
-      - "${REPORT_WORKER_PORT:-3220}:3220"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3220/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "1.0"
-
-  # ─── Audit Service (خدمة التدقيق) ───────────────────────────────────────
-  # audit-service: # ARCHIVED → _archived/dead-microservices-bulk/
-  # context: ./services/audit-service
-  # dockerfile: Dockerfile
-  search-service:
-    build:
-      context: ./services/search-service
-      dockerfile: Dockerfile
-    container_name: alawael-search-service
-    profiles: ["optional", "all"]
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3240
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-    ports:
-      - "${SEARCH_SERVICE_PORT:-3240}:3240"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3240/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Webhook Worker (خدمة الويب هوك) ────────────────────────────────────
-  webhook-worker:
-    build:
-      context: ./services/webhook-worker
-      dockerfile: Dockerfile
-    container_name: alawael-webhook-worker
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3250
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_webhooks?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      REDIS_HOST: redis
-      WEBHOOK_MAX_RETRIES: ${WEBHOOK_MAX_RETRIES:-5}
-      WEBHOOK_TIMEOUT_MS: ${WEBHOOK_TIMEOUT_MS:-10000}
-    ports:
-      - "${WEBHOOK_WORKER_PORT:-3250}:3250"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3250/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Scheduler (خدمة الجدولة) ───────────────────────────────────────────
-  scheduler:
-    build:
-      context: ./services/scheduler
-      dockerfile: Dockerfile
-    container_name: alawael-scheduler
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3260
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_scheduler?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      REDIS_HOST: redis
-    ports:
-      - "${SCHEDULER_PORT:-3260}:3260"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3260/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── File Processor (خدمة معالجة الملفات) ───────────────────────────────
-  file-processor:
-    build:
-      context: ./services/file-processor
-      dockerfile: Dockerfile
-    container_name: alawael-file-processor
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3270
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_files?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      REDIS_HOST: redis
-      UPLOAD_DIR: /app/uploads
-      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-52428800}
-      WATERMARK_TEXT: ${WATERMARK_TEXT:-}
-    ports:
-      - "${FILE_PROCESSOR_PORT:-3270}:3270"
-    volumes:
-      - file-processor-data:/app/uploads
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3270/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "1.0"
-
-  # ─── Saudi Gov Gateway (بوابة الخدمات الحكومية) ─────────────────────────
-  saudi-gov-gateway:
-    build:
-      context: ./services/saudi-gov-gateway
-      dockerfile: Dockerfile
-    container_name: alawael-saudi-gov-gateway
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3280
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_gov?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      GOV_ENCRYPTION_KEY: ${GOV_ENCRYPTION_KEY:-}
-      GOSI_API_URL: ${GOSI_API_URL:-https://api.gosi.gov.sa/v1}
-      QIWA_API_URL: ${QIWA_API_URL:-https://api.qiwa.sa/v1}
-      TAQAT_API_URL: ${TAQAT_API_URL:-https://api.taqat.sa/v1}
-      MUDAD_API_URL: ${MUDAD_API_URL:-https://api.mudad.com.sa/v1}
-      NOOR_API_URL: ${NOOR_API_URL:-https://api.noor.moe.gov.sa/v1}
-      MOI_API_URL: ${MOI_API_URL:-https://api.moi.gov.sa/v1}
-      MUQEEM_API_URL: ${MUQEEM_API_URL:-https://api.muqeem.sa/v1}
-    ports:
-      - "${SAUDI_GOV_PORT:-3280}:3280"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3280/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── IoT Gateway (بوابة إنترنت الأشياء) ────────────────────────────────
-  iot-gateway:
-    build:
-      context: ./services/iot-gateway
-      dockerfile: Dockerfile
-    container_name: alawael-iot-gateway
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3290
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_iot?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-    ports:
-      - "${IOT_GATEWAY_PORT:-3290}:3290"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3290/health"]
-      <<: *healthcheck-defaults
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # المرحلة 5 — الخدمات المتخصصة المستخرجة من الباك إند
-  # Phase 5 — Specialized Microservices Extracted from Backend Monolith
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  # ─── HR & Payroll Service (الموارد البشرية والرواتب) ──────────────────────
-  # hr-payroll-service: # ARCHIVED → _archived/dead-microservices-bulk/
-  # context: ./services/hr-payroll-service
-  # dockerfile: Dockerfile
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: alawael-prometheus
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-    volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./monitoring/rules:/etc/prometheus/rules:ro
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
-      - '--storage.tsdb.retention.time=30d'
-    networks:
-      - alawael-net
-      - monitoring-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Grafana ─────────────────────────────────────────────────────────────
-  grafana:
-    image: grafana/grafana:latest
-    container_name: alawael-grafana
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_INSTALL_PLUGINS: grafana-piechart-panel,redis-datasource
-    ports:
-      - "${GRAFANA_PORT:-3060}:3000"
-    volumes:
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - grafana-data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - monitoring-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Loki (Log Aggregation) ─────────────────────────────────────────────
-  loki:
-    image: grafana/loki:latest
-    container_name: alawael-loki
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    ports:
-      - "${LOKI_PORT:-3100}:3100"
-    networks:
-      - monitoring-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ─── Alertmanager ────────────────────────────────────────────────────────
-  alertmanager:
-    image: prom/alertmanager:latest
-    container_name: alawael-alertmanager
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    ports:
-      - "${ALERTMANAGER_PORT:-9093}:9093"
-    environment:
-      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL:-}"
-      MAIL_USERNAME: "${MAIL_USERNAME:-}"
-      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
-    volumes:
-      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml.tmpl:ro
-      - ./monitoring/alertmanager/docker-entrypoint.sh:/docker-entrypoint.sh:ro
-      - alertmanager-data:/alertmanager
-    entrypoint: ["/bin/sh", "/docker-entrypoint.sh"]
-    command: []
-    depends_on:
-      - prometheus
-    networks:
-      - monitoring-net
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
-
-  # ─── Node Exporter (System Metrics) ─────────────────────────────────────
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: alawael-node-exporter
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    ports:
-      - "${NODE_EXPORTER_PORT:-9100}:9100"
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    networks:
-      - monitoring-net
-
-  # ─── Redis Exporter ─────────────────────────────────────────────────────
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: alawael-redis-exporter
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    environment:
-      REDIS_ADDR: redis://redis:6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-    ports:
-      - "${REDIS_EXPORTER_PORT:-9121}:9121"
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-      - monitoring-net
-
-  # ─── Jaeger (Distributed Tracing) ───────────────────────────────────────
-  jaeger:
-    image: jaegertracing/all-in-one:1.52
-    container_name: alawael-jaeger
-    profiles: ["monitoring", "all"]
-    <<: *restart-policy
-    environment:
-      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
-      SPAN_STORAGE_TYPE: memory
-    ports:
-      - "${JAEGER_UI_PORT:-16686}:16686"
-      - "${JAEGER_COLLECTOR_PORT:-14268}:14268"
-      - "6831:6831/udp"
-      - "9411:9411"
-    networks:
-      - alawael-net
-      - monitoring-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  بنية تحتية اختيارية — OPTIONAL INFRASTRUCTURE (--profile optional)  ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── PostgreSQL 16 ──────────────────────────────────────────────────────
-  postgres:
-    image: postgres:16-alpine
-    container_name: alawael-postgres
-    profiles: ["optional", "all"]
-    <<: *restart-policy
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-      POSTGRES_DB: ${POSTGRES_DB:-alawael_erp}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    ports:
-      # Postgres port exposed for dev only — bind to 127.0.0.1 in production
-      - "${POSTGRES_PORT:-127.0.0.1:5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "1.0"
-
-  # ─── Elasticsearch 8 ───────────────────────────────────────────────────
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
-    container_name: alawael-elasticsearch
-    profiles: ["optional", "all"]
-    <<: *restart-policy
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ports:
-      # ES port exposed for dev only — bind to 127.0.0.1 in production
-      - "${ELASTICSEARCH_PORT:-127.0.0.1:9200}:9200"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -q '\"status\":\"[gy]'"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: "1.0"
-
-  # ─── Kibana (Elasticsearch UI) ──────────────────────────────────────────
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.0
-    container_name: alawael-kibana
-    profiles: ["optional", "all"]
-    <<: *restart-policy
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    ports:
-      - "${KIBANA_PORT:-5601}:5601"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status | grep -q '\"overall\"'"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "0.5"
-
-  # ╔═════════════════════════════════════════════════════════════════════════╗
-  # ║  أدوات التطوير — DEV TOOLS (--profile dev)                           ║
-  # ╚═════════════════════════════════════════════════════════════════════════╝
-
-  # ─── Mongo Express (DB Admin UI) ────────────────────────────────────────
-  mongo-express:
-    image: mongo-express:1.0
-    container_name: alawael-mongo-express
-    profiles: ["dev", "all"]
-    <<: *restart-policy
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:?Set MONGO_EXPRESS_PASSWORD in .env}
-    ports:
-      - "${MONGO_EXPRESS_PORT:-8081}:8081"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
-
-  # ─── MailHog (Email Testing) ─────────────────────────────────────────────
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: alawael-mailhog
-    profiles: ["dev", "all"]
-    <<: *restart-policy
-    ports:
-      - "${MAILHOG_SMTP_PORT:-1025}:1025"
-      - "${MAILHOG_UI_PORT:-8025}:8025"
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: "0.25"
-
-  # ─── Redis Commander (Redis Admin UI) ────────────────────────────────────
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: alawael-redis-commander
-    profiles: ["dev", "all"]
-    <<: *restart-policy
-    environment:
-      REDIS_HOSTS: "local:redis:6379:0:${REDIS_PASSWORD}"
-    ports:
-      - "${REDIS_COMMANDER_PORT:-8082}:8081"
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: "0.25"
-

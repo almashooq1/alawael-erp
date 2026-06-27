@@ -1,407 +1,142 @@
 /**
- * Compliance Management Routes — مسارات إدارة الامتثال
+ * Compliance Routes — مسارات الامتثال والاعتماد
+ * Mount: /api/v1/compliance
  *
- * Unified compliance API using ComplianceControl (InternalControl + ComplianceItem),
- * ComplianceLog, and ComplianceMetric models.
+ * Endpoints:
+ *   GET  /dashboard
+ *   GET  /audits
+ *   POST /audits
+ *   GET  /audits/:id
+ *   PATCH /audits/:id/status
+ *   GET  /pending-actions
+ *   GET  /upcoming-reviews
+ *   GET  /evidence/:auditId
+ *   GET  /audit-trail
  */
+
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { requireAuth, requireRole } = require('../middleware/auth');
+const service = require('../services/compliance.service');
 const safeError = require('../utils/safeError');
+const logger = require('../utils/logger');
 
-// W465: role gate for compliance governance. Regulator-facing
-// InternalControl + ComplianceItem + ComplianceLog + ComplianceMetric
-// — only compliance/admin/quality should mutate (or read in detail).
-const COMPLIANCE_ROLES = [
-  'admin',
-  'super_admin',
-  'superadmin',
-  'manager',
-  'branch_manager',
-  'compliance',
-  'compliance_officer',
-  'quality',
-];
+const QUALITY_ROLES = ['admin', 'super_admin', 'manager', 'quality_manager', 'compliance_officer', 'clinical_director'];
 
-// ─── Authentication Middleware ────────────────────────────────────────────
-router.use(authenticate);
-router.use(requireBranchAccess);
-router.use(authorize(COMPLIANCE_ROLES)); // W465
-// Safe-require models (project uses safeRequire pattern)
-let InternalControl, ComplianceItem, ComplianceLog, ComplianceMetric;
-try {
-  const cc = require('../models/ComplianceControl');
-  InternalControl = cc.InternalControl;
-  ComplianceItem = cc.ComplianceItem;
-} catch {
-  logger.warn('[Compliance] ComplianceControl model not loaded');
-}
-try {
-  ComplianceLog = require('../models/ComplianceLog');
-} catch {
-  /* optional */
-}
-try {
-  ComplianceMetric = require('../models/ComplianceMetric');
-} catch {
-  /* optional */
+/** Helper: run service call with standardized response */
+async function handle(req, res, fn, name) {
+  try {
+    const result = await fn();
+    res.json({ success: true, data: result });
+  } catch (err) {
+    logger.error(`[Compliance] ${name} error:`, err.message);
+    safeError(res, err, `compliance:${name}`);
+  }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — لوحة تحكم الامتثال
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/dashboard', async (req, res) => {
-  try {
-    const results = {};
-
-    if (ComplianceMetric) {
-      const metrics = await ComplianceMetric.find().sort({ updatedAt: -1 }).limit(10).lean();
-      const statuses = await ComplianceMetric.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]);
-      results.metrics = metrics;
-      results.metricSummary = Object.fromEntries(statuses.map(s => [s._id, s.count]));
-    }
-
-    if (ComplianceLog) {
-      const [openIssues, criticalCount, recentLogs] = await Promise.all([
-        ComplianceLog.countDocuments({ status: 'OPEN' }),
-        ComplianceLog.countDocuments({ severity: 'CRITICAL', status: 'OPEN' }),
-        ComplianceLog.find().sort({ detectedAt: -1 }).limit(10).lean(),
-      ]);
-      results.openIssues = openIssues;
-      results.criticalIssues = criticalCount;
-      results.recentLogs = recentLogs;
-    }
-
-    if (InternalControl) {
-      const controlStats = await InternalControl.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]);
-      results.controlStatus = Object.fromEntries(controlStats.map(s => [s._id, s.count]));
-    }
-
-    if (ComplianceItem) {
-      const itemStats = await ComplianceItem.aggregate([
-        { $group: { _id: '$complianceStatus', count: { $sum: 1 } } },
-      ]);
-      results.itemStatus = Object.fromEntries(itemStats.map(s => [s._id, s.count]));
-    }
-
-    res.json({ success: true, data: results });
-  } catch (error) {
-    safeError(res, error, '[Compliance] Dashboard error');
+// ─── 1. Dashboard Overview ────────────────────────────────────────────
+router.get(
+  '/dashboard',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { branchId, standard } = req.query;
+    await handle(req, res, () => service.getComplianceDashboard(branchId, standard), 'dashboard');
   }
-});
+);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// INTERNAL CONTROLS — الضوابط الداخلية
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/controls', async (req, res) => {
-  try {
-    if (!InternalControl)
-      return res.json({ success: true, data: [], message: 'Model not available' });
-
-    const { status, category, riskLevel, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (category) filter.category = category;
-    if (riskLevel) filter.riskLevel = riskLevel;
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [controls, total] = await Promise.all([
-      InternalControl.find(filter)
-        .populate('owner', 'name email')
-        .sort({ riskLevel: -1, createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      InternalControl.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data: controls,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'compliance');
+// ─── 2. List Audits ───────────────────────────────────────────────────
+router.get(
+  '/audits',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { standard, category, status, branchId, search, page, limit } = req.query;
+    await handle(req, res, () => service.listAudits(
+      { standard, category, status, branchId, search },
+      { page, limit }
+    ), 'list-audits');
   }
-});
+);
 
-router.post('/controls', async (req, res) => {
-  try {
-    if (!InternalControl)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: control });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 3. Create Audit ──────────────────────────────────────────────────
+router.post(
+  '/audits',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    await handle(req, res, () => service.createComplianceAudit(req.body), 'create-audit');
   }
-});
+);
 
-router.put('/controls/:id', async (req, res) => {
-  try {
-    if (!InternalControl)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
-      { returnDocument: 'after', runValidators: true }
-    );
-    if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
-    res.json({ success: true, data: control });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 4. Get Single Audit ──────────────────────────────────────────────
+router.get(
+  '/audits/:id',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { id } = req.params;
+    await handle(req, res, () => service.getAuditById(id), 'get-audit');
   }
-});
+);
 
-router.post('/controls/:id/test-result', async (req, res) => {
-  try {
-    if (!InternalControl)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.findById(req.params.id);
-    if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
-
-    control.testResults.push({
-      ...stripUpdateMeta(req.body),
-      tester: req.user?._id,
-      testDate: new Date(),
-    });
-    control.lastTestDate = new Date();
-    control.lastTestResult = req.body.result;
-    await control.save();
-
-    res.json({ success: true, data: control, message: 'تم إضافة نتيجة الاختبار' });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 5. Update Status ─────────────────────────────────────────────────
+router.patch(
+  '/audits/:id/status',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { id } = req.params;
+    const { status, evidence } = req.body;
+    const changedBy = req.user?._id;
+    await handle(req, res, () => service.updateComplianceStatus(id, status, evidence, changedBy), 'update-status');
   }
-});
+);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// COMPLIANCE ITEMS — بنود الامتثال التنظيمي
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/items', async (req, res) => {
-  try {
-    if (!ComplianceItem)
-      return res.json({ success: true, data: [], message: 'Model not available' });
-
-    const { complianceStatus, regulatoryBody, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (complianceStatus) filter.complianceStatus = complianceStatus;
-    if (regulatoryBody) filter.regulatoryBody = regulatoryBody;
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [items, total] = await Promise.all([
-      ComplianceItem.find(filter)
-        .populate('responsiblePerson', 'name email')
-        .sort({ deadline: 1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      ComplianceItem.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data: items,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'compliance');
+// ─── 6. Pending Actions ─────────────────────────────────────────────
+router.get(
+  '/pending-actions',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { branchId } = req.query;
+    await handle(req, res, () => service.getPendingCorrectiveActions(branchId), 'pending-actions');
   }
-});
+);
 
-router.post('/items', async (req, res) => {
-  try {
-    if (!ComplianceItem)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const item = await ComplianceItem.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: item });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 7. Upcoming Reviews ──────────────────────────────────────────────
+router.get(
+  '/upcoming-reviews',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { branchId, days } = req.query;
+    await handle(req, res, () => service.getUpcomingReviews(branchId, Number(days) || 30), 'upcoming-reviews');
   }
-});
+);
 
-router.put('/items/:id', async (req, res) => {
-  try {
-    if (!ComplianceItem)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const item = await ComplianceItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
-    if (!item) return res.status(404).json({ success: false, error: 'البند غير موجود' });
-    res.json({ success: true, data: item });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 8. Evidence Registry ─────────────────────────────────────────────
+router.get(
+  '/evidence/:auditId',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { auditId } = req.params;
+    await handle(req, res, () => service.getEvidenceRegistry(auditId), 'evidence-registry');
   }
-});
+);
 
-router.post('/items/:id/evidence', async (req, res) => {
-  try {
-    if (!ComplianceItem)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const item = await ComplianceItem.findById(req.params.id);
-    if (!item) return res.status(404).json({ success: false, error: 'البند غير موجود' });
-
-    item.evidence.push({ ...stripUpdateMeta(req.body), uploadedAt: new Date() });
-    await item.save();
-
-    res.json({ success: true, data: item, message: 'تم إضافة الإثبات' });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+// ─── 9. Audit Trail ───────────────────────────────────────────────────
+router.get(
+  '/audit-trail',
+  requireAuth,
+  requireRole(QUALITY_ROLES),
+  async (req, res) => {
+    const { standard, startDate, endDate } = req.query;
+    await handle(req, res, () => service.getAuditTrail(standard, startDate, endDate), 'audit-trail');
   }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMPLIANCE LOGS — سجلات الامتثال
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/logs', async (req, res) => {
-  try {
-    if (!ComplianceLog)
-      return res.json({ success: true, data: [], message: 'Model not available' });
-
-    const { domain, severity, status, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (domain) filter.domain = domain;
-    if (severity) filter.severity = severity;
-    if (status) filter.status = status;
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [logs, total] = await Promise.all([
-      ComplianceLog.find(filter)
-        .sort({ detectedAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      ComplianceLog.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data: logs,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'compliance');
-  }
-});
-
-router.post('/logs', async (req, res) => {
-  try {
-    if (!ComplianceLog)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const log = await ComplianceLog.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: log });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
-  }
-});
-
-router.patch('/logs/:id/resolve', async (req, res) => {
-  try {
-    if (!ComplianceLog)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const log = await ComplianceLog.findByIdAndUpdate(
-      req.params.id,
-      { status: 'RESOLVED', resolvedAt: new Date(), resolvedBy: req.user?._id },
-      { returnDocument: 'after' }
-    );
-    if (!log) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    res.json({ success: true, data: log, message: 'تم حل المشكلة' });
-  } catch (error) {
-    safeError(res, error, 'compliance');
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// METRICS — مقاييس الامتثال
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/metrics', async (req, res) => {
-  try {
-    if (!ComplianceMetric)
-      return res.json({ success: true, data: [], message: 'Model not available' });
-
-    const { status, metricType, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (metricType) filter.metricType = metricType;
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [metrics, total] = await Promise.all([
-      ComplianceMetric.find(filter)
-        .sort({ updatedAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      ComplianceMetric.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data: metrics,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'compliance');
-  }
-});
-
-router.post('/metrics', async (req, res) => {
-  try {
-    if (!ComplianceMetric)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const metric = await ComplianceMetric.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: metric });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
-  }
-});
-
-router.put('/metrics/:id', async (req, res) => {
-  try {
-    if (!ComplianceMetric)
-      return res.status(501).json({ success: false, error: 'Model not available' });
-    const metric = await ComplianceMetric.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
-      { returnDocument: 'after', runValidators: true }
-    );
-    if (!metric) return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
-    res.json({ success: true, data: metric });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
-  }
-});
+);
 
 module.exports = router;

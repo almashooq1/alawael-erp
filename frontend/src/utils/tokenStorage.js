@@ -8,9 +8,45 @@
  * cleaned up on write to gradually unify the codebase.
  */
 
-// ---------------------------------------------------------------------------
-// Keys
-// ---------------------------------------------------------------------------
+/**
+ * Secure Cookie Storage — preferred for auth tokens in production
+ * Uses document.cookie with Secure, SameSite=Strict, and __Secure- prefix
+ * Falls back to localStorage if cookies are unavailable
+ */
+
+const COOKIE_PREFIX = '__Secure-';
+
+function getCookie(name) {
+  try {
+    const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${COOKIE_PREFIX}${name}=([^;]+)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCookie(name, value, maxAge = 86400) {
+  try {
+    const isSecure = window.location.protocol === 'https:';
+    const flags = [`${COOKIE_PREFIX}${name}=${encodeURIComponent(value)}`, `path=/`, `SameSite=Strict`];
+    if (isSecure) flags.push('Secure');
+    if (maxAge) flags.push(`max-age=${maxAge}`);
+    document.cookie = flags.join('; ');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function removeCookie(name) {
+  try {
+    const flags = [`${COOKIE_PREFIX}${name}=`, `path=/`, `max-age=0`];
+    document.cookie = flags.join('; ');
+  } catch {
+    /* ignore */
+  }
+}
+
 const TOKEN_KEY = 'token';
 const LEGACY_TOKEN_KEYS = ['authToken', 'auth_token', 'access_token', 'accessToken'];
 
@@ -26,9 +62,6 @@ const LEGACY_USER_KEYS = ['userData'];
 
 /**
  * Read the first available value from a list of localStorage keys.
- * @param {string} primary   – the canonical key to check first
- * @param {string[]} legacy  – additional keys to check as fallback
- * @returns {string|null}
  */
 function readFirst(primary, legacy) {
   const value = localStorage.getItem(primary);
@@ -55,29 +88,30 @@ function removeAll(primary, legacy) {
 // Public API — Access Token
 // ---------------------------------------------------------------------------
 
-/** Read the access token, checking canonical key first then legacy keys. */
+/** Read the access token, checking secure cookie first then localStorage. */
 export function getToken() {
+  // Prefer secure cookie in production
+  const cookieToken = getCookie(TOKEN_KEY);
+  if (cookieToken) return cookieToken;
   return readFirst(TOKEN_KEY, LEGACY_TOKEN_KEYS);
 }
 
-/**
- * Persist the access token.
- * Writes to the canonical key and (temporarily) to 'authToken' so that
- * parts of the codebase not yet migrated continue to work.
- * Also clears the other legacy keys to prevent stale reads.
- */
+/** Persist the access token to secure cookie (or localStorage as fallback). */
 export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
-  // Backward-compat bridge – remove once all readers are migrated
+  const cookieSet = setCookie(TOKEN_KEY, token, 86400); // 24 hours
+  if (!cookieSet) {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+  // Backward-compat bridge
   localStorage.setItem('authToken', token);
-  // Clean up other legacy keys
   localStorage.removeItem('auth_token');
   localStorage.removeItem('access_token');
   localStorage.removeItem('accessToken');
 }
 
-/** Remove all token keys from localStorage. */
+/** Remove all token keys from storage. */
 export function removeToken() {
+  removeCookie(TOKEN_KEY);
   removeAll(TOKEN_KEY, LEGACY_TOKEN_KEYS);
 }
 
@@ -86,15 +120,21 @@ export function removeToken() {
 // ---------------------------------------------------------------------------
 
 export function getRefreshToken() {
+  const cookieToken = getCookie(REFRESH_KEY);
+  if (cookieToken) return cookieToken;
   return readFirst(REFRESH_KEY, LEGACY_REFRESH_KEYS);
 }
 
 export function setRefreshToken(token) {
-  localStorage.setItem(REFRESH_KEY, token);
+  const cookieSet = setCookie(REFRESH_KEY, token, 604800); // 7 days
+  if (!cookieSet) {
+    localStorage.setItem(REFRESH_KEY, token);
+  }
   localStorage.removeItem('refresh_token');
 }
 
 export function removeRefreshToken() {
+  removeCookie(REFRESH_KEY);
   removeAll(REFRESH_KEY, LEGACY_REFRESH_KEYS);
 }
 

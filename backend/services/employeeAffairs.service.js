@@ -28,6 +28,26 @@ const getLeaveRequest = () => {
   return LeaveRequest;
 };
 
+// ── Backward-compat helper: normalise lean() results for legacy callers ─────
+function _normEmp(e) {
+  if (!e) return e;
+  e.employeeId = e.employee_number || e.employeeId;
+  e.firstName = e.name_ar || e.firstName || '';
+  e.lastName = e.name_en || e.lastName || '';
+  e.fullName = `${e.firstName} ${e.lastName}`.trim() || e.name || '';
+  e.position = e.job_title_ar || e.position || '';
+  if (!e.salary) e.salary = { base: e.basic_salary || 0 };
+  else if (e.salary.base === undefined && e.basic_salary !== undefined) e.salary.base = e.basic_salary;
+  if (!e.contract) {
+    e.contract = {
+      startDate: e.hire_date,
+      endDate: e.probation_end_date,
+      contractType: e.contract_type,
+    };
+  }
+  return e;
+}
+
 class EmployeeAffairsService {
   // ═══════════════════════════════════════════════════════════════════════════
   // إدارة الموظفين
@@ -38,12 +58,13 @@ class EmployeeAffairsService {
    */
   async createEmployee(data) {
     const Emp = getEmployee();
+    const searchId = data.employeeId || data.employee_number;
     const existing = await Emp.findOne({
-      $or: [{ employeeId: data.employeeId }, { email: data.email }],
+      $or: [{ employee_number: searchId }, { email: data.email }],
     });
     if (existing) {
       throw new Error(
-        existing.employeeId === data.employeeId
+        existing.employee_number === searchId
           ? 'رقم الموظف مستخدم بالفعل'
           : 'البريد الإلكتروني مستخدم بالفعل'
       );
@@ -51,16 +72,17 @@ class EmployeeAffairsService {
 
     const employee = new Emp({
       ...data,
+      employee_number: data.employee_number || data.employeeId,
       status: data.status || 'active',
       leave: {
-        annualLeaveDays: data.annualLeaveDays || 30,
-        sickLeaveDays: data.sickLeaveDays || 10,
+        annualLeaveDays: data.annualLeaveDays || data.leave?.annualLeaveDays || 30,
+        sickLeaveDays: data.sickLeaveDays || data.leave?.sickLeaveDays || 10,
         usedAnnualLeave: 0,
         usedSickLeave: 0,
       },
     });
     await employee.save();
-    logger.info(`[EmployeeAffairs] Employee created: ${employee.employeeId}`);
+    logger.info(`[EmployeeAffairs] Employee created: ${employee.employee_number}`);
     return employee;
   }
 
@@ -95,11 +117,11 @@ class EmployeeAffairsService {
     if (search) {
       const regex = new RegExp(escapeRegex(search), 'i');
       query.$or = [
-        { firstName: regex },
-        { lastName: regex },
+        { name_ar: regex },
+        { name_en: regex },
         { email: regex },
-        { employeeId: regex },
-        { position: regex },
+        { employee_number: regex },
+        { job_title_ar: regex },
       ];
     }
 

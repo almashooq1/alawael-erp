@@ -1,0 +1,81 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Al-Awael ERP — Deploy to Production VPS
+# ═══════════════════════════════════════════════════════════════════════════
+# Triggered ONLY on pushes to `main`.
+# SSH into the VPS and executes the deployment script.
+#
+# Required GitHub Secrets:
+#   VPS_HOST      → hostname or IP of the production server
+#   VPS_USER      → SSH username
+#   VPS_SSH_KEY   → private key (add as a Deploy Key or Repository Secret)
+#   APP_DIR       → absolute path on the server where the app lives
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: Deploy
+
+permissions:
+  contents: read
+
+# ── Triggers ──────────────────────────────────────────────────────────────
+on:
+  push:
+    branches:
+      - main
+
+# ── Shared Environment ──────────────────────────────────────────────────
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  # Deploy — SSH to VPS and run the deploy script
+  # ═══════════════════════════════════════════════════════════════════
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── SSH Deploy ───────────────────────────────────────────────
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          # port: 22          # uncomment if your SSH listens on a non-standard port
+          script_stop: true   # abort on first failed command
+          script: |
+            echo "=== Al-Awael ERP Deploy — $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+            cd ${{ secrets.APP_DIR }}
+
+            # Pull latest code
+            git fetch origin
+            git reset --hard origin/main
+
+            # Install & restart (adjust to your actual deploy script)
+            # Option A: if you have a deploy script on the VPS
+            # bash scripts/deploy-vps.sh
+
+            # Option B: docker compose rebuild (recommended for this project)
+            docker compose -f docker-compose.production.yml pull
+            docker compose -f docker-compose.production.yml up -d --build --remove-orphans
+
+            # Prune old images to keep disk space healthy
+            docker image prune -af --filter "until=168h"
+
+            echo "=== Deploy completed ==="
+
+      # ── Optional: Smoke test after deploy ──────────────────────
+      - name: Smoke test /health endpoint
+        run: |
+          echo "Waiting 20s for containers to warm up..."
+          sleep 20
+          curl -fsS --max-time 30 \
+            "http://${{ secrets.VPS_HOST }}:3001/health" \
+            || (echo "Health check failed!" && exit 1)
+        # Note: if your health endpoint is behind HTTPS or a different port,
+        # adjust the URL above accordingly.

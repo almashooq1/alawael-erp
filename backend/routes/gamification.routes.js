@@ -1,170 +1,111 @@
 /**
- * Gamification Routes — مسارات اللعبية
- * Manage badges, wallets, and point awards
+ * Gamification Routes — مسارات نظام التحفيز والشارات
+ * Endpoints for gamification profile, points, badges, challenges, leaderboard
  */
 
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
-// W440: auto-enforce branch ownership on every :beneficiaryId param.
-router.param('beneficiaryId', branchScopedBeneficiaryParam);
-const SmartGamificationService = require('../services/smartGamification.service');
-const { Badge, BeneficiaryWallet } = require('../models/Gamification');
+const { authenticate } = require('../middleware/auth');
+const { authGate } = require('../middleware/authUnified');
+const gamificationService = require('../services/gamification.service');
+const { Gamification } = require('../models/Gamification');
 const logger = require('../utils/logger');
-const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
-// ── Badges CRUD ──────────────────────────────────────────────────
+// ─── All routes require authentication ─────────────────────────
+router.use(authenticate);
 
-/** GET /api/gamification/badges — list all badges */
-router.get('/badges', requireAuth, requireBranchAccess, async (req, res) => {
+// ─── GET /profile/:beneficiaryId ─────────────────────────────
+router.get('/profile/:beneficiaryId', async (req, res) => {
   try {
-    const badges = await Badge.find().sort({ category: 1, threshold: 1 });
-    res.json({ success: true, data: badges, count: badges.length });
+    const profile = await gamificationService.getGamificationProfile(req.params.beneficiaryId);
+    res.json({ success: true, data: profile });
   } catch (err) {
-    safeError(res, err, 'gamification badges list error');
+    logger.error('gamification profile error:', err);
+    safeError(res, err, 'gamification profile error');
   }
 });
 
-/** POST /api/gamification/badges — create badge (admin) */
-router.post(
-  '/badges',
-  requireAuth,
-  requireBranchAccess,
-  requireRole(['admin']),
-  async (req, res) => {
-    try {
-      const badge = await Badge.create(stripUpdateMeta(req.body));
-      res.status(201).json({ success: true, data: badge });
-    } catch (err) {
-      logger.error('gamification badge create error:', err);
-      res.status(400).json({ success: false, message: safeError(err) });
-    }
-  }
-);
-
-/** PUT /api/gamification/badges/:id — update badge (admin) */
-router.put(
-  '/badges/:id',
-  requireAuth,
-  requireBranchAccess,
-  requireRole(['admin']),
-  async (req, res) => {
-    try {
-      const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        returnDocument: 'after',
-        runValidators: true,
-      });
-      if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
-      res.json({ success: true, data: badge });
-    } catch (err) {
-      logger.error('gamification badge update error:', err);
-      res.status(400).json({ success: false, message: safeError(err) });
-    }
-  }
-);
-
-/** DELETE /api/gamification/badges/:id — delete badge (admin) */
-router.delete(
-  '/badges/:id',
-  requireAuth,
-  requireBranchAccess,
-  requireRole(['admin']),
-  async (req, res) => {
-    try {
-      const badge = await Badge.findByIdAndDelete(req.params.id);
-      if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
-      res.json({ success: true, message: 'Badge deleted' });
-    } catch (err) {
-      safeError(res, err, 'gamification badge delete error');
-    }
-  }
-);
-
-/** POST /api/gamification/badges/seed — seed default badges (admin) */
-router.post(
-  '/badges/seed',
-  requireAuth,
-  requireBranchAccess,
-  requireRole(['admin']),
-  async (req, res) => {
-    try {
-      await SmartGamificationService.seedBadges();
-      const count = await Badge.countDocuments();
-      res.json({ success: true, message: 'Badges seeded', count });
-    } catch (err) {
-      safeError(res, err, 'gamification seed error');
-    }
-  }
-);
-
-// ── Wallets ──────────────────────────────────────────────────────
-
-/** GET /api/gamification/wallets — list all wallets */
-router.get('/wallets', requireAuth, requireBranchAccess, async (req, res) => {
+// ─── POST /award-points ──────────────────────────────────────
+router.post('/award-points', async (req, res) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
-    const skip = (page - 1) * limit;
-    const [wallets, total] = await Promise.all([
-      BeneficiaryWallet.find()
-        .populate('beneficiary', 'name fileNumber')
-        .sort({ totalPoints: -1 })
-        .skip(skip)
-        .limit(+limit),
-      BeneficiaryWallet.countDocuments(),
-    ]);
-    res.json({ success: true, data: wallets, total, page: +page, pages: Math.ceil(total / limit) });
+    const { beneficiaryId, points, reason } = req.body;
+    if (!beneficiaryId || points == null) {
+      return res.status(400).json({ success: false, message: 'beneficiaryId and points are required' });
+    }
+    const profile = await gamificationService.awardPoints(beneficiaryId, points, reason);
+    res.json({ success: true, data: profile });
   } catch (err) {
-    safeError(res, err, 'gamification wallets list error');
+    logger.error('gamification award-points error:', err);
+    safeError(res, err, 'gamification award-points error');
   }
 });
 
-/** GET /api/gamification/wallets/:beneficiaryId — get wallet by beneficiary */
-router.get('/wallets/:beneficiaryId', requireAuth, requireBranchAccess, async (req, res) => {
+// ─── GET /leaderboard ────────────────────────────────────────
+router.get('/leaderboard', async (req, res) => {
   try {
-    const wallet = await BeneficiaryWallet.findOne({ beneficiary: req.params.beneficiaryId })
-      .populate('beneficiary', 'name fileNumber')
-      .populate('badges.badge');
-    if (!wallet) return res.status(404).json({ success: false, message: 'Wallet not found' });
-    res.json({ success: true, data: wallet });
+    const { branchId, limit = 20 } = req.query;
+    const leaders = await gamificationService.getLeaderboard(branchId || null, +limit);
+    res.json({ success: true, data: leaders });
   } catch (err) {
-    safeError(res, err, 'gamification wallet get error');
+    logger.error('gamification leaderboard error:', err);
+    safeError(res, err, 'gamification leaderboard error');
   }
 });
 
-/** POST /api/gamification/award — award points to beneficiary */
-router.post('/award', requireAuth, requireBranchAccess, async (req, res) => {
+// ─── POST /challenges ────────────────────────────────────────
+router.post('/challenges', async (req, res) => {
   try {
-    const { beneficiaryId, actionType, points } = req.body;
-    if (!beneficiaryId || !actionType) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'beneficiaryId and actionType required' });
+    const { beneficiaryId, ...challengeData } = req.body;
+    if (!beneficiaryId) {
+      return res.status(400).json({ success: false, message: 'beneficiaryId is required' });
     }
-    const result = await SmartGamificationService.awardAction(
+    const result = await gamificationService.createChallenge(beneficiaryId, challengeData);
+    res.status(201).json({ success: true, data: result });
+  } catch (err) {
+    logger.error('gamification create-challenge error:', err);
+    safeError(res, err, 'gamification create-challenge error');
+  }
+});
+
+// ─── PATCH /challenges/:challengeId/progress ─────────────────
+router.patch('/challenges/:challengeId/progress', async (req, res) => {
+  try {
+    const { beneficiaryId, progress } = req.body;
+    if (!beneficiaryId || progress == null) {
+      return res.status(400).json({ success: false, message: 'beneficiaryId and progress are required' });
+    }
+    const result = await gamificationService.updateChallengeProgress(
       beneficiaryId,
-      actionType,
-      points || 10
+      req.params.challengeId,
+      +progress
     );
     res.json({ success: true, data: result });
   } catch (err) {
-    safeError(res, err, 'gamification award error');
+    logger.error('gamification challenge-progress error:', err);
+    safeError(res, err, 'gamification challenge-progress error');
   }
 });
 
-/** GET /api/gamification/leaderboard — top wallets */
-router.get('/leaderboard', requireAuth, requireBranchAccess, async (req, res) => {
+// ─── GET /badges/:beneficiaryId ─────────────────────────────
+router.get('/badges/:beneficiaryId', async (req, res) => {
   try {
-    const { limit = 10 } = req.query;
-    const leaders = await BeneficiaryWallet.find()
-      .populate('beneficiary', 'name fileNumber')
-      .sort({ totalPoints: -1 })
-      .limit(+limit);
-    res.json({ success: true, data: leaders });
+    const profile = await Gamification.findOrCreate(req.params.beneficiaryId);
+    res.json({ success: true, data: profile.badges });
   } catch (err) {
-    safeError(res, err, 'gamification leaderboard error');
+    logger.error('gamification badges error:', err);
+    safeError(res, err, 'gamification badges error');
+  }
+});
+
+// ─── POST /check-badges/:beneficiaryId ───────────────────────
+router.post('/check-badges/:beneficiaryId', async (req, res) => {
+  try {
+    const result = await gamificationService.checkAndAwardBadges(req.params.beneficiaryId);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    logger.error('gamification check-badges error:', err);
+    safeError(res, err, 'gamification check-badges error');
   }
 });
 

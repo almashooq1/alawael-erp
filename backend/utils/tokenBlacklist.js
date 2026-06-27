@@ -59,7 +59,7 @@ module.exports = {
    * @param {string} token - The raw JWT string
    * @param {object} decoded - The decoded JWT payload (must have `exp`)
    */
-  async add(token, decoded) {
+  async add(token, decodedOrTtl) {
     try {
       const hash = hashToken(token);
       const redis = await getRedis();
@@ -74,7 +74,15 @@ module.exports = {
       }
 
       const key = PREFIX + hash;
-      const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+      // Accept either a decoded JWT object (with exp) or a raw TTL number
+      let ttl;
+      if (typeof decodedOrTtl === 'number') {
+        ttl = decodedOrTtl;
+      } else if (decodedOrTtl && typeof decodedOrTtl === 'object' && decodedOrTtl.exp) {
+        ttl = decodedOrTtl.exp - Math.floor(Date.now() / 1000);
+      } else {
+        ttl = 86400; // default 24h
+      }
       if (ttl > 0) {
         await Promise.race([
           redis.set(key, '1', 'EX', ttl),

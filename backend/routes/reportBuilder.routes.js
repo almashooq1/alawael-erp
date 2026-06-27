@@ -117,7 +117,6 @@ router.post(
   '/reports',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     body('name').notEmpty().withMessage('اسم التقرير مطلوب'),
@@ -138,7 +137,6 @@ router.post(
 router.put(
   '/reports/:id',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
@@ -161,7 +159,6 @@ router.delete(
   '/reports/:id',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -179,7 +176,6 @@ router.delete(
 router.post(
   '/reports/:id/duplicate',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
@@ -204,7 +200,6 @@ router.post(
   '/reports/:id/columns',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty(), body('fieldId').notEmpty().withMessage('معرف الحقل مطلوب')],
   async (req, res) => {
@@ -224,7 +219,6 @@ router.delete(
   '/reports/:id/columns/:fieldId',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   async (req, res) => {
     try {
@@ -241,7 +235,6 @@ router.delete(
 router.put(
   '/reports/:id/columns/reorder',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty(), body('orderedFieldIds').isArray().withMessage('ترتيب الحقول مطلوب')],
@@ -261,7 +254,6 @@ router.put(
 router.post(
   '/reports/:id/filters',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
@@ -302,7 +294,6 @@ router.put(
   '/reports/:id/filters/:filterId',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   async (req, res) => {
     try {
@@ -319,7 +310,6 @@ router.put(
 router.put(
   '/reports/:id/sorting',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
@@ -340,7 +330,6 @@ router.put(
   '/reports/:id/group-by',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -359,7 +348,6 @@ router.put(
 router.post(
   '/reports/:id/calculated-fields',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
@@ -399,7 +387,6 @@ router.delete(
 router.put(
   '/reports/:id/chart',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
@@ -490,7 +477,6 @@ router.post(
   '/templates/:id/create-report',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -508,7 +494,6 @@ router.post(
 router.post(
   '/reports/:id/save-as-template',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
@@ -569,7 +554,6 @@ router.post(
   '/schedules',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     body('reportId').notEmpty().withMessage('معرف التقرير مطلوب'),
@@ -593,7 +577,6 @@ router.put(
   '/schedules/:id',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -611,7 +594,6 @@ router.put(
 router.delete(
   '/schedules/:id',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
@@ -634,7 +616,6 @@ router.delete(
 router.post(
   '/reports/:id/share',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],

@@ -231,6 +231,11 @@ export const ROUTES = {
   SYSTEM_ADMIN: '/system-admin',
   GROUPS: '/groups',
   FRIENDS: '/friends',
+
+  // Mobile PWA
+  MOBILE: '/mobile',
+  MOBILE_SESSIONS: '/mobile/sessions',
+  MOBILE_BENEFICIARIES: '/mobile/beneficiaries',
 };
 
 export default ROUTES;

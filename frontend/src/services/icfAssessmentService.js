@@ -1,72 +1,95 @@
 /**
  * ICF Assessment Service
- * خدمة تقييمات التصنيف الدولي للأداء الوظيفي (ICF)
+ * خدمة تقييمات ICF - API Client
  */
-import api from './api';
+import apiClient from './api.client';
 
-const BASE = '/api/v1/icf-assessments';
+const BASE_URL = '/api/v1/icf-assessments';
 
-// ── Assessments CRUD ──
 export const assessmentsService = {
-  getAll: () =>
-    api
-      .get(BASE)
-      .then(r => r.data)
-      .catch(() => ({ data: [] })),
-  getById: id => api.get(`${BASE}/${id}`).then(r => r.data),
-  create: data => api.post(BASE, data).then(r => r.data),
-  update: (id, data) => api.put(`${BASE}/${id}`, data).then(r => r.data),
-  remove: id => api.delete(`${BASE}/${id}`).then(r => r.data),
-  updateStatus: (id, status) => api.patch(`${BASE}/${id}/status`, { status }).then(r => r.data),
-  compare: id => api.get(`${BASE}/${id}/compare`).then(r => r.data),
-  benchmark: id => api.get(`${BASE}/${id}/benchmark`).then(r => r.data),
-  getReport: id => api.get(`${BASE}/${id}/report`).then(r => r.data),
+  getAll: async (params = {}) => {
+    const response = await apiClient.get(BASE_URL, { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await apiClient.get(`${BASE_URL}/${id}`);
+    return response.data;
+  },
+
+  getByPatient: async (beneficiaryId, params = {}) => {
+    const response = await apiClient.get(`${BASE_URL}/beneficiary/${beneficiaryId}`, { params });
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await apiClient.post(BASE_URL, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await apiClient.put(`${BASE_URL}/${id}`, data);
+    return response.data;
+  },
+
+  submit: async (id) => {
+    const response = await apiClient.post(`${BASE_URL}/${id}/submit`);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await apiClient.delete(`${BASE_URL}/${id}`);
+    return response.data;
+  },
+
+  getProgress: async (beneficiaryId, timeRange = '6months') => {
+    const response = await apiClient.get(`${BASE_URL}/beneficiary/${beneficiaryId}/progress`, {
+      params: { timeRange },
+    });
+    return response.data;
+  },
+
+  compare: async (id, otherId) => {
+    const response = await apiClient.get(`${BASE_URL}/${id}/compare/${otherId}`);
+    return response.data;
+  },
+
+  generateGoals: async (id, carePlanVersionId = null) => {
+    const response = await apiClient.post(`${BASE_URL}/${id}/generate-goals`, {
+      carePlanVersionId,
+    });
+    return response.data;
+  },
+
+  getRecommendations: async (id) => {
+    const response = await apiClient.get(`${BASE_URL}/${id}/recommendations`);
+    return response.data;
+  },
+
+  createCarePlan: async (id) => {
+    const response = await apiClient.post(`${BASE_URL}/${id}/create-care-plan`);
+    return response.data;
+  },
+
+  exportToDocument: async (id) => {
+    const response = await apiClient.post(`${BASE_URL}/${id}/export-to-document`);
+    return response.data;
+  },
 };
 
-// ── ICF Codes ──
-export const codesService = {
-  search: params =>
-    api
-      .get(`${BASE}/codes`, { params })
-      .then(r => r.data)
-      .catch(() => ({ data: [] })),
-  getTree: component => api.get(`${BASE}/codes/tree/${component}`).then(r => r.data),
-};
-
-// ── Benchmarks ──
-export const benchmarksService = {
-  getAll: () =>
-    api
-      .get(`${BASE}/benchmarks`)
-      .then(r => r.data)
-      .catch(() => ({ data: [] })),
-  create: data => api.post(`${BASE}/benchmarks`, data).then(r => r.data),
-  importData: data => api.post(`${BASE}/benchmarks/import`, data).then(r => r.data),
-};
-
-// ── Reports & Statistics ──
 export const reportsService = {
-  getStatistics: () =>
-    api
-      .get(`${BASE}/statistics`)
-      .then(r => r.data)
-      .catch(() => ({ data: {} })),
-  getDomainDistribution: () =>
-    api
-      .get(`${BASE}/domain-distribution`)
-      .then(r => r.data)
-      .catch(() => ({ data: {} })),
-  getOrganizationReport: () =>
-    api
-      .get(`${BASE}/organization-report`)
-      .then(r => r.data)
-      .catch(() => ({ data: {} })),
+  getStatistics: async (params = {}) => {
+    const response = await apiClient.get(`${BASE_URL}/stats/overview`, { params });
+    return response.data;
+  },
+
+  generateReport: async (assessmentId, format = 'pdf') => {
+    const response = await apiClient.get(`${BASE_URL}/${assessmentId}/report`, {
+      params: { format },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
-// ── Beneficiary ──
-export const beneficiaryService = {
-  getTimeline: beneficiaryId =>
-    api.get(`${BASE}/beneficiary/${beneficiaryId}/timeline`).then(r => r.data),
-  getComparativeReport: beneficiaryId =>
-    api.get(`${BASE}/beneficiary/${beneficiaryId}/comparative-report`).then(r => r.data),
-};
+export default { assessmentsService, reportsService };

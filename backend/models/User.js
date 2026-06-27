@@ -187,6 +187,24 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  twoFactorSecret: {
+    type: String,
+    select: false,
+    default: null,
+  },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  twoFactorBackupCodes: {
+    type: [String],
+    select: false,
+    default: [],
+  },
+  passwordExpiresAt: {
+    type: Date,
+    default: null,
+  },
   tokenVersion: {
     type: Number,
     default: 0,
@@ -272,7 +290,7 @@ userSchema.pre('save', async function () {
   // Only hash password if it was modified (or is new) and not already hashed
   if (this.isModified('password') && this.password) {
     // Skip if value is already a bcrypt hash (prevents double-hashing)
-    const isBcryptHash = /^\$2[aby]\$\d{2}\$/.test(this.password);
+    const isBcryptHash = /^\$2[aby]\$\d{2}\$[.\/A-Za-z0-9]{53}$/.test(this.password);
     if (!isBcryptHash) {
       const bcrypt = require('bcryptjs');
       this.password = await bcrypt.hash(this.password, 12);

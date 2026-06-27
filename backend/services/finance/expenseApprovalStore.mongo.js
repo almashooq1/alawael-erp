@@ -124,7 +124,7 @@ function createMongoStore({ Model }) {
           $set: { ...recordNoVersion, expenseId: String(id) },
           $setOnInsert: { __v: 0 },
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
       ).lean();
       return project(doc);
     },

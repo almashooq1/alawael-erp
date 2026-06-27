@@ -17,6 +17,7 @@ const {
   TelehealthDevice,
   VirtualSession,
   SessionRecording,
+  RehabTelehealthSession,
 } = require('../models/Telehealth');
 
 const {
@@ -32,6 +33,17 @@ const {
   getProviderQueue,
   _generateAgoraToken,
 } = require('../services/telehealthService');
+
+const {
+  scheduleTelehealthSession,
+  getUpcomingSessions,
+  startSession: startRehabSession,
+  completeSession,
+  getSessionMaterials,
+  addSessionMaterial,
+  recordTechnicalIssue,
+  getTelehealthStatistics,
+} = require('../services/telehealth.service');
 
 const { v4: uuidv4 } = require('uuid');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -797,6 +809,203 @@ router.get('/recordings/:consultationId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'لا يوجد تسجيل لهذه الجلسة' });
     }
     res.json({ success: true, data: recording });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Remote Rehabilitation Sessions — جلسات التأهيل عن بُعد
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/telehealth/sessions
+ * جدولة جلسة تأهيل عن بُعد
+ */
+router.post(
+  '/sessions',
+  authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'receptionist']),
+  async (req, res) => {
+    try {
+      const session = await scheduleTelehealthSession(req.body);
+      res.status(201).json({
+        success: true,
+        message: 'تم جدولة جلسة التأهيل عن بُعد بنجاح',
+        data: session,
+      });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+);
+
+/**
+ * GET /api/telehealth/sessions
+ * قائمة جلسات التأهيل عن بُعد
+ */
+router.get('/sessions', async (req, res) => {
+  try {
+    const { status, beneficiaryId, therapistId, from, to, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
+    if (therapistId) filter.therapistId = therapistId;
+    if (from || to) {
+      filter.scheduledAt = {};
+      if (from) filter.scheduledAt.$gte = new Date(from);
+      if (to) filter.scheduledAt.$lte = new Date(to);
+    }
+
+    const total = await RehabTelehealthSession.countDocuments(filter);
+    const sessions = await RehabTelehealthSession.find(filter)
+      .populate('beneficiaryId', 'name nationalId')
+      .populate('therapistId', 'name email')
+      .populate('sessionId', 'sessionNumber type')
+      .sort({ scheduledAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .lean();
+
+    res.json({ success: true, data: sessions, total, page: Number(page), pages: Math.ceil(total / limit) });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+/**
+ * GET /api/telehealth/sessions/:id
+ * تفاصيل جلسة تأهيل عن بُعد
+ */
+router.get('/sessions/:id', async (req, res) => {
+  try {
+    const session = await RehabTelehealthSession.findById(req.params.id)
+      .populate('beneficiaryId', 'name nationalId phone dateOfBirth')
+      .populate('therapistId', 'name email specialty')
+      .populate('sessionId', 'sessionNumber type status')
+      .lean();
+
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
+    }
+    res.json({ success: true, data: session });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+/**
+ * PATCH /api/telehealth/sessions/:id/start
+ * بدء جلسة التأهيل عن بُعد
+ */
+router.patch(
+  '/sessions/:id/start',
+  authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'medical_director']),
+  async (req, res) => {
+    try {
+      const session = await startRehabSession(req.params.id);
+      res.json({ success: true, message: 'تم بدء الجلسة', data: session });
+    } catch (err) {
+      res.status(422).json({ success: false, message: err.message });
+    }
+  }
+);
+
+/**
+ * PATCH /api/telehealth/sessions/:id/complete
+ * إنهاء جلسة التأهيل عن بُعد
+ */
+router.patch(
+  '/sessions/:id/complete',
+  authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'medical_director']),
+  async (req, res) => {
+    try {
+      const { notes, goalsProgress } = req.body;
+      const session = await completeSession(req.params.id, notes, goalsProgress);
+      res.json({ success: true, message: 'تم إنهاء الجلسة بنجاح', data: session });
+    } catch (err) {
+      res.status(422).json({ success: false, message: err.message });
+    }
+  }
+);
+
+/**
+ * POST /api/telehealth/sessions/:id/materials
+ * إضافة مادة تعليمية/علاجية للجلسة
+ */
+router.post('/sessions/:id/materials', async (req, res) => {
+  try {
+    const materials = await addSessionMaterial(req.params.id, req.body);
+    res.json({ success: true, data: materials });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * GET /api/telehealth/sessions/:id/materials
+ * جلب المواد المشتركة للجلسة
+ */
+router.get('/sessions/:id/materials', async (req, res) => {
+  try {
+    const materials = await getSessionMaterials(req.params.id);
+    res.json({ success: true, data: materials });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+/**
+ * POST /api/telehealth/sessions/:id/technical-issues
+ * تسجيل مشكلة تقنية
+ */
+router.post('/sessions/:id/technical-issues', async (req, res) => {
+  try {
+    const issues = await recordTechnicalIssue(req.params.id, req.body);
+    res.json({ success: true, data: issues });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * GET /api/telehealth/upcoming
+ * الجلسات القادمة للمستخدم الحالي
+ */
+router.get('/upcoming', async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const role = req.user.role || '';
+    const beneficiaryId = req.query.beneficiaryId;
+
+    let therapistId;
+    if (['therapist', 'doctor', 'specialist', 'clinical_supervisor'].includes(role)) {
+      therapistId = userId;
+    }
+
+    const sessions = await getUpcomingSessions(therapistId, beneficiaryId);
+    res.json({ success: true, data: sessions });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+/**
+ * GET /api/telehealth/statistics
+ * إحصائيات جلسات التأهيل عن بُعد
+ */
+router.get('/statistics', async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const role = req.user.role || '';
+    const beneficiaryId = req.query.beneficiaryId;
+
+    let therapistId;
+    if (['therapist', 'doctor', 'specialist', 'clinical_supervisor'].includes(role)) {
+      therapistId = userId;
+    }
+
+    const stats = await getTelehealthStatistics(therapistId, beneficiaryId);
+    res.json({ success: true, data: stats });
   } catch (err) {
     safeError(res, err);
   }

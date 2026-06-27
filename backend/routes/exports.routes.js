@@ -35,6 +35,17 @@ router.get('/:format', async (req, res) => {
 
     const userId = req.user?.userId || req.user?._id || req.user?.id;
 
+    // Validate module exists before proceeding
+    const availableModules = importExportService.getAvailableModules();
+    const moduleKeys = availableModules.map(m => m.key);
+    if (!moduleKeys.includes(mod)) {
+      return res.status(400).json({
+        success: false,
+        message: `الوحدة '${mod}' غير مدعومة. الوحدات المتاحة: ${moduleKeys.join(', ')}`,
+        availableModules: moduleKeys,
+      });
+    }
+
     // Safely parse filters JSON
     let parsedFilters = {};
     if (filters) {

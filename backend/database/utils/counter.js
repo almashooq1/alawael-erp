@@ -269,8 +269,7 @@ async function getNextNumber(counterName, overrides = {}) {
       },
     },
     {
-      upsert: true,
-      new: true,
+      upsert: true, returnDocument: 'after',
       setDefaultsOnInsert: true,
     }
   );
@@ -321,7 +320,7 @@ async function nextSequence(counterName) {
         description: def.description || counterName,
       },
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
   );
 
   let seq = result.seq;

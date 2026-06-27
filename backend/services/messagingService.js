@@ -69,33 +69,54 @@ class MessageEncryptionService {
 
 class NotificationService {
   constructor() {
-    // Email configuration
-    this.transporter = nodemailer.createTransport({
+    this._transporter = null;
+    this._twilioClient = null;
+  }
+
+  _getTransporter() {
+    if (this._transporter) return this._transporter;
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      logger.warn('[NotificationService] Email credentials not configured');
+      return null;
+    }
+    this._transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: process.env.EMAIL_PORT || 587,
-      secure: false,
+      port: Number(process.env.EMAIL_PORT) || 587,
+      secure: (Number(process.env.EMAIL_PORT) || 587) === 465,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
     });
+    return this._transporter;
+  }
 
-    // SMS configuration (Twilio)
-    this.twilio = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  _getTwilioClient() {
+    if (this._twilioClient) return this._twilioClient;
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+      logger.warn('[NotificationService] Twilio credentials not configured');
+      return null;
+    }
+    this._twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    return this._twilioClient;
   }
 
   // Send Email Notification
   async sendEmailNotification(to, subject, htmlContent, textContent) {
+    const transporter = this._getTransporter();
+    if (!transporter) {
+      return { success: false, error: 'Email not configured' };
+    }
     try {
       const mailOptions = {
-        from: process.env.EMAIL_FROM || 'noreply@system.com',
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@system.com',
         to,
         subject,
         html: htmlContent,
         text: textContent,
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
 
       return {
         success: true,
@@ -113,12 +134,16 @@ class NotificationService {
 
   // Send SMS Notification
   async sendSMSNotification(phoneNumber, message) {
+    const client = this._getTwilioClient();
+    if (!client) {
+      return { success: false, error: 'SMS not configured' };
+    }
     try {
       if (!process.env.TWILIO_PHONE_NUMBER) {
         throw new Error('Twilio phone number not configured');
       }
 
-      const response = await this.twilio.messages.create({
+      const response = await client.messages.create({
         body: message,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: phoneNumber,
@@ -141,7 +166,17 @@ class NotificationService {
   // Send In-App Notification
   async sendInAppNotification(beneficiaryId, title, body, data = {}) {
     try {
-      // Implementation would save to database
+      const Notification = require('../models/Notification');
+      await Notification.create({
+        recipientId: beneficiaryId,
+        title,
+        message: body,
+        body,
+        type: data.type || 'info',
+        channel: 'in-app',
+        status: 'sent',
+        metadata: data.metadata || {},
+      });
       return {
         success: true,
         timestamp: new Date(),
@@ -160,7 +195,7 @@ class NotificationService {
     const results = {};
 
     // Email
-    if (beneficiary.notificationPreferences.email && notification.channels.includes('email')) {
+    if (beneficiary.notificationPreferences?.email && notification.channels.includes('email')) {
       results.email = await this.sendEmailNotification(
         beneficiary.email,
         notification.title,
@@ -170,16 +205,17 @@ class NotificationService {
     }
 
     // SMS
-    if (beneficiary.notificationPreferences.sms && notification.channels.includes('sms')) {
+    if (beneficiary.notificationPreferences?.sms && notification.channels.includes('sms')) {
       results.sms = await this.sendSMSNotification(beneficiary.phone, notification.body);
     }
 
     // In-App
-    if (beneficiary.notificationPreferences.inApp && notification.channels.includes('in_app')) {
+    if (beneficiary.notificationPreferences?.inApp && notification.channels.includes('in_app')) {
       results.inApp = await this.sendInAppNotification(
         beneficiary._id,
         notification.title,
-        notification.body
+        notification.body,
+        { type: notification.type, metadata: notification.metadata }
       );
     }
 

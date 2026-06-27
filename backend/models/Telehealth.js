@@ -354,6 +354,43 @@ const providerAvailabilitySlotSchema = new Schema(
 providerAvailabilitySlotSchema.index({ provider: 1, slotDate: 1, status: 1 });
 providerAvailabilitySlotSchema.index({ branch: 1, slotDate: 1, status: 1 });
 
+// ─── RehabTelehealthSession — Remote Rehabilitation Sessions ───────────────
+
+const rehabTelehealthSessionSchema = new Schema(
+  {
+    sessionId: { type: Schema.Types.ObjectId, ref: 'ClinicalSession' },
+    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
+    therapistId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    scheduledAt: { type: Date, required: true },
+    duration: { type: Number, default: 45 }, // minutes
+    status: {
+      type: String,
+      enum: ['scheduled', 'in_progress', 'completed', 'cancelled', 'no_show'],
+      default: 'scheduled',
+    },
+    meetingLink: { type: String }, // Zoom/Google Meet link
+    roomId: { type: String, unique: true, sparse: true }, // custom room ID
+    platform: {
+      type: String,
+      enum: ['zoom', 'google_meet', 'teams', 'custom'],
+      default: 'zoom',
+    },
+    notes: { type: String },
+    parentAttended: { type: Boolean, default: false },
+    recordings: [{ url: String, duration: Number, createdAt: Date }],
+    materials: [{ title: String, url: String, type: String }], // shared PDFs, videos
+    sessionGoals: [{ goalId: Schema.Types.ObjectId, progressNotes: String, progressPercentage: Number }],
+    technicalIssues: [{ description: String, resolved: Boolean, timestamp: Date }],
+    consentSigned: { type: Boolean, default: false },
+    consentDate: Date,
+  },
+  { timestamps: true, collection: 'rehab_telehealth_sessions' }
+);
+
+rehabTelehealthSessionSchema.index({ beneficiaryId: 1, scheduledAt: -1 });
+rehabTelehealthSessionSchema.index({ therapistId: 1, scheduledAt: -1 });
+rehabTelehealthSessionSchema.index({ status: 1, scheduledAt: -1 });
+
 // ─── TeleconsultationParticipant ──────────────────────────────────────────────
 
 const teleconsultationParticipantSchema = new Schema(
@@ -413,4 +450,7 @@ module.exports = {
     'TeleconsultationParticipant',
     teleconsultationParticipantSchema
   ),
+  RehabTelehealthSession:
+    mongoose.models.RehabTelehealthSession ||
+    mongoose.model('RehabTelehealthSession', rehabTelehealthSessionSchema),
 };

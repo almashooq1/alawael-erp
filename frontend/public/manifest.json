@@ -1,17 +1,41 @@
 {
-  "short_name": "الأوائل للرعاية النهارية",
-  "name": "نظام مراكز الأوائل للرعاية النهارية - نظام إدارة شامل ومتكامل",
-  "description": "Al-Awael Day Care Centers - Comprehensive Management System",
+  "name": "Al-Awael ERP - Rehabilitation Center",
+  "short_name": "Al-Awael",
+  "description": "نظام إدارة مراكز التأهيل",
+  "start_url": "/mobile",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "orientation": "portrait",
   "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "productivity", "health"],
+  "screenshots": [
     {
-      "src": "logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#667eea",
-  "background_color": "#ffffff",
-  "orientation": "portrait-primary"
+  "shortcuts": [
+    {
+      "name": "الجلسات",
+      "short_name": "الجلسات",
+      "description": "عرض جلسات اليوم",
+      "url": "/mobile/sessions",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "المستفيدون",
+      "short_name": "المستفيدون",
+      "description": "قائمة المستفيدين",
+      "url": "/mobile/beneficiaries",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
 }

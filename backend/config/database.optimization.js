@@ -121,6 +121,26 @@ const createIndexes = async () => {
     await safeIndex('Assessment', { beneficiaryId: 1, assessmentDate: -1 });
     await safeIndex('Assessment', { assessorId: 1, status: 1 });
 
+    // ────── WhatsApp & Communication indexes ──────
+    await safeIndex('WhatsAppDlq', { status: 1, nextRetryAt: 1, lockedUntil: 1 });
+    await safeIndex('WhatsAppDlq', { phone: 1, createdAt: -1 });
+    await safeIndex('WhatsAppConversation', { phone: 1, lastMessageAt: -1 });
+    await safeIndex('WhatsAppConversation', { status: 1, unreadCount: 1 });
+
+    // ────── Report & Dashboard indexes ──────
+    await safeIndex('ReportTemplate', { category: 1, type: 1, isActive: 1 });
+    await safeIndex('ReportTemplate', { createdBy: 1, createdAt: -1 });
+    await safeIndex('ScheduledReport', { status: 1, nextRunAt: 1 });
+    await safeIndex('ScheduledReport', { frequency: 1, lastRunAt: -1 });
+    await safeIndex('DashboardConfig', { userId: 1, role: 1 });
+    await safeIndex('DashboardConfig', { type: 1, isActive: 1 });
+
+    // ────── ZATCA & Finance indexes ──────
+    await safeIndex('Invoice', { zatcaStatus: 1, submissionDate: -1 });
+    await safeIndex('Invoice', { status: 1, dueDate: -1 });
+    await safeIndex('ChartOfAccount', { code: 1, status: 1 });
+    await safeIndex('ChartOfAccount', { type: 1, parentId: 1 });
+
     logger.info('✅ Database indexes verified/created successfully (core models)');
 
     // ────── DDD Model Indexes (auto-sync from schema definitions) ──────

@@ -38,7 +38,7 @@ describe('W1488 — WhatsAppConversation findOneAndUpdate hook is async (no "nex
     const doc = await Conversation.findOneAndUpdate(
       { phone: '966500000001' },
       { $setOnInsert: { phone: '966500000001' }, $set: { urgencyLevel: 'high' } },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after'}
     );
     expect(doc).toBeTruthy();
     expect(doc.phone).toBe('966500000001');

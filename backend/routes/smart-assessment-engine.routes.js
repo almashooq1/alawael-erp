@@ -99,6 +99,8 @@ const {
   CaregiverBurdenAssessment,
 } = require('../models/clinical-assessment-battery.model');
 
+const ICFAssessment = require('../models/assessment/ICFAssessment');
+
 /* ─── Middleware ────────────────────────────────────────────────────────── */
 const { authenticateToken } = require('../middleware/auth');
 
@@ -610,6 +612,58 @@ router.get(
     res.json({
       success: true,
       data: { age_months: ageMonths, diagnosis, recommended_assessments: battery },
+    });
+  })
+);
+
+// ─── ICF-aware battery recommendation ────────────────────────
+const ICF_DOMAIN_ASSESSMENTS = {
+  bodyFunctions: ['GMFM-88', 'FIM', 'WeeFIM', 'MACS'],
+  bodyStructures: ['Berg Balance', 'BOT-2'],
+  activitiesAndParticipation: ['PEDI', 'Vineland-3', 'CFCS', 'PEP-3'],
+  environmentalFactors: ['FBA', 'Family Needs Survey', 'QoL'],
+  personalFactors: ['SRS-2', 'BRIEF-2', 'BASC-3'],
+};
+
+router.post(
+  '/battery/recommend-with-icf',
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
+  asyncHandler(async (req, res) => {
+    const { beneficiaryId, ageMonths: reqAgeMonths, diagnosis: reqDiagnosis } = req.body;
+    const ageMonths = reqAgeMonths || 48;
+    const diagnosis = reqDiagnosis || 'default';
+
+    let icfBased = false;
+    let domainScores = {};
+    let icfAssessments = [];
+
+    try {
+      const latestIcf = await ICFAssessment.findLatestByPatient(beneficiaryId);
+      if (latestIcf && latestIcf.domainScores) {
+        icfBased = true;
+        domainScores = latestIcf.domainScores;
+
+        for (const [domain, assessments] of Object.entries(ICF_DOMAIN_ASSESSMENTS)) {
+          const score = domainScores[domain];
+          if (typeof score === 'number' && score > 2) {
+            icfAssessments.push(...assessments);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('ICF lookup failed for battery recommendation:', err);
+    }
+
+    const baseBattery = ClinicalDecisionSupport.getRecommendedAssessments(ageMonths, diagnosis);
+    const combined = [...new Set([...baseBattery, ...icfAssessments])];
+
+    res.json({
+      success: true,
+      battery: combined,
+      icfBased,
+      domainScores,
     });
   })
 );

@@ -117,6 +117,7 @@ function registerCctvRoutes(app, opts = {}) {
     ['/cctv/parent-portal', '../cctv/parent-portal.routes'],
     ['/cctv/admin', '../cctv/admin.routes'],
     ['/cctv/reports', '../cctv/reports.routes'],
+    ['/cctv/integration', '../cctv/cctv-integration.routes'],
   ];
   let ok = 0;
   for (const [base, mod] of mounts) {

@@ -13,7 +13,8 @@
       content="مراكز الأوائل, تأهيل ذوي الإعاقة, تأهيل التوحد, تأهيل الإعاقة الذهنية, الرياض, تدخل مبكر, ABA, خطة فردية IEP, متلازمة داون, رعاية نهارية"
     />
     <meta name="author" content="مراكز الأوائل للرعاية والتأهيل" />
-    <meta name="theme-color" content="#1B4A8A" />
+    <meta name="theme-color" content="#1976d2" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href="https://awael.sa/" />
 
     <!-- Open Graph -->
@@ -29,7 +30,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ar_SA" />
     <meta property="og:url" content="https://awael.sa/" />
-    <meta property="og:image" content="https://awael.sa/alawael-logo.svg" />
+    <meta property="og:image" content="https://awael.sa/og-image.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -41,19 +42,36 @@
       name="twitter:description"
       content="الخيار الأول في الرياض لتأهيل ذوي الإعاقة الذهنية واضطراب التوحد — 4 فروع، 400+ متخصص، 25 سنة خبرة."
     />
-    <meta name="twitter:image" content="https://awael.sa/alawael-logo.svg" />
+    <meta name="twitter:image" content="https://awael.sa/og-image.png" />
+
+    <!-- Content Security Policy (development only — production uses nginx headers) -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://awael.sa; connect-src 'self' http://localhost:3001 ws://localhost:3001; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+    />
 
     <!-- Accessibility -->
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
 
-    <!-- Fonts: Tajawal (brand primary) + Cairo (display fallback) -->
+    <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Prefetch critical chunks (production only) -->
+    <link rel="prefetch" href="/src/index.js" as="script" />
+
+    <!-- Fonts: Tajawal (brand primary) + Cairo (display fallback) -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@200;300;400;500;600;700;900&display=swap" as="style" onload="this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@200;300;400;500;600;700;900&display=swap" /></noscript>
 
     <title>مراكز الأوائل للرعاية والتأهيل | تأهيل ذوي الإعاقة والتوحد في الرياض</title>
   </head>
   <body>
+    <!-- Skip to content link for keyboard accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:right-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded">
+      تخطي إلى المحتوى الرئيسي
+    </a>
     <div id="root"></div>
     <script type="module" src="/src/index.js"></script>
   </body>

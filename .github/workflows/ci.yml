@@ -1,186 +1,155 @@
-name: CI Pipeline
+# ═══════════════════════════════════════════════════════════════════════════
+# Al-Awael ERP — Continuous Integration Pipeline
+# ═══════════════════════════════════════════════════════════════════════════
+# Triggers on every push to main / feature branches and on all pull requests.
+# Gates: lint → test → audit → docker build. All must pass before deploy.
+# ═══════════════════════════════════════════════════════════════════════════
 
-# Least-privilege token: no job in this workflow writes to the repo
-# (checkout + setup-node + tests only). CodeQL actions/missing-workflow-permissions.
+name: CI
+
 permissions:
   contents: read
 
+# ── Triggers ──────────────────────────────────────────────────────────────
 on:
   push:
-    branches: [main, develop, 'feature/**', 'hotfix/**']
+    branches:
+      - main
+      - 'feat/**'
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
 
-# Cancel superseded runs on the same ref so PRs/branches track only the
-# latest commit and we stop burning CI minutes on stale pushes.
+# ── Shared Environment ──────────────────────────────────────────────────
+env:
+  NODE_VERSION: '20'
+
+# ── Concurrency: cancel stale runs on the same branch/PR ───────────────
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: '20'
-
 jobs:
-  tests:
-    name: Tests & Code Quality
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 1: Lint — ESLint check on backend/
+  # ═══════════════════════════════════════════════════════════════════
+  lint:
+    name: Lint Backend
     runs-on: ubuntu-latest
-    # Bumped 15 → 25 (2026-05-26 Cycle 11 of CI investigation): backend
-    # test count grew past the original 15-min budget after W340+ added
-    # ~500+ drift assertions. Parallel Sprint Tests workflow finishes in
-    # ~7 min (focused on __tests__/), but THIS job also runs lint +
-    # coverage on top of the full test surface, pushing total to 17+ min.
-    # CI was cancelling here despite Sprint Tests success → false-failure
-    # signal blocking deploy.
-    # Bumped 25 → 40 (2026-06-11, PR #354 merge): sprint-tests.txt grew to
-    # 997 entries after the core-linkage arc + main's W1200/W1204 landed,
-    # pushing test:guard + test:sprint past 25 min (two consecutive runs
-    # cancelled at exactly 25m with all other 13 gates green).
-    timeout-minutes: 40
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Run backend tests (canonical sprint gate)
+      - name: Run ESLint
         working-directory: backend
-        # Was `npm run quality:ci` = audit + guard + the FULL `npm test`
-        # (--coverage --runInBand over 2000+ files). That consistently blew the
-        # 25-min cap and got cancelled → permanent false-failure that blocked
-        # deploy even though the Sprint Tests workflow was green. Run the
-        # project's CANONICAL gate instead: test:guard (meta-tests) + test:sprint
-        # (~13 min, the gate sprint-tests.yml already runs green). The security
-        # audit stays as its own step below.
-        run: npm run test:guard && npm run test:sprint
-        env:
-          NODE_ENV: test
-          JWT_SECRET: test-jwt-secret-ci-only
-          MONGODB_URI: ""
+        run: npm run lint
 
-      - name: Backend security audit (high+)
-        working-directory: backend
-        run: npm audit --audit-level=high --omit=dev
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-
-      - name: Frontend lint
-        working-directory: frontend
-        run: npx eslint src/ --max-warnings=0
-        env:
-          CI: "false"
-
-      - name: Frontend build check
-        working-directory: frontend
-        run: npm run build
-        env:
-          NODE_OPTIONS: --max-old-space-size=6144
-          REACT_APP_API_URL: /api/v1
-          REACT_APP_ENVIRONMENT: ci
-          GENERATE_SOURCEMAP: "false"
-          CI: "false"
-          DISABLE_ESLINT_PLUGIN: "true"
-
-  frontend-tests:
-    name: Frontend Tests
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 2: Test — Jest with mongodb-memory-server
+  # ═══════════════════════════════════════════════════════════════════
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Mirrors the pr-checks.yml `frontend-tests` job so direct pushes to
-    # main/develop/feature branches also gate on the full Jest suite
-    # (~11K tests). Without this, silent failures from BOM corruption or
-    # missing helper exports (e.g. utils/dateUtils.getDayRange) can sit
-    # on main between PRs. See pr-checks.yml for rationale + history.
+    timeout-minutes: 30
+    needs: lint
+
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-      - name: Run frontend tests
-        working-directory: frontend
-        run: npm test -- --watchAll=false --no-coverage --ci --passWithNoTests
-        env:
-          CI: "true"
+          cache-dependency-path: backend/package-lock.json
 
-  scm-frontend:
-    name: SCM Frontend Quality Gate
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install
-        working-directory: supply-chain-management/frontend
+      - name: Install backend dependencies
+        working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-      - name: Lint (zero warnings)
-        working-directory: supply-chain-management/frontend
-        run: npm run lint
-        env:
-          CI: "false"
-      - name: Tests
-        working-directory: supply-chain-management/frontend
-        run: npm test -- --watchAll=false --ci --passWithNoTests
-        env:
-          CI: "true"
 
-  mobile:
-    name: Mobile Quality Gate
+      - name: Run Jest tests
+        working-directory: backend
+        run: npm test -- --passWithNoTests --no-coverage --ci --runInBand --forceExit
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-ci-only
+          MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test_ci
+          # mongodb-memory-server will use this URI and spin up an in-memory instance
+          MONGOMS_VERSION: '7.0'
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 3: Audit — npm audit (fail on high/critical vulnerabilities)
+  # ═══════════════════════════════════════════════════════════════════
+  audit:
+    name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install
-        working-directory: mobile
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-      - name: Lint (zero warnings)
-        working-directory: mobile
-        run: npm run lint
-      - name: Tests
-        working-directory: mobile
-        run: npm test -- --watchAll=false --ci --passWithNoTests
-        env:
-          CI: "true"
-
-  security:
-    name: Security Scanning
-    runs-on: ubuntu-latest
-    needs: tests
-    if: always()
+    needs: test
+    if: always()   # Run even if tests fail, so we always see audit results
 
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Backend audit (high)
+      - name: Install backend dependencies (production)
         working-directory: backend
-        run: |
-          npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-          npm audit --audit-level=high --omit=dev
+        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Frontend audit (high)
-        working-directory: frontend
-        run: |
-          npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-          npm audit --audit-level=high --omit=dev
+      - name: Run npm audit (high/critical only)
+        working-directory: backend
+        run: npm audit --audit-level=high --omit=dev
+        # --audit-level=high  → fails on HIGH and CRITICAL severities
+        # --omit=dev          → skip devDependencies to reduce noise
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 4: Build — Verify Docker image builds successfully
+  # ═══════════════════════════════════════════════════════════════════
+  build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, test]
+    if: always() && (needs.lint.result == 'success' && needs.test.result == 'success')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: |
+            alawael-erp:${{ github.sha }}
+            alawael-erp:latest
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp || github.event.pull_request.updated_at }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

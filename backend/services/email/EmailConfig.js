@@ -22,7 +22,7 @@ const EmailConfig = {
     secure: (process.env.SMTP_SECURE || process.env.EMAIL_SECURE || '') === 'true',
     auth: {
       user: process.env.SMTP_USER || process.env.EMAIL_USER || '',
-      pass: process.env.SMTP_PASSWORD || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || '',
+      pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || '',
     },
     pool: true,
     maxConnections: parseInt(process.env.SMTP_MAX_CONNECTIONS || '5', 10),

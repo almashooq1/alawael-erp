@@ -87,6 +87,18 @@ async function loadLandingCms() {
   }
 }
 
+// Register Service Worker for PWA support (production only)
+function registerServiceWorker() {
+  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((reg) => console.info('SW registered:', reg.scope))
+        .catch((err) => console.warn('SW registration failed:', err));
+    });
+  }
+}
+
 // Render app (App is dynamically imported AFTER the CMS fetch so that the
 // injected window override is in place before the landing content modules run).
 async function bootstrap() {
@@ -98,6 +110,5 @@ async function bootstrap() {
       <App />
     </React.StrictMode>
   );
+  registerServiceWorker();
 }
-
-bootstrap();

@@ -239,12 +239,12 @@ function bootstrapRedFlagSystem(options = {}) {
       // Requires an additional Certification model; if it's missing we
       // skip registration so the flag records a loud locator-error
       // instead of silently returning zero counts.
-      const HrCertificationModel = tryLoadModel('../models/hr/Certification');
+      const HrCertificationModel = tryLoadModel('../models/HR/Certification');
       if (HrCertificationModel) {
         // EmploymentContract is a soft dep — older deployments may not
         // have it, in which case the contract flag records locator-error.
         // License + mandatory-cert flags still evaluate correctly.
-        const HrEmploymentContractModel = tryLoadModel('../models/hr/EmploymentContract');
+        const HrEmploymentContractModel = tryLoadModel('../models/HR/EmploymentContract');
         locator.register(
           'hrCredentialService',
           createHrCredentialObservations({
@@ -260,8 +260,8 @@ function bootstrapRedFlagSystem(options = {}) {
       // shift-assignment sync). LeaveBalance/PerformanceReview/Shift
       // are all soft deps — missing model → locator-error on the
       // specific flag, others still resolve.
-      const LeaveBalanceModel = tryLoadModel('../models/hr/LeaveBalance');
-      const PerformanceReviewModel = tryLoadModel('../models/hr/PerformanceReview');
+      const LeaveBalanceModel = tryLoadModel('../models/HR/LeaveBalance');
+      const PerformanceReviewModel = tryLoadModel('../models/HR/PerformanceReview');
       const ShiftModel = tryLoadModel('../models/Shift');
       locator.register(
         'hrWorkforceService',

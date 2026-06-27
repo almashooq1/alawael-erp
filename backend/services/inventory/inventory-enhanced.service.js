@@ -29,7 +29,7 @@ class InventoryEnhancedService {
       const stock = await InventoryStock.findOneAndUpdate(
         { itemId, warehouseId, batchNumber: meta.batchNumber || null },
         { $inc: { quantityOnHand: quantity } },
-        { upsert: true, new: true, session }
+        { upsert: true, returnDocument: 'after', session }
       );
 
       const before = stock.quantityOnHand - quantity;

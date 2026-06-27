@@ -143,7 +143,7 @@ const TEMPLATES = [
     const r = await FormTemplate.findOneAndUpdate(
       { templateId: t.templateId },
       { $set: t },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     console.log(`✓ ${t.templateId} (${r.isPublic ? 'public' : 'internal'})`);
   }

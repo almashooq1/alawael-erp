@@ -81,10 +81,9 @@ class NotificationEnhancedService {
 
   async _sendSms(phone, body) {
     if (!phone) return null;
-    // تكامل مع UnifonicSmsService الموجود في communication/
     try {
       const { smsService } = require('../../communication');
-      return await smsService.sendSms(phone, body);
+      return await smsService.send({ to: phone, message: body });
     } catch (err) {
       logger.error(`[Notifications] فشل SMS: ${err.message}`);
       return { error: err.message };

@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,7 +12,10 @@ import { ThemeModeProvider, useThemeMode } from './contexts/ThemeContext';
 import { CalendarProvider } from './contexts/CalendarContext';
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
+import AccessibilityWidget from './components/AccessibilityWidget';
+import QueryProvider from './providers/QueryProvider';
 import logger from './utils/logger';
+import { register as registerServiceWorker } from './registerServiceWorker';
 
 // Public pages — lazy loaded with Tailwind design
 const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
@@ -51,7 +54,9 @@ function App() {
   return (
     <ThemeModeProvider>
       <CalendarProvider>
-        <AppContent />
+        <QueryProvider>
+          <AppContent />
+        </QueryProvider>
       </CalendarProvider>
     </ThemeModeProvider>
   );
@@ -61,6 +66,11 @@ function AppContent() {
   const { theme } = useThemeMode();
   const cacheRtl = useMemo(() => createRtlCache(), []);
 
+  // Register PWA service worker on mount
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={theme}>
@@ -69,6 +79,9 @@ function AppContent() {
           <SnackbarProvider>
             <AuthProvider>
               <Router>
+                {/* aria-live region for dynamic notifications */}
+                <div aria-live="polite" aria-atomic="true" className="sr-only" />
+                <AccessibilityWidget />
                 <Suspense fallback={<DashboardSkeleton />}>
                   <AppRoutes />
                 </Suspense>

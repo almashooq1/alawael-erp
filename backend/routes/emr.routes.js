@@ -1,762 +1,218 @@
 /**
- * EMR (Electronic Medical Record) Lite Routes — مسارات السجل الطبي الإلكتروني
- *
- * Endpoints:
- *   /api/emr/records         — Medical records CRUD
- *   /api/emr/vitals          — Vital signs
- *   /api/emr/lab-results     — Lab results
- *   /api/emr/clinical-notes  — Clinical notes (SOAP)
- *   /api/emr/allergies       — Allergies
- *   /api/emr/patient-summary — Patient summary view
- *   /api/emr/dashboard       — EMR dashboard
+ * emr.routes.js — مسارات السجل الطبي الإلكتروني (EMR Routes)
+ * ══════════════════════════════════════════════════════════════════
+ * Mounted at: /api/v1/emr
  */
 
+'use strict';
+
 const express = require('express');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const router = express.Router();
-// W440: auto-enforce branch ownership on every :beneficiaryId param.
-router.param('beneficiaryId', branchScopedBeneficiaryParam);
-const {
-  MedicalRecord,
-  VitalSign,
-  LabResult,
-  ClinicalNote,
-  Allergy,
-} = require('../models/emr.model');
-const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const {
-  fetchScopedByBeneficiary,
-  assertBeneficiaryInScope,
-} = require('../utils/beneficiaryBranchGate');
-const Beneficiary = require('../models/Beneficiary');
-const logger = require('../utils/logger');
-const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const safeError = require('../utils/safeError');
+const emrService = require('../services/emr.service');
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { body, param, validationResult } = require('express-validator');
 
-// W466: role gate for EMR (PHI). Pre-W466 every endpoint only had
-// `authenticate + requireBranchAccess` — meaning ANY authenticated
-// user (visitor with a valid JWT, parent-portal user, therapist
-// without medical role) could read every patient's medical records,
-// vitals, lab results, clinical notes, AND modify them. The allergy
-// CRUD is especially dangerous: a malicious or careless edit to a
-// beneficiary's allergy list could KILL them (wrong allergy info →
-// wrong med administered).
-//
-// Restrict to clinical roles only.
-const EMR_ROLES = [
-  'admin',
-  'super_admin',
-  'superadmin',
-  'manager',
-  'branch_manager',
-  'clinical_supervisor',
-  'physician',
-  'doctor',
-  'nurse',
-  'therapist',
-];
-
-// ── Auth: all EMR routes require authentication (PHI data) ───────────────
-router.use(authenticate);
-router.use(requireBranchAccess);
-router.use(authorize(EMR_ROLES)); // W466: clinical roles only — PHI surface
-
-async function beneficiaryIdsInScope(req) {
-  const scope = branchFilter(req);
-  if (!Object.keys(scope).length) return null;
-  const rows = await Beneficiary.find(scope).select('_id').lean();
-  return rows.map(r => r._id);
+function handleValidation(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+  next();
 }
 
-/** Restrict list filters to beneficiaries in caller branch (W901). */
-async function applyBeneficiaryListScope(req, filter) {
-  const ids = await beneficiaryIdsInScope(req);
-  if (!ids) return filter;
-  if (filter.beneficiary) {
-    const bid = String(filter.beneficiary);
-    if (!ids.some(id => String(id) === bid)) return { ...filter, beneficiary: { $in: [] } };
-    return filter;
-  }
-  return { ...filter, beneficiary: { $in: ids } };
+function wrap(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
 }
 
-async function scopedMedicalRecordUpdate(req, res, id, update, opts = {}) {
-  const { doc, denied } = await fetchScopedByBeneficiary(MedicalRecord, id, req, res, {
-    select: 'beneficiary',
-    lean: true,
-  });
-  if (denied) return null;
-  return MedicalRecord.findByIdAndUpdate(doc._id, update, opts);
-}
+// ─── Prescriptions ───────────────────────────────────────────────────────────
+router.post(
+  '/prescriptions',
+  authenticate,
+  [
+    body('beneficiary').notEmpty().withMessage('beneficiary required'),
+    body('prescribedBy').notEmpty().withMessage('prescribedBy required'),
+    body('medications').isArray({ min: 1 }).withMessage('medications array required'),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const prescription = await emrService.createPrescription(req.body);
+    res.status(201).json({ success: true, data: prescription });
+  })
+);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MEDICAL RECORDS — السجلات الطبية
-// ═══════════════════════════════════════════════════════════════════════════
+router.get(
+  '/prescriptions/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const list = await emrService.getPrescriptions(req.params.beneficiaryId);
+    res.json({ success: true, data: list });
+  })
+);
 
-router.get('/records', async (req, res) => {
-  try {
-    const { beneficiary, search, page = 1, limit = 20 } = req.query;
-    let filter = { isDeleted: { $ne: true } };
-    if (beneficiary) filter.beneficiary = beneficiary;
-    if (search) {
-      filter.$or = [{ mrn: { $regex: escapeRegex(search), $options: 'i' } }];
-    }
-    filter = await applyBeneficiaryListScope(req, filter);
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [records, total] = await Promise.all([
-      MedicalRecord.find(filter)
-        .populate('beneficiary', 'name')
-        .populate('primaryProvider', 'name')
-        .sort({ updatedAt: -1 })
-        .limit(parseInt(limit))
-        .skip(skip),
-      MedicalRecord.countDocuments(filter),
-    ]);
-    res.json({ success: true, data: records, total });
-  } catch (error) {
-    logger.error('[EMR] List records error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجلات الطبية', error: safeError(error) });
-  }
-});
-
-router.get('/records/:id', async (req, res) => {
-  try {
-    const { doc, denied } = await fetchScopedByBeneficiary(MedicalRecord, req.params.id, req, res, {
-      populate: [
-        { path: 'beneficiary', select: 'name dateOfBirth gender' },
-        { path: 'primaryProvider', select: 'name' },
-        { path: 'careTeam.provider', select: 'name' },
-        { path: 'primaryDiagnosis.diagnosedBy', select: 'name' },
-      ],
-    });
-    if (denied) return;
-    res.json({ success: true, data: doc });
-  } catch (error) {
-    logger.error('[EMR] Get record error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: safeError(error) });
-  }
-});
-
-// Get or create medical record by beneficiary
-router.get('/records/beneficiary/:beneficiaryId', async (req, res) => {
-  try {
-    let record = await MedicalRecord.findOne({
-      beneficiary: req.params.beneficiaryId,
-      isDeleted: { $ne: true },
-    })
-      .populate('beneficiary', 'name dateOfBirth gender')
-      .populate('primaryProvider', 'name');
-
-    if (!record) {
-      record = new MedicalRecord({
-        beneficiary: req.params.beneficiaryId,
-        createdBy: req.user?.id,
-      });
-      await record.save();
-      record = await MedicalRecord.findById(record._id).populate(
-        'beneficiary',
-        'name dateOfBirth gender'
-      );
-      logger.info(`[EMR] Auto-created medical record: ${record.mrn}`);
-    }
-    res.json({ success: true, data: record });
-  } catch (error) {
-    logger.error('[EMR] Get by beneficiary error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: safeError(error) });
-  }
-});
-
-router.post('/records', async (req, res) => {
-  try {
-    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
-    if (denied) return;
-    const record = new MedicalRecord({ ...req.body, createdBy: req.user?.id });
-    await record.save();
-    logger.info(`[EMR] Medical record created: ${record.mrn}`);
-    res.status(201).json({ success: true, data: record });
-  } catch (error) {
-    logger.error('[EMR] Create record error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء السجل الطبي', error: safeError(error) });
-  }
-});
-
-router.put('/records/:id', async (req, res) => {
-  try {
-    const body = stripUpdateMeta(req.body);
-    delete body.beneficiary;
-    const record = await scopedMedicalRecordUpdate(req, res, req.params.id, body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
-    if (!record) return;
-    res.json({ success: true, data: record });
-  } catch (error) {
-    logger.error('[EMR] Update record error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تحديث السجل الطبي', error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// VITAL SIGNS — العلامات الحيوية
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/vitals', async (req, res) => {
-  try {
-    const { beneficiary, dateFrom, dateTo, page = 1, limit = 20 } = req.query;
-    let filter = { isDeleted: { $ne: true } };
-    if (beneficiary) filter.beneficiary = beneficiary;
-    if (dateFrom || dateTo) {
-      filter.recordedAt = {};
-      if (dateFrom) filter.recordedAt.$gte = new Date(dateFrom);
-      if (dateTo) filter.recordedAt.$lte = new Date(dateTo);
-    }
-    filter = await applyBeneficiaryListScope(req, filter);
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [vitals, total] = await Promise.all([
-      VitalSign.find(filter)
-        .populate('recordedBy', 'name')
-        .sort({ recordedAt: -1 })
-        .limit(parseInt(limit))
-        .skip(skip),
-      VitalSign.countDocuments(filter),
-    ]);
-    res.json({ success: true, data: vitals, total });
-  } catch (error) {
-    logger.error('[EMR] List vitals error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب العلامات الحيوية', error: safeError(error) });
-  }
-});
-
-router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
-  try {
-    const latest = await VitalSign.findOne({
-      beneficiary: req.params.beneficiaryId,
-      isDeleted: { $ne: true },
-    })
-      .populate('recordedBy', 'name')
-      .sort({ recordedAt: -1 });
-    res.json({ success: true, data: latest });
-  } catch (error) {
-    logger.error('[EMR] Latest vitals error:', { message: error.message });
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب آخر العلامات الحيوية',
-      error: safeError(error),
-    });
-  }
-});
-
-router.post('/vitals', async (req, res) => {
-  try {
-    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
-    if (denied) return;
-    const vital = new VitalSign({ ...req.body, recordedBy: req.body.recordedBy || req.user?.id });
-    await vital.save();
-
-    // Update medical record last visit
-    if (req.body.medicalRecord) {
-      await scopedMedicalRecordUpdate(req, res, req.body.medicalRecord, {
-        lastVisitDate: new Date(),
-      });
-    }
-
+// ─── Vital Signs ───────────────────────────────────────────────────────────
+router.post(
+  '/vital-signs',
+  authenticate,
+  [body('beneficiary').notEmpty().withMessage('beneficiary required')],
+  handleValidation,
+  wrap(async (req, res) => {
+    const vital = await emrService.recordVitalSigns(req.body);
     res.status(201).json({ success: true, data: vital });
-  } catch (error) {
-    logger.error('[EMR] Create vital error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تسجيل العلامات الحيوية', error: safeError(error) });
-  }
-});
+  })
+);
 
-// Vitals trend chart data
-router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
-  try {
-    const { parameter = 'bloodPressure', days = 30 } = req.query;
-    const since = new Date(Date.now() - parseInt(days) * 24 * 60 * 60 * 1000);
-    const vitals = await VitalSign.find({
-      beneficiary: req.params.beneficiaryId,
-      recordedAt: { $gte: since },
-      isDeleted: { $ne: true },
-    })
-      .select(`recordedAt ${parameter} weight.value height bmi`)
-      .sort({ recordedAt: 1 });
-    res.json({ success: true, data: vitals });
-  } catch (error) {
-    logger.error('[EMR] Vitals trend error:', { message: error.message });
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب اتجاه العلامات الحيوية',
-      error: safeError(error),
-    });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// LAB RESULTS — نتائج المختبر
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/lab-results', async (req, res) => {
-  try {
-    const { beneficiary, category, overallStatus, search, page = 1, limit = 20 } = req.query;
-    let filter = { isDeleted: { $ne: true } };
-    if (beneficiary) filter.beneficiary = beneficiary;
-    if (category) filter.category = category;
-    if (overallStatus) filter.overallStatus = overallStatus;
-    if (search) {
-      filter.$or = [
-        { labOrderNumber: { $regex: escapeRegex(search), $options: 'i' } },
-        { 'testName.ar': { $regex: escapeRegex(search), $options: 'i' } },
-        { 'testName.en': { $regex: escapeRegex(search), $options: 'i' } },
-      ];
-    }
-    filter = await applyBeneficiaryListScope(req, filter);
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [results, total] = await Promise.all([
-      LabResult.find(filter)
-        .populate('beneficiary', 'name')
-        .populate('orderedBy', 'name')
-        .sort({ orderedDate: -1 })
-        .limit(parseInt(limit))
-        .skip(skip),
-      LabResult.countDocuments(filter),
-    ]);
-    res.json({ success: true, data: results, total });
-  } catch (error) {
-    logger.error('[EMR] List lab results error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب نتائج المختبر', error: safeError(error) });
-  }
-});
-
-router.get('/lab-results/:id', async (req, res) => {
-  try {
-    const { doc, denied } = await fetchScopedByBeneficiary(LabResult, req.params.id, req, res, {
-      populate: [
-        { path: 'beneficiary', select: 'name' },
-        { path: 'orderedBy', select: 'name' },
-      ],
-    });
-    if (denied) return;
-    res.json({ success: true, data: doc });
-  } catch (error) {
-    safeError(res, error, '[EMR] Get lab result error');
-  }
-});
-
-router.post('/lab-results', async (req, res) => {
-  try {
-    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
-    if (denied) return;
-    const result = new LabResult(stripUpdateMeta(req.body));
-    await result.save();
-    logger.info(`[EMR] Lab result created: ${result.labOrderNumber}`);
-    res.status(201).json({ success: true, data: result });
-  } catch (error) {
-    logger.error('[EMR] Create lab result error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء نتيجة المختبر', error: safeError(error) });
-  }
-});
-
-router.put('/lab-results/:id', async (req, res) => {
-  try {
-    const { doc, denied } = await fetchScopedByBeneficiary(LabResult, req.params.id, req, res, {
-      select: 'beneficiary',
-      lean: true,
-    });
-    if (denied) return;
-    const body = stripUpdateMeta(req.body);
-    delete body.beneficiary;
-    const result = await LabResult.findByIdAndUpdate(doc._id, body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
-    if (!result) return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
-    res.json({ success: true, data: result });
-  } catch (error) {
-    safeError(res, error, '[EMR] Update lab result error');
-  }
-});
-
-// Critical lab results needing attention
-router.get('/lab-results-critical', async (req, res) => {
-  try {
-    let filter = {
-      'criticalValues.hasCritical': true,
-      'criticalValues.acknowledgedBy': { $exists: false },
-      isDeleted: { $ne: true },
-    };
-    filter = await applyBeneficiaryListScope(req, filter);
-    const results = await LabResult.find(filter)
-      .populate('beneficiary', 'name')
-      .populate('orderedBy', 'name')
-      .sort({ orderedDate: -1 });
-    res.json({ success: true, data: results, count: results.length });
-  } catch (error) {
-    logger.error('[EMR] Critical results error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب النتائج الحرجة', error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CLINICAL NOTES — الملاحظات السريرية
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/clinical-notes', async (req, res) => {
-  try {
-    const { beneficiary, noteType, author, status, page = 1, limit = 20 } = req.query;
-    let filter = { isDeleted: { $ne: true } };
-    if (beneficiary) filter.beneficiary = beneficiary;
-    if (noteType) filter.noteType = noteType;
-    if (author) filter.author = author;
-    if (status) filter.status = status;
-    filter = await applyBeneficiaryListScope(req, filter);
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [notes, total] = await Promise.all([
-      ClinicalNote.find(filter)
-        .populate('beneficiary', 'name')
-        .populate('author', 'name')
-        .sort({ createdAt: -1 })
-        .limit(parseInt(limit))
-        .skip(skip),
-      ClinicalNote.countDocuments(filter),
-    ]);
-    res.json({ success: true, data: notes, total });
-  } catch (error) {
-    logger.error('[EMR] List clinical notes error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب الملاحظات السريرية', error: safeError(error) });
-  }
-});
-
-router.get('/clinical-notes/:id', async (req, res) => {
-  try {
-    const { doc, denied } = await fetchScopedByBeneficiary(ClinicalNote, req.params.id, req, res, {
-      populate: [
-        { path: 'beneficiary', select: 'name' },
-        { path: 'author', select: 'name' },
-        { path: 'coSignedBy', select: 'name' },
-        { path: 'objective.vitalSigns' },
-      ],
-    });
-    if (denied) return;
-    res.json({ success: true, data: doc });
-  } catch (error) {
-    safeError(res, error, '[EMR] Get clinical note error');
-  }
-});
-
-router.post('/clinical-notes', async (req, res) => {
-  try {
-    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
-    if (denied) return;
-    const note = new ClinicalNote({ ...req.body, author: req.body.author || req.user?.id });
-    await note.save();
-
-    // Update medical record last visit
-    if (req.body.medicalRecord) {
-      await scopedMedicalRecordUpdate(req, res, req.body.medicalRecord, {
-        lastVisitDate: new Date(),
-      });
-    }
-
-    logger.info(`[EMR] Clinical note created: ${note.noteType} for ${note.beneficiary}`);
-    res.status(201).json({ success: true, data: note });
-  } catch (error) {
-    logger.error('[EMR] Create clinical note error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء الملاحظة السريرية', error: safeError(error) });
-  }
-});
-
-router.put('/clinical-notes/:id', async (req, res) => {
-  try {
-    const { doc: note, denied } = await fetchScopedByBeneficiary(
-      ClinicalNote,
-      req.params.id,
-      req,
-      res
+router.get(
+  '/vital-signs/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const { type, days } = req.query;
+    const list = await emrService.getVitalSignsHistory(
+      req.params.beneficiaryId,
+      type,
+      days ? parseInt(days, 10) : 30
     );
-    if (denied) return;
-    if (note.status === 'final') {
-      return res
-        .status(400)
-        .json({ success: false, message: 'لا يمكن تعديل ملاحظة نهائية، استخدم التعديل' });
-    }
-    Object.assign(note, stripUpdateMeta(req.body));
-    await note.save();
-    res.json({ success: true, data: note });
-  } catch (error) {
-    logger.error('[EMR] Update clinical note error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تحديث الملاحظة', error: safeError(error) });
-  }
-});
+    res.json({ success: true, data: list });
+  })
+);
 
-router.patch('/clinical-notes/:id/finalize', async (req, res) => {
-  try {
-    const { doc: scoped, denied } = await fetchScopedByBeneficiary(
-      ClinicalNote,
-      req.params.id,
-      req,
-      res,
-      {
-        select: 'beneficiary',
-        lean: true,
-      }
-    );
-    if (denied) return;
-    const note = await ClinicalNote.findByIdAndUpdate(
-      scoped._id,
-      { status: 'final' },
-      { returnDocument: 'after' }
-    );
-    if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
-    logger.info(`[EMR] Clinical note finalized: ${note._id}`);
-    res.json({ success: true, data: note, message: 'تم اعتماد الملاحظة' });
-  } catch (error) {
-    logger.error('[EMR] Finalize note error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في اعتماد الملاحظة', error: safeError(error) });
-  }
-});
+// ─── Medication Administration ───────────────────────────────────────────
+router.post(
+  '/medication-administration',
+  authenticate,
+  [
+    body('beneficiary').notEmpty(),
+    body('medicationName').notEmpty(),
+    body('dosage').notEmpty(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const mar = await emrService.administerMedication(req.body);
+    res.status(201).json({ success: true, data: mar });
+  })
+);
 
-router.patch('/clinical-notes/:id/amend', async (req, res) => {
-  try {
-    const { doc: note, denied } = await fetchScopedByBeneficiary(
-      ClinicalNote,
-      req.params.id,
-      req,
-      res
-    );
-    if (denied) return;
-    note.status = 'amended';
-    note.amendments.push({
-      date: new Date(),
-      by: req.user?.id,
-      reason: req.body.reason,
-      changes: req.body.changes,
-    });
-    await note.save();
-    res.json({ success: true, data: note });
-  } catch (error) {
-    logger.error('[EMR] Amend note error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تعديل الملاحظة', error: safeError(error) });
-  }
-});
+router.get(
+  '/medication-schedule/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const schedule = await emrService.getMedicationSchedule(req.params.beneficiaryId);
+    res.json({ success: true, data: schedule });
+  })
+);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ALLERGIES — الحساسية
-// ═══════════════════════════════════════════════════════════════════════════
+// ─── Lab Results ───────────────────────────────────────────────────────────
+router.post(
+  '/lab-results',
+  authenticate,
+  [
+    body('beneficiary').notEmpty(),
+    body('orderedDate').notEmpty(),
+    body('category').notEmpty(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const lab = await emrService.addLabResult(req.body);
+    res.status(201).json({ success: true, data: lab });
+  })
+);
 
-router.get('/allergies', async (req, res) => {
-  try {
-    const { beneficiary, allergenType, clinicalStatus, page = 1, limit = 20 } = req.query;
-    let filter = { isDeleted: { $ne: true } };
-    if (beneficiary) filter.beneficiary = beneficiary;
-    if (allergenType) filter['allergen.type'] = allergenType;
-    if (clinicalStatus) filter.clinicalStatus = clinicalStatus;
-    filter = await applyBeneficiaryListScope(req, filter);
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [allergies, total] = await Promise.all([
-      Allergy.find(filter)
-        .populate('beneficiary', 'name')
-        .populate('recordedBy', 'name')
-        .sort({ createdAt: -1 })
-        .limit(parseInt(limit))
-        .skip(skip),
-      Allergy.countDocuments(filter),
-    ]);
-    res.json({ success: true, data: allergies, total });
-  } catch (error) {
-    safeError(res, error, '[EMR] List allergies error');
-  }
-});
+router.get(
+  '/lab-results/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const list = await emrService.getLabResults(req.params.beneficiaryId);
+    res.json({ success: true, data: list });
+  })
+);
 
-router.get('/allergies/patient/:beneficiaryId', async (req, res) => {
-  try {
-    const allergies = await Allergy.find({
-      beneficiary: req.params.beneficiaryId,
-      clinicalStatus: 'active',
-      isDeleted: { $ne: true },
-    }).sort({ 'reaction.severity': -1 });
-    res.json({ success: true, data: allergies, count: allergies.length });
-  } catch (error) {
-    logger.error('[EMR] Patient allergies error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب حساسية المريض', error: safeError(error) });
-  }
-});
-
-router.post('/allergies', async (req, res) => {
-  try {
-    const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
-    if (denied) return;
-    const allergy = new Allergy({ ...req.body, recordedBy: req.body.recordedBy || req.user?.id });
-    await allergy.save();
-    logger.info(`[EMR] Allergy recorded: ${allergy.allergen.name.ar} for ${allergy.beneficiary}`);
+// ─── Allergies ───────────────────────────────────────────────────────────
+router.post(
+  '/allergies',
+  authenticate,
+  [
+    body('beneficiaryId').notEmpty(),
+    body('allergen').isObject(),
+    body('reaction').isObject(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const { beneficiaryId, ...allergyData } = req.body;
+    const allergy = await emrService.addAllergy(beneficiaryId, allergyData);
     res.status(201).json({ success: true, data: allergy });
-  } catch (error) {
-    logger.error('[EMR] Create allergy error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تسجيل الحساسية', error: safeError(error) });
-  }
-});
+  })
+);
 
-router.put('/allergies/:id', async (req, res) => {
-  try {
-    const { doc, denied } = await fetchScopedByBeneficiary(Allergy, req.params.id, req, res, {
-      select: 'beneficiary',
-      lean: true,
-    });
-    if (denied) return;
-    const body = stripUpdateMeta(req.body);
-    delete body.beneficiary;
-    const allergy = await Allergy.findByIdAndUpdate(doc._id, body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
-    if (!allergy)
-      return res.status(404).json({ success: false, message: 'سجل الحساسية غير موجود' });
-    res.json({ success: true, data: allergy });
-  } catch (error) {
-    logger.error('[EMR] Update allergy error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تحديث الحساسية', error: safeError(error) });
-  }
-});
+router.get(
+  '/allergies/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const list = await emrService.checkAllergyAlerts(req.params.beneficiaryId, req.query.medication);
+    res.json({ success: true, data: list });
+  })
+);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PATIENT SUMMARY — ملخص المريض
-// ═══════════════════════════════════════════════════════════════════════════
+// ─── Immunizations ───────────────────────────────────────────────────────────
+router.post(
+  '/immunizations',
+  authenticate,
+  [
+    body('beneficiary').notEmpty(),
+    body('dateAdministered').notEmpty(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const imm = await emrService.addImmunization(req.body);
+    res.status(201).json({ success: true, data: imm });
+  })
+);
 
-router.get('/patient-summary/:beneficiaryId', async (req, res) => {
-  try {
-    const beneficiaryId = req.params.beneficiaryId;
+router.get(
+  '/immunizations/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const list = await emrService.getImmunizationSchedule(req.params.beneficiaryId);
+    res.json({ success: true, data: list });
+  })
+);
 
-    const [medicalRecord, latestVitals, activeAllergies, recentLabResults, recentNotes] =
-      await Promise.all([
-        MedicalRecord.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
-          .populate('beneficiary', 'name dateOfBirth gender')
-          .populate('primaryProvider', 'name'),
-        VitalSign.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).sort({
-          recordedAt: -1,
-        }),
-        Allergy.find({
-          beneficiary: beneficiaryId,
-          clinicalStatus: 'active',
-          isDeleted: { $ne: true },
-        }),
-        LabResult.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
-          .sort({ orderedDate: -1 })
-          .limit(5),
-        ClinicalNote.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
-          .populate('author', 'name')
-          .sort({ createdAt: -1 })
-          .limit(5),
-      ]);
+// ─── Referrals ───────────────────────────────────────────────────────────
+router.post(
+  '/referrals',
+  authenticate,
+  [
+    body('beneficiary').notEmpty(),
+    body('referredBy').notEmpty(),
+    body('reason').isObject(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    const ref = await emrService.createReferral(req.body);
+    res.status(201).json({ success: true, data: ref });
+  })
+);
 
-    res.json({
-      success: true,
-      data: {
-        medicalRecord,
-        latestVitals,
-        activeAllergies,
-        allergyCount: activeAllergies.length,
-        recentLabResults,
-        recentNotes,
-      },
-    });
-  } catch (error) {
-    logger.error('[EMR] Patient summary error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب ملخص المريض', error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — لوحة التحكم
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/dashboard', async (req, res) => {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const [
-      totalRecords,
-      todayVitals,
-      todayNotes,
-      pendingLabResults,
-      criticalLabResults,
-      draftNotes,
-      activeAllergies,
-    ] = await Promise.all([
-      MedicalRecord.countDocuments({ isDeleted: { $ne: true } }),
-      VitalSign.countDocuments({
-        recordedAt: { $gte: today, $lt: tomorrow },
-        isDeleted: { $ne: true },
-      }),
-      ClinicalNote.countDocuments({
-        createdAt: { $gte: today, $lt: tomorrow },
-        isDeleted: { $ne: true },
-      }),
-      LabResult.countDocuments({
-        overallStatus: { $in: ['ordered', 'collected', 'processing'] },
-        isDeleted: { $ne: true },
-      }),
-      LabResult.countDocuments({
-        'criticalValues.hasCritical': true,
-        'criticalValues.acknowledgedBy': { $exists: false },
-        isDeleted: { $ne: true },
-      }),
-      ClinicalNote.countDocuments({ status: 'draft', isDeleted: { $ne: true } }),
-      Allergy.countDocuments({ clinicalStatus: 'active', isDeleted: { $ne: true } }),
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        records: { total: totalRecords },
-        today: { vitalsRecorded: todayVitals, notesWritten: todayNotes },
-        lab: { pending: pendingLabResults, critical: criticalLabResults },
-        notes: { drafts: draftNotes },
-        allergies: { active: activeAllergies },
-      },
-    });
-  } catch (error) {
-    safeError(res, error, '[EMR] Dashboard error');
-  }
-});
+router.get(
+  '/referrals/:beneficiaryId',
+  authenticate,
+  [param('beneficiaryId').notEmpty()],
+  handleValidation,
+  wrap(async (req, res) => {
+    const list = await emrService.getReferralsByBeneficiary(req.params.beneficiaryId);
+    res.json({ success: true, data: list });
+  })
+);
 
 module.exports = router;

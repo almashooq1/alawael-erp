@@ -262,8 +262,14 @@ class ConnectionPoolManager extends EventEmitter {
       } else {
         const entry = this._connections.get(name);
         if (entry && entry.connection.readyState !== 1) {
-          // Try to reconnect
-          await entry.connection.openUri(uri, config);
+          // Try to reconnect — mongoose 8+: create a fresh connection and replace the old one
+          const newConnection = mongoose.createConnection(uri, config);
+          await newConnection.asPromise();
+          entry.connection = newConnection;
+          entry.status = 'connected';
+          entry.connectedAt = new Date();
+          this._setupEventHandlers(name, newConnection, uri, config);
+          this._stats.reconnections++;
         }
       }
     } catch (err) {

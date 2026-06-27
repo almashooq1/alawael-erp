@@ -72,7 +72,7 @@ authRouter.post('/subscribe', async (req, res) => {
           lastError: '',
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.json({ ok: true, subscription: { id: sub._id } });
   } catch (err) {

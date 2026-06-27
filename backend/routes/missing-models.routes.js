@@ -74,7 +74,7 @@ router.post('/medical-history', requireAuth, requireBranchAccess, async (req, re
     const record = await MedicalHistory.findOneAndUpdate(
       { beneficiary: beneficiaryId, ...branchFilter(req) },
       { ...rest, beneficiary: beneficiaryId },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, returnDocument: 'after', runValidators: true }
     );
     ok(res, record, { message: 'تم حفظ التاريخ الطبي' });
   } catch (err) {
@@ -375,7 +375,7 @@ router.post('/leave-balances', requireAuth, requireBranchAccess, async (req, res
     const balance = await LeaveBalance.findOneAndUpdate(
       { employee, year, leaveType },
       { employee, year, leaveType, ...rest },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, returnDocument: 'after', runValidators: true }
     );
     ok(res, balance, { message: 'تم حفظ الرصيد' });
   } catch (err) {

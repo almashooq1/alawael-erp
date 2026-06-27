@@ -193,7 +193,7 @@ router.post('/config/reset', async (req, res) => {
         updatedByName: req.user?.name || req.user?.email,
         $inc: { version: 1 },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
@@ -227,7 +227,7 @@ router.put('/content/draft', async (req, res) => {
     await LandingContent.findOneAndUpdate(
       { tenantId: 'default' },
       { draft: content, updatedBy: req.user?.id || req.user?.email || null },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.json({ ok: true });
   } catch (err) {
@@ -250,7 +250,7 @@ router.post('/content/publish', async (req, res) => {
         updatedBy: req.user?.id || req.user?.email || null,
         $inc: { version: 1 },
       },
-      { new: true, setDefaultsOnInsert: true }
+      {returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.json({ ok: true, version: updated.version, publishedAt: updated.publishedAt });
   } catch (err) {
@@ -275,8 +275,7 @@ router.post('/content/seed', async (req, res) => {
       update.$inc = { version: 1 };
     }
     await LandingContent.findOneAndUpdate({ tenantId: 'default' }, update, {
-      upsert: true,
-      new: true,
+      upsert: true, returnDocument: 'after',
       setDefaultsOnInsert: true,
     });
     res.json({ ok: true });

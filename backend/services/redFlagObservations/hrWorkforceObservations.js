@@ -76,8 +76,8 @@ function requireOptional(path) {
 
 const DEFAULT_SESSION_ATTENDANCE = requireOptional('../../models/SessionAttendance');
 const DEFAULT_EMPLOYEE = requireOptional('../../models/HR/Employee');
-const DEFAULT_LEAVE_BALANCE = requireOptional('../../models/hr/LeaveBalance');
-const DEFAULT_PERFORMANCE_REVIEW = requireOptional('../../models/hr/PerformanceReview');
+const DEFAULT_LEAVE_BALANCE = requireOptional('../../models/HR/LeaveBalance');
+const DEFAULT_PERFORMANCE_REVIEW = requireOptional('../../models/HR/PerformanceReview');
 const DEFAULT_SHIFT = requireOptional('../../models/Shift');
 
 function createHrWorkforceObservations(deps = {}) {

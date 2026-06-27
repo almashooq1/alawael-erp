@@ -604,7 +604,7 @@ describe('Clinical Legacy Adapter routes', () => {
       expect(fakeModels.TherapeuticGoal.findByIdAndUpdate).toHaveBeenCalledWith(
         'g1',
         expect.objectContaining({ $set: expect.objectContaining({ 'target.value': 40 }) }),
-        { new: true }
+        {returnDocument: 'after'}
       );
       expect(res._body.success).toBe(true);
       expect(res._body.data.targetScore).toBe(40);
@@ -646,7 +646,7 @@ describe('Clinical Legacy Adapter routes', () => {
             notes: expect.stringMatching(/^\[.*\] new note\nold note$/),
           }),
         }),
-        { new: true }
+        {returnDocument: 'after'}
       );
       expect(res._status).toBe(201);
       expect(res._body.data.noteAr).toBe('new note');
@@ -673,7 +673,7 @@ describe('Clinical Legacy Adapter routes', () => {
         expect.objectContaining({
           $set: expect.objectContaining({ status: 'discontinued' }),
         }),
-        { new: true }
+        {returnDocument: 'after'}
       );
       expect(res._body.success).toBe(true);
       expect(res._body.data.status).toBe('discontinued');
@@ -700,7 +700,7 @@ describe('Clinical Legacy Adapter routes', () => {
         expect.objectContaining({
           $set: expect.objectContaining({ status: 'active' }),
         }),
-        { new: true }
+        {returnDocument: 'after'}
       );
       expect(res._body.success).toBe(true);
       expect(res._body.data.status).toBe('active');

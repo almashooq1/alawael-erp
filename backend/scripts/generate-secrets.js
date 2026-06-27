@@ -1,117 +1,102 @@
 #!/usr/bin/env node
-
 /**
- * ════════════════════════════════════════════════════════════════
- * Al-Awael ERP — Generate Secure Secrets
- * نظام الأوائل — توليد مفاتيح آمنة
- * ════════════════════════════════════════════════════════════════
+ * generate-secrets.js — توليد secrets قوية للبيئة الحالية
  *
  * Usage:
- *   node scripts/generate-secrets.js           # Print new secrets
- *   node scripts/generate-secrets.js --apply   # Update .env file
- *   node scripts/generate-secrets.js --json    # Output as JSON
+ *   node scripts/generate-secrets.js
+ *
+ * Generates:
+ *   - JWT_SECRET (64 bytes hex)
+ *   - JWT_REFRESH_SECRET (64 bytes hex)
+ *   - SESSION_SECRET (32 bytes hex)
+ *   - ENCRYPTION_KEY (32 bytes hex)
+ *   - REDIS_PASSWORD (16 bytes alphanumeric)
+ *   - MONGO_ROOT_PASSWORD (16 bytes alphanumeric)
+ *   - MINIO_SECRET_KEY (16 bytes alphanumeric)
+ *   - GRAFANA_PASSWORD (12 bytes alphanumeric)
+ *   - ADMIN_DEFAULT_PASSWORD (12 bytes mixed)
+ *
+ * Outputs ready-to-paste environment variables.
  */
+'use strict';
 
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 
-const C = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  bold: '\x1b[1m',
-};
-
-const args = process.argv.slice(2);
-const applyToEnv = args.includes('--apply');
-const jsonOutput = args.includes('--json');
-
-// ─── Secret Generators ──────────────────────────────────────────────────────
-function generateSecret(length = 64) {
-  return crypto.randomBytes(length).toString('base64url').slice(0, length);
+function genHex(len) {
+  return crypto.randomBytes(len).toString('hex');
 }
 
-function generateHex(length = 32) {
-  return crypto.randomBytes(length).toString('hex').slice(0, length);
+function genAlphanumeric(len) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const bytes = crypto.randomBytes(len);
+  for (let i = 0; i < len; i++) {
+    result += chars[bytes[i] % chars.length];
+  }
+  return result;
 }
 
-// ─── Secrets to Generate ────────────────────────────────────────────────────
+function genPassword(len = 12) {
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const digits = '0123456789';
+  const symbols = '!@#$%^&*';
+  const all = lower + upper + digits + symbols;
+  let result = '';
+  const bytes = crypto.randomBytes(len);
+  // Ensure at least one of each category
+  result += lower[bytes[0] % lower.length];
+  result += upper[bytes[1] % upper.length];
+  result += digits[bytes[2] % digits.length];
+  result += symbols[bytes[3] % symbols.length];
+  for (let i = 4; i < len; i++) {
+    result += all[bytes[i] % all.length];
+  }
+  // Shuffle
+  return result.split('').sort(() => 0.5 - Math.random()).join('');
+}
+
 const secrets = {
-  JWT_SECRET: generateSecret(64),
-  JWT_REFRESH_SECRET: generateSecret(64),
-  SESSION_SECRET: generateSecret(48),
-  ENCRYPTION_KEY: generateHex(64),
+  JWT_SECRET: genHex(64),
+  JWT_REFRESH_SECRET: genHex(64),
+  SESSION_SECRET: genHex(32),
+  ENCRYPTION_KEY: genHex(32),
+  REDIS_PASSWORD: genAlphanumeric(16),
+  MONGO_ROOT_PASSWORD: genAlphanumeric(16),
+  MINIO_SECRET_KEY: genAlphanumeric(16),
+  GRAFANA_PASSWORD: genPassword(12),
+  ADMIN_DEFAULT_PASSWORD: genPassword(12),
 };
 
-// ─── JSON Output ────────────────────────────────────────────────────────────
-if (jsonOutput) {
-  console.log(JSON.stringify(secrets, null, 2));
-  process.exit(0);
-}
-
-// ─── Print Secrets ──────────────────────────────────────────────────────────
-console.log(`\n${C.bold}${C.cyan}🔐 Generated Secure Secrets${C.reset}\n`);
-console.log(`${C.yellow}Copy these to your .env file:${C.reset}\n`);
-
+console.log('═══════════════════════════════════════════════════════════════════════');
+console.log('  Al-Awael ERP — Generated Secrets for .env');
+console.log('═══════════════════════════════════════════════════════════════════════');
+console.log('');
+console.log('# ─── Copy these into your .env file ──────────────────────────────────');
+console.log('');
 for (const [key, value] of Object.entries(secrets)) {
-  console.log(`${C.green}${key}${C.reset}=${value}`);
+  console.log(`${key}=${value}`);
 }
+console.log('');
+console.log('═══════════════════════════════════════════════════════════════════════');
+console.log('  ⚠️  WARNING: Store these secrets securely. Do NOT commit .env to git.');
+console.log('═══════════════════════════════════════════════════════════════════════');
 
-// ─── Apply to .env ──────────────────────────────────────────────────────────
-if (applyToEnv) {
-  const envPath = path.join(__dirname, '..', '.env');
-
-  if (!fs.existsSync(envPath)) {
-    const examplePath = path.join(__dirname, '..', '.env.example');
-    if (fs.existsSync(examplePath)) {
-      fs.copyFileSync(examplePath, envPath);
-      console.log(`\n${C.cyan}ℹ️  Created .env from .env.example${C.reset}`);
-    } else {
-      console.log(`\n${C.red}❌ No .env or .env.example found${C.reset}`);
-      process.exit(1);
-    }
-  }
-
-  let envContent = fs.readFileSync(envPath, 'utf8');
-  let updated = 0;
-
-  for (const [key, value] of Object.entries(secrets)) {
-    // Only replace if the current value is a placeholder/default
-    const regex = new RegExp(`^(${key})=(.*)$`, 'm');
-    const match = envContent.match(regex);
-
-    if (match) {
-      const currentVal = match[2];
-      if (
-        currentVal.includes('change-me') ||
-        currentVal.includes('your-') ||
-        currentVal.length < 16
-      ) {
-        envContent = envContent.replace(regex, `$1=${value}`);
-        updated++;
-        console.log(`  ${C.green}✅ Updated ${key}${C.reset}`);
-      } else {
-        console.log(`  ${C.yellow}⏭️  Skipped ${key} (already has a custom value)${C.reset}`);
-      }
-    } else {
-      // Variable doesn't exist, append it
-      envContent += `\n${key}=${value}`;
-      updated++;
-      console.log(`  ${C.green}➕ Added ${key}${C.reset}`);
-    }
-  }
-
-  if (updated > 0) {
-    fs.writeFileSync(envPath, envContent);
-    console.log(`\n${C.green}${C.bold}✅ Updated ${updated} secret(s) in .env${C.reset}\n`);
-  } else {
-    console.log(`\n${C.yellow}No secrets needed updating.${C.reset}\n`);
-  }
-} else {
-  console.log(
-    `\n${C.cyan}Tip: Run with ${C.bold}--apply${C.reset}${C.cyan} to update .env automatically.${C.reset}\n`
-  );
-}
+// Also generate a docker-compose override snippet
+console.log('');
+console.log('# ─── Docker Compose override snippet (docker-compose.override.yml) ───');
+console.log('');
+console.log('version: "3.8"');
+console.log('services:');
+console.log('  backend:');
+console.log('    environment:');
+console.log(`      ALLOW_DEV_SECRETS: "1"`);
+console.log(`      JWT_SECRET: ${secrets.JWT_SECRET}`);
+console.log(`      JWT_REFRESH_SECRET: ${secrets.JWT_REFRESH_SECRET}`);
+console.log(`      SESSION_SECRET: ${secrets.SESSION_SECRET}`);
+console.log(`      ENCRYPTION_KEY: ${secrets.ENCRYPTION_KEY}`);
+console.log(`      REDIS_PASSWORD: ${secrets.REDIS_PASSWORD}`);
+console.log(`      MONGO_ROOT_PASSWORD: ${secrets.MONGO_ROOT_PASSWORD}`);
+console.log(`      MINIO_SECRET_KEY: ${secrets.MINIO_SECRET_KEY}`);
+console.log(`      GRAFANA_PASSWORD: ${secrets.GRAFANA_PASSWORD}`);
+console.log(`      ADMIN_DEFAULT_PASSWORD: ${secrets.ADMIN_DEFAULT_PASSWORD}`);

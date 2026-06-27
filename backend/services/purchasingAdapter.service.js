@@ -251,8 +251,7 @@ async function updateVendor(id, body) {
   if (body.paymentTerms != null) patch.paymentTerms = body.paymentTerms;
   if (body.rating != null) patch.rating = body.rating;
   if (body.isActive != null) patch.status = body.isActive ? 'active' : 'inactive';
-  const doc = await Vendor.findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, patch, {
-    new: true,
+  const doc = await Vendor.findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, patch, {returnDocument: 'after',
   });
   if (!doc) {
     const err = new Error('vendor_not_found');
@@ -267,7 +266,7 @@ async function deleteVendor(id) {
   const doc = await Vendor.findOneAndUpdate(
     { _id: id, isDeleted: { $ne: true } },
     { isDeleted: true, status: 'inactive' },
-    { new: true }
+    {returnDocument: 'after'}
   );
   if (!doc) {
     const err = new Error('vendor_not_found');
@@ -466,7 +465,7 @@ async function approveOrder(id, actorId) {
       approved_at: new Date(),
       updated_by: actorId,
     },
-    { new: true }
+    {returnDocument: 'after'}
   );
   if (!doc) {
     const err = new Error('order_not_found');

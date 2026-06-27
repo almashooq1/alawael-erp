@@ -143,6 +143,49 @@ export const PRESCRIPTION_STATUS_LABELS = {
   expired: 'منتهية',
 };
 
+// ─── Remote Rehabilitation Labels ───────────────────────────────────────────
+
+export const REHAB_STATUS_LABELS = {
+  scheduled: 'مجدولة',
+  in_progress: 'جارية',
+  completed: 'مكتملة',
+  cancelled: 'ملغاة',
+  no_show: 'لم يحضر',
+};
+
+export const REHAB_STATUS_COLORS = {
+  scheduled: 'blue',
+  in_progress: 'green',
+  completed: 'teal',
+  cancelled: 'gray',
+  no_show: 'red',
+};
+
+// ─── Remote Rehabilitation Sessions ─────────────────────────────────────────
+
+export const getRehabSessions = (params = {}) => api.get(`${BASE}/sessions`, { params });
+
+export const getRehabSession = id => api.get(`${BASE}/sessions/${id}`);
+
+export const createRehabSession = data => api.post(`${BASE}/sessions`, data);
+
+export const startRehabSession = id => api.patch(`${BASE}/sessions/${id}/start`);
+
+export const completeRehabSession = (id, notes) =>
+  api.patch(`${BASE}/sessions/${id}/complete`, { notes });
+
+export const getUpcomingRehabSessions = () => api.get(`${BASE}/upcoming`);
+
+export const getRehabStatistics = () => api.get(`${BASE}/statistics`);
+
+export const getRehabMaterials = sessionId => api.get(`${BASE}/sessions/${sessionId}/materials`);
+
+export const addRehabMaterial = (sessionId, data) =>
+  api.post(`${BASE}/sessions/${sessionId}/materials`, data);
+
+export const recordRehabIssue = (sessionId, data) =>
+  api.post(`${BASE}/sessions/${sessionId}/technical-issues`, data);
+
 const telehealthService = {
   getTelehealthStats,
   getConsultations,
@@ -179,6 +222,18 @@ const telehealthService = {
   TYPE_LABELS,
   PRIORITY_LABELS,
   PRESCRIPTION_STATUS_LABELS,
+  REHAB_STATUS_LABELS,
+  REHAB_STATUS_COLORS,
+  getRehabSessions,
+  getRehabSession,
+  createRehabSession,
+  startRehabSession,
+  completeRehabSession,
+  getUpcomingRehabSessions,
+  getRehabStatistics,
+  getRehabMaterials,
+  addRehabMaterial,
+  recordRehabIssue,
 };
 
 export default telehealthService;

@@ -81,7 +81,7 @@ router.post('/subscribe', limiter, async (req, res) => {
         },
         $unset: { unsubscribedAt: '' },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     logger.info('[newsletter] subscribe', { id: doc._id.toString(), email });

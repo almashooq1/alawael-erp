@@ -1,47 +1,63 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { searchAPI } from '../services/api';
 
-/**
- * useSearch — Debounced search with multi-field filtering.
- *
- * @param {Array}  data         — Source data array
- * @param {Array}  fields       — Field paths to search in (supports dot notation)
- * @param {number} [delay=300]  — Debounce delay in ms
- *
- * @returns {object} { query, setQuery, results, isSearching, resultCount }
- */
-const useSearch = (data = [], fields = [], delay = 300) => {
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setDebouncedQuery(query), delay);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [query, delay]);
-
-  const results = useMemo(() => {
-    if (!debouncedQuery.trim()) return data;
-    const q = debouncedQuery.toLowerCase();
-    return data.filter(item =>
-      fields.some(field => {
-        const val = field.split('.').reduce((obj, key) => obj?.[key], item);
-        return String(val || '')
-          .toLowerCase()
-          .includes(q);
-      })
-    );
-  }, [data, debouncedQuery, fields]);
-
-  return {
-    query,
-    setQuery,
-    results,
-    isSearching: query !== debouncedQuery,
-    resultCount: results.length,
-  };
+const SEARCH_KEYS = {
+  fullText: (query) => ['search', 'full-text', query],
+  fuzzy: (query) => ['search', 'fuzzy', query],
+  suggestions: (query) => ['search', 'suggestions', query],
 };
 
-export default useSearch;
+/**
+ * useSearchFullText
+ * بحث نصي كامل
+ * @param {string} query — نص البحث
+ * @param {object} options — إضافية (enabled, etc.)
+ */
+export function useSearchFullText(query, options = {}) {
+  return useQuery({
+    queryKey: SEARCH_KEYS.fullText(query),
+    queryFn: () => searchAPI.fullText(query),
+    enabled: !!query && query.length >= 2, // Only search if query >= 2 chars
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    ...options,
+  });
+}
+
+/**
+ * useSearchFuzzy
+ * بحث تقريب (fuzzy)
+ * @param {string} query — نص البحث
+ * @param {object} options — إضافية
+ */
+export function useSearchFuzzy(query, options = {}) {
+  return useQuery({
+    queryKey: SEARCH_KEYS.fuzzy(query),
+    queryFn: () => searchAPI.fuzzy(query),
+    enabled: !!query && query.length >= 2,
+    staleTime: 2 * 60 * 1000,
+    ...options,
+  });
+}
+
+/**
+ * useSearchSuggestions
+ * اقتراحات البحث (لـ autocomplete)
+ * @param {string} query — نص البحث
+ * @param {object} options — إضافية
+ */
+export function useSearchSuggestions(query, options = {}) {
+  return useQuery({
+    queryKey: SEARCH_KEYS.suggestions(query),
+    queryFn: () => searchAPI.suggestions(query),
+    enabled: !!query && query.length >= 1, // Suggestions work with 1 char
+    staleTime: 1 * 60 * 1000, // 1 minute
+    ...options,
+  });
+}
+
+// Default export
+export default {
+  useSearchFullText,
+  useSearchFuzzy,
+  useSearchSuggestions,
+};

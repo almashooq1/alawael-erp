@@ -79,8 +79,12 @@ const { setupSchedulers } = require('./startup/schedulers');
 const { setupIntegrationBus } = require('./startup/integrationBus');
 
 // Centralised route registry
-const { mountAllRoutes } = require('./routes/_registry');
-const { authRateLimiter } = require('./config/security.advanced');
+// LEGACY _registry.js removed — all routes now managed by unifiedRouteRegistry
+// const { mountAllRoutes } = require('./routes/_registry');
+// const { authRateLimiter } = require('./config/security.advanced');
+
+// UNIFIED ROUTE REGISTRY (v2 — single source of truth for ALL route mounts)
+const { mountRegistry: mountUnifiedRegistry } = require('./config/unifiedRouteRegistry');
 
 // Infrastructure (Phase II)
 const { mountEventStoreRoutes } = require('./infrastructure/eventStore');
@@ -89,6 +93,12 @@ const { mountMigrationRoutes } = require('./infrastructure/migrationRunner');
 require('./api/versionRouter'); // side-effects only
 const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
 const safeError = require('./utils/safeError');
+
+// ════════════════════════════════════════════════════════════════════════════
+// UNIFIED ROUTE HEALTH & STANDARDIZED RESPONSE (Phase 38 Repair)
+// ════════════════════════════════════════════════════════════════════════════
+const { routeHealthMonitor, createRouteHealthRouter } = require('./utils/unifiedRouteHealth');
+const { standardizedResponse } = require('./utils/standardizedResponse');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. MIDDLEWARE STACK
@@ -106,7 +116,7 @@ setupHealthProbes(app, { isTestEnv, isProd });
 setupAdminEndpoints(app, { isProd });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4. ROUTE MOUNTING (centralised in routes/_registry.js)
+// 4. ROUTE MOUNTING (unified in config/unifiedRouteRegistry.js)
 // ═══════════════════════════════════════════════════════════════════════════
 // Legacy clinical adapters BEFORE stubs so real data wins over stub catch-alls.
 // (e.g. /api/v1/measures, /api/v1/outcomes used by the web-admin frontend).
@@ -114,15 +124,14 @@ app.use('/api/v1', require('./routes/clinical-legacy-adapter.routes'));
 
 // Stubs come after adapters so they only catch routes not yet implemented.
 app.use('/api/v1', require('./routes/stub-missing.routes'));
+
+// UNIFIED ROUTE REGISTRY (v2 — single source of truth for ALL route mounts)
+// Every route is explicitly declared in config/unifiedRouteRegistry.js with metadata (auth, roles, phase, description).
 try {
-  mountAllRoutes(app, { authRateLimiter });
+  const { mounted, failed, skipped } = mountUnifiedRegistry(app, { logger, routeHealthMonitor });
+  logger.info(`[UnifiedRegistry] ✓ Mounted ${mounted} routes (${failed} failed, ${skipped} skipped)`);
 } catch (err) {
-  // Inline err.message into the message string — winston's default format
-  // drops the splat-style second argument, which made this line just say
-  // "[Routes] Some routes failed to mount:" with no actionable detail.
-  logger.warn(`[Routes] Some routes failed to mount: ${err.message}`, {
-    stack: err.stack,
-  });
+  logger.warn(`[UnifiedRegistry] Mount failed: ${err.message}`, { stack: err.stack });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -299,14 +308,6 @@ try {
   logger.info('[FormsSubmission] ✓ mounted at /api/documents-pro/forms');
 } catch (err) {
   logger.warn('[FormsSubmission] mount skipped:', err.message);
-}
-
-// Phase 25 — Landing-page CMS. Public GET, admin-gated PUT/PATCH/POST/DELETE.
-try {
-  app.use('/api/v1/landing', require('./routes/landing-config.routes'));
-  logger.info('[LandingConfig] ✓ mounted at /api/v1/landing');
-} catch (err) {
-  logger.warn('[LandingConfig] mount skipped:', err.message);
 }
 
 // Phase 27 — admin-only file uploads to /home/alawael/app/uploads/<bucket>/.
@@ -2646,71 +2647,18 @@ try {
 }
 
 // ─── Auto-mount all remaining route files ────────────────────────────────────
-// Mounts every routes/*.js file not already individually registered above.
-// Filename → /api/v1/<kebab-case> (e.g. academicYear.routes.js → /api/v1/academic-year)
-try {
-  const { autoMountRoutes } = require('./utils/autoRouteLoader');
-  const routesDir = require('path').join(__dirname, 'routes');
-  // Files already required individually above — skip to avoid double-mount
-  const alreadyMounted = [
-    '_registry',
-    'admin-ops-dlq.routes',
-    'ai.recommendations.routes',
-    'audit-reviews.routes',
-    'beneficiary-consents.routes',
-    'bi-dashboard.routes',
-    'compensationBenefits.routes',
-    'complaints.routes',
-    'contract-management.routes',
-    'dashboard-alerts.routes',
-    'dashboard-saved-views.routes',
-    'dashboards-platform.routes',
-    'employee-affairs-expanded.routes',
-    'employee-affairs-phase2.routes',
-    'employee-affairs-phase3.routes',
-    'employeeAffairs.routes',
-    'employeePortal.routes',
-    'forms-catalog.routes',
-    'forms-submission.routes',
-    'hr-attendance.routes',
-    'hr-insurance.routes',
-    'hrSystem.routes',
-    'insurance.routes',
-    'iq-assessments.routes',
-    'kpi-dashboard.routes',
-    'landing-config.routes',
-    'leave-requests.routes',
-    'nafath-signing.routes',
-    'notifications-log.routes',
-    'nphies-webhook.routes',
-    'openapi-integration.routes',
-    'outcomes-admin.routes',
-    'parent-portal-v1.routes',
-    'payroll.routes',
-    'public-forms.routes',
-    'public-uploads.routes',
-    'push.routes',
-    'recruitment.routes',
-    'rehab-disciplines.routes',
-    'rehab-goal-suggestions.routes',
-    'reports-inbox.routes',
-    'reports-ops.routes',
-    'student-portal.routes',
-    'therapist-portal.routes',
-    'training.routes',
-    'universal-codes.routes',
-    'uploads.routes',
-    'visitor-auth.routes',
-    'wasel-address.routes',
-    'work-shifts.routes',
-    'yakeen-verification.routes',
-    'zatca-credentials-admin.routes',
-    'zkteco.routes',
-  ];
-  autoMountRoutes(app, routesDir, alreadyMounted);
-} catch (autoErr) {
-  logger.warn('[AutoRouter] failed to initialize:', autoErr.message);
-}
+// DISABLED: autoMountRoutes replaced by unifiedRouteRegistry (config/unifiedRouteRegistry.js).
+// All routes are now explicitly declared with metadata (auth, roles, phase, description).
+// This prevents silent double-mounts and makes the route surface fully auditable.
+// If you need to add a new route, add it to config/unifiedRouteRegistry.js instead of here.
+logger.debug('[AutoRouter] DISABLED — using unifiedRouteRegistry');
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STANDARDIZED RESPONSE & ROUTE HEALTH (Phase 38 Repair)
+// ═══════════════════════════════════════════════════════════════════════════
+app.use(standardizedResponse({ includeTimestamp: true, includeRequestId: true, includeDuration: true }));
+app.use('/api/health/routes', createRouteHealthRouter());
+logger.info('[UnifiedRouteHealth] ✓ Route health monitoring active at /api/health/routes');
 
 // ─── Error Handling (MUST be after all routes) ───────────────────────────────
 app.use(notFoundHandler);

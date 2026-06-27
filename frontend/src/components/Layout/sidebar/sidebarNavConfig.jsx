@@ -99,6 +99,8 @@ import {
   LocalPrintshop as PrintCenterIcon,
   Share as SocialShareIcon,
   Psychology as CDSSIcon,
+  PhoneAndroid as PhoneAndroidIcon,
+  Videocam as CctvIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -111,6 +113,15 @@ const getNavigationItems = () => [
     icon: <DashboardIcon />,
     path: '/dashboard',
     roles: ['*'],
+  },
+  {
+    id: 'executive-dashboard',
+    label: 'لوحة القيادة التنفيذية',
+    icon: <DashboardIcon />,
+    path: '/executive-dashboard',
+    roles: ['admin', 'super_admin', 'manager', 'executive'],
+    badge: 'جديد',
+    badgeColor: 'success',
   },
   {
     id: 'monitoring',
@@ -272,6 +283,13 @@ const getNavigationItems = () => [
         badgeColor: 'error',
       },
       {
+        id: 'ai-predictive',
+        label: 'التحليلات التنبؤية',
+        path: '/ai-predictive',
+        badge: 'AI',
+        badgeColor: 'error',
+      },
+      {
         id: 'clinical-research',
         label: 'الأبحاث السريرية',
         path: '/clinical-research',
@@ -357,6 +375,13 @@ const getNavigationItems = () => [
       { id: 'therapy-sessions-admin', label: 'الجلسات العلاجية', path: '/therapy-sessions-admin' },
       { id: 'assistive-devices', label: 'الأجهزة المساعدة', path: '/assistive-devices' },
       { id: 'rehab-reports', label: 'تقارير التأهيل', path: '/disability-rehab-reports' },
+      {
+        id: 'gamification',
+        label: 'نظام التحفيز',
+        path: '/gamification',
+        badge: 'جديد',
+        badgeColor: 'warning',
+      },
     ],
   },
   {
@@ -416,6 +441,24 @@ const getNavigationItems = () => [
     icon: <ICFIcon />,
     path: '/icf-assessments',
     roles: ['admin', 'super_admin', 'therapist', 'specialist'],
+  },
+  {
+    id: 'clinical-dashboard',
+    label: 'الملف السريري المتكامل',
+    icon: <MonitorIcon />,
+    path: '/clinical-dashboard',
+    roles: ['admin', 'super_admin', 'therapist', 'doctor', 'clinical_director'],
+    badge: 'جديد',
+    badgeColor: 'success',
+  },
+  {
+    id: 'integrated-reports',
+    label: 'التقارير المتكاملة',
+    icon: <PrintCenterIcon />,
+    path: '/reports/integrated',
+    roles: ['admin', 'super_admin', 'therapist', 'doctor', 'clinical_director'],
+    badge: 'جديد',
+    badgeColor: 'primary',
   },
   {
     id: 'mdt-coordination',
@@ -485,6 +528,15 @@ const getNavigationItems = () => [
     icon: <MedicalFilesIcon />,
     path: '/medical-files',
     roles: ['admin', 'super_admin', 'doctor', 'therapist'],
+  },
+  {
+    id: 'emr',
+    label: 'السجل الطبي الإلكتروني',
+    icon: <MonitorIcon />,
+    path: '/emr',
+    roles: ['admin', 'super_admin', 'doctor', 'therapist', 'nurse'],
+    badge: 'جديد',
+    badgeColor: 'success',
   },
   {
     id: 'mhpss',
@@ -706,6 +758,15 @@ const getNavigationItems = () => [
     ],
   },
   {
+    id: 'cctv-monitoring',
+    label: 'مركز المراقبة',
+    icon: <CctvIcon />,
+    path: '/cctv-monitoring',
+    roles: ['admin', 'super_admin', 'manager', 'security_officer'],
+    badge: 'CCTV',
+    badgeColor: 'error',
+  },
+  {
     id: 'fleet',
     label: 'الأسطول والنقل',
     icon: <MonitorIcon />,
@@ -784,6 +845,13 @@ const getNavigationItems = () => [
       },
       { id: 'hse', label: 'الصحة والسلامة (HSE)', path: '/hse' },
       { id: 'crisis-management', label: 'إدارة الأزمات', path: '/crisis' },
+      {
+        id: 'compliance-center',
+        label: 'مركز الامتثال والاعتماد',
+        path: '/compliance',
+        badge: 'جديد',
+        badgeColor: 'primary',
+      },
     ],
   },
 
@@ -812,6 +880,12 @@ const getNavigationItems = () => [
         path: '/whatsapp',
         badge: 'جديد',
         badgeColor: 'success',
+      },
+      {
+        id: 'comm-whatsapp-chatbot',
+        label: 'روبوت واتساب',
+        path: '/whatsapp-chatbot',
+        roles: ['admin', 'super_admin', 'manager'],
       },
     ],
   },
@@ -1057,6 +1131,15 @@ const getNavigationItems = () => [
     path: '/bi-dashboard',
     roles: ['admin', 'super_admin', 'manager'],
   },
+  {
+    id: 'bi-analytics',
+    label: 'التحليلات المتقدمة',
+    icon: <AnalyticsIcon />,
+    path: '/bi-analytics',
+    roles: ['admin', 'super_admin', 'manager', 'analyst', 'finance_manager', 'hr_manager'],
+    badge: 'جديد',
+    badgeColor: 'primary',
+  },
 
   // ═══════════════════════════════════════════════════════
   //  ⑨ إدارة الأعمال — Business Management
@@ -1143,6 +1226,15 @@ const getNavigationItems = () => [
   //  ⑩ البوابات — Portals
   // ═══════════════════════════════════════════════════════
   { id: 'divider-portals', type: 'divider', label: 'البوابات' },
+  {
+    id: 'mobile-app',
+    label: 'تطبيق الموبايل',
+    icon: <PhoneAndroidIcon />,
+    path: '/mobile',
+    roles: ['*'],
+    badge: 'PWA',
+    badgeColor: 'success',
+  },
   {
     id: 'student-portal',
     label: 'بوابة الطالب',
@@ -1304,6 +1396,13 @@ const getNavigationItems = () => [
         path: '/parent-portal/appointments-scheduling',
       },
       { id: 'parent-messages', label: 'الرسائل', path: '/parent-portal/messages' },
+      {
+        id: 'parent-beneficiary-detail',
+        label: 'تفاصيل المستفيد',
+        path: '/parent-portal/:beneficiaryId',
+        badge: 'جديد',
+        badgeColor: 'primary',
+      },
       {
         id: 'parent-portal-management',
         label: 'إدارة البوابة',

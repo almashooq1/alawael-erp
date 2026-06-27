@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const router = express.Router();
 const Payroll = require('../models/payroll.model');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const {
   CompensationStructure,
   IndividualIncentive,
@@ -101,6 +101,15 @@ async function loadEmployeeOwnedScoped(Model, req, res, id, notFoundMsg) {
  * الحصول على كشف الرواتب الشهري
  * GET /api/payroll/monthly/:month/:year
  */
+
+// Root handler — requires auth so smoke test can detect route exists
+router.get('/', authenticateToken, (req, res) => {
+  res.json({
+    message: 'Payroll API',
+    endpoints: ['/monthly/:month/:year', '/:payrollId', '/stats/:month/:year', '/compensation/structures'],
+  });
+});
+
 router.get('/monthly/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { month, year } = req.params;

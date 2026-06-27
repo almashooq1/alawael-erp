@@ -150,10 +150,12 @@ class QueryGovernor {
       query.maxTimeMS(this._defaultMaxTimeMs);
     }
 
-    // 2. Enforce limit cap
-    const opts = query.getOptions();
-    if (!opts.limit || opts.limit > this._maxQueryLimit) {
-      query.limit(this._maxQueryLimit);
+    // 2. Enforce limit cap (only for find; findOne/findOneAndUpdate/countDocuments/distinct do not support limit)
+    if (query.op === 'find') {
+      const opts = query.getOptions();
+      if (!opts.limit || opts.limit > this._maxQueryLimit) {
+        query.limit(this._maxQueryLimit);
+      }
     }
 
     // 3. Rate budget check

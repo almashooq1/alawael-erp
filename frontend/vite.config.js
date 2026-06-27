@@ -38,7 +38,12 @@ export default defineConfig(({ mode }) => {
       processEnvObj[key] = val;
     }
   }
-  envDefines['process.env'] = JSON.stringify(processEnvObj);
+  // SECURITY: Only stringify the process.env object in development.
+  // In production, only include NODE_ENV to avoid leaking any accidentally
+  // exposed env vars into the bundle.
+  if (mode !== 'production') {
+    envDefines['process.env'] = JSON.stringify(processEnvObj);
+  }
 
   return {
     plugins: [jsxInJsPlugin, react()],

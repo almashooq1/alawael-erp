@@ -36,7 +36,7 @@ async function linkDocumentToEntity(documentId, entityType, entityId, metadata =
           }
         : {}),
     },
-    { new: true, runValidators: true }
+    {returnDocument: 'after', runValidators: true }
   );
 
   if (!document) {

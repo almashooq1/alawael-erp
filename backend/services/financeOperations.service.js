@@ -138,7 +138,7 @@ class FinanceOperationsService {
     const invoice = await Invoice.findOneAndUpdate(
       { _id: id, status: { $nin: ['PAID', 'CANCELLED'] } },
       { $set: { status: 'CANCELLED', cancelledBy: userId } },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!invoice) {
       const exists = await Invoice.exists({ _id: id });
@@ -165,7 +165,7 @@ class FinanceOperationsService {
           paidAt: new Date(),
         },
       },
-      { new: true }
+      {returnDocument: 'after'}
     );
     if (!invoice) {
       const exists = await Invoice.exists({ _id: id });

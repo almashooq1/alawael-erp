@@ -977,7 +977,7 @@ router.patch(
     const updated = await TherapeuticGoal.findByIdAndUpdate(
       goal._id,
       { $set: update },
-      { new: true }
+      {returnDocument: 'after'}
     )
       .lean()
       .catch(() => null);
@@ -1043,7 +1043,7 @@ router.post(
             updatedBy: userId ? new mongoose.Types.ObjectId(userId) : undefined,
           },
         },
-        { new: true }
+        {returnDocument: 'after'}
       )
         .lean()
         .catch(() => null);
@@ -1093,7 +1093,7 @@ router.patch(
           updatedBy: userId ? new mongoose.Types.ObjectId(userId) : undefined,
         },
       },
-      { new: true }
+      {returnDocument: 'after'}
     )
       .lean()
       .catch(() => null);
@@ -1147,7 +1147,7 @@ router.patch(
           updatedBy: userId ? new mongoose.Types.ObjectId(userId) : undefined,
         },
       },
-      { new: true }
+      {returnDocument: 'after'}
     )
       .lean()
       .catch(() => null);

@@ -145,17 +145,22 @@ WhatsAppDlqSchema.statics.enqueueFailure = async function enqueueFailure(payload
  * if nothing due. Use `release()` (success or error) when done.
  */
 WhatsAppDlqSchema.statics.claimNext = async function claimNext({ now = new Date() } = {}) {
-  return this.findOneAndUpdate(
-    {
-      status: 'pending',
-      nextRetryAt: { $lte: now },
-      $or: [{ lockedUntil: null }, { lockedUntil: { $lt: now } }],
-    },
-    {
-      $set: { status: 'retrying', lockedUntil: new Date(now.getTime() + 30_000) },
-    },
-    { sort: { nextRetryAt: 1 }, returnDocument: 'after' }
+  // Two-step atomic claim: find + update to avoid findOneAndUpdate+sort driver issues
+  const doc = await this.findOne({
+    status: 'pending',
+    nextRetryAt: { $lte: now },
+    $or: [{ lockedUntil: null }, { lockedUntil: { $lt: now } }],
+  }).sort({ nextRetryAt: 1 }).lean();
+
+  if (!doc) return null;
+
+  const updated = await this.findOneAndUpdate(
+    { _id: doc._id, status: 'pending' },
+    { $set: { status: 'retrying', lockedUntil: new Date(now.getTime() + 30_000) } },
+    { returnDocument: 'after' }
   );
+
+  return updated; // null if another worker claimed it first
 };
 
 WhatsAppDlqSchema.statics.markReplayed = async function markReplayed(id, providerMessageId) {

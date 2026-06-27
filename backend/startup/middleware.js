@@ -35,6 +35,7 @@ const {
   compressionMiddleware,
   requestTimerMiddleware,
   cacheMiddleware,
+  etagMiddleware,
 } = require('../config/performance');
 const { initializePerformanceOptimizations } = require('../utils/performance-optimizer');
 const { requestIdMiddleware } = require('../middleware/requestId.middleware');
@@ -175,6 +176,7 @@ function setupMiddleware(app, { isTestEnv, isProd }) {
   app.use(compressionMiddleware);
   app.use(requestTimerMiddleware);
   app.use(cacheMiddleware(300, 'api'));
+  app.use(etagMiddleware); // conditional GET with 304 responses
 
   if (!isTestEnv) {
     initializeRedis();

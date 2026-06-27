@@ -12,128 +12,141 @@ import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import { ToastProvider } from './components/ui/NotificationToast';
 import { lazyWithRetry } from './utils/lazyLoader';
 import ProLayout from './components/Layout/ProLayout';
+import SafeRouteWrapper from './components/SafeRouteWrapper';
 import logger from './utils/logger';
 
 // Route Modules
-import {
-  FinanceRoutes,
-  HRRoutes,
-  AdminRoutes,
-  RehabRoutes,
-  EducationRoutes,
-  WorkflowRoutes,
-  PortalRoutes,
-  EnterpriseRoutes,
-  EnterpriseProPlusRoutes,
-  EnterpriseUltraRoutes,
-  GovernmentIntegrationRoutes,
-  AdministrativeSystemsRoutes,
-  BIDashboardRoutes,
-  WarehouseRoutes,
-  LegalAffairsRoutes,
-  TrainingRoutes,
-  EventManagementRoutes,
-  PublicRelationsRoutes,
-  RiskManagementRoutes,
-  InternalAuditRoutes,
-  AssetManagementRoutes,
-  HelpDeskRoutes,
-  HSERoutes,
-  ProjectManagementRoutes,
-  ContractManagementRoutes,
-  ProcurementRoutes,
-  RecruitmentRoutes,
-  FleetRoutes,
-  CrisisManagementRoutes,
-  PayrollRoutes,
-  EmployeeAffairsRoutes,
-  AttendanceRoutes,
-  MessagingRoutes,
-  QualityComplianceRoutes,
-  StrategicPlanningRoutes,
-  DocumentManagementRoutes,
-  MeetingsRoutes,
-  SupplyChainRoutes,
-  PerformanceRoutes,
-  StudentManagementRoutes,
-  DisabilityRoutes,
-  VisitorsRoutes,
-  ComplaintsRoutes,
-  FacilityRoutes,
-  KnowledgeCenterRoutes,
-  IntegratedCareRoutes,
-  SessionsRoutes,
-  ESignatureRoutes,
-  TreatmentAuthRoutes,
-  FamilySatisfactionRoutes,
-  SuccessionRoutes,
-  MontessoriRoutes,
-  BeneficiaryRoutes,
-  LeaveManagementRoutes,
-  HRInsuranceRoutes,
-  OrgStructureRoutes,
-  ReportsRoutes,
-  CRMRoutes,
-  OperationsRoutes,
-  MedicalFilesRoutes,
-  KitchenRoutes,
-  LaundryRoutes,
-  CommunityRoutes,
-  VolunteerRoutes,
-  MHPSSRoutes,
-  IndependentLivingRoutes,
-  ResearchRoutes,
-  ECommerceRoutes,
-  CMSRoutes,
-  WaitlistRoutes,
-  GPSTrackingRoutes,
-  IoTRoutes,
-  SSOAdminRoutes,
-  BlockchainRoutes,
-  ICFAssessmentRoutes,
-  MDTCoordinationRoutes,
-  ARRehabRoutes,
-  TelehealthRoutes,
-  BusTrackingRoutes,
-  ReportBuilderRoutes,
-  LibraryRoutes,
-  ChatRoutes,
-  AIDiagnosticRoutes,
-  OCRDocumentRoutes,
-  CEODashboardRoutes,
-  QualityManagementRoutes,
-  WorkforceAnalyticsRoutes,
-  LearningDevelopmentRoutes,
-  AutomatedBackupRoutes,
-  WafRateLimitRoutes,
-  PrintCenterRoutes,
-  CarePlanRoutes,
-  MuqeemRoutes,
-  ZatcaPhase2Routes,
-  NphiesRoutes,
-  AuditLogsRoutes,
-  EpisodesRoutes,
-  Beneficiary360Routes,
-  MeasuresLibraryRoutes,
-  DDDRoutes,
-  TeleRehabRoutes,
-  EquipmentLifecycleRoutes,
-  SocialMediaRoutes,
-  CDSSRoutes,
-  GroupTherapyRoutes,
-  FamilyEngagementRoutes,
-  PostRehabRoutes,
-} from './routes';
+const FinanceRoutes = lazyWithRetry(() => import('./routes/FinanceRoutes'));
+const HRRoutes = lazyWithRetry(() => import('./routes/HRRoutes'));
+const AdminRoutes = lazyWithRetry(() => import('./routes/AdminRoutes'));
+const RehabRoutes = lazyWithRetry(() => import('./routes/RehabRoutes'));
+const EducationRoutes = lazyWithRetry(() => import('./routes/EducationRoutes'));
+const WorkflowRoutes = lazyWithRetry(() => import('./routes/WorkflowRoutes'));
+const PortalRoutes = lazyWithRetry(() => import('./routes/PortalRoutes'));
+const EnterpriseRoutes = lazyWithRetry(() => import('./routes/EnterpriseRoutes'));
+const EnterpriseProPlusRoutes = lazyWithRetry(() => import('./routes/EnterpriseProPlusRoutes'));
+const EnterpriseUltraRoutes = lazyWithRetry(() => import('./routes/EnterpriseUltraRoutes'));
+const GovernmentIntegrationRoutes = lazyWithRetry(() => import('./routes/GovernmentIntegrationRoutes'));
+const AdministrativeSystemsRoutes = lazyWithRetry(() => import('./routes/AdministrativeSystemsRoutes'));
+const BIDashboardRoutes = lazyWithRetry(() => import('./routes/BIDashboardRoutes'));
+const BIAnalyticsRoutes = lazyWithRetry(() => import('./routes/BIAnalyticsRoutes'));
+const WarehouseRoutes = lazyWithRetry(() => import('./routes/WarehouseRoutes'));
+const LegalAffairsRoutes = lazyWithRetry(() => import('./routes/LegalAffairsRoutes'));
+const TrainingRoutes = lazyWithRetry(() => import('./routes/TrainingRoutes'));
+const EventManagementRoutes = lazyWithRetry(() => import('./routes/EventManagementRoutes'));
+const PublicRelationsRoutes = lazyWithRetry(() => import('./routes/PublicRelationsRoutes'));
+const RiskManagementRoutes = lazyWithRetry(() => import('./routes/RiskManagementRoutes'));
+const InternalAuditRoutes = lazyWithRetry(() => import('./routes/InternalAuditRoutes'));
+const AssetManagementRoutes = lazyWithRetry(() => import('./routes/AssetManagementRoutes'));
+const HelpDeskRoutes = lazyWithRetry(() => import('./routes/HelpDeskRoutes'));
+const HSERoutes = lazyWithRetry(() => import('./routes/HSERoutes'));
+const ProjectManagementRoutes = lazyWithRetry(() => import('./routes/ProjectManagementRoutes'));
+const ContractManagementRoutes = lazyWithRetry(() => import('./routes/ContractManagementRoutes'));
+const ProcurementRoutes = lazyWithRetry(() => import('./routes/ProcurementRoutes'));
+const RecruitmentRoutes = lazyWithRetry(() => import('./routes/RecruitmentRoutes'));
+const FleetRoutes = lazyWithRetry(() => import('./routes/FleetRoutes'));
+const CrisisManagementRoutes = lazyWithRetry(() => import('./routes/CrisisManagementRoutes'));
+const PayrollRoutes = lazyWithRetry(() => import('./routes/PayrollRoutes'));
+const EmployeeAffairsRoutes = lazyWithRetry(() => import('./routes/EmployeeAffairsRoutes'));
+const AttendanceRoutes = lazyWithRetry(() => import('./routes/AttendanceRoutes'));
+const MessagingRoutes = lazyWithRetry(() => import('./routes/MessagingRoutes'));
+const QualityComplianceRoutes = lazyWithRetry(() => import('./routes/QualityComplianceRoutes'));
+const StrategicPlanningRoutes = lazyWithRetry(() => import('./routes/StrategicPlanningRoutes'));
+const DocumentManagementRoutes = lazyWithRetry(() => import('./routes/DocumentManagementRoutes'));
+const MeetingsRoutes = lazyWithRetry(() => import('./routes/MeetingsRoutes'));
+const SupplyChainRoutes = lazyWithRetry(() => import('./routes/SupplyChainRoutes'));
+const PerformanceRoutes = lazyWithRetry(() => import('./routes/PerformanceRoutes'));
+const StudentManagementRoutes = lazyWithRetry(() => import('./routes/StudentManagementRoutes'));
+const DisabilityRoutes = lazyWithRetry(() => import('./routes/DisabilityRoutes'));
+const VisitorsRoutes = lazyWithRetry(() => import('./routes/VisitorsRoutes'));
+const ComplaintsRoutes = lazyWithRetry(() => import('./routes/ComplaintsRoutes'));
+const FacilityRoutes = lazyWithRetry(() => import('./routes/FacilityRoutes'));
+const KnowledgeCenterRoutes = lazyWithRetry(() => import('./routes/KnowledgeCenterRoutes'));
+const IntegratedCareRoutes = lazyWithRetry(() => import('./routes/IntegratedCareRoutes'));
+const SessionsRoutes = lazyWithRetry(() => import('./routes/SessionsRoutes'));
+const ESignatureRoutes = lazyWithRetry(() => import('./routes/ESignatureRoutes'));
+const TreatmentAuthRoutes = lazyWithRetry(() => import('./routes/TreatmentAuthRoutes'));
+const FamilySatisfactionRoutes = lazyWithRetry(() => import('./routes/FamilySatisfactionRoutes'));
+const SuccessionRoutes = lazyWithRetry(() => import('./routes/SuccessionRoutes'));
+const MontessoriRoutes = lazyWithRetry(() => import('./routes/MontessoriRoutes'));
+const BeneficiaryRoutes = lazyWithRetry(() => import('./routes/BeneficiaryRoutes'));
+const LeaveManagementRoutes = lazyWithRetry(() => import('./routes/LeaveManagementRoutes'));
+const HRInsuranceRoutes = lazyWithRetry(() => import('./routes/HRInsuranceRoutes'));
+const OrgStructureRoutes = lazyWithRetry(() => import('./routes/OrgStructureRoutes'));
+const ReportsRoutes = lazyWithRetry(() => import('./routes/ReportsRoutes'));
+const CRMRoutes = lazyWithRetry(() => import('./routes/CRMRoutes'));
+const OperationsRoutes = lazyWithRetry(() => import('./routes/OperationsRoutes'));
+const MedicalFilesRoutes = lazyWithRetry(() => import('./routes/MedicalFilesRoutes'));
+const EMRRoutes = lazyWithRetry(() => import('./routes/EMRRoutes'));
+const KitchenRoutes = lazyWithRetry(() => import('./routes/KitchenRoutes'));
+const LaundryRoutes = lazyWithRetry(() => import('./routes/LaundryRoutes'));
+const CommunityRoutes = lazyWithRetry(() => import('./routes/CommunityRoutes'));
+const VolunteerRoutes = lazyWithRetry(() => import('./routes/VolunteerRoutes'));
+const MHPSSRoutes = lazyWithRetry(() => import('./routes/MHPSSRoutes'));
+const IndependentLivingRoutes = lazyWithRetry(() => import('./routes/IndependentLivingRoutes'));
+const ResearchRoutes = lazyWithRetry(() => import('./routes/ResearchRoutes'));
+const ECommerceRoutes = lazyWithRetry(() => import('./routes/ECommerceRoutes'));
+const CMSRoutes = lazyWithRetry(() => import('./routes/CMSRoutes'));
+const WaitlistRoutes = lazyWithRetry(() => import('./routes/WaitlistRoutes'));
+const GPSTrackingRoutes = lazyWithRetry(() => import('./routes/GPSTrackingRoutes'));
+const IoTRoutes = lazyWithRetry(() => import('./routes/IoTRoutes'));
+const SSOAdminRoutes = lazyWithRetry(() => import('./routes/SSOAdminRoutes'));
+const BlockchainRoutes = lazyWithRetry(() => import('./routes/BlockchainRoutes'));
+const ICFAssessmentRoutes = lazyWithRetry(() => import('./routes/ICFAssessmentRoutes'));
+const ClinicalRoutes = lazyWithRetry(() => import('./routes/ClinicalRoutes'));
+const SessionICFRoutes = lazyWithRetry(() => import('./routes/SessionICFRoutes'));
+const MDTCoordinationRoutes = lazyWithRetry(() => import('./routes/MDTCoordinationRoutes'));
+const ARRehabRoutes = lazyWithRetry(() => import('./routes/ARRehabRoutes'));
+const TelehealthRoutes = lazyWithRetry(() => import('./routes/TelehealthRoutes'));
+const BusTrackingRoutes = lazyWithRetry(() => import('./routes/BusTrackingRoutes'));
+const ReportBuilderRoutes = lazyWithRetry(() => import('./routes/ReportBuilderRoutes'));
+const LibraryRoutes = lazyWithRetry(() => import('./routes/LibraryRoutes'));
+const ChatRoutes = lazyWithRetry(() => import('./routes/ChatRoutes'));
+const AIDiagnosticRoutes = lazyWithRetry(() => import('./routes/AIDiagnosticRoutes'));
+const AIPredictiveRoutes = lazyWithRetry(() => import('./routes/AIPredictiveRoutes'));
+const ComplianceRoutes = lazyWithRetry(() => import('./routes/ComplianceRoutes'));
+const OCRDocumentRoutes = lazyWithRetry(() => import('./routes/OCRDocumentRoutes'));
+const CEODashboardRoutes = lazyWithRetry(() => import('./routes/CEODashboardRoutes'));
+const ExecutiveRoutes = lazyWithRetry(() => import('./routes/ExecutiveRoutes'));
+const QualityManagementRoutes = lazyWithRetry(() => import('./routes/QualityManagementRoutes'));
+const WorkforceAnalyticsRoutes = lazyWithRetry(() => import('./routes/WorkforceAnalyticsRoutes'));
+const LearningDevelopmentRoutes = lazyWithRetry(() => import('./routes/LearningDevelopmentRoutes'));
+const AutomatedBackupRoutes = lazyWithRetry(() => import('./routes/AutomatedBackupRoutes'));
+const WafRateLimitRoutes = lazyWithRetry(() => import('./routes/WafRateLimitRoutes'));
+const PrintCenterRoutes = lazyWithRetry(() => import('./routes/PrintCenterRoutes'));
+const CarePlanRoutes = lazyWithRetry(() => import('./routes/CarePlanRoutes'));
+const MuqeemRoutes = lazyWithRetry(() => import('./routes/MuqeemRoutes'));
+const ZatcaPhase2Routes = lazyWithRetry(() => import('./routes/ZatcaPhase2Routes'));
+const NphiesRoutes = lazyWithRetry(() => import('./routes/NphiesRoutes'));
+const AuditLogsRoutes = lazyWithRetry(() => import('./routes/AuditLogsRoutes'));
+const EpisodesRoutes = lazyWithRetry(() => import('./routes/EpisodesRoutes'));
+const Beneficiary360Routes = lazyWithRetry(() => import('./routes/Beneficiary360Routes'));
+const MeasuresLibraryRoutes = lazyWithRetry(() => import('./routes/MeasuresLibraryRoutes'));
+const DDDRoutes = lazyWithRetry(() => import('./routes/DDDRoutes'));
+const TeleRehabRoutes = lazyWithRetry(() => import('./routes/TeleRehabRoutes'));
+const EquipmentLifecycleRoutes = lazyWithRetry(() => import('./routes/EquipmentLifecycleRoutes'));
+const SocialMediaRoutes = lazyWithRetry(() => import('./routes/SocialMediaRoutes'));
+const CDSSRoutes = lazyWithRetry(() => import('./routes/CDSSRoutes'));
+const WhatsAppChatbotRoutes = lazyWithRetry(() => import('./routes/WhatsAppChatbotRoutes'));
+const GroupTherapyRoutes = lazyWithRetry(() => import('./routes/GroupTherapyRoutes'));
+const FamilyEngagementRoutes = lazyWithRetry(() => import('./routes/FamilyEngagementRoutes'));
+const PostRehabRoutes = lazyWithRetry(() => import('./routes/PostRehabRoutes'));
+const ParentPortalRoutes = lazyWithRetry(() => import('./routes/ParentPortalRoutes'));
+const GamificationRoutes = lazyWithRetry(() => import('./routes/GamificationRoutes'));
+const CCTVRoutes = lazyWithRetry(() => import('./routes/CCTVRoutes'));
+const MobileAppRoutes = lazyWithRetry(() => import('./routes/MobileAppRoutes'));
 
 // Pages
-import Home from './pages/common/Home';
-import NotFound from './pages/common/NotFound';
-import EntityFormPage from './pages/common/EntityFormPage';
+const Home = lazyWithRetry(() => import('./pages/common/Home'));
+const NotFound = lazyWithRetry(() => import('./pages/common/NotFound'));
+const EntityFormPage = lazyWithRetry(() => import('./pages/common/EntityFormPage'));
+const EntityDetailPage = lazyWithRetry(() => import('./pages/common/EntityDetailPage'));
+const FileUploadPage = lazyWithRetry(() => import('./pages/common/FileUploadPage'));
+
+// Registry objects (must be static — not React components)
 import CREATE_FORMS from './pages/createForms/registry';
-import EntityDetailPage from './pages/common/EntityDetailPage';
 import DETAIL_VIEWS from './pages/createForms/detailViews';
 import EDIT_FORMS from './pages/createForms/editForms';
-import FileUploadPage from './pages/common/FileUploadPage';
 import UPLOAD_FORMS from './pages/createForms/uploadForms';
 
 // Lazy pages
@@ -313,80 +326,80 @@ export default function AuthenticatedShell() {
           <ToastProvider>
             <Suspense fallback={<DashboardSkeleton />}>
               <Routes>
-                <Route path="/" element={<ProLayout />}>
+                <Route path="/" element={<SafeRouteWrapper><ProLayout /></SafeRouteWrapper>}>
                   <Route index element={<Navigate to="/home" replace />} />
-                  <Route path="home" element={<Home />} />
-                  <Route path="dashboard" element={<AdvancedDashboard />} />
-                  <Route path="dashboard/simple" element={<Dashboard />} />
-                  <Route path="monitoring" element={<MonitoringDashboard />} />
-                  <Route path="dashboard/advanced" element={<AdvancedDashboardUI />} />
-                  <Route path="dashboard/pro" element={<ProDashboard />} />
-                  <Route path="activity" element={<Activity />} />
-                  <Route path="reports" element={<AdvancedReportsPage />} />
-                  <Route path="admin/bookings" element={<AdminBookings />} />
-                  <Route path="admin/applications" element={<AdminApplications />} />
-                  <Route path="admin/branches" element={<AdminBranches />} />
-                  <Route path="admin/beneficiaries" element={<AdminBeneficiaries />} />
-                  <Route path="admin/therapy-sessions" element={<AdminTherapySessions />} />
-                  <Route path="admin/assessments" element={<AdminAssessments />} />
-                  <Route path="admin/care-plans" element={<AdminCarePlans />} />
-                  <Route path="admin/analytics" element={<AdminBIAnalytics />} />
-                  <Route path="admin/invoices" element={<AdminInvoices />} />
-                  <Route path="admin/clinical-docs" element={<AdminClinicalDocs />} />
-                  <Route path="admin/hr/compliance" element={<AdminHRCompliance />} />
-                  <Route path="admin/hr/cpe" element={<AdminCpeCredits />} />
-                  <Route path="admin/attendance" element={<AdminAttendance />} />
-                  <Route path="admin/outcomes" element={<AdminOutcomes />} />
-                  <Route path="admin/nps" element={<AdminNps />} />
-                  <Route path="admin/goal-progress" element={<AdminGoalProgress />} />
-                  <Route path="admin/utilization" element={<AdminUtilization />} />
-                  <Route path="admin/waitlist" element={<AdminWaitlist />} />
-                  <Route path="admin/referrals" element={<AdminReferrals />} />
-                  <Route path="admin/revenue" element={<AdminRevenue />} />
-                  <Route path="admin/claims-analytics" element={<AdminClaimsAnalytics />} />
-                  <Route path="admin/revenue-forecast" element={<AdminRevenueForecast />} />
-                  <Route path="admin/retention" element={<AdminRetention />} />
-                  <Route path="admin/complaints-analytics" element={<AdminComplaintsAnalytics />} />
-                  <Route path="admin/document-expiry" element={<AdminDocumentExpiry />} />
-                  <Route path="admin/incidents-analytics" element={<AdminIncidentsAnalytics />} />
-                  <Route path="admin/saudization" element={<AdminSaudization />} />
-                  <Route path="admin/onboarding" element={<AdminOnboarding />} />
-                  <Route path="admin/gov-integrations" element={<AdminGovIntegrations />} />
-                  <Route path="admin/integrations-ops" element={<AdminIntegrationsOps />} />
-                  <Route path="admin/rate-limits" element={<AdminRateLimits />} />
-                  <Route path="admin/adapter-audit" element={<AdminAdapterAudit />} />
-                  <Route path="admin/nphies-claims" element={<AdminNphiesClaims />} />
-                  <Route path="admin/notifications" element={<AdminNotifications />} />
-                  <Route path="admin/red-flags" element={<RedFlagAdmin />} />
-                  <Route path="admin/capa" element={<CapaAdmin />} />
-                  <Route path="admin/pdpl-consents" element={<PdplConsentsAdmin />} />
-                  <Route path="admin/session-amendments" element={<SessionAmendmentAudit />} />
+                  <Route path="home" element={<SafeRouteWrapper><Home /></SafeRouteWrapper>} />
+                  <Route path="dashboard" element={<SafeRouteWrapper><AdvancedDashboard /></SafeRouteWrapper>} />
+                  <Route path="dashboard/simple" element={<SafeRouteWrapper><Dashboard /></SafeRouteWrapper>} />
+                  <Route path="monitoring" element={<SafeRouteWrapper><MonitoringDashboard /></SafeRouteWrapper>} />
+                  <Route path="dashboard/advanced" element={<SafeRouteWrapper><AdvancedDashboardUI /></SafeRouteWrapper>} />
+                  <Route path="dashboard/pro" element={<SafeRouteWrapper><ProDashboard /></SafeRouteWrapper>} />
+                  <Route path="activity" element={<SafeRouteWrapper><Activity /></SafeRouteWrapper>} />
+                  <Route path="reports" element={<SafeRouteWrapper><AdvancedReportsPage /></SafeRouteWrapper>} />
+                  <Route path="admin/bookings" element={<SafeRouteWrapper><AdminBookings /></SafeRouteWrapper>} />
+                  <Route path="admin/applications" element={<SafeRouteWrapper><AdminApplications /></SafeRouteWrapper>} />
+                  <Route path="admin/branches" element={<SafeRouteWrapper><AdminBranches /></SafeRouteWrapper>} />
+                  <Route path="admin/beneficiaries" element={<SafeRouteWrapper><AdminBeneficiaries /></SafeRouteWrapper>} />
+                  <Route path="admin/therapy-sessions" element={<SafeRouteWrapper><AdminTherapySessions /></SafeRouteWrapper>} />
+                  <Route path="admin/assessments" element={<SafeRouteWrapper><AdminAssessments /></SafeRouteWrapper>} />
+                  <Route path="admin/care-plans" element={<SafeRouteWrapper><AdminCarePlans /></SafeRouteWrapper>} />
+                  <Route path="admin/analytics" element={<SafeRouteWrapper><AdminBIAnalytics /></SafeRouteWrapper>} />
+                  <Route path="admin/invoices" element={<SafeRouteWrapper><AdminInvoices /></SafeRouteWrapper>} />
+                  <Route path="admin/clinical-docs" element={<SafeRouteWrapper><AdminClinicalDocs /></SafeRouteWrapper>} />
+                  <Route path="admin/hr/compliance" element={<SafeRouteWrapper><AdminHRCompliance /></SafeRouteWrapper>} />
+                  <Route path="admin/hr/cpe" element={<SafeRouteWrapper><AdminCpeCredits /></SafeRouteWrapper>} />
+                  <Route path="admin/attendance" element={<SafeRouteWrapper><AdminAttendance /></SafeRouteWrapper>} />
+                  <Route path="admin/outcomes" element={<SafeRouteWrapper><AdminOutcomes /></SafeRouteWrapper>} />
+                  <Route path="admin/nps" element={<SafeRouteWrapper><AdminNps /></SafeRouteWrapper>} />
+                  <Route path="admin/goal-progress" element={<SafeRouteWrapper><AdminGoalProgress /></SafeRouteWrapper>} />
+                  <Route path="admin/utilization" element={<SafeRouteWrapper><AdminUtilization /></SafeRouteWrapper>} />
+                  <Route path="admin/waitlist" element={<SafeRouteWrapper><AdminWaitlist /></SafeRouteWrapper>} />
+                  <Route path="admin/referrals" element={<SafeRouteWrapper><AdminReferrals /></SafeRouteWrapper>} />
+                  <Route path="admin/revenue" element={<SafeRouteWrapper><AdminRevenue /></SafeRouteWrapper>} />
+                  <Route path="admin/claims-analytics" element={<SafeRouteWrapper><AdminClaimsAnalytics /></SafeRouteWrapper>} />
+                  <Route path="admin/revenue-forecast" element={<SafeRouteWrapper><AdminRevenueForecast /></SafeRouteWrapper>} />
+                  <Route path="admin/retention" element={<SafeRouteWrapper><AdminRetention /></SafeRouteWrapper>} />
+                  <Route path="admin/complaints-analytics" element={<SafeRouteWrapper><AdminComplaintsAnalytics /></SafeRouteWrapper>} />
+                  <Route path="admin/document-expiry" element={<SafeRouteWrapper><AdminDocumentExpiry /></SafeRouteWrapper>} />
+                  <Route path="admin/incidents-analytics" element={<SafeRouteWrapper><AdminIncidentsAnalytics /></SafeRouteWrapper>} />
+                  <Route path="admin/saudization" element={<SafeRouteWrapper><AdminSaudization /></SafeRouteWrapper>} />
+                  <Route path="admin/onboarding" element={<SafeRouteWrapper><AdminOnboarding /></SafeRouteWrapper>} />
+                  <Route path="admin/gov-integrations" element={<SafeRouteWrapper><AdminGovIntegrations /></SafeRouteWrapper>} />
+                  <Route path="admin/integrations-ops" element={<SafeRouteWrapper><AdminIntegrationsOps /></SafeRouteWrapper>} />
+                  <Route path="admin/rate-limits" element={<SafeRouteWrapper><AdminRateLimits /></SafeRouteWrapper>} />
+                  <Route path="admin/adapter-audit" element={<SafeRouteWrapper><AdminAdapterAudit /></SafeRouteWrapper>} />
+                  <Route path="admin/nphies-claims" element={<SafeRouteWrapper><AdminNphiesClaims /></SafeRouteWrapper>} />
+                  <Route path="admin/notifications" element={<SafeRouteWrapper><AdminNotifications /></SafeRouteWrapper>} />
+                  <Route path="admin/red-flags" element={<SafeRouteWrapper><RedFlagAdmin /></SafeRouteWrapper>} />
+                  <Route path="admin/capa" element={<SafeRouteWrapper><CapaAdmin /></SafeRouteWrapper>} />
+                  <Route path="admin/pdpl-consents" element={<SafeRouteWrapper><PdplConsentsAdmin /></SafeRouteWrapper>} />
+                  <Route path="admin/session-amendments" element={<SafeRouteWrapper><SessionAmendmentAudit /></SafeRouteWrapper>} />
                   <Route
                     path="admin/branch-license-expiry"
-                    element={<BranchLicenseExpiryAdmin />}
+                    element={<SafeRouteWrapper><BranchLicenseExpiryAdmin /></SafeRouteWrapper>}
                   />
-                  <Route path="beneficiary-consents" element={<BeneficiaryConsentAdmin />} />
-                  <Route path="beneficiary-transfers" element={<BeneficiaryTransferAdmin />} />
-                  <Route path="admin/alerts" element={<AlertsCenter />} />
-                  <Route path="admin/break-glass" element={<BreakGlassActivation />} />
-                  <Route path="approvals" element={<ApprovalInbox />} />
-                  <Route path="branches/analytics" element={<BranchAnalytics />} />
-                  <Route path="branches/dashboard" element={<BranchDashboard />} />
-                  <Route path="executive-snapshot" element={<ExecutiveSnapshot />} />
-                  <Route path="hq-dashboard" element={<HQDashboard />} />
-                  <Route path="articles" element={<ArticleList />} />
-                  <Route path="articles/:id" element={<ArticleDetail />} />
-                  <Route path="parent-portal/management" element={<ParentPortalManagement />} />
-                  <Route path="referrals" element={<ReferralPortal />} />
-                  <Route path="rehab/disciplines" element={<RehabDisciplinesTaxonomy />} />
-                  <Route path="rehab/goal-suggestions" element={<RehabGoalSuggestions />} />
-                  <Route path="insurance-tariffs" element={<InsuranceTariffsAdmin />} />
-                  <Route path="zatca-credentials" element={<ZatcaCredentialsAdmin />} />
-                  <Route path="my-children" element={<MyChildrenPortal />} />
-                  <Route path="workbench" element={<TherapistWorkbench />} />
-                  <Route path="chat" element={<ChatV2 />} />
-                  <Route path="telehealth" element={<TelehealthList />} />
-                  <Route path="telehealth/:sessionId" element={<TelehealthRoom />} />
+                  <Route path="beneficiary-consents" element={<SafeRouteWrapper><BeneficiaryConsentAdmin /></SafeRouteWrapper>} />
+                  <Route path="beneficiary-transfers" element={<SafeRouteWrapper><BeneficiaryTransferAdmin /></SafeRouteWrapper>} />
+                  <Route path="admin/alerts" element={<SafeRouteWrapper><AlertsCenter /></SafeRouteWrapper>} />
+                  <Route path="admin/break-glass" element={<SafeRouteWrapper><BreakGlassActivation /></SafeRouteWrapper>} />
+                  <Route path="approvals" element={<SafeRouteWrapper><ApprovalInbox /></SafeRouteWrapper>} />
+                  <Route path="branches/analytics" element={<SafeRouteWrapper><BranchAnalytics /></SafeRouteWrapper>} />
+                  <Route path="branches/dashboard" element={<SafeRouteWrapper><BranchDashboard /></SafeRouteWrapper>} />
+                  <Route path="executive-snapshot" element={<SafeRouteWrapper><ExecutiveSnapshot /></SafeRouteWrapper>} />
+                  <Route path="hq-dashboard" element={<SafeRouteWrapper><HQDashboard /></SafeRouteWrapper>} />
+                  <Route path="articles" element={<SafeRouteWrapper><ArticleList /></SafeRouteWrapper>} />
+                  <Route path="articles/:id" element={<SafeRouteWrapper><ArticleDetail /></SafeRouteWrapper>} />
+                  <Route path="parent-portal/management" element={<SafeRouteWrapper><ParentPortalManagement /></SafeRouteWrapper>} />
+                  <Route path="referrals" element={<SafeRouteWrapper><ReferralPortal /></SafeRouteWrapper>} />
+                  <Route path="rehab/disciplines" element={<SafeRouteWrapper><RehabDisciplinesTaxonomy /></SafeRouteWrapper>} />
+                  <Route path="rehab/goal-suggestions" element={<SafeRouteWrapper><RehabGoalSuggestions /></SafeRouteWrapper>} />
+                  <Route path="insurance-tariffs" element={<SafeRouteWrapper><InsuranceTariffsAdmin /></SafeRouteWrapper>} />
+                  <Route path="zatca-credentials" element={<SafeRouteWrapper><ZatcaCredentialsAdmin /></SafeRouteWrapper>} />
+                  <Route path="my-children" element={<SafeRouteWrapper><MyChildrenPortal /></SafeRouteWrapper>} />
+                  <Route path="workbench" element={<SafeRouteWrapper><TherapistWorkbench /></SafeRouteWrapper>} />
+                  <Route path="chat" element={<SafeRouteWrapper><ChatV2 /></SafeRouteWrapper>} />
+                  <Route path="telehealth" element={<SafeRouteWrapper><TelehealthList /></SafeRouteWrapper>} />
+                  <Route path="telehealth/:sessionId" element={<SafeRouteWrapper><TelehealthRoom /></SafeRouteWrapper>} />
 
                   {/* Schema-driven "create" forms — replaces dead Add/New 404s.
                       Static paths outrank module :id routes in React Router v6. */}
@@ -423,6 +436,7 @@ export default function AuthenticatedShell() {
                   {safeRoutes(GovernmentIntegrationRoutes, 'GovernmentIntegration')}
                   {safeRoutes(AdministrativeSystemsRoutes, 'AdministrativeSystems')}
                   {safeRoutes(BIDashboardRoutes, 'BIDashboard')}
+                  {safeRoutes(BIAnalyticsRoutes, 'BIAnalytics')}
                   {safeRoutes(WarehouseRoutes, 'Warehouse')}
                   {safeRoutes(LegalAffairsRoutes, 'LegalAffairs')}
                   {safeRoutes(TrainingRoutes, 'Training')}
@@ -470,6 +484,7 @@ export default function AuthenticatedShell() {
                   {safeRoutes(CRMRoutes, 'CRM')}
                   {safeRoutes(OperationsRoutes, 'Operations')}
                   {safeRoutes(MedicalFilesRoutes, 'MedicalFiles')}
+                  {safeRoutes(EMRRoutes, 'EMR')}
                   {safeRoutes(KitchenRoutes, 'Kitchen')}
                   {safeRoutes(LaundryRoutes, 'Laundry')}
                   {safeRoutes(CommunityRoutes, 'Community')}
@@ -485,6 +500,8 @@ export default function AuthenticatedShell() {
                   {safeRoutes(SSOAdminRoutes, 'SSOAdmin')}
                   {safeRoutes(BlockchainRoutes, 'Blockchain')}
                   {safeRoutes(ICFAssessmentRoutes, 'ICFAssessment')}
+                  {safeRoutes(ClinicalRoutes, 'Clinical')}
+                  {safeRoutes(SessionICFRoutes, 'SessionICF')}
                   {safeRoutes(MDTCoordinationRoutes, 'MDTCoordination')}
                   {safeRoutes(ARRehabRoutes, 'ARRehab')}
                   {safeRoutes(TelehealthRoutes, 'Telehealth')}
@@ -493,8 +510,11 @@ export default function AuthenticatedShell() {
                   {safeRoutes(LibraryRoutes, 'Library')}
                   {safeRoutes(ChatRoutes, 'Chat')}
                   {safeRoutes(AIDiagnosticRoutes, 'AIDiagnostic')}
+                  {safeRoutes(AIPredictiveRoutes, 'AIPredictive')}
+                  {safeRoutes(ComplianceRoutes, 'Compliance')}
                   {safeRoutes(OCRDocumentRoutes, 'OCRDocument')}
                   {safeRoutes(CEODashboardRoutes, 'CEODashboard')}
+                  {safeRoutes(ExecutiveRoutes, 'Executive')}
                   {safeRoutes(QualityManagementRoutes, 'QualityManagement')}
                   {safeRoutes(WorkforceAnalyticsRoutes, 'WorkforceAnalytics')}
                   {safeRoutes(LearningDevelopmentRoutes, 'LearningDevelopment')}
@@ -513,87 +533,93 @@ export default function AuthenticatedShell() {
                   {safeRoutes(MeasuresLibraryRoutes, 'MeasuresLibrary')}
                   {safeRoutes(SocialMediaRoutes, 'SocialMedia')}
                   {safeRoutes(CDSSRoutes, 'CDSS')}
+                  {safeRoutes(WhatsAppChatbotRoutes, 'WhatsAppChatbot')}
                   {safeRoutes(GroupTherapyRoutes, 'GroupTherapy')}
                   {safeRoutes(FamilyEngagementRoutes, 'FamilyEngagement')}
                   {safeRoutes(PostRehabRoutes, 'PostRehab')}
+                  {safeRoutes(ParentPortalRoutes, 'ParentPortal')}
+                  {safeRoutes(GamificationRoutes, 'Gamification')}
+                  {safeRoutes(CCTVRoutes, 'CCTV')}
 
                   {/* Shared Routes */}
                   <Route path="ai-assistant" element={<Navigate to="/ai-analytics" replace />} />
-                  <Route path="ai-analytics" element={<AIAnalyticsDashboard />} />
-                  <Route path="analytics" element={<AnalyticsDashboard />} />
-                  <Route path="analytics/advanced" element={<AdvancedReports />} />
-                  <Route path="export-import" element={<ExportImportManager />} />
-                  <Route path="data-management" element={<ExportImportManager />} />
-                  <Route path="messages" element={<MessagingPage />} />
-                  <Route path="communications" element={<Communications />} />
-                  <Route path="communications-system" element={<CommunicationsSystem />} />
-                  <Route path="whatsapp" element={<WhatsAppDashboard />} />
-                  <Route path="documents" element={<Documents />} />
-                  <Route path="documents-management" element={<DocumentsPage />} />
-                  <Route path="smart-documents" element={<SmartDocumentsPage />} />
-                  <Route path="archiving" element={<ArchivingDashboard />} />
-                  <Route path="electronic-archiving" element={<ArchivingDashboard />} />
-                  <Route path="documents-advanced" element={<DocumentAdvancedPage />} />
-                  <Route path="media-library" element={<MediaLibrary />} />
-                  <Route path="groups" element={<Groups />} />
-                  <Route path="groups/:groupId" element={<GroupDetail />} />
-                  <Route path="friends" element={<Friends />} />
-                  <Route path="balances" element={<AccountingDashboard />} />
-                  <Route path="expenses" element={<ExpenseManagement />} />
-                  <Route path="expenses/new" element={<ExpenseManagement />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="budget-management" element={<BudgetManagement />} />
+                  <Route path="ai-analytics" element={<SafeRouteWrapper><AIAnalyticsDashboard /></SafeRouteWrapper>} />
+                  <Route path="analytics" element={<SafeRouteWrapper><AnalyticsDashboard /></SafeRouteWrapper>} />
+                  <Route path="analytics/advanced" element={<SafeRouteWrapper><AdvancedReports /></SafeRouteWrapper>} />
+                  <Route path="export-import" element={<SafeRouteWrapper><ExportImportManager /></SafeRouteWrapper>} />
+                  <Route path="data-management" element={<SafeRouteWrapper><ExportImportManager /></SafeRouteWrapper>} />
+                  <Route path="messages" element={<SafeRouteWrapper><MessagingPage /></SafeRouteWrapper>} />
+                  <Route path="communications" element={<SafeRouteWrapper><Communications /></SafeRouteWrapper>} />
+                  <Route path="communications-system" element={<SafeRouteWrapper><CommunicationsSystem /></SafeRouteWrapper>} />
+                  <Route path="whatsapp" element={<SafeRouteWrapper><WhatsAppDashboard /></SafeRouteWrapper>} />
+                  <Route path="documents" element={<SafeRouteWrapper><Documents /></SafeRouteWrapper>} />
+                  <Route path="documents-management" element={<SafeRouteWrapper><DocumentsPage /></SafeRouteWrapper>} />
+                  <Route path="smart-documents" element={<SafeRouteWrapper><SmartDocumentsPage /></SafeRouteWrapper>} />
+                  <Route path="archiving" element={<SafeRouteWrapper><ArchivingDashboard /></SafeRouteWrapper>} />
+                  <Route path="electronic-archiving" element={<SafeRouteWrapper><ArchivingDashboard /></SafeRouteWrapper>} />
+                  <Route path="documents-advanced" element={<SafeRouteWrapper><DocumentAdvancedPage /></SafeRouteWrapper>} />
+                  <Route path="media-library" element={<SafeRouteWrapper><MediaLibrary /></SafeRouteWrapper>} />
+                  <Route path="groups" element={<SafeRouteWrapper><Groups /></SafeRouteWrapper>} />
+                  <Route path="groups/:groupId" element={<SafeRouteWrapper><GroupDetail /></SafeRouteWrapper>} />
+                  <Route path="friends" element={<SafeRouteWrapper><Friends /></SafeRouteWrapper>} />
+                  <Route path="balances" element={<SafeRouteWrapper><AccountingDashboard /></SafeRouteWrapper>} />
+                  <Route path="expenses" element={<SafeRouteWrapper><ExpenseManagement /></SafeRouteWrapper>} />
+                  <Route path="expenses/new" element={<SafeRouteWrapper><ExpenseManagement /></SafeRouteWrapper>} />
+                  <Route path="profile" element={<SafeRouteWrapper><Profile /></SafeRouteWrapper>} />
+                  <Route path="budget-management" element={<SafeRouteWrapper><BudgetManagement /></SafeRouteWrapper>} />
                   <Route path="surveillance" element={<Navigate to="/monitoring" replace />} />
 
                   {/* Premium Dashboards */}
-                  <Route path="premium" element={<PremiumHub />} />
-                  <Route path="ceo-pro" element={<CEODashboardPro />} />
-                  <Route path="hr-pro" element={<HRAdvancedDashboard />} />
-                  <Route path="finance-pro" element={<FinanceDashboardPro />} />
-                  <Route path="patients-pro" element={<PatientsDashboardPro />} />
-                  <Route path="schedule-pro" element={<ScheduleDashboardPro />} />
-                  <Route path="reports-pro" element={<ReportsDashboardPro />} />
-                  <Route path="inventory-pro" element={<InventoryDashboardPro />} />
-                  <Route path="notifications-pro" element={<NotificationsDashboardPro />} />
+                  <Route path="premium" element={<SafeRouteWrapper><PremiumHub /></SafeRouteWrapper>} />
+                  <Route path="ceo-pro" element={<SafeRouteWrapper><CEODashboardPro /></SafeRouteWrapper>} />
+                  <Route path="hr-pro" element={<SafeRouteWrapper><HRAdvancedDashboard /></SafeRouteWrapper>} />
+                  <Route path="finance-pro" element={<SafeRouteWrapper><FinanceDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="patients-pro" element={<SafeRouteWrapper><PatientsDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="schedule-pro" element={<SafeRouteWrapper><ScheduleDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="reports-pro" element={<SafeRouteWrapper><ReportsDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="inventory-pro" element={<SafeRouteWrapper><InventoryDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="notifications-pro" element={<SafeRouteWrapper><NotificationsDashboardPro /></SafeRouteWrapper>} />
                   {/* Alias: header/sidebar navigate to /notifications */}
-                  <Route path="notifications" element={<NotificationsDashboardPro />} />
-                  <Route path="security-pro" element={<SecurityDashboardPro />} />
-                  <Route path="analytics-pro" element={<AnalyticsDashboardPro />} />
-                  <Route path="settings-pro" element={<SettingsDashboardPro />} />
+                  <Route path="notifications" element={<SafeRouteWrapper><NotificationsDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="security-pro" element={<SafeRouteWrapper><SecurityDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="analytics-pro" element={<SafeRouteWrapper><AnalyticsDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="settings-pro" element={<SafeRouteWrapper><SettingsDashboardPro /></SafeRouteWrapper>} />
                   {/* Alias: header/sidebar settings button + nav navigate to /settings */}
-                  <Route path="settings" element={<SettingsDashboardPro />} />
-                  <Route path="therapist-pro" element={<TherapistProDashboard />} />
-                  <Route path="kpi-pro" element={<KPIProDashboard />} />
-                  <Route path="rehab-pro" element={<RehabProDashboard />} />
-                  <Route path="admin-executive" element={<AdminExecutiveDashboard />} />
-                  <Route path="pharmacy-pro" element={<PharmacyProDashboard />} />
-                  <Route path="lab-pro" element={<LabProDashboard />} />
-                  <Route path="insurance-pro" element={<InsuranceProDashboard />} />
-                  <Route path="quality-pro" element={<QualityProDashboard />} />
-                  <Route path="training-pro" element={<TrainingProDashboard2 />} />
-                  <Route path="crm-pro" element={<CRMProDashboard />} />
-                  <Route path="operations-pro" element={<OperationsProDashboard />} />
-                  <Route path="nursing-pro" element={<NursingProDashboard />} />
-                  <Route path="procurement-pro" element={<ProcurementProDashboard />} />
-                  <Route path="radiology-pro" element={<RadiologyProDashboard />} />
-                  <Route path="emergency-pro" element={<EmergencyProDashboard />} />
-                  <Route path="risk-pro" element={<RiskProDashboard />} />
-                  <Route path="nutrition-pro" element={<NutritionProDashboard />} />
-                  <Route path="infection-control-pro" element={<InfectionControlProDashboard />} />
-                  <Route path="social-work-pro" element={<SocialWorkProDashboard />} />
-                  <Route path="maintenance-pro" element={<MaintenanceProDashboard />} />
-                  <Route path="blood-bank-pro" element={<BloodBankProDashboard />} />
-                  <Route path="medical-records-pro" element={<MedicalRecordsProDashboard />} />
-                  <Route path="transport-pro" element={<TransportProDashboard />} />
-                  <Route path="compliance-pro" element={<ComplianceProDashboard />} />
-                  <Route path="waste-management-pro" element={<WasteManagementProDashboard />} />
-                  <Route path="telemedicine-pro" element={<TelemedicineProDashboard />} />
-                  <Route path="clinical-trials-pro" element={<ClinicalTrialsProDashboard />} />
-                  <Route path="patient-safety-pro" element={<PatientSafetyProDashboard />} />
+                  <Route path="settings" element={<SafeRouteWrapper><SettingsDashboardPro /></SafeRouteWrapper>} />
+                  <Route path="therapist-pro" element={<SafeRouteWrapper><TherapistProDashboard /></SafeRouteWrapper>} />
+                  <Route path="kpi-pro" element={<SafeRouteWrapper><KPIProDashboard /></SafeRouteWrapper>} />
+                  <Route path="rehab-pro" element={<SafeRouteWrapper><RehabProDashboard /></SafeRouteWrapper>} />
+                  <Route path="admin-executive" element={<SafeRouteWrapper><AdminExecutiveDashboard /></SafeRouteWrapper>} />
+                  <Route path="pharmacy-pro" element={<SafeRouteWrapper><PharmacyProDashboard /></SafeRouteWrapper>} />
+                  <Route path="lab-pro" element={<SafeRouteWrapper><LabProDashboard /></SafeRouteWrapper>} />
+                  <Route path="insurance-pro" element={<SafeRouteWrapper><InsuranceProDashboard /></SafeRouteWrapper>} />
+                  <Route path="quality-pro" element={<SafeRouteWrapper><QualityProDashboard /></SafeRouteWrapper>} />
+                  <Route path="training-pro" element={<SafeRouteWrapper><TrainingProDashboard2 /></SafeRouteWrapper>} />
+                  <Route path="crm-pro" element={<SafeRouteWrapper><CRMProDashboard /></SafeRouteWrapper>} />
+                  <Route path="operations-pro" element={<SafeRouteWrapper><OperationsProDashboard /></SafeRouteWrapper>} />
+                  <Route path="nursing-pro" element={<SafeRouteWrapper><NursingProDashboard /></SafeRouteWrapper>} />
+                  <Route path="procurement-pro" element={<SafeRouteWrapper><ProcurementProDashboard /></SafeRouteWrapper>} />
+                  <Route path="radiology-pro" element={<SafeRouteWrapper><RadiologyProDashboard /></SafeRouteWrapper>} />
+                  <Route path="emergency-pro" element={<SafeRouteWrapper><EmergencyProDashboard /></SafeRouteWrapper>} />
+                  <Route path="risk-pro" element={<SafeRouteWrapper><RiskProDashboard /></SafeRouteWrapper>} />
+                  <Route path="nutrition-pro" element={<SafeRouteWrapper><NutritionProDashboard /></SafeRouteWrapper>} />
+                  <Route path="infection-control-pro" element={<SafeRouteWrapper><InfectionControlProDashboard /></SafeRouteWrapper>} />
+                  <Route path="social-work-pro" element={<SafeRouteWrapper><SocialWorkProDashboard /></SafeRouteWrapper>} />
+                  <Route path="maintenance-pro" element={<SafeRouteWrapper><MaintenanceProDashboard /></SafeRouteWrapper>} />
+                  <Route path="blood-bank-pro" element={<SafeRouteWrapper><BloodBankProDashboard /></SafeRouteWrapper>} />
+                  <Route path="medical-records-pro" element={<SafeRouteWrapper><MedicalRecordsProDashboard /></SafeRouteWrapper>} />
+                  <Route path="transport-pro" element={<SafeRouteWrapper><TransportProDashboard /></SafeRouteWrapper>} />
+                  <Route path="compliance-pro" element={<SafeRouteWrapper><ComplianceProDashboard /></SafeRouteWrapper>} />
+                  <Route path="waste-management-pro" element={<SafeRouteWrapper><WasteManagementProDashboard /></SafeRouteWrapper>} />
+                  <Route path="telemedicine-pro" element={<SafeRouteWrapper><TelemedicineProDashboard /></SafeRouteWrapper>} />
+                  <Route path="clinical-trials-pro" element={<SafeRouteWrapper><ClinicalTrialsProDashboard /></SafeRouteWrapper>} />
+                  <Route path="patient-safety-pro" element={<SafeRouteWrapper><PatientSafetyProDashboard /></SafeRouteWrapper>} />
                 </Route>
                 {/* DDD Platform — own layout, must be outside ProLayout */}
-                <Route path="platform/*" element={<DDDRoutes />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="platform/*" element={<SafeRouteWrapper><DDDRoutes /></SafeRouteWrapper>} />
+                {/* Mobile App — own layout, must be outside ProLayout */}
+                <Route path="mobile/*" element={<SafeRouteWrapper><MobileAppRoutes /></SafeRouteWrapper>} />
+                <Route path="*" element={<SafeRouteWrapper><NotFound /></SafeRouteWrapper>} />
               </Routes>
             </Suspense>
           </ToastProvider>

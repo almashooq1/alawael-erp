@@ -462,7 +462,7 @@ async function seedDatabase() {
 
     // 1. إنشاء الفروع
     console.log('📍 إنشاء الفروع...');
-    const branches = await Branch.insertMany(seedData.branches);
+    const branches = await Branch.insertMany(seedData.branches, { ordered: false });
     console.log(`   ✅ تم إنشاء ${branches.length} فروع`);
 
     // 2. إنشاء الأقسام
@@ -471,18 +471,19 @@ async function seedDatabase() {
       seedData.departments.map((dept, i) => ({
         ...dept,
         branch: branches[0]._id,
-      }))
+      })),
+      { ordered: false }
     );
     console.log(`   ✅ تم إنشاء ${departments.length} أقسام`);
 
     // 3. إنشاء أنواع الإعاقات
     console.log('♿ إنشاء أنواع الإعاقات...');
-    const disabilityTypes = await DisabilityType.insertMany(seedData.disabilityTypes);
+    const disabilityTypes = await DisabilityType.insertMany(seedData.disabilityTypes, { ordered: false });
     console.log(`   ✅ تم إنشاء ${disabilityTypes.length} أنواع إعاقات`);
 
     // 4. إنشاء الخدمات
     console.log('🛠️ إنشاء الخدمات...');
-    const services = await Service.insertMany(seedData.services);
+    const services = await Service.insertMany(seedData.services, { ordered: false });
     console.log(`   ✅ تم إنشاء ${services.length} خدمات`);
 
     // 5. إنشاء المستخدمين
@@ -496,7 +497,8 @@ async function seedDatabase() {
         branch: branches[0]._id,
         department: departments[0]._id,
         preferences: { language: 'ar', theme: 'light', notifications: true },
-      }))
+      })),
+      { ordered: false }
     );
     console.log(`   ✅ تم إنشاء ${users.length} مستخدمين`);
 
@@ -538,7 +540,7 @@ async function seedDatabase() {
         },
       });
     }
-    const beneficiaries = await Beneficiary.insertMany(beneficiariesData);
+    const beneficiaries = await Beneficiary.insertMany(beneficiariesData, { ordered: false });
     console.log(`   ✅ تم إنشاء ${beneficiaries.length} مستفيد`);
 
     // 7. إنشاء جلسات
@@ -561,7 +563,7 @@ async function seedDatabase() {
         status: ['scheduled', 'completed', 'cancelled', 'no-show'][Math.floor(Math.random() * 4)],
       });
     }
-    const sessions = await Session.insertMany(sessionsData);
+    const sessions = await Session.insertMany(sessionsData, { ordered: false });
     console.log(`   ✅ تم إنشاء ${sessions.length} جلسة`);
 
     // 8. إنشاء مركبات
@@ -613,7 +615,7 @@ async function seedDatabase() {
         branch: branches[0]._id,
       },
     ];
-    const vehicles = await Vehicle.insertMany(vehiclesData);
+    const vehicles = await Vehicle.insertMany(vehiclesData, { ordered: false });
     console.log(`   ✅ تم إنشاء ${vehicles.length} مركبات`);
 
     console.log('\n✨ تم زرع البيانات التجريبية بنجاح!\n');
@@ -657,7 +659,10 @@ module.exports = {
 // تشغيل البذر إذا تم استدعاء الملف مباشرة
 if (require.main === module) {
   mongoose
-    .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael')
+    .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael', {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+    })
     .then(() => seedDatabase())
     .then(() => mongoose.disconnect())
     .catch(err => {

@@ -72,8 +72,8 @@ function requireOptional(path) {
 
 const DEFAULT_SESSION_ATTENDANCE = requireOptional('../../models/SessionAttendance');
 const DEFAULT_EMPLOYEE = requireOptional('../../models/HR/Employee');
-const DEFAULT_CERTIFICATION = requireOptional('../../models/hr/Certification');
-const DEFAULT_EMPLOYMENT_CONTRACT = requireOptional('../../models/hr/EmploymentContract');
+const DEFAULT_CERTIFICATION = requireOptional('../../models/HR/Certification');
+const DEFAULT_EMPLOYMENT_CONTRACT = requireOptional('../../models/HR/EmploymentContract');
 
 function createHrCredentialObservations(deps = {}) {
   const SessionAttendance = deps.sessionAttendanceModel || DEFAULT_SESSION_ATTENDANCE;

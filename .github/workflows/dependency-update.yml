@@ -1,0 +1,180 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Al-Awael ERP — Weekly Dependency Update Bot
+# ═══════════════════════════════════════════════════════════════════════════
+# Runs every Sunday at 06:00 UTC to check for outdated dependencies and
+# security vulnerabilities. Automatically opens a PR when updates are found.
+#
+# Uses the built-in GitHub Actions bot token (GITHUB_TOKEN) so no extra
+# PAT is required for the repository-level PR.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: Dependency Update
+
+permissions:
+  contents: write       # needed to push the update branch
+  pull-requests: write  # needed to open the PR
+
+# ── Triggers ──────────────────────────────────────────────────────────────
+on:
+  schedule:
+    # Every Sunday at 06:00 UTC (off-peak, avoids weekday CI congestion)
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+# ── Shared Environment ──────────────────────────────────────────────────
+env:
+  NODE_VERSION: '20'
+  BRANCH_PREFIX: 'deps/weekly-update'
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  # check — Run npm outdated + npm audit, then open PR if needed
+  # ═══════════════════════════════════════════════════════════════════
+  check:
+    name: Check & Update Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # ── Install dependencies ─────────────────────────────────────
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+
+      # ── Audit (production) ─────────────────────────────────────
+      - name: Run npm audit (backend)
+        id: audit_backend
+        working-directory: backend
+        run: |
+          npm audit --audit-level=moderate --omit=dev > ../audit_backend.txt 2>&1 || true
+          cat ../audit_backend.txt
+
+      - name: Run npm audit (frontend)
+        id: audit_frontend
+        working-directory: frontend
+        run: |
+          npm audit --audit-level=moderate --omit=dev > ../audit_frontend.txt 2>&1 || true
+          cat ../audit_frontend.txt
+
+      # ── Check outdated packages ────────────────────────────────
+      - name: Run npm outdated (backend)
+        id: outdated_backend
+        working-directory: backend
+        run: |
+          npm outdated --json > ../outdated_backend.json 2>&1 || true
+          echo "--- backend outdated ---"
+          cat ../outdated_backend.json
+
+      - name: Run npm outdated (frontend)
+        id: outdated_frontend
+        working-directory: frontend
+        run: |
+          npm outdated --json > ../outdated_frontend.json 2>&1 || true
+          echo "--- frontend outdated ---"
+          cat ../outdated_frontend.json
+
+      # ── Determine if updates are available ───────────────────────
+      - name: Check if updates exist
+        id: has_updates
+        run: |
+          # If any of the outdated JSONs contain more than "{}", we have updates
+          BACKEND_LEN=$(wc -c < outdated_backend.json)
+          FRONTEND_LEN=$(wc -c < outdated_frontend.json)
+
+          if [ "$BACKEND_LEN" -gt 3 ] || [ "$FRONTEND_LEN" -gt 3 ]; then
+            echo "has_updates=true" >> "$GITHUB_OUTPUT"
+            echo "Updates found."
+          else
+            echo "has_updates=false" >> "$GITHUB_OUTPUT"
+            echo "No updates found."
+          fi
+
+      # ── Safe update: bump non-breaking versions ────────────────
+      - name: Bump patch & minor updates (backend)
+        if: steps.has_updates.outputs.has_updates == 'true'
+        working-directory: backend
+        run: |
+          # --save-exact keeps exact versions in package.json (prevents drift)
+          # npm update bumps everything that satisfies semver range
+          npm update --save
+
+      - name: Bump patch & minor updates (frontend)
+        if: steps.has_updates.outputs.has_updates == 'true'
+        working-directory: frontend
+        run: |
+          npm update --save
+
+      # ── Regenerate lockfiles ───────────────────────────────────
+      - name: Regenerate backend lockfile
+        if: steps.has_updates.outputs.has_updates == 'true'
+        working-directory: backend
+        run: npm install --legacy-peer-deps
+
+      - name: Regenerate frontend lockfile
+        if: steps.has_updates.outputs.has_updates == 'true'
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+
+      # ── Create PR ──────────────────────────────────────────────
+      - name: Create Pull Request
+        if: steps.has_updates.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.BRANCH_PREFIX }}-${{ github.run_id }}
+          delete-branch: true
+          commit-message: 'chore(deps): weekly dependency update'
+          title: 'chore(deps): weekly dependency update — ${{ github.event.schedule || "manual" }}'
+          body: |
+            ## Weekly Dependency Update
+
+            This PR was auto-generated by the `dependency-update.yml` workflow.
+
+            ### What changed
+            - Ran `npm update` in both `backend/` and `frontend/`
+            - Regenerated `package-lock.json` files
+
+            ### Audit Summary
+            <details>
+            <summary>Backend audit</summary>
+
+            ```
+            ${{ steps.audit_backend.outputs.stdout }}
+            ```
+            </details>
+
+            <details>
+            <summary>Frontend audit</summary>
+
+            ```
+            ${{ steps.audit_frontend.outputs.stdout }}
+            ```
+            </details>
+
+            ### Review Checklist
+            - [ ] CI passes (`lint`, `test`, `audit`, `build`)
+            - [ ] Smoke-test on staging before merge
+            - [ ] Verify no breaking changes in major version bumps
+
+            ---
+            *Workflow run: [View logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*
+          labels: |
+            dependencies
+            automated
+          draft: false

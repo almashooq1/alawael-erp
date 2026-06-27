@@ -71,8 +71,8 @@ code {
   scrollbar-color: rgba(27, 74, 138, 0.2) transparent;
 }
 
-/* ═══ Smooth image loading ═══ */
-img {
+/* ═══ Smooth image loading (scoped to avoid layout shifts) ═══ */
+img.lazy-img {
   content-visibility: auto;
 }
 
@@ -204,4 +204,69 @@ html.dark input:-webkit-autofill:hover,
 html.dark input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
   -webkit-text-fill-color: #e5e7eb !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   prefers-color-scheme: dark (OS-level dark mode)
+   Mirrors the html.dark rules for users who prefer
+   dark mode at the OS level.
+   ═══════════════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  html:not(.light),
+  html:not(.light) body {
+    background: #0b1220;
+    color: #e5e7eb;
+  }
+
+  html:not(.light) .bg-white { background-color: #111827 !important; }
+  html:not(.light) .bg-gray-50 { background-color: #0b1220 !important; }
+  html:not(.light) .bg-gray-100 { background-color: #1f2937 !important; }
+  html:not(.light) .bg-slate-50 { background-color: #0b1220 !important; }
+  html:not(.light) .bg-slate-100 { background-color: #1f2937 !important; }
+  html:not(.light) .bg-primary-50 { background-color: #15233b !important; }
+  html:not(.light) .bg-accent-50 { background-color: #2a1f12 !important; }
+  html:not(.light) .bg-green-50 { background-color: #102018 !important; }
+  html:not(.light) .from-white { --tw-gradient-from: #0b1220 var(--tw-gradient-from-position) !important; }
+  html:not(.light) .via-white { --tw-gradient-via: #0b1220 var(--tw-gradient-via-position) !important; }
+  html:not(.light) .to-white { --tw-gradient-to: #0b1220 var(--tw-gradient-to-position) !important; }
+  html:not(.light) .text-gray-900 { color: #f3f4f6 !important; }
+  html:not(.light) .text-gray-800 { color: #e5e7eb !important; }
+  html:not(.light) .text-gray-700,
+  html:not(.light) .text-gray-600 { color: #cbd5e1 !important; }
+  html:not(.light) .text-gray-500,
+  html:not(.light) .text-gray-400 { color: #94a3b8 !important; }
+  html:not(.light) .border-gray-100,
+  html:not(.light) .border-gray-200,
+  html:not(.light) .border-gray-300 { border-color: #1f2937 !important; }
+  html:not(.light) .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+  html:not(.light) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
+  html:not(.light) input,
+  html:not(.light) textarea,
+  html:not(.light) select {
+    background-color: #0f172a;
+    color: #e5e7eb;
+    border-color: #334155;
+  }
+  html:not(.light) input::placeholder,
+  html:not(.light) textarea::placeholder { color: #64748b; }
+  html:not(.light) input:-webkit-autofill,
+  html:not(.light) input:-webkit-autofill:hover,
+  html:not(.light) input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    -webkit-text-fill-color: #e5e7eb !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   prefers-reduced-motion: respect user preference
+   ═══════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

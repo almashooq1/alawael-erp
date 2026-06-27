@@ -345,7 +345,7 @@ router.post('/devices', async (req, res) => {
           lastActiveAt: new Date(),
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     res.status(201).json({

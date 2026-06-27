@@ -17,7 +17,7 @@ const prescriptionValidationSchema = new mongoose.Schema(
     },
     checksPerformed: { type: mongoose.Schema.Types.Mixed }, // [{check_type, result, details}]
     warnings: { type: mongoose.Schema.Types.Mixed },
-    errors: { type: mongoose.Schema.Types.Mixed },
+    validationErrors: { type: mongoose.Schema.Types.Mixed },
     drugInteractionResults: { type: mongoose.Schema.Types.Mixed },
     allergyCheckResults: { type: mongoose.Schema.Types.Mixed },
     dosageCheckResults: { type: mongoose.Schema.Types.Mixed },

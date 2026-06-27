@@ -282,7 +282,7 @@ describe('DisabilityAuthorityService', () => {
         expect(CBAHIStandard.findOneAndUpdate).toHaveBeenCalledWith(
           { standardCode: 'LG-01' },
           data,
-          { upsert: true, new: true, setDefaultsOnInsert: true }
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         );
         expect(r.standardCode).toBe('LG-01');
       });

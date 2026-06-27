@@ -2138,7 +2138,7 @@ async function run() {
 
   // تعيين branch لكل مستفيد حسب nationalId
   const branchMap = {};
-  for (let i = 1; i <= 20; i++) branchMap[`110123400${String(i).padStart(1, '0')}`] = riyadh._id;
+  for (let i = 1; i <= 20; i++) branchMap[`1101234${String(i).padStart(3, '0')}`] = riyadh._id;
   // (سيتم تحديده تلقائياً من خلال address.city)
 
   let created = 0;

@@ -25,7 +25,7 @@ router.use((_req, res, next) => {
  * @desc    Get all available reports
  * @access  Private
  */
-router.get('/', authenticate, requireBranchAccess, requireBranchAccess, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const reports = await reportService.getAvailableReports(req.query);
     res.status(200).json({
@@ -46,7 +46,6 @@ router.get('/', authenticate, requireBranchAccess, requireBranchAccess, async (r
 router.post(
   '/generate',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   async (req, res) => {
     try {
@@ -86,7 +85,6 @@ router.get(
   '/type/disability-summary',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   async (req, res) => {
     try {
       const report = await reportService.getDisabilitySummary(req.query);
@@ -110,7 +108,6 @@ router.get(
   '/type/maintenance-schedule',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   async (req, res) => {
     try {
       const report = await reportService.getMaintenanceSchedule(req.query);
@@ -133,7 +130,6 @@ router.get(
 router.get(
   '/:reportId',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   async (req, res) => {
     try {
@@ -165,7 +161,6 @@ router.get(
   '/:reportId/download',
   authenticate,
   requireBranchAccess,
-  requireBranchAccess,
   async (req, res) => {
     try {
       const file = await reportService.downloadReport(req.params.reportId, req.query.format);
@@ -195,7 +190,6 @@ router.get(
 router.delete(
   '/:reportId',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
@@ -227,7 +221,6 @@ router.delete(
 router.post(
   '/export-batch',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   async (req, res) => {
     try {
@@ -267,7 +260,6 @@ router.post(
 router.get(
   '/schedule/:reportId',
   authenticate,
-  requireBranchAccess,
   requireBranchAccess,
   async (req, res) => {
     try {

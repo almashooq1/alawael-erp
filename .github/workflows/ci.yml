@@ -83,12 +83,25 @@ jobs:
 
       - name: Run Jest tests
         working-directory: backend
-        run: npm run test:sprint -- --ci --forceExit
+        run: npm run test:sprint -- --ci --runInBand --forceExit --testTimeout=30000 2>&1 | tee sprint-test-output.log
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
           MONGOMS_VERSION: '7.0'
           MONGOMS_DOWNLOAD_TIMEOUT: 120000
+
+      - name: Upload sprint test output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint-test-output
+          path: backend/sprint-test-output.log
+          retention-days: 1
+
+      - name: Print sprint test output on failure
+        if: failure()
+        working-directory: backend
+        run: tail -n 200 sprint-test-output.log || true
 
   # ═══════════════════════════════════════════════════════════════════
   # Job 3: Audit — npm audit (fail on high/critical vulnerabilities)

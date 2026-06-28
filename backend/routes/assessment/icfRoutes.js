@@ -23,7 +23,7 @@ function localCalculateDomainScore(scores, domain) {
   return domainScores.reduce((a, b) => a + b, 0) / domainScores.length;
 }
 
-function localCalculateOverallScore(scores) {
+function _localCalculateOverallScore(scores) {
   const domains = [
     'bodyFunctions',
     'bodyStructures',

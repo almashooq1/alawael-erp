@@ -7,7 +7,6 @@
 'use strict';
 
 const ScheduledReport = require('../models/ScheduledReport');
-const mongoose = require('mongoose');
 
 // ─── Schedule CRUD ───────────────────────────────────────────────────────
 

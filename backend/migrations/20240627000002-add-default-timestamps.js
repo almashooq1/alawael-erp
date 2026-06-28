@@ -23,7 +23,7 @@ module.exports = {
     console.log('Timestamps added successfully');
   },
 
-  async down(db) {
+  async down(_db) {
     // Note: We don't remove timestamps in down migration
     // as it would be destructive and hard to recover
     console.log('Down migration: timestamps left intact (non-destructive)');

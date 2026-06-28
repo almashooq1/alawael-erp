@@ -7,7 +7,6 @@
 'use strict';
 
 const VisualizationChart = require('../models/VisualizationChart');
-const mongoose = require('mongoose');
 
 // ─── Chart CRUD ────────────────────────────────────────────────────────────
 

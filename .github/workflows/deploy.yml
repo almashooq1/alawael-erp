@@ -29,6 +29,7 @@ on:
         default: ""
 
 env:
+  NODE_VERSION: '20'
   APP_DIR: /opt/alawael-erp
 
 jobs:

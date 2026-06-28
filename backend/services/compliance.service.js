@@ -27,7 +27,7 @@ function getModels() {
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
 
-function formatDateAr(date) {
+function _formatDateAr(date) {
   if (!date) return 'غير محدد';
   return new Date(date).toLocaleDateString('ar-SA', {
     year: 'numeric',
@@ -36,7 +36,7 @@ function formatDateAr(date) {
   });
 }
 
-function calculateCompliancePercentage(stats) {
+function _calculateCompliancePercentage(stats) {
   const applicable = stats.total - stats.notApplicable;
   if (applicable === 0) return 0;
   return Math.round((stats.compliant / applicable) * 100);

@@ -41,7 +41,7 @@ function mean(arr) {
   return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
-function stdDev(arr) {
+function _stdDev(arr) {
   if (!arr || arr.length < 2) return 0;
   const m = mean(arr);
   const variance = mean(arr.map(x => (x - m) ** 2));
@@ -179,7 +179,7 @@ async function predictDischargeReadiness(beneficiaryId) {
   // Criteria checks
   const criteria = [];
   let readinessScore = 0;
-  let totalCriteria = 0;
+  let _totalCriteria = 0;
 
   // 1. All domain scores < 1.5 (mild impairment)
   const latestAssessment = assessments[0];
@@ -190,7 +190,7 @@ async function predictDischargeReadiness(beneficiaryId) {
     value: latestAssessment?.domainScores?.map(d => `${d.domainAr || d.domain}: ${d.averageQualifier.toFixed(2)}`).join('، ') || 'لا توجد بيانات',
   });
   if (domainScoresOk) readinessScore += 25;
-  totalCriteria += 25;
+  _totalCriteria += 25;
 
   // 2. Goal achievement rate > 70%
   const goals = await Goal.find({ participantId: beneficiaryId }).lean();
@@ -204,7 +204,7 @@ async function predictDischargeReadiness(beneficiaryId) {
     value: `${achievementRate.toFixed(1)}% (${achievedGoals}/${totalGoals})`,
   });
   if (achievementOk) readinessScore += 25;
-  totalCriteria += 25;
+  _totalCriteria += 25;
 
   // 3. Session attendance > 80%
   const sessions = await TherapySession.find({ beneficiary: beneficiaryId }).lean();
@@ -218,7 +218,7 @@ async function predictDischargeReadiness(beneficiaryId) {
     value: `${attendanceRate.toFixed(1)}% (${attendedSessions}/${totalSessions})`,
   });
   if (attendanceOk) readinessScore += 25;
-  totalCriteria += 25;
+  _totalCriteria += 25;
 
   // 4. Recent assessment exists (< 3 months)
   const hasRecentAssessment = latestAssessment && daysBetween(latestAssessment.assessmentDate, new Date()) < 90;
@@ -228,7 +228,7 @@ async function predictDischargeReadiness(beneficiaryId) {
     value: latestAssessment ? formatDateAr(latestAssessment.assessmentDate) : 'لا يوجد تقييم',
   });
   if (hasRecentAssessment) readinessScore += 25;
-  totalCriteria += 25;
+  _totalCriteria += 25;
 
   const isReady = readinessScore >= 75;
 
@@ -448,7 +448,7 @@ async function recommendNextInterventions(beneficiaryId) {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 async function predictLengthOfStay(beneficiaryId) {
-  const { ICFAssessment, GoalProgressEntry, Goal } = getModels();
+  const { ICFAssessment, GoalProgressEntry: _GoalProgressEntry, Goal } = getModels();
   if (!ICFAssessment || !Goal) {
     throw new Error('النماذج غير متوفرة');
   }

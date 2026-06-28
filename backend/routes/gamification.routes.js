@@ -6,7 +6,6 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { authGate } = require('../middleware/authUnified');
 const gamificationService = require('../services/gamification.service');
 const { Gamification } = require('../models/Gamification');
 const logger = require('../utils/logger');

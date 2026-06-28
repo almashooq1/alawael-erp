@@ -10,7 +10,6 @@ const express = require('express');
 const router = express.Router();
 const emrService = require('../services/emr.service');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { body, param, validationResult } = require('express-validator');
 
 function handleValidation(req, res, next) {

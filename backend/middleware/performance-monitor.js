@@ -32,7 +32,7 @@ function requestLatencyMonitor(req, res, next) {
 /**
  * Mongoose plugin: log queries slower than threshold
  */
-function mongooseSlowQueryPlugin(schema, options) {
+function mongooseSlowQueryPlugin(schema, _options) {
   schema.pre(['find', 'findOne', 'findOneAndUpdate', 'updateOne', 'updateMany', 'aggregate'], function () {
     this._startTime = Date.now();
   });

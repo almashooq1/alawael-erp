@@ -11,7 +11,6 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const logger = require('../utils/logger');
 const chatbotService = require('../services/whatsappChatbot.service');
 
 function asyncHandler(fn) {
@@ -59,7 +58,7 @@ router.post(
       });
     } else if (message) {
       // Simple outgoing text (stored in conversation)
-      const conv = await chatbotService.getConversationHistory(phone, 1);
+      const _conv = await chatbotService.getConversationHistory(phone, 1);
       // We use the processIncomingMessage pattern but for outgoing manual messages
       // For simplicity, we push a manual outgoing message via the service helper
       const WhatsAppConversation = require('../models/WhatsAppConversation');

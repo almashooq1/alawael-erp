@@ -11,8 +11,6 @@
 
 const mongoose = require('mongoose');
 const WhatsAppConversation = require('../models/WhatsAppConversation');
-const WhatsAppContactGroup = require('../models/WhatsAppContactGroup');
-const logger = require('../utils/logger');
 
 // ─── Simple Template Schema (inline for self-containment) ───────────────────
 const chatbotTemplateSchema = new mongoose.Schema(
@@ -86,7 +84,7 @@ function matchIntent(text = '') {
 }
 
 // ─── Helper: enrich reply with mock data (production: query real services) ──
-function enrichReply(reply, intent, phone, beneficiaryId) {
+function enrichReply(reply, intent, _phone, _beneficiaryId) {
   // In a real implementation, these would call AppointmentService, ICFService, etc.
   const enrichments = {
     session_inquiry: { sessionInfo: 'الأحد ٩ صباحاً — قسم النطق والتخاطب' },

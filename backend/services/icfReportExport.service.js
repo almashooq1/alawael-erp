@@ -1,6 +1,5 @@
 const ICFAssessment = require('../models/assessment/ICFAssessment');
 const Document = require('../models/Document');
-const Beneficiary = require('../models/Beneficiary');
 
 async function exportAssessmentToDocument(assessmentId, userId) {
   try {

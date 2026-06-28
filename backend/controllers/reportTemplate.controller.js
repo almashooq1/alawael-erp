@@ -7,7 +7,6 @@
 'use strict';
 
 const ReportTemplate = require('../models/ReportTemplate');
-const mongoose = require('mongoose');
 
 // ─── Template CRUD ───────────────────────────────────────────────────────
 

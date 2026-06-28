@@ -35,7 +35,7 @@ function safeRequire(modulePath) {
   try {
     return require(modulePath);
   } catch (err) {
-    const isMissing = err.code === 'MODULE_NOT_FOUND' && err.message.includes(modulePath);
+    const _isMissing = err.code === 'MODULE_NOT_FOUND' && err.message.includes(modulePath);
     return express.Router(); // empty router
   }
 }

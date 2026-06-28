@@ -18,7 +18,7 @@
 const http = require('http');
 const logger = require('../utils/logger');
 
-const { ROUTE_MANIFEST, getAllRoutes } = require('../config/routeManifest');
+const { ROUTE_MANIFEST: _ROUTE_MANIFEST, getAllRoutes: _getAllRoutes } = require('../config/routeManifest');
 
 const BASE_URL = process.env.SMOKE_BASE_URL || 'http://localhost:3001';
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS, 10) || 10000;

@@ -117,12 +117,12 @@ async function main() {
 
   // 2. Check required services
   logger.log('\n📦 Checking required services...');
-  const mongoInstalled = checkService(
+  const _mongoInstalled = checkService(
     'mongod --version 2>/dev/null || mongosh --version 2>/dev/null',
     'MongoDB',
     'https://www.mongodb.com/docs/manual/installation/'
   );
-  const redisInstalled = checkService(
+  const _redisInstalled = checkService(
     'redis-cli --version 2>/dev/null || redis-server --version 2>/dev/null',
     'Redis',
     'https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/'

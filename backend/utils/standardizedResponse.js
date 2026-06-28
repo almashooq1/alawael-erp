@@ -15,8 +15,6 @@
 
 'use strict';
 
-const logger = require('./logger');
-
 /**
  * Generate a unique request ID
  */

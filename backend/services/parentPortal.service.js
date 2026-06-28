@@ -6,7 +6,6 @@ const TherapeuticGoal = require('../domains/goals/models/TherapeuticGoal');
 const Goal = require('../models/Goal');
 const Document = require('../models/Document');
 const Beneficiary = require('../models/Beneficiary');
-const ParentPortal = require('../models/ParentPortal/ParentPortal');
 
 /**
  * Parent Portal Service
@@ -124,7 +123,7 @@ async function getProgressTimeline(beneficiaryId, months = 6) {
         }).sort({ createdAt: 1 }).select('createdAt progressPercentage status').lean()
       : [];
 
-    const timeline = [];
+    const _timeline = [];
     const monthlyData = {};
 
     for (const icf of icfHistory) {

@@ -1,5 +1,3 @@
-const express = require('express');
-
 class ClinicalController {
   async getDashboard(req, res) {
     res.status(200).json({ status: 'ok', data: [] });

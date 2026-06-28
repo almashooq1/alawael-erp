@@ -523,7 +523,7 @@ async function getDataWarehouseSummary() {
 }
 
 /* ─── 10. getPredictiveAnalytics ──────────────────────────────────────── */
-async function getPredictiveAnalytics(type, params = {}) {
+async function getPredictiveAnalytics(type, _params = {}) {
   const models = getModels();
   const now = new Date();
 
@@ -585,10 +585,10 @@ async function getPredictiveAnalytics(type, params = {}) {
     }
 
     case 'goalAchievement': {
-      const goals = await models.Goal?.find({ status: { $in: ['active', 'completed'] } }).lean() || [];
+      const _goals = await models.Goal?.find({ status: { $in: ['active', 'completed'] } }).lean() || [];
       const progressEntries = await models.GoalProgressEntry?.find().sort({ createdAt: -1 }).lean() || [];
       const points = progressEntries.map(p => p.progressPercent || 0);
-      const { slope, intercept, r2 } = linearRegression(points.slice(0, 30));
+      const { slope, _intercept, r2 } = linearRegression(points.slice(0, 30));
       const projectedCompletion = slope > 0 ? Math.ceil((100 - (points[0] || 0)) / slope) : null;
       return {
         type: 'goalAchievement',

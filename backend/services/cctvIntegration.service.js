@@ -45,7 +45,7 @@ async function getCameraList(branchId) {
     const filters = branchId ? { branchCode: branchId, isDeleted: false } : { isDeleted: false };
     const cameras = await CctvCamera.find(filters).sort({ name_ar: 1 }).limit(50).lean();
     if (cameras && cameras.length > 0) return cameras;
-  } catch (err) {
+  } catch (_err) {
     // fallback to mock
   }
 
@@ -81,7 +81,7 @@ async function getLiveFeed(cameraId) {
         placeholder: false,
       };
     }
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 
@@ -106,7 +106,7 @@ async function getRecordingList(cameraId, startDate, endDate) {
     }
     const recordings = await CctvRecording.find(query).sort({ startTime: -1 }).limit(100).lean();
     if (recordings && recordings.length > 0) return recordings;
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 
@@ -147,7 +147,7 @@ async function getFaceRecognitionLog(beneficiaryId, startDate, endDate) {
     }
     const events = await CctvEvent.find(query).sort({ startedAt: -1 }).limit(200).lean();
     if (events && events.length > 0) return events;
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 
@@ -201,7 +201,7 @@ async function getAttendanceFromCCTV(beneficiaryId, date) {
         };
       }
     }
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 
@@ -232,7 +232,7 @@ async function getSecurityAlerts(startDate, endDate) {
     }
     const alerts = await CctvAlert.find(query).sort({ severity: -1, firstEventAt: -1 }).limit(100).lean();
     if (alerts && alerts.length > 0) return alerts;
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 

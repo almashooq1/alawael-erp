@@ -11,7 +11,6 @@
 const ICFAssessment = require('../models/assessment/ICFAssessment');
 const TherapeuticGoalModule = require('../domains/goals/models/TherapeuticGoal');
 const ClinicalSessionModule = require('../domains/sessions/models/ClinicalSession');
-const CarePlanVersion = require('../models/CarePlanVersion');
 
 // ─── Model extraction with fallbacks ─────────────────────────────────────────
 // DDD models export { ModelName, schema, … }; legacy models export directly.
@@ -478,7 +477,7 @@ async function getICFProgressForGoal(goalId, timeRange = '3months') {
     }
 
     // Calculate trend
-    let trend = { direction: 'stable' };
+    const trend = { direction: 'stable' };
     const scoredEntries = progressHistory.filter(
       (p) => typeof p.performanceScore === 'number'
     );

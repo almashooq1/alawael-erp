@@ -17,7 +17,7 @@ let ICFAssessment;
 try {
   ICFAssessment = require('../models/assessment/ICFAssessment');
   console.log('[ClinicalDashboard] Loaded ICFAssessment from DDD path');
-} catch (err) {
+} catch (_err) {
   console.warn('[ClinicalDashboard] ICFAssessment DDD model not found, will attempt fallback');
 }
 
@@ -33,7 +33,7 @@ let ClinicalSession;
 try {
   ClinicalSession = require('../domains/sessions/models/ClinicalSession');
   console.log('[ClinicalDashboard] Loaded ClinicalSession from DDD path');
-} catch (err) {
+} catch (_err) {
   console.warn('[ClinicalDashboard] ClinicalSession DDD model not found, will attempt fallback');
 }
 
@@ -50,7 +50,7 @@ let TherapeuticGoal;
 try {
   TherapeuticGoal = require('../domains/goals/models/TherapeuticGoal');
   console.log('[ClinicalDashboard] Loaded TherapeuticGoal from DDD path');
-} catch (err) {
+} catch (_err) {
   console.warn('[ClinicalDashboard] TherapeuticGoal DDD model not found, will attempt fallback');
 }
 

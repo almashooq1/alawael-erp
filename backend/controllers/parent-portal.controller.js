@@ -1,5 +1,3 @@
-const express = require('express');
-
 class ParentPortalController {
   async getChildProfile(req, res) {
     res.status(200).json({ status: 'ok', data: {} });

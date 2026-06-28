@@ -637,7 +637,7 @@ router.post(
 
     let icfBased = false;
     let domainScores = {};
-    let icfAssessments = [];
+    const icfAssessments = [];
 
     try {
       const latestIcf = await ICFAssessment.findLatestByPatient(beneficiaryId);

@@ -15,7 +15,6 @@ const path = require('path');
 const logger = require('../utils/logger');
 
 const CONTROLLERS_DIR = path.join(__dirname, '..', 'controllers');
-const ROUTES_DIR = path.join(__dirname, '..', 'routes');
 
 // Patterns that indicate a stub function
 const STUB_PATTERNS = [

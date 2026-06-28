@@ -75,7 +75,7 @@ exports.getKPIs = async (req, res, next) => {
 
 exports.getActivity = async (req, res, next) => {
   try {
-    const { limit = 20, offset = 0 } = req.query;
+    const { limit: _limit = 20, offset: _offset = 0 } = req.query;
     // Placeholder: integrate with ActivityLog model when available
     const recentActivity = [];
     const alerts = [];

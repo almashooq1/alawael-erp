@@ -17,7 +17,7 @@ const logger = console;
 function safeModel(name) {
   try {
     return require(`../models/${name}`);
-  } catch (err) {
+  } catch (_err) {
     logger.warn(`[ExecutiveDashboard] Model not found: ${name}`);
     return null;
   }
@@ -213,7 +213,7 @@ async function getExecutiveOverview(branchId = null) {
 
   const sessVals = sessRes.status === 'fulfilled' ? sessRes.value : [];
   const completedSessions = sessVals[0]?.value || 0;
-  const totalSessions = sessVals[1]?.value || 0;
+  const _totalSessions = sessVals[1]?.value || 0;
   const avgSessionDuration = sessVals[2]?.value?.[0]?.avgDuration || 0;
 
   const icfVals = icfRes.status === 'fulfilled' ? icfRes.value : [];

@@ -103,6 +103,14 @@ jobs:
             fi
             cd "$APP_DIR"
 
+            # ─── Stop host nginx (free ports 80/443 for Docker nginx) ────
+            echo "🛑 Stopping host nginx (if running) to free ports 80/443..."
+            sudo systemctl stop nginx 2>/dev/null || true
+            sudo systemctl disable nginx 2>/dev/null || true
+            sudo fuser -k 80/tcp 2>/dev/null || true
+            sudo fuser -k 443/tcp 2>/dev/null || true
+            echo "✅ Host nginx stopped"
+
             # ─── Check .env exists ───────────────────────────────────
             if [ ! -f ".env" ]; then
               echo "❌ .env file not found at $APP_DIR/.env"

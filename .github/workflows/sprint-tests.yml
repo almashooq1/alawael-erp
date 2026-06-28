@@ -3999,7 +3999,7 @@ jobs:
 
       - name: Run admin API smoke tests
         working-directory: backend
-        run: npm run test:admin-api
+        run: npm run test:admin-api -- --runInBand
         env:
           NODE_ENV: test
           USE_MOCK_DB: 'true'
@@ -4028,10 +4028,12 @@ jobs:
 
       - name: Run ops-subsystem tests (rate limiter, circuit breaker, metrics registry)
         working-directory: backend
-        run: npm run test:ops-subsystems -- --runInBand --forceExit
+        run: npm run test:ops-subsystems -- --runInBand --forceExit --testTimeout=30000
         env:
           NODE_ENV: test
           JWT_SECRET: ci-secret-at-least-sixteen-chars-long-for-validator
+          MONGOMS_DOWNLOAD_TIMEOUT: 120000
+          MONGOMS_VERSION: '7.0'
 
   demo-seed-dryrun:
     name: "🌱 Demo seed loads"

@@ -18,7 +18,6 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - ".github/**"
   workflow_dispatch:
     inputs:
       deploy_target:
@@ -76,7 +75,7 @@ jobs:
           fi
           echo "✅ Deployment confirmed"
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -153,9 +152,9 @@ jobs:
         shard: [1, 2, 3, 4]
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -167,7 +166,7 @@ jobs:
       # above). restore-keys falls back to the most recent prior binary cache so
       # a package-lock bump that doesn't change the mongod version is a cache hit.
       - name: Cache MongoMemoryServer binary
-        uses: actions/cache@v6
+        uses: actions/cache@v4
         with:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
@@ -209,9 +208,9 @@ jobs:
       needs.preflight.result == 'success'
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -254,14 +253,14 @@ jobs:
 
       - name: Upload build log (always — success or failure)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ github.sha }}
           path: frontend/build.log
           if-no-files-found: ignore
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build-prod-${{ github.sha }}
           path: frontend/build/
@@ -287,7 +286,7 @@ jobs:
       name: production
       url: https://alaweal.org
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Check required secrets
         run: |
@@ -305,7 +304,7 @@ jobs:
 
       - name: Download frontend build
         if: needs.build-frontend.result == 'success'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: frontend-build-prod-${{ github.sha }}
           path: frontend/build/
@@ -563,7 +562,7 @@ jobs:
 
       - name: Upload diagnostics artifact
         if: needs.build-frontend.result == 'success'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: deploy-diagnostics-${{ github.sha }}
           path: /tmp/deploy-diag/

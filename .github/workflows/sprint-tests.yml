@@ -4028,7 +4028,7 @@ jobs:
 
       - name: Run ops-subsystem tests (rate limiter, circuit breaker, metrics registry)
         working-directory: backend
-        run: npm run test:ops-subsystems
+        run: npm run test:ops-subsystems -- --runInBand --forceExit
         env:
           NODE_ENV: test
           JWT_SECRET: ci-secret-at-least-sixteen-chars-long-for-validator

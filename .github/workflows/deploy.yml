@@ -188,3 +188,36 @@ jobs:
             echo "══════════════════════════════════════════════════════"
             ss -tlnp | grep -E '3001|80' || netstat -tlnp | grep -E '3001|80' || echo "No relevant ports listening"
             echo "══════════════════════════════════════════════════════"
+
+      - name: Save container logs as artifact
+        if: failure()
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/alawael-erp
+            mkdir -p /tmp/deploy-logs
+            docker compose logs --tail 200 backend > /tmp/deploy-logs/backend.log 2>&1 || echo "backend logs failed" > /tmp/deploy-logs/backend.log
+            docker compose logs --tail 100 nginx > /tmp/deploy-logs/nginx.log 2>&1 || echo "nginx logs failed" > /tmp/deploy-logs/nginx.log
+            docker compose ps > /tmp/deploy-logs/ps.log 2>&1 || echo "docker ps failed" > /tmp/deploy-logs/ps.log
+            echo "Logs saved to /tmp/deploy-logs/"
+
+      - name: Download logs from VPS to runner
+        if: failure()
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "/tmp/deploy-logs/*"
+          target: "deploy-logs/"
+
+      - name: Upload deploy logs artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-logs
+          path: deploy-logs/
+          retention-days: 3

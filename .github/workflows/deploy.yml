@@ -138,7 +138,8 @@ jobs:
           MAX_RETRIES=5
           for i in $(seq 1 $MAX_RETRIES); do
             echo "🩺 Health check attempt $i/$MAX_RETRIES..."
-            HEALTH=$(curl -fsS --max-time 10 "http://${{ secrets.VPS_HOST }}:3001/health" 2>/dev/null || echo "")
+            # Check via NGINX on port 80 (production path) — port 3001 is internal only
+            HEALTH=$(curl -fsS --max-time 10 "http://${{ secrets.VPS_HOST }}/health" 2>/dev/null || echo "")
             if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
               echo "✅ Health check PASSED: $HEALTH"
               exit 0
@@ -175,7 +176,7 @@ jobs:
             docker compose logs --tail 20 nginx 2>/dev/null || echo "nginx container not found"
             echo ""
             echo "══════════════════════════════════════════════════════"
-            echo "  Port 3001 listening check"
+            echo "  Port listening check (80 + 3001)"
             echo "══════════════════════════════════════════════════════"
-            ss -tlnp | grep 3001 || netstat -tlnp | grep 3001 || echo "Port 3001 not listening"
+            ss -tlnp | grep -E '3001|80' || netstat -tlnp | grep -E '3001|80' || echo "No relevant ports listening"
             echo "══════════════════════════════════════════════════════"

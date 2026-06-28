@@ -75,6 +75,7 @@ services:
       - /tmp
     volumes:
       - uploads_data:/app/uploads
+      - logs_data:/app/logs
     security_opt:
       - no-new-privileges:true
     ulimits:
@@ -299,4 +300,6 @@ services:
   # hr-payroll-service: # ARCHIVED → _archived/dead-microservices-bulk/
 volumes:
   uploads_data:
+    driver: local
+  logs_data:
     driver: local

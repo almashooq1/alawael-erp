@@ -111,13 +111,77 @@ jobs:
             sudo fuser -k 443/tcp 2>/dev/null || true
             echo "✅ Host nginx stopped"
 
-            # ─── Check .env exists ───────────────────────────────────
-            if [ ! -f ".env" ]; then
-              echo "❌ .env file not found at $APP_DIR/.env"
-              echo "   Create it first: cp .env.example .env && nano .env"
-              exit 1
+            # ─── Create or update .env from secrets ──────────────────
+            echo "📝 Checking .env configuration..."
+            REQUIRED_VARS="MONGO_ROOT_PASSWORD REDIS_PASSWORD JWT_SECRET JWT_REFRESH_SECRET SETUP_SECRET_KEY ADMIN_PASSWORD"
+            MISSING_VARS=""
+
+            # Check if .env exists and has required variables
+            if [ -f ".env" ]; then
+              for var in $REQUIRED_VARS; do
+                if ! grep -q "^${var}=" .env || grep -q "^${var}=$" .env; then
+                  MISSING_VARS="$MISSING_VARS $var"
+                fi
+              done
+            else
+              MISSING_VARS="$REQUIRED_VARS"
             fi
-            echo "✅ .env found"
+
+            # If any required vars are missing, generate .env from secrets
+            if [ -n "$MISSING_VARS" ]; then
+              echo "⚠️  Missing required variables:$MISSING_VARS"
+              echo "   Generating .env from GitHub secrets..."
+
+              # Check if secrets are available
+              if [ -z "${{ secrets.MONGO_ROOT_PASSWORD }}" ]; then
+                echo "❌ Missing GitHub secret: MONGO_ROOT_PASSWORD"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+              if [ -z "${{ secrets.REDIS_PASSWORD }}" ]; then
+                echo "❌ Missing GitHub secret: REDIS_PASSWORD"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+              if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+                echo "❌ Missing GitHub secret: JWT_SECRET"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+              if [ -z "${{ secrets.JWT_REFRESH_SECRET }}" ]; then
+                echo "❌ Missing GitHub secret: JWT_REFRESH_SECRET"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+              if [ -z "${{ secrets.SETUP_SECRET_KEY }}" ]; then
+                echo "❌ Missing GitHub secret: SETUP_SECRET_KEY"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+              if [ -z "${{ secrets.ADMIN_PASSWORD }}" ]; then
+                echo "❌ Missing GitHub secret: ADMIN_PASSWORD"
+                echo "   Add it at: Settings → Secrets and variables → Actions → New repository secret"
+                exit 1
+              fi
+
+              cat > .env << 'EOF'
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+SETUP_SECRET_KEY=${{ secrets.SETUP_SECRET_KEY }}
+ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL:-admin@alawael.com }}
+FRONTEND_URL=${{ secrets.FRONTEND_URL:-http://localhost }}
+CORS_ORIGINS=${{ secrets.CORS_ORIGINS:-http://localhost:3004,http://localhost:3000 }}
+TZ=Asia/Riyadh
+NODE_ENV=production
+EOF
+              echo "✅ .env created from GitHub secrets"
+            else
+              echo "✅ .env is complete"
+            fi
 
             # ─── Pull latest code ────────────────────────────────────
             echo "📥 Pulling latest code..."

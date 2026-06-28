@@ -130,6 +130,7 @@ jobs:
 
       # ── Smoke test ───────────────────────────────────────────────
       - name: Smoke test /health endpoint
+        if: always()
         run: |
           echo "⏳ Waiting 30s for containers to warm up..."
           sleep 30
@@ -148,3 +149,33 @@ jobs:
 
           echo "❌ Health check failed after $MAX_RETRIES attempts"
           exit 1
+
+      - name: Print container logs on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "══════════════════════════════════════════════════════"
+            echo "  Docker container status"
+            echo "══════════════════════════════════════════════════════"
+            cd /opt/alawael-erp
+            docker compose ps
+            echo ""
+            echo "══════════════════════════════════════════════════════"
+            echo "  Backend container logs (last 50 lines)"
+            echo "══════════════════════════════════════════════════════"
+            docker compose logs --tail 50 backend 2>/dev/null || docker compose logs --tail 50
+            echo ""
+            echo "══════════════════════════════════════════════════════"
+            echo "  Nginx container logs (last 20 lines)"
+            echo "══════════════════════════════════════════════════════"
+            docker compose logs --tail 20 nginx 2>/dev/null || echo "nginx container not found"
+            echo ""
+            echo "══════════════════════════════════════════════════════"
+            echo "  Port 3001 listening check"
+            echo "══════════════════════════════════════════════════════"
+            ss -tlnp | grep 3001 || netstat -tlnp | grep 3001 || echo "Port 3001 not listening"
+            echo "══════════════════════════════════════════════════════"

@@ -264,6 +264,7 @@ const ROUTES = [
   { path: '/api/v1/therapist', file: 'routes/therapist-portal.routes', auth: true, phase: 'clinical', description: 'Therapist portal' },
   { path: '/api/v1/portal', file: 'routes/parent-portal-v1.routes', auth: true, phase: 'student', description: 'Parent portal v1' },
   { path: '/api/v1/parent-portal', file: 'routes/parent-portal.routes', auth: true, roles: ['parent', 'guardian', 'admin', 'super_admin'], phase: 'student', description: 'Parent portal v2' },
+  { path: '/api/chat-v2', file: 'routes/chat-v2.routes', auth: true, phase: 'messaging', description: 'Chat v2' },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════

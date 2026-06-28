@@ -1,265 +1,86 @@
-/* Tailwind v4 native CSS-first syntax.
-   @import pulls in preflight + utilities + ALL default colors (gray, red, …).
-   @config tells v4 to read tailwind.config.js for our custom theme.extend
-   (font-cairo, primary/accent/navy palettes, gradients, shadows). */
-@import "tailwindcss";
-@config "../tailwind.config.js";
+/* Al-Awael ERP v3.5.0 — Global Styles */
 
-/* ═══════════════════════════════════════════════════
-   Global Styles — Professional Enhancements
-   ═══════════════════════════════════════════════════ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* RTL direction + smooth scroll */
+/* RTL Base Styles */
+html[dir="rtl"],
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="ltr"],
+[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Arabic Font Stack */
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/NotoSansArabic-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/NotoSansArabic-Bold.woff2') format('woff2');
+}
+
+/* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 body {
-  direction: rtl;
+  font-family: 'Noto Sans Arabic', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #F5F5F5;
+  color: #212121;
+  min-height: 100vh;
   overflow-x: hidden;
-  /* Alawael brand font — Tajawal first, Cairo fallback. */
-  font-family: 'Tajawal', 'Cairo', system-ui, sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+/* Mobile Safe Area Support */
+.mobile-app-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* ═══ Selection — brand orange wash on navy text ═══ */
-::selection {
-  background-color: rgba(243, 146, 32, 0.20);
-  color: #0A1E3A;
-}
-
-::-moz-selection {
-  background-color: rgba(243, 146, 32, 0.20);
-  color: #0A1E3A;
-}
-
-/* ═══ Focus Visible — brand orange ring (matches design-system --c-focus) ═══ */
-:focus-visible {
-  outline: 2px solid rgba(243, 146, 32, 0.6);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ═══ Custom Scrollbar — brand navy ═══ */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(27, 74, 138, 0.2);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(27, 74, 138, 0.35);
-  background-clip: content-box;
+  background: rgba(0, 0, 0, 0.3);
 }
 
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(27, 74, 138, 0.2) transparent;
-}
-
-/* ═══ Smooth image loading (scoped to avoid layout shifts) ═══ */
-img.lazy-img {
-  content-visibility: auto;
-}
-
-/* ═══ Form autofill style fix ═══ */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 30px #fafafa inset !important;
-  -webkit-text-fill-color: #1a1a1a !important;
-  caret-color: #1B4A8A;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-/* ═══ Reduced motion ═══ */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   Accessibility widget preferences (toggled by the
-   floating a11y panel — see AccessibilityWidget.jsx).
-   All applied at the <html> level so they never break
-   layout, fixed elements, or the brand colours.
-   ═══════════════════════════════════════════════════ */
-
-/* Highlight links + buttons for low-vision users */
-html.a11y-links a,
-html.a11y-links button:not([aria-label]) {
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
-}
-html.a11y-links a:focus,
-html.a11y-links a:hover {
-  outline: 2px solid rgba(243, 146, 32, 0.7) !important;
+/* Focus Ring for Accessibility */
+:focus-visible {
+  outline: 2px solid #1B5E20;
   outline-offset: 2px;
 }
 
-/* Dyslexia-friendly spacing */
-html.a11y-readable,
-html.a11y-readable * {
-  line-height: 1.9 !important;
-  letter-spacing: 0.02em !important;
-  word-spacing: 0.08em !important;
-}
-
-/* Pause all motion (vestibular / neurodivergent comfort) */
-html.a11y-noanim,
-html.a11y-noanim *,
-html.a11y-noanim *::before,
-html.a11y-noanim *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
-  scroll-behavior: auto !important;
-}
-
-/* Larger, higher-contrast cursor */
-html.a11y-bigcursor,
-html.a11y-bigcursor * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M6 3 L6 33 L14 25 L19 36 L24 33 L19 23 L31 23 Z' fill='%23000' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") 6 3, auto !important;
-}
-
-/* ═══════════════════════════════════════════════════
-   Dark mode (toggled from the AccessibilityWidget).
-   A TASTEFUL, BOUNDED override that remaps the light
-   surfaces the landing uses most. Brand navy/primary
-   gradients are left intact — only neutral light
-   backgrounds + text are darkened. Goal: a clean,
-   readable night theme, not pixel-perfect.
-   ═══════════════════════════════════════════════════ */
-
-html.dark,
-html.dark body {
-  background: #0b1220;
-  color: #e5e7eb;
-}
-
-/* Solid neutral surfaces → dark panels */
-html.dark .bg-white { background-color: #111827 !important; }
-html.dark .bg-gray-50 { background-color: #0b1220 !important; }
-html.dark .bg-gray-100 { background-color: #1f2937 !important; }
-html.dark .bg-slate-50 { background-color: #0b1220 !important; }
-html.dark .bg-slate-100 { background-color: #1f2937 !important; }
-
-/* Soft brand tints on light sections → muted dark tints */
-html.dark .bg-primary-50 { background-color: #15233b !important; }
-html.dark .bg-accent-50 { background-color: #2a1f12 !important; }
-html.dark .bg-green-50 { background-color: #102018 !important; }
-
-/* Light section gradients (from/via/to white) → dark stops */
-html.dark .from-white { --tw-gradient-from: #0b1220 var(--tw-gradient-from-position) !important; }
-html.dark .via-white { --tw-gradient-via: #0b1220 var(--tw-gradient-via-position) !important; }
-html.dark .to-white { --tw-gradient-to: #0b1220 var(--tw-gradient-to-position) !important; }
-
-/* Neutral text → light foregrounds */
-html.dark .text-gray-900 { color: #f3f4f6 !important; }
-html.dark .text-gray-800 { color: #e5e7eb !important; }
-html.dark .text-gray-700,
-html.dark .text-gray-600 { color: #cbd5e1 !important; }
-html.dark .text-gray-500,
-html.dark .text-gray-400 { color: #94a3b8 !important; }
-
-/* Neutral borders + dividers → subtle dark lines */
-html.dark .border-gray-100,
-html.dark .border-gray-200,
-html.dark .border-gray-300 { border-color: #1f2937 !important; }
-html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
-html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
-
-/* Form fields stay readable on dark panels */
-html.dark input,
-html.dark textarea,
-html.dark select {
-  background-color: #0f172a;
-  color: #e5e7eb;
-  border-color: #334155;
-}
-html.dark input::placeholder,
-html.dark textarea::placeholder { color: #64748b; }
-html.dark input:-webkit-autofill,
-html.dark input:-webkit-autofill:hover,
-html.dark input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
-  -webkit-text-fill-color: #e5e7eb !important;
-}
-
-/* ═══════════════════════════════════════════════════
-   prefers-color-scheme: dark (OS-level dark mode)
-   Mirrors the html.dark rules for users who prefer
-   dark mode at the OS level.
-   ═══════════════════════════════════════════════════ */
-@media (prefers-color-scheme: dark) {
-  html:not(.light),
-  html:not(.light) body {
-    background: #0b1220;
-    color: #e5e7eb;
-  }
-
-  html:not(.light) .bg-white { background-color: #111827 !important; }
-  html:not(.light) .bg-gray-50 { background-color: #0b1220 !important; }
-  html:not(.light) .bg-gray-100 { background-color: #1f2937 !important; }
-  html:not(.light) .bg-slate-50 { background-color: #0b1220 !important; }
-  html:not(.light) .bg-slate-100 { background-color: #1f2937 !important; }
-  html:not(.light) .bg-primary-50 { background-color: #15233b !important; }
-  html:not(.light) .bg-accent-50 { background-color: #2a1f12 !important; }
-  html:not(.light) .bg-green-50 { background-color: #102018 !important; }
-  html:not(.light) .from-white { --tw-gradient-from: #0b1220 var(--tw-gradient-from-position) !important; }
-  html:not(.light) .via-white { --tw-gradient-via: #0b1220 var(--tw-gradient-via-position) !important; }
-  html:not(.light) .to-white { --tw-gradient-to: #0b1220 var(--tw-gradient-to-position) !important; }
-  html:not(.light) .text-gray-900 { color: #f3f4f6 !important; }
-  html:not(.light) .text-gray-800 { color: #e5e7eb !important; }
-  html:not(.light) .text-gray-700,
-  html:not(.light) .text-gray-600 { color: #cbd5e1 !important; }
-  html:not(.light) .text-gray-500,
-  html:not(.light) .text-gray-400 { color: #94a3b8 !important; }
-  html:not(.light) .border-gray-100,
-  html:not(.light) .border-gray-200,
-  html:not(.light) .border-gray-300 { border-color: #1f2937 !important; }
-  html:not(.light) .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
-  html:not(.light) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
-  html:not(.light) input,
-  html:not(.light) textarea,
-  html:not(.light) select {
-    background-color: #0f172a;
-    color: #e5e7eb;
-    border-color: #334155;
-  }
-  html:not(.light) input::placeholder,
-  html:not(.light) textarea::placeholder { color: #64748b; }
-  html:not(.light) input:-webkit-autofill,
-  html:not(.light) input:-webkit-autofill:hover,
-  html:not(.light) input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
-    -webkit-text-fill-color: #e5e7eb !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   prefers-reduced-motion: respect user preference
-   ═══════════════════════════════════════════════════ */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -267,6 +88,28 @@ html.dark input:-webkit-autofill:focus {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Dark Mode Support */
+.dark body {
+  background-color: #121212;
+  color: #E0E0E0;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+  }
+  .no-print {
+    display: none !important;
   }
 }

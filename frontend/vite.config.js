@@ -1,279 +1,74 @@
-import { defineConfig, loadEnv, transformWithEsbuild } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { VitePWA } from 'vite-plugin-pwa';
+import path from 'node:path';
 
-// CRA used .js files for JSX. Vite requires .jsx by default.
-// This pre-plugin tells esbuild to treat src/**/*.js as JSX so
-// vite:build-import-analysis can parse them before the React plugin runs.
-// Use a regex to match both Unix '/' and Windows '\' path separators.
-const srcJsPattern = /[/\\]src[/\\]/;
-const jsxInJsPlugin = {
-  name: 'jsx-in-js',
-  enforce: 'pre',
-  async transform(code, id) {
-    if (srcJsPattern.test(id) && id.endsWith('.js') && !id.includes('node_modules')) {
-      return transformWithEsbuild(code, id, {
-        loader: 'jsx',
-        jsx: 'automatic',
-        jsxDev: false,
-      });
-    }
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'prompt',
+      injectRegister: 'script',
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
+      manifest: false, // We use our own manifest.json
+      injectManifest: {
+        injectionPoint: undefined, // Custom SW, no workbox injection
+        globDirectory: 'dist',
+        globPatterns: [
+          '**/*.{js,css,html,png,svg,ico,woff,woff2,json}',
+        ],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
+      workbox: {
+        // Not used since we have custom SW, but required for plugin
+        cleanupOutdatedCaches: true,
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@pwa': path.resolve(__dirname, './src/pwa'),
+      '@api': path.resolve(__dirname, './src/api'),
+    },
   },
-};
-
-export default defineConfig(({ mode }) => {
-  // Load ALL env vars (no prefix filter) so REACT_APP_ vars are accessible
-  const env = loadEnv(mode, process.cwd(), '');
-
-  // Build process.env shim: REACT_APP_* → process.env.REACT_APP_*
-  // Also build a full process.env object so dynamic lookups (process.env[key])
-  // resolve at runtime — Vite's `define` only does literal string replacement.
-  const envDefines = {};
-  const processEnvObj = {
-    NODE_ENV: mode === 'production' ? 'production' : 'development',
-  };
-  for (const [key, val] of Object.entries(env)) {
-    if (key.startsWith('REACT_APP_')) {
-      envDefines[`process.env.${key}`] = JSON.stringify(val);
-      processEnvObj[key] = val;
-    }
-  }
-  // SECURITY: Only stringify the process.env object in development.
-  // In production, only include NODE_ENV to avoid leaking any accidentally
-  // exposed env vars into the bundle.
-  if (mode !== 'production') {
-    envDefines['process.env'] = JSON.stringify(processEnvObj);
-  }
-
-  return {
-    plugins: [jsxInJsPlugin, react()],
-
-    // esbuild settings — control JSX transform for any pass that touches src.
-    // jsxDev:false ensures jsx-runtime (not jsx-dev-runtime) is used in prod builds.
-    esbuild: {
-      jsx: 'automatic',
-      jsxDev: false,
-    },
-
-    optimizeDeps: {
-      esbuildOptions: {
-        loader: {
-          '.js': 'jsx',
-        },
-        jsx: 'automatic',
-        jsxDev: false,
-      },
-    },
-
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(mode === 'production' ? 'production' : 'development'),
-      ...envDefines,
-    },
-
-    resolve: {
-      alias: {
-        // Absolute imports from src/ (CRA: moduleDirectories: ['node_modules', 'src'])
-        // Maps bare imports like `utils/logger` → `src/utils/logger`
-        src: path.resolve(__dirname, './src'),
-        api: path.resolve(__dirname, './src/api'),
-        components: path.resolve(__dirname, './src/components'),
-        config: path.resolve(__dirname, './src/config'),
-        constants: path.resolve(__dirname, './src/constants'),
-        contexts: path.resolve(__dirname, './src/contexts'),
-        data: path.resolve(__dirname, './src/data'),
-        hooks: path.resolve(__dirname, './src/hooks'),
-        pages: path.resolve(__dirname, './src/pages'),
-        routes: path.resolve(__dirname, './src/routes'),
-        services: path.resolve(__dirname, './src/services'),
-        theme: path.resolve(__dirname, './src/theme'),
-        ui: path.resolve(__dirname, './src/ui'),
-        utils: path.resolve(__dirname, './src/utils'),
-        views: path.resolve(__dirname, './src/views'),
-      },
-    },
-
-    server: {
-      port: 3000,
-      open: true,
-      proxy: {
-        '/api': {
-          target: env.REACT_APP_API_URL
-            ? env.REACT_APP_API_URL.replace('/api', '')
-            : 'http://localhost:3001',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/socket.io': {
-          target: 'http://localhost:3001',
-          changeOrigin: true,
-          ws: true,
+  build: {
+    target: 'es2020',
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          charts: ['recharts', 'chart.js'],
+          utils: ['date-fns', 'lodash', 'axios'],
         },
       },
     },
-
-    build: {
-      outDir: 'build', // keep same output dir as CRA
-      sourcemap: env.GENERATE_SOURCEMAP !== 'false',
-      chunkSizeWarningLimit: 1000, // exceljs is a 940 kB CJS bundle — irreducible without replacing the library
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            // ── node_modules splitting ──────────────────────────────────────
-            if (id.includes('node_modules')) {
-              // Heavy MUI X packages (data-grid, date-pickers) → separate chunk
-              if (id.includes('@mui/x-data-grid') || id.includes('@mui/x-date-pickers')) {
-                return 'mui-x';
-              }
-              // MUI icon set (separate — large independent tree)
-              if (id.includes('@mui/icons-material')) {
-                return 'mui-icons';
-              }
-              // Core MUI + emotion (required by MUI)
-              if (
-                id.includes('@mui/material') ||
-                id.includes('@mui/system') ||
-                id.includes('@mui/base') ||
-                id.includes('@mui/utils') ||
-                id.includes('@emotion/react') ||
-                id.includes('@emotion/styled') ||
-                id.includes('@emotion/cache')
-              ) {
-                return 'mui';
-              }
-              // Charts
-              if (id.includes('recharts') || id.includes('victory')) {
-                return 'charts';
-              }
-              // Excel export (heavy)
-              if (id.includes('exceljs')) {
-                return 'exceljs';
-              }
-              // PDF tools
-              if (id.includes('jspdf') || id.includes('html2canvas')) {
-                return 'pdf-tools';
-              }
-              // Date utilities
-              if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
-                return 'date-utils';
-              }
-              // Form & validation
-              if (
-                id.includes('react-hook-form') ||
-                id.includes('zod') ||
-                id.includes('yup') ||
-                id.includes('@hookform')
-              ) {
-                return 'forms';
-              }
-              // i18n
-              if (id.includes('i18next') || id.includes('react-i18next')) {
-                return 'i18n';
-              }
-              // Core React + react-dom + scheduler + jsx-runtime MUST be in the
-              // same chunk — they share internal state (ReactSharedInternals,
-              // Scheduler). Splitting causes "Cannot set properties of undefined
-              // (setting 'Children')" at runtime in production.
-              if (
-                /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id) ||
-                id.includes('react-router-dom') ||
-                /[\\/]node_modules[\\/]react-router[\\/]/.test(id)
-              ) {
-                return 'vendor';
-              }
-            }
-
-            // ── Heavy page-specific template modules ────────────────────────
-            if (id.includes('/src/pages/PrintCenter/templates/')) {
-              // Split each template family into its own chunk so no single chunk
-              // exceeds the 1000 kB warning threshold.
-              const match = id.match(/\/([^/]+)PrintTemplates\.jsx?$/);
-              return match ? `print-${match[1].toLowerCase()}` : 'print-templates';
-            }
-
-            // ── Route modules: split by business domain ─────────────────────
-            if (id.includes('/src/routes/')) {
-              if (
-                id.includes('Finance') ||
-                id.includes('Payroll') ||
-                id.includes('Zatca') ||
-                id.includes('Nphies') ||
-                id.includes('Muqeem') ||
-                id.includes('ZatcaPhase2')
-              ) {
-                return 'routes-finance';
-              }
-              if (
-                id.includes('HRRoutes') ||
-                id.includes('AttendanceRoutes') ||
-                id.includes('LeaveManagement') ||
-                id.includes('Recruitment') ||
-                id.includes('EmployeeAffairs') ||
-                id.includes('Succession') ||
-                id.includes('WorkforceAnalytics') ||
-                id.includes('LearningDevelopment') ||
-                id.includes('HRInsurance') ||
-                id.includes('OrgStructure')
-              ) {
-                return 'routes-hr';
-              }
-              if (
-                id.includes('RehabRoutes') ||
-                id.includes('BeneficiaryRoutes') ||
-                id.includes('Beneficiary360') ||
-                id.includes('DDDRoutes') ||
-                id.includes('SessionsRoutes') ||
-                id.includes('EpisodesRoutes') ||
-                id.includes('CarePlanRoutes') ||
-                id.includes('ICFAssessment') ||
-                id.includes('MDTCoordination') ||
-                id.includes('IntegratedCare') ||
-                id.includes('TeleRehabRoutes') ||
-                id.includes('TelehealthRoutes') ||
-                id.includes('ARRehabRoutes') ||
-                id.includes('DisabilityRoutes') ||
-                id.includes('MHPSSRoutes') ||
-                id.includes('IndependentLiving')
-              ) {
-                return 'routes-rehab';
-              }
-              if (
-                id.includes('AdminRoutes') ||
-                id.includes('AuditLogs') ||
-                id.includes('QualityCompliance') ||
-                id.includes('QualityManagement') ||
-                id.includes('SSOAdmin') ||
-                id.includes('WafRateLimit') ||
-                id.includes('AutomatedBackup') ||
-                id.includes('BlockchainRoutes') ||
-                id.includes('StrategicPlanning') ||
-                id.includes('RiskManagement') ||
-                id.includes('InternalAudit')
-              ) {
-                return 'routes-admin';
-              }
-              if (
-                id.includes('EnterpriseRoutes') ||
-                id.includes('EnterpriseProPlus') ||
-                id.includes('EnterpriseUltra') ||
-                id.includes('GovernmentIntegration') ||
-                id.includes('AdministrativeSystems') ||
-                id.includes('BIDashboard') ||
-                id.includes('CEODashboard') ||
-                id.includes('ReportBuilderRoutes') ||
-                id.includes('ReportsRoutes') ||
-                id.includes('PerformanceRoutes')
-              ) {
-                return 'routes-enterprise';
-              }
-              // All remaining route modules → misc chunk
-              return 'routes-misc';
-            }
-          },
-        },
-      },
-    },
-
-    // Public dir (static assets served as-is)
-    publicDir: 'public',
-  };
+    chunkSizeWarningLimit: 500, // KB
+  },
+  server: {
+    port: 3000,
+    host: true,
+    strictPort: false,
+  },
+  preview: {
+    port: 4173,
+    host: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@mui/material', '@mui/icons-material'],
+  },
 });

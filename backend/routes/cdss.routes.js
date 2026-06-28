@@ -788,7 +788,7 @@ router.post(
       status,
       checksPerformed: [{ checkType: 'drug_interaction', result: status }],
       warnings,
-      errors,
+      validationErrors: errors,
       drugInteractionResults: interactions,
       createdBy: req.user?._id,
     });

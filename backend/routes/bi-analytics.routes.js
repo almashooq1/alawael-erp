@@ -83,7 +83,45 @@ router.get('/reports/:templateId', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// 4. POST /api/v1/bi/reports/:templateId/export — تصدير التقرير
+// 4. POST /api/v1/bi/reports/custom/export — تصدير تقرير مبني (بدون template)
+// ═══════════════════════════════════════════════════════════════════
+router.post('/reports/custom/export', async (req, res) => {
+  try {
+    const { config, format = 'excel' } = req.body;
+    if (!config?.sourceId) {
+      return safeError(res, 400, 'تكوين التقرير مطلوب');
+    }
+
+    const report = await biAnalyticsService.buildCustomReport(config);
+
+    let result;
+    switch (format.toLowerCase()) {
+      case 'excel':
+      case 'xlsx':
+        result = await biAnalyticsService.exportToExcel(report);
+        break;
+      case 'pdf':
+        result = await biAnalyticsService.exportToPDF(report);
+        break;
+      case 'powerbi':
+      case 'json':
+        result = await biAnalyticsService.exportToPowerBI(report);
+        break;
+      default:
+        return safeError(res, 400, 'صيغة التصدير غير مدعومة');
+    }
+
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.send(result.buffer);
+  } catch (err) {
+    logger.error('[BI-Analytics] custom export error:', err);
+    safeError(res, 500, 'فشل في تصدير التقرير', err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 5. POST /api/v1/bi/reports/:templateId/export — تصدير التقرير
 // ═══════════════════════════════════════════════════════════════════
 router.post('/reports/:templateId/export', async (req, res) => {
   try {
@@ -124,7 +162,7 @@ router.post('/reports/:templateId/export', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// 5. POST /api/v1/bi/schedule — جدولة تقرير
+// 6. POST /api/v1/bi/schedule — جدولة تقرير
 // ═══════════════════════════════════════════════════════════════════
 router.post('/schedule', async (req, res) => {
   try {
@@ -177,44 +215,6 @@ router.post('/predictive', async (req, res) => {
   } catch (err) {
     logger.error('[BI-Analytics] predictive error:', err);
     safeError(res, 500, 'فشل في التحليل التنبؤي', err.message);
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// 9. POST /api/v1/bi/reports/custom/export — تصدير تقرير مبني (بدون template)
-// ═══════════════════════════════════════════════════════════════════
-router.post('/reports/custom/export', async (req, res) => {
-  try {
-    const { config, format = 'excel' } = req.body;
-    if (!config?.sourceId) {
-      return safeError(res, 400, 'تكوين التقرير مطلوب');
-    }
-
-    const report = await biAnalyticsService.buildCustomReport(config);
-
-    let result;
-    switch (format.toLowerCase()) {
-      case 'excel':
-      case 'xlsx':
-        result = await biAnalyticsService.exportToExcel(report);
-        break;
-      case 'pdf':
-        result = await biAnalyticsService.exportToPDF(report);
-        break;
-      case 'powerbi':
-      case 'json':
-        result = await biAnalyticsService.exportToPowerBI(report);
-        break;
-      default:
-        return safeError(res, 400, 'صيغة التصدير غير مدعومة');
-    }
-
-    res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
-    res.send(result.buffer);
-  } catch (err) {
-    logger.error('[BI-Analytics] custom export error:', err);
-    safeError(res, 500, 'فشل في تصدير التقرير', err.message);
   }
 });
 

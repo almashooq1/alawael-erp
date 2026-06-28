@@ -239,11 +239,10 @@ ReportTemplateSchema.methods.recordRun = async function (status, error = '') {
 };
 
 // ── Middleware ────────────────────────────────────────────────────
-ReportTemplateSchema.pre('save', function (next) {
+ReportTemplateSchema.pre('save', function () {
   if (this.schedule && this.schedule.enabled && !this.schedule.nextRunAt) {
     this.schedule.nextRunAt = this.calculateNextRun();
   }
-  next();
 });
 
 module.exports = mongoose.model('ReportTemplate', ReportTemplateSchema);

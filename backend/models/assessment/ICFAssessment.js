@@ -347,12 +347,11 @@ ICFAssessmentSchema.statics.getStatistics = function(options = {}) {
 };
 
 // Pre-save middleware
-ICFAssessmentSchema.pre('save', function(next) {
+ICFAssessmentSchema.pre('save', function () {
   if (this.isModified('scores')) {
     this.calculateDomainScores();
     this.calculateOverallScore();
   }
-  next();
 });
 
 module.exports = mongoose.model('ICFAssessment', ICFAssessmentSchema);

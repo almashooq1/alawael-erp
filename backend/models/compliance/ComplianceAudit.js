@@ -136,11 +136,10 @@ ComplianceAuditSchema.index({ 'correctiveActions.completed': 1, status: 1 });
 
 /* ─── Pre-save Middleware ─────────────────────────────── */
 
-ComplianceAuditSchema.pre('save', function (next) {
+ComplianceAuditSchema.pre('save', function () {
   if (this.isNew && !this.auditNumber) {
     this.auditNumber = generateAuditNumber();
   }
-  next();
 });
 
 /* ─── Methods ─────────────────────────────────────────── */

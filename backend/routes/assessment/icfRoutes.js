@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const ICFAssessment = require('../models/assessment/ICFAssessment');
-const { auth, checkRole } = require('../middleware/auth');
-const { validate, Joi } = require('../middleware/validate');
+const ICFAssessment = require('../../models/assessment/ICFAssessment');
+const { auth, checkRole } = require('../../middleware/auth');
+const { validate, Joi } = require('../../middleware/validate');
 
 // نسخة محلية من دوال الحساب (backend-only) — لا تعتمد على frontend
 function localCalculateDomainScore(scores, domain) {

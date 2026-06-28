@@ -7,7 +7,7 @@
 
 'use strict';
 
-const { CctvCamera, CctvEvent, CctvAlert, CctvRecording, CctvFaceIdentity } = require('../../models/cctv');
+const { CctvCamera, CctvEvent, CctvAlert, CctvRecording, CctvFaceIdentity } = require('../models/cctv');
 
 // ─── Mock camera list (with DB fallback) ───────────────────────────────────
 

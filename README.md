@@ -21,6 +21,9 @@
   <a href="#">
     <img src="https://img.shields.io/badge/Build-Passing-28A745?style=flat-square&logo=githubactions&logoColor=white" alt="Build Status" />
   </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/tests-1553%20passing-28A745?style=flat-square&logo=githubactions&logoColor=white" alt="Sprint Tests" />
+  </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-FFC107?style=flat-square&logo=open-source-initiative" alt="License" />
   </a>

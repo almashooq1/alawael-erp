@@ -79,13 +79,14 @@ jobs:
 
       # ── Deploy via SSH ───────────────────────────────────────────
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           # port: 22
           script_stop: true
+          debug: true
           script: |
             echo "══════════════════════════════════════════════════════════════════"
             echo "  Al-Awael ERP — Deploy $(date -u +%Y-%m-%dT%H:%M:%SZ)"

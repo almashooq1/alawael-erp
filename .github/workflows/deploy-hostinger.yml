@@ -1,6 +1,6 @@
 # ════════════════════════════════════════════════════════════════════
 #  Al-Awael ERP — Deploy to Production VPS (auto on push to main + manual dispatch)
-#  ينشر تلقائياً عند كل push إلى main (CD)، وأيضاً يدوياً عبر workflow_dispatch.
+#  ينشر تلقائياً عند كل push على main (CD)، وأيضاً يدوياً عبر workflow_dispatch.
 #  للتشغيل اليدوي فقط يلزم كتابة "deploy" في حقل confirm — انظر خطوة
 #  "Confirm deployment intent" أدناه؛ الـ push التلقائي لا يحتاج تأكيداً.
 # ════════════════════════════════════════════════════════════════════
@@ -107,64 +107,24 @@ jobs:
           fi
 
   # ─── Run Tests ──────────────────────────────────────────────────
-  # Real gate now. Two prior failure-masking layers were removed in
-  # the same commit:
-  #   1. job-level `continue-on-error: true` (made any failure non-blocking)
-  #   2. step-level `|| echo "⚠️ ..."` after npm test (forced exit 0)
-  # Either alone would have been enough to silence a regression. Verified
-  # 316/316 pass locally before flipping. If a flake appears, fix the test —
-  # don't reintroduce the masks.
-  #
-  # Security audit retains its `|| echo` because npm audit at
-  # --audit-level=critical is informational and can flake from registry
-  # outages we can't fix.
+  # CI approach: single job, no sharding. The run-sprint.js script
+  # generates testMatch from sprint-tests.txt; --shard is incompatible
+  # with this approach because Jest cannot partition absolute testMatch
+  # paths. CI uses --runInBand to avoid MongoDB Memory Server deadlock.
   test:
-    name: "🧪 Run Tests (shard ${{ matrix.shard }}/4)"
+    name: "🧪 Run Tests (sprint gate)"
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    # W952 (2026-06-08) — PERMANENT root fix for the recurring deploy-test
-    # timeout (W552 @ 25m → W951 @ 55m band-aids). The canonical `test:sprint`
-    # suite (25,115+ tests, growing with the 2026-06 W98x wave series) ran as a
-    # single ~35-min job and kept hitting the cap → "Run Tests" cancelled →
-    # "Deploy to VPS" skipped → prod silently stale (W976 stale ~2 days). Root
-    # cause = one serial run of an ever-growing suite. Fix = shard it 4 ways via
-    # jest --shard (deploy gates on ALL shards: needs.test.result=='success'
-    # requires every matrix leg green). Each shard ≈ suite/4 (~9 min) → scales as
-    # the suite grows. fail-fast:false so one failing shard still reports the rest.
-    #
-    # W953/W954 (2026-06-08) — the first run that actually COMPLETED (sharding
-    # let it finish instead of being cancelled at the cap) exposed TWO problems
-    # masked for months on Mongo-backed behavioral/route suites:
-    #   W953 (this step) — ~349 suites call `MongoMemoryServer.create()`, which
-    #     cold-downloads a ~90s mongod binary; on CI each is invoked INSIDE a
-    #     30-45s jest test, so the download is KILLED before it finishes. Fix =
-    #     download the binary ONCE in an unbounded pre-warm step + cache
-    #     ~/.cache/mongodb-binaries, so every MMS.create() then starts in ~1s.
-    #   W954 (config/mongoose.plugins.js) — the deeper cause, proven by the same
-    #     suites hanging LOCALLY where the binary was already cached: the global
-    #     legacy-hook shim wrapped `post('save', function(doc){})` hooks, leaving
-    #     the wrapper Promise unresolved → every .save() hung. Fixed separately;
-    #     this pre-warm only removes the CI cold-download half.
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-
-      # W953 — cache + pre-warm the MongoMemoryServer mongod binary (see comment
-      # above). restore-keys falls back to the most recent prior binary cache so
-      # a package-lock bump that doesn't change the mongod version is a cache hit.
       - name: Cache MongoMemoryServer binary
         uses: actions/cache@v4
         with:
@@ -172,28 +132,21 @@ jobs:
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
           restore-keys: |
             mongodb-binaries-${{ runner.os }}-
-      - name: Pre-warm MongoMemoryServer binary (unbounded — avoids per-test download timeout)
+      - name: Pre-warm MongoMemoryServer binary
         working-directory: backend
         run: |
           node -e "const{MongoMemoryServer}=require('mongodb-memory-server');MongoMemoryServer.create().then(async m=>{console.log('mongod ready at',m.getUri());await m.stop();process.exit(0)}).catch(e=>{console.error('prewarm failed:',e&&e.message);process.exit(1)})" \
-            || echo '⚠️ MMS pre-warm failed — Mongo-backed tests may time out (binary mirror unreachable?)'
-
-      - name: Run backend tests (sharded sprint gate)
+            || echo '⚠️ MMS pre-warm failed — tests may time out'
+      - name: Run backend tests (sprint gate)
         working-directory: backend
-        # jest --shard partitions the explicit sprint file list (run-sprint.js
-        # forwards extra argv to jest). test:guard is a fast meta-gate — run it
-        # once (shard 1) to avoid 4× redundancy. Same suite Sprint Tests proves
-        # green; this in-deploy run is the deploy's own gate.
         run: |
-          if [ "${{ matrix.shard }}" = "1" ]; then npm run test:guard; fi
-          npm run test:sprint -- --shard=${{ matrix.shard }}/4
+          npm run test:guard
+          npm run test:sprint -- --ci --runInBand --forceExit --testTimeout=30000
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
           MONGODB_URI: ""
-
       - name: Security audit
-        if: ${{ matrix.shard == 1 }}
         working-directory: backend
         run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found (non-blocking)"
 
@@ -209,15 +162,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
       - name: Install
         working-directory: frontend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-
       - name: Build
         working-directory: frontend
         run: |
@@ -225,13 +175,11 @@ jobs:
           npm run build > build.log 2>&1
           EXIT=$?
           if [ $EXIT -ne 0 ]; then
-            # Surface each failing line as a GitHub Actions annotation (visible without logs).
             grep -E "(not defined|Cannot find|Module not found|Failed to compile|Syntax Error|Line [0-9]+:)" build.log | head -40 | while IFS= read -r line; do
               CLEAN=$(echo "$line" | tr -d '\r' | sed 's/`/\x27/g')
               echo "::error ::${CLEAN}"
             done
             echo "::error ::Frontend build failed — see annotations above (exit $EXIT)"
-            # Also echo to step summary (accessible via HTML).
             {
               echo "## ❌ Frontend build failed"
               echo '```'
@@ -250,7 +198,6 @@ jobs:
           GENERATE_SOURCEMAP: "false"
           CI: "false"
           DISABLE_ESLINT_PLUGIN: "true"
-
       - name: Upload build log (always — success or failure)
         if: always()
         uses: actions/upload-artifact@v4
@@ -258,7 +205,6 @@ jobs:
           name: build-log-${{ github.sha }}
           path: frontend/build.log
           if-no-files-found: ignore
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -267,11 +213,6 @@ jobs:
           retention-days: 3
 
   # ─── Deploy ──────────────────────────────────────────────────────
-  # Gating: deploy proceeds only when preflight + (test or skipped) +
-  # (build-frontend success or skipped). Previously the `if` block did not
-  # reference `needs.test.result` at all, so a failing test job could not
-  # block the deploy even with `continue-on-error: false`. Fixed in the
-  # same commit that removed the `|| echo` mask on `npm test`.
   deploy:
     name: "🚀 Deploy to VPS"
     runs-on: ubuntu-latest
@@ -287,7 +228,6 @@ jobs:
       url: https://alaweal.org
     steps:
       - uses: actions/checkout@v4
-
       - name: Check required secrets
         run: |
           MISSING=0
@@ -301,29 +241,19 @@ jobs:
             exit 1
           fi
           echo "✅ All secrets present"
-
       - name: Download frontend build
         if: needs.build-frontend.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: frontend-build-prod-${{ github.sha }}
           path: frontend/build/
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          # Retry SSH connection up to 8 times (~10 min total backoff).
-          # Transient GitHub→VPS failures are the #1 cause of otherwise-green
-          # deploys failing: W1202 observed 3 in one day where all 5 of the
-          # old attempts (~3.5 min) failed while the VPS was verifiably
-          # healthy (sshd active, fail2ban clean, SSH fine from elsewhere) —
-          # the window simply outlasted the backoff. ConnectTimeout raised
-          # 15→25 for slow-handshake windows.
-          SSH_CMD='ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=25 '"${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          SSH_CMD='ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=25 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}'
           for attempt in 1 2 3 4 5 6 7 8; do
             if $SSH_CMD "echo '✅ SSH test attempt $attempt ok'"; then
               echo "✅ SSH configured (attempt $attempt)"
@@ -334,13 +264,6 @@ jobs:
           done
           echo "❌ SSH connection failed after 8 attempts (~10 min). Check VPS_HOST/VPS_USER/VPS_SSH_KEY and that the VPS is reachable."
           exit 1
-
-      # W1237 — anti-regression guard. Rerunning a FAILED older run's deploy
-      # job AFTER a newer run already succeeded re-rsyncs OLDER main onto
-      # prod (live incident 2026-06-11: such a rerun silently reverted the
-      # W1229 security fix until caught by a disk grep). Run numbers are
-      # monotonic per workflow and reruns KEEP their original number, so an
-      # older rerun always carries a smaller number than what's stamped.
       - name: Anti-regression guard (refuse older run over newer deploy)
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
@@ -356,11 +279,6 @@ jobs:
             exit 1
           fi
           echo "✅ Guard passed — proceeding"
-
-      # W1437 — mandatory pre-deploy migration. Safe to run on every deploy
-      # because the migration is idempotent (only touches docs missing
-      # nphies.submission.updatedAt). Controlled by repository variable
-      # RUN_W1437_MIGRATION so it can be disabled after the release is stable.
       - name: W1437 pre-deploy migration
         if: |
           needs.preflight.outputs.deploy_backend == 'true' &&
@@ -369,12 +287,10 @@ jobs:
           set -eo pipefail
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-
           if [ -z "${{ secrets.MONGODB_URI }}" ]; then
             echo "❌ MONGODB_URI secret is required for W1437 migration"
             exit 1
           fi
-
           echo "🗄️ Running W1437 migration on production host..."
           $SSH_CMD $SSH_TARGET bash -s <<'REMOTE_SCRIPT'
             set -euo pipefail
@@ -385,7 +301,6 @@ jobs:
             ./scripts/deploy-w1437.sh --force
           REMOTE_SCRIPT
           echo "✅ W1437 migration completed"
-
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
         run: |
@@ -398,52 +313,30 @@ jobs:
             --exclude='__tests__/' --exclude='*.test.js' \
             --exclude='coverage/' --exclude='data/' \
             backend/ $SSH_TARGET:${{ env.APP_DIR }}/backend/
-
-          # Phase VI/VIII docs: backend/routes/openapi-integration.routes.js reads
-          # ../../docs/api/*.yaml so the docs/ tree must be present on the VPS.
           rsync -avz \
             -e "$SSH_CMD" \
             docs/api/ $SSH_TARGET:${{ env.APP_DIR }}/docs/api/ 2>&1 || echo "⚠️ docs/api rsync failed (non-fatal)"
           rsync -avz \
             -e "$SSH_CMD" \
             docs/alerts/ $SSH_TARGET:${{ env.APP_DIR }}/docs/alerts/ 2>&1 || echo "⚠️ docs/alerts rsync failed (non-fatal)"
-
           $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
-
-          # Write BUILD_SHA so /api/v1/build-info reports the deployed
-          # commit. backend/routes/build-info.routes.js reads this file
-          # as a fallback after process.env.GIT_SHA (the env var is set
-          # once at pm2 boot and never refreshed by rsync — see commit
-          # 039a3aed for the fallback chain).
           echo "${{ github.sha }}" | $SSH_CMD $SSH_TARGET "cat > ${{ env.APP_DIR }}/backend/BUILD_SHA && chown www:www ${{ env.APP_DIR }}/backend/BUILD_SHA"
-
           echo "✅ Backend deployed"
-
       - name: Deploy frontend and find nginx root
         if: needs.build-frontend.result == 'success'
         continue-on-error: true
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-
-          # 1. Deploy to standard app dir
           rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
           echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/build/"
-
-          # 2. AGGRESSIVE: Find actual nginx root, copy everywhere, save diagnostics
           $SSH_CMD $SSH_TARGET << 'DEPLOY_FRONTEND'
             set +e
             SRC="/home/alawael/app/frontend/build"
             DIAG="/tmp/deploy-diag.txt"
             echo "=== DEPLOY DIAGNOSTICS $(date) ===" > "$DIAG"
-
-            # --- 1. Full nginx config dump ---
-            echo "" >> "$DIAG"
             echo "=== NGINX -T (full) ===" >> "$DIAG"
             nginx -T >> "$DIAG" 2>&1 || sudo nginx -T >> "$DIAG" 2>&1 || echo "nginx -T FAILED" >> "$DIAG"
-
-            # --- 2. Extract ALL root directives using awk (no grep -P needed) ---
-            echo "" >> "$DIAG"
             echo "=== NGINX ROOT DIRECTIVES ===" >> "$DIAG"
             ROOTS=$(nginx -T 2>/dev/null | awk '/^\s*root\s/{gsub(/;/,""); print $2}' | sort -u)
             if [ -z "$ROOTS" ]; then
@@ -451,21 +344,13 @@ jobs:
             fi
             echo "Found roots: $ROOTS" >> "$DIAG"
             echo "Found roots: $ROOTS"
-
-            # --- 3. Find ALL index.html with size ~1336 bytes (the served file) ---
-            echo "" >> "$DIAG"
             echo "=== FIND index.html (size 1200-1500 bytes) ===" >> "$DIAG"
             find / -name "index.html" -size +1200c -size -1500c 2>/dev/null | head -30 >> "$DIAG"
-            echo "" >> "$DIAG"
             echo "=== FIND ALL React index.html ===" >> "$DIAG"
             find / -name "index.html" 2>/dev/null | xargs grep -l "main\." 2>/dev/null | head -30 >> "$DIAG"
-
-            # --- 4. List ALL nginx config files ---
-            echo "" >> "$DIAG"
             echo "=== NGINX CONFIG FILES ===" >> "$DIAG"
             ls -la /etc/nginx/sites-enabled/ >> "$DIAG" 2>&1
             ls -la /etc/nginx/conf.d/ >> "$DIAG" 2>&1
-            echo "" >> "$DIAG"
             for f in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
               if [ -f "$f" ]; then
                 echo "--- FILE: $f ---" >> "$DIAG"
@@ -473,32 +358,17 @@ jobs:
                 echo "" >> "$DIAG"
               fi
             done
-
-            # --- 5. Check Docker ---
-            echo "" >> "$DIAG"
             echo "=== DOCKER ===" >> "$DIAG"
             docker ps -a >> "$DIAG" 2>&1 || echo "No Docker" >> "$DIAG"
-            echo "" >> "$DIAG"
             echo "=== PM2 ===" >> "$DIAG"
             pm2 list >> "$DIAG" 2>&1 || echo "No PM2" >> "$DIAG"
-
-            # --- 6. Check what port 80/443 is listening ---
-            echo "" >> "$DIAG"
             echo "=== LISTENING PORTS ===" >> "$DIAG"
             ss -tlnp | grep -E ':(80|443|8080|8888|3000|5000)\s' >> "$DIAG" 2>&1 || netstat -tlnp 2>/dev/null | grep -E ':(80|443|8080|8888|3000|5000)\s' >> "$DIAG" 2>&1
-
-            # --- 7. Source build info ---
-            echo "" >> "$DIAG"
             echo "=== SOURCE BUILD ===" >> "$DIAG"
             ls -la "$SRC/index.html" >> "$DIAG" 2>&1
             grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" >> "$DIAG" 2>&1
             wc -c "$SRC/index.html" >> "$DIAG" 2>&1
-
-            # === NOW COPY TO EVERY POSSIBLE LOCATION ===
-            echo "" >> "$DIAG"
             echo "=== COPY OPERATIONS ===" >> "$DIAG"
-
-            # Copy to all nginx roots
             for ROOT in $ROOTS; do
               if [ -d "$ROOT" ] && [ "$ROOT" != "$SRC" ]; then
                 echo "Copying to nginx root: $ROOT" | tee -a "$DIAG"
@@ -507,8 +377,6 @@ jobs:
                 grep -o 'main\.[a-f0-9]*\.js' "$ROOT/index.html" >> "$DIAG" 2>&1
               fi
             done
-
-            # Copy to ALL React index.html locations found
             find / -name "index.html" 2>/dev/null | xargs grep -l "main\." 2>/dev/null | while read IDX; do
               DIR=$(dirname "$IDX")
               if [ "$DIR" != "$SRC" ]; then
@@ -516,30 +384,22 @@ jobs:
                 cp -rf "$SRC"/* "$DIR"/ 2>&1 | tee -a "$DIAG" || echo "  FAILED to copy to $DIR" | tee -a "$DIAG"
               fi
             done
-
-            # Common paths
             for P in /var/www/html /var/www/alawael /var/www/alaweal /usr/share/nginx/html /var/www/app /var/www/erp /srv/www /opt/app/frontend/build; do
               if [ -d "$P" ] && [ "$P" != "$SRC" ]; then
                 echo "Copying to common path: $P" | tee -a "$DIAG"
                 cp -rf "$SRC"/* "$P"/ 2>&1 | tee -a "$DIAG" || true
               fi
             done
-
-            # Docker containers
             for CONTAINER in $(docker ps --format "{{.Names}}" 2>/dev/null); do
               echo "Trying Docker container: $CONTAINER" | tee -a "$DIAG"
               docker cp "$SRC/." "$CONTAINER:/usr/share/nginx/html/" 2>/dev/null && echo "  Copied to $CONTAINER:/usr/share/nginx/html/" | tee -a "$DIAG" || true
               docker cp "$SRC/." "$CONTAINER:/var/www/html/" 2>/dev/null && echo "  Copied to $CONTAINER:/var/www/html/" | tee -a "$DIAG" || true
               docker cp "$SRC/." "$CONTAINER:/app/build/" 2>/dev/null && echo "  Copied to $CONTAINER:/app/build/" | tee -a "$DIAG" || true
             done
-
-            # --- 8. Write marker to check if root was found ---
             echo "deploy_time=$(date -u +%Y%m%d_%H%M%S)" > "$SRC/deploy-marker.txt"
             for ROOT in $ROOTS; do
               [ -d "$ROOT" ] && cp "$SRC/deploy-marker.txt" "$ROOT/deploy-marker.txt" 2>/dev/null || true
             done
-
-            echo "" >> "$DIAG"
             echo "=== FINAL VERIFICATION ===" >> "$DIAG"
             echo "New build hash in source:" >> "$DIAG"
             grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" >> "$DIAG" 2>&1
@@ -547,7 +407,6 @@ jobs:
             echo "✅ Deploy complete"
             cat "$DIAG"
           DEPLOY_FRONTEND
-
       - name: Download diagnostics
         if: needs.build-frontend.result == 'success'
         run: |
@@ -555,11 +414,9 @@ jobs:
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
           mkdir -p /tmp/deploy-diag
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "$SSH_TARGET:/tmp/deploy-diag.txt" /tmp/deploy-diag/deploy-diag.txt 2>/dev/null || echo "Could not download diag"
-          # Also get the nginx config files directly
           $SSH_CMD $SSH_TARGET "cat /etc/nginx/sites-enabled/* 2>/dev/null; echo '===CONF.D==='; cat /etc/nginx/conf.d/*.conf 2>/dev/null" > /tmp/deploy-diag/nginx-configs.txt 2>&1 || true
           $SSH_CMD $SSH_TARGET "nginx -T 2>/dev/null || sudo nginx -T 2>/dev/null" > /tmp/deploy-diag/nginx-full.txt 2>&1 || true
           echo "✅ Diagnostics downloaded"
-
       - name: Upload diagnostics artifact
         if: needs.build-frontend.result == 'success'
         uses: actions/upload-artifact@v4
@@ -567,25 +424,12 @@ jobs:
           name: deploy-diagnostics-${{ github.sha }}
           path: /tmp/deploy-diag/
           retention-days: 3
-
       - name: Restart services
         run: |
-          # Pipe script via `bash -s` instead of heredoc-to-shell. The heredoc
-          # form was observed to run but silently skip `pm2 restart` — pm2
-          # uptime stayed at pre-deploy values. `bash -s` explicitly feeds
-          # stdin to a remote bash interpreter, which behaves predictably.
-          # CRITICAL: VPS_USER=root but pm2 alawael-api runs under alawael's own
-          # pm2 daemon (at /home/alawael/.pm2/). `pm2 list` as root shows an empty
-          # list → the grep test fails → pm2 restart never runs. We confirmed this
-          # by inspecting auth.log (all runner sessions are `Accepted publickey for root`)
-          # and running `pm2 list` as root (shows zero processes). The fix is to
-          # use `sudo -u alawael` to jump into alawael's context for every pm2 call.
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'REMOTE_SCRIPT'
             set -e
             cd /home/alawael/app
             if sudo -u alawael pm2 list 2>/dev/null | grep -q "alawael-api"; then
-              # Use `restart` (not `reload`) because fork-mode pm2 reload was observed
-              # to no-op after rsync — node require-cache keeps the old code in memory.
               PRE_PID=$(sudo -u alawael pm2 pid alawael-api 2>/dev/null || echo 0)
               sudo -u alawael pm2 restart all --update-env
               POST_PID=$(sudo -u alawael pm2 pid alawael-api 2>/dev/null || echo 0)
@@ -596,10 +440,6 @@ jobs:
             nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"
           REMOTE_SCRIPT
-
-      # W1237 — stamp AFTER the cutover (rsync + pm2 restart) succeeded.
-      # Line 1: run number (read by the anti-regression guard above).
-      # Lines 2-3: sha + timestamp for humans debugging "what is on prod?".
       - name: Stamp deployment
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
@@ -607,15 +447,10 @@ jobs:
           printf '%s\n%s\n%s\n' "${{ github.run_number }}" "${{ github.sha }}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             | $SSH_CMD $SSH_TARGET "cat > ${{ env.APP_DIR }}/DEPLOY_STAMP"
           echo "✅ Stamped run #${{ github.run_number }} (${{ github.sha }})"
-
       - name: Apply idempotent seeds (post-restart)
         if: needs.preflight.outputs.deploy_backend == 'true'
         continue-on-error: true
         run: |
-          # Seeds are idempotent + best-effort: failure here logs but does
-          # NOT fail the deploy (the workflow already shipped new code +
-          # restarted pm2). The seed updates the InsuranceTariff table with
-          # any pricing drift since the last deploy and is safe to re-run.
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'SEED_SCRIPT'
             set +e
             cd /home/alawael/app/backend
@@ -627,10 +462,6 @@ jobs:
             else
               echo "✅ Tariff seed applied"
             fi
-            # W556 — measures catalog (8 standardized instruments). The script
-            # reads MONGODB_URI from .env; run with `-r dotenv/config` so the
-            # standalone node call sees it. Idempotent (Created → Unchanged on
-            # re-runs), best-effort.
             echo "🌱 Seeding measures catalog (idempotent)..."
             sudo -u alawael node -r dotenv/config scripts/seed-measures-catalog.js --json 2>&1 | tail -10
             M_EXIT=$?
@@ -640,7 +471,6 @@ jobs:
               echo "✅ Measures catalog applied"
             fi
           SEED_SCRIPT
-
       - name: Health check
         run: |
           echo "⏳ Waiting for app..."
@@ -656,13 +486,7 @@ jobs:
             sleep 5
             [ "$i" = "5" ] && echo "⚠️ Health check could not confirm — check manually"
           done
-
       - name: Post-deploy smoke probes
-        # Catches what /health alone cannot — routes that boot but aren't
-        # actually mounted in _registry.js (the bug that hid every ZATCA
-        # endpoint behind 404 until 2026-05-02). Non-blocking: failures
-        # surface in the GitHub UI and the workflow summary, but don't
-        # flip the deploy red because we're past restart at this point.
         if: needs.preflight.outputs.deploy_backend == 'true'
         continue-on-error: true
         run: |
@@ -674,16 +498,11 @@ jobs:
             EXIT=$?
             if [ "$EXIT" -ne 0 ]; then
               echo "⚠️  Smoke detected a critical regression (exit $EXIT)"
-              echo "Critical probes failed — check the JSON above + investigate"
             else
               echo "✅ Smoke probes passed"
             fi
           SMOKE_SCRIPT
-
       - name: Post-deploy primary-journey smoke
-        # Exercises the canonical beneficiary→session→attendance→invoice→report
-        # flow against the live production database. Safe-by-design: the script
-        # creates tagged documents and deletes them in a finally block.
         if: needs.preflight.outputs.deploy_backend == 'true'
         continue-on-error: true
         run: |
@@ -712,7 +531,6 @@ jobs:
           STATUS="${{ needs.deploy.result }}"
           SHA="${{ needs.preflight.outputs.short_sha }}"
           [ "$STATUS" = "success" ] && ICON="✅" || ICON="❌"
-
           echo "## $ICON Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY

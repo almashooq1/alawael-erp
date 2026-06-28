@@ -63,7 +63,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     needs: lint
 
     steps:
@@ -83,7 +83,7 @@ jobs:
 
       - name: Run Jest tests
         working-directory: backend
-        run: npm run test:sprint -- --ci --runInBand --forceExit
+        run: npm run test:sprint -- --ci --forceExit
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only

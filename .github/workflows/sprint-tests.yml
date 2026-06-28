@@ -3999,7 +3999,7 @@ jobs:
 
       - name: Run admin API smoke tests
         working-directory: backend
-        run: npm run test:admin-api -- --runInBand
+        run: npm run test:admin-api -- --runInBand 2>&1 | tee admin-api-test-output.log
         env:
           NODE_ENV: test
           USE_MOCK_DB: 'true'
@@ -4007,6 +4007,19 @@ jobs:
           CSRF_DISABLE: 'true'
           MONGOMS_DOWNLOAD_TIMEOUT: 120000
           MONGOMS_VERSION: '7.0'
+
+      - name: Upload admin-api test output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-api-test-output
+          path: backend/admin-api-test-output.log
+          retention-days: 1
+
+      - name: Print admin-api test output on failure
+        if: failure()
+        working-directory: backend
+        run: tail -n 200 admin-api-test-output.log || true
 
   ops-subsystems-tests:
     name: "🛡️ Ops Subsystems (102 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo/envelope/safeerror)"
@@ -4028,12 +4041,25 @@ jobs:
 
       - name: Run ops-subsystem tests (rate limiter, circuit breaker, metrics registry)
         working-directory: backend
-        run: npm run test:ops-subsystems -- --runInBand --forceExit --testTimeout=30000
+        run: npm run test:ops-subsystems -- --runInBand --forceExit --testTimeout=30000 2>&1 | tee ops-test-output.log
         env:
           NODE_ENV: test
           JWT_SECRET: ci-secret-at-least-sixteen-chars-long-for-validator
           MONGOMS_DOWNLOAD_TIMEOUT: 120000
           MONGOMS_VERSION: '7.0'
+
+      - name: Upload ops-subsystems test output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-subsystems-test-output
+          path: backend/ops-test-output.log
+          retention-days: 1
+
+      - name: Print ops-subsystems test output on failure
+        if: failure()
+        working-directory: backend
+        run: tail -n 200 ops-test-output.log || true
 
   demo-seed-dryrun:
     name: "🌱 Demo seed loads"

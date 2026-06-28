@@ -25,7 +25,7 @@ on:
 
 # ── Shared Environment ──────────────────────────────────────────────────
 env:
-  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'http://localhost:3001/health' }}
+  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'http://72.60.84.56/health' }}
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════

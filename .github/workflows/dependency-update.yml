@@ -45,17 +45,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
+            backend/package.json
+            frontend/package.json
 
       # ── Install dependencies ─────────────────────────────────────
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       # ── Audit (production) ─────────────────────────────────────
       - name: Run npm audit (backend)

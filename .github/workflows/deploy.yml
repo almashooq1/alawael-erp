@@ -18,9 +18,12 @@ permissions:
 
 # ── Triggers ──────────────────────────────────────────────────────────
 on:
-  push:
-    branches:
-      - main
+  # DISABLED: This workflow uses Docker Compose but the VPS runs PM2 + nginx.
+  # The real deploy workflow is deploy-hostinger.yml (🚀 Deploy to Production).
+  # Kept workflow_dispatch only for emergency manual use.
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
     inputs:
       confirm:

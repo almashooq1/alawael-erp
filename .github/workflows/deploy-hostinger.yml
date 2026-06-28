@@ -125,12 +125,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
       - name: Cache MongoMemoryServer binary
         uses: actions/cache@v4
         with:
           path: ~/.cache/mongodb-binaries
-          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package.json') }}
           restore-keys: |
             mongodb-binaries-${{ runner.os }}-
       - name: Pre-warm MongoMemoryServer binary
@@ -169,7 +169,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install
         working-directory: frontend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
       - name: Build
         working-directory: frontend
         run: |
@@ -192,11 +192,11 @@ jobs:
           exit $EXIT
         env:
           NODE_OPTIONS: --max-old-space-size=6144
-          REACT_APP_API_URL: /api/v1
-          REACT_APP_API_V1_URL: /api/v1
-          REACT_APP_WS_URL: ""
-          REACT_APP_ENVIRONMENT: production
-          REACT_APP_VERSION: ${{ needs.preflight.outputs.short_sha }}
+          VITE_API_BASE_URL: /api/v1
+          VITE_API_V1_URL: /api/v1
+          VITE_WS_URL: ""
+          VITE_ENVIRONMENT: production
+          VITE_VERSION: ${{ needs.preflight.outputs.short_sha }}
           GENERATE_SOURCEMAP: "false"
           CI: "false"
           DISABLE_ESLINT_PLUGIN: "true"
@@ -211,7 +211,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build-prod-${{ github.sha }}
-          path: frontend/build/
+          path: frontend/dist/
           retention-days: 3
 
   # ─── Deploy ──────────────────────────────────────────────────────
@@ -244,7 +244,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build-prod-${{ github.sha }}
-          path: frontend/build/
+          path: frontend/dist/
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -317,7 +317,7 @@ jobs:
           rsync -avz \
             -e "$SSH_CMD" \
             docs/alerts/ $SSH_TARGET:${{ env.APP_DIR }}/docs/alerts/ 2>&1 || echo "⚠️ docs/alerts rsync failed (non-fatal)"
-          $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
+          $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm install --production --no-audit --no-fund 2>&1 | tail -5"
           echo "${{ github.sha }}" | $SSH_CMD $SSH_TARGET "cat > ${{ env.APP_DIR }}/backend/BUILD_SHA && chown www:www ${{ env.APP_DIR }}/backend/BUILD_SHA"
           echo "✅ Backend deployed"
       - name: Deploy frontend and find nginx root
@@ -326,11 +326,11 @@ jobs:
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-          rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
-          echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/build/"
+          rsync -avz --delete -e "$SSH_CMD" frontend/dist/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/dist/
+          echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/dist/"
           $SSH_CMD $SSH_TARGET << 'DEPLOY_FRONTEND'
             set +e
-            SRC="/home/alawael/app/frontend/build"
+            SRC="/home/alawael/app/frontend/dist"
             DIAG="/tmp/deploy-diag.txt"
             echo "=== DEPLOY DIAGNOSTICS $(date) ===" > "$DIAG"
             echo "=== NGINX -T (full) ===" >> "$DIAG"
@@ -382,7 +382,7 @@ jobs:
                 cp -rf "$SRC"/* "$DIR"/ 2>&1 | tee -a "$DIAG" || echo "  FAILED to copy to $DIR" | tee -a "$DIAG"
               fi
             done
-            for P in /var/www/html /var/www/alawael /var/www/alaweal /usr/share/nginx/html /var/www/app /var/www/erp /srv/www /opt/app/frontend/build; do
+            for P in /var/www/html /var/www/alawael /var/www/alaweal /usr/share/nginx/html /var/www/app /var/www/erp /srv/www /opt/app/frontend/dist; do
               if [ -d "$P" ] && [ "$P" != "$SRC" ]; then
                 echo "Copying to common path: $P" | tee -a "$DIAG"
                 cp -rf "$SRC"/* "$P"/ 2>&1 | tee -a "$DIAG" || true

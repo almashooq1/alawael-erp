@@ -51,7 +51,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Run ESLint
         working-directory: backend
@@ -75,11 +75,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: backend/package.json
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Run Jest tests
         working-directory: backend
@@ -122,11 +122,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: backend/package.json
 
       - name: Install backend dependencies (production)
         working-directory: backend
-        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Run npm audit (high/critical only)
         working-directory: backend

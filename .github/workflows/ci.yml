@@ -83,7 +83,7 @@ jobs:
 
       - name: Run Jest tests
         working-directory: backend
-        run: npm run test:sprint -- --ci --runInBand --forceExit --testTimeout=30000 2>&1 | tee sprint-test-output.log
+        run: timeout 300s npm run test:sprint -- --ci --runInBand --forceExit --testTimeout=30000 --verbose --detectOpenHandles 2>&1 | tee sprint-test-output.log
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only

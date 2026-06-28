@@ -110,7 +110,7 @@ services:
       start_period: 60s
 
   # ─── Frontend (Production) ──────────────────────────────────────────────
-  frontend:
+  # frontend: # ARCHIVED — not in docker-compose.yml base file
     deploy:
       resources:
         limits:
@@ -187,7 +187,7 @@ services:
 
   # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/
 
-  python-ml:
+  # python-ml: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     security_opt: [no-new-privileges:true]
     deploy:
@@ -198,7 +198,7 @@ services:
   # ─── Business Modules ───────────────────────────────────────────────────
   # finance-backend: # ARCHIVED → _archived/dead-subprojects/finance-module/
 
-  scm-backend:
+  # scm-backend: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     security_opt: [no-new-privileges:true]
     environment:
@@ -209,7 +209,7 @@ services:
         limits: { memory: 512M, cpus: "0.5" }
     logging: *prod-logging
 
-  scm-frontend:
+  # scm-frontend: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     deploy:
       resources:
@@ -222,7 +222,7 @@ services:
 
   # ─── Advanced Business Services ─────────────────────────────────────────
   # notification-service: # ARCHIVED → _archived/dead-microservices-bulk/
-  report-worker:
+  # report-worker: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -231,7 +231,7 @@ services:
     logging: *prod-logging
 
   # audit-service: # ARCHIVED → _archived/dead-microservices-bulk/
-  webhook-worker:
+  # webhook-worker: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -239,7 +239,7 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  scheduler:
+  # scheduler: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -247,7 +247,7 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  file-processor:
+  # file-processor: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -255,7 +255,7 @@ services:
         limits: { memory: 512M, cpus: "0.5" }
     logging: *prod-logging
 
-  saudi-gov-gateway:
+  # saudi-gov-gateway: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     security_opt: [no-new-privileges:true]
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
@@ -264,7 +264,7 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  iot-gateway:
+  # iot-gateway: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -272,7 +272,7 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  queue-worker:
+  # queue-worker: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -280,7 +280,7 @@ services:
         limits: { memory: 512M, cpus: "0.5" }
     logging: *prod-logging
 
-  backup-service:
+  # backup-service: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:
@@ -288,7 +288,7 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  log-aggregator:
+  # log-aggregator: # ARCHIVED — not in docker-compose.yml base file
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
     deploy:

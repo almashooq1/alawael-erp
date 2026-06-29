@@ -15,7 +15,7 @@
 // DDD models (preferred)
 let ICFAssessment;
 try {
-  ICFAssessment = require('../models/assessment/ICFAssessment');
+  ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
   console.log('[ClinicalDashboard] Loaded ICFAssessment from DDD path');
 } catch (_err) {
   console.warn('[ClinicalDashboard] ICFAssessment DDD model not found, will attempt fallback');

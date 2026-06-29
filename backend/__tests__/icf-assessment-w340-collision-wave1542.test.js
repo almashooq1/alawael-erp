@@ -3,7 +3,7 @@
  *
  * Two LIVE files registered the model name 'ICFAssessment' with INCOMPATIBLE
  * schemas: models/icf/ICFAssessment.model.js (canonical, `beneficiaryId`) and
- * models/assessment/ICFAssessment.js (`beneficiary` + findByPatient/… statics).
+ * models/assessment/ICFAssessmentLegacy.js (`beneficiary` + findByPatient/… statics).
  * Because models/index.js loads icf/ first, any top-level require() of the
  * assessment/ file then threw `Cannot overwrite 'ICFAssessment' model once
  * compiled`, silently unmounting smart-assessment-engine (12 clinical scales) and
@@ -28,7 +28,7 @@ describe('W1542 — ICFAssessment dual-registration collision stays broken-by-de
   });
 
   test('assessment/ registers the DISTINCT name "ICFAssessmentLegacy", not "ICFAssessment"', () => {
-    const src = read('models/assessment/ICFAssessment.js');
+    const src = read('models/assessment/ICFAssessmentLegacy.js');
     expect(src).toMatch(/mongoose\.model\(\s*'ICFAssessmentLegacy'/);
     // The bare `mongoose.model('ICFAssessment', schema)` registration that caused
     // the OverwriteModelError must NOT come back.
@@ -36,7 +36,7 @@ describe('W1542 — ICFAssessment dual-registration collision stays broken-by-de
   });
 
   test('assessment/ pins the same `icfassessments` collection (no data move)', () => {
-    const src = read('models/assessment/ICFAssessment.js');
+    const src = read('models/assessment/ICFAssessmentLegacy.js');
     expect(src).toMatch(/'ICFAssessmentLegacy'\s*,\s*ICFAssessmentSchema\s*,\s*'icfassessments'/);
   });
 });

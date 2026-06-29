@@ -8,7 +8,7 @@
  * @module services/sessionICFLinker
  */
 
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 const TherapeuticGoalModule = require('../domains/goals/models/TherapeuticGoal');
 const ClinicalSessionModule = require('../domains/sessions/models/ClinicalSession');
 

@@ -1,4 +1,4 @@
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 const CarePlanVersion = require('../models/CarePlanVersion');
 const ClinicalSession = require('../domains/sessions/models/ClinicalSession');
 const TherapySession = require('../models/TherapySession');

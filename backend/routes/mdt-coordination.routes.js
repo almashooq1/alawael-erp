@@ -20,7 +20,7 @@ const _logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

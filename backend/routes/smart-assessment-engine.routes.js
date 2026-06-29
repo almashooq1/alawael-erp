@@ -99,7 +99,7 @@ const {
   CaregiverBurdenAssessment,
 } = require('../models/clinical-assessment-battery.model');
 
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 
 /* ─── Middleware ────────────────────────────────────────────────────────── */
 const { authenticateToken } = require('../middleware/auth');

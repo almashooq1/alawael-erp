@@ -3,6 +3,11 @@
 /**
  * ICF Functional Assessment Model — نموذج التقييم الوظيفي وفق ICF
  *
+ * CANONICAL ICF model (registers 'ICFAssessment', structured representation).
+ * A deliberately-distinct sibling exists at
+ * `models/assessment/ICFAssessmentLegacy.js` (model name 'ICFAssessmentLegacy',
+ * flat scores + coreSetType). They are NOT duplicates — see ADR-046 (Option B).
+ *
  * يعتمد على التصنيف الدولي للأداء الوظيفي والإعاقة والصحة (ICF)
  * الصادر عن منظمة الصحة العالمية (WHO)
  *

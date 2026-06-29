@@ -6,7 +6,7 @@
  * Sessions, and Assessments data into structured JSON/HTML.
  */
 
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 const CarePlanVersion = require('../models/CarePlanVersion');
 const ClinicalSession = require('../domains/sessions/models/ClinicalSession');
 const TherapeuticGoal = require('../domains/goals/models/TherapeuticGoal');

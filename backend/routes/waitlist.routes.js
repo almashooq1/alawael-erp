@@ -545,7 +545,10 @@ router.post('/:id/enroll', validateId, async (req, res) => {
         },
         gender: entry.gender,
         status: 'active',
-        enrollmentDate: new Date(),
+        // top-level enrollment date is joinDate — `enrollmentDate` only exists
+        // inside the enrolledPrograms subdoc, so a top-level enrollmentDate write
+        // was silently dropped (registrationDate auto-defaults to now).
+        joinDate: new Date(),
         createdBy: req.user?._id,
       });
 

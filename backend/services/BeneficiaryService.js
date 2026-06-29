@@ -104,8 +104,11 @@ class BeneficiaryService {
     const branch = await Branch.findById(branchId).select('maxCapacity nameAr').lean();
     if (!branch || !branch.maxCapacity) return;
 
+    // Beneficiary's branch field is `branchId` (not `branch`) — the old `branch:`
+    // query matched ZERO docs, so activeCount was always 0 and the capacity gate
+    // never fired (branches enrolled past maxCapacity).
     const activeCount = await Beneficiary.countDocuments({
-      branch: branchId,
+      branchId,
       status: BENEFICIARY_STATUSES.ACTIVE,
     });
 
@@ -140,7 +143,7 @@ class BeneficiaryService {
     // فحص في نفس الفرع
     const inBranchQuery = {
       ...baseFilter,
-      branch: branchId,
+      branchId,
       status: { $nin: [BENEFICIARY_STATUSES.DISCHARGED, BENEFICIARY_STATUSES.TRANSFERRED] },
     };
     const existsInBranch = await Beneficiary.exists(inBranchQuery);
@@ -155,11 +158,11 @@ class BeneficiaryService {
     // فحص في فروع أخرى (تحذير فقط — لا نمنع)
     const existsElsewhere = await Beneficiary.findOne({
       ...baseFilter,
-      branch: { $ne: branchId },
+      branchId: { $ne: branchId },
       status: BENEFICIARY_STATUSES.ACTIVE,
     })
-      .populate('branch', 'nameAr code')
-      .select('fileNumber branch')
+      .populate('branchId', 'nameAr code')
+      .select('fileNumber branchId')
       .lean();
 
     return { inBranch: false, elsewhere: existsElsewhere };
@@ -476,7 +479,7 @@ class BeneficiaryService {
    * @returns {Promise<object>}
    */
   async getQuickStats(branchId = null) {
-    const filter = branchId ? { branch: branchId } : {};
+    const filter = branchId ? { branchId } : {};
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);

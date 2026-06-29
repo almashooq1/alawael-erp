@@ -1081,3 +1081,4 @@ __tests__/report-template-w340-crash-guard-wave1543.test.js
 __tests__/no-bare-export-duplicate-model-registration-wave1544.test.js
 __tests__/phantom-write-document-center.test.js
 __tests__/phantom-schema-fields.test.js
+__tests__/waitlist-capacity-phantom.test.js

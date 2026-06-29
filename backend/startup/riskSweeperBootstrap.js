@@ -41,7 +41,12 @@ function wireRiskSweeper(app, deps = {}) {
     try {
       return mongoose.model('AiAlert');
     } catch {
-      return null;
+      // load-order fallback: require the model file to force-register it
+      try {
+        return require('../models/AiAlert');
+      } catch {
+        return null;
+      }
     }
   })();
 
@@ -81,7 +86,12 @@ function wireRiskSweeper(app, deps = {}) {
       try {
         return mongoose.model('PlanReview');
       } catch {
-        return null;
+        // load-order fallback: require the model file to force-register it
+        try {
+          return require('../models/PlanReview');
+        } catch {
+          return null;
+        }
       }
     })();
     if (CarePlan && PlanReview) {
@@ -154,7 +164,12 @@ function wireRiskSweeper(app, deps = {}) {
       try {
         return mongoose.model('PlanReview');
       } catch {
-        return null;
+        // load-order fallback: require the model file to force-register it
+        try {
+          return require('../models/PlanReview');
+        } catch {
+          return null;
+        }
       }
     })();
     if (PlanReview && AiAlert) {

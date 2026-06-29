@@ -29,7 +29,16 @@ function dpiaServiceFactory({
   mfaActorReader: _mfaActorReader = null,
   enforceMfa = false,
 } = {}) {
-  const Dpia = DpiaModel || mongoose.model('Dpia');
+  const Dpia =
+    DpiaModel ||
+    (() => {
+      try {
+        return mongoose.model('Dpia');
+      } catch {
+        // load-order fallback: require the model file to force-register it
+        return require('../models/Dpia');
+      }
+    })();
 
   async function create(payload, actor) {
     if (!actor || !actor.userId) {

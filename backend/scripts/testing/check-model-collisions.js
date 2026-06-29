@@ -35,6 +35,23 @@ const SCAN_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, '
 // named. Lower this number as duplicates are eliminated; never raise it.
 const MAX_COLLIDING_NAMES = 0;
 
+// Named ratchet allowlist — known collisions that are crash-SAFE (every
+// registration uses the `mongoose.models.X || mongoose.model(...)` guard) AND
+// whose full structural resolution (Pattern-D rename / consolidation) is tracked
+// by an ADR and is stakeholder-gated. A NEW collision NOT in this set still
+// fails the guard. The allowlist may only SHRINK — the stale-entry check below
+// fails the moment an allowlisted name stops colliding, forcing its removal so
+// the set can never silently rot. (Ratchet doctrine, W340 lineage.)
+const ALLOWLISTED_COLLISIONS = new Set([
+  // ADR-023 — `ReportTemplate` is registered by 3 files with DISTINCT schemas
+  // (models/ReportTemplate.js + models/analytics/ReportTemplate.js +
+  // models/reports/ReportTemplate.js), each with live consumers. Made crash-safe
+  // by W1543 (2026-06-29) via the `mongoose.models.X || ...` guard. The Pattern-D
+  // rename of the two non-canonical files is stakeholder-gated (which `ref` /
+  // consumer intends which schema), so it is accepted here pending ADR-023.
+  'ReportTemplate',
+]);
+
 const REGISTER_RE = /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
 
 /** Recursively yields all .js files under `dir` (skipping node_modules). */
@@ -81,35 +98,57 @@ function main() {
     0
   );
 
+  // Named ratchet: a collision is a REGRESSION only if it isn't an explicitly
+  // accepted, ADR-tracked entry. Stale allowlist entries (no longer colliding)
+  // must be removed — that forces the set to ratchet down with real fixes.
+  const unexpected = collisions.filter(([name]) => !ALLOWLISTED_COLLISIONS.has(name));
+  const collidingNames = new Set(collisions.map(([n]) => n));
+  const staleAllowlist = [...ALLOWLISTED_COLLISIONS].filter(n => !collidingNames.has(n));
+  const allowlistedHit = collisions.length - unexpected.length;
+
   console.log(
     `[guard:model-collisions] ${totalRegistrations} mongoose.model() ` +
       `registrations across ${registrations.size} unique names; ` +
-      `${collisions.length} colliding (baseline ≤ ${MAX_COLLIDING_NAMES}).`
+      `${collisions.length} colliding (${unexpected.length} unexpected, ` +
+      `${allowlistedHit} allowlisted; baseline ≤ ${MAX_COLLIDING_NAMES}).`
   );
 
-  if (collisions.length > MAX_COLLIDING_NAMES) {
+  let failed = false;
+
+  if (unexpected.length > MAX_COLLIDING_NAMES) {
+    failed = true;
     console.error(
-      `\n❌ Model collision regression: ${collisions.length} colliding names ` +
-        `> baseline ${MAX_COLLIDING_NAMES}.\n` +
+      `\n❌ Model collision regression: ${unexpected.length} unexpected colliding ` +
+        `names > baseline ${MAX_COLLIDING_NAMES}.\n` +
         'New duplicates were introduced. Either consolidate the new ' +
-        'registration into the existing canonical file or replace the new ' +
-        'file with a re-export shim.\n\nColliding names:'
+        'registration into the existing canonical file, replace the new file ' +
+        'with a re-export shim, or — for a known crash-safe ADR-tracked ' +
+        'collision — add it to ALLOWLISTED_COLLISIONS with the ADR reference.' +
+        '\n\nColliding names:'
     );
-    for (const [name, files] of collisions) {
+    for (const [name, files] of unexpected) {
       console.error(`  - ${name}`);
       for (const f of files) console.error(`      ${f}`);
     }
-    process.exit(1);
   }
 
-  if (collisions.length < MAX_COLLIDING_NAMES) {
-    console.log(
-      `✅ Collisions ratcheted down. Lower MAX_COLLIDING_NAMES in ` +
-        `${path.relative(BACKEND_ROOT, __filename).replace(/\\/g, '/')} ` +
-        `to ${collisions.length}.`
+  if (staleAllowlist.length > 0) {
+    failed = true;
+    console.error(
+      `\n❌ Stale ALLOWLISTED_COLLISIONS entries (no longer colliding — remove ` +
+        `them to ratchet the allowlist down): ${staleAllowlist.join(', ')}`
     );
+  }
+
+  if (failed) process.exit(1);
+
+  if (collisions.length === 0) {
+    console.log('✅ No collisions. (ALLOWLISTED_COLLISIONS is now empty — good.)');
   } else {
-    console.log('✅ Collisions at baseline; no regression.');
+    console.log(
+      `✅ All ${collisions.length} collision(s) are ADR-tracked allowlisted ` +
+        'entries; no unexpected regression.'
+    );
   }
 }
 

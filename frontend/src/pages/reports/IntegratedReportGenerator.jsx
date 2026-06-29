@@ -82,7 +82,7 @@ const AVAILABLE_SECTIONS = [
 // ───────────────────────────────────────────────────────────────────────────
 const generateMockReport = (beneficiary, sections, format) => {
   const today = new Date().toLocaleDateString('ar-SA');
-  const included = sections.filter((s) => s.checked);
+  const included = sections.filter(s => s.checked);
 
   if (format === 'json') {
     return JSON.stringify(
@@ -94,7 +94,7 @@ const generateMockReport = (beneficiary, sections, format) => {
           age: beneficiary.age,
           fileNo: beneficiary.fileNo,
         },
-        sections: included.map((s) => ({
+        sections: included.map(s => ({
           title: s.label,
           data: `بيانات ${s.label} — نموذج وهمي`,
         })),
@@ -167,10 +167,14 @@ const generateMockReport = (beneficiary, sections, format) => {
 function getMockSectionContent(key) {
   const contents = {
     icf: 'الدرجة الإجمالية: 2.3 (من 5.0). المجال البدني: 2.8، المجال النفسي: 1.9، المجال الاجتماعي: 2.1. المستخدم يواجه تحديات في الأنشطة اليومية والتفاعل الاجتماعي. يُنصح بزيادة الجلسات العلاجية الفردية.',
-    carePlan: 'الهدف الأول: تحسين الحركة المستقلة خلال 3 أشهر. الهدف الثاني: تعزيز التواصل الاجتماعي. الإجراءات: جلسة علاج وظيفي أسبوعياً، جلستان نفسيتان شهرياً، متابعة عائلية منتظمة.',
-    therapySessions: 'عدد الجلسات: 12 جلسة. معدل الحضور: 83%. الجلسة الأخيرة: 2024/06/15. الملاحظات: تحسن ملحوظ في الاستجابة للعلاج المعرفي السلوكي.',
-    mdtMeetings: 'عدد الاجتماعات: 3 اجتماعات. أعضاء الفريق: أخصائي نفسي، أخصائي علاج وظيفي، أخصائي اجتماعي، ممرضة. القرارات: تعديل خطة الرعاية بناءً على التقييم الأخير.',
-    smartMetrics: 'درجة الذكاء: 102 (متوسط). الانتباه: 85%. السرعة المعالجية: 78%. الذاكرة العاملة: 92%. النتائج تشير إلى أداء جيد في المهام المعرفية المعقدة.',
+    carePlan:
+      'الهدف الأول: تحسين الحركة المستقلة خلال 3 أشهر. الهدف الثاني: تعزيز التواصل الاجتماعي. الإجراءات: جلسة علاج وظيفي أسبوعياً، جلستان نفسيتان شهرياً، متابعة عائلية منتظمة.',
+    therapySessions:
+      'عدد الجلسات: 12 جلسة. معدل الحضور: 83%. الجلسة الأخيرة: 2024/06/15. الملاحظات: تحسن ملحوظ في الاستجابة للعلاج المعرفي السلوكي.',
+    mdtMeetings:
+      'عدد الاجتماعات: 3 اجتماعات. أعضاء الفريق: أخصائي نفسي، أخصائي علاج وظيفي، أخصائي اجتماعي، ممرضة. القرارات: تعديل خطة الرعاية بناءً على التقييم الأخير.',
+    smartMetrics:
+      'درجة الذكاء: 102 (متوسط). الانتباه: 85%. السرعة المعالجية: 78%. الذاكرة العاملة: 92%. النتائج تشير إلى أداء جيد في المهام المعرفية المعقدة.',
   };
   return contents[key] || 'بيانات القسم غير متوفرة حالياً.';
 }
@@ -188,7 +192,7 @@ export default function IntegratedReportGenerator() {
   });
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [sections, setSections] = useState(
-    AVAILABLE_SECTIONS.map((s) => ({ ...s, checked: s.defaultChecked }))
+    AVAILABLE_SECTIONS.map(s => ({ ...s, checked: s.defaultChecked }))
   );
   const [format, setFormat] = useState('html');
   const [previewData, setPreviewData] = useState('');
@@ -200,10 +204,8 @@ export default function IntegratedReportGenerator() {
   // ───────────────────────────────────────────
   // تبديل حالة قسم
   // ───────────────────────────────────────────
-  const handleSectionToggle = (index) => {
-    setSections((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, checked: !s.checked } : s))
-    );
+  const handleSectionToggle = index => {
+    setSections(prev => prev.map((s, i) => (i === index ? { ...s, checked: !s.checked } : s)));
   };
 
   // ───────────────────────────────────────────
@@ -214,7 +216,7 @@ export default function IntegratedReportGenerator() {
       setError('يرجى اختيار مستفيد أولاً');
       return;
     }
-    const checkedCount = sections.filter((s) => s.checked).length;
+    const checkedCount = sections.filter(s => s.checked).length;
     if (checkedCount === 0) {
       setError('يرجى اختيار قسم واحد على الأقل');
       return;
@@ -224,7 +226,7 @@ export default function IntegratedReportGenerator() {
     setLoading(true);
 
     // محاكاة تأخير الاتصال بالخادم
-    await new Promise((r) => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 1200));
 
     const report = generateMockReport(selectedBeneficiary, sections, format);
     setPreviewData(report);
@@ -244,18 +246,20 @@ export default function IntegratedReportGenerator() {
   // ───────────────────────────────────────────
   // تحميل الملف
   // ───────────────────────────────────────────
-  const handleDownload = (type) => {
+  const handleDownload = type => {
     let blob;
     let filename;
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
     if (type === 'pdf') {
       // HTML مُغلّف بـ PDF (في الواقع نحفظ HTML كـ PDF وهمي)
-      const htmlContent = format === 'html' ? previewData : generateMockReport(selectedBeneficiary, sections, 'html');
+      const htmlContent =
+        format === 'html' ? previewData : generateMockReport(selectedBeneficiary, sections, 'html');
       blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       filename = `تقرير-${selectedBeneficiary.fileNo}-${timestamp}.html`;
     } else if (type === 'word') {
-      const htmlContent = format === 'html' ? previewData : generateMockReport(selectedBeneficiary, sections, 'html');
+      const htmlContent =
+        format === 'html' ? previewData : generateMockReport(selectedBeneficiary, sections, 'html');
       // تغليف بسيط كـ Word
       const wordDoc = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -265,7 +269,8 @@ export default function IntegratedReportGenerator() {
       blob = new Blob([wordDoc], { type: 'application/msword' });
       filename = `تقرير-${selectedBeneficiary.fileNo}-${timestamp}.doc`;
     } else if (type === 'json') {
-      const jsonContent = format === 'json' ? previewData : generateMockReport(selectedBeneficiary, sections, 'json');
+      const jsonContent =
+        format === 'json' ? previewData : generateMockReport(selectedBeneficiary, sections, 'json');
       blob = new Blob([jsonContent], { type: 'application/json' });
       filename = `تقرير-${selectedBeneficiary.fileNo}-${timestamp}.json`;
     }
@@ -279,7 +284,9 @@ export default function IntegratedReportGenerator() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    setSuccess(`تم تحميل ${type === 'pdf' ? 'ملف HTML' : type === 'word' ? 'ملف Word' : 'ملف JSON'} بنجاح`);
+    setSuccess(
+      `تم تحميل ${type === 'pdf' ? 'ملف HTML' : type === 'word' ? 'ملف Word' : 'ملف JSON'} بنجاح`
+    );
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -311,7 +318,7 @@ export default function IntegratedReportGenerator() {
   // ───────────────────────────────────────────
   const handleRegenerate = async () => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 800));
     const report = generateMockReport(selectedBeneficiary, sections, format);
     setPreviewData(report);
     setLoading(false);
@@ -333,7 +340,17 @@ export default function IntegratedReportGenerator() {
       <Card elevation={2} sx={{ borderRadius: 3, mb: 3 }}>
         <CardContent sx={{ p: { xs: 2, md: 4 } }}>
           {/* عنوان القسم */}
-          <Typography variant="h6" sx={{ mb: 3, color: '#1a237e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 3,
+              color: '#1a237e',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
             <AssessmentIcon />
             إعدادات التقرير
           </Typography>
@@ -343,10 +360,10 @@ export default function IntegratedReportGenerator() {
             <Grid item xs={12} md={6}>
               <Autocomplete
                 options={MOCK_BENEFICIARIES}
-                getOptionLabel={(option) => `${option.name} — ${option.fileNo}`}
+                getOptionLabel={option => `${option.name} — ${option.fileNo}`}
                 value={selectedBeneficiary}
                 onChange={(_, newValue) => setSelectedBeneficiary(newValue)}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     label="البحث عن المستفيد"
@@ -363,7 +380,9 @@ export default function IntegratedReportGenerator() {
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
                       <PersonIcon fontSize="small" color="primary" />
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" fontWeight={600}>{option.name}</Typography>
+                        <Typography variant="body1" fontWeight={600}>
+                          {option.name}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {option.fileNo} — {option.age} سنة
                         </Typography>
@@ -383,19 +402,23 @@ export default function IntegratedReportGenerator() {
                   label="تاريخ البداية"
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={e => setStartDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  InputProps={{ startAdornment: <CalendarIcon sx={{ color: 'action.active', mr: 1 }} /> }}
+                  InputProps={{
+                    startAdornment: <CalendarIcon sx={{ color: 'action.active', mr: 1 }} />,
+                  }}
                 />
                 <TextField
                   label="تاريخ النهاية"
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={e => setEndDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  InputProps={{ startAdornment: <CalendarIcon sx={{ color: 'action.active', mr: 1 }} /> }}
+                  InputProps={{
+                    startAdornment: <CalendarIcon sx={{ color: 'action.active', mr: 1 }} />,
+                  }}
                 />
               </Stack>
             </Grid>
@@ -420,7 +443,9 @@ export default function IntegratedReportGenerator() {
                         borderRadius: 2,
                         transition: 'all 0.2s',
                         borderColor: section.checked ? 'primary.main' : 'divider',
-                        backgroundColor: section.checked ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
+                        backgroundColor: section.checked
+                          ? 'rgba(25, 118, 210, 0.04)'
+                          : 'transparent',
                         '&:hover': { borderColor: 'primary.main' },
                       }}
                     >
@@ -455,11 +480,7 @@ export default function IntegratedReportGenerator() {
                 <FormLabel component="legend" sx={{ mb: 1, fontWeight: 600 }}>
                   تنسيق التقرير:
                 </FormLabel>
-                <RadioGroup
-                  row
-                  value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                >
+                <RadioGroup row value={format} onChange={e => setFormat(e.target.value)}>
                   <FormControlLabel
                     value="html"
                     control={<Radio />}
@@ -782,7 +803,11 @@ export default function IntegratedReportGenerator() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
           >
-            <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setSuccess('')}>
+            <Alert
+              severity="success"
+              sx={{ mb: 3, borderRadius: 2 }}
+              onClose={() => setSuccess('')}
+            >
               {success}
             </Alert>
           </motion.div>
@@ -796,9 +821,7 @@ export default function IntegratedReportGenerator() {
 
       {/* تذييل */}
       <Box sx={{ mt: 6, textAlign: 'center', color: 'text.disabled' }}>
-        <Typography variant="caption">
-          نظام Al-Awael ERP — مركز الأوائل للتأهيل © 2025
-        </Typography>
+        <Typography variant="caption">نظام Al-Awael ERP — مركز الأوائل للتأهيل © 2025</Typography>
       </Box>
     </Container>
   );

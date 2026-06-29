@@ -18,7 +18,7 @@ const EpisodesPage = lazy(() => import('../pages/episodes/EpisodesPage'));
 const SessionsPage = lazy(() => import('../pages/Sessions/SessionsPage'));
 const WorkflowPage = lazy(() => import('../pages/workflow/WorkflowPage'));
 const QualityPage = lazy(() => import('../pages/Quality/QualityPage'));
-const ReportsPage = lazy(() => import('../pages/Reports/ReportsPage'));
+const ReportsPage = lazy(() => import('../pages/reports/ReportsPage'));
 
 /* Dedicated full-featured domain pages */
 const GroupTherapyPage = lazy(() => import('../pages/group-therapy/GroupTherapyPage'));

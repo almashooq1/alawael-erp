@@ -4,8 +4,8 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const ReportsDashboard = lazyWithRetry(() => import('../pages/Reports/ReportsDashboard'));
-const AdvancedReportsPage = lazyWithRetry(() => import('../pages/Reports/AdvancedReportsPage'));
+const ReportsDashboard = lazyWithRetry(() => import('../pages/reports/ReportsDashboard'));
+const AdvancedReportsPage = lazyWithRetry(() => import('../pages/reports/AdvancedReportsPage'));
 
 export default function ReportsRoutes() {
   return (

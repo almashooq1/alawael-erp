@@ -14,7 +14,7 @@ const AdvancedAdminPanel = lazyWithRetry(() => import('../pages/Admin/AdvancedAd
 const AdminUsersManagement = lazyWithRetry(() => import('../pages/AdminUsers'));
 const AdminSystemSettings = lazyWithRetry(() => import('../pages/Admin/AdminSystemSettings'));
 const AdminReportsAnalytics = lazyWithRetry(() => import('../pages/Admin/AdminReportsAnalytics'));
-const AdvancedReportsPage = lazyWithRetry(() => import('../pages/Reports/AdvancedReportsPage'));
+const AdvancedReportsPage = lazyWithRetry(() => import('../pages/reports/AdvancedReportsPage'));
 const AdminAuditLogs = lazyWithRetry(() => import('../pages/Admin/AdminAuditLogs'));
 const AdminClinicManagement = lazyWithRetry(() => import('../pages/Admin/AdminClinicManagement'));
 const AdminPaymentsBilling = lazyWithRetry(() => import('../pages/Admin/AdminPaymentsBilling'));

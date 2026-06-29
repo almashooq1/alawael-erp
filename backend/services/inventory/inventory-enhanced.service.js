@@ -114,6 +114,10 @@ class InventoryEnhancedService {
 
   /** تحويل بين مستودعين */
   async transfer(itemId, fromWarehouseId, toWarehouseId, quantity, reason, performedBy) {
+    // The two legs each run in their own transaction (issue/receive). If the
+    // receive leg fails AFTER the issue leg has already committed, the issued
+    // quantity would otherwise be destroyed — so compensate by returning it to
+    // the source warehouse before rethrowing (saga-style rollback).
     const issueTx = await this.issue(
       itemId,
       fromWarehouseId,
@@ -121,34 +125,74 @@ class InventoryEnhancedService {
       { reason: `تحويل: ${reason}`, referenceType: 'transfer' },
       performedBy
     );
-    const receiveTx = await this.receive(
-      itemId,
-      toWarehouseId,
-      quantity,
-      { reason: `تحويل من مستودع: ${reason}` },
-      performedBy
-    );
+    let receiveTx;
+    try {
+      receiveTx = await this.receive(
+        itemId,
+        toWarehouseId,
+        quantity,
+        { reason: `تحويل من مستودع: ${reason}`, referenceType: 'transfer' },
+        performedBy
+      );
+    } catch (err) {
+      try {
+        await this.receive(
+          itemId,
+          fromWarehouseId,
+          quantity,
+          { reason: `تعويض تحويل فاشل: ${reason}`, referenceType: 'transfer' },
+          performedBy
+        );
+      } catch (compErr) {
+        logger.error(
+          `[Inventory] transfer compensation FAILED for item ${itemId} (${quantity} units may be lost): ${compErr.message}`
+        );
+      }
+      throw err;
+    }
     return { issueTx, receiveTx };
   }
 
   /** تعديل يدوي للمخزون */
   async adjust(itemId, warehouseId, newQuantity, reason, performedBy) {
-    await InventoryStock.findOneAndUpdate(
-      { itemId, warehouseId },
-      { quantityOnHand: newQuantity },
-      { upsert: true, returnDocument: 'after' }
-    );
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      // Read the prior on-hand FIRST so the ledger records the real before-value
+      // and the signed delta (not the absolute new total). Atomic with the write.
+      const existing = await InventoryStock.findOne({ itemId, warehouseId }).session(session);
+      const before = existing ? existing.quantityOnHand : 0;
 
-    return InventoryTransaction.create({
-      itemId,
-      warehouseId,
-      transactionType: 'adjust',
-      quantity: newQuantity,
-      quantityBefore: 0,
-      quantityAfter: newQuantity,
-      reason,
-      performedBy,
-    });
+      await InventoryStock.findOneAndUpdate(
+        { itemId, warehouseId },
+        { quantityOnHand: newQuantity },
+        { upsert: true, returnDocument: 'after', session }
+      );
+
+      const tx = await InventoryTransaction.create(
+        [
+          {
+            itemId,
+            warehouseId,
+            transactionType: 'adjust',
+            quantity: newQuantity - before,
+            quantityBefore: before,
+            quantityAfter: newQuantity,
+            reason,
+            performedBy,
+          },
+        ],
+        { session }
+      );
+
+      await session.commitTransaction();
+      return tx[0];
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
   }
 
   // ============================================================
@@ -161,7 +205,7 @@ class InventoryEnhancedService {
 
   async getTotalStock(itemId) {
     const result = await InventoryStock.aggregate([
-      { $match: { itemId: mongoose.Types.ObjectId(itemId) } },
+      { $match: { itemId: new mongoose.Types.ObjectId(itemId) } },
       {
         $group: {
           _id: null,
@@ -182,16 +226,20 @@ class InventoryEnhancedService {
     const alerts = [];
 
     for (const item of items) {
-      const { totalOnHand } = await this.getTotalStock(item._id);
-      if (totalOnHand <= item.reorderPoint) {
+      const { totalOnHand, totalReserved } = await this.getTotalStock(item._id);
+      // Reorder against AVAILABLE (on-hand minus reserved), not raw on-hand —
+      // fully-reserved stock should still trigger a reorder.
+      const available = totalOnHand - (totalReserved || 0);
+      if (available <= item.reorderPoint) {
         alerts.push({
           itemId: item._id,
           sku: item.sku,
           name: item.nameAr,
           currentStock: totalOnHand,
+          availableStock: available,
           reorderPoint: item.reorderPoint,
           reorderQuantity: item.reorderQuantity,
-          shortage: item.reorderPoint - totalOnHand,
+          shortage: Math.max(0, item.reorderPoint - available),
         });
       }
     }

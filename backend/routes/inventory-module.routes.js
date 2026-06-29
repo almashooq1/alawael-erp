@@ -152,12 +152,13 @@ router.post('/transactions', async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { item_id, transaction_type, quantity, unit_cost, notes, ...rest } = req.body;
+    const { item_id, transaction_type, quantity, unit_cost, notes } = req.body;
 
     const item = await InventoryItem.findOne({ _id: item_id, deleted_at: null }).session(session);
     if (!item) throw new Error('العنصر غير موجود');
 
     const qty = Number(quantity);
+    if (!Number.isFinite(qty) || qty <= 0) throw new Error('الكمية غير صالحة');
     const before = item.quantity_on_hand;
     let after = before;
 
@@ -174,6 +175,9 @@ router.post('/transactions', async (req, res) => {
     item.quantity_available = Math.max(0, after - (item.quantity_reserved || 0));
     await item.save({ session });
 
+    // No `...rest` spread: the computed ledger values (quantity_before/after),
+    // the audit `created_by`, and branch ownership must NOT be client-overridable
+    // (mass-assignment would forge the stock ledger + the actor).
     const txn = new InventoryTransaction({
       item_id,
       transaction_type,
@@ -183,8 +187,7 @@ router.post('/transactions', async (req, res) => {
       quantity_after: after,
       notes,
       created_by: req.user._id,
-      branch_id: rest.branch_id || item.branch_id,
-      ...rest,
+      branch_id: item.branch_id,
     });
     await txn.save({ session });
     await session.commitTransaction();

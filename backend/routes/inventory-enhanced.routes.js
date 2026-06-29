@@ -319,7 +319,14 @@ router.post(
   async (req, res) => {
     try {
       const { itemId, fromWarehouseId, toWarehouseId, quantity, reason } = req.body;
-      const txs = await svc.transfer(itemId, fromWarehouseId, toWarehouseId, quantity, reason);
+      const txs = await svc.transfer(
+        itemId,
+        fromWarehouseId,
+        toWarehouseId,
+        quantity,
+        reason,
+        req.user._id
+      );
       res.status(201).json({ success: true, data: txs });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

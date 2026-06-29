@@ -1,0 +1,90 @@
+/**
+ * perf-budget-check.js
+ * فحص ميزانية الأداء بناءً على ملفات البناء
+ *
+ * Usage:
+ *   node scripts/perf-budget-check.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const BUILD_DIR = path.join(__dirname, '..', 'frontend', 'dist');
+
+const DEFAULT_BUDGET = {
+  maxJsSizeKb: 800,
+  maxCssSizeKb: 200,
+  maxImageSizeKb: 1000,
+  maxTotalRequests: 80,
+  maxTransferSizeKb: 2500,
+};
+
+function getFileSizeKb(filePath) {
+  const stats = fs.statSync(filePath);
+  return stats.size / 1024;
+}
+
+function walkDir(dir, extensions) {
+  const files = [];
+  if (!fs.existsSync(dir)) return files;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...walkDir(fullPath, extensions));
+    } else if (extensions.some(ext => entry.name.endsWith(ext))) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
+function main() {
+  if (!fs.existsSync(BUILD_DIR)) {
+    console.error(`❌ Build directory not found: ${BUILD_DIR}`);
+    console.error('Run "npm run build" in the frontend directory first.');
+    process.exit(1);
+  }
+
+  const budget = DEFAULT_BUDGET;
+  let failures = 0;
+
+  const jsFiles = walkDir(BUILD_DIR, ['.js']);
+  const cssFiles = walkDir(BUILD_DIR, ['.css']);
+  const imageFiles = walkDir(BUILD_DIR, ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']);
+  const assets = walkDir(BUILD_DIR, ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff2']);
+
+  const totalJsSize = jsFiles.reduce((sum, f) => sum + getFileSizeKb(f), 0);
+  const totalCssSize = cssFiles.reduce((sum, f) => sum + getFileSizeKb(f), 0);
+  const totalImageSize = imageFiles.reduce((sum, f) => sum + getFileSizeKb(f), 0);
+  const totalTransferSize = assets.reduce((sum, f) => sum + getFileSizeKb(f), 0);
+
+  console.log('📦 Performance Budget Check');
+  console.log('─────────────────────────────');
+
+  const checks = [
+    { name: 'Total JS Size', value: totalJsSize, budget: budget.maxJsSizeKb, unit: 'KB' },
+    { name: 'Total CSS Size', value: totalCssSize, budget: budget.maxCssSizeKb, unit: 'KB' },
+    { name: 'Total Image Size', value: totalImageSize, budget: budget.maxImageSizeKb, unit: 'KB' },
+    { name: 'Total Requests', value: assets.length, budget: budget.maxTotalRequests, unit: '' },
+    { name: 'Total Transfer Size', value: totalTransferSize, budget: budget.maxTransferSizeKb, unit: 'KB' },
+  ];
+
+  for (const check of checks) {
+    const passed = check.value <= check.budget;
+    const icon = passed ? '✅' : '❌';
+    console.log(`${icon} ${check.name}: ${Math.round(check.value)}${check.unit} / ${check.budget}${check.unit}`);
+    if (!passed) failures++;
+  }
+
+  if (failures > 0) {
+    console.error(`\n❌ ${failures} budget check(s) failed`);
+    process.exit(1);
+  }
+
+  console.log('\n✅ All performance budget checks passed');
+}
+
+main();

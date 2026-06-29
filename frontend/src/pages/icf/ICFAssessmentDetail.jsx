@@ -5,13 +5,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Box, Paper, Button, Typography, Grid, Chip, Stack, Divider, Alert, CircularProgress,
-  Snackbar, Dialog, DialogTitle, DialogContent, DialogActions,
+  Box,
+  Paper,
+  Button,
+  Typography,
+  Grid,
+  Chip,
+  Stack,
+  Divider,
+  Alert,
+  CircularProgress,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon, Edit as EditIcon, Print as PrintIcon,
-  TrendingUp as TrendingUpIcon, Assessment as AssessmentIcon,
-  Assignment as AssignmentIcon, Recommend as RecommendIcon, PlaylistAdd as PlaylistAddIcon,
+  ArrowBack as ArrowBackIcon,
+  Edit as EditIcon,
+  Print as PrintIcon,
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon,
+  Assignment as AssignmentIcon,
+  Recommend as RecommendIcon,
+  PlaylistAdd as PlaylistAddIcon,
   SaveAlt as SaveAltIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -60,7 +78,11 @@ export default function ICFAssessmentDetail() {
       notes: 'ملاحظات التقييم',
       recommendations: [
         { priority: 'high', domain: 'bodyFunctions', recommendation: 'تدليك في الحركة' },
-        { priority: 'medium', domain: 'activitiesAndParticipation', recommendation: 'تدريب على الحياة اليومية' },
+        {
+          priority: 'medium',
+          domain: 'activitiesAndParticipation',
+          recommendation: 'تدريب على الحياة اليومية',
+        },
       ],
     };
 
@@ -94,7 +116,7 @@ export default function ICFAssessmentDetail() {
     personalFactors: 'العوامل الشخصية',
   };
 
-  const getScoreColor = (score) => {
+  const getScoreColor = score => {
     if (score <= 1) return 'success';
     if (score <= 2) return 'warning';
     return 'error';
@@ -118,7 +140,11 @@ export default function ICFAssessmentDetail() {
       await assessmentsService.createCarePlan(assessment._id);
       setSnackbar({ open: true, message: 'تم إنشاء خطة الرعاية بنجاح', severity: 'success' });
     } catch (err) {
-      setSnackbar({ open: true, message: err?.message || 'فشل إنشاء خطة الرعاية', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: err?.message || 'فشل إنشاء خطة الرعاية',
+        severity: 'error',
+      });
     } finally {
       setCreatingCarePlan(false);
     }
@@ -137,7 +163,7 @@ export default function ICFAssessmentDetail() {
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const handleCloseRecommendations = () => {
@@ -148,9 +174,17 @@ export default function ICFAssessmentDetail() {
     setExportingDocument(true);
     try {
       const data = await assessmentsService.exportToDocument(assessment._id);
-      setSnackbar({ open: true, message: data?.message || 'تم حفظ التقرير في الملفات الطبية', severity: 'success' });
+      setSnackbar({
+        open: true,
+        message: data?.message || 'تم حفظ التقرير في الملفات الطبية',
+        severity: 'success',
+      });
     } catch (err) {
-      setSnackbar({ open: true, message: err?.message || 'فشل حفظ التقرير في الملفات الطبية', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: err?.message || 'فشل حفظ التقرير في الملفات الطبية',
+        severity: 'error',
+      });
     } finally {
       setExportingDocument(false);
     }
@@ -216,10 +250,7 @@ export default function ICFAssessmentDetail() {
           >
             تعديل
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<PrintIcon />}
-          >
+          <Button variant="outlined" startIcon={<PrintIcon />}>
             طباعة
           </Button>
           <Button
@@ -250,25 +281,42 @@ export default function ICFAssessmentDetail() {
                 <Divider sx={{ my: 2 }} />
                 <Stack spacing={2}>
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">المستفيد</Typography>
-                    <Typography variant="body2" fontWeight={600}>{assessment.beneficiary?.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      المستفيد
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {assessment.beneficiary?.name}
+                    </Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">العمر</Typography>
-                    <Typography variant="body2" fontWeight={600">{assessment.beneficiary?.age} سنة</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      العمر
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                    >{`${assessment.beneficiary?.age || '-'} سنة`}</Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">المقيّم</Typography>
-                    <Typography variant="body2" fontWeight={600">{assessment.assessor?.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      المقيّم
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {assessment.assessor?.name || '-'}
+                    </Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">التاريخ</Typography>
-                    <Typography variant="body2" fontWeight={600">
+                    <Typography variant="body2" color="text.secondary">
+                      التاريخ
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
                       {new Date(assessment.assessmentDate).toLocaleDateString('ar-SA')}
                     </Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">الحالة</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      الحالة
+                    </Typography>
                     <Chip
                       label={assessment.status === 'completed' ? 'مكتمل' : 'مسودة'}
                       color={assessment.status === 'completed' ? 'success' : 'warning'}
@@ -296,7 +344,11 @@ export default function ICFAssessmentDetail() {
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <Box display="flex" alignItems="center" gap={2} mb={2}>
-                      <Typography variant="h3" fontWeight={800} color={getScoreColor(assessment.overallScore)}>
+                      <Typography
+                        variant="h3"
+                        fontWeight={800}
+                        color={getScoreColor(assessment.overallScore)}
+                      >
                         {assessment.overallScore.toFixed(1)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -311,7 +363,7 @@ export default function ICFAssessmentDetail() {
                     <Grid item xs={12} sm={6} key={domain}>
                       <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Typography variant="body2" fontWeight={600">
+                          <Typography variant="body2" fontWeight={600}>
                             {domainLabels[domain]}
                           </Typography>
                           <Typography variant="h6" fontWeight={700} color={getScoreColor(score)}>
@@ -334,12 +386,7 @@ export default function ICFAssessmentDetail() {
               transition={{ delay: 0.3 }}
             >
               <Paper elevation={1} sx={{ p: 3, borderRadius: 3 }}>
-                <ICFProgressChart
-                  data={[]}
-                  showTrend={false}
-                  showRadar={true}
-                  showBar={true}
-                />
+                <ICFProgressChart data={[]} showTrend={false} showRadar={true} showBar={true} />
               </Paper>
             </motion.div>
           </Grid>
@@ -380,19 +427,38 @@ export default function ICFAssessmentDetail() {
       </Box>
 
       {/* Recommendations Dialog */}
-      <Dialog open={recommendationsDialog.open} onClose={handleCloseRecommendations} fullWidth maxWidth="sm">
+      <Dialog
+        open={recommendationsDialog.open}
+        onClose={handleCloseRecommendations}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>التوصيات المقترحة</DialogTitle>
         <DialogContent dividers>
           <Stack spacing={2}>
             {recommendationsDialog.data.length === 0 && (
-              <Typography variant="body2" color="text.secondary">لا توجد توصيات متاحة.</Typography>
+              <Typography variant="body2" color="text.secondary">
+                لا توجد توصيات متاحة.
+              </Typography>
             )}
             {recommendationsDialog.data.map((rec, i) => (
               <Paper key={i} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <Chip
-                    label={rec.priority === 'high' ? 'أولوية عالية' : rec.priority === 'medium' ? 'أولوية متوسطة' : 'أولوية منخفضة'}
-                    color={rec.priority === 'high' ? 'error' : rec.priority === 'medium' ? 'warning' : 'default'}
+                    label={
+                      rec.priority === 'high'
+                        ? 'أولوية عالية'
+                        : rec.priority === 'medium'
+                          ? 'أولوية متوسطة'
+                          : 'أولوية منخفضة'
+                    }
+                    color={
+                      rec.priority === 'high'
+                        ? 'error'
+                        : rec.priority === 'medium'
+                          ? 'warning'
+                          : 'default'
+                    }
                     size="small"
                   />
                   <Typography variant="body2" fontWeight={600}>

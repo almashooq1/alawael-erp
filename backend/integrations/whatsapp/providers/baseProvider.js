@@ -26,7 +26,7 @@ class BaseWhatsAppProvider {
    * @param {object} options - Additional options
    * @returns {Promise<{success: boolean, messageId: string|null, error: string|null}>}
    */
-  async sendText(to, message, options = {}) {
+  async sendText(_to, _message, _options = {}) {
     throw new Error('sendText() must be implemented by subclass');
   }
 
@@ -38,7 +38,7 @@ class BaseWhatsAppProvider {
    * @param {string} language - Language code (ar, en)
    * @returns {Promise<{success: boolean, messageId: string|null, error: string|null}>}
    */
-  async sendTemplate(to, templateName, params = {}, language = 'ar') {
+  async sendTemplate(_to, _templateName, _params = {}, _language = 'ar') {
     throw new Error('sendTemplate() must be implemented by subclass');
   }
 
@@ -50,7 +50,7 @@ class BaseWhatsAppProvider {
    * @param {string} type - Media type: image, video, document, audio
    * @returns {Promise<{success: boolean, messageId: string|null, error: string|null}>}
    */
-  async sendMedia(to, mediaUrl, caption = '', type = 'image') {
+  async sendMedia(_to, _mediaUrl, _caption = '', _type = 'image') {
     throw new Error('sendMedia() must be implemented by subclass');
   }
 
@@ -61,7 +61,7 @@ class BaseWhatsAppProvider {
    * @param {Array} buttons - Array of button objects {id, title}
    * @returns {Promise<{success: boolean, messageId: string|null, error: string|null}>}
    */
-  async sendInteractiveButtons(to, body, buttons) {
+  async sendInteractiveButtons(_to, _body, _buttons) {
     throw new Error('sendInteractiveButtons() must be implemented by subclass');
   }
 
@@ -73,7 +73,7 @@ class BaseWhatsAppProvider {
    * @param {Array} sections - Array of sections with rows
    * @returns {Promise<{success: boolean, messageId: string|null, error: string|null}>}
    */
-  async sendListMessage(to, body, buttonText, sections) {
+  async sendListMessage(_to, _body, _buttonText, _sections) {
     throw new Error('sendListMessage() must be implemented by subclass');
   }
 
@@ -84,7 +84,7 @@ class BaseWhatsAppProvider {
    * @param {string} secret - Webhook secret
    * @returns {boolean}
    */
-  verifyWebhookSignature(signature, body, secret) {
+  verifyWebhookSignature(_signature, _body, _secret) {
     // Default: no signature verification
     return true;
   }
@@ -94,7 +94,7 @@ class BaseWhatsAppProvider {
    * @param {object} payload - Raw webhook body
    * @returns {Array<{type: string, data: object}>} - Parsed events
    */
-  parseWebhook(payload) {
+  parseWebhook(_payload) {
     throw new Error('parseWebhook() must be implemented by subclass');
   }
 
@@ -103,7 +103,7 @@ class BaseWhatsAppProvider {
    * @param {string} messageId - Message ID from the provider
    * @returns {Promise<{status: string, deliveredAt: Date|null, readAt: Date|null}>}
    */
-  async getMessageStatus(messageId) {
+  async getMessageStatus(_messageId) {
     // Default: return unknown
     return { status: 'unknown', deliveredAt: null, readAt: null };
   }

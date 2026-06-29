@@ -28,7 +28,7 @@ export function register() {
 function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
-    .then((registration) => {
+    .then(registration => {
       // Handle updates
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -50,22 +50,21 @@ function registerValidSW(swUrl) {
         };
       };
     })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
+    .catch(error => {
       console.error('Error during service worker registration:', error);
     });
 }
 
 function checkValidServiceWorker(swUrl) {
   fetch(swUrl, { headers: { 'Service-Worker': 'script' } })
-    .then((response) => {
+    .then(response => {
       const contentType = response.headers.get('content-type');
       if (
         response.status === 404 ||
         (contentType != null && contentType.indexOf('javascript') === -1)
       ) {
         // No service worker found. Probably a different app. Reload the page.
-        navigator.serviceWorker.ready.then((registration) => {
+        navigator.serviceWorker.ready.then(registration => {
           registration.unregister().then(() => {
             window.location.reload();
           });
@@ -84,11 +83,10 @@ function checkValidServiceWorker(swUrl) {
 export function unregister() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready
-      .then((registration) => {
+      .then(registration => {
         registration.unregister();
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
+      .catch(error => {
         console.error(error.message);
       });
   }

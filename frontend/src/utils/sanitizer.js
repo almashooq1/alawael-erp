@@ -52,16 +52,18 @@ export function sanitizeText(dirty) {
 export function sanitizeUrl(dirty) {
   if (!dirty || typeof dirty !== 'string') return null;
   const sanitized = dirty.trim();
+
+  // Allow explicit relative paths without resolving them
+  if (sanitized.startsWith('/') && !sanitized.startsWith('//')) return sanitized;
+  if (sanitized.startsWith('#') || sanitized === '' || sanitized.startsWith('?'))
+    return sanitized || null;
+
   try {
-    const url = new URL(sanitized, window.location.href);
+    const url = new URL(sanitized);
     const allowedSchemes = ['http:', 'https:', 'mailto:', 'tel:'];
     if (!allowedSchemes.includes(url.protocol)) return null;
-    // Block javascript: and data: schemes explicitly
-    if (url.protocol === 'javascript:' || url.protocol === 'data:') return null;
     return url.href;
   } catch {
-    // If it's a relative URL starting with /, allow it
-    if (sanitized.startsWith('/') && !sanitized.startsWith('//')) return sanitized;
     return null;
   }
 }

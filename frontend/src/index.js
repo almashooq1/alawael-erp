@@ -13,6 +13,7 @@ import '@fontsource/cairo/600.css';
 import '@fontsource/cairo/700.css';
 import { surfaceColors, neutralColors } from './theme/palette';
 import { initSentry } from './utils/sentry';
+import { startWebVitalsReporting } from './utils/webVitalsReporter';
 import { validateFrontendEnv } from './config/validateEnv';
 
 // Validate environment variables early
@@ -20,6 +21,9 @@ validateFrontendEnv();
 
 // Initialize Sentry error tracking (loads async, non-blocking)
 initSentry();
+
+// Start Real User Monitoring (Web Vitals) — non-blocking, sampled
+startWebVitalsReporting();
 
 // Global styles
 const globalStyles = `
@@ -93,8 +97,8 @@ function registerServiceWorker() {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/service-worker.js')
-        .then((reg) => console.info('SW registered:', reg.scope))
-        .catch((err) => console.warn('SW registration failed:', err));
+        .then(reg => console.info('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
     });
   }
 }

@@ -1,18 +1,18 @@
-const js = require('@eslint/js');
-const globals = require('globals');
-const reactPlugin = require('eslint-plugin-react');
-const reactHooksPlugin = require('eslint-plugin-react-hooks');
-const importPlugin = require('eslint-plugin-import');
-const tsParser = require('@typescript-eslint/parser');
+import js from '@eslint/js';
+import globals from 'globals';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import importPlugin from 'eslint-plugin-import';
+import tsParser from '@typescript-eslint/parser';
 // eslint-plugin-unused-imports@4.4.1 (latest) still calls context.getFilename(),
 // which ESLint 10 removed. Temporarily disabled until upstream releases a
 // compat build; covered in the interim by the built-in `no-unused-vars` rule
 // with `varsIgnorePattern: '^_'`.
-// const unusedImportsPlugin = require('eslint-plugin-unused-imports');
+// import unusedImportsPlugin from 'eslint-plugin-unused-imports';
 
 // This flat config is used by ESLint v8+ when linting frontend files.
 // It mirrors the rules from .eslintrc.json but in flat config format.
-module.exports = [
+export default [
   // Global ignores — must be a standalone object (no other keys) in flat config
   {
     ignores: [
@@ -55,6 +55,8 @@ module.exports = [
         ...globals.node,
         React: 'readonly',
         JSX: 'readonly',
+        Intl: 'readonly',
+        vi: 'readonly',
       },
     },
     rules: {

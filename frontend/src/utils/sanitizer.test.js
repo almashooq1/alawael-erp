@@ -81,7 +81,7 @@ describe('Sanitizer Utility', () => {
   describe('sanitizeObject', () => {
     test('should sanitize string values', () => {
       const input = { name: '<script>alert(1)</script>John' };
-      expect(sanitizeObject(input)).toEqual({ name: 'alert(1)John' });
+      expect(sanitizeObject(input)).toEqual({ name: 'John' });
     });
 
     test('should preserve numbers', () => {
@@ -111,7 +111,7 @@ describe('Sanitizer Utility', () => {
 
     test('should handle arrays', () => {
       const input = {
-        tags: ['<script>evil</script>', 'good'],
+        tags: ['<b>evil</b>', 'good'],
       };
       expect(sanitizeObject(input)).toEqual({
         tags: ['evil', 'good'],

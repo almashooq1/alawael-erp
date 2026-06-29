@@ -10,7 +10,6 @@ const {
   MESSAGE_STATUS,
   MESSAGE_TYPE,
   MESSAGE_DIRECTION,
-  WHATSAPP_CHANNEL,
 } = require('../integrations/whatsapp/constants');
 
 const whatsAppMessageSchema = new mongoose.Schema(

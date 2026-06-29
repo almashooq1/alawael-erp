@@ -9,7 +9,13 @@
 'use strict';
 
 const { getProviders } = require('./providers');
-const { WEBHOOK_EVENTS, EMERGENCY_KEYWORDS, CONVERSATION_TTL_SECONDS, MESSAGE_DIRECTION, MESSAGE_STATUS } = require('./constants');
+const {
+  WEBHOOK_EVENTS,
+  EMERGENCY_KEYWORDS,
+  CONVERSATION_TTL_SECONDS,
+  MESSAGE_DIRECTION,
+  MESSAGE_STATUS,
+} = require('./constants');
 const WhatsAppMessage = require('../../models/WhatsAppMessage');
 const logger = require('../../utils/logger');
 
@@ -85,7 +91,7 @@ class WhatsAppWebhookHandler {
       to,
       body,
       type,
-      timestamp,
+      timestamp: _timestamp,
       mediaUrl,
       caption,
       selectedButtonId,
@@ -130,7 +136,7 @@ class WhatsAppWebhookHandler {
    * Handle message status updates (sent, delivered, read, failed)
    */
   async _handleStatusUpdate(data) {
-    const { messageId, status, recipient, timestamp } = data;
+    const { messageId, status, recipient: _recipient, timestamp: _timestamp } = data;
 
     const statusMap = {
       sent: MESSAGE_STATUS.SENT,
@@ -158,7 +164,10 @@ class WhatsAppWebhookHandler {
    * Handle emergency keyword detection
    */
   async _handleEmergency(messageDoc, body, from) {
-    logger.warn?.('[whatsapp-webhook] EMERGENCY detected:', { from, body: body?.substring(0, 100) });
+    logger.warn?.('[whatsapp-webhook] EMERGENCY detected:', {
+      from,
+      body: body?.substring(0, 100),
+    });
 
     // Update message with emergency flag
     await WhatsAppMessage.findByIdAndUpdate(messageDoc._id, {
@@ -196,7 +205,7 @@ class WhatsAppWebhookHandler {
   _checkEmergencyKeywords(text) {
     if (!text) return false;
     const lowerText = text.toLowerCase();
-    return EMERGENCY_KEYWORDS.some((keyword) => lowerText.includes(keyword.toLowerCase()));
+    return EMERGENCY_KEYWORDS.some(keyword => lowerText.includes(keyword.toLowerCase()));
   }
 
   /**
@@ -209,7 +218,7 @@ class WhatsAppWebhookHandler {
 
       const sessionKey = `whatsapp:conversation:${phoneNumber}`;
       const sessionData = await redis.get(sessionKey);
-      let context = sessionData ? JSON.parse(sessionData) : { messages: [], state: 'idle' };
+      const context = sessionData ? JSON.parse(sessionData) : { messages: [], state: 'idle' };
 
       context.messages.push({
         id: messageDoc._id.toString(),
@@ -261,7 +270,8 @@ class WhatsAppWebhookHandler {
       return true; // No verification if provider doesn't support it
     }
 
-    const signature = req.headers['x-ultramsg-signature'] || req.headers['x-twilio-signature'] || '';
+    const signature =
+      req.headers['x-ultramsg-signature'] || req.headers['x-twilio-signature'] || '';
     const body = req.rawBody || JSON.stringify(req.body);
 
     return this.provider.verifyWebhookSignature(signature, body, this.secret);

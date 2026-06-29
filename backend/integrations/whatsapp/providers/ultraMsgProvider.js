@@ -38,7 +38,7 @@ class UltraMsgProvider extends BaseWhatsAppProvider {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.token}`,
       },
       body: JSON.stringify(body),
     });
@@ -74,7 +74,7 @@ class UltraMsgProvider extends BaseWhatsAppProvider {
     const formattedTo = this.formatPhoneNumber(to);
 
     // Build template body parameters
-    const bodyParams = Object.entries(params).map(([key, value]) => ({
+    const bodyParams = Object.entries(params).map(([_key, value]) => ({
       type: 'text',
       text: String(value),
     }));
@@ -169,10 +169,7 @@ class UltraMsgProvider extends BaseWhatsAppProvider {
       .createHmac('sha256', secret)
       .update(typeof body === 'string' ? body : JSON.stringify(body))
       .digest('hex');
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
-      Buffer.from(expected, 'hex')
-    );
+    return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
   }
 
   parseWebhook(payload) {

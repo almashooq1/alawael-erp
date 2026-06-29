@@ -76,6 +76,10 @@
     "lint:all": "npm run lint:backend && npm run lint:frontend",
     "lint:backend": "cd backend && npm run lint",
     "lint:frontend": "cd frontend && npm run lint",
+    "lint:staged:backend": "cd backend && npx eslint --fix",
+    "lint:staged:frontend": "cd frontend && npx eslint --fix",
+    "lint:staged:mobile": "cd mobile && npx eslint --fix",
+    "lint:staged:scm-frontend": "cd \"supply-chain-management/frontend\" && npx eslint --fix",
     "logs": "cd backend && npm run logs:view",
     "logs:errors": "cd backend && npm run logs:errors",
     "migrate:zkteco": "cd backend && npm run migrate:zkteco",
@@ -122,34 +126,13 @@
     "test": "cd backend && npm test",
     "test:backend": "cd backend && npm test",
     "test:drift": "cd backend && npm run test:drift",
-    "test:frontend": "cd frontend && npm test -- --watchAll=false",
+    "test:frontend": "cd frontend && npm test",
     "test:ops-subsystems": "cd backend && npm run test:ops-subsystems",
     "test:sprint": "cd backend && npm run test:sprint",
     "utilization:digest": "cd backend && npm run utilization:digest",
     "utilization:digest:json": "cd backend && npm run utilization:digest:json",
     "waitlist:digest": "cd backend && npm run waitlist:digest",
     "waitlist:digest:json": "cd backend && npm run waitlist:digest:json"
-  },
-  "lint-staged": {
-    "backend/**/*.js": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "frontend/src/**/*.{js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "supply-chain-management/frontend/src/**/*.{js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "mobile/{src,App.tsx}/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "**/*.{json,md}": [
-      "prettier --write"
-    ]
   },
   "overrides": {
     "dompurify": "$dompurify",

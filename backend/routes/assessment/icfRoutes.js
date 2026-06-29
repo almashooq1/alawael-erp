@@ -2,8 +2,21 @@ const express = require('express');
 const router = express.Router();
 const ICFAssessment = require('../../models/assessment/ICFAssessment');
 const { authenticate: auth, requireRole: checkRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../../middleware/assertBranchMatch');
 const { validate } = require('../../middleware/validate');
 const Joi = require('joi');
+
+// W269 cross-branch isolation: branch-check both the `:beneficiaryId` path
+// params and the POST-body beneficiaryId. Fail-open for cross-branch roles /
+// unscoped callers; enforced for restricted staff.
+router.use(auth);
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard);
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 // نسخة محلية من دوال الحساب (backend-only) — لا تعتمد على frontend
 function localCalculateDomainScore(scores, domain) {

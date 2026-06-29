@@ -1067,3 +1067,4 @@ __tests__/rehabilitation-metrics-behavioral.test.js
 __tests__/rehabilitation-reports-behavioral.test.js
 __tests__/smart-assessment-engine-behavioral.test.js
 __tests__/inventory-correctness-bugfix.test.js
+__tests__/branch-isolation-inventory-module.test.js

@@ -8,7 +8,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const InventoryItem = require('../models/inventory/InventoryItem');
 const InventoryTransaction = require('../models/inventory/InventoryTransaction');
 const PurchaseOrder = require('../models/inventory/PurchaseOrder');
@@ -16,6 +16,17 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// Cross-branch isolation (W269 doctrine): `requireBranchAccess` only rejects a
+// request that NAMES a foreign branch — it does NOT auto-filter `:id` lookups.
+// These models use snake_case `branch_id`, while branchFilter() returns the
+// camelCase {branchId}; map it so the scope actually matches the field. Returns
+// {branch_id: <user-branch>} for restricted users, {} for cross-branch roles.
+function branchScope(req) {
+  const f = branchFilter(req);
+  return f && f.branchId ? { branch_id: f.branchId } : {};
+}
+
 // ═══════════════════════════════════════════════════════
 // عناصر المخزون — Inventory Items
 // ═══════════════════════════════════════════════════════
@@ -24,9 +35,12 @@ router.use(requireBranchAccess);
 router.get('/items', async (req, res) => {
   try {
     const { category, search, low_stock, branch_id, page = 1, limit = 20 } = req.query;
-    const filter = { deleted_at: null };
+    const scope = branchScope(req);
+    const filter = { deleted_at: null, ...scope };
     if (category) filter.category = category;
-    if (branch_id) filter.branch_id = branch_id;
+    // Restricted users are pinned to their own branch; only cross-branch roles
+    // may narrow by a query branch_id.
+    if (branch_id && !scope.branch_id) filter.branch_id = branch_id;
     if (low_stock === 'true') filter.$expr = { $lte: ['$quantity_on_hand', '$minimum_stock'] };
     if (search) filter.$text = { $search: search };
 
@@ -45,8 +59,13 @@ router.get('/items', async (req, res) => {
 router.get('/items/low-stock', async (req, res) => {
   try {
     const { branch_id } = req.query;
-    const filter = { deleted_at: null, $expr: { $lte: ['$quantity_on_hand', '$minimum_stock'] } };
-    if (branch_id) filter.branch_id = branch_id;
+    const scope = branchScope(req);
+    const filter = {
+      deleted_at: null,
+      ...scope,
+      $expr: { $lte: ['$quantity_on_hand', '$minimum_stock'] },
+    };
+    if (branch_id && !scope.branch_id) filter.branch_id = branch_id;
     const items = await InventoryItem.find(filter).sort({ quantity_on_hand: 1 }).limit(50);
     res.json({ items, count: items.length });
   } catch (e) {
@@ -57,7 +76,11 @@ router.get('/items/low-stock', async (req, res) => {
 // GET /api/inventory-module/items/:id
 router.get('/items/:id', async (req, res) => {
   try {
-    const item = await InventoryItem.findOne({ _id: req.params.id, deleted_at: null });
+    const item = await InventoryItem.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScope(req),
+    });
     if (!item) return res.status(404).json({ error: 'العنصر غير موجود' });
     res.json({ item });
   } catch (e) {
@@ -68,7 +91,10 @@ router.get('/items/:id', async (req, res) => {
 // POST /api/inventory-module/items
 router.post('/items', async (req, res) => {
   try {
-    const item = new InventoryItem({ ...req.body, created_by: req.user._id });
+    // Restricted users may only create items in their own branch — branchScope
+    // (spread last) overrides any client-supplied branch_id; it's {} (no-op) for
+    // cross-branch roles, which keep the body value.
+    const item = new InventoryItem({ ...req.body, ...branchScope(req), created_by: req.user._id });
     await item.save();
     res.status(201).json({ item, message: 'تم إضافة العنصر بنجاح' });
   } catch (e) {
@@ -80,7 +106,7 @@ router.post('/items', async (req, res) => {
 router.put('/items/:id', async (req, res) => {
   try {
     const item = await InventoryItem.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { ...req.body, updated_by: req.user._id },
       { returnDocument: 'after', runValidators: true }
     );
@@ -95,7 +121,7 @@ router.put('/items/:id', async (req, res) => {
 router.delete('/items/:id', async (req, res) => {
   try {
     const item = await InventoryItem.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -154,7 +180,11 @@ router.post('/transactions', async (req, res) => {
   try {
     const { item_id, transaction_type, quantity, unit_cost, notes } = req.body;
 
-    const item = await InventoryItem.findOne({ _id: item_id, deleted_at: null }).session(session);
+    const item = await InventoryItem.findOne({
+      _id: item_id,
+      deleted_at: null,
+      ...branchScope(req),
+    }).session(session);
     if (!item) throw new Error('العنصر غير موجود');
 
     const qty = Number(quantity);
@@ -204,10 +234,20 @@ router.post('/transactions', async (req, res) => {
 // GET /api/inventory-module/transactions/:id
 router.get('/transactions/:id', async (req, res) => {
   try {
+    const scope = branchScope(req);
     const txn = await InventoryTransaction.findOne({ _id: req.params.id, deleted_at: null })
-      .populate('item_id', 'name_ar item_code')
+      .populate('item_id', 'name_ar item_code branch_id')
       .populate('created_by', 'name');
     if (!txn) return res.status(404).json({ error: 'الحركة غير موجودة' });
+    // The transaction model has no single branch_id — scope via the linked item's
+    // branch (404, not 403, so a foreign id can't be probed for existence).
+    if (
+      scope.branch_id &&
+      txn.item_id &&
+      String(txn.item_id.branch_id) !== String(scope.branch_id)
+    ) {
+      return res.status(404).json({ error: 'الحركة غير موجودة' });
+    }
     res.json({ transaction: txn });
   } catch (e) {
     safeError(res, e, 'inventory-module');
@@ -222,10 +262,11 @@ router.get('/transactions/:id', async (req, res) => {
 router.get('/purchase-orders', async (req, res) => {
   try {
     const { status, supplier_id, branch_id, page = 1, limit = 20 } = req.query;
-    const filter = { deleted_at: null };
+    const scope = branchScope(req);
+    const filter = { deleted_at: null, ...scope };
     if (status) filter.status = status;
     if (supplier_id) filter.supplier_id = supplier_id;
-    if (branch_id) filter.branch_id = branch_id;
+    if (branch_id && !scope.branch_id) filter.branch_id = branch_id;
     const skip = (Number(page) - 1) * Number(limit);
     const [orders, total] = await Promise.all([
       PurchaseOrder.find(filter)
@@ -244,7 +285,12 @@ router.get('/purchase-orders', async (req, res) => {
 // POST /api/inventory-module/purchase-orders
 router.post('/purchase-orders', async (req, res) => {
   try {
-    const po = new PurchaseOrder({ ...req.body, created_by: req.user._id, status: 'draft' });
+    const po = new PurchaseOrder({
+      ...req.body,
+      ...branchScope(req),
+      created_by: req.user._id,
+      status: 'draft',
+    });
     await po.save();
     res.status(201).json({ order: po, message: 'تم إنشاء أمر الشراء' });
   } catch (e) {
@@ -255,7 +301,11 @@ router.post('/purchase-orders', async (req, res) => {
 // GET /api/inventory-module/purchase-orders/:id
 router.get('/purchase-orders/:id', async (req, res) => {
   try {
-    const po = await PurchaseOrder.findOne({ _id: req.params.id, deleted_at: null })
+    const po = await PurchaseOrder.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScope(req),
+    })
       .populate('items.item_id', 'name_ar item_code unit_of_measure')
       .populate('approved_by', 'name');
     if (!po) return res.status(404).json({ error: 'أمر الشراء غير موجود' });
@@ -269,7 +319,12 @@ router.get('/purchase-orders/:id', async (req, res) => {
 router.put('/purchase-orders/:id', async (req, res) => {
   try {
     const po = await PurchaseOrder.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending_approval'] } },
+      {
+        _id: req.params.id,
+        deleted_at: null,
+        status: { $in: ['draft', 'pending_approval'] },
+        ...branchScope(req),
+      },
       { ...req.body, updated_by: req.user._id },
       { returnDocument: 'after', runValidators: true }
     );
@@ -284,7 +339,7 @@ router.put('/purchase-orders/:id', async (req, res) => {
 router.post('/purchase-orders/:id/submit', async (req, res) => {
   try {
     const po = await PurchaseOrder.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'draft' },
+      { _id: req.params.id, deleted_at: null, status: 'draft', ...branchScope(req) },
       { status: 'pending_approval' },
       { returnDocument: 'after' }
     );
@@ -299,7 +354,7 @@ router.post('/purchase-orders/:id/submit', async (req, res) => {
 router.post('/purchase-orders/:id/approve', async (req, res) => {
   try {
     const po = await PurchaseOrder.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'pending_approval' },
+      { _id: req.params.id, deleted_at: null, status: 'pending_approval', ...branchScope(req) },
       { status: 'approved', approved_by: req.user._id, approved_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -320,6 +375,7 @@ router.post('/purchase-orders/:id/receive', async (req, res) => {
       _id: req.params.id,
       deleted_at: null,
       status: { $in: ['approved', 'sent', 'partial'] },
+      ...branchScope(req),
     }).session(session);
     if (!po) throw new Error('لا يمكن استلام هذا الأمر');
 
@@ -330,7 +386,9 @@ router.post('/purchase-orders/:id/receive', async (req, res) => {
       if (!poItem) continue;
       poItem.quantity_received = (poItem.quantity_received || 0) + Number(ri.quantity_received);
 
-      const item = await InventoryItem.findById(ri.item_id).session(session);
+      const item = await InventoryItem.findOne({ _id: ri.item_id, ...branchScope(req) }).session(
+        session
+      );
       if (item) {
         item.quantity_on_hand += Number(ri.quantity_received);
         item.quantity_available = Math.max(
@@ -375,7 +433,12 @@ router.post('/purchase-orders/:id/receive', async (req, res) => {
 router.delete('/purchase-orders/:id', async (req, res) => {
   try {
     const po = await PurchaseOrder.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending_approval'] } },
+      {
+        _id: req.params.id,
+        deleted_at: null,
+        status: { $in: ['draft', 'pending_approval'] },
+        ...branchScope(req),
+      },
       { deleted_at: new Date(), status: 'cancelled' },
       { returnDocument: 'after' }
     );

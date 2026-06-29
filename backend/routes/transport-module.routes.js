@@ -13,7 +13,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 let createCustomLimiter;
 try {
   ({ createCustomLimiter } = require('../middleware/rateLimiter'));
@@ -29,6 +29,15 @@ router.use(authenticate);
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 router.use(requireBranchAccess);
+
+// Cross-branch isolation (W269): requireBranchAccess only rejects a request that
+// NAMES a foreign branch — it does NOT scope `:id` Trip lookups. Trip is
+// branch-scoped (snake `branch_id`); branchFilter() returns camelCase {branchId},
+// so map it. {} for cross-branch roles → org-wide preserved.
+function branchScope(req) {
+  const f = branchFilter(req);
+  return f && f.branchId ? { branch_id: f.branchId } : {};
+}
 
 // Rate-limiter for GPS endpoints: 600 single-point uploads / minute / device
 // (1 ping every 100ms upper bound — well above the 10s typical cadence)
@@ -564,7 +573,7 @@ router.get(
   '/trips/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null })
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate('vehicle_id', 'plate_number vehicle_type capacity wheelchair_accessible')
       .populate('driver_id', 'name phone')
       .populate('route_id', 'route_name_ar route_number waypoints')
@@ -581,7 +590,9 @@ router.get(
 router.post(
   '/trips',
   asyncHandler(async (req, res) => {
-    const trip = new Trip({ ...req.body, created_by: req.user?._id });
+    // Pin the branch for restricted users (scope wins over any client branch_id);
+    // {} for cross-branch roles keeps the body value.
+    const trip = new Trip({ ...req.body, ...branchScope(req), created_by: req.user?._id });
     await trip.save();
     res.status(201).json({ success: true, data: trip, message: 'تم إنشاء الرحلة بنجاح' });
   })
@@ -594,7 +605,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { _trip_number, _created_by, ...updateData } = req.body;
     const trip = await Trip.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { ...updateData, updated_at: new Date() },
       { returnDocument: 'after', runValidators: true }
     );
@@ -608,7 +619,12 @@ router.post(
   '/trips/:id/start',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, status: 'scheduled' })
+    const trip = await Trip.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      status: 'scheduled',
+      ...branchScope(req),
+    })
       .populate('vehicle_id', 'license_plate vehicle_type')
       .populate('route_id', 'route_name_ar');
     if (!trip)
@@ -670,6 +686,7 @@ router.post(
       _id: req.params.id,
       deleted_at: null,
       status: 'in_progress',
+      ...branchScope(req),
     });
     if (!trip)
       return res.status(404).json({ success: false, message: 'الرحلة غير موجودة أو لم تبدأ بعد' });
@@ -684,13 +701,19 @@ router.post(
 
     await trip.save();
 
-    // إشعار أولياء الأمور بالوصول
-    const notifs = await notificationService.notifyDropoff(trip);
+    // Notify each passenger's guardian of arrival. notifyDropoff is STATIC and
+    // takes (tripId, beneficiaryId) — the old single instance-call with the trip
+    // doc threw (undefined method + wrong args) and rejected /complete AFTER the
+    // trip was already saved. allSettled so one bad notification can't fail it.
+    const recipients = (trip.passengers || []).filter(p => p.beneficiary_id);
+    await Promise.allSettled(
+      recipients.map(p => ParentNotificationService.notifyDropoff(trip._id, p.beneficiary_id))
+    );
 
     res.json({
       success: true,
       data: trip,
-      notifications_sent: notifs.length,
+      notifications_sent: recipients.length,
       message: 'تم إنهاء الرحلة',
     });
   })
@@ -702,7 +725,12 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const trip = await Trip.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $in: ['scheduled', 'in_progress'] } },
+      {
+        _id: req.params.id,
+        deleted_at: null,
+        status: { $in: ['scheduled', 'in_progress'] },
+        ...branchScope(req),
+      },
       {
         status: 'cancelled',
         cancellation_reason: req.body.reason,
@@ -732,7 +760,7 @@ router.post(
   '/trips/:id/inspection',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
 
     // Caller must be the driver assigned to this trip (or admin role)
@@ -802,7 +830,7 @@ router.post(
   '/trips/:id/pickup/:beneficiaryId',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
 
     const passenger = trip.passengers.find(
@@ -811,12 +839,17 @@ router.post(
     if (!passenger)
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود في الرحلة' });
 
-    passenger.pickup_status = 'picked_up';
-    passenger.actual_pickup_time = new Date();
+    // The passenger subdoc has a single `status` + `pickup_time_actual` —
+    // `pickup_status`/`actual_pickup_time` were phantom paths (strict mode
+    // dropped them → the pickup was never recorded).
+    passenger.status = 'picked_up';
+    passenger.pickup_time_actual = new Date();
     await trip.save();
 
-    // إشعار ولي الأمر
-    await notificationService.notifyPickup(trip, passenger.beneficiary_id);
+    // notifyPickup is a STATIC method (was called on an instance → undefined →
+    // crash) and takes a tripId, not the doc. Fire-and-forget so a notification
+    // failure never undoes a recorded pickup.
+    ParentNotificationService.notifyPickup(trip._id, passenger.beneficiary_id).catch(() => {});
 
     res.json({ success: true, data: passenger, message: 'تم تسجيل استلام المستفيد' });
   })
@@ -827,7 +860,7 @@ router.post(
   '/trips/:id/dropoff/:beneficiaryId',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
 
     const passenger = trip.passengers.find(
@@ -836,12 +869,14 @@ router.post(
     if (!passenger)
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود في الرحلة' });
 
-    passenger.dropoff_status = 'dropped_off';
-    passenger.actual_dropoff_time = new Date();
+    // `dropoff_status`/`actual_dropoff_time` were phantom paths — the real
+    // fields are `status` + `dropoff_time_actual`.
+    passenger.status = 'dropped_off';
+    passenger.dropoff_time_actual = new Date();
     await trip.save();
 
-    // إشعار ولي الأمر
-    await notificationService.notifyDropoff(trip, passenger.beneficiary_id);
+    // notifyDropoff is STATIC + takes a tripId; fire-and-forget.
+    ParentNotificationService.notifyDropoff(trip._id, passenger.beneficiary_id).catch(() => {});
 
     res.json({ success: true, data: passenger, message: 'تم تسجيل توصيل المستفيد' });
   })
@@ -853,7 +888,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const trip = await Trip.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'scheduled' },
+      { _id: req.params.id, deleted_at: null, status: 'scheduled', ...branchScope(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -883,6 +918,7 @@ router.get(
     const activeTrip = await Trip.findOne({
       vehicle_id: req.params.vehicleId,
       status: 'in_progress',
+      ...branchScope(req),
     }).select('trip_number route_id passengers');
 
     res.json({
@@ -1572,7 +1608,7 @@ router.post(
         .json({ success: false, message: 'إحداثيات GPS و beneficiary_id مطلوبة' });
     }
 
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (String(trip.driver_id) !== String(driverId)) {
       // W413: unify with 404 (anti-existence-probe). Non-admin caller who
@@ -1696,7 +1732,7 @@ router.get(
   '/trips/:id/live-eta',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null })
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate({ path: 'route_id', select: 'waypoints' })
       .select('vehicle_id route_id passengers');
 
@@ -1970,7 +2006,7 @@ router.post(
   '/trips/:id/tracking-token',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
 
     const token = signTrackingToken(String(trip._id), TRACKING_TOKEN_SECRET);

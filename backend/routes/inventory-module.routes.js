@@ -379,18 +379,30 @@ router.post('/purchase-orders/:id/receive', async (req, res) => {
     }).session(session);
     if (!po) throw new Error('لا يمكن استلام هذا الأمر');
 
+    const seenItems = new Set();
     for (const ri of received_items || []) {
-      const poItem = po.items.id
-        ? po.items.find(i => String(i.item_id) === String(ri.item_id))
-        : null;
+      // Validate the received qty (a missing/NaN/≤0 value would corrupt stock
+      // into NaN forever) and reject duplicate lines (double-counting).
+      const qtyR = Number(ri.quantity_received);
+      if (!Number.isFinite(qtyR) || qtyR <= 0) {
+        throw new Error('كمية مستلمة غير صالحة');
+      }
+      const key = String(ri.item_id);
+      if (seenItems.has(key)) {
+        throw new Error('صنف مكرر في طلب الاستلام');
+      }
+      seenItems.add(key);
+
+      const poItem = po.items.find(i => String(i.item_id) === key);
       if (!poItem) continue;
-      poItem.quantity_received = (poItem.quantity_received || 0) + Number(ri.quantity_received);
+      poItem.quantity_received = (poItem.quantity_received || 0) + qtyR;
 
       const item = await InventoryItem.findOne({ _id: ri.item_id, ...branchScope(req) }).session(
         session
       );
       if (item) {
-        item.quantity_on_hand += Number(ri.quantity_received);
+        const beforeQty = item.quantity_on_hand;
+        item.quantity_on_hand = beforeQty + qtyR;
         item.quantity_available = Math.max(
           0,
           item.quantity_on_hand - (item.quantity_reserved || 0)
@@ -400,9 +412,9 @@ router.post('/purchase-orders/:id/receive', async (req, res) => {
         await new InventoryTransaction({
           item_id: ri.item_id,
           transaction_type: 'receipt',
-          quantity: Number(ri.quantity_received),
+          quantity: qtyR,
           unit_cost: poItem.unit_cost,
-          quantity_before: item.quantity_on_hand - Number(ri.quantity_received),
+          quantity_before: beforeQty,
           quantity_after: item.quantity_on_hand,
           reference_type: 'PurchaseOrder',
           reference_id: po._id,

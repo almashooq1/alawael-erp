@@ -7,8 +7,8 @@
 
 const express = require('express');
 const router = express.Router();
-const { getWebhookHandler } = require('../../integrations/whatsapp/webhookHandler');
-const logger = require('../../utils/logger');
+const { getWebhookHandler } = require('../integrations/whatsapp/webhookHandler');
+const logger = require('../utils/logger');
 
 /**
  * POST /webhooks/whatsapp

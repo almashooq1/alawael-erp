@@ -102,6 +102,12 @@ const DocumentSchema = new mongoose.Schema(
     // NOTE: expiryDate is declared once in the "التنبيهات والتذكيرات" section below.
     entityType: { type: String },
     entityId: { type: String },
+    // Optional episode link for a beneficiary-linked document. Added W-phantom:
+    // documentCenter.service used to write/query a `linkedBeneficiary` subdoc that
+    // was never declared here (strict mode dropped it → getBeneficiaryDocuments
+    // always returned []). The service now links via entityType:'Beneficiary'
+    // + entityId, with episodeId for the finer-grained episode filter.
+    episodeId: { type: String, default: null },
     fileUrl: { type: String },
     isConfidential: { type: Boolean, default: false },
 
@@ -152,6 +158,8 @@ const DocumentSchema = new mongoose.Schema(
         },
         email: String,
         name: String,
+        // who granted the share (bulk-share wrote this; was undeclared → dropped)
+        sharedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         permission: {
           type: String,
           enum: ['view', 'edit', 'download', 'share'],
@@ -256,6 +264,23 @@ const DocumentSchema = new mongoose.Schema(
     retentionExpiry: { type: Date, index: true, sparse: true },
     retentionUpdatedAt: Date,
     retentionUpdatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // retention policy flags — documentRetention.service wrote/queried these as a
+    // `retentionPolicy.*` subdoc that was never declared (strict mode dropped the
+    // review flag; the `legalHold: {$ne:true}` guard matched ALL docs since the
+    // path was always absent → legal-hold docs weren't excluded from purge).
+    retentionPolicy: {
+      reviewRequired: { type: Boolean, default: false },
+      legalHold: { type: Boolean, default: false },
+      legalHoldReason: { type: String, trim: true },
+      legalHoldBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      legalHoldAt: { type: Date },
+    },
+    // soft-delete audit — the soft-delete itself sets status:'محذوف' (the value
+    // every read filters on); these record who/when. documentBulk/Retention used
+    // to write a phantom `isDeleted`/`deletedBy` that strict mode dropped AND that
+    // no read filtered on → the doc stayed visible (soft-delete was a silent no-op).
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
     // الاسترجاع من الأرشيف
     restoredAt: Date,

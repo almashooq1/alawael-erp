@@ -163,14 +163,7 @@ module.exports = function registerFeatureRoutes(
   // RTL layout renderer + preview + admin test-send (converges the 55 scattered
   // inline-HTML email call sites onto one contract-validated formatting layer).
   dualMountAuth(app, 'email-templates', emailTemplatesRoutes, authenticate);
-  try { require('fs').appendFileSync('/tmp/freg-diag.log', `[FREG] pre-166 bt=${typeof beneficiaryTransfersRoutes} stack=${beneficiaryTransfersRoutes && beneficiaryTransfersRoutes.stack ? beneficiaryTransfersRoutes.stack.length : 'n/a'}\n`); } catch (_) {}
-  try {
-    dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
-    try { require('fs').appendFileSync('/tmp/freg-diag.log', '[FREG] passed-166\n'); } catch (_) {}
-  } catch (e166) {
-    try { require('fs').appendFileSync('/tmp/freg-diag.log', `[FREG] LINE166-THREW: ${e166 && e166.message}\n${(e166 && e166.stack || '').split('\n').slice(0,3).join(' | ')}\n`); } catch (_) {}
-    throw e166;
-  }
+  dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
   // Wave 174: Daily rollcall (مركز تأهيل نهاري) — distinct from session attendance
   dualMountAuth(app, 'beneficiary-day-attendance', beneficiaryDayAttendanceRoutes, authenticate);
   // Wave 175: Program-based sections (الفصول التخصصية)

@@ -827,24 +827,21 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   try {
     registerPhaseRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
   } catch (e) {
-    try{require('fs').appendFileSync('/tmp/reg-diag.log','['+"registerPhaseRoutes"+'] THREW: '+(e&&e.stack||e)+String.fromCharCode(10));}catch(_){}
-console.error('[BOOT-DIAG] registerPhaseRoutes THREW:', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e);
+    logger.error('[registry] registerPhaseRoutes failed', { err: e && e.message });
   }
 
   // ── Phase-16 Ops Control Tower (W801) — was built but unmounted until W801 ──
   try {
     registerOpsRoutes(app, { safeMount, logger });
   } catch (e) {
-    try{require('fs').appendFileSync('/tmp/reg-diag.log','['+"registerOpsRoutes"+'] THREW: '+(e&&e.stack||e)+String.fromCharCode(10));}catch(_){}
-console.error('[BOOT-DIAG] registerOpsRoutes THREW:', e && e.message);
+    logger.error('[registry] registerOpsRoutes failed', { err: e && e.message });
   }
 
   // ── Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js ──
   try {
     registerFeatureRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
   } catch (e) {
-    try{require('fs').appendFileSync('/tmp/reg-diag.log','['+"registerFeatureRoutes"+'] THREW: '+(e&&e.stack||e)+String.fromCharCode(10));}catch(_){}
-console.error('[BOOT-DIAG] registerFeatureRoutes THREW:', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e);
+    logger.error('[registry] registerFeatureRoutes failed', { err: e && e.message });
   }
 
   // ── Route Mount Summary ─────────────────────────────────────────────────

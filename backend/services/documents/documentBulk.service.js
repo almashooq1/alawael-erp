@@ -100,8 +100,12 @@ class DocumentBulkService {
     return this._executeBulkOperation('bulk_delete', documentIds, userId, options, async docId => {
       const Document = mongoose.model('Document');
       if (options.softDelete !== false) {
+        // Soft-delete = status 'محذوف' (the value every read filters on, per
+        // documents.routes.js). The old soft-delete flag was an undeclared field
+        // (strict-mode dropped it) AND nothing read it → the doc stayed visible.
         await Document.findByIdAndUpdate(docId, {
-          isDeleted: true,
+          status: 'محذوف',
+          isArchived: false,
           deletedAt: new Date(),
           deletedBy: userId,
         });
@@ -118,8 +122,12 @@ class DocumentBulkService {
   async bulkArchive(documentIds, userId, options = {}) {
     return this._executeBulkOperation('bulk_archive', documentIds, userId, options, async docId => {
       const Document = mongoose.model('Document');
+      // canonical archived status is the Arabic enum value 'مؤرشف' — 'archived'
+      // is not in the Document status enum (was written unvalidated → a value no
+      // read matches).
       await Document.findByIdAndUpdate(docId, {
-        status: 'archived',
+        status: 'مؤرشف',
+        isArchived: true,
         archivedAt: new Date(),
         archivedBy: userId,
       });
@@ -133,9 +141,11 @@ class DocumentBulkService {
   async bulkRestore(documentIds, userId, options = {}) {
     return this._executeBulkOperation('bulk_restore', documentIds, userId, options, async docId => {
       const Document = mongoose.model('Document');
+      // restore to the canonical active status 'نشط' ('active' is not in the enum);
+      // drop the phantom isDeleted and clear the soft-delete / archive audit.
       await Document.findByIdAndUpdate(docId, {
-        status: 'active',
-        isDeleted: false,
+        status: 'نشط',
+        isArchived: false,
         $unset: { deletedAt: 1, deletedBy: 1, archivedAt: 1, archivedBy: 1 },
       });
       return { status: 'success', message: 'تم الاستعادة' };
@@ -251,8 +261,11 @@ class DocumentBulkService {
       options,
       async docId => {
         const Document = mongoose.model('Document');
+        // workflowStatus is a String enum, not a subdoc — the old
+        // 'workflowStatus.currentState' dotted write was a phantom (silently
+        // dropped) so bulk status change was a no-op.
         await Document.findByIdAndUpdate(docId, {
-          'workflowStatus.currentState': status,
+          workflowStatus: status,
           lastModified: new Date(),
         });
         return { status: 'success', message: `تم تحديث الحالة: ${status}` };

@@ -1988,6 +1988,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-guard.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/phantom-write-document-center.test.js'
+      - 'backend/__tests__/phantom-schema-fields.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dedicated-comms-document-models-wave1540.test.js'
       - 'backend/__tests__/dedicated-comms-document-models-behavioral-wave1540.test.js'
       - 'backend/__tests__/icf-assessment-w340-collision-wave1542.test.js'
@@ -3958,6 +3961,9 @@ on:
       - 'backend/__tests__/medication-safety.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-guard.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/phantom-write-document-center.test.js'
+      - 'backend/__tests__/phantom-schema-fields.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/dedicated-comms-document-models-wave1540.test.js'
       - 'backend/__tests__/dedicated-comms-document-models-behavioral-wave1540.test.js'

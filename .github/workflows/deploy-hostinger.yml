@@ -450,7 +450,11 @@ jobs:
             else
               echo "⚠️  alawael-api not found in alawael's pm2 — check VPS state"
             fi
-            nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
+            # reload-or-restart (NOT plain reload): if nginx is stopped, a plain
+            # `reload` silently no-ops and the site stays down; reload-or-restart
+            # STARTS it. `enable` ensures nginx survives a reboot. (2026-06-29)
+            nginx -t 2>/dev/null && systemctl reload-or-restart nginx 2>/dev/null || true
+            systemctl enable nginx 2>/dev/null || true
             echo "✅ Services restarted"
           REMOTE_SCRIPT
       - name: Stamp deployment

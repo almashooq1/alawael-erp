@@ -73,7 +73,7 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     set('PayrollRun', '../../models/HR/PayrollRun');
     set('SmartAttendance', '../../models/smart-attendance');
     set('PerformanceEvaluation', '../../models/PerformanceEvaluation');
-    set('User', '../../models/user.model');
+    set('User', '../../models/User');
     return engineModels;
   }
 

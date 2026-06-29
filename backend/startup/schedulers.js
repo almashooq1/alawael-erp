@@ -189,7 +189,7 @@ function setupSchedulers({ isTestEnv }) {
       tryModel('PayrollRun', '../models/HR/PayrollRun');
       tryModel('SmartAttendance', '../models/smart-attendance');
       tryModel('PerformanceEvaluation', '../models/PerformanceEvaluation');
-      tryModel('User', '../models/user.model');
+      tryModel('User', '../models/User');
 
       let notifier = null;
       try {

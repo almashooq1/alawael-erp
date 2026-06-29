@@ -1072,3 +1072,4 @@ __tests__/inventory-receive-stockcount-integrity.test.js
 __tests__/branch-isolation-finance-module.test.js
 __tests__/finance-money-integrity.test.js
 __tests__/transport-trip-safety.test.js
+__tests__/medication-safety.test.js

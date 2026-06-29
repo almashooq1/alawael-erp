@@ -177,18 +177,33 @@ router.post('/:id/administer', requireRole(ADMINISTER_ROLES), async (req, res) =
         message: 'الدواء المراقَب يتطلب شاهداً (witnessedBy/witnessedByName)',
       });
     }
-    row.status = 'administered';
-    row.actualTime = new Date();
-    row.administeredBy = req.user?.id || null;
-    row.administeredByName = req.user?.name || body.administeredByName || '';
+    // administeredByName is derived strictly from the authenticated user (no client
+    // fallback — it's part of the controlled-drug audit trail).
+    const $set = {
+      status: 'administered',
+      actualTime: new Date(),
+      administeredBy: req.user?.id || null,
+      administeredByName: req.user?.name || '',
+    };
     if (body.witnessedBy && mongoose.isValidObjectId(body.witnessedBy)) {
-      row.witnessedBy = body.witnessedBy;
+      $set.witnessedBy = body.witnessedBy;
     }
-    if (body.witnessedByName) row.witnessedByName = String(body.witnessedByName).slice(0, 100);
-    if (body.sideEffects) row.sideEffects = String(body.sideEffects).slice(0, 500);
-    if (body.notes) row.notes = String(body.notes).slice(0, 500);
-    await row.save();
-    res.json({ success: true, data: row });
+    if (body.witnessedByName) $set.witnessedByName = String(body.witnessedByName).slice(0, 100);
+    if (body.sideEffects) $set.sideEffects = String(body.sideEffects).slice(0, 500);
+    if (body.notes) $set.notes = String(body.notes).slice(0, 500);
+    // Atomic conditional transition: only flip a still-scheduled/held dose so two
+    // concurrent /administer requests can't both record an administration (double-dose).
+    const updated = await MAR.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req), status: { $in: ['scheduled', 'held'] } },
+      { $set },
+      { returnDocument: 'after', runValidators: true }
+    );
+    if (!updated) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'تم تعاطي الجرعة بالفعل أو تغيّرت حالتها' });
+    }
+    res.json({ success: true, data: updated });
   } catch (err) {
     return safeError(res, err, 'mar.administer');
   }
@@ -204,8 +219,11 @@ router.post('/:id/refuse', requireRole(ADMINISTER_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الرفض مطلوب' });
     }
+    // status precondition: only a not-yet-given dose can be refused (refusing an
+    // already-'administered' dose would overwrite its actualTime/administeredBy
+    // and falsify the record).
     const row = await MAR.findOneAndUpdate(
-      { _id: req.params.id, ...branchFilter(req) },
+      { _id: req.params.id, ...branchFilter(req), status: { $in: ['scheduled', 'held'] } },
       {
         status: 'refused',
         actualTime: new Date(),
@@ -215,7 +233,10 @@ router.post('/:id/refuse', requireRole(ADMINISTER_ROLES), async (req, res) => {
       },
       { returnDocument: 'after', runValidators: true }
     );
-    if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
+    if (!row)
+      return res
+        .status(404)
+        .json({ success: false, message: 'السجل غير موجود أو لا يمكن رفض جرعة بحالته الحالية' });
     res.json({ success: true, data: row });
   } catch (err) {
     return safeError(res, err, 'mar.refuse');
@@ -232,12 +253,18 @@ router.post('/:id/hold', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الإيقاف مطلوب' });
     }
+    // status precondition: only a still-'scheduled' dose can be held (holding an
+    // already-administered/refused dose corrupts the record, and 'held' is
+    // re-administerable → would enable a second dose).
     const row = await MAR.findOneAndUpdate(
-      { _id: req.params.id, ...branchFilter(req) },
+      { _id: req.params.id, ...branchFilter(req), status: 'scheduled' },
       { status: 'held', notes: reason.slice(0, 500) },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true }
     );
-    if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
+    if (!row)
+      return res
+        .status(404)
+        .json({ success: false, message: 'السجل غير موجود أو لا يمكن إيقاف جرعة بحالته الحالية' });
     res.json({ success: true, data: row });
   } catch (err) {
     return safeError(res, err, 'mar.hold');

@@ -270,9 +270,22 @@ router.put('/prescriptions/:id', async (req, res) => {
   try {
     const existing = await scopedPrescriptionById(req, req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    // Whitelist editable clinical fields only — stripUpdateMeta merely removes a
+    // prototype-pollution blacklist, so it let any caller forge status/verifiedBy/
+    // beneficiary (self-verify a prescription, re-point it to another beneficiary,
+    // bypass the dedicated /verify + /cancel transitions). Lifecycle + identity
+    // fields are intentionally NOT editable here.
+    const PRESCRIPTION_UPDATABLE = [
+      'medications',
+      'diagnosis',
+      'notes',
+      'startDate',
+      'endDate',
+      'refills',
+    ];
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
-      stripUpdateMeta(req.body),
+      pick(req.body, PRESCRIPTION_UPDATABLE),
       { returnDocument: 'after', runValidators: true }
     );
     if (!prescription)

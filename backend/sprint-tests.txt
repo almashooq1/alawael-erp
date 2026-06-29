@@ -1069,3 +1069,4 @@ __tests__/smart-assessment-engine-behavioral.test.js
 __tests__/inventory-correctness-bugfix.test.js
 __tests__/branch-isolation-inventory-module.test.js
 __tests__/inventory-receive-stockcount-integrity.test.js
+__tests__/branch-isolation-finance-module.test.js

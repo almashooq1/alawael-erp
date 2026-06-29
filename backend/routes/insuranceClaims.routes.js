@@ -248,7 +248,7 @@ router.get('/contracts', async (req, res) => {
   }
 });
 
-router.get('/contracts/:id', async (req, res) => {
+router.get('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
     const contract = await InsuranceContract.findById(req.params.id);
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
@@ -298,7 +298,7 @@ router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   }
 });
 
-router.delete('/contracts/:id', async (req, res) => {
+router.delete('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
     await InsuranceContract.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف العقد بنجاح' });
@@ -598,6 +598,27 @@ router.post(
   }
 );
 
+// Fields a PUT may edit. Money (total*/share), lifecycle (status/submission*/
+// adjudication/payment/resubmission/nphiesData) and identity (beneficiary/
+// contract/claimNumber) are intentionally EXCLUDED — those move only through
+// /submit, /adjudicate and item totals. stripUpdateMeta did NOT strip them, so
+// the old PUT let any in-branch user forge status:'paid' + payment.amount
+// (money fabrication + state-machine bypass).
+const CLAIM_UPDATABLE = [
+  'claimType',
+  'priority',
+  'membershipNumber',
+  'visitDate',
+  'admissionDate',
+  'dischargeDate',
+  'provider',
+  'diagnosis',
+  'procedures',
+  'preAuthorization',
+  'attachments',
+  'notes',
+];
+
 router.put('/claims/:id', async (req, res) => {
   try {
     const { doc: scoped, denied } = await fetchScopedByBeneficiary(
@@ -608,8 +629,8 @@ router.put('/claims/:id', async (req, res) => {
       { select: 'beneficiary', lean: true }
     );
     if (denied) return;
-    const body = stripUpdateMeta(req.body);
-    delete body.beneficiary;
+    const body = {};
+    for (const k of CLAIM_UPDATABLE) if (k in req.body) body[k] = req.body[k];
     const claim = await InsuranceClaim.findByIdAndUpdate(scoped._id, body, {
       returnDocument: 'after',
       runValidators: true,
@@ -676,7 +697,9 @@ router.patch(
   '/claims/:id/adjudicate',
   [
     mongoId('id'),
-    body('approvedAmount').isNumeric().withMessage('المبلغ المعتمد يجب أن يكون رقماً'),
+    body('approvedAmount').isFloat({ min: 0 }).withMessage('المبلغ المعتمد يجب أن يكون رقماً غير سالب'),
+    body('deniedAmount').optional().isFloat({ min: 0 }),
+    body('adjustmentAmount').optional().isFloat({ min: 0 }),
     validate,
   ],
   async (req, res) => {
@@ -689,6 +712,24 @@ router.patch(
         res
       );
       if (denied) return;
+
+      // state-machine guard: only an in-flight claim may be adjudicated — block
+      // adjudicating an un-submitted draft or RE-adjudicating a settled claim
+      // (paid/cancelled/voided), which would overwrite a finalized adjudication
+      // and corrupt reconciliation.
+      const NON_ADJUDICABLE = ['draft', 'paid', 'partially_paid', 'cancelled', 'voided'];
+      if (NON_ADJUDICABLE.includes(claim.status)) {
+        return res
+          .status(409)
+          .json({ success: false, message: `لا يمكن تسوية مطالبة بحالة "${claim.status}"` });
+      }
+      // approved amount cannot exceed the claim's net (over-approval).
+      if (Number(approvedAmount) > claim.totalNet) {
+        return res.status(400).json({
+          success: false,
+          message: 'المبلغ المعتمد لا يمكن أن يتجاوز صافي المطالبة',
+        });
+      }
 
       claim.adjudication = {
         processDate: new Date(),
@@ -793,14 +834,32 @@ router.post(
   }
 );
 
-router.delete('/claim-items/:id', async (req, res) => {
+router.delete('/claim-items/:id', [mongoId('id'), validate], async (req, res) => {
   try {
-    const item = await ClaimItem.findByIdAndUpdate(
-      req.params.id,
-      { isDeleted: true },
-      { returnDocument: 'after' }
-    );
+    const item = await ClaimItem.findById(req.params.id).select('claim isDeleted');
     if (!item) return res.status(404).json({ success: false, message: 'البند غير موجود' });
+    // a claim item has no branch — its tenant is the parent claim's beneficiary;
+    // verify the caller may touch that beneficiary before mutating (was a
+    // cross-tenant IDOR: any in-branch user could soft-delete another tenant's
+    // claim line item by id, tampering with foreign claim totals/PHI).
+    const claim = await InsuranceClaim.findById(item.claim).select('beneficiary');
+    if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, claim.beneficiary, res);
+    if (denied) return;
+
+    item.isDeleted = true;
+    await item.save();
+
+    // keep the parent claim's totals consistent after removing a line item
+    const allItems = await ClaimItem.find({ claim: item.claim, isDeleted: { $ne: true } });
+    const totalNet = allItems.reduce((sum, i) => sum + (i.totalNet || 0), 0);
+    const totalDiscount = allItems.reduce((sum, i) => sum + (i.discount || 0), 0);
+    await InsuranceClaim.findByIdAndUpdate(item.claim, {
+      totalGross: totalNet + totalDiscount,
+      totalNet,
+      totalDiscount,
+    });
+
     res.json({ success: true, message: 'تم حذف البند بنجاح' });
   } catch (error) {
     safeError(res, error, '[InsuranceClaims] Delete claim item error');

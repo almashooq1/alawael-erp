@@ -15,6 +15,35 @@ const logger = require('../utils/logger');
 const { AppError } = require('../errors/AppError');
 const { escapeRegex } = require('../utils/sanitize');
 
+// Anti-mass-assignment: the booking routes pass req.body straight through, so
+// every Appointment field used to be settable by the caller — including the
+// lifecycle/audit fields. We whitelist what a caller may set on create vs update.
+// `status` is intentionally OMITTED from create (new appointments must start at
+// the schema default PENDING and move only via confirm/cancel/complete or a
+// tracked update); audit/system fields are never client-writable.
+const APPOINTMENT_CREATABLE = [
+  'beneficiary', 'beneficiaryName', 'beneficiaryPhone', 'bookedByName',
+  'therapist', 'therapistName', 'department', 'type', 'date', 'startTime',
+  'endTime', 'duration', 'room', 'location', 'priority', 'reason', 'notes',
+  'recurrence', 'recurrenceEnd', 'reminders', 'insuranceApprovalRequired',
+  'estimatedCost', 'source', 'branchId',
+];
+// Update keeps the tracked `status` path (see updateAppointment) + edit fields,
+// but never the audit/system fields (statusHistory/cancelledBy/cancelledAt/
+// createdBy/bookedBy/appointmentNumber/branchId/lifecycleCancellationTag/…).
+const APPOINTMENT_UPDATABLE = [
+  'therapist', 'therapistName', 'department', 'type', 'date', 'startTime',
+  'endTime', 'duration', 'room', 'location', 'priority', 'reason', 'notes',
+  'internalNotes', 'recurrence', 'recurrenceEnd', 'reminders', 'beneficiaryName',
+  'beneficiaryPhone', 'status', 'insuranceApprovalRequired', 'estimatedCost',
+];
+const pick = (obj, fields) => {
+  const out = {};
+  if (!obj) return out;
+  for (const k of fields) if (obj[k] !== undefined) out[k] = obj[k];
+  return out;
+};
+
 class AppointmentService {
   // ─── APPOINTMENT CRUD ───────────────────────────────────────────────
 
@@ -49,8 +78,9 @@ class AppointmentService {
     }
 
     const appointment = new Appointment({
-      ...data,
+      ...pick(data, APPOINTMENT_CREATABLE),
       createdBy: userId,
+      bookedBy: userId,
       reminders: data.reminders || [
         { type: 'sms', minutesBefore: 60 },
         { type: 'push', minutesBefore: 30 },
@@ -205,7 +235,7 @@ class AppointmentService {
       });
     }
 
-    Object.assign(apt, data);
+    Object.assign(apt, pick(data, APPOINTMENT_UPDATABLE));
     await apt.save();
     return apt;
   }

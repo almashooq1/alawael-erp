@@ -344,45 +344,6 @@ router.get('/routes', (_req, res) => {
 });
 
 /**
- * GET /api/v1/health/router-stack?q=<substr>
- * Introspects the LIVE Express router stack to report which paths are actually
- * mounted — diagnostic for "route file loads but endpoint 404s" (post-deploy
- * smoke drift; dualMount/dualMountAuth don't populate routeHealth). `?q` filters
- * (recommended); omit for the full list (capped at 500).
- */
-router.get('/router-stack', (req, res) => {
-  try {
-    const out = [];
-    const walk = (stack, prefix) => {
-      if (!stack) return;
-      for (const layer of stack) {
-        if (layer.route && layer.route.path) {
-          out.push(prefix + layer.route.path);
-        } else if (layer.handle && layer.handle.stack) {
-          let mp = '';
-          try {
-            mp = layer.regexp.source
-              .replace(/\\\/\?\(\?=\\\/\|\$\)/, '')
-              .replace(/^\^/, '')
-              .replace(/\$$/, '')
-              .replace(/\\\//g, '/');
-          } catch (_) {
-            /* unparseable mount regexp — keep prefix only */
-          }
-          walk(layer.handle.stack, prefix + mp);
-        }
-      }
-    };
-    walk(req.app && req.app._router && req.app._router.stack, '');
-    const q = typeof req.query.q === 'string' ? req.query.q : '';
-    const paths = [...new Set(out)].filter(p => !q || p.includes(q)).sort();
-    res.json({ success: true, total: out.length, matched: paths.length, paths: paths.slice(0, 500) });
-  } catch (err) {
-    return safeError(res, err, 'health router-stack');
-  }
-});
-
-/**
  * GET /api/v1/health/domains
  * Domain registry health — lists every BaseDomainModule, whether it
  * initialized, what prefix it mounted on, and how many routes it owns.

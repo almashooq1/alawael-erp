@@ -5,168 +5,184 @@ const { Schema } = mongoose;
  * ICF Assessment Schema
  * نموذج تقييم ICF
  */
-const ICFScoreSchema = new Schema({
-  code: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  performance: {
-    type: Number,
-    min: 0,
-    max: 9,
-    default: 8,
-  },
-  capacity: {
-    type: Number,
-    min: 0,
-    max: 9,
-    default: 8,
-  },
-  environmental: {
-    type: Number,
-    min: -4,
-    max: 9,
-    default: 8,
-  },
-  notes: {
-    type: String,
-    trim: true,
-  },
-  linkedGoals: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Goal',
-  }],
-}, { _id: false });
-
-const ICFAssessmentSchema = new Schema({
-  beneficiary: {
-    type: Schema.Types.ObjectId,
-    ref: 'Beneficiary',
-    required: true,
-    index: true,
-  },
-  assessor: {
-    type: Schema.Types.ObjectId,
-    ref: 'Employee',
-    required: true,
-  },
-  coreSetType: {
-    type: String,
-    enum: ['rehab', 'autism', 'cp', 'custom'],
-    default: 'rehab',
-    required: true,
-  },
-  scores: {
-    type: Map,
-    of: ICFScoreSchema,
-    default: new Map(),
-  },
-  domainScores: {
-    bodyFunctions: {
+const ICFScoreSchema = new Schema(
+  {
+    code: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    performance: {
       type: Number,
       min: 0,
-      max: 4,
+      max: 9,
+      default: 8,
     },
-    bodyStructures: {
+    capacity: {
       type: Number,
       min: 0,
-      max: 4,
+      max: 9,
+      default: 8,
     },
-    activitiesAndParticipation: {
-      type: Number,
-      min: 0,
-      max: 4,
-    },
-    environmentalFactors: {
+    environmental: {
       type: Number,
       min: -4,
-      max: 4,
+      max: 9,
+      default: 8,
     },
-    personalFactors: {
+    notes: {
+      type: String,
+      trim: true,
+    },
+    linkedGoals: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Goal',
+      },
+    ],
+  },
+  { _id: false }
+);
+
+const ICFAssessmentSchema = new Schema(
+  {
+    beneficiary: {
+      type: Schema.Types.ObjectId,
+      ref: 'Beneficiary',
+      required: true,
+      index: true,
+    },
+    assessor: {
+      type: Schema.Types.ObjectId,
+      ref: 'Employee',
+      required: true,
+    },
+    coreSetType: {
+      type: String,
+      enum: ['rehab', 'autism', 'cp', 'custom'],
+      default: 'rehab',
+      required: true,
+    },
+    scores: {
+      type: Map,
+      of: ICFScoreSchema,
+      default: new Map(),
+    },
+    domainScores: {
+      bodyFunctions: {
+        type: Number,
+        min: 0,
+        max: 4,
+      },
+      bodyStructures: {
+        type: Number,
+        min: 0,
+        max: 4,
+      },
+      activitiesAndParticipation: {
+        type: Number,
+        min: 0,
+        max: 4,
+      },
+      environmentalFactors: {
+        type: Number,
+        min: -4,
+        max: 4,
+      },
+      personalFactors: {
+        type: Number,
+        min: 0,
+        max: 4,
+      },
+    },
+    overallScore: {
       type: Number,
       min: 0,
       max: 4,
     },
-  },
-  overallScore: {
-    type: Number,
-    min: 0,
-    max: 4,
-  },
-  status: {
-    type: String,
-    enum: ['draft', 'completed', 'archived'],
-    default: 'draft',
-    index: true,
-  },
-  assessmentDate: {
-    type: Date,
-    default: Date.now,
-    required: true,
-    index: true,
-  },
-  nextAssessmentDate: {
-    type: Date,
-  },
-  notes: {
-    type: String,
-    trim: true,
-  },
-  recommendations: [{
-    priority: {
+    status: {
       type: String,
-      enum: ['high', 'medium', 'low'],
+      enum: ['draft', 'completed', 'archived'],
+      default: 'draft',
+      index: true,
     },
-    domain: String,
-    recommendation: String,
-    interventions: [String],
-    timeline: String,
-  }],
-  linkedGoals: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Goal',
-  }],
-  environmentalBarriers: [{
-    code: String,
-    description: String,
-    severity: {
+    assessmentDate: {
+      type: Date,
+      default: Date.now,
+      required: true,
+      index: true,
+    },
+    nextAssessmentDate: {
+      type: Date,
+    },
+    notes: {
+      type: String,
+      trim: true,
+    },
+    recommendations: [
+      {
+        priority: {
+          type: String,
+          enum: ['high', 'medium', 'low'],
+        },
+        domain: String,
+        recommendation: String,
+        interventions: [String],
+        timeline: String,
+      },
+    ],
+    linkedGoals: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Goal',
+      },
+    ],
+    environmentalBarriers: [
+      {
+        code: String,
+        description: String,
+        severity: {
+          type: Number,
+          min: 1,
+          max: 4,
+        },
+      },
+    ],
+    environmentalFacilitators: [
+      {
+        code: String,
+        description: String,
+        impact: {
+          type: Number,
+          min: 1,
+          max: 4,
+        },
+      },
+    ],
+    reliability: {
       type: Number,
-      min: 1,
-      max: 4,
+      min: 0,
+      max: 1,
     },
-  }],
-  environmentalFacilitators: [{
-    code: String,
-    description: String,
-    impact: {
+    standardError: {
       type: Number,
-      min: 1,
-      max: 4,
     },
-  }],
-  reliability: {
-    type: Number,
-    min: 0,
-    max: 1,
+    confidenceInterval: {
+      lower: Number,
+      upper: Number,
+      confidence: Number,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  standardError: {
-    type: Number,
-  },
-  confidenceInterval: {
-    lower: Number,
-    upper: Number,
-    confidence: Number,
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true },
-});
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 // Indexes
 ICFAssessmentSchema.index({ beneficiary: 1, assessmentDate: -1 });
@@ -175,7 +191,7 @@ ICFAssessmentSchema.index({ assessor: 1, assessmentDate: -1 });
 ICFAssessmentSchema.index({ coreSetType: 1, status: 1 });
 
 // Virtuals
-ICFAssessmentSchema.virtual('age').get(function() {
+ICFAssessmentSchema.virtual('age').get(function () {
   if (!this.assessmentDate) return null;
   const now = new Date();
   const assessmentDate = new Date(this.assessmentDate);
@@ -185,7 +201,7 @@ ICFAssessmentSchema.virtual('age').get(function() {
 });
 
 // Methods
-ICFAssessmentSchema.methods.calculateDomainScores = function() {
+ICFAssessmentSchema.methods.calculateDomainScores = function () {
   const scores = this.scores;
   const domains = {
     bodyFunctions: [],
@@ -199,15 +215,20 @@ ICFAssessmentSchema.methods.calculateDomainScores = function() {
   scores.forEach((score, code) => {
     const prefix = code.charAt(0);
     const domainMap = {
-      'b': 'bodyFunctions',
-      's': 'bodyStructures',
-      'd': 'activitiesAndParticipation',
-      'e': 'environmentalFactors',
-      'p': 'personalFactors',
+      b: 'bodyFunctions',
+      s: 'bodyStructures',
+      d: 'activitiesAndParticipation',
+      e: 'environmentalFactors',
+      p: 'personalFactors',
     };
 
     const domain = domainMap[prefix];
-    if (domain && score.performance !== undefined && score.performance !== 8 && score.performance !== 9) {
+    if (
+      domain &&
+      score.performance !== undefined &&
+      score.performance !== 8 &&
+      score.performance !== 9
+    ) {
       domains[domain].push(score.performance);
     }
   });
@@ -224,7 +245,7 @@ ICFAssessmentSchema.methods.calculateDomainScores = function() {
   return this.domainScores;
 };
 
-ICFAssessmentSchema.methods.calculateOverallScore = function() {
+ICFAssessmentSchema.methods.calculateOverallScore = function () {
   const domainScores = this.domainScores || {};
   const scores = Object.values(domainScores).filter(score => score !== undefined && score > 0);
 
@@ -238,7 +259,7 @@ ICFAssessmentSchema.methods.calculateOverallScore = function() {
   return this.overallScore;
 };
 
-ICFAssessmentSchema.methods.compareWith = function(otherAssessment) {
+ICFAssessmentSchema.methods.compareWith = function (otherAssessment) {
   const improvements = {};
   const domains = Object.keys(this.domainScores || {});
 
@@ -262,7 +283,7 @@ ICFAssessmentSchema.methods.compareWith = function(otherAssessment) {
 };
 
 // Statics
-ICFAssessmentSchema.statics.findByPatient = function(patientId, options = {}) {
+ICFAssessmentSchema.statics.findByPatient = function (patientId, options = {}) {
   const { limit = 10, status, startDate, endDate } = options;
 
   const query = { beneficiary: patientId };
@@ -280,14 +301,14 @@ ICFAssessmentSchema.statics.findByPatient = function(patientId, options = {}) {
     .populate('linkedGoals', 'title status');
 };
 
-ICFAssessmentSchema.statics.findLatestByPatient = function(patientId) {
+ICFAssessmentSchema.statics.findLatestByPatient = function (patientId) {
   return this.findOne({ beneficiary: patientId, status: 'completed' })
     .sort({ assessmentDate: -1 })
     .populate('assessor', 'name role')
     .populate('linkedGoals', 'title status');
 };
 
-ICFAssessmentSchema.statics.getProgressData = function(patientId, timeRange = '6months') {
+ICFAssessmentSchema.statics.getProgressData = function (patientId, timeRange = '6months') {
   const now = new Date();
   const startDate = new Date();
 
@@ -317,7 +338,7 @@ ICFAssessmentSchema.statics.getProgressData = function(patientId, timeRange = '6
     .select('assessmentDate overallScore domainScores status');
 };
 
-ICFAssessmentSchema.statics.getStatistics = function(options = {}) {
+ICFAssessmentSchema.statics.getStatistics = function (options = {}) {
   const { startDate, endDate, coreSetType } = options;
   const query = { status: 'completed' };
 
@@ -354,4 +375,26 @@ ICFAssessmentSchema.pre('save', function () {
   }
 });
 
-module.exports = mongoose.model('ICFAssessment', ICFAssessmentSchema);
+// W340 / ADR-021 Pattern D — collision break.
+// This assessment-module ICF schema collided with the canonical
+// `models/icf/ICFAssessment.model.js`: BOTH registered the model name
+// 'ICFAssessment' with INCOMPATIBLE schemas (this one keys on `beneficiary` and
+// carries findByPatient/getProgressData/… statics; icf/ keys on `beneficiaryId`).
+// `models/index.js` loads icf/ first, so every TOP-LEVEL `require()` of this file
+// afterwards threw `Cannot overwrite 'ICFAssessment' model once compiled` — which
+// silently unmounted routes/smart-assessment-engine.routes.js (12 clinical scales)
+// via safeMount's catch and broke the ICF service cluster
+// (sessionICFLinker / icfReportExport / clinicalDashboard / icfGoalIntegration /
+//  integratedReport / parentPortal) + routes/mdt-coordination.routes.js.
+//
+// Fix: register under a DISTINCT model name on the SAME `icfassessments`
+// collection (so no data moves). The 8 consumers `require()` this FILE directly,
+// so the renamed registration is transparent to them; name-based lookups
+// (`mongoose.model('ICFAssessment')`) and `ref: 'ICFAssessment'` now resolve
+// deterministically to the canonical icf/ schema. The proper end-state —
+// consolidating both clusters onto ONE schema — remains a separate ADR-021 task.
+const ICFAssessment =
+  mongoose.models.ICFAssessmentLegacy ||
+  mongoose.model('ICFAssessmentLegacy', ICFAssessmentSchema, 'icfassessments');
+
+module.exports = ICFAssessment;

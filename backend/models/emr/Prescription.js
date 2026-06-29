@@ -11,7 +11,19 @@ const MedicationItemSchema = new Schema(
     dosage: { type: String, required: true },
     route: {
       type: String,
-      enum: ['oral', 'iv', 'im', 'sc', 'topical', 'inhalation', 'rectal', 'ocular', 'otic', 'nasal', 'other'],
+      enum: [
+        'oral',
+        'iv',
+        'im',
+        'sc',
+        'topical',
+        'inhalation',
+        'rectal',
+        'ocular',
+        'otic',
+        'nasal',
+        'other',
+      ],
       default: 'oral',
     },
     frequency: { type: String, required: true },
@@ -73,9 +85,8 @@ const PrescriptionSchema = new Schema(
 );
 
 PrescriptionSchema.index({ beneficiary: 1, prescribedDate: -1 });
-PrescriptionSchema.index({ prescriptionNumber: 1 });
+// prescriptionNumber index is provided by `unique: true` on the field — no separate index()
 PrescriptionSchema.index({ status: 1 });
 
 module.exports =
-  mongoose.models.EmrPrescription ||
-  mongoose.model('EmrPrescription', PrescriptionSchema);
+  mongoose.models.EmrPrescription || mongoose.model('EmrPrescription', PrescriptionSchema);

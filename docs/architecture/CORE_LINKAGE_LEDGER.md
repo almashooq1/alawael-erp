@@ -219,3 +219,34 @@ and the remaining work is now a list — not a discovery.
 
 _See agent memory `project_core_linkage_silent_failures_2026-06-05` for the
 full incident detail + the per-wave PR list (PRs #276 W970 … #316 W985, + W986)._
+
+---
+
+## 7. EMR / clinical-document linkage + ledger acknowledgements (2026-06-29)
+
+`check:core-linkage` flagged 10 beneficiary-keyed models with no core emission.
+Resolved as follows:
+
+### Wired into the timeline (via `integration/modelEventBridge.js` MAPPINGS)
+
+These reuse the existing LIVE contracts `medical.record.created` and
+`beneficiary.assessment.completed` (no new contracts), so each now surfaces on
+the beneficiary CareTimeline on create:
+
+| Model                      | File                                     | Contract                           |
+| -------------------------- | ---------------------------------------- | ---------------------------------- |
+| `LabResult`                | `models/emr/LabResult.js`                | `medical.record.created`           |
+| `VitalSigns`               | `models/emr/VitalSigns.js`               | `medical.record.created`           |
+| `MedicationAdministration` | `models/emr/MedicationAdministration.js` | `medical.record.created`           |
+| `AllergyRecord`            | `models/emr/AllergyRecord.js`            | `medical.record.created`           |
+| `ImmunizationRecord`       | `models/emr/ImmunizationRecord.js`       | `medical.record.created`           |
+| `ElectronicDirective`      | `models/ElectronicDirective.js`          | `medical.record.created`           |
+| `StudentCertificate`       | `models/StudentCertificate.js`           | `medical.record.created`           |
+| `ICFAssessment`            | `models/assessment/ICFAssessment.js`     | `beneficiary.assessment.completed` |
+
+### Acknowledged as intentionally NOT timeline-linked (this ledger entry)
+
+| Model             | File                                  | Why no timeline emission                                                                                                        |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `ParentPortal`    | `models/ParentPortal/ParentPortal.js` | Guardian portal **account/access** record, not a clinical event — would be timeline noise on every credential/preference write. |
+| `WhatsAppMessage` | `models/WhatsAppMessage.js`           | Outbound/inbound **comms log** with its own channel + dashboards; per-message timeline emission would be high-volume noise.     |

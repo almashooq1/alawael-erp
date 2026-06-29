@@ -14,7 +14,18 @@ const fieldSchema = new mongoose.Schema(
     label: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ['text', 'number', 'date', 'select', 'multiselect', 'textarea', 'checkbox', 'signature', 'image', 'table'],
+      enum: [
+        'text',
+        'number',
+        'date',
+        'select',
+        'multiselect',
+        'textarea',
+        'checkbox',
+        'signature',
+        'image',
+        'table',
+      ],
       required: true,
     },
     required: { type: Boolean, default: false },
@@ -76,4 +87,10 @@ reportTemplateSchema.index({ category: 1, isActive: 1 });
 reportTemplateSchema.index({ createdBy: 1, category: 1 });
 reportTemplateSchema.index({ tags: 1 });
 
-module.exports = mongoose.model('ReportTemplate', reportTemplateSchema);
+// W340 crash-guard — see models/analytics/ReportTemplate.js for the full note.
+// Three files register 'ReportTemplate' with different schemas; the bare
+// registrations threw OverwriteModelError on second load. The `models.X ||`
+// guard removes the runtime crash only (ADR-023 canonical consolidation remains
+// stakeholder-gated; W340 still flags the duplication).
+module.exports =
+  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema);

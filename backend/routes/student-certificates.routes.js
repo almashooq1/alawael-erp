@@ -21,6 +21,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+require('../models/StudentCertificate'); // register model for safeModel() lookup
 
 const router = express.Router();
 router.use(authenticate);
@@ -37,7 +38,7 @@ const safeModel = name => {
 // ── GET / ──────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document) return res.json({ success: true, data: [], pagination: { total: 0 } });
     const { page = 1, limit = 20, beneficiaryId, certType, status } = req.query;
     const filter = {
@@ -71,7 +72,7 @@ router.post('/generate', requireRole('admin', 'manager', 'supervisor'), async (r
       return res
         .status(400)
         .json({ success: false, message: 'beneficiaryId and certificateType are required' });
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const verificationCode = crypto.randomBytes(8).toString('hex').toUpperCase();
@@ -114,7 +115,7 @@ router.get('/types', (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────────────
 router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.json({
         success: true,
@@ -141,7 +142,7 @@ router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, 
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOne({
@@ -160,7 +161,7 @@ router.get('/:id', async (req, res) => {
 router.delete('/:id', requireRole('admin', 'manager'), async (req, res) => {
   try {
     const { reason } = req.body;
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -183,7 +184,7 @@ router.delete('/:id', requireRole('admin', 'manager'), async (req, res) => {
 // ── GET /:id/download ──────────────────────────────────────────────────────
 router.get('/:id/download', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOne({
@@ -217,7 +218,7 @@ router.post('/verify', async (req, res) => {
     const { code } = req.body;
     if (!code)
       return res.status(400).json({ success: false, message: 'Verification code is required' });
-    const Document = safeModel('Document');
+    const Document = safeModel('StudentCertificate');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOne({

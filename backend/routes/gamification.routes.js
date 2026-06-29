@@ -6,13 +6,19 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const gamificationService = require('../services/gamification.service');
 const { Gamification } = require('../models/Gamification');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
-// ─── All routes require authentication ─────────────────────────
+// ─── All routes require authentication + branch isolation ──────
+// W269: branch-check every `:beneficiaryId` lookup (fail-open for cross-branch
+// roles / unscoped callers; enforced for restricted staff).
 router.use(authenticate);
+router.use(requireBranchAccess);
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 // ─── GET /profile/:beneficiaryId ─────────────────────────────
 router.get('/profile/:beneficiaryId', async (req, res) => {
@@ -30,7 +36,9 @@ router.post('/award-points', async (req, res) => {
   try {
     const { beneficiaryId, points, reason } = req.body;
     if (!beneficiaryId || points == null) {
-      return res.status(400).json({ success: false, message: 'beneficiaryId and points are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'beneficiaryId and points are required' });
     }
     const profile = await gamificationService.awardPoints(beneficiaryId, points, reason);
     res.json({ success: true, data: profile });
@@ -72,7 +80,9 @@ router.patch('/challenges/:challengeId/progress', async (req, res) => {
   try {
     const { beneficiaryId, progress } = req.body;
     if (!beneficiaryId || progress == null) {
-      return res.status(400).json({ success: false, message: 'beneficiaryId and progress are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'beneficiaryId and progress are required' });
     }
     const result = await gamificationService.updateChallengeProgress(
       beneficiaryId,

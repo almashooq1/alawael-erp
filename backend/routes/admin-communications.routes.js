@@ -22,6 +22,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+require('../models/CommunicationRecord'); // register model for safeModel() lookup
 
 const router = express.Router();
 router.use(authenticate);
@@ -39,7 +40,7 @@ const safeModel = name => {
 // ── GET /overview ──────────────────────────────────────────────────────────
 router.get('/overview', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.json({
         success: true,
@@ -79,7 +80,7 @@ router.get('/overview', async (req, res) => {
 // ── GET /queue ─────────────────────────────────────────────────────────────
 router.get('/queue', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [] });
     const { page = 1, limit = 20, channel, priority } = req.query;
     const filter = {
@@ -114,7 +115,7 @@ router.patch('/queue/:id/assign', async (req, res) => {
     const { assignedTo } = req.body;
     if (!assignedTo)
       return res.status(400).json({ success: false, message: 'assignedTo is required' });
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -133,7 +134,7 @@ router.patch('/queue/:id/assign', async (req, res) => {
 router.patch('/queue/:id/escalate', async (req, res) => {
   try {
     const { escalateTo, reason } = req.body;
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -159,7 +160,7 @@ router.patch('/queue/:id/escalate', async (req, res) => {
 router.patch('/queue/:id/close', async (req, res) => {
   try {
     const { resolution } = req.body;
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -177,7 +178,7 @@ router.patch('/queue/:id/close', async (req, res) => {
 // ── GET /staff-metrics ─────────────────────────────────────────────────────
 router.get('/staff-metrics', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [] });
     const metrics = await Communication.aggregate([
       { $match: { branchId: req.user.branchId, assignedTo: { $exists: true } } },
@@ -198,7 +199,7 @@ router.get('/staff-metrics', async (req, res) => {
 // ── GET /sla-breaches ──────────────────────────────────────────────────────
 router.get('/sla-breaches', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [], total: 0 });
     const slaThresholdMs = 4 * 60 * 60 * 1000; // 4 hours
     const data = await Communication.find({
@@ -220,7 +221,7 @@ router.post('/bulk-action', async (req, res) => {
     const { ids = [], action, assignedTo, resolution } = req.body;
     if (!ids.length || !action)
       return res.status(400).json({ success: false, message: 'ids and action are required' });
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     let update = {};
@@ -249,7 +250,7 @@ router.post('/bulk-action', async (req, res) => {
 // ── GET /audit-log ─────────────────────────────────────────────────────────
 router.get('/audit-log', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [] });
     const { page = 1, limit = 50, startDate, endDate } = req.query;
     const filter = { branchId: req.user.branchId };

@@ -47,6 +47,7 @@ if (mongoose.models.Notification) {
           'maintenance',
           'general',
           'notification',
+          'announcement',
         ],
         default: 'info',
       },

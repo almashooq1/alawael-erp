@@ -23,7 +23,16 @@ const ReferralSchema = new Schema(
     referralDate: { type: Date, default: Date.now, required: true },
     referralType: {
       type: String,
-      enum: ['internal', 'external', 'emergency', 'routine', 'specialist', 'diagnostic', 'therapy', 'surgical'],
+      enum: [
+        'internal',
+        'external',
+        'emergency',
+        'routine',
+        'specialist',
+        'diagnostic',
+        'therapy',
+        'surgical',
+      ],
       default: 'routine',
     },
     department: String,
@@ -76,8 +85,6 @@ const ReferralSchema = new Schema(
 
 ReferralSchema.index({ beneficiary: 1, referralDate: -1 });
 ReferralSchema.index({ status: 1, urgency: 1 });
-ReferralSchema.index({ referralNumber: 1 });
+// referralNumber index is provided by `unique: true` on the field — no separate index()
 
-module.exports =
-  mongoose.models.EmrReferral ||
-  mongoose.model('EmrReferral', ReferralSchema);
+module.exports = mongoose.models.EmrReferral || mongoose.model('EmrReferral', ReferralSchema);

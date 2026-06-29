@@ -174,7 +174,8 @@ ReportTemplateSchema.virtual('lastRunAgo').get(function () {
 // ── Static Methods ────────────────────────────────────────────────
 ReportTemplateSchema.statics.findByCategory = function (category, options = {}) {
   const query = { category, isActive: true };
-  if (options.visibility) query.visibility = { $in: ['public', 'organization', ...(options.team ? ['team'] : [])] };
+  if (options.visibility)
+    query.visibility = { $in: ['public', 'organization', ...(options.team ? ['team'] : [])] };
   return this.find(query).sort({ updatedAt: -1 }).lean();
 };
 
@@ -182,7 +183,9 @@ ReportTemplateSchema.statics.findScheduled = function () {
   return this.find({
     'schedule.enabled': true,
     isActive: true,
-  }).sort({ 'schedule.nextRunAt': 1 }).lean();
+  })
+    .sort({ 'schedule.nextRunAt': 1 })
+    .lean();
 };
 
 ReportTemplateSchema.statics.findDueForRun = function () {
@@ -245,4 +248,14 @@ ReportTemplateSchema.pre('save', function () {
   }
 });
 
-module.exports = mongoose.model('ReportTemplate', ReportTemplateSchema);
+// W340 crash-guard (NOT the ADR-023 canonical consolidation — that is still
+// stakeholder-gated). Three files register the name 'ReportTemplate' with
+// different schemas (analytics/ here, models/ReportTemplate.js, reports/). The
+// two bare `mongoose.model(name, schema)` registrations threw
+// `Cannot overwrite 'ReportTemplate' model once compiled` whenever the second
+// one loaded — crashing whichever consumer required it second (biAnalytics vs
+// domains/reports). The `models.X ||` guard removes ONLY that runtime crash;
+// it does not decide a canonical schema, so check:no-duplicate-model-registration
+// (ADR-023) still tracks the consolidation.
+module.exports =
+  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', ReportTemplateSchema);

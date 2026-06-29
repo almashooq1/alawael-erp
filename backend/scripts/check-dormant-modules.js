@@ -168,6 +168,7 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/finance/zatcaCalculation.service.js', // ⚠ ZATCA compliance — verify vs live zatca path first
   'services/gpsSecurityService.js', // entangled w/ W440 security drift-guard (verifyAPIKey timing-safe)
   'services/rehabilitation/RehabService.js', // deliberate module add; rehab system is fragmented (future ADR)
+  'services/smartGamification.service.js', // added 3mo ago (archive-cleanup 5dc79e471), never referenced; gamification.routes uses services/gamification.service.js instead — wire-vs-delete decision pending (ADR-030)
   // services/isolationForest.service.js — RATCHETED-DOWN 2026-06-20 (W340 repair):
   //   now wired via services/financeAnomaly.service.js + services/operationsAnomaly.service.js.
   //   No longer dormant.

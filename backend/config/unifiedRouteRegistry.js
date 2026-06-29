@@ -266,6 +266,11 @@ const ROUTES = [
   { path: '/api/v1/parent-portal', file: 'routes/parent-portal.routes', auth: true, roles: ['parent', 'guardian', 'admin', 'super_admin'], phase: 'student', description: 'Parent portal v2' },
   { path: '/api/chat-v2', file: 'routes/chat-v2.routes', auth: true, phase: 'messaging', description: 'Chat v2' },
   // ── 2026-06-29: complete _registry.js -> unified migration (were in dead legacy registries only) ──
+  { path: "/api/v1/admin/capa", file: "routes/capa-admin.routes", auth: true, phase: "quality", description: "CAPA admin", dualMount: true },
+  { path: "/api/v1/admin/nphies-claims", file: "routes/nphies-claims.routes", auth: true, phase: "finance", description: "NPHIES claims admin", dualMount: true },
+  { path: "/api/v1/admin/insurance-tariffs", file: "routes/insurance-tariffs-admin.routes", auth: true, phase: "finance", description: "Insurance tariffs admin", dualMount: true },
+  { path: "/api/v1/admin/pii-access-audit", file: "routes/pii-access-audit-admin.routes", auth: true, phase: "security", description: "PII access audit", dualMount: true },
+  { path: "/api/v1/admin/zatca-credentials", file: "routes/zatca-credentials-admin.routes", auth: true, phase: "government", description: "ZATCA credentials admin", dualMount: true },
   { path: "/api/v1/zatca-phase2", file: "routes/zatca-phase2.routes", auth: false, phase: "government", description: "ZATCA Phase 2 e-invoicing", dualMount: true },
   { path: "/api/v1/pdpl", file: "routes/pdpl.routes", auth: false, phase: "government", description: "PDPL retention/compliance", dualMount: true },
   { path: "/api/v1/management-review", file: "routes/managementReview.routes", auth: false, phase: "quality", description: "Management review (CBAHI)", dualMount: true },

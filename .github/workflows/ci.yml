@@ -135,7 +135,58 @@ jobs:
         # --omit=dev          → skip devDependencies to reduce noise
 
   # ═══════════════════════════════════════════════════════════════════
-  # Job 4: Build — Verify Docker image builds successfully
+  # Job 4: Performance Monitoring — Build frontend & check budgets
+  # ═══════════════════════════════════════════════════════════════════
+  performance:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, test]
+    if: always() && (needs.lint.result != 'failure' && needs.test.result != 'failure')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Check performance budget
+        run: node scripts/perf-budget-check.js
+
+      - name: Setup Node.js for backend
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install --legacy-peer-deps
+
+      - name: Run performance routes tests
+        working-directory: backend
+        run: npx jest __tests__/performance-routes.test.js --testTimeout=30000 --forceExit --detectOpenHandles
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-ci-only
+          MONGOMS_VERSION: '7.0'
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 5: Build — Verify Docker image builds successfully
   # ═══════════════════════════════════════════════════════════════════
   build:
     name: Docker Build Check

@@ -41,6 +41,18 @@ const OPTIONAL = [
     validate: v => /^https:\/\/.+@.+\.ingest\.sentry\.io\/.+/.test(v),
     hint: 'Sentry DSN URL format',
   },
+  {
+    key: 'REACT_APP_PERFORMANCE_MONITORING_ENABLED',
+    label: 'Performance Monitoring Enabled',
+    validate: v => /^(true|false)$/i.test(v),
+    hint: 'Must be "true" or "false"',
+  },
+  {
+    key: 'REACT_APP_WEB_VITALS_SAMPLE_RATE',
+    label: 'Web Vitals Sample Rate',
+    validate: v => /^\d*\.?\d+$/.test(v) && Number(v) >= 0 && Number(v) <= 1,
+    hint: 'Must be a number between 0 and 1',
+  },
 ];
 
 /**

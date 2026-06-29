@@ -9,7 +9,6 @@
 'use strict';
 
 const { getProviders, sendWithFallback } = require('./providers');
-const constants = require('./constants');
 const logger = require('../../utils/logger');
 
 class WhatsAppGateway {
@@ -31,21 +30,34 @@ class WhatsAppGateway {
    */
   async init() {
     if (!this.enabled) {
-      logger.info?.('[whatsapp] Gateway disabled — WHATSAPP_ENABLED is not true or no provider configured');
+      logger.info?.(
+        '[whatsapp] Gateway disabled — WHATSAPP_ENABLED is not true or no provider configured'
+      );
       return { ready: false, reason: 'disabled' };
     }
 
-    const primaryValidation = this.primary ? this.primary.validateConfig() : { valid: false, error: 'not_configured' };
+    const primaryValidation = this.primary
+      ? this.primary.validateConfig()
+      : { valid: false, error: 'not_configured' };
     if (!primaryValidation.valid && this.fallback) {
       const fallbackValidation = this.fallback.validateConfig();
       if (!fallbackValidation.valid) {
         this.enabled = false;
-        logger.error?.('[whatsapp] Both providers invalid:', primaryValidation.error, fallbackValidation.error);
+        logger.error?.(
+          '[whatsapp] Both providers invalid:',
+          primaryValidation.error,
+          fallbackValidation.error
+        );
         return { ready: false, reason: 'config_error' };
       }
     }
 
-    logger.info?.('[whatsapp] Gateway initialized — provider:', this.primary?.getName() || 'none', 'fallback:', this.fallback?.getName() || 'none');
+    logger.info?.(
+      '[whatsapp] Gateway initialized — provider:',
+      this.primary?.getName() || 'none',
+      'fallback:',
+      this.fallback?.getName() || 'none'
+    );
     return { ready: true };
   }
 
@@ -247,7 +259,7 @@ class WhatsAppGateway {
 
     try {
       const result = await sendWithFallback(
-        (provider) => provider[methodName](...args),
+        provider => provider[methodName](...args),
         this.primary,
         this.fallback
       );

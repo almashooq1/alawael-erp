@@ -283,6 +283,15 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Recruitment Scheduler initialization skipped:', err.message);
   }
 
+  // Initialize Performance Monitoring Scheduler
+  try {
+    const { startPerformanceScheduler } = require('./scheduler/performance.scheduler');
+    startPerformanceScheduler();
+    logger.info('⚡ Performance Monitoring Scheduler ready');
+  } catch (err) {
+    logger.info('Performance Scheduler initialization skipped:', err.message);
+  }
+
   // Quality & Compliance Schedulers (Phase 13) — wire 4 sweepers
   // that already shipped as services but were never booted. Each
   // uses qualityEventBus as dispatcher so emitted events fan out

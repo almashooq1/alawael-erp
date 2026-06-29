@@ -80,6 +80,9 @@ const ZatcaChainIntegrityAdmin = lazyWithRetry(
 // MFA Compliance — امتثال المصادقة الثنائية (BC-01 High P1)
 const MfaComplianceAdmin = lazyWithRetry(() => import('../pages/Admin/MfaComplianceAdmin'));
 
+// Performance Monitoring Dashboard — لوحة تحكم الأداء
+const PerformanceDashboard = lazyWithRetry(() => import('../pages/Admin/PerformanceDashboard'));
+
 export default function AdminRoutes() {
   return (
     <>
@@ -163,6 +166,16 @@ export default function AdminRoutes() {
 
       {/* MFA Compliance — امتثال المصادقة الثنائية (BC-01 High P1) */}
       <Route path="admin-portal/mfa-compliance" element={<MfaComplianceAdmin />} />
+
+      {/* Performance Monitoring Dashboard — لوحة تحكم الأداء */}
+      <Route
+        path="admin-portal/performance"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin', 'manager']}>
+            <PerformanceDashboard />
+          </RoleGuard>
+        }
+      />
 
       {/* System Settings — إعدادات النظام */}
       <Route

@@ -16,8 +16,10 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
   constructor(config = {}) {
     super(config);
     this.name = 'twilio';
-    this.accountSid = config.accountSid || process.env.TWILIO_WHATSAPP_SID || process.env.TWILIO_ACCOUNT_SID;
-    this.authToken = config.authToken || process.env.TWILIO_WHATSAPP_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
+    this.accountSid =
+      config.accountSid || process.env.TWILIO_WHATSAPP_SID || process.env.TWILIO_ACCOUNT_SID;
+    this.authToken =
+      config.authToken || process.env.TWILIO_WHATSAPP_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
     this.fromNumber = config.fromNumber || process.env.TWILIO_WHATSAPP_FROM;
     this.baseUrl = 'https://api.twilio.com/2010-04-01';
     this.enabled = !!(this.accountSid && this.authToken && this.fromNumber);
@@ -42,7 +44,10 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
       return { valid: false, error: 'TWILIO_WHATSAPP_AUTH_TOKEN or TWILIO_AUTH_TOKEN is required' };
     }
     if (!this.fromNumber) {
-      return { valid: false, error: 'TWILIO_WHATSAPP_FROM is required (e.g., whatsapp:+14155238886)' };
+      return {
+        valid: false,
+        error: 'TWILIO_WHATSAPP_FROM is required (e.g., whatsapp:+14155238886)',
+      };
     }
     return { valid: true };
   }
@@ -68,17 +73,17 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
         error: null,
         raw: message,
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         success: false,
         messageId: null,
-        error: err?.message || err?.code || String(err),
-        raw: err,
+        error: _err?.message || _err?.code || String(_err),
+        raw: _err,
       };
     }
   }
 
-  async sendText(to, message, options = {}) {
+  async sendText(to, message, _options = {}) {
     return this._sendViaRest(to, message);
   }
 
@@ -89,7 +94,7 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
     return this._sendViaRest(to, body);
   }
 
-  async sendMedia(to, mediaUrl, caption = '', type = 'image') {
+  async sendMedia(to, mediaUrl, caption = '', _type = 'image') {
     return this._sendViaRest(to, caption, [mediaUrl]);
   }
 
@@ -107,7 +112,7 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
     return this._sendViaRest(to, formattedBody);
   }
 
-  _renderTemplateBody(templateName, params, language) {
+  _renderTemplateBody(templateName, params, _language) {
     // Simple template rendering fallback
     let body = templateName;
     Object.entries(params).forEach(([key, value]) => {
@@ -124,11 +129,11 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
   _formatListAsText(body, sections) {
     let text = `${body}\n\n`;
     let counter = 1;
-    sections.forEach((section) => {
+    sections.forEach(section => {
       if (section.title) {
         text += `*${section.title}*\n`;
       }
-      section.rows.forEach((row) => {
+      section.rows.forEach(row => {
         text += `${counter}. ${row.title}`;
         if (row.description) {
           text += ` - ${row.description}`;
@@ -220,7 +225,7 @@ class TwilioWhatsAppProvider extends BaseWhatsAppProvider {
         deliveredAt: message.dateSent ? new Date(message.dateSent) : null,
         readAt: null, // Twilio basic doesn't provide read receipts
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         status: 'unknown',
         deliveredAt: null,

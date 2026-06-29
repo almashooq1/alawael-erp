@@ -63,7 +63,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import cctvService from '../services/cctvService';
+import cctvService from 'services/cctvService';
 
 // ─── Status helpers ─────────────────────────────────────────────────────────
 
@@ -111,7 +111,9 @@ function CameraPlaceholderCard({ camera, index, selected, onClick }) {
       }`}
       dir="rtl"
     >
-      <Box className={`relative h-36 bg-gradient-to-br ${gradient} flex items-center justify-center rounded-t-md overflow-hidden`}>
+      <Box
+        className={`relative h-36 bg-gradient-to-br ${gradient} flex items-center justify-center rounded-t-md overflow-hidden`}
+      >
         <VideocamIcon className="text-white/20 text-6xl absolute" />
         <Box className="absolute top-2 right-2">
           <Chip
@@ -137,7 +139,13 @@ function CameraPlaceholderCard({ camera, index, selected, onClick }) {
             {camera.location?.room || camera.location?.area || '—'}
           </Typography>
           <Tooltip title="عرض البث المباشر">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onClick(camera); }}>
+            <IconButton
+              size="small"
+              onClick={e => {
+                e.stopPropagation();
+                onClick(camera);
+              }}
+            >
               <VisibilityIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -199,7 +207,7 @@ export default function CCTVDashboard() {
   };
 
   // Load selected camera details
-  const loadCameraDetails = async (camera) => {
+  const loadCameraDetails = async camera => {
     if (!camera) return;
     try {
       const [feedRes, recRes, faceRes] = await Promise.all([
@@ -224,16 +232,15 @@ export default function CCTVDashboard() {
 
   useEffect(() => {
     loadCameraDetails(selectedCamera);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCamera]);
 
   const openAlertsCount = useMemo(
-    () => alerts.filter((a) => a.status === 'open' || a.status === 'investigating').length,
+    () => alerts.filter(a => a.status === 'open' || a.status === 'investigating').length,
     [alerts]
   );
 
-  const onlineCount = useMemo(() => cameras.filter((c) => c.status === 'online').length, [cameras]);
-  const offlineCount = useMemo(() => cameras.filter((c) => c.status === 'offline').length, [cameras]);
+  const onlineCount = useMemo(() => cameras.filter(c => c.status === 'online').length, [cameras]);
+  const offlineCount = useMemo(() => cameras.filter(c => c.status === 'offline').length, [cameras]);
 
   return (
     <Box className="min-h-screen bg-slate-50 p-4" dir="rtl">
@@ -254,7 +261,7 @@ export default function CCTVDashboard() {
         <Box className="flex items-center gap-3 flex-wrap">
           <FormControl size="small" className="min-w-[180px]">
             <InputLabel>الفرع</InputLabel>
-            <Select value={branchId} label="الفرع" onChange={(e) => setBranchId(e.target.value)}>
+            <Select value={branchId} label="الفرع" onChange={e => setBranchId(e.target.value)}>
               <MenuItem value="">الكل</MenuItem>
               <MenuItem value="HQ-01">الفرع الرئيسي</MenuItem>
               <MenuItem value="BR-02">فرع الشمال</MenuItem>
@@ -318,7 +325,7 @@ export default function CCTVDashboard() {
                 قائمة الكاميرات ({cameras.length})
               </Typography>
               <List dense>
-                {cameras.map((cam) => {
+                {cameras.map(cam => {
                   const st = STATUS_MAP[cam.status] || STATUS_MAP.provisioned;
                   return (
                     <ListItem key={cam._id} disablePadding className="mb-1">
@@ -327,9 +334,7 @@ export default function CCTVDashboard() {
                         onClick={() => setSelectedCamera(cam)}
                         className="rounded-lg"
                       >
-                        <Box className="ml-2">
-                          {st.icon}
-                        </Box>
+                        <Box className="ml-2">{st.icon}</Box>
                         <ListItemText
                           primary={cam.name_ar || cam.name || cam.code}
                           secondary={cam.code}
@@ -357,9 +362,11 @@ export default function CCTVDashboard() {
                 {selectedCamera && (
                   <Fade in>
                     <Paper className="mb-4 overflow-hidden">
-                      <Box className={`relative h-72 bg-gradient-to-br ${getGradientForCamera(
-                        cameras.findIndex((c) => c._id === selectedCamera._id)
-                      )} flex items-center justify-center`}>
+                      <Box
+                        className={`relative h-72 bg-gradient-to-br ${getGradientForCamera(
+                          cameras.findIndex(c => c._id === selectedCamera._id)
+                        )} flex items-center justify-center`}
+                      >
                         <VideocamIcon className="text-white/10 text-9xl absolute" />
                         <Box className="text-center text-white z-10">
                           <Typography variant="h4" className="font-bold drop-shadow-lg">
@@ -387,7 +394,8 @@ export default function CCTVDashboard() {
                           {new Date().toLocaleTimeString('ar-SA')}
                         </Box>
                         <Box className="absolute bottom-3 right-3 bg-black/50 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
-                          {feed?.streams?.[0]?.resolution || '1920x1080'} — {feed?.streams?.[0]?.fps || '25'} FPS
+                          {feed?.streams?.[0]?.resolution || '1920x1080'} —{' '}
+                          {feed?.streams?.[0]?.fps || '25'} FPS
                         </Box>
                       </Box>
 
@@ -395,7 +403,10 @@ export default function CCTVDashboard() {
                       <Box className="p-3">
                         <Grid container spacing={2}>
                           <Grid item xs={12} md={6}>
-                            <Typography variant="subtitle2" className="font-bold mb-2 flex items-center gap-1">
+                            <Typography
+                              variant="subtitle2"
+                              className="font-bold mb-2 flex items-center gap-1"
+                            >
                               <ScheduleIcon fontSize="small" /> التسجيلات
                             </Typography>
                             <Box className="max-h-40 overflow-auto bg-slate-50 rounded-lg p-2">
@@ -404,13 +415,21 @@ export default function CCTVDashboard() {
                                   لا توجد تسجيلات
                                 </Typography>
                               ) : (
-                                recordings.slice(0, 8).map((rec) => (
-                                  <Box key={rec._id} className="flex justify-between items-center py-1 border-b last:border-0 border-slate-200">
+                                recordings.slice(0, 8).map(rec => (
+                                  <Box
+                                    key={rec._id}
+                                    className="flex justify-between items-center py-1 border-b last:border-0 border-slate-200"
+                                  >
                                     <Typography variant="caption" className="font-bold">
                                       {new Date(rec.startTime).toLocaleTimeString('ar-SA')}
                                     </Typography>
                                     <Box className="flex items-center gap-2">
-                                      <Chip size="small" label={rec.kind === 'motion' ? 'حركة' : 'مستمر'} color={rec.kind === 'motion' ? 'warning' : 'default'} className="text-xs" />
+                                      <Chip
+                                        size="small"
+                                        label={rec.kind === 'motion' ? 'حركة' : 'مستمر'}
+                                        color={rec.kind === 'motion' ? 'warning' : 'default'}
+                                        className="text-xs"
+                                      />
                                       <Typography variant="caption" color="text.secondary">
                                         {Math.floor((rec.durationMs || 0) / 60000)} د
                                       </Typography>
@@ -422,7 +441,10 @@ export default function CCTVDashboard() {
                           </Grid>
 
                           <Grid item xs={12} md={6}>
-                            <Typography variant="subtitle2" className="font-bold mb-2 flex items-center gap-1">
+                            <Typography
+                              variant="subtitle2"
+                              className="font-bold mb-2 flex items-center gap-1"
+                            >
                               <FaceIcon fontSize="small" /> التعرف على الوجوه
                             </Typography>
                             <Box className="max-h-40 overflow-auto bg-slate-50 rounded-lg p-2">
@@ -431,8 +453,11 @@ export default function CCTVDashboard() {
                                   لا توجد أحداث
                                 </Typography>
                               ) : (
-                                faceLogs.slice(0, 8).map((log) => (
-                                  <Box key={log._id} className="flex justify-between items-center py-1 border-b last:border-0 border-slate-200">
+                                faceLogs.slice(0, 8).map(log => (
+                                  <Box
+                                    key={log._id}
+                                    className="flex justify-between items-center py-1 border-b last:border-0 border-slate-200"
+                                  >
                                     <Typography variant="caption" className="font-bold">
                                       {log.aiResult?.label || '—'}
                                     </Typography>
@@ -487,7 +512,7 @@ export default function CCTVDashboard() {
             <AlertsIcon color="error" /> التنبيهات الأمنية
           </Typography>
           <Grid container spacing={2}>
-            {alerts.map((alert) => {
+            {alerts.map(alert => {
               const sev = SEVERITY_MAP[alert.severity] || SEVERITY_MAP.low;
               return (
                 <Grid item xs={12} md={6} lg={4} key={alert._id}>
@@ -512,15 +537,23 @@ export default function CCTVDashboard() {
                       <Box className="flex gap-2">
                         <Chip
                           size="small"
-                          label={alert.status === 'open' ? 'مفتوح' : alert.status === 'acknowledged' ? 'مُقر' : 'قيد التحقيق'}
-                          color={alert.status === 'open' ? 'error' : alert.status === 'acknowledged' ? 'warning' : 'info'}
+                          label={
+                            alert.status === 'open'
+                              ? 'مفتوح'
+                              : alert.status === 'acknowledged'
+                                ? 'مُقر'
+                                : 'قيد التحقيق'
+                          }
+                          color={
+                            alert.status === 'open'
+                              ? 'error'
+                              : alert.status === 'acknowledged'
+                                ? 'warning'
+                                : 'info'
+                          }
                           variant="outlined"
                         />
-                        <Chip
-                          size="small"
-                          label={alert.category || 'عام'}
-                          variant="outlined"
-                        />
+                        <Chip size="small" label={alert.category || 'عام'} variant="outlined" />
                       </Box>
                     </CardContent>
                   </Card>
@@ -609,7 +642,10 @@ export default function CCTVDashboard() {
                       <YAxis tick={{ fontSize: 12 }} />
                       <RechartsTooltip
                         contentStyle={{ textAlign: 'right' }}
-                        formatter={(value, name) => [value, name === 'peopleCount' ? 'عدد الأشخاص' : name]}
+                        formatter={(value, name) => [
+                          value,
+                          name === 'peopleCount' ? 'عدد الأشخاص' : name,
+                        ]}
                       />
                       <Line
                         type="monotone"
@@ -651,10 +687,15 @@ export default function CCTVDashboard() {
                     <BarChart data={analytics.peakHours} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" tick={{ fontSize: 12 }} />
-                      <YAxis dataKey="hour" type="category" tick={{ fontSize: 12 }} tickFormatter={(v) => `${v}:00`} />
+                      <YAxis
+                        dataKey="hour"
+                        type="category"
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={v => `${v}:00`}
+                      />
                       <RechartsTooltip
                         contentStyle={{ textAlign: 'right' }}
-                        formatter={(value) => [value, 'العدد']}
+                        formatter={value => [value, 'العدد']}
                       />
                       <Bar dataKey="count" fill="#0ea5e9" radius={[0, 4, 4, 0]} name="count" />
                     </BarChart>
@@ -676,7 +717,7 @@ export default function CCTVDashboard() {
               </Typography>
               <Box className="relative h-64 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center">
                 <Box className="grid grid-cols-4 gap-2 w-full h-full p-4">
-                  {analytics?.heatmap?.map((zone) => (
+                  {analytics?.heatmap?.map(zone => (
                     <Box
                       key={zone.zone}
                       className="rounded-lg flex flex-col items-center justify-center text-white font-bold text-sm transition-all hover:scale-105 cursor-pointer"
@@ -689,9 +730,7 @@ export default function CCTVDashboard() {
                       <Typography variant="body2" className="font-bold text-center">
                         {zone.zone}
                       </Typography>
-                      <Typography variant="caption">
-                        {zone.intensity}%
-                      </Typography>
+                      <Typography variant="caption">{zone.intensity}%</Typography>
                     </Box>
                   ))}
                 </Box>

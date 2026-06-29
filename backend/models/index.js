@@ -111,6 +111,13 @@ const Warehouse = require('./Warehouse');
 const Donation = require('./Donation');
 const Donor = require('./Donor');
 
+// ── Performance & Monitoring ─────────────────────────────────────────────────
+const WebVitalMetric = require('./WebVitalMetric');
+const LighthouseAudit = require('./LighthouseAudit');
+const PageSpeedMetric = require('./PageSpeedMetric');
+const PerformanceBudget = require('./PerformanceBudget');
+const PerformanceAlert = require('./PerformanceAlert');
+
 // ── Communication ────────────────────────────────────────────────────────────
 const Communication = require('./Communication');
 const CommunicationRecord = require('./CommunicationRecord');
@@ -226,6 +233,13 @@ module.exports = {
   Warehouse,
   Donation,
   Donor,
+
+  // Performance & Monitoring
+  WebVitalMetric,
+  LighthouseAudit,
+  PageSpeedMetric,
+  PerformanceBudget,
+  PerformanceAlert,
 
   // Communication
   Communication,

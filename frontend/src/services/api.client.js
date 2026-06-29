@@ -20,6 +20,7 @@ import {
 } from '../utils/tokenStorage';
 import { attachCsrfToken, refreshCsrfTokenFromHeaders } from '../utils/csrf';
 import { requestCache } from '../utils/cache';
+import { sanitizeObject } from '../utils/sanitizer';
 
 // تكوين قاعدة الـ API
 // Runtime detection: force relative /api/v1 on production (HTTPS) to avoid mixed-content

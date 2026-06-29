@@ -28,7 +28,11 @@ function getCookie(name) {
 function setCookie(name, value, maxAge = 86400) {
   try {
     const isSecure = window.location.protocol === 'https:';
-    const flags = [`${COOKIE_PREFIX}${name}=${encodeURIComponent(value)}`, `path=/`, `SameSite=Strict`];
+    const flags = [
+      `${COOKIE_PREFIX}${name}=${encodeURIComponent(value)}`,
+      `path=/`,
+      `SameSite=Strict`,
+    ];
     if (isSecure) flags.push('Secure');
     if (maxAge) flags.push(`max-age=${maxAge}`);
     document.cookie = flags.join('; ');
@@ -126,10 +130,9 @@ export function getRefreshToken() {
 }
 
 export function setRefreshToken(token) {
-  const cookieSet = setCookie(REFRESH_KEY, token, 604800); // 7 days
-  if (!cookieSet) {
-    localStorage.setItem(REFRESH_KEY, token);
-  }
+  setCookie(REFRESH_KEY, token, 604800); // 7 days
+  // Always mirror to localStorage as a reliable fallback
+  localStorage.setItem(REFRESH_KEY, token);
   localStorage.removeItem('refresh_token');
 }
 

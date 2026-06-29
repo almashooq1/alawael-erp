@@ -1972,6 +1972,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-waitlist-notify-wave1539.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+
       - 'backend/__tests__/inventory-correctness-bugfix.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-isolation-inventory-module.test.js'
@@ -1998,6 +1999,7 @@ on:
       - 'backend/__tests__/no-bare-export-duplicate-model-registration-wave1544.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/waitlist-capacity-phantom.test.js'
+
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3948,6 +3950,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-waitlist-notify-wave1539.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+
       - 'backend/__tests__/inventory-correctness-bugfix.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-isolation-inventory-module.test.js'

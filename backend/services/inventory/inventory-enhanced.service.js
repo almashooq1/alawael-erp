@@ -470,24 +470,61 @@ class InventoryEnhancedService {
   }
 
   async approveStockCount(stockCountId, approvedBy) {
-    const stockCount = await StockCount.findById(stockCountId);
-    if (!stockCount) throw new Error('سجل الجرد غير موجود');
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const stockCount = await StockCount.findById(stockCountId).session(session);
+      if (!stockCount) throw new Error('سجل الجرد غير موجود');
 
-    // تطبيق التعديلات على المخزون الفعلي
-    for (const item of stockCount.items) {
-      if (item.countedQuantity !== null && item.countedQuantity !== item.systemQuantity) {
+      // Apply every reconciliation atomically: stock correction + a matching
+      // `adjust` ledger entry per corrected item (audit trail) + the status flip
+      // all commit together, so a mid-loop failure can't leave a partial count.
+      let discrepancyValue = 0;
+      for (const item of stockCount.items) {
+        if (item.countedQuantity === null || item.countedQuantity === item.systemQuantity) {
+          continue;
+        }
+        const before = item.systemQuantity;
+        const delta = item.countedQuantity - before;
+        discrepancyValue += Math.abs(delta);
+
         await InventoryStock.findOneAndUpdate(
           { itemId: item.itemId, warehouseId: stockCount.warehouseId },
-          { quantityOnHand: item.countedQuantity }
+          { quantityOnHand: item.countedQuantity },
+          { session }
+        );
+
+        await InventoryTransaction.create(
+          [
+            {
+              itemId: item.itemId,
+              warehouseId: stockCount.warehouseId,
+              transactionType: 'adjust',
+              quantity: delta,
+              quantityBefore: before,
+              quantityAfter: item.countedQuantity,
+              reason: `جرد دوري: ${stockCount.countNumber || stockCountId}`,
+              performedBy: approvedBy,
+            },
+          ],
+          { session }
         );
       }
-    }
 
-    return StockCount.findByIdAndUpdate(
-      stockCountId,
-      { status: 'approved', approvedBy },
-      { returnDocument: 'after' }
-    );
+      const updated = await StockCount.findByIdAndUpdate(
+        stockCountId,
+        { status: 'approved', approvedBy, discrepancyValue },
+        { returnDocument: 'after', session }
+      );
+
+      await session.commitTransaction();
+      return updated;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
   }
 
   // ============================================================

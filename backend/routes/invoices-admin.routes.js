@@ -319,7 +319,8 @@ router.post('/:id/pay', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const { paymentMethod = 'CASH' } = req.body || {};
     const doc = await Invoice.findOneAndUpdate(
-      scopedById(req, req.params.id),
+      // status guard: can't re-pay a PAID invoice or pay a CANCELLED one
+      { ...scopedById(req, req.params.id), status: { $nin: ['PAID', 'CANCELLED'] } },
       { status: 'PAID', paymentMethod, paidAt: new Date() },
       { returnDocument: 'after' }
     ).lean();
@@ -334,7 +335,8 @@ router.post('/:id/pay', requireRole(WRITE_ROLES), async (req, res) => {
 router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const doc = await Invoice.findOneAndUpdate(
-      scopedById(req, req.params.id),
+      // status guard: can't cancel a PAID (or already-CANCELLED) invoice
+      { ...scopedById(req, req.params.id), status: { $nin: ['PAID', 'CANCELLED'] } },
       { status: 'CANCELLED', notes: req.body?.reason || '' },
       { returnDocument: 'after' }
     ).lean();

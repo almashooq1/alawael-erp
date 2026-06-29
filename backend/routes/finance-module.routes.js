@@ -245,6 +245,18 @@ router.get(
 router.post(
   '/journal-entries',
   asyncHandler(async (req, res) => {
+    // Double-entry integrity: never create a journal entry whose debits ≠ credits
+    // (the model only COMPUTES is_balanced; it doesn't reject). Mirrors the
+    // model's own line-sum so an unbalanced entry can't be saved/posted.
+    const lines = Array.isArray(req.body.lines) ? req.body.lines : [];
+    const td = lines.reduce((s, l) => s + (Number(l.debit) || 0), 0);
+    const tc = lines.reduce((s, l) => s + (Number(l.credit) || 0), 0);
+    if (lines.length === 0 || Math.abs(td - tc) >= 0.01) {
+      return res.status(400).json({
+        success: false,
+        message: 'القيد غير متوازن (مجموع المدين ≠ مجموع الدائن)',
+      });
+    }
     const entry = new JournalEntry({
       ...req.body,
       created_by: req.user?._id,
@@ -260,7 +272,8 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const entry = await JournalEntry.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'draft' },
+      // is_balanced gate: an unbalanced draft can never be posted.
+      { _id: req.params.id, deleted_at: null, status: 'draft', is_balanced: true },
       {
         status: 'posted',
         approved_by: req.user?._id,
@@ -527,7 +540,7 @@ router.get(
       vat_number: invoice.seller?.vat_number || '',
       invoice_date: invoice.invoice_date?.toISOString() || new Date().toISOString(),
       total_amount: invoice.total_amount?.toString() || '0',
-      vat_amount: invoice.vat_total?.toString() || '0',
+      vat_amount: invoice.vat_amount?.toString() || '0',
     });
 
     res.json({ success: true, data: { qr_code: qrCode, invoice_number: invoice.invoice_number } });
@@ -579,7 +592,7 @@ router.post(
       vat_number: invoice.seller?.vat_number || '',
       invoice_date: invoice.invoice_date?.toISOString() || '',
       total_amount: invoice.total_amount?.toString() || '0',
-      vat_amount: invoice.vat_total?.toString() || '0',
+      vat_amount: invoice.vat_amount?.toString() || '0',
     });
 
     await Invoice.findByIdAndUpdate(invoice._id, {
@@ -659,7 +672,7 @@ router.get(
       deleted_at: null,
       ...branchScopeSnake(req),
     })
-      .populate('invoice_id', 'invoice_number total_amount remaining_amount')
+      .populate('invoice_id', 'invoice_number total_amount balance_due')
       .populate('beneficiary_id', 'full_name_ar file_number phone')
       .populate('received_by', 'name');
     if (!payment) return res.status(404).json({ success: false, message: 'الدفعة غير موجودة' });
@@ -671,26 +684,67 @@ router.get(
 router.post(
   '/payments',
   asyncHandler(async (req, res) => {
+    // Validate the amount + strip privileged/derived fields so a client can't
+    // forge status/branch/refund/timestamps or post a negative/over-payment.
+    const amt = Number(req.body.amount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      return res.status(400).json({ success: false, message: 'مبلغ الدفعة غير صالح' });
+    }
+    const {
+      status: _ps,
+      branch_id: _pb,
+      refund_amount: _pr,
+      refunded_at: _pra,
+      refunded_by: _prb,
+      refund_reason: _prr,
+      deleted_at: _pd,
+      received_by: _prcv,
+      ...safeBody
+    } = req.body;
+
+    let invoice = null;
+    if (req.body.invoice_id) {
+      invoice = await Invoice.findOne({
+        _id: req.body.invoice_id,
+        deleted_at: null,
+        ...branchScopeSnake(req),
+      });
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
+      }
+      const balance =
+        invoice.balance_due != null
+          ? invoice.balance_due
+          : (invoice.total_amount || 0) - (invoice.paid_amount || 0);
+      if (amt > balance + 0.01) {
+        return res.status(400).json({ success: false, message: 'المبلغ يتجاوز الرصيد المستحق' });
+      }
+    }
+
     const payment = new Payment({
-      ...req.body,
-      received_by: req.body.received_by || req.user?._id,
+      ...safeBody,
+      amount: amt,
+      branch_id: invoice ? invoice.branch_id : branchScopeSnake(req).branch_id || _pb,
+      received_by: req.user?._id,
+      status: 'completed',
     });
     await payment.save();
 
-    // تحديث الفاتورة المرتبطة
-    if (payment.invoice_id) {
-      const invoice = await Invoice.findById(payment.invoice_id);
-      if (invoice) {
-        invoice.paid_amount = (invoice.paid_amount || 0) + payment.amount;
-        invoice.remaining_amount = invoice.total_amount - invoice.paid_amount;
-        if (invoice.remaining_amount <= 0) {
-          invoice.status = 'paid';
-          invoice.paid_at = new Date();
-        } else {
-          invoice.status = 'partial';
-        }
-        await invoice.save();
+    if (invoice) {
+      // atomic increment — avoids a concurrent read-modify-write losing a payment
+      const upd = await Invoice.findByIdAndUpdate(
+        invoice._id,
+        { $inc: { paid_amount: amt } },
+        { new: true }
+      );
+      upd.balance_due = (upd.total_amount || 0) - (upd.paid_amount || 0);
+      if (upd.balance_due <= 0) {
+        upd.status = 'paid';
+        upd.paid_at = new Date();
+      } else {
+        upd.status = 'partially_paid';
       }
+      await upd.save();
     }
 
     res.status(201).json({ success: true, data: payment, message: 'تم تسجيل الدفعة بنجاح' });
@@ -723,9 +777,18 @@ router.post(
     if (payment.invoice_id) {
       const invoice = await Invoice.findById(payment.invoice_id);
       if (invoice) {
-        invoice.paid_amount = Math.max(0, (invoice.paid_amount || 0) - payment.amount);
-        invoice.remaining_amount = invoice.total_amount - invoice.paid_amount;
-        invoice.status = invoice.paid_amount <= 0 ? 'pending' : 'partial';
+        // Recompute paid_amount from the remaining `completed` payments (the
+        // refunded one is now excluded) instead of blind subtraction — robust to
+        // multiple payments + a forged/over amount.
+        const agg = await Payment.aggregate([
+          { $match: { invoice_id: invoice._id, status: 'completed', deleted_at: null } },
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+        ]);
+        const paid = (agg[0] && agg[0].total) || 0;
+        invoice.paid_amount = paid;
+        invoice.balance_due = (invoice.total_amount || 0) - paid;
+        invoice.status =
+          paid <= 0 ? 'issued' : invoice.balance_due <= 0 ? 'paid' : 'partially_paid';
         await invoice.save();
       }
     }
@@ -951,7 +1014,7 @@ router.get(
             _id: '$status',
             count: { $sum: 1 },
             total: { $sum: '$total_amount' },
-            vat: { $sum: '$vat_total' },
+            vat: { $sum: '$vat_amount' },
           },
         },
       ]),
@@ -1068,7 +1131,7 @@ router.get(
           _id: groupId,
           invoices: { $sum: 1 },
           subtotal: { $sum: '$subtotal' },
-          vat: { $sum: '$vat_total' },
+          vat: { $sum: '$vat_amount' },
           discount: { $sum: '$discount_amount' },
           total_amount: { $sum: '$total_amount' },
           paid_amount: { $sum: '$paid_amount' },

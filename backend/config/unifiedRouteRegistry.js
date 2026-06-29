@@ -266,6 +266,11 @@ const ROUTES = [
   { path: '/api/v1/parent-portal', file: 'routes/parent-portal.routes', auth: true, roles: ['parent', 'guardian', 'admin', 'super_admin'], phase: 'student', description: 'Parent portal v2' },
   { path: '/api/chat-v2', file: 'routes/chat-v2.routes', auth: true, phase: 'messaging', description: 'Chat v2' },
   // ── 2026-06-29: complete _registry.js -> unified migration (were in dead legacy registries only) ──
+  { path: "/api/v1/zatca-phase2", file: "routes/zatca-phase2.routes", auth: false, phase: "government", description: "ZATCA Phase 2 e-invoicing", dualMount: true },
+  { path: "/api/v1/pdpl", file: "routes/pdpl.routes", auth: false, phase: "government", description: "PDPL retention/compliance", dualMount: true },
+  { path: "/api/v1/management-review", file: "routes/managementReview.routes", auth: false, phase: "quality", description: "Management review (CBAHI)", dualMount: true },
+  { path: "/api/v1/compliance-calendar", file: "routes/complianceCalendar.routes", auth: false, phase: "quality", description: "Compliance calendar (CBAHI)", dualMount: true },
+  { path: "/api/v1/evidence", file: "routes/evidence.routes", auth: false, phase: "quality", description: "Evidence vault (CBAHI)", dualMount: true },
   { path: "/api/v1/voice-log", file: "routes/voice-log.routes", auth: true, phase: "clinical", description: "Beneficiary voice log (CRPD Art 7/12/21)", dualMount: true },
   { path: "/api/v1/decision-rights", file: "routes/decision-rights.routes", auth: true, phase: "clinical", description: "Decision rights assessment (CRPD)", dualMount: true },
   { path: "/api/v1/self-advocacy", file: "routes/self-advocacy.routes", auth: true, phase: "clinical", description: "Self-advocacy plan (CRPD)", dualMount: true },

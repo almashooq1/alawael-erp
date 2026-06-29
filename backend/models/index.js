@@ -114,6 +114,8 @@ const Donor = require('./Donor');
 // ── Communication ────────────────────────────────────────────────────────────
 const Communication = require('./Communication');
 const Correspondence = require('./Correspondence');
+const WhatsAppMessage = require('./WhatsAppMessage');
+const WhatsAppTemplate = require('./WhatsAppTemplate');
 
 module.exports = {
   // Core
@@ -225,4 +227,6 @@ module.exports = {
   // Communication
   Communication,
   Correspondence,
+  WhatsAppMessage,
+  WhatsAppTemplate,
 };

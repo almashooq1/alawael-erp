@@ -280,6 +280,15 @@ try {
   logger.warn('[NPHIES] webhook mount skipped:', err.message);
 }
 
+// WhatsApp Webhooks — inbound messages + delivery status
+// (Phase 1 of WhatsApp Integration)
+try {
+  app.use('/api/v1/webhooks', require('./routes/webhook.routes'));
+  logger.info('[WhatsApp] ✓ webhook routes mounted at /api/v1/webhooks/whatsapp');
+} catch (err) {
+  logger.warn('[WhatsApp] webhook routes skipped:', err.message);
+}
+
 // W714 — IQ Assessments (SB5 / Wechsler) — Score-entry-only, copyright-compliant
 try {
   require('./models/IQAssessment');

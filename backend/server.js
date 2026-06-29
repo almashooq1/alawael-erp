@@ -159,6 +159,31 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Redis initialization failed:', err.message);
   }
 
+  // Initialize WhatsApp Integration (Phase 1 — Core Infrastructure)
+  try {
+    if (process.env.WHATSAPP_ENABLED === 'true') {
+      const { getWhatsAppGateway } = require('./integrations/whatsapp/whatsappGateway');
+      const { getScheduledWhatsAppService } = require('./services/scheduledWhatsApp.service');
+
+      const gateway = getWhatsAppGateway();
+      const gatewayInit = await gateway.init();
+
+      if (gatewayInit.ready) {
+        const scheduledService = getScheduledWhatsAppService();
+        await scheduledService.init();
+        app.locals.whatsappGateway = gateway;
+        app.locals.whatsappScheduled = scheduledService;
+        logger.info('[WhatsApp] ✓ Gateway + Scheduled Service initialized');
+      } else {
+        logger.info('[WhatsApp] Gateway not ready:', gatewayInit.reason);
+      }
+    } else {
+      logger.info('[WhatsApp] disabled via WHATSAPP_ENABLED');
+    }
+  } catch (err) {
+    logger.warn('[WhatsApp] initialization skipped:', err.message);
+  }
+
   // Initialize Report Delivery Scheduler
   try {
     const mongoose = require('mongoose');
@@ -605,6 +630,12 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
           logger.info(
             `📧 Digest aggregator purged (${counts.dailyItems} daily, ${counts.weeklyItems} weekly)`
           );
+        }
+      });
+      registerShutdownHook('WhatsApp Scheduled Service', async () => {
+        if (app.locals.whatsappScheduled) {
+          await app.locals.whatsappScheduled.shutdown();
+          logger.info('[WhatsApp] Scheduled service shut down');
         }
       });
     } catch {

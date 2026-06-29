@@ -577,6 +577,7 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.get(
   '/:id',
+  requireDocumentAccess('view'),
   wrap(async (req, res) => {
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } }).populate(
       'uploadedBy',
@@ -701,6 +702,7 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.get(
   '/:id/versions',
+  requireDocumentAccess('view'),
   wrap(async (req, res) => {
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } }).select(
       'title version previousVersions isLatestVersion'
@@ -725,6 +727,7 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.put(
   '/:id',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const { title, description, category, tags, folder, status, metadata } = req.body;
 
@@ -764,6 +767,7 @@ router.put(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/link',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const { entityType, entityId, sourceModule } = req.body;
     if (!entityType || !entityId) {
@@ -789,6 +793,7 @@ router.post(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/unlink',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const { entityType, entityId } = req.body;
     if (!entityType || !entityId) {
@@ -824,6 +829,7 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 router.delete(
   '/:id',
+  requireDocumentAccess('delete'),
   wrap(async (req, res) => {
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: { $ne: 'محذوف' } },
@@ -842,6 +848,7 @@ router.delete(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/restore',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: 'محذوف' },
@@ -862,6 +869,7 @@ router.post(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/archive',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: 'نشط' },
@@ -887,6 +895,7 @@ router.post(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/share',
+  requireDocumentAccess('share'),
   wrap(async (req, res) => {
     const { email, permission = 'view', name } = req.body;
     if (!email || !email.trim()) {
@@ -920,6 +929,7 @@ router.post(
 // ══════════════════════════════════════════════════════════════════════════════
 router.delete(
   '/:id/share/:shareId',
+  requireDocumentAccess('share'),
   wrap(async (req, res) => {
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
@@ -941,6 +951,7 @@ router.delete(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/upload-version',
+  requireDocumentAccess('edit'),
   singleUpload('file', MAX_BYTES),
   wrap(async (req, res) => {
     if (!req.file) {
@@ -1005,6 +1016,7 @@ router.post(
 // ══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/:id/versions/:vid/restore',
+  requireDocumentAccess('edit'),
   wrap(async (req, res) => {
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });

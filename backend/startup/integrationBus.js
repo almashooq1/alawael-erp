@@ -126,6 +126,19 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] WhatsApp reminder auto-enqueue skipped:', waEnqErr.message);
     }
 
+    // W1539: WhatsApp waitlist auto-notify — on appointment.cancelled, message
+    // the top-priority waiting beneficiary for the same branch+service (slot
+    // fill-rate). Env-gated (ENABLE_WHATSAPP_WAITLIST_NOTIFY); off by default +
+    // consent-gated + idempotent (waiting → notified).
+    try {
+      const {
+        wireWhatsappWaitlistNotify,
+      } = require('../services/whatsapp/whatsappWaitlistNotifySubscriber');
+      wireWhatsappWaitlistNotify(integrationBus, { logger });
+    } catch (waWaitErr) {
+      logger.warn('[Integration] WhatsApp waitlist auto-notify skipped:', waWaitErr.message);
+    }
+
     // W387: bridge service-local EventEmitter emits (W379-W386 wires) to
     // integrationBus.publish so subscribers actually receive them. Pre-W387
     // the W379-W386 producers fired on local BaseService EventEmitter while

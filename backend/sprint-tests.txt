@@ -1047,6 +1047,7 @@ __tests__/whatsapp-reminder-auto-enqueue-wave1527.test.js
 __tests__/whatsapp-risk-aware-reminders-wave1537.test.js
 __tests__/whatsapp-reminder-replies-wave1536.test.js
 __tests__/whatsapp-reminder-cancel-on-cancel-wave1534.test.js
+__tests__/whatsapp-waitlist-notify-wave1539.test.js
 __tests__/whatsapp-sentiment-insight-wave1538.test.js
 __tests__/whatsapp-urgency-breakdown-wave745.test.js
 __tests__/whatsapp-urgency-rank-wave742.test.js

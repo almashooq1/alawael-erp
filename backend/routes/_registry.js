@@ -822,13 +822,27 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
 
   // ── Phases & Systems (~100 modules) — delegated to registries/phases.registry.js ──
-  registerPhaseRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
+  // Guarded: a throw inside one registry must NOT abort the registries that
+  // follow it (root cause of unmounted features/government routes — 2026-06-29).
+  try {
+    registerPhaseRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
+  } catch (e) {
+    console.error('[BOOT-DIAG] registerPhaseRoutes THREW:', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e);
+  }
 
   // ── Phase-16 Ops Control Tower (W801) — was built but unmounted until W801 ──
-  registerOpsRoutes(app, { safeMount, logger });
+  try {
+    registerOpsRoutes(app, { safeMount, logger });
+  } catch (e) {
+    console.error('[BOOT-DIAG] registerOpsRoutes THREW:', e && e.message);
+  }
 
   // ── Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js ──
-  registerFeatureRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
+  try {
+    registerFeatureRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
+  } catch (e) {
+    console.error('[BOOT-DIAG] registerFeatureRoutes THREW:', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e);
+  }
 
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;

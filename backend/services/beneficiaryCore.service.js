@@ -565,7 +565,11 @@ class BeneficiaryCoreSvc {
   async _getDocuments(beneficiaryId) {
     return safeQuery(M.Document, m =>
       m
-        .find({ 'metadata.beneficiaryId': beneficiaryId, isDeleted: { $ne: true } })
+        // Document links a beneficiary via entityType/entityId; `metadata` has no
+        // beneficiaryId and `isDeleted` isn't a schema field (soft-delete = status
+        // 'محذوف') — the old filter matched nothing, so the 360 Documents tab was
+        // always empty.
+        .find({ entityType: 'Beneficiary', entityId: String(beneficiaryId), status: { $ne: 'محذوف' } })
         .select('title category type status fileSize createdAt')
         .sort('-createdAt')
         .limit(15)

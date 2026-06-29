@@ -1074,3 +1074,5 @@ __tests__/finance-money-integrity.test.js
 __tests__/transport-trip-safety.test.js
 __tests__/medication-safety.test.js
 __tests__/document-access-guard.test.js
+__tests__/phantom-write-document-center.test.js
+__tests__/phantom-schema-fields.test.js

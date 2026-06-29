@@ -368,14 +368,19 @@ class DocumentRetentionService {
             switch (policy.expiryAction) {
               case 'archive':
                 await Document.findByIdAndUpdate(doc._id, {
-                  status: 'archived',
+                  status: 'مؤرشف',
+                  isArchived: true,
                   archivedAt: new Date(),
                 });
                 results.archived++;
                 break;
               case 'delete':
+                // soft-delete = status 'محذوف' (canonical); 'isDeleted' was a
+                // phantom field nothing read → the retention sweeper's auto-delete
+                // was a silent no-op.
                 await Document.findByIdAndUpdate(doc._id, {
-                  isDeleted: true,
+                  status: 'محذوف',
+                  isArchived: false,
                   deletedAt: new Date(),
                 });
                 results.deleted++;
@@ -438,7 +443,7 @@ class DocumentRetentionService {
 
       const docs = await Document.find({
         expiryDate: { $lte: targetDate, $gte: new Date() },
-        isDeleted: { $ne: true },
+        status: { $ne: 'محذوف' },
         'retentionPolicy.legalHold': { $ne: true },
       })
         .select('title category expiryDate createdAt entityType entityId')
@@ -530,7 +535,7 @@ class DocumentRetentionService {
   }
 
   _buildQuery(rules, expiryDate) {
-    const query = { createdAt: { $lte: expiryDate }, isDeleted: { $ne: true } };
+    const query = { createdAt: { $lte: expiryDate }, status: { $ne: 'محذوف' } };
     if (rules?.categories?.length) query.category = { $in: rules.categories };
     if (rules?.fileTypes?.length) query.fileType = { $in: rules.fileTypes };
     if (rules?.tags?.length) query.tags = { $in: rules.tags };

@@ -274,7 +274,12 @@ async function listDocuments(filters = {}, pagination = {}) {
   if (priority) query['smartClassification.priority'] = priority;
   if (folder) query.folder = folder;
   if (uploadedBy) query.uploadedBy = uploadedBy;
-  if (linkedBeneficiary) query['linkedBeneficiary.beneficiaryId'] = linkedBeneficiary;
+  if (linkedBeneficiary) {
+    // Beneficiary link lives on entityType/entityId (a `linkedBeneficiary` subdoc
+    // was never in the Document schema → this filter used to match nothing).
+    query.entityType = 'Beneficiary';
+    query.entityId = String(linkedBeneficiary);
+  }
 
   if (tags && tags.length) query.tags = { $in: Array.isArray(tags) ? tags : [tags] };
 
@@ -318,7 +323,7 @@ async function listDocuments(filters = {}, pagination = {}) {
         'uploadedBy uploadedByName version viewCount downloadCount ' +
         'smartClassification.category smartClassification.confidence ' +
         'smartClassification.securityLevel smartClassification.priority ' +
-        'ocrStatus isFavoriteOf linkedBeneficiary'
+        'ocrStatus isFavoriteOf entityType entityId episodeId'
     )
     .lean();
 
@@ -883,7 +888,12 @@ async function linkToBeneficiary(docId, beneficiaryId, episodeId, userId, userNa
   const doc = await Document.findById(docId);
   if (!doc) throw Object.assign(new Error('المستند غير موجود'), { status: 404 });
 
-  doc.linkedBeneficiary = { beneficiaryId, episodeId: episodeId || null };
+  // Link via the schema's entityType/entityId (a `linkedBeneficiary` subdoc was
+  // never declared → strict mode silently dropped this write, so the link never
+  // persisted). episodeId is now a real schema field.
+  doc.entityType = 'Beneficiary';
+  doc.entityId = String(beneficiaryId);
+  doc.episodeId = episodeId || null;
   await logActivity(
     doc,
     'تعديل',
@@ -898,16 +908,17 @@ async function linkToBeneficiary(docId, beneficiaryId, episodeId, userId, userNa
 async function getBeneficiaryDocuments(beneficiaryId, filters = {}) {
   const Document = Doc();
   const q = {
-    'linkedBeneficiary.beneficiaryId': beneficiaryId,
+    entityType: 'Beneficiary',
+    entityId: String(beneficiaryId),
     status: { $ne: 'محذوف' },
   };
-  if (filters.episodeId) q['linkedBeneficiary.episodeId'] = filters.episodeId;
+  if (filters.episodeId) q.episodeId = filters.episodeId;
   if (filters.category) q.category = filters.category;
 
   return Document.find(q)
     .sort({ createdAt: -1 })
     .select(
-      'title category fileType fileSize status workflowStatus createdAt uploadedByName expiryDate linkedBeneficiary'
+      'title category fileType fileSize status workflowStatus createdAt uploadedByName expiryDate entityType entityId episodeId'
     )
     .lean();
 }

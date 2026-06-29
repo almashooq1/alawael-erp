@@ -9,18 +9,31 @@
 
 const mongoose = require('mongoose');
 
-const templateComponentSchema = new mongoose.Schema({
-  type: { type: String, enum: ['header', 'body', 'footer', 'button'], required: true },
-  format: { type: String, enum: ['text', 'image', 'video', 'document', 'location'], default: 'text' },
-  text: { type: String, maxlength: 1024 },
-  example: { type: mongoose.Schema.Types.Mixed }, // Example values for template approval
-  buttons: [{
-    type: { type: String, enum: ['quick_reply', 'url', 'phone_number'], default: 'quick_reply' },
-    text: { type: String, maxlength: 25 },
-    url: { type: String },
-    phoneNumber: { type: String },
-  }],
-}, { _id: false });
+const templateComponentSchema = new mongoose.Schema(
+  {
+    type: { type: String, enum: ['header', 'body', 'footer', 'button'], required: true },
+    format: {
+      type: String,
+      enum: ['text', 'image', 'video', 'document', 'location'],
+      default: 'text',
+    },
+    text: { type: String, maxlength: 1024 },
+    example: { type: mongoose.Schema.Types.Mixed }, // Example values for template approval
+    buttons: [
+      {
+        type: {
+          type: String,
+          enum: ['quick_reply', 'url', 'phone_number'],
+          default: 'quick_reply',
+        },
+        text: { type: String, maxlength: 25 },
+        url: { type: String },
+        phoneNumber: { type: String },
+      },
+    ],
+  },
+  { _id: false }
+);
 
 const whatsAppTemplateSchema = new mongoose.Schema(
   {
@@ -80,7 +93,7 @@ const whatsAppTemplateSchema = new mongoose.Schema(
 
 // Indexes
 whatsAppTemplateSchema.index({ namespace: 1, language: 1, status: 1 });
-whatsAppTemplateSchema.index({ tags: 1 });
+// tags index is provided by `index: true` on the field definition — no separate index()
 whatsAppTemplateSchema.index({ isActive: 1, status: 1 });
 
 // Virtual
@@ -190,4 +203,5 @@ whatsAppTemplateSchema.statics.SYSTEM_TEMPLATES = [
   },
 ];
 
-module.exports = mongoose.models.WhatsAppTemplate || mongoose.model('WhatsAppTemplate', whatsAppTemplateSchema);
+module.exports =
+  mongoose.models.WhatsAppTemplate || mongoose.model('WhatsAppTemplate', whatsAppTemplateSchema);

@@ -113,7 +113,10 @@ const Donor = require('./Donor');
 
 // ── Communication ────────────────────────────────────────────────────────────
 const Communication = require('./Communication');
+const CommunicationRecord = require('./CommunicationRecord');
 const Correspondence = require('./Correspondence');
+const ElectronicDirective = require('./ElectronicDirective');
+const StudentCertificate = require('./StudentCertificate');
 const WhatsAppMessage = require('./WhatsAppMessage');
 const WhatsAppTemplate = require('./WhatsAppTemplate');
 
@@ -226,7 +229,10 @@ module.exports = {
 
   // Communication
   Communication,
+  CommunicationRecord,
   Correspondence,
+  ElectronicDirective,
+  StudentCertificate,
   WhatsAppMessage,
   WhatsAppTemplate,
 };

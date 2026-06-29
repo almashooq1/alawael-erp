@@ -132,6 +132,13 @@ const OPTIONAL_REQUIRES_ALLOWLIST = new Set([
   // dependency. Was invisible pre-W885 (backtick template literal); the
   // single-quote rewrite exposed it to the scanner.
   'routes/events-management.routes.js::../models/EventManagement',
+  // WhatsApp Stage 1 (commit 3f7970833) — webhookHandler optionally emits
+  // emergency/inbound events on an event bus that is wired in "Stage 3". Both
+  // call sites are inside try/catch with `if (eventBus && eventBus.emit)` and a
+  // "(Assuming an event bus exists; if not, this is a no-op)" comment, so the
+  // missing module degrades to a no-op — never a load-time dependency. Remove
+  // this entry when Stage 3 points it at the real bus (integration/systemIntegrationBus).
+  'integrations/whatsapp/webhookHandler.js::../../services/eventBus',
 ]);
 
 function walk(dir, files = []) {

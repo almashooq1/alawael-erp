@@ -41,111 +41,70 @@ const JSON_MODE = process.argv.includes('--json');
 // file::model-file-base::key — pre-existing findings to burn down (W325c
 // ratchet pattern): new entries must FAIL CI; fixed entries must be removed.
 const KNOWN_PHANTOM_WRITES = new Set([
-  "routes/electronic-directives.routes.js::document::MISSING::fileName",
-  "routes/electronic-directives.routes.js::document::MISSING::originalFileName",
-  "routes/electronic-directives.routes.js::document::MISSING::fileSize",
-  "routes/electronic-directives.routes.js::document::MISSING::filePath",
-  "routes/electronic-directives.routes.js::document::MISSING::uploadedBy",
-  "routes/email-v2.routes.js::communication::MISSING::title",
-  "routes/email-v2.routes.js::communication::MISSING::type",
-  "routes/email-v2.routes.js::communication::MISSING::receiver",
-  "routes/email-v2.routes.js::communication::MISSING::sentDate",
-  "routes/email-v2.routes.js::communication::MISSING::createdBy",
-  "routes/guardians.routes.js::guardian::MISSING::userId",
-  "routes/student-certificates.routes.js::document::MISSING::fileName",
-  "routes/student-certificates.routes.js::document::MISSING::originalFileName",
-  "routes/student-certificates.routes.js::document::MISSING::fileSize",
-  "routes/student-certificates.routes.js::document::MISSING::filePath",
-  "routes/student-certificates.routes.js::document::MISSING::uploadedBy",
-  "routes/student-complaints.routes.js::communication::MISSING::title",
-  "routes/student-complaints.routes.js::communication::MISSING::type",
-  "routes/student-complaints.routes.js::communication::MISSING::receiver",
-  "routes/student-complaints.routes.js::communication::MISSING::sentDate",
-  "routes/student-complaints.routes.js::communication::MISSING::createdBy",
-  "routes/student-elearning.routes.js::studentactivity::MISSING::beneficiaryId",
-  "routes/student-elearning.routes.js::studentactivity::MISSING::titleAr",
-  "routes/student-elearning.routes.js::studentactivity::MISSING::dueAt",
-  "routes/student-events.routes.js::studentactivity::MISSING::beneficiaryId",
-  "routes/student-events.routes.js::studentactivity::MISSING::titleAr",
-  "routes/student-events.routes.js::studentactivity::MISSING::dueAt",
-  "routes/student-rewards-store.routes.js::studentactivity::MISSING::beneficiaryId",
-  "routes/student-rewards-store.routes.js::studentactivity::MISSING::titleAr",
-  "routes/student-rewards-store.routes.js::studentactivity::MISSING::dueAt",
-  "routes/electronic-directives.routes.js::document::directiveType",
-  "routes/electronic-directives.routes.js::document::beneficiaryId",
-  "routes/electronic-directives.routes.js::document::content",
-  "routes/electronic-directives.routes.js::document::requiredSigners",
-  "routes/electronic-directives.routes.js::document::signatureStatus",
-  "routes/electronic-directives.routes.js::document::createdBy",
-  "routes/electronic-directives.routes.js::document::auditTrail",
-  "routes/email-v2.routes.js::communication::channel",
-  "routes/email-v2.routes.js::communication::direction",
-  "routes/email-v2.routes.js::communication::recipient",
-  "routes/email-v2.routes.js::communication::cc",
-  "routes/email-v2.routes.js::communication::bcc",
-  "routes/email-v2.routes.js::communication::replyTo",
-  "routes/email-v2.routes.js::communication::body",
-  "routes/email-v2.routes.js::communication::sentAt",
-  "routes/email-v2.routes.js::communication::sentBy",
-  "routes/guardians.routes.js::guardian::name_ar",
-  "routes/guardians.routes.js::guardian::name_en",
-  "routes/guardians.routes.js::guardian::phone2",
-  "routes/guardians.routes.js::guardian::employer",
-  "routes/guardians.routes.js::guardian::city",
-  "routes/guardians.routes.js::guardian::preferredContactMethod",
-  "routes/guardians.routes.js::guardian::preferredLanguage",
-  "routes/guardians.routes.js::guardian::canPickup",
-  "routes/student-certificates.routes.js::document::beneficiaryId",
-  "routes/student-certificates.routes.js::document::certificateType",
-  "routes/student-certificates.routes.js::document::data",
-  "routes/student-certificates.routes.js::document::verificationCode",
-  "routes/student-certificates.routes.js::document::issuedAt",
-  "routes/student-certificates.routes.js::document::issuedBy",
-  "routes/student-complaints.routes.js::communication::channel",
-  "routes/student-complaints.routes.js::communication::body",
-  "routes/student-complaints.routes.js::communication::direction",
-  "routes/student-complaints.routes.js::communication::notes",
-  "routes/student-elearning.routes.js::studentactivity::activityType",
-  "routes/student-elearning.routes.js::studentactivity::data",
-  "routes/student-elearning.routes.js::studentactivity::recordedBy",
-  "routes/student-elearning.routes.js::studentactivity::date",
-  "routes/student-elearning.routes.js::studentactivity::activityType",
-  "routes/student-elearning.routes.js::studentactivity::studentId",
-  "routes/student-elearning.routes.js::studentactivity::data",
-  "routes/student-elearning.routes.js::studentactivity::recordedBy",
-  "routes/student-elearning.routes.js::studentactivity::date",
-  "routes/student-elearning.routes.js::studentactivity::activityType",
-  "routes/student-elearning.routes.js::studentactivity::studentId",
-  "routes/student-elearning.routes.js::studentactivity::data",
-  "routes/student-elearning.routes.js::studentactivity::recordedBy",
-  "routes/student-elearning.routes.js::studentactivity::date",
-  "routes/student-events.routes.js::studentactivity::activityType",
-  "routes/student-events.routes.js::studentactivity::data",
-  "routes/student-events.routes.js::studentactivity::date",
-  "routes/student-events.routes.js::studentactivity::recordedBy",
-  "routes/student-rewards-store.routes.js::studentactivity::studentId",
-  "routes/student-rewards-store.routes.js::studentactivity::activityType",
-  "routes/student-rewards-store.routes.js::studentactivity::points",
-  "routes/student-rewards-store.routes.js::studentactivity::reason",
-  "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
-  "routes/student-rewards-store.routes.js::studentactivity::date",
-  "routes/student-rewards-store.routes.js::studentactivity::activityType",
-  "routes/student-rewards-store.routes.js::studentactivity::data",
-  "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
-  "routes/student-rewards-store.routes.js::studentactivity::date",
-  "routes/student-rewards-store.routes.js::studentactivity::studentId",
-  "routes/student-rewards-store.routes.js::studentactivity::activityType",
-  "routes/student-rewards-store.routes.js::studentactivity::points",
-  "routes/student-rewards-store.routes.js::studentactivity::reason",
-  "routes/student-rewards-store.routes.js::studentactivity::data",
-  "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
-  "routes/student-rewards-store.routes.js::studentactivity::date",
-  "routes/student-rewards-store.routes.js::studentactivity::studentId",
-  "routes/student-rewards-store.routes.js::studentactivity::activityType",
-  "routes/student-rewards-store.routes.js::studentactivity::data",
-  "routes/student-rewards-store.routes.js::studentactivity::reason",
-  "routes/student-rewards-store.routes.js::studentactivity::recordedBy",
-  "routes/student-rewards-store.routes.js::studentactivity::date",
+  // electronic-directives / email-v2 / student-certificates / student-complaints
+  // moved off the generic Document/Communication models onto dedicated
+  // ElectronicDirective / CommunicationRecord / StudentCertificate models — the
+  // former phantom writes are now declared schema fields, so those baseline
+  // entries were removed (ratchet-down).
+  'routes/guardians.routes.js::guardian::MISSING::userId',
+  'routes/student-elearning.routes.js::studentactivity::MISSING::beneficiaryId',
+  'routes/student-elearning.routes.js::studentactivity::MISSING::titleAr',
+  'routes/student-elearning.routes.js::studentactivity::MISSING::dueAt',
+  'routes/student-events.routes.js::studentactivity::MISSING::beneficiaryId',
+  'routes/student-events.routes.js::studentactivity::MISSING::titleAr',
+  'routes/student-events.routes.js::studentactivity::MISSING::dueAt',
+  'routes/student-rewards-store.routes.js::studentactivity::MISSING::beneficiaryId',
+  'routes/student-rewards-store.routes.js::studentactivity::MISSING::titleAr',
+  'routes/student-rewards-store.routes.js::studentactivity::MISSING::dueAt',
+  'routes/guardians.routes.js::guardian::name_ar',
+  'routes/guardians.routes.js::guardian::name_en',
+  'routes/guardians.routes.js::guardian::phone2',
+  'routes/guardians.routes.js::guardian::employer',
+  'routes/guardians.routes.js::guardian::city',
+  'routes/guardians.routes.js::guardian::preferredContactMethod',
+  'routes/guardians.routes.js::guardian::preferredLanguage',
+  'routes/guardians.routes.js::guardian::canPickup',
+  'routes/student-elearning.routes.js::studentactivity::activityType',
+  'routes/student-elearning.routes.js::studentactivity::data',
+  'routes/student-elearning.routes.js::studentactivity::recordedBy',
+  'routes/student-elearning.routes.js::studentactivity::date',
+  'routes/student-elearning.routes.js::studentactivity::activityType',
+  'routes/student-elearning.routes.js::studentactivity::studentId',
+  'routes/student-elearning.routes.js::studentactivity::data',
+  'routes/student-elearning.routes.js::studentactivity::recordedBy',
+  'routes/student-elearning.routes.js::studentactivity::date',
+  'routes/student-elearning.routes.js::studentactivity::activityType',
+  'routes/student-elearning.routes.js::studentactivity::studentId',
+  'routes/student-elearning.routes.js::studentactivity::data',
+  'routes/student-elearning.routes.js::studentactivity::recordedBy',
+  'routes/student-elearning.routes.js::studentactivity::date',
+  'routes/student-events.routes.js::studentactivity::activityType',
+  'routes/student-events.routes.js::studentactivity::data',
+  'routes/student-events.routes.js::studentactivity::date',
+  'routes/student-events.routes.js::studentactivity::recordedBy',
+  'routes/student-rewards-store.routes.js::studentactivity::studentId',
+  'routes/student-rewards-store.routes.js::studentactivity::activityType',
+  'routes/student-rewards-store.routes.js::studentactivity::points',
+  'routes/student-rewards-store.routes.js::studentactivity::reason',
+  'routes/student-rewards-store.routes.js::studentactivity::recordedBy',
+  'routes/student-rewards-store.routes.js::studentactivity::date',
+  'routes/student-rewards-store.routes.js::studentactivity::activityType',
+  'routes/student-rewards-store.routes.js::studentactivity::data',
+  'routes/student-rewards-store.routes.js::studentactivity::recordedBy',
+  'routes/student-rewards-store.routes.js::studentactivity::date',
+  'routes/student-rewards-store.routes.js::studentactivity::studentId',
+  'routes/student-rewards-store.routes.js::studentactivity::activityType',
+  'routes/student-rewards-store.routes.js::studentactivity::points',
+  'routes/student-rewards-store.routes.js::studentactivity::reason',
+  'routes/student-rewards-store.routes.js::studentactivity::data',
+  'routes/student-rewards-store.routes.js::studentactivity::recordedBy',
+  'routes/student-rewards-store.routes.js::studentactivity::date',
+  'routes/student-rewards-store.routes.js::studentactivity::studentId',
+  'routes/student-rewards-store.routes.js::studentactivity::activityType',
+  'routes/student-rewards-store.routes.js::studentactivity::data',
+  'routes/student-rewards-store.routes.js::studentactivity::reason',
+  'routes/student-rewards-store.routes.js::studentactivity::recordedBy',
+  'routes/student-rewards-store.routes.js::studentactivity::date',
 ]);
 
 const ALWAYS_ALLOWED = new Set([
@@ -542,7 +501,8 @@ function buildBindings(src) {
   const reqRe =
     /(?:const|let|var)\s+(\w+)\s*=\s*require\(\s*['"][^'"]*\/models\/(?:[\w.-]+\/)*([\w.-]+?)(?:\.js)?['"]\s*\)/g;
   while ((m = reqRe.exec(src))) bindings.set(m[1], m[2].toLowerCase());
-  const lookupRe = /(?:const|let|var)\s+(\w+)\s*=\s*(?:mongoose\.model|safeModel)\(\s*['"](\w+)['"]\s*\)/g;
+  const lookupRe =
+    /(?:const|let|var)\s+(\w+)\s*=\s*(?:mongoose\.model|safeModel)\(\s*['"](\w+)['"]\s*\)/g;
   while ((m = lookupRe.exec(src))) bindings.set(m[1], m[2].toLowerCase());
   return bindings;
 }
@@ -564,7 +524,10 @@ function scanRepo({ root = ROOT, baseline } = {}) {
   let scannedSites = 0;
   let skippedSites = 0;
 
-  const targets = [...listJsFiles(path.join(root, 'routes')), ...listJsFiles(path.join(root, 'services'))];
+  const targets = [
+    ...listJsFiles(path.join(root, 'routes')),
+    ...listJsFiles(path.join(root, 'services')),
+  ];
   for (const file of targets) {
     let src;
     try {
@@ -673,7 +636,9 @@ function main() {
       process.stdout.write(`  ✗ ${f.file}:${f.line} — ${f.model}.create() ${msg}\n`);
     }
     for (const id of r.staleBaseline) {
-      process.stdout.write(`  ⚠ stale baseline entry (fixed — remove from KNOWN_PHANTOM_WRITES): ${id}\n`);
+      process.stdout.write(
+        `  ⚠ stale baseline entry (fixed — remove from KNOWN_PHANTOM_WRITES): ${id}\n`
+      );
     }
     if (!fail) process.stdout.write('  ✓ no phantom schema writes detected\n');
   }

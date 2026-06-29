@@ -360,7 +360,7 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeSnake(req) };
 
     if (status) filter.status = status;
     if (invoice_type) filter.invoice_type = invoice_type;
@@ -418,7 +418,11 @@ router.get(
   '/invoices/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const invoice = await Invoice.findOne({ _id: req.params.id, deleted_at: null })
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    })
       .populate('beneficiary_id', 'full_name_ar file_number phone')
       .populate('created_by', 'name');
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
@@ -462,7 +466,11 @@ router.put(
   '/invoices/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const invoice = await Invoice.findOne({ _id: req.params.id, deleted_at: null });
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    });
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
 
     if (['paid', 'cancelled'].includes(invoice.status)) {
@@ -490,7 +498,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const invoice = await Invoice.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending'] } },
+      { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending'] }, ...branchScopeSnake(req) },
       { status: 'cancelled', cancellation_reason: req.body.reason, updated_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -507,7 +515,11 @@ router.get(
   '/invoices/:id/qr',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const invoice = await Invoice.findOne({ _id: req.params.id, deleted_at: null });
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    });
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
 
     const qrCode = zatcaService.generateQrTLV({
@@ -527,7 +539,11 @@ router.get(
   '/invoices/:id/xml',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const invoice = await Invoice.findOne({ _id: req.params.id, deleted_at: null }).populate(
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    }).populate(
       'beneficiary_id',
       'full_name_ar'
     );
@@ -549,7 +565,11 @@ router.post(
   '/invoices/:id/zatca-submit',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const invoice = await Invoice.findOne({ _id: req.params.id, deleted_at: null });
+    const invoice = await Invoice.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    });
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
 
     const xml = zatcaService.generateInvoiceXml(invoice);
@@ -595,7 +615,7 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeSnake(req) };
 
     if (status) filter.status = status;
     if (payment_method) filter.payment_method = payment_method;
@@ -634,7 +654,11 @@ router.get(
   '/payments/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const payment = await Payment.findOne({ _id: req.params.id, deleted_at: null })
+    const payment = await Payment.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    })
       .populate('invoice_id', 'invoice_number total_amount remaining_amount')
       .populate('beneficiary_id', 'full_name_ar file_number phone')
       .populate('received_by', 'name');
@@ -682,6 +706,7 @@ router.post(
       _id: req.params.id,
       deleted_at: null,
       status: 'completed',
+      ...branchScopeSnake(req),
     });
     if (!payment)
       return res
@@ -715,7 +740,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const payment = await Payment.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $in: ['pending', 'failed'] } },
+      { _id: req.params.id, deleted_at: null, status: { $in: ['pending', 'failed'] }, ...branchScopeSnake(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -744,7 +769,7 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeSnake(req) };
 
     if (status) filter.status = status;
     if (insurance_company)
@@ -784,7 +809,11 @@ router.get(
   '/insurance-claims/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const claim = await InsuranceClaim.findOne({ _id: req.params.id, deleted_at: null })
+    const claim = await InsuranceClaim.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScopeSnake(req),
+    })
       .populate('beneficiary_id', 'full_name_ar file_number phone date_of_birth')
       .populate('invoice_id', 'invoice_number total_amount lines')
       .populate('created_by', 'name');
@@ -812,7 +841,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const claim = await InsuranceClaim.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'draft' },
+      { _id: req.params.id, deleted_at: null, status: 'draft', ...branchScopeSnake(req) },
       {
         status: 'submitted',
         submitted_at: new Date(),
@@ -835,7 +864,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { approved_amount, approval_reference, notes } = req.body;
     const claim = await InsuranceClaim.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'submitted' },
+      { _id: req.params.id, deleted_at: null, status: 'submitted', ...branchScopeSnake(req) },
       {
         status: 'approved',
         approved_amount: approved_amount || undefined,
@@ -856,7 +885,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const claim = await InsuranceClaim.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'submitted' },
+      { _id: req.params.id, deleted_at: null, status: 'submitted', ...branchScopeSnake(req) },
       {
         status: 'rejected',
         rejection_reason: req.body.reason,
@@ -875,7 +904,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const claim = await InsuranceClaim.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'draft' },
+      { _id: req.params.id, deleted_at: null, status: 'draft', ...branchScopeSnake(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );

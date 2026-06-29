@@ -130,6 +130,17 @@ const measureAlertSchema = new mongoose.Schema(
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
 
     notes: String,
+
+    // Idempotency link: set once this alert has been converted into an AI
+    // recommendation bundle, so the plateau/regression adapter doesn't re-convert
+    // the same open alert on every sweep tick. Was a phantom write (field
+    // undeclared → strict-mode dropped it → the `: null` filter matched every open
+    // alert → the same alert produced duplicate bundles indefinitely).
+    linkedRecommendationBundleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AiRecommendationBundle',
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -30,6 +30,14 @@ const leaveSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    // approval / rejection audit trail — attendanceService writes these on
+    // approve/reject; they were undeclared so strict mode silently dropped them
+    // (only status + approvedBy persisted → no record of when/why/who-rejected).
+    approvedDate: { type: Date },
+    approvalNotes: { type: String, trim: true },
+    rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    rejectedDate: { type: Date },
+    rejectionReason: { type: String, trim: true },
     attachments: [String],
   },
   {

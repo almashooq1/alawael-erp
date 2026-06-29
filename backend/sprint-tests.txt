@@ -1068,3 +1068,4 @@ __tests__/rehabilitation-reports-behavioral.test.js
 __tests__/smart-assessment-engine-behavioral.test.js
 __tests__/dedicated-comms-document-models-wave1540.test.js
 __tests__/dedicated-comms-document-models-behavioral-wave1540.test.js
+__tests__/icf-assessment-w340-collision-wave1542.test.js

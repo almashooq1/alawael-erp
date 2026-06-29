@@ -56,6 +56,10 @@
     "file": "models/Assessment.js"
   },
   {
+    "name": "ICFAssessmentLegacy",
+    "file": "models/assessment/ICFAssessmentLegacy.js"
+  },
+  {
     "name": "AssessmentComparison",
     "file": "models/AssessmentComparison.js"
   },
@@ -326,10 +330,6 @@
   {
     "name": "ParentMessage",
     "file": "models/ParentMessage.js"
-  },
-  {
-    "name": "ParentPortal",
-    "file": "models/ParentPortal.js"
   },
   {
     "name": "PaymentTransaction",

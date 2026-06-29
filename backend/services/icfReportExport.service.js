@@ -1,4 +1,4 @@
-const ICFAssessment = require('../models/assessment/ICFAssessment');
+const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 const Document = require('../models/Document');
 
 async function exportAssessmentToDocument(assessmentId, userId) {

@@ -2,8 +2,19 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 /**
- * ICF Assessment Schema
- * نموذج تقييم ICF
+ * ICFAssessmentLegacy — نموذج تقييم ICF (التمثيل المسطّح: scores + coreSetType)
+ * ════════════════════════════════════════════════════════════════════════════
+ * DELIBERATELY DISTINCT from the canonical `models/icf/ICFAssessment.model.js`
+ * (which registers 'ICFAssessment' with a STRUCTURED representation —
+ * assessedItems[] / bodyFunctions / bodyStructures / beneficiaryId / assessorId).
+ *
+ * This file registers the SEPARATE model name 'ICFAssessmentLegacy' (W1542) on
+ * the shared `icfassessments` collection. The two are NOT duplicates to merge —
+ * they model ICF differently and carry INCOMPATIBLE required-field contracts
+ * (this one keys on `beneficiary` + flat `scores` + `coreSetType`; the canonical
+ * requires `title`/`assessmentType`/`beneficiaryId`/`assessorId`). Re-pointing
+ * this at the canonical would re-introduce the W1540 ValidationError-500 class.
+ * **Decision: keep distinct (ADR-046 Option B). Do NOT consolidate.**
  */
 const ICFScoreSchema = new Schema(
   {

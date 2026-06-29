@@ -1,7 +1,7 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../../app');
-const ICFAssessment = require('../../models/assessment/ICFAssessment');
+const ICFAssessment = require('../../models/assessment/ICFAssessmentLegacy');
 
 // Test data
 const testAssessment = {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ICFAssessment = require('../../models/assessment/ICFAssessment');
+const ICFAssessment = require('../../models/assessment/ICFAssessmentLegacy');
 const { authenticate: auth, requireRole: checkRole } = require('../../middleware/auth');
 const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
 const {

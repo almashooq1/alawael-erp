@@ -1075,3 +1075,4 @@ __tests__/transport-trip-safety.test.js
 __tests__/medication-safety.test.js
 __tests__/document-access-guard.test.js
 __tests__/dedicated-comms-document-models-wave1540.test.js
+__tests__/dedicated-comms-document-models-behavioral-wave1540.test.js

@@ -1,14 +1,14 @@
 /**
- * Auto-generated tests for pages/Reports/ReportsPage.jsx
+ * Auto-generated tests for pages/reports/ReportsPage.jsx
  * Type: page | 191L | React | .jsx
  * @generated P#107 frontend universal generator (fs-based)
  */
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/Reports/ReportsPage.jsx');
+const SRC = path.resolve(__dirname, '../pages/reports/ReportsPage.jsx');
 
-describe('pages/Reports/ReportsPage.jsx', () => {
+describe('pages/reports/ReportsPage.jsx', () => {
   let source;
   beforeAll(() => {
     source = fs.readFileSync(SRC, 'utf8');

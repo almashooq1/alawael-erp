@@ -1,14 +1,14 @@
 /**
- * Auto-generated tests for pages/Reports/AdvancedReportsPage.jsx
+ * Auto-generated tests for pages/reports/AdvancedReportsPage.jsx
  * Type: page | 445L | React | .jsx
  * @generated P#107 frontend universal generator (fs-based)
  */
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/Reports/AdvancedReportsPage.jsx');
+const SRC = path.resolve(__dirname, '../pages/reports/AdvancedReportsPage.jsx');
 
-describe('pages/Reports/AdvancedReportsPage.jsx', () => {
+describe('pages/reports/AdvancedReportsPage.jsx', () => {
   let source;
   beforeAll(() => {
     source = fs.readFileSync(SRC, 'utf8');

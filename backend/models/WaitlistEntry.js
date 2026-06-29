@@ -301,7 +301,7 @@ waitlistEntrySchema.pre('save', function () {
 waitlistEntrySchema.methods.markContacted = function (note) {
   this.status = WAITLIST_STATUSES.CONTACTED;
   this.contactedAt = new Date();
-  if (note) this.notes = note;
+  if (note) this.notes = [this.notes, note].filter(Boolean).join('\n');
   return this.save();
 };
 
@@ -314,7 +314,7 @@ waitlistEntrySchema.methods.scheduleAssessment = function (assessmentDate, note)
   this.status = WAITLIST_STATUSES.ASSESSMENT_SCHEDULED;
   this.assessmentScheduledAt = new Date();
   this.assessmentDate = assessmentDate;
-  if (note) this.notes = note;
+  if (note) this.notes = [this.notes, note].filter(Boolean).join('\n');
   return this.save();
 };
 
@@ -325,7 +325,7 @@ waitlistEntrySchema.methods.scheduleAssessment = function (assessmentDate, note)
 waitlistEntrySchema.methods.approve = function (note) {
   this.status = WAITLIST_STATUSES.APPROVED;
   this.approvedAt = new Date();
-  if (note) this.notes = note;
+  if (note) this.notes = [this.notes, note].filter(Boolean).join('\n');
   return this.save();
 };
 

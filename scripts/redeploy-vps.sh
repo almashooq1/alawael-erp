@@ -65,6 +65,10 @@ rsync -a --delete \
   --exclude='coverage/' --exclude='data/' \
   "$SRC/$BR/" "$APP/$BR/"
 chown -R www:www "$APP/$BR" 2>/dev/null || true
+# logs/ + uploads/ MUST stay writable by the process user (alawael) — else Winston
+# file logging and file uploads break silently (the 2026-06-23 incident). rsync
+# excludes them, but the chown -R above recurses in and re-breaks them; restore.
+chown -R alawael:alawael "$APP/$BR/logs" "$APP/$BR/uploads" 2>/dev/null || true
 
 # 4) production deps + restart
 log "npm install --production"
@@ -79,6 +83,7 @@ if [ "$CODE" != "200" ]; then
   log "HEALTH CHECK FAILED (HTTP $CODE) — ROLLING BACK to previous backend"
   rsync -a --delete --exclude node_modules --exclude .env --exclude logs --exclude uploads "$BAK/" "$APP/$BR/"
   chown -R www:www "$APP/$BR" 2>/dev/null || true
+  chown -R alawael:alawael "$APP/$BR/logs" "$APP/$BR/uploads" 2>/dev/null || true
   su - alawael -c "pm2 restart alawael-api --update-env" >/dev/null 2>&1 || true
   sleep 5
   RB=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$HEALTH_URL" || echo 000)

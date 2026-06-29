@@ -31,6 +31,7 @@ const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+require('../models/CommunicationRecord'); // register model for safeModel() lookup
 
 const router = express.Router();
 router.use(authenticate);
@@ -47,7 +48,7 @@ const safeModel = name => {
 // ── GET /inbox ─────────────────────────────────────────────────────────────
 router.get('/inbox', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [], pagination: { total: 0 } });
     const { page = 1, limit = 20, isRead, isStarred, search } = req.query;
     const filter = {
@@ -86,7 +87,7 @@ router.get('/inbox', async (req, res) => {
 // ── GET /inbox/:id ─────────────────────────────────────────────────────────
 router.get('/inbox/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const email = await Communication.findOne({
@@ -103,7 +104,7 @@ router.get('/inbox/:id', async (req, res) => {
 // ── POST /compose — send email ─────────────────────────────────────────────
 router.post('/compose', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const { to, subject, body, cc, bcc, replyTo, attachments = [] } = req.body;
@@ -136,7 +137,7 @@ router.post('/compose', async (req, res) => {
 // ── POST /drafts — save draft ──────────────────────────────────────────────
 router.post('/drafts', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.create({
@@ -156,7 +157,7 @@ router.post('/drafts', async (req, res) => {
 // ── GET /drafts ────────────────────────────────────────────────────────────
 router.get('/drafts', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [] });
     const data = await Communication.find({
       branchId: req.user.branchId,
@@ -175,7 +176,7 @@ router.get('/drafts', async (req, res) => {
 // ── PUT /drafts/:id ────────────────────────────────────────────────────────
 router.put('/drafts/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -193,7 +194,7 @@ router.put('/drafts/:id', async (req, res) => {
 // ── DELETE /drafts/:id ─────────────────────────────────────────────────────
 router.delete('/drafts/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndDelete({
@@ -211,7 +212,7 @@ router.delete('/drafts/:id', async (req, res) => {
 // ── GET /sent ──────────────────────────────────────────────────────────────
 router.get('/sent', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [] });
     const { page = 1, limit = 20 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -239,7 +240,7 @@ router.get('/sent', async (req, res) => {
 // ── PATCH /inbox/:id/read ──────────────────────────────────────────────────
 router.patch('/inbox/:id/read', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -257,7 +258,7 @@ router.patch('/inbox/:id/read', async (req, res) => {
 // ── PATCH /inbox/:id/star ──────────────────────────────────────────────────
 router.patch('/inbox/:id/star', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const current = await Communication.findOne({
@@ -276,7 +277,7 @@ router.patch('/inbox/:id/star', async (req, res) => {
 // ── DELETE /inbox/:id ──────────────────────────────────────────────────────
 router.delete('/inbox/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -395,7 +396,7 @@ router.delete('/templates/:id', requireRole('admin'), async (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────────────
 router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.json({ success: true, data: { sent: 0, received: 0, unread: 0, drafts: 0 } });
     const base = { branchId: req.user.branchId, channel: 'email' };

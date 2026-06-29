@@ -26,6 +26,7 @@ const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+require('../models/ElectronicDirective'); // register model for safeModel() lookup
 
 const router = express.Router();
 router.use(authenticate);
@@ -43,7 +44,7 @@ const safeModel = name => {
 // ── GET / ──────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document) return res.json({ success: true, data: [], pagination: { total: 0 } });
     const { page = 1, limit = 20, type, status, beneficiaryId } = req.query;
     const filter = { branchId: req.user.branchId, category: 'directive', isDeleted: { $ne: true } };
@@ -68,7 +69,7 @@ router.get('/', async (req, res) => {
 // ── POST / ─────────────────────────────────────────────────────────────────
 router.post('/', requireRole('admin', 'manager', 'doctor', 'clinician'), async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const { directiveType, beneficiaryId, title, content, requiredSigners = [] } = req.body;
@@ -111,7 +112,7 @@ router.get('/templates', async (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────────────
 router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.json({
         success: true,
@@ -134,7 +135,7 @@ router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, 
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOne({
@@ -152,7 +153,7 @@ router.get('/:id', async (req, res) => {
 // ── PUT /:id ───────────────────────────────────────────────────────────────
 router.put('/:id', requireRole('admin', 'manager', 'doctor', 'clinician'), async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -170,7 +171,7 @@ router.put('/:id', requireRole('admin', 'manager', 'doctor', 'clinician'), async
 // ── DELETE /:id ────────────────────────────────────────────────────────────
 router.delete('/:id', requireRole('admin', 'manager'), async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -190,7 +191,7 @@ router.post(
   requireRole('admin', 'manager', 'doctor', 'clinician'),
   async (req, res) => {
     try {
-      const Document = safeModel('Document');
+      const Document = safeModel('ElectronicDirective');
       if (!Document)
         return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
       const { notifyVia = 'email' } = req.body;
@@ -233,7 +234,7 @@ router.patch('/:id/sign', async (req, res) => {
     const { signerType = 'beneficiary', signatureData, pinConfirmed } = req.body;
     if (!pinConfirmed)
       return res.status(400).json({ success: false, message: 'PIN confirmation required' });
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -276,7 +277,7 @@ router.patch('/:id/sign', async (req, res) => {
 // ── PATCH /:id/witness-sign ────────────────────────────────────────────────
 router.patch('/:id/witness-sign', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -306,7 +307,7 @@ router.patch('/:id/revoke', requireRole('admin', 'manager', 'doctor'), async (re
     const { reason } = req.body;
     if (!reason)
       return res.status(400).json({ success: false, message: 'Revocation reason is required' });
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOneAndUpdate(
@@ -345,7 +346,7 @@ router.patch('/:id/revoke', requireRole('admin', 'manager', 'doctor'), async (re
 // ── GET /:id/audit-trail ───────────────────────────────────────────────────
 router.get('/:id/audit-trail', async (req, res) => {
   try {
-    const Document = safeModel('Document');
+    const Document = safeModel('ElectronicDirective');
     if (!Document)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Document.findOne({

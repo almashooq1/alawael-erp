@@ -1066,3 +1066,4 @@ __tests__/rehabilitation-kpis.test.js
 __tests__/rehabilitation-metrics-behavioral.test.js
 __tests__/rehabilitation-reports-behavioral.test.js
 __tests__/smart-assessment-engine-behavioral.test.js
+__tests__/dedicated-comms-document-models-wave1540.test.js

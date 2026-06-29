@@ -23,6 +23,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+require('../models/CommunicationRecord'); // register model for safeModel() lookup
 
 const router = express.Router();
 router.use(authenticate);
@@ -36,13 +37,14 @@ const safeModel = name => {
   }
 };
 
-// We use the Communication model as the canonical complaint/feedback store
-// (channel: 'complaint'), falling back to a generic object store pattern.
+// We use the dedicated CommunicationRecord model as the complaint/feedback
+// store (channel: 'complaint'). See models/CommunicationRecord.js for why this
+// replaced the canonical Communication model (which threw on every write).
 
 // ── GET / ──────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication) return res.json({ success: true, data: [], pagination: { total: 0 } });
     const { page = 1, limit = 20, status, category, priority, assignedTo } = req.query;
     const filter = { branchId: req.user.branchId, channel: 'complaint' };
@@ -68,7 +70,7 @@ router.get('/', async (req, res) => {
 // ── POST / ─────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const { category, subject, description, priority = 'medium', attachments = [] } = req.body;
@@ -119,7 +121,7 @@ router.get('/categories', (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────────────
 router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.json({ success: true, data: { total: 0, open: 0, resolved: 0, escalated: 0 } });
     const base = { branchId: req.user.branchId, channel: 'complaint' };
@@ -147,7 +149,7 @@ router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, 
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOne({
@@ -168,7 +170,7 @@ router.patch('/:id/assign', requireRole('admin', 'manager', 'supervisor'), async
     const { assignedTo } = req.body;
     if (!assignedTo)
       return res.status(400).json({ success: false, message: 'assignedTo is required' });
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -192,7 +194,7 @@ router.post(
       const { note, isInternal = true } = req.body;
       if (!note)
         return res.status(400).json({ success: false, message: 'note content is required' });
-      const Communication = safeModel('Communication');
+      const Communication = safeModel('CommunicationRecord');
       if (!Communication)
         return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
       const doc = await Communication.findOneAndUpdate(
@@ -218,7 +220,7 @@ router.patch('/:id/resolve', requireRole('admin', 'manager', 'supervisor'), asyn
     const { resolution, notifySubmitter = true } = req.body;
     if (!resolution)
       return res.status(400).json({ success: false, message: 'resolution is required' });
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -251,7 +253,7 @@ router.patch('/:id/resolve', requireRole('admin', 'manager', 'supervisor'), asyn
 router.patch('/:id/escalate', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
     const { reason, escalateTo } = req.body;
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -277,7 +279,7 @@ router.patch('/:id/escalate', requireRole('admin', 'manager', 'supervisor'), asy
 router.patch('/:id/reopen', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
   try {
     const { reason } = req.body;
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
@@ -299,7 +301,7 @@ router.post('/:id/feedback', async (req, res) => {
     const { rating, comment } = req.body;
     if (!rating || rating < 1 || rating > 5)
       return res.status(400).json({ success: false, message: 'rating must be between 1 and 5' });
-    const Communication = safeModel('Communication');
+    const Communication = safeModel('CommunicationRecord');
     if (!Communication)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(

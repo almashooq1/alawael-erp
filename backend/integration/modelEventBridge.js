@@ -405,6 +405,112 @@ const MAPPINGS = [
       branchId: doc.branchId ? String(doc.branchId) : '',
     }),
   },
+  // ─── Core-linkage: EMR + clinical-document records → beneficiary CareTimeline.
+  // Reuse the LIVE `medical.record.created` and `beneficiary.assessment.completed`
+  // contracts (no new contracts) so these previously-unlinked, beneficiary-keyed
+  // models surface in the unified timeline. Envelopes match the contract keys
+  // exactly. EMR models key on `beneficiary`; the bridge tolerates either name.
+  // EMR models register under Emr-prefixed mongoose names (EmrLabResult, …) —
+  // the bridge dispatches on `this.constructor.modelName`, so the mapping must
+  // use the registered name, not the file basename. The core-linkage gate still
+  // recognises them via the CORE_LINKAGE_LEDGER §7 entries (LabResult, …).
+  {
+    modelName: 'EmrLabResult',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'lab_result',
+      createdBy: String(doc.recordedBy || doc.orderedBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'EmrVitalSigns',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'vital_signs',
+      createdBy: String(doc.recordedBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'EmrMedicationAdministration',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'medication_administration',
+      createdBy: String(doc.administeredBy || doc.recordedBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'EmrAllergyRecord',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'allergy',
+      createdBy: String(doc.recordedBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'EmrImmunizationRecord',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'immunization',
+      createdBy: String(doc.recordedBy || doc.administeredBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'ElectronicDirective',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'directive',
+      createdBy: String(doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'StudentCertificate',
+    domain: 'medical',
+    eventType: 'record.created',
+    trigger: 'create-only',
+    payload: doc => ({
+      recordId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || doc.beneficiary || ''),
+      recordType: 'certificate',
+      createdBy: String(doc.issuedBy || doc.createdBy || 'system'),
+    }),
+  },
+  {
+    modelName: 'ICFAssessment',
+    domain: 'beneficiary',
+    eventType: 'assessment.completed',
+    trigger: 'create-only',
+    payload: doc => ({
+      beneficiaryId: String(doc.beneficiary || doc.beneficiaryId || ''),
+      assessmentId: String(doc._id),
+      assessmentType: 'ICF',
+      overallScore: Number(doc.overallScore || 0),
+      assessor: String(doc.assessor || doc.createdBy || 'system'),
+    }),
+  },
 ];
 
 /**

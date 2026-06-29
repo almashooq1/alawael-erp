@@ -100,8 +100,6 @@ const LabResultSchema = new Schema(
 
 LabResultSchema.index({ beneficiary: 1, orderedDate: -1 });
 LabResultSchema.index({ category: 1, overallStatus: 1 });
-LabResultSchema.index({ labOrderNumber: 1 });
+// labOrderNumber index is provided by `unique: true` on the field — no separate index()
 
-module.exports =
-  mongoose.models.EmrLabResult ||
-  mongoose.model('EmrLabResult', LabResultSchema);
+module.exports = mongoose.models.EmrLabResult || mongoose.model('EmrLabResult', LabResultSchema);

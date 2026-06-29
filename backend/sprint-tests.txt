@@ -1077,3 +1077,4 @@ __tests__/document-access-guard.test.js
 __tests__/dedicated-comms-document-models-wave1540.test.js
 __tests__/dedicated-comms-document-models-behavioral-wave1540.test.js
 __tests__/icf-assessment-w340-collision-wave1542.test.js
+__tests__/report-template-w340-crash-guard-wave1543.test.js

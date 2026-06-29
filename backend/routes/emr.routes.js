@@ -11,6 +11,15 @@ const router = express.Router();
 const emrService = require('../services/emr.service');
 const { authenticate } = require('../middleware/auth');
 const { body, param, validationResult } = require('express-validator');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+
+// W269 cross-branch isolation: authenticate + scope, then branch-check every
+// `:beneficiaryId` path lookup. The param guard fail-opens for cross-branch
+// roles / unscoped callers and only enforces for restricted staff.
+router.use(authenticate);
+router.use(requireBranchAccess);
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 function handleValidation(req, res, next) {
   const errors = validationResult(req);
@@ -83,11 +92,7 @@ router.get(
 router.post(
   '/medication-administration',
   authenticate,
-  [
-    body('beneficiary').notEmpty(),
-    body('medicationName').notEmpty(),
-    body('dosage').notEmpty(),
-  ],
+  [body('beneficiary').notEmpty(), body('medicationName').notEmpty(), body('dosage').notEmpty()],
   handleValidation,
   wrap(async (req, res) => {
     const mar = await emrService.administerMedication(req.body);
@@ -110,11 +115,7 @@ router.get(
 router.post(
   '/lab-results',
   authenticate,
-  [
-    body('beneficiary').notEmpty(),
-    body('orderedDate').notEmpty(),
-    body('category').notEmpty(),
-  ],
+  [body('beneficiary').notEmpty(), body('orderedDate').notEmpty(), body('category').notEmpty()],
   handleValidation,
   wrap(async (req, res) => {
     const lab = await emrService.addLabResult(req.body);
@@ -137,11 +138,7 @@ router.get(
 router.post(
   '/allergies',
   authenticate,
-  [
-    body('beneficiaryId').notEmpty(),
-    body('allergen').isObject(),
-    body('reaction').isObject(),
-  ],
+  [body('beneficiaryId').notEmpty(), body('allergen').isObject(), body('reaction').isObject()],
   handleValidation,
   wrap(async (req, res) => {
     const { beneficiaryId, ...allergyData } = req.body;
@@ -156,7 +153,10 @@ router.get(
   [param('beneficiaryId').notEmpty()],
   handleValidation,
   wrap(async (req, res) => {
-    const list = await emrService.checkAllergyAlerts(req.params.beneficiaryId, req.query.medication);
+    const list = await emrService.checkAllergyAlerts(
+      req.params.beneficiaryId,
+      req.query.medication
+    );
     res.json({ success: true, data: list });
   })
 );
@@ -165,10 +165,7 @@ router.get(
 router.post(
   '/immunizations',
   authenticate,
-  [
-    body('beneficiary').notEmpty(),
-    body('dateAdministered').notEmpty(),
-  ],
+  [body('beneficiary').notEmpty(), body('dateAdministered').notEmpty()],
   handleValidation,
   wrap(async (req, res) => {
     const imm = await emrService.addImmunization(req.body);
@@ -191,11 +188,7 @@ router.get(
 router.post(
   '/referrals',
   authenticate,
-  [
-    body('beneficiary').notEmpty(),
-    body('referredBy').notEmpty(),
-    body('reason').isObject(),
-  ],
+  [body('beneficiary').notEmpty(), body('referredBy').notEmpty(), body('reason').isObject()],
   handleValidation,
   wrap(async (req, res) => {
     const ref = await emrService.createReferral(req.body);

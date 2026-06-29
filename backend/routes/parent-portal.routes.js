@@ -1,7 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken: auth } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const parentPortal = require('../services/parentPortal.service');
+
+// W269 cross-branch isolation on every `:beneficiaryId` lookup (fail-open for
+// cross-branch roles / unscoped callers; enforced for restricted staff).
+// NOTE: this is a dormant legacy route (the live surface is
+// parent-portal-enhanced.routes.js). Guardian↔beneficiary *ownership* — the
+// correct model for guardian callers, who carry no branch scope — is a separate
+// concern tracked for the live portal, not closed by branch isolation here.
+router.use(auth);
+router.use(requireBranchAccess);
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 /**
  * Parent Portal Routes

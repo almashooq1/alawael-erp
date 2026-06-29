@@ -265,6 +265,19 @@ const ROUTES = [
   { path: '/api/v1/portal', file: 'routes/parent-portal-v1.routes', auth: true, phase: 'student', description: 'Parent portal v1' },
   { path: '/api/v1/parent-portal', file: 'routes/parent-portal.routes', auth: true, roles: ['parent', 'guardian', 'admin', 'super_admin'], phase: 'student', description: 'Parent portal v2' },
   { path: '/api/chat-v2', file: 'routes/chat-v2.routes', auth: true, phase: 'messaging', description: 'Chat v2' },
+  // ── 2026-06-29: complete _registry.js -> unified migration (were in dead legacy registries only) ──
+  { path: "/api/v1/voice-log", file: "routes/voice-log.routes", auth: true, phase: "clinical", description: "Beneficiary voice log (CRPD Art 7/12/21)", dualMount: true },
+  { path: "/api/v1/decision-rights", file: "routes/decision-rights.routes", auth: true, phase: "clinical", description: "Decision rights assessment (CRPD)", dualMount: true },
+  { path: "/api/v1/self-advocacy", file: "routes/self-advocacy.routes", auth: true, phase: "clinical", description: "Self-advocacy plan (CRPD)", dualMount: true },
+  { path: "/api/v1/pathway-bundles", file: "routes/pathway-bundles.routes", auth: true, phase: "clinical", description: "Disability pathway bundles (Blueprint 43 R4)", dualMount: true },
+  { path: "/api/v1/next-best-action", file: "routes/next-best-action.routes", auth: true, phase: "clinical", description: "Next-best-action CDSS (Blueprint 43 R6)", dualMount: true },
+  { path: "/api/v1/outcomes-rollup", file: "routes/outcomes-rollup.routes", auth: true, phase: "clinical", description: "Outcomes roll-up ladder (Blueprint 43)", dualMount: true },
+  { path: "/api/v1/launch-readiness", file: "routes/launch-readiness.routes", auth: true, phase: "clinical", description: "Launch-readiness verdict (W1375)", dualMount: true },
+  { path: "/api/v1/clinical-pathway", file: "routes/clinical-pathway.routes", auth: true, phase: "clinical", description: "Clinical pathway engine", dualMount: true },
+  { path: "/api/v1/guardians", file: "routes/guardians.routes", auth: true, phase: "student", description: "Guardians", dualMount: true },
+  { path: "/api/v1/family-home-program", file: "routes/family-home-program.routes", auth: true, phase: "clinical", description: "Family home program", dualMount: true },
+  { path: "/api/v1/seizure-log", file: "routes/seizure-log.routes", auth: true, phase: "clinical", description: "Seizure event log (ILAE 2017)", dualMount: true },
+  { path: "/api/v1/safeguarding", file: "routes/safeguarding.routes", auth: true, phase: "clinical", description: "Safeguarding concerns (CBAHI)", dualMount: true },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════

@@ -11,7 +11,7 @@ const {
   MESSAGE_TYPE,
   MESSAGE_DIRECTION,
   WHATSAPP_CHANNEL,
-} = require('./constants');
+} = require('../integrations/whatsapp/constants');
 
 const whatsAppMessageSchema = new mongoose.Schema(
   {
@@ -130,16 +130,24 @@ whatsAppMessageSchema.statics.findByPhone = function (phoneNumber, options = {})
   if (options.direction) query.direction = options.direction;
   if (options.status) query.status = options.status;
   if (options.tag) query.tag = options.tag;
-  return this.find(query).sort({ createdAt: -1 }).limit(options.limit || 50);
+  return this.find(query)
+    .sort({ createdAt: -1 })
+    .limit(options.limit || 50);
 };
 
 whatsAppMessageSchema.statics.findByBeneficiary = function (beneficiaryId, options = {}) {
   const query = { beneficiaryId };
   if (options.direction) query.direction = options.direction;
-  return this.find(query).sort({ createdAt: -1 }).limit(options.limit || 50);
+  return this.find(query)
+    .sort({ createdAt: -1 })
+    .limit(options.limit || 50);
 };
 
-whatsAppMessageSchema.statics.updateStatus = async function (providerMessageId, status, details = {}) {
+whatsAppMessageSchema.statics.updateStatus = async function (
+  providerMessageId,
+  status,
+  details = {}
+) {
   const update = { status };
   if (status === MESSAGE_STATUS.SENT) update.sentAt = new Date();
   if (status === MESSAGE_STATUS.DELIVERED) update.deliveredAt = new Date();
@@ -148,11 +156,7 @@ whatsAppMessageSchema.statics.updateStatus = async function (providerMessageId, 
     update.failedAt = new Date();
     update.errorMessage = details.errorMessage || 'Unknown error';
   }
-  return this.findOneAndUpdate(
-    { providerMessageId },
-    { $set: update },
-    { new: true }
-  );
+  return this.findOneAndUpdate({ providerMessageId }, { $set: update }, { new: true });
 };
 
 whatsAppMessageSchema.statics.getStats = async function (period = '24h') {
@@ -165,4 +169,5 @@ whatsAppMessageSchema.statics.getStats = async function (period = '24h') {
   return { period, outbound, inbound, failed, total: outbound + inbound };
 };
 
-module.exports = mongoose.models.WhatsAppMessage || mongoose.model('WhatsAppMessage', whatsAppMessageSchema);
+module.exports =
+  mongoose.models.WhatsAppMessage || mongoose.model('WhatsAppMessage', whatsAppMessageSchema);

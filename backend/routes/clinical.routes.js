@@ -4,7 +4,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const { auth, checkRole } = require('../middleware/auth');
+const { authenticateToken: auth, requireRole: checkRole } = require('../middleware/auth');
 const clinicalDashboard = require('../services/clinicalDashboard.service');
 const integratedReport = require('../services/integratedReport.service');
 const sessionICF = require('../services/sessionICFLinker.service');
@@ -14,35 +14,33 @@ const sessionICF = require('../services/sessionICFLinker.service');
 // ═══════════════════════════════════════════════════════════════════
 
 // Get unified clinical dashboard for a beneficiary
-router.get('/dashboard/:beneficiaryId',
-  auth,
-  async (req, res) => {
-    try {
-      const { beneficiaryId } = req.params;
-      const result = await clinicalDashboard.getClinicalDashboard(beneficiaryId);
+router.get('/dashboard/:beneficiaryId', auth, async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const result = await clinicalDashboard.getClinicalDashboard(beneficiaryId);
 
-      if (!result.success) {
-        return res.status(404).json(result);
-      }
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ClinicalRoutes] Dashboard error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching clinical dashboard',
-        error: error.message,
-      });
+    if (!result.success) {
+      return res.status(404).json(result);
     }
+
+    res.json(result);
+  } catch (error) {
+    console.error('[ClinicalRoutes] Dashboard error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching clinical dashboard',
+      error: error.message,
+    });
   }
-);
+});
 
 // ═══════════════════════════════════════════════════════════════════
 //  Integrated Reports
 // ═══════════════════════════════════════════════════════════════════
 
 // Generate integrated report for a beneficiary
-router.post('/reports/:beneficiaryId',
+router.post(
+  '/reports/:beneficiaryId',
   auth,
   checkRole(['therapist', 'doctor', 'admin', 'clinical_director']),
   async (req, res) => {
@@ -80,70 +78,65 @@ router.post('/reports/:beneficiaryId',
 );
 
 // Preview report (same as generate but always returns JSON with HTML)
-router.get('/reports/:beneficiaryId/preview',
-  auth,
-  async (req, res) => {
-    try {
-      const { beneficiaryId } = req.params;
-      const { startDate, endDate, sections } = req.query;
+router.get('/reports/:beneficiaryId/preview', auth, async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const { startDate, endDate, sections } = req.query;
 
-      const result = await integratedReport.generateIntegratedReport(beneficiaryId, {
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
-        sections: sections ? sections.split(',') : undefined,
-        format: 'html',
-      });
+    const result = await integratedReport.generateIntegratedReport(beneficiaryId, {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      sections: sections ? sections.split(',') : undefined,
+      format: 'html',
+    });
 
-      if (!result.success) {
-        return res.status(400).json(result);
-      }
-
-      res.json({
-        success: true,
-        html: result.html,
-        report: result.report,
-      });
-    } catch (error) {
-      console.error('[ClinicalRoutes] Report preview error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error previewing report',
-        error: error.message,
-      });
+    if (!result.success) {
+      return res.status(400).json(result);
     }
+
+    res.json({
+      success: true,
+      html: result.html,
+      report: result.report,
+    });
+  } catch (error) {
+    console.error('[ClinicalRoutes] Report preview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error previewing report',
+      error: error.message,
+    });
   }
-);
+});
 
 // ═══════════════════════════════════════════════════════════════════
 //  Session-ICF Linking
 // ═══════════════════════════════════════════════════════════════════
 
 // Get ICF targets for a session
-router.get('/sessions/:sessionId/icf-targets',
-  auth,
-  async (req, res) => {
-    try {
-      const { sessionId } = req.params;
-      const result = await sessionICF.getSessionICFTargets(sessionId);
+router.get('/sessions/:sessionId/icf-targets', auth, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const result = await sessionICF.getSessionICFTargets(sessionId);
 
-      if (!result.success) {
-        return res.status(404).json(result);
-      }
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ClinicalRoutes] Session ICF targets error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching session ICF targets',
-        error: error.message,
-      });
+    if (!result.success) {
+      return res.status(404).json(result);
     }
+
+    res.json(result);
+  } catch (error) {
+    console.error('[ClinicalRoutes] Session ICF targets error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching session ICF targets',
+      error: error.message,
+    });
   }
-);
+});
 
 // Record ICF progress during a session
-router.post('/sessions/:sessionId/icf-progress',
+router.post(
+  '/sessions/:sessionId/icf-progress',
   auth,
   checkRole(['therapist', 'doctor', 'admin']),
   async (req, res) => {
@@ -170,53 +163,47 @@ router.post('/sessions/:sessionId/icf-progress',
 );
 
 // Get ICF progress history for a goal
-router.get('/goals/:goalId/icf-progress',
-  auth,
-  async (req, res) => {
-    try {
-      const { goalId } = req.params;
-      const { timeRange } = req.query;
+router.get('/goals/:goalId/icf-progress', auth, async (req, res) => {
+  try {
+    const { goalId } = req.params;
+    const { timeRange } = req.query;
 
-      const result = await sessionICF.getICFProgressForGoal(goalId, timeRange || '3months');
+    const result = await sessionICF.getICFProgressForGoal(goalId, timeRange || '3months');
 
-      if (!result.success) {
-        return res.status(404).json(result);
-      }
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ClinicalRoutes] Goal ICF progress error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching goal ICF progress',
-        error: error.message,
-      });
+    if (!result.success) {
+      return res.status(404).json(result);
     }
+
+    res.json(result);
+  } catch (error) {
+    console.error('[ClinicalRoutes] Goal ICF progress error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching goal ICF progress',
+      error: error.message,
+    });
   }
-);
+});
 
 // Auto-link session to ICF goals
-router.post('/sessions/:sessionId/auto-link-icf',
-  auth,
-  async (req, res) => {
-    try {
-      const { sessionId } = req.params;
-      const result = await sessionICF.autoLinkSessionToICF(sessionId);
+router.post('/sessions/:sessionId/auto-link-icf', auth, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const result = await sessionICF.autoLinkSessionToICF(sessionId);
 
-      if (!result.success) {
-        return res.status(400).json(result);
-      }
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ClinicalRoutes] Auto-link ICF error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error auto-linking session to ICF',
-        error: error.message,
-      });
+    if (!result.success) {
+      return res.status(400).json(result);
     }
+
+    res.json(result);
+  } catch (error) {
+    console.error('[ClinicalRoutes] Auto-link ICF error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error auto-linking session to ICF',
+      error: error.message,
+    });
   }
-);
+});
 
 module.exports = router;

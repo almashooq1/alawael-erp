@@ -47,13 +47,15 @@ function Beneficiary() {
 }
 function MeasureReassessmentTask() {
   if (!_MeasureReassessmentTask) {
-    _MeasureReassessmentTask = require('../domains/goals/models/MeasureReassessmentTask');
+    // the module exports { MeasureReassessmentTask, ... } — pull the model out
+    // (the bare require returned the OBJECT → .aggregate/.find were undefined → 500)
+    _MeasureReassessmentTask = require('../domains/goals/models/MeasureReassessmentTask').MeasureReassessmentTask;
   }
   return _MeasureReassessmentTask;
 }
 function MeasureAlert() {
   if (!_MeasureAlert) {
-    _MeasureAlert = require('../domains/goals/models/MeasureAlert');
+    _MeasureAlert = require('../domains/goals/models/MeasureAlert').MeasureAlert;
   }
   return _MeasureAlert;
 }

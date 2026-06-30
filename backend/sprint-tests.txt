@@ -1104,3 +1104,4 @@ __tests__/mdt-coordination-lean-idor.test.js
 __tests__/whatsapp-meta-provider-wave1424b.test.js
 __tests__/no-never-set-req-fields.test.js
 __tests__/parent-portal-reschedule-careplan.test.js
+__tests__/therapist-clinical-signals-import-shape.test.js

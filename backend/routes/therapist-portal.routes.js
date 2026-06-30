@@ -1868,7 +1868,9 @@ router.post(
           .status(400)
           .json({ error: 'InvalidId', message: 'taskId is not a valid ObjectId' });
       }
-      const MeasureReassessmentTask = require('../domains/goals/models/MeasureReassessmentTask');
+      // the module exports { MeasureReassessmentTask, ... } — destructure the model
+      // (bare require returned the OBJECT, so .findById was undefined → 500)
+      const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
       const task = await MeasureReassessmentTask.findById(req.params.taskId)
         .select('_id beneficiaryId status')
         .lean();
@@ -1926,7 +1928,7 @@ router.post(
           .status(400)
           .json({ error: 'InvalidId', message: 'alertId is not a valid ObjectId' });
       }
-      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const { MeasureAlert } = require('../domains/goals/models/MeasureAlert');
       const alert = await MeasureAlert.findById(req.params.alertId)
         .select('_id beneficiaryId status')
         .lean();
@@ -1994,7 +1996,7 @@ router.post(
           .status(400)
           .json({ error: 'InvalidId', message: 'alertId is not a valid ObjectId' });
       }
-      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const { MeasureAlert } = require('../domains/goals/models/MeasureAlert');
       const alert = await MeasureAlert.findById(req.params.alertId)
         .select('_id beneficiaryId status')
         .lean();
@@ -2070,7 +2072,7 @@ router.post(
           message: 'سبب الصرف مطلوب (١٠ أحرف على الأقل).',
         });
       }
-      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const { MeasureAlert } = require('../domains/goals/models/MeasureAlert');
       const alert = await MeasureAlert.findById(req.params.alertId)
         .select('_id beneficiaryId status')
         .lean();

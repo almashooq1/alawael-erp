@@ -29,6 +29,31 @@ const RISK_READ_ROLES = [...RISK_ROLES, 'clinical_supervisor', 'safety_officer']
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EnterpriseRisk`)[n];
 
+// Business-content fields a client may set. riskScore is COMPUTED (probability ×
+// impact in the pre('save') hook); branchId/organizationId/createdBy/isDeleted are
+// server-controlled — stripUpdateMeta (a prototype-pollution blacklist) didn't
+// strip any of these, so a caller could forge riskScore (skewing the top-risk
+// ranking) or branchId (relocating a risk to another branch).
+const RISK_WRITABLE = [
+  'riskCode',
+  'titleAr',
+  'category',
+  'description',
+  'probability',
+  'impact',
+  'priority',
+  'status',
+  'owner',
+  'ownerUserId',
+  'reviewDate',
+];
+const pick = (body, keys) => {
+  const out = {};
+  const src = body || {};
+  for (const k of keys) if (k in src) out[k] = src[k];
+  return out;
+};
+
 // ── Dashboard ────────────────────────────────────────────────
 router.get(
   '/dashboard',
@@ -40,15 +65,14 @@ router.get(
       const Risk = safeModel('EnterpriseRisk');
       const Assessment = safeModel('RiskAssessment');
 
-      const [totalRisks, critical, mitigating, assessments] = await Promise.all([
-        Risk.countDocuments().catch(() => 0),
-        Risk.countDocuments({ priority: 'critical' }).catch(() => 0),
-        Risk.countDocuments({ status: 'mitigating' }).catch(() => 0),
-        Assessment.countDocuments().catch(() => 0),
-      ]);
-
       // W663 — branch-scope (Risk carries branchId). {} for cross-branch/HQ.
       const _rs = branchFilter(req);
+      const [totalRisks, critical, mitigating, assessments] = await Promise.all([
+        Risk.countDocuments({ ..._rs }).catch(() => 0),
+        Risk.countDocuments({ ..._rs, priority: 'critical' }).catch(() => 0),
+        Risk.countDocuments({ ..._rs, status: 'mitigating' }).catch(() => 0),
+        Assessment.countDocuments().catch(() => 0),
+      ]);
       const byCategory = await Risk.aggregate([
         { $match: { ..._rs } },
         { $group: { _id: '$category', count: { $sum: 1 } } },
@@ -98,7 +122,7 @@ router.get(
     try {
       const Risk = safeModel('EnterpriseRisk');
       const { status, category, priority, page = 1, limit = 20 } = req.query;
-      const filter = {};
+      const filter = { ...branchFilter(req) }; // branch isolation (EnterpriseRisk has branchId)
       if (status) filter.status = status;
       if (category) filter.category = category;
       if (priority) filter.priority = priority;
@@ -130,7 +154,11 @@ router.post(
   async (req, res) => {
     try {
       const Risk = safeModel('EnterpriseRisk');
-      const doc = await Risk.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
+      const doc = await Risk.create({
+        ...pick(req.body, RISK_WRITABLE),
+        branchId: req.branchScope?.branchId || req.body.branchId || undefined,
+        createdBy: req.user?._id,
+      });
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       safeError(res, err, 'enterprise-risk');
@@ -145,13 +173,18 @@ router.put(
   authorize(RISK_ROLES) /* W465 */,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+      }
       const Risk = safeModel('EnterpriseRisk');
-      const doc = await Risk.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        returnDocument: 'after',
-        runValidators: true,
-      });
-      if (!doc) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
-      res.json({ success: true, data: doc });
+      // branch-scoped load + whitelist + save() so the pre('save') hook recomputes
+      // riskScore (findByIdAndUpdate skips it → forged/stale score skews ranking)
+      // and the branch can't be re-homed.
+      const risk = await Risk.findOne({ _id: req.params.id, ...branchFilter(req) });
+      if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
+      Object.assign(risk, pick(req.body, RISK_WRITABLE));
+      await risk.save();
+      res.json({ success: true, data: risk });
     } catch (err) {
       safeError(res, err, 'enterprise-risk');
     }
@@ -165,8 +198,14 @@ router.delete(
   authorize(RISK_ROLES) /* W465 */,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+      }
       const Risk = safeModel('EnterpriseRisk');
-      await Risk.findByIdAndDelete(req.params.id);
+      // branch-scoped + result-checked: was an unscoped hard delete that returned
+      // success even when nothing matched → cross-branch destruction of any risk.
+      const deleted = await Risk.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
+      if (!deleted) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
       safeError(res, err, 'enterprise-risk');
@@ -182,8 +221,11 @@ router.post(
   authorize(RISK_ROLES) /* W465 */,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+      }
       const Risk = safeModel('EnterpriseRisk');
-      const risk = await Risk.findById(req.params.id);
+      const risk = await Risk.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
       risk.mitigations.push(req.body);
       risk.history.push({ action: 'إضافة إجراء تخفيف', user: req.user?._id });
@@ -238,9 +280,15 @@ router.put(
   authorize(RISK_ROLES) /* W465 */,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+      }
       const Assessment = safeModel('RiskAssessment');
+      // runValidators so probability/impact (min:0,max:1) + required enums can't be
+      // written out of range via this update path.
       const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         returnDocument: 'after',
+        runValidators: true,
       });
       if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
       res.json({ success: true, data: doc });

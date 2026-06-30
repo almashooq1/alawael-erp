@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
       - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-wave1547.test.js'
@@ -2053,6 +2054,10 @@ on:
       - 'backend/__tests__/whatsapp-inbound-idempotency-wave1424f.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-notification-dlq-wave1424g.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-secondary-webhook-failclosed-wave1424h.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-template-request-model.test.js'
       - 'backend/package.json'
@@ -3190,6 +3195,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
       - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-wave1547.test.js'
@@ -4085,6 +4091,10 @@ on:
       - 'backend/__tests__/whatsapp-inbound-idempotency-wave1424f.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-notification-dlq-wave1424g.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-secondary-webhook-failclosed-wave1424h.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-template-request-model.test.js'
       - 'backend/package.json'

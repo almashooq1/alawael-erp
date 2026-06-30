@@ -2091,6 +2091,8 @@ on:
       - 'backend/__tests__/document-audit-getauditlog-shape.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/workflowpro-approval-authz-wave1559.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4159,6 +4161,8 @@ on:
       - 'backend/__tests__/document-audit-getauditlog-shape.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/workflowpro-approval-authz-wave1559.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

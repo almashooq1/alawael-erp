@@ -286,7 +286,28 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
  */
 router.post('/iep', async (req, res) => {
   try {
-    const iepData = req.body;
+    // Whitelist creatable fields — NEVER pass req.body straight into createIEP.
+    // The service does `new SmartIEP({ ...data })`, so spreading req.body would let
+    // a caller forge privileged/computed fields (status, approved_by, approval_date,
+    // linked_assessments, ai_analysis, overall_progress, version, previous_iep_id).
+    const IEP_CREATABLE = [
+      'beneficiary_id',
+      'plan_type',
+      'plan_period',
+      'present_level',
+      'services',
+      'family_involvement',
+      'iep_team',
+      'notes',
+    ];
+    const iepData = {};
+    for (const f of IEP_CREATABLE) {
+      if (req.body[f] !== undefined) iepData[f] = req.body[f];
+    }
+    // branch_id is server-authoritative: a restricted user gets their own branch
+    // (any body value is ignored); cross-branch roles may target a branch.
+    const scoped = branchScope(req);
+    iepData.branch_id = scoped.branch_id || req.body.branch_id;
     if (!iepData.beneficiary_id || !iepData.branch_id) {
       return res.status(400).json({ success: false, error: 'beneficiary_id و branch_id مطلوبان' });
     }
@@ -354,13 +375,15 @@ router.get('/iep/:id', async (req, res) => {
  */
 router.patch('/iep/:id', async (req, res) => {
   try {
+    // `status` (use POST /iep/:id/transition — the state machine sets approval_date
+    // /approved_by) and `parent_consent` (use POST /iep/:id/parent-consent) are
+    // intentionally EXCLUDED: allowing them here lets a caller self-approve a plan
+    // or forge parental consent on a clinical document.
     const allowedFields = [
       'plan_end',
-      'status',
       'present_level',
       'services',
       'family_involvement',
-      'parent_consent',
       'iep_team',
     ];
     const updates = {};

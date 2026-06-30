@@ -2074,6 +2074,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-max-turns-wave1424k.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4125,6 +4127,8 @@ on:
       - 'backend/__tests__/forgotten-stub-models.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-bot-max-turns-wave1424k.test.js'
       - 'backend/package.json'

@@ -662,8 +662,8 @@ async function sendOtp(to, otp, expiryMinutes = 5) {
  * Send a notification via the `notification` template. Title + body fields
  * must match the template registered in Meta Business Manager.
  */
-async function sendNotification(to, title, body) {
-  return sendTemplate(to, 'notification', 'ar', [
+async function sendNotification(to, title, body, ctx = {}) {
+  const components = [
     {
       type: 'body',
       parameters: [
@@ -671,7 +671,36 @@ async function sendNotification(to, title, body) {
         { type: 'text', text: String(body).slice(0, 1024) },
       ],
     },
-  ]);
+  ];
+
+  let result;
+  try {
+    result = await sendTemplate(to, 'notification', 'ar', components);
+  } catch (err) {
+    result = { success: false, error: err.message };
+  }
+
+  // W1424g — the automation/subscriber sends (post-session summary,
+  // complaint-resolved, waitlist, appointment reminders) all route through
+  // sendNotification, NOT through the routes' withSendGuards — so a terminal Meta
+  // failure (after the in-call retries) had NO DLQ enqueue and the notification
+  // was lost with no replay. Enqueue on failure so the DLQ sweeper replays it.
+  // Payload shape matches dlq.service dispatchByType('template').
+  if (!result || result.success === false) {
+    try {
+      const dlq = require('./dlq.service');
+      await dlq.enqueue(
+        'template',
+        { to, templateName: 'notification', language: 'ar', components },
+        new Error(result?.error || 'sendNotification failed'),
+        ctx
+      );
+    } catch (_) {
+      /* DLQ enqueue is best-effort — never let it mask the send result */
+    }
+  }
+
+  return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

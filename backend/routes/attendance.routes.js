@@ -164,9 +164,14 @@ router.post(
       });
 
       if (result.success) {
-        // إرسال إشعار للمدير
-        const employee = await require('../models/employee.model').findById(req.user.employeeId);
-        await HRNotificationService.notifyLeaveRequest(employee, result.leave);
+        // إرسال إشعار بطلب الإجازة — best-effort: a notification failure must NOT
+        // mask the (already-persisted) leave request as a 400 to the employee.
+        try {
+          const employee = await require('../models/employee.model').findById(req.user.employeeId);
+          await HRNotificationService.notifyLeaveRequest(employee, result.leave);
+        } catch (notifyErr) {
+          if (req.log && req.log.warn) req.log.warn('leave-request notification failed', { error: notifyErr.message });
+        }
       }
 
       res.json(result);

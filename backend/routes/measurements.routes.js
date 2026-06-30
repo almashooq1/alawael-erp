@@ -3,7 +3,10 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  assertBeneficiaryInScope,
+} = require('../middleware/assertBranchMatch');
 const { paginate } = require('../utils/paginate');
 
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
@@ -226,23 +229,36 @@ router.get('/results/:beneficiaryId/compare/:typeId', async (req, res) => {
  */
 router.put('/results/:resultId/approve', async (req, res) => {
   try {
-    const updated = await MeasurementResult.findByIdAndUpdate(
-      req.params.resultId,
-      {
-        status: 'APPROVED',
-        approvalInfo: {
-          approvedBy: req.user._id,
-          approvalDate: new Date(),
-          approvalNotes: req.body.approvalNotes,
-        },
-      },
-      { returnDocument: 'after' }
+    const mongoose = require('mongoose');
+    if (!mongoose.isValidObjectId(req.params.resultId))
+      return res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    // W1563: this :resultId route bypasses the W440 :beneficiaryId param guard, so it
+    // had NO ownership check — any branch-restricted user could APPROVE another branch's
+    // clinical result and forge approvalInfo.approvedBy. MeasurementResult has no
+    // branchId but carries beneficiaryId → enforce via the beneficiary's branch. Also
+    // add a state precondition + use .save() (which fires the CareTimeline hook that
+    // findByIdAndUpdate skips).
+    const result = await MeasurementResult.findById(req.params.resultId).select(
+      'beneficiaryId status'
     );
+    if (!result) return res.status(404).json({ success: false, error: 'النتيجة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, result.beneficiaryId, res);
+    if (denied) return;
+    if (result.status === 'APPROVED')
+      return res.status(409).json({ success: false, error: 'النتيجة معتمدة مسبقاً' });
+
+    result.status = 'APPROVED';
+    result.approvalInfo = {
+      approvedBy: req.user._id,
+      approvalDate: new Date(),
+      approvalNotes: req.body.approvalNotes,
+    };
+    await result.save();
 
     res.json({
       success: true,
       message: 'تم الموافقة على نتيجة القياس',
-      data: updated,
+      data: result,
     });
   } catch (error) {
     safeError(res, error, 'measurements');
@@ -310,15 +326,32 @@ router.get('/:beneficiaryId', async (req, res, next) => {
  */
 router.put('/:planId', async (req, res) => {
   try {
-    const updated = await measurementService.updateIndividualRehabPlan(req.params.planId, req.body);
+    const mongoose = require('mongoose');
+    if (!mongoose.isValidObjectId(req.params.planId))
+      return res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    // W1563: bypasses the W440 param guard AND spread the whole req.body into the
+    // service's findByIdAndUpdate — a branch-restricted user could update another
+    // branch's plan and forge status (skipping /:planId/approve), approvalInfo
+    // (sign-off), beneficiaryId (re-parent), planCode/createdBy. Enforce via the
+    // beneficiary + strip the privileged/lifecycle fields.
+    const plan = await IndividualRehabPlan.findById(req.params.planId).select('beneficiaryId');
+    if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, plan.beneficiaryId, res);
+    if (denied) return;
+    const body = { ...req.body };
+    ['_id', 'status', 'approvalInfo', 'beneficiaryId', 'planCode', 'createdBy'].forEach(
+      k => delete body[k]
+    );
+
+    const updated = await measurementService.updateIndividualRehabPlan(req.params.planId, body);
 
     res.json({
       success: true,
       message: 'تم تحديث خطة التأهيل بنجاح',
       data: updated,
     });
-  } catch {
-    res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
+  } catch (error) {
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -328,23 +361,32 @@ router.put('/:planId', async (req, res) => {
  */
 router.put('/:planId/approve', async (req, res) => {
   try {
-    const updated = await IndividualRehabPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        status: 'ACTIVE',
-        approvalInfo: {
-          approvedBy: req.user._id,
-          approvalDate: new Date(),
-          approvalNotes: req.body.approvalNotes,
-        },
-      },
-      { returnDocument: 'after' }
+    const mongoose = require('mongoose');
+    if (!mongoose.isValidObjectId(req.params.planId))
+      return res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    // W1563: same class as /results/:resultId/approve — bypasses the W440 param guard.
+    // IndividualRehabPlan has beneficiaryId (no branchId) → enforce via the beneficiary.
+    const plan = await IndividualRehabPlan.findById(req.params.planId).select(
+      'beneficiaryId status'
     );
+    if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, plan.beneficiaryId, res);
+    if (denied) return;
+    if (plan.status === 'ACTIVE')
+      return res.status(409).json({ success: false, error: 'الخطة معتمدة مسبقاً' });
+
+    plan.status = 'ACTIVE';
+    plan.approvalInfo = {
+      approvedBy: req.user._id,
+      approvalDate: new Date(),
+      approvalNotes: req.body.approvalNotes,
+    };
+    await plan.save();
 
     res.json({
       success: true,
       message: 'تم الموافقة على خطة التأهيل',
-      data: updated,
+      data: plan,
     });
   } catch (error) {
     safeError(res, error, 'measurements');

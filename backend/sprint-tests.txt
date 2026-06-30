@@ -1122,3 +1122,4 @@ __tests__/whatsapp-meta-transport-parity-wave1424i.test.js
 __tests__/forgotten-stub-models.test.js
 __tests__/ticketing-branch-idor-wave1552.test.js
 __tests__/whatsapp-delivery-observability-wave1424j.test.js
+__tests__/whatsapp-bot-max-turns-wave1424k.test.js

@@ -536,6 +536,22 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           interactiveEnabled,
           botCtx,
         });
+        // W1424k — the bot auto-escalated after N unmatched / confirm-reprompt
+        // turns. Flag the conversation for staff (mirrors the classified
+        // escalation block below) so a stuck guardian gets a human follow-up.
+        if (plan.escalate && conv && conv._id) {
+          await Conversation.findOneAndUpdate(
+            { _id: conv._id },
+            {
+              $set: {
+                requiresHumanReview: true,
+                status: 'escalated',
+                escalationReason: 'bot_unmatched_limit',
+                escalatedAt: new Date(),
+              },
+            }
+          ).catch(err => logger.warn(`[WhatsApp] bot escalation flag failed: ${err.message}`));
+        }
         return; // bot owns this turn; skip the stateless auto-reply path
       }
     } catch (err) {

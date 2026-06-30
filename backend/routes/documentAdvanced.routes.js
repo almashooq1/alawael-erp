@@ -280,7 +280,10 @@ router.post(
 router.post(
   '/watermarks/templates',
   wrap(async (req, res) => {
-    const result = await watermarkService.createTemplate(req.body.orgId, req.body);
+    // createTemplate(data) → createProfile(data): the whole body IS the data
+    // object (it already carries orgId). Passing orgId as a 1st positional arg
+    // made `data` the orgId string and dropped every template field.
+    const result = await watermarkService.createTemplate(req.body);
     res.json(result);
   })
 );
@@ -302,11 +305,16 @@ router.get(
 router.post(
   '/approvals/create',
   wrap(async (req, res) => {
-    const result = await approvalService.createApprovalRequest(
-      req.body.documentId,
-      req.body.template || req.body.config,
-      { userId: userId(req), userName: userName(req) }
-    );
+    // createApprovalRequest(data) destructures { documentId, templateId,
+    // requestedBy, requestedByName, … } from a SINGLE object. Passing positional
+    // args made `data` the documentId string → every field undefined.
+    const result = await approvalService.createApprovalRequest({
+      ...req.body,
+      documentId: req.body.documentId,
+      templateId: req.body.template || req.body.config || req.body.templateId,
+      requestedBy: userId(req),
+      requestedByName: userName(req),
+    });
     res.json(result);
   })
 );
@@ -790,7 +798,13 @@ router.get(
 router.post(
   '/export/csv',
   wrap(async (req, res) => {
-    const result = await exportService.exportToCSV(req.body.documentIds, req.body.options);
+    // exportToCSV(options) → exportDocuments({ ...options, format:'csv' }), which
+    // destructures `documentIds` from the single options object. Passing
+    // documentIds as a 1st positional arg made `options` the ids array.
+    const result = await exportService.exportToCSV({
+      documentIds: req.body.documentIds,
+      ...req.body.options,
+    });
     res.json(result);
   })
 );

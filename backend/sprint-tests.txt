@@ -1099,3 +1099,4 @@ __tests__/enterprise-risk-idor.test.js
 __tests__/mfa-email-otp-wave1461c.test.js
 __tests__/no-duplicate-route-declaration.test.js
 __tests__/mdt-coordination-lean-idor.test.js
+__tests__/whatsapp-meta-provider-wave1424b.test.js

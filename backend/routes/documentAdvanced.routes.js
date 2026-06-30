@@ -219,8 +219,12 @@ router.get(
 router.post(
   '/watermarks/apply',
   wrap(async (req, res) => {
-    const result = await watermarkService.applyWatermark(req.body.documentId, {
+    // service signature is applyWatermark(options) — documentId/userId live INSIDE
+    // the options object (it destructures `const { documentId, profileId, userId } = options`).
+    const result = await watermarkService.applyWatermark({
+      documentId: req.body.documentId,
       ...req.body.options,
+      userId: userId(req),
       userName: userName(req),
     });
     res.json(result);
@@ -260,7 +264,10 @@ router.get(
 router.post(
   '/watermarks/dynamic',
   wrap(async (req, res) => {
-    const result = await watermarkService.applyWatermark(req.body.documentId, {
+    // applyWatermark(options) — documentId lives INSIDE the options object.
+    const result = await watermarkService.applyWatermark({
+      documentId: req.body.documentId,
+      ...req.body.options,
       type: 'dynamic',
       userName: userName(req),
       userId: userId(req),
@@ -308,8 +315,12 @@ router.post(
 router.post(
   '/approvals/:workflowId/decide',
   wrap(async (req, res) => {
-    const result = await approvalService.submitDecision(req.params.workflowId, userId(req), {
+    // service signature is submitDecision(requestId, stepId, decision) and matches
+    // the step via `steps.find(s => s.id === stepId)` — the 2nd arg must be the
+    // approval STEP id (from the body), NOT the acting user's id.
+    const result = await approvalService.submitDecision(req.params.workflowId, req.body.stepId, {
       ...req.body,
+      decidedBy: userId(req),
       userName: userName(req),
     });
     res.json(result);
@@ -725,8 +736,12 @@ router.get(
 router.post(
   '/export',
   wrap(async (req, res) => {
-    const result = await exportService.createExportJob(req.body.documentIds, {
+    // service signature is createExportJob(options) → exportDocuments(options),
+    // which destructures `documentIds` from the single options object.
+    const result = await exportService.createExportJob({
+      documentIds: req.body.documentIds,
       ...req.body.options,
+      userId: userId(req),
       exportedBy: userId(req),
       exportedByName: userName(req),
     });
@@ -738,8 +753,12 @@ router.post(
 router.post(
   '/import',
   wrap(async (req, res) => {
-    const result = await exportService.createImportJob(req.body.data, {
+    // service signature is createImportJob(options) → importDocuments(options),
+    // which destructures `data` and `userId` from the single options object.
+    const result = await exportService.createImportJob({
+      data: req.body.data,
       ...req.body.options,
+      userId: userId(req),
       importedBy: userId(req),
       importedByName: userName(req),
     });

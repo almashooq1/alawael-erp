@@ -183,7 +183,11 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
-          MONGOMS_VERSION: '7.0'
+          # Must be a FULL version: mongodb-memory-server fetches this string
+          # literally, and the bare '7.0' URL 404s on MongoDB's CDN (403 =
+          # MongoDB's not-found), failing this step deterministically.
+          MONGOMS_VERSION: '7.0.16'
+          MONGOMS_DOWNLOAD_TIMEOUT: '120000'
 
   # ═══════════════════════════════════════════════════════════════════
   # Job 5: Build — Verify Docker image builds successfully

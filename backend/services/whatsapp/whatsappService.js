@@ -697,7 +697,59 @@ async function sendNotification(to, title, body, ctx = {}) {
     }
   }
 
+  // W1424j — persist the outbound on SUCCESS so Meta delivered/read/failed status
+  // webhooks reconcile it (delivery observability). The routes /send/* already log
+  // to the conversation; sendNotification (subscribers/automation only) did NOT —
+  // those guardian messages were fire-and-forget with no delivery visibility.
+  if (result && result.success && result.messageId) {
+    recordOutbound(to, result.messageId, {
+      text: [String(title), String(body)].join(" - "),
+      branchId: ctx.branchId || null,
+      beneficiaryId: ctx.beneficiaryId || null,
+    }).catch(() => {});
+  }
+
   return result;
+}
+
+// W1424j — persist an outbound automation send into the conversation thread so the
+// inbound status webhook (handleStatusUpdate matches messages.providerMessageId)
+// reconciles delivered/read/failed. Best-effort — delivery tracking must never
+// break a send. Mirrors the /send/* route-handler logging shape.
+async function recordOutbound(to, providerMessageId, opts = {}) {
+  if (!providerMessageId) return;
+  let Conversation;
+  try {
+    Conversation = require("../../models/WhatsAppConversation");
+  } catch {
+    return;
+  }
+  if (!Conversation) return;
+  const { text = "", type = "template", branchId = null, beneficiaryId = null } = opts;
+  const phone = normalizePhone(to);
+  await Conversation.findOneAndUpdate(
+    { phone },
+    {
+      $setOnInsert: {
+        phone,
+        ...(beneficiaryId ? { beneficiaryId } : {}),
+        ...(branchId ? { branchId } : {}),
+        createdAt: new Date(),
+      },
+      $push: {
+        messages: {
+          direction: "outgoing",
+          type,
+          text: String(text).slice(0, 1024),
+          providerMessageId,
+          timestamp: new Date(),
+          deliveryStatus: "sent",
+        },
+      },
+      $set: { lastMessageAt: new Date() },
+    },
+    { upsert: true }
+  ).catch((err) => logger.warn("[WhatsApp] recordOutbound error: " + err.message));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -726,6 +778,7 @@ const whatsappService = {
   // Convenience wrappers — see block above.
   sendOtp,
   sendNotification,
+  recordOutbound,
   isEnabled: () => cfg().enabled,
 };
 

@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js
 __tests__/invoice-admin-lifecycle-mass-assign-wave1551.test.js
 __tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js
 __tests__/emr-body-branch-isolation-wave1549.test.js

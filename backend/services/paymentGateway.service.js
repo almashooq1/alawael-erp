@@ -518,7 +518,7 @@ class PaymentGatewayService {
   /**
    * معالجة الاسترداد
    */
-  async processRefund(transactionId, amount, reason, userId) {
+  async processRefund(transactionId, amount, reason, userId, branchScope = null) {
     // Validate the amount up front — defends against the prior caller bug
     // that passed an object here (NaN comparison silently bypassed the cap).
     const refundAmount = Number(amount);
@@ -526,7 +526,13 @@ class PaymentGatewayService {
       throw new Error('مبلغ الاسترداد غير صالح');
     }
 
-    const transaction = await PaymentTransaction.findById(transactionId);
+    // W1552: confine the refund to the caller's branch. PaymentTransaction.branchId
+    // is required; a restricted caller must not refund another branch's paid
+    // transaction. branchScope is null for cross-branch/HQ roles (no constraint).
+    const transaction = await PaymentTransaction.findOne({
+      _id: transactionId,
+      ...(branchScope ? { branchId: branchScope } : {}),
+    });
     if (!transaction) throw new Error('المعاملة غير موجودة');
     if (transaction.status !== 'paid') throw new Error('لا يمكن استرداد معاملة غير مدفوعة');
 

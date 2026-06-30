@@ -1093,4 +1093,8 @@ __tests__/check-mass-assignment-spread-script.test.js
 =======
 __tests__/asset-management-idor.test.js
 >>>>>>> f7e7c81d1 (fix(asset-management): depreciation IDOR + dashboard leak + transfer state machine)
+<<<<<<< HEAD
 __tests__/payroll-mfa-tier-wave1461.test.js
+=======
+__tests__/complaints-enhanced-idor.test.js
+>>>>>>> 45f439435 (fix(complaints-enhanced): close cross-branch IDOR sweep + escalate audit bug)

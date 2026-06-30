@@ -21,7 +21,11 @@ const { Types } = require('mongoose');
 // breaking check:routes-load for the whole shared tree.
 const { branchFilter, requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { requireMfaTier } = require('../middleware/requireMfaTier');
-const { assertBranchMatch, enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
+const {
+  assertBranchMatch,
+  enforceBeneficiaryBranch,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 const IQAssessment = require('../models/IQAssessment');
 const registry = require('../measures/scoring');
 const { generateAssessmentReport } = require('../services/iqReportService');
@@ -89,7 +93,11 @@ router.post('/', requireMfaTier(2), async (req, res) => {
     const assessment = new IQAssessment({
       beneficiaryId,
       episodeId,
-      branchId: req.effectiveBranchId || req.user?.branchId,
+      // `req.effectiveBranchId` is set by NO middleware (always undefined) and
+      // `req.user.branchId` is never populated either — so this used to persist
+      // branchId:undefined, breaking branch isolation on the assessment. Use the
+      // canonical helper (restricted users → own branch, anti-spoof).
+      branchId: effectiveBranchScope(req),
       instrumentType,
       edition: edition || 'N/A',
       examinerName,

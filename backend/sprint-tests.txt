@@ -1103,3 +1103,4 @@ __tests__/whatsapp-meta-provider-wave1424b.test.js
 __tests__/no-never-set-req-fields.test.js
 __tests__/parent-portal-reschedule-careplan.test.js
 __tests__/risk-sweep-branch-isolation.test.js
+__tests__/risk-sweep-branch-isolation-behavioral.test.js

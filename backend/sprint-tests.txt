@@ -1091,3 +1091,4 @@ __tests__/digital-wallet-route-service-contract.test.js
 __tests__/payroll-mfa-tier-wave1461.test.js
 __tests__/complaints-enhanced-idor.test.js
 __tests__/document-advanced-route-service-contract.test.js
+__tests__/mfa-enrollment-wave1461b.test.js

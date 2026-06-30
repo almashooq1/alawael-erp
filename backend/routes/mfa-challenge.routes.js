@@ -141,6 +141,39 @@ function createMfaChallengeRouter({ service, logger = console } = {}) {
     }
   });
 
+  // POST /enroll/setup — generate a TOTP secret for the authenticated user.
+  // W1461b: declared BEFORE the /:id/* routes so '/enroll/...' is not captured
+  // by the ':id' param (Express matches in declaration order).
+  router.post('/enroll/setup', async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || null;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'USER_REQUIRED', reason: 'USER_REQUIRED' });
+      }
+      const result = await service.enrollSetup({
+        userId,
+        accountName: req.user?.email || 'AlAwael ERP',
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'mfa.enroll.setup');
+    }
+  });
+
+  // POST /enroll/verify — confirm the authenticator code to enable TOTP.
+  router.post('/enroll/verify', async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || null;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'USER_REQUIRED', reason: 'USER_REQUIRED' });
+      }
+      const result = await service.enrollVerify({ userId, token: req.body?.token });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'mfa.enroll.verify');
+    }
+  });
+
   // POST /:id/verify — submit OTP/biometric token
   router.post('/:id/verify', async (req, res) => {
     try {

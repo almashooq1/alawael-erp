@@ -403,7 +403,7 @@ function createBeneficiaryRoutes(router, service) {
       const { action, ids, payload } = req.body;
       const context = {
         userId: req.user?._id || req.user?.id,
-        // W1561 — per-id branch ownership for body.ids[] (no param/body hook covers it).
+        // W1563 — per-id branch ownership for body.ids[] (no param/body hook covers it).
         branchScope: effectiveBranchScope(req),
       };
       const result = await service.bulkAction(action, ids, payload, context);

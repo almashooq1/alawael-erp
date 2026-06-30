@@ -124,7 +124,7 @@
   "routes/reportBuilder.routes.js": 6,
   "routes/reports-analytics-module.routes.js": 2,
   "routes/scheduling-module.routes.js": 3,
-  "routes/smart-assessment-engine.routes.js": 4,
+  "routes/smart-assessment-engine.routes.js": 3,
   "routes/smart-insurance.routes.js": 3,
   "routes/smartScheduler.routes.js": 1,
   "routes/standardizedAssessments.routes.js": 1,

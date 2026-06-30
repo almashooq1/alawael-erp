@@ -2013,6 +2013,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-mfa-tier-wave1461.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-enhanced-idor.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/digital-wallet-route-service-contract.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4003,6 +4005,8 @@ on:
       - 'backend/__tests__/asset-management-idor.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-mfa-tier-wave1461.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-enhanced-idor.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/digital-wallet-route-service-contract.test.js'
       - 'backend/package.json'

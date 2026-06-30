@@ -1089,3 +1089,4 @@ __tests__/check-mass-assignment-spread-script.test.js
 __tests__/asset-management-idor.test.js
 __tests__/digital-wallet-route-service-contract.test.js
 __tests__/payroll-mfa-tier-wave1461.test.js
+__tests__/complaints-enhanced-idor.test.js

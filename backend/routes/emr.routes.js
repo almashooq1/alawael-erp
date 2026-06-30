@@ -12,13 +12,23 @@ const emrService = require('../services/emr.service');
 const { authenticate } = require('../middleware/auth');
 const { body, param, validationResult } = require('express-validator');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
 
 // W269 cross-branch isolation: authenticate + scope, then branch-check every
-// `:beneficiaryId` path lookup. The param guard fail-opens for cross-branch
-// roles / unscoped callers and only enforces for restricted staff.
+// `:beneficiaryId` path lookup AND every body `beneficiary` on writes.
+// W1549: the param guard only covers GET /:beneficiaryId reads — the 7 EMR POST
+// endpoints (vital-signs, prescriptions, MAR, lab-results, allergies,
+// immunizations, referrals) take the beneficiary from req.body, which the param
+// guard never inspects, so a restricted staffer could write clinical PHI onto a
+// foreign-branch beneficiary. bodyScopedBeneficiaryGuard closes that write path
+// (it reads body.beneficiaryId|beneficiary_id|beneficiary, fail-opens for
+// cross-branch roles, and 403s a restricted caller naming a foreign beneficiary).
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard);
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 function handleValidation(req, res, next) {

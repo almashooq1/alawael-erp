@@ -1135,3 +1135,4 @@ __tests__/branch-enhanced-appointment-enum.test.js
 __tests__/parent-v2-extras-enum-mismatch-wave1556.test.js
 __tests__/document-audit-getauditlog-shape.test.js
 __tests__/enterprise-ultra-validators-nullderef-wave1557.test.js
+__tests__/quality-complaint-createdby.test.js

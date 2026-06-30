@@ -1144,3 +1144,4 @@ __tests__/smart-iep-mass-assignment-wave1558.test.js
 __tests__/early-intervention-milestone-derived-wave1560.test.js
 __tests__/therapy-sessions-conflict-massassign-wave1561.test.js
 __tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js
+__tests__/transport-vehicle-delete-status-enum-wave1562.test.js

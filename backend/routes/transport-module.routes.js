@@ -308,7 +308,11 @@ router.delete(
   asyncHandler(async (req, res) => {
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, ...branchScope(req) },
-      { deleted_at: new Date(), status: 'decommissioned' },
+      // W1562: 'decommissioned' is NOT in the Vehicle.status enum
+      // {active,maintenance,out_of_service,retired}; findOneAndUpdate skips enum
+      // validation by default, so this soft-delete was persisting an invalid status.
+      // 'retired' is the enum's terminal "permanently removed from service" value.
+      { deleted_at: new Date(), status: 'retired' },
       { returnDocument: 'after' }
     );
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });

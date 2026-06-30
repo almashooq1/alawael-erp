@@ -69,7 +69,11 @@ const M = {
   },
   Attendance: () => {
     try {
-      return mongoose.model('AttendanceRecord');
+      // 'AttendanceRecord' is registered by NO model → this always threw → null →
+      // _getAttendanceSummary silently returned empty for EVERY beneficiary. The
+      // model whose schema matches the query ({ beneficiaryId, date }, status
+      // present/absent) is BeneficiaryDayAttendance.
+      return mongoose.model('BeneficiaryDayAttendance');
     } catch {
       return null;
     }

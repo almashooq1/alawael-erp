@@ -2082,6 +2082,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-value-query-mismatch.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-v2-extras-enum-mismatch-wave1556.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-enhanced-appointment-enum.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4141,6 +4143,8 @@ on:
       - 'backend/__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-value-query-mismatch.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-v2-extras-enum-mismatch-wave1556.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-enhanced-appointment-enum.test.js'
       - 'backend/package.json'

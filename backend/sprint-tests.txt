@@ -1095,3 +1095,4 @@ __tests__/mfa-enrollment-wave1461b.test.js
 __tests__/contract-management-integrity.test.js
 __tests__/attendance-leave-request-notify-phantom.test.js
 __tests__/donations-campaign-receipt.test.js
+__tests__/enterprise-risk-idor.test.js

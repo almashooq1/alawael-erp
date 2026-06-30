@@ -7,6 +7,9 @@
 
 const express = require('express');
 const { stripUpdateMeta, escapeRegex } = require('../utils/sanitize');
+// Register the stock-movement model so safeModel('WarehouseTransaction') resolves it.
+// (It was never built when the domain was scaffolded → POST /transactions 500-ed.)
+require('../models/WarehouseTransaction');
 const router = express.Router();
 
 // ── Helpers ──────────────────────────────────────────────────────

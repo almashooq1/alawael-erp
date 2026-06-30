@@ -13,6 +13,7 @@
 'use strict';
 
 const BaseWhatsAppProvider = require('./baseProvider');
+const metaTransport = require('../../../services/whatsapp/metaTransport');
 
 class MetaCloudProvider extends BaseWhatsAppProvider {
   constructor(config = {}) {
@@ -27,18 +28,13 @@ class MetaCloudProvider extends BaseWhatsAppProvider {
     // appsecret_proof — required when the Meta app has "Require App Secret Proof
     // for Server API calls" enabled. = HMAC-SHA256(access_token, app_secret).
     // The app secret is the same value used to verify webhook signatures.
-    this.appSecret =
-      config.appSecret || process.env.WHATSAPP_APP_SECRET || process.env.WHATSAPP_WEBHOOK_SECRET;
+    this.appSecret = config.appSecret || metaTransport.resolveAppSecret();
     this.enabled = !!(this.token && this.phoneId);
   }
 
   _withProof(url) {
-    if (!this.appSecret) return url;
-    const proof = require('crypto')
-      .createHmac('sha256', this.appSecret)
-      .update(this.token)
-      .digest('hex');
-    return url + (url.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
+    // Shared signer (W1424i) — identical appsecret_proof to Path A (whatsappService).
+    return metaTransport.withProof(url, this.token, this.appSecret);
   }
 
   validateConfig() {

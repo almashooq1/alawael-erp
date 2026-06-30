@@ -72,8 +72,10 @@ describe('never-set req.<field> reads (W269h generalization)', () => {
 
   test('req.mfaActor reads stay confined to the known baseline (canonical is req.actor.mfaLevel)', () => {
     // SECURITY DEBT — ratchet DOWN only. Fixing a file => remove it here same commit.
+    // capa.routes.js FIXED (mfaTier was always tier 0 → CAPA close/reject blocked) →
+    // req.actor.mfaLevel, removed. risk-sweep.routes.js fix is in PR #750 (in review),
+    // so it remains here until that merges.
     const KNOWN = [
-      'routes/quality/capa.routes.js',
       'routes/risk-sweep.routes.js',
     ];
     expect(filesReading('mfaActor')).toEqual(KNOWN.sort());

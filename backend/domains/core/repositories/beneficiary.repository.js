@@ -12,6 +12,20 @@ class BeneficiaryRepository extends BaseRepository {
   }
 
   /**
+   * W1561 — البحث بمعرف مع استبعاد المؤرشف افتراضياً.
+   * BaseRepository.findById يتخطى _applyDeleteFilter (بخلاف find/findOne/count)، فكان
+   * GET /:beneficiaryId (عبر service.getById) يُرجع مستفيداً مؤرشفاً/محذوفاً ناعماً —
+   * تسريب PII. نمرّره عبر findOne الذي يطبّق فلتر الحذف الناعم. من يحتاج المؤرشف
+   * صراحةً (مثل مسار إلغاء الأرشفة) يمرّر { includeDeleted: true }.
+   */
+  async findById(id, { select, populate, includeDeleted = false } = {}) {
+    if (includeDeleted) {
+      return super.findById(id, { select, populate });
+    }
+    return this.findOne({ _id: id }, { select, populate });
+  }
+
+  /**
    * بحث متقدم متعدد الحقول
    */
   async advancedSearch(filters) {
@@ -44,7 +58,8 @@ class BeneficiaryRepository extends BaseRepository {
    */
   async findWithFullContext(id) {
     return this.model
-      .findById(id)
+      // W1561 — exclude soft-deleted (isArchived) from the 360 full-context read too.
+      .findOne({ _id: id, isArchived: { $ne: true } })
       .populate('currentEpisodeId')
       .populate('episodes')
       .populate('timeline')

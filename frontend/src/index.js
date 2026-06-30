@@ -16,8 +16,14 @@ import { initSentry } from './utils/sentry';
 import { startWebVitalsReporting } from './utils/webVitalsReporter';
 import { validateFrontendEnv } from './config/validateEnv';
 
-// Validate environment variables early
-validateFrontendEnv();
+// Validate environment variables early.
+// Never let a missing/invalid var crash the entire UI in production — the API
+// client falls back to same-origin /api/v1. Log loudly but keep rendering.
+try {
+  validateFrontendEnv();
+} catch (err) {
+  console.error('[index] Environment validation failed (continuing to render):', err);
+}
 
 // Initialize Sentry error tracking (loads async, non-blocking)
 initSentry();
@@ -116,3 +122,11 @@ async function bootstrap() {
   );
   registerServiceWorker();
 }
+
+// Kick off the async bootstrap (CMS preload → dynamic App import → mount React).
+// This invocation was missing, so bootstrap() was tree-shaken and the app never
+// mounted → blank page (prod outage 2026-06-30). A render failure must surface
+// in the console, never silently blank the page.
+bootstrap().catch(err => {
+  console.error('[index] Bootstrap failed:', err);
+});

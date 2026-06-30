@@ -8,11 +8,13 @@
 const BaseWhatsAppProvider = require('./baseProvider');
 const UltraMsgProvider = require('./ultraMsgProvider');
 const TwilioWhatsAppProvider = require('./twilioWhatsAppProvider');
+const MetaCloudProvider = require('./metaCloudProvider');
 const { PROVIDER } = require('../constants');
 
 const PROVIDER_MAP = {
   [PROVIDER.ULTRAMSG]: UltraMsgProvider,
   [PROVIDER.TWILIO]: TwilioWhatsAppProvider,
+  [PROVIDER.META]: MetaCloudProvider, // W1424b — Meta Cloud API (uses the staged WHATSAPP_API_TOKEN/PHONE_ID)
 };
 
 /**
@@ -93,4 +95,5 @@ module.exports = {
   BaseWhatsAppProvider,
   UltraMsgProvider,
   TwilioWhatsAppProvider,
+  MetaCloudProvider,
 };

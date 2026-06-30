@@ -37,6 +37,8 @@ function cfg() {
   };
 }
 
+const metaTransport = require('./metaTransport');
+
 // ─── HTTP helper (no extra deps — uses built-in https) ──────────────────────
 function request(method, path, body = null, token = null) {
   return new Promise((resolve, reject) => {
@@ -49,15 +51,10 @@ function request(method, path, body = null, token = null) {
     // so every send/template/media call fails. Append it when an app secret is
     // configured (WHATSAPP_WEBHOOK_SECRET). Harmless when the toggle is off, and
     // Meta recommends it regardless. W1425 — found live during activation.
-    let apiPath = `/v21.0${path}`;
-    const appSecret = cfg().webhookSecret;
-    if (appSecret && accessToken) {
-      const proof = require('crypto')
-        .createHmac('sha256', appSecret)
-        .update(accessToken)
-        .digest('hex');
-      apiPath += (apiPath.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
-    }
+    // appsecret_proof via the shared signer (W1424i) — one secret precedence
+    // across Path A + Path B. Behaviour-identical to the prior inline HMAC on
+    // prod (WHATSAPP_APP_SECRET unset → keyed by WHATSAPP_WEBHOOK_SECRET as before).
+    const apiPath = metaTransport.withProof(`/v21.0${path}`, accessToken);
     const options = {
       hostname: 'graph.facebook.com',
       path: apiPath,

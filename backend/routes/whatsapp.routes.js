@@ -842,6 +842,7 @@ router.post(
       sectionTitle,
       headerText,
       footerText,
+      skipConsentCheck,
     } = req.body;
 
     if (type !== 'buttons' && type !== 'list') {
@@ -864,6 +865,21 @@ router.post(
             items,
             sectionTitle,
           };
+    // Consent gate (W1424e) — interactive messages need the 24h service window
+    // OR opt-in, same as /send/text|template|document (this handler skipped it).
+    if (!skipConsentCheck) {
+      try {
+        await whatsappService.assertCanMessage(to, 'any');
+      } catch (err) {
+        return res.status(err.statusCode || 403).json({
+          success: false,
+          code: err.code,
+          message: err.message,
+          details: err.details,
+        });
+      }
+    }
+
     const outcome = await withSendGuards(req, 'interactive', phone, payload, () => {
       return type === 'buttons'
         ? whatsappService.sendInteractiveButtons(to, bodyText, buttons, headerText, footerText)
@@ -914,6 +930,23 @@ router.post(
     for (let i = 0; i < sliced.length; i++) {
       const msg = sliced[i];
       const phone = whatsappService.normalizePhone(msg.phone);
+
+      // Consent gate per recipient (W1424e) — /bulk previously skipped consent
+      // entirely (a staff member could blast non-consenting/opted-out guardians).
+      // Skip + record blocked rows instead of sending (mirrors campaign partitioning).
+      if (!req.body.skipConsentCheck) {
+        try {
+          await whatsappService.assertCanMessage(msg.phone, 'any');
+        } catch (consentErr) {
+          results.push({
+            phone: msg.phone,
+            success: false,
+            blocked: true,
+            code: consentErr.code || 'CONSENT_REQUIRED',
+          });
+          continue;
+        }
+      }
 
       // Derive a per-recipient idempotency key so re-issuing the same bulkId
       // re-uses cached results from the first run.

@@ -35,6 +35,10 @@ const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
+// Register the dedicated template-request model so safeModel() can resolve it.
+// (The /template-requests workflow used to mis-target NotificationTemplate, whose
+// required bilingual fields it never set → every submit threw. W1540 fix.)
+require('../models/WhatsAppTemplateRequest');
 
 const router = express.Router();
 router.use(authenticate);
@@ -149,7 +153,7 @@ router.delete('/broadcast-groups/:id', requireRole('admin', 'manager'), async (r
 router.get('/template-requests', async (req, res) => {
   try {
     const { status } = req.query;
-    const NotifTmpl = safeModel('NotificationTemplate');
+    const NotifTmpl = safeModel('WhatsAppTemplateRequest');
     if (!NotifTmpl) return res.json({ success: true, data: [] });
     const filter = scopedFilter(req, { type: 'whatsapp_template' });
     if (status) filter.approvalStatus = status;
@@ -162,7 +166,7 @@ router.get('/template-requests', async (req, res) => {
 
 router.post('/template-requests', async (req, res) => {
   try {
-    const NotifTmpl = safeModel('NotificationTemplate');
+    const NotifTmpl = safeModel('WhatsAppTemplateRequest');
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     // Whitelist creatable fields — NEVER spread req.body (mass-assignment: a caller
@@ -199,7 +203,7 @@ router.patch('/template-requests/:id', requireRole('admin', 'manager'), async (r
       return res
         .status(400)
         .json({ success: false, message: 'status must be approved or rejected' });
-    const NotifTmpl = safeModel('NotificationTemplate');
+    const NotifTmpl = safeModel('WhatsAppTemplateRequest');
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await NotifTmpl.findOneAndUpdate(

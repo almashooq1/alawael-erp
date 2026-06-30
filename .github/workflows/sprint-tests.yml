@@ -2051,6 +2051,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-consent-gate-bulk-interactive-wave1424e.test.js'
       - 'backend/__tests__/whatsapp-inbound-idempotency-wave1424f.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4079,6 +4081,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-consent-gate-bulk-interactive-wave1424e.test.js'
       - 'backend/__tests__/whatsapp-inbound-idempotency-wave1424f.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

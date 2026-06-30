@@ -44,11 +44,10 @@ router.get('/leads', async (req, res) => {
       dateTo,
       page = 1,
       limit = 15,
-      branchId,
     } = req.query;
 
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
 
     if (search) {
       filter.$or = [
@@ -89,9 +88,8 @@ router.get('/leads', async (req, res) => {
 /** GET /api/crm-enhanced/leads/stats — dashboard stats */
 router.get('/leads/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
 
     const [total, newToday, dueFollowup, enrolledMonth, byStatus, bySource] = await Promise.all([
       CrmLead.countDocuments(filter),
@@ -141,9 +139,8 @@ router.get('/leads/stats', async (req, res) => {
 /** GET /api/crm-enhanced/leads/pipeline — pipeline view */
 router.get('/leads/pipeline', async (req, res) => {
   try {
-    const { branchId } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
 
     const stages = ['new', 'contacted', 'qualified', 'assessment_scheduled', 'enrolled'];
     const pipeline = await Promise.all(
@@ -166,15 +163,14 @@ router.get('/leads/pipeline', async (req, res) => {
 /** GET /api/crm-enhanced/leads/form-options */
 router.get('/leads/form-options', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const branchFilter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
+    const scope = { deletedAt: null, ...branchFilter(req) }; // ignore optional client ?branchId
 
     const [partners, users] = await Promise.all([
-      CrmPartner.find({ ...branchFilter, status: 'active' })
+      CrmPartner.find({ ...scope, status: 'active' })
         .select('name type')
         .lean(),
       require('../models/User')
-        ? require('../models/User').find(branchFilter).select('name email').lean()
+        ? require('../models/User').find(scope).select('name email').lean()
         : [],
     ]);
 
@@ -238,6 +234,9 @@ router.post('/leads', async (req, res) => {
 
     data.leadScore = CrmLead.calculateScore(data);
     data.createdBy = req.user?._id || req.userId;
+    // pin branchId to the caller's branch for restricted users (don't let the body
+    // plant a lead in another branch); cross-branch roles keep the body value.
+    if (req.branchScope?.branchId) data.branchId = req.branchScope.branchId;
 
     const lead = new CrmLead(data);
     await lead.save();
@@ -271,6 +270,10 @@ router.put('/leads/:id', async (req, res) => {
     const oldStatus = lead.status;
     const updateData = { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId };
     delete updateData.activities;
+    // never let the generic PUT relocate the lead cross-branch or forge the
+    // server-computed score (stripUpdateMeta is a blacklist that omits these).
+    delete updateData.branchId;
+    delete updateData.leadScore;
 
     Object.assign(lead, updateData);
 
@@ -362,12 +365,17 @@ router.post('/leads/:id/enroll', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
+    // status precondition: don't re-enroll an already-enrolled lead (clobbering
+    // enrolledAt) or resurrect a 'lost' one — only enroll a still-active lead.
     const lead = await CrmLead.findOneAndUpdate(
-      { _id: req.params.id, ...branchFilter(req) },
+      { _id: req.params.id, ...branchFilter(req), status: { $nin: ['enrolled', 'lost'] } },
       { status: 'enrolled', enrolledAt: new Date(), updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after' }
     );
-    if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
+    if (!lead)
+      return res
+        .status(404)
+        .json({ success: false, message: 'العميل غير موجود أو لا يمكن تسجيله بحالته الحالية' });
 
     res.json({ success: true, data: lead, message: 'تم تسجيل العميل بنجاح' });
   } catch (err) {
@@ -382,9 +390,9 @@ router.post('/leads/:id/enroll', async (req, res) => {
 /** GET /api/crm-enhanced/partners */
 router.get('/partners', async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 15, branchId } = req.query;
+    const { status, type, page = 1, limit = 15 } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
     if (status) filter.status = status;
     if (type) filter.type = type;
 
@@ -402,8 +410,7 @@ router.get('/partners', async (req, res) => {
 /** GET /api/crm-enhanced/partners/stats */
 router.get('/partners/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const filter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
+    const filter = { deletedAt: null, ...branchFilter(req) }; // ignore optional client ?branchId
 
     const [total, active, byType] = await Promise.all([
       CrmPartner.countDocuments(filter),
@@ -492,9 +499,9 @@ router.delete('/partners/:id', authorize(['admin', 'super_admin']), async (req, 
 /** GET /api/crm-enhanced/campaigns */
 router.get('/campaigns', async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 15, branchId } = req.query;
+    const { status, type, page = 1, limit = 15 } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
     if (status) filter.status = status;
     if (type) filter.type = type;
 
@@ -512,8 +519,7 @@ router.get('/campaigns', async (req, res) => {
 /** GET /api/crm-enhanced/campaigns/stats */
 router.get('/campaigns/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const filter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
+    const filter = { deletedAt: null, ...branchFilter(req) }; // ignore optional client ?branchId
     const [total, running, completed, scheduled, byType] = await Promise.all([
       CrmCampaign.countDocuments(filter),
       CrmCampaign.countDocuments({ ...filter, status: 'running' }),
@@ -645,9 +651,9 @@ router.delete('/campaigns/:id', authorize(['admin', 'super_admin']), async (req,
 /** GET /api/crm-enhanced/segments */
 router.get('/segments', async (req, res) => {
   try {
-    const { isActive, branchId } = req.query;
+    const { isActive } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     const data = await CrmSegment.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
     res.json({ success: true, data });
@@ -726,9 +732,9 @@ router.delete('/segments/:id', authorize(['admin', 'super_admin']), async (req, 
 /** GET /api/crm-enhanced/surveys */
 router.get('/surveys', async (req, res) => {
   try {
-    const { isActive, type, branchId } = req.query;
+    const { isActive, type } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (type) filter.type = type;
     const data = await CrmSurvey.find(filter).select('-responses').sort({ createdAt: -1 }).lean();
@@ -846,9 +852,9 @@ router.delete('/surveys/:id', authorize(['admin', 'super_admin']), async (req, r
 /** GET /api/crm-enhanced/commissions */
 router.get('/commissions', async (req, res) => {
   try {
-    const { status, partnerId, page = 1, limit = 15, branchId } = req.query;
+    const { status, partnerId, page = 1, limit = 15 } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchFilter(req)); // branch isolation — ignore optional client ?branchId
     if (status) filter.status = status;
     if (partnerId && mongoose.isValidObjectId(partnerId)) filter.partnerId = partnerId;
 

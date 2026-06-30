@@ -51,6 +51,24 @@ describe('documentAdvanced route↔service signature contract', () => {
       expect(route).not.toMatch(/createImportJob\(\s*req\.body\.data\s*,/);
       expect(route).toMatch(/createImportJob\(\{\s*[\r\n]+\s*data:\s*req\.body\.data/);
     });
+
+    // follow-up: 3 more methods whose calls passed positional args where the
+    // service takes a single object (missed in the first pass because they had
+    // no `...req.body` spread to grep for).
+    test('createTemplate is called with the single data object (req.body), not (orgId, body)', () => {
+      expect(route).not.toMatch(/createTemplate\(\s*req\.body\.orgId\s*,/);
+      expect(route).toMatch(/createTemplate\(\s*req\.body\s*\)/);
+    });
+
+    test('createApprovalRequest is called with a SINGLE data object, not (documentId, template, …)', () => {
+      expect(route).not.toMatch(/createApprovalRequest\(\s*req\.body\.documentId\s*,/);
+      expect(route).toMatch(/createApprovalRequest\(\{[\s\S]*?requestedBy:\s*userId\(req\)/);
+    });
+
+    test('exportToCSV is called with a SINGLE options object (documentIds inside), not (documentIds, options)', () => {
+      expect(route).not.toMatch(/exportToCSV\(\s*req\.body\.documentIds\s*,/);
+      expect(route).toMatch(/exportToCSV\(\{\s*[\r\n]+\s*documentIds:\s*req\.body\.documentIds/);
+    });
   });
 
   describe('the targeted service signatures are unchanged (the other half of the contract)', () => {
@@ -73,6 +91,24 @@ describe('documentAdvanced route↔service signature contract', () => {
       // and the destructure targets the route now supplies inside the object
       expect(svc).toMatch(/const\s*\{[\s\S]*documentIds[\s\S]*\}\s*=\s*options/);
       expect(svc).toMatch(/const\s*\{\s*data\s*,[\s\S]*\}\s*=\s*options/);
+    });
+
+    test('documentWatermark.createTemplate takes a single data object', () => {
+      expect(read('services/documents/documentWatermark.service.js')).toMatch(
+        /async createTemplate\(\s*data\s*\)/
+      );
+    });
+
+    test('documentApprovalService.createApprovalRequest takes a single data object (destructured)', () => {
+      const svc = read('services/documentApprovalService.js');
+      expect(svc).toMatch(/async createApprovalRequest\(\s*data\s*\)/);
+      expect(svc).toMatch(/const\s*\{[\s\S]*documentId[\s\S]*requestedBy[\s\S]*\}\s*=\s*data/);
+    });
+
+    test('documentImportExport.exportToCSV takes a single options object', () => {
+      expect(read('services/documents/documentImportExport.service.js')).toMatch(
+        /async exportToCSV\(\s*options\s*=\s*\{\}\s*\)/
+      );
     });
   });
 });

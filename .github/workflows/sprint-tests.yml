@@ -2034,6 +2034,8 @@ on:
       - 'backend/__tests__/no-duplicate-route-declaration.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mdt-coordination-lean-idor.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-meta-provider-wave1424b.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4045,6 +4047,8 @@ on:
       - 'backend/__tests__/no-duplicate-route-declaration.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mdt-coordination-lean-idor.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-meta-provider-wave1424b.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

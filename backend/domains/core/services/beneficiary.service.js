@@ -272,6 +272,33 @@ class BeneficiaryService extends BaseService {
       throw error;
     }
 
+    // W1561 — validate every id is a real ObjectId (a bad id → CastError 500 mid-loop,
+    // leaving a PARTIAL bulk mutation) and enforce per-id branch ownership. The URL
+    // param-hook only guards :beneficiaryId and bodyScopedBeneficiaryGuard only checks
+    // body.beneficiaryId — NEITHER covers body.ids[], so a branch-restricted caller could
+    // archive/delete/re-status ANY branch's beneficiaries by id. Reject the whole batch.
+    const mongoose = require('mongoose');
+    const badIds = ids.filter(id => !mongoose.isValidObjectId(id));
+    if (badIds.length) {
+      const error = new Error(`معرّفات غير صالحة: ${badIds.join(', ')}`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (context.branchScope) {
+      const owned = await this.repository.model
+        .find({ _id: { $in: ids } })
+        .select('_id branchId')
+        .lean();
+      const foreign = owned.filter(
+        d => d.branchId && String(d.branchId) !== String(context.branchScope)
+      );
+      if (foreign.length || owned.length !== ids.length) {
+        const error = new Error('بعض المستفيدين خارج نطاق فرعك');
+        error.statusCode = 403;
+        throw error;
+      }
+    }
+
     const results = [];
 
     if (action === 'archive') {

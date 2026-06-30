@@ -12,7 +12,7 @@ class BeneficiaryRepository extends BaseRepository {
   }
 
   /**
-   * W1561 — البحث بمعرف مع استبعاد المؤرشف افتراضياً.
+   * W1563 — البحث بمعرف مع استبعاد المؤرشف افتراضياً.
    * BaseRepository.findById يتخطى _applyDeleteFilter (بخلاف find/findOne/count)، فكان
    * GET /:beneficiaryId (عبر service.getById) يُرجع مستفيداً مؤرشفاً/محذوفاً ناعماً —
    * تسريب PII. نمرّره عبر findOne الذي يطبّق فلتر الحذف الناعم. من يحتاج المؤرشف
@@ -58,7 +58,7 @@ class BeneficiaryRepository extends BaseRepository {
    */
   async findWithFullContext(id) {
     return this.model
-      // W1561 — exclude soft-deleted (isArchived) from the 360 full-context read too.
+      // W1563 — exclude soft-deleted (isArchived) from the 360 full-context read too.
       .findOne({ _id: id, isArchived: { $ne: true } })
       .populate('currentEpisodeId')
       .populate('episodes')

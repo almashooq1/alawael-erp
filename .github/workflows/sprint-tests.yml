@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-wave1547.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-behavioral-wave1547.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
@@ -3179,6 +3180,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-wave1547.test.js'
       - 'backend/__tests__/branch-isolation-scheduling-module-behavioral-wave1547.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js

@@ -268,19 +268,41 @@ router.get('/slots', async (req, res) => {
 
 router.patch('/slots/:id/book', async (req, res) => {
   try {
-    const slot = await TimeSlot.findById(req.params.id);
-    if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
-    if (slot.status === 'booked' && slot.currentPatients >= slot.maxPatients) {
-      return res.status(409).json({ success: false, message: 'الفترة محجوزة بالكامل' });
-    }
+    // W1548: atomic capacity-guarded booking. The previous read-then-write
+    // (findById → check currentPatients < maxPatients → += 1 → save) raced:
+    // two concurrent requests both read the same count, both passed the check,
+    // and both incremented → the slot was over-booked past maxPatients. A single
+    // conditional findOneAndUpdate ($expr capacity check + $inc) is atomic at the
+    // document level, so only one of N concurrent bookings can take the last seat.
+    const slot = await TimeSlot.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        status: { $in: ['available', 'booked'] }, // bookable states only
+        $expr: { $lt: ['$currentPatients', '$maxPatients'] }, // capacity remains
+      },
+      {
+        $set: {
+          status: 'booked',
+          beneficiary: req.body.beneficiary,
+          appointment: req.body.appointment,
+          ...(req.body.appointmentType ? { appointmentType: req.body.appointmentType } : {}),
+        },
+        $inc: { currentPatients: 1 },
+      },
+      { returnDocument: 'after', runValidators: true }
+    );
 
-    slot.status = 'booked';
-    slot.beneficiary = req.body.beneficiary;
-    slot.appointment = req.body.appointment;
-    if (req.body.appointmentType) slot.appointmentType = req.body.appointmentType;
-    slot.currentPatients += 1;
-    if (slot.currentPatients > slot.maxPatients) slot.isOverbooked = true;
-    await slot.save();
+    if (!slot) {
+      // Distinguish not-found (404) from full/unbookable (409). This read is only
+      // on the failure path, so it cannot reintroduce the booking race.
+      const exists = await TimeSlot.exists({ _id: req.params.id });
+      return res.status(exists ? 409 : 404).json({
+        success: false,
+        message: exists
+          ? 'الفترة محجوزة بالكامل أو غير متاحة للحجز'
+          : 'الفترة غير موجودة',
+      });
+    }
 
     res.json({ success: true, data: slot, message: 'تم حجز الفترة بنجاح' });
   } catch (error) {

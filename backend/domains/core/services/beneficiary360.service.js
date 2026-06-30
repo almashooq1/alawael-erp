@@ -213,7 +213,8 @@ class Beneficiary360Service {
 
     const [events, total] = await Promise.all([
       CareTimeline.find(filter)
-        .sort({ eventDate: -1, createdAt: -1 })
+        // W1557 — CareTimeline's date field + indexes are `occurredAt`, not `eventDate`.
+        .sort({ occurredAt: -1, createdAt: -1 })
         .limit(limit)
         .populate('performedBy', 'name firstName lastName role')
         .lean(),
@@ -228,7 +229,7 @@ class Beneficiary360Service {
         title: e.title,
         description: e.description,
         performedBy: e.performedBy,
-        eventDate: e.eventDate || e.createdAt,
+        eventDate: e.occurredAt || e.createdAt,
         flags: e.flags,
       })),
       total,
@@ -243,41 +244,42 @@ class Beneficiary360Service {
     const ClinicalAssessment = this._model('ClinicalAssessment');
     if (!ClinicalAssessment) return { recent: [], count: 0 };
 
-    const filter = { beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId) };
+    // W1557 — the ClinicalAssessment schema keys on `beneficiary` (NOT beneficiaryId)
+    // and stores flat `score` + `scoreBreakdown[].domain/score` + `tool`/`therapist`/
+    // `category` (NO scoring.*/measureId/assessorId/type). The prior query + shape were
+    // phantom → this widget returned EMPTY for every real beneficiary.
+    const filter = { beneficiary: new mongoose.Types.ObjectId(beneficiaryId) };
 
     const [recent, count] = await Promise.all([
       ClinicalAssessment.find(filter)
         .sort({ assessmentDate: -1 })
         .limit(5)
-        .populate('measureId', 'name nameAr category')
-        .populate('assessorId', 'name firstName lastName role')
+        .populate('therapist', 'name firstName lastName role')
         .lean(),
       ClinicalAssessment.countDocuments(filter),
     ]);
 
-    // Group latest by type
+    // Group latest by category
     const latestByType = {};
     for (const a of recent) {
-      if (!latestByType[a.type]) {
-        latestByType[a.type] = a;
+      if (a.category && !latestByType[a.category]) {
+        latestByType[a.category] = a;
       }
     }
 
     return {
       recent: recent.map(a => ({
         id: a._id,
-        type: a.type,
-        measure: a.measureId?.nameAr || a.measureId?.name,
-        assessor: a.assessorId,
+        type: a.category,
+        measure: a.tool,
+        assessor: a.therapist,
         date: a.assessmentDate,
-        totalScore: a.scoring?.totalScore,
+        totalScore: a.score,
         status: a.status,
-        domainScores: a.scoring?.domainScores?.map(d => ({
-          domain: d.domainName,
-          raw: d.rawScore,
-          standard: d.standardScore,
+        domainScores: a.scoreBreakdown?.map(d => ({
+          domain: d.domain,
+          score: d.score,
         })),
-        trend: a.trendAnalysis,
       })),
       count,
       latestByType,
@@ -291,13 +293,21 @@ class Beneficiary360Service {
     const TherapeuticGoal = this._model('TherapeuticGoal');
     if (!TherapeuticGoal) return { active: [], completed: [], counts: {} };
 
-    const filter = { beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId) };
+    // W1557 — TherapeuticGoal: progress is `currentProgress` (not progressPercentage);
+    // exclude soft-deleted; align status buckets to the real enum
+    // (active/achieved/partially_achieved/not_achieved/discontinued/deferred/...).
+    const filter = {
+      beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
+      isDeleted: { $ne: true },
+    };
 
     const goals = await TherapeuticGoal.find(filter).sort({ createdAt: -1 }).limit(30).lean();
 
-    const active = goals.filter(g => g.status === 'active' || g.status === 'in_progress');
-    const completed = goals.filter(g => g.status === 'achieved' || g.status === 'completed');
-    const onHold = goals.filter(g => g.status === 'on_hold');
+    const active = goals.filter(g => g.status === 'active');
+    const completed = goals.filter(
+      g => g.status === 'achieved' || g.status === 'partially_achieved'
+    );
+    const onHold = goals.filter(g => g.status === 'deferred' || g.status === 'discontinued');
 
     // Group by category
     const byCategory = {};
@@ -308,10 +318,7 @@ class Beneficiary360Service {
         id: g._id,
         title: g.title,
         level: g.level,
-        progress: g.progressPercentage || 0,
-        target: g.targetValue,
-        current: g.currentValue,
-        trend: g.trendAnalysis?.direction,
+        progress: g.currentProgress || 0,
         targetDate: g.targetDate,
       });
     });
@@ -322,8 +329,7 @@ class Beneficiary360Service {
         title: g.title,
         category: g.category,
         level: g.level,
-        progress: g.progressPercentage || 0,
-        trend: g.trendAnalysis?.direction,
+        progress: g.currentProgress || 0,
       })),
       completed: completed.length,
       onHold: onHold.length,
@@ -331,7 +337,7 @@ class Beneficiary360Service {
       byCategory,
       averageProgress:
         active.length > 0
-          ? Math.round(active.reduce((s, g) => s + (g.progressPercentage || 0), 0) / active.length)
+          ? Math.round(active.reduce((s, g) => s + (g.currentProgress || 0), 0) / active.length)
           : 0,
     };
   }
@@ -588,22 +594,23 @@ class Beneficiary360Service {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
+    // W1557 — real schema: keyed on `beneficiary`, flat `score`, `scoreBreakdown[].domain/score`.
     const assessments = await ClinicalAssessment.find({
-      beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
+      beneficiary: new mongoose.Types.ObjectId(beneficiaryId),
       assessmentDate: { $gte: twelveMonthsAgo },
-      'scoring.totalScore': { $exists: true },
+      score: { $exists: true },
     })
       .sort({ assessmentDate: 1 })
-      .select('assessmentDate type scoring.totalScore scoring.domainScores trendAnalysis')
+      .select('assessmentDate category score scoreBreakdown')
       .lean();
 
     // Build data points for charting
     const dataPoints = assessments.map(a => ({
       date: a.assessmentDate,
-      type: a.type,
-      totalScore: a.scoring?.totalScore,
-      domains: (a.scoring?.domainScores || []).reduce((map, d) => {
-        map[d.domainName] = d.standardScore || d.rawScore;
+      type: a.category,
+      totalScore: a.score,
+      domains: (a.scoreBreakdown || []).reduce((map, d) => {
+        map[d.domain] = d.score;
         return map;
       }, {}),
     }));
@@ -624,15 +631,16 @@ class Beneficiary360Service {
       if (TherapeuticGoal) {
         const goals = await TherapeuticGoal.find({
           beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
-          status: { $in: ['active', 'in_progress', 'achieved', 'completed'] },
+          isDeleted: { $ne: true },
+          status: { $in: ['active', 'achieved', 'partially_achieved'] },
         })
-          .select('title category progressPercentage progressHistory createdAt')
+          .select('title category currentProgress progressHistory createdAt')
           .lean();
 
         goalProgress = goals.map(g => ({
           title: g.title,
           category: g.category,
-          currentProgress: g.progressPercentage || 0,
+          currentProgress: g.currentProgress || 0,
           history: (g.progressHistory || []).slice(-10).map(h => ({
             date: h.date || h.recordedAt,
             value: h.value,

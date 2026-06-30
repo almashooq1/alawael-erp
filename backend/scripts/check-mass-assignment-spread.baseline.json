@@ -19,7 +19,7 @@
   "routes/contract-management.routes.js": 7,
   "routes/controlledDocument.routes.js": 2,
   "routes/cpe-admin.routes.js": 1,
-  "routes/digital-wallet.routes.js": 5,
+  "routes/digital-wallet.routes.js": 1,
   "routes/disability-assessment.routes.js": 3,
   "routes/dispatch.js": 1,
   "routes/documentAdvanced.routes.js": 13,

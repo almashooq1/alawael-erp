@@ -61,11 +61,12 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
-    const wallet = await walletService.createWallet({
-      ...req.body,
-      branchId: effectiveBranchScope(req),
-      createdBy: req.user._id,
-    });
+    const wallet = await walletService.createWallet(
+      req.body.ownerType,
+      req.body.ownerId,
+      effectiveBranchScope(req),
+      req.user._id
+    );
     res.status(201).json({ success: true, data: wallet });
   })
 );
@@ -91,10 +92,13 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
-    const data = await walletService.topUp(req.params.id, {
-      ...req.body,
-      userId: req.user._id,
-    });
+    const data = await walletService.topUp(
+      req.params.id,
+      Number(req.body.amount),
+      req.body.source || 'manual',
+      req.body.metadata || {},
+      req.user._id
+    );
     res.json({ success: true, data });
   })
 );
@@ -106,10 +110,14 @@ router.post(
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
-    const data = await walletService.debit(req.params.id, {
-      ...req.body,
-      userId: req.user._id,
-    });
+    const data = await walletService.debit(
+      req.params.id,
+      Number(req.body.amount),
+      req.body.description,
+      req.body.relatedType || null,
+      req.body.relatedId || null,
+      req.user._id
+    );
     res.json({ success: true, data });
   })
 );
@@ -121,10 +129,12 @@ router.post(
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
-    const data = await walletService.transfer(req.params.id, req.body.targetWalletId, {
-      ...req.body,
-      userId: req.user._id,
-    });
+    const data = await walletService.transfer(
+      req.params.id,
+      req.body.targetWalletNumber || req.body.targetWalletId,
+      Number(req.body.amount),
+      req.user._id
+    );
     res.json({ success: true, data });
   })
 );
@@ -137,10 +147,10 @@ router.post(
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.applyCoupon(
-      req.params.id,
       req.body.couponCode,
-      req.body.orderAmount,
-      req.body
+      Number(req.body.orderAmount),
+      req.body.beneficiaryId,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data });
   })
@@ -153,9 +163,11 @@ router.post(
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
-    const data = await walletService.redeemLoyaltyPoints(req.params.id, req.body.points, {
-      userId: req.user._id,
-    });
+    const data = await walletService.redeemLoyaltyPoints(
+      req.params.id,
+      Number(req.body.points),
+      req.user._id
+    );
     res.json({ success: true, data });
   })
 );
@@ -167,7 +179,11 @@ router.get(
   requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
-    const data = await walletService.getStatement(req.params.id, req.query);
+    const data = await walletService.getStatement(
+      req.params.id,
+      req.query.from || req.query.dateFrom,
+      req.query.to || req.query.dateTo
+    );
     res.json({ success: true, data });
   })
 );
@@ -179,7 +195,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
-    const data = await walletService.blockWallet(req.params.id, req.body.reason);
+    const data = await walletService.blockWallet(req.params.id, req.body.reason, req.user._id);
     res.json({ success: true, data });
   })
 );
@@ -190,7 +206,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
-    const data = await walletService.unblockWallet(req.params.id);
+    const data = await walletService.unblockWallet(req.params.id, req.user._id);
     res.json({ success: true, data });
   })
 );

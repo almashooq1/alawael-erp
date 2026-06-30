@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 
 const safeError = require('../utils/safeError');
 const documentUploadService = require('../services/documents/documentUpload.service');
@@ -230,6 +230,22 @@ router.get('/download/:documentId', authenticate, requireBranchAccess, async (re
     const doc = await Document.findById(req.params.documentId);
     if (!doc) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+    }
+
+    // W1561 — Document has no branchId of its own; these medical files are
+    // entityType:'Beneficiary' (upload is already bodyScopedBeneficiaryGuard'd).
+    // Enforce branch ownership via the linked beneficiary so a user from another
+    // branch cannot download a beneficiary's medical file by enumerating ids.
+    // (enforceBeneficiaryBranch throws err.status 403/404/503; safeError only maps
+    // err.statusCode, so map the status here explicitly.)
+    if (doc.entityType === 'Beneficiary' && doc.entityId) {
+      try {
+        await enforceBeneficiaryBranch(req, doc.entityId);
+      } catch (e) {
+        return res
+          .status(e && e.status ? e.status : 403)
+          .json({ success: false, message: 'غير مصرح بالوصول إلى هذا الملف' });
+      }
     }
 
     const fileExists = await storageService

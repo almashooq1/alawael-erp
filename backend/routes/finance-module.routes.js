@@ -15,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 // W651 — finance/Invoice uses snake_case `branch_id`; translate the camelCase
@@ -30,6 +30,21 @@ const logger = require('../utils/logger');
 // 🔒 All finance routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W1553 — payment refund + delete are sensitive money operations. The router
+// otherwise applies only authenticate + requireBranchAccess, so ANY authenticated
+// branch user (therapist, receptionist, transport…) could refund a completed
+// payment or delete a pending one. Gate them to the finance-write role set used
+// for invoices (admin/manager/finance/accountant/cashier — not reception/clinical).
+const FINANCE_WRITE_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'manager',
+  'finance',
+  'accountant',
+  'cashier',
+];
 // ─── Models ─────────────────────────────────────────────────────────────────
 const ChartOfAccount = require('../models/finance/ChartOfAccount');
 const JournalEntry = require('../models/finance/JournalEntry');
@@ -754,6 +769,7 @@ router.post(
 // POST /finance-module/payments/:id/refund — استرداد دفعة
 router.post(
   '/payments/:id/refund',
+  authorize(FINANCE_WRITE_ROLES),
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const payment = await Payment.findOne({
@@ -800,6 +816,7 @@ router.post(
 // DELETE /finance-module/payments/:id
 router.delete(
   '/payments/:id',
+  authorize(FINANCE_WRITE_ROLES),
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const payment = await Payment.findOneAndUpdate(

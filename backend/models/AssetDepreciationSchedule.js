@@ -17,7 +17,9 @@ const assetDepreciationScheduleSchema = new mongoose.Schema(
     depreciationDate: { type: Date, required: true },
     depreciationAmount: { type: Number, required: true, min: 0 },
     accumulatedDepreciation: { type: Number, required: true, min: 0 },
-    netBookValue: { type: Number, required: true },
+    // min:0 — net book value can't go negative (the route trusts the client value;
+    // this rejects a sub-zero book value past any salvage floor).
+    netBookValue: { type: Number, required: true, min: 0 },
     status: {
       type: String,
       enum: ['scheduled', 'posted', 'reversed'],

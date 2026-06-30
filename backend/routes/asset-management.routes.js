@@ -268,7 +268,10 @@ router.get('/assets/scan/:barcode', async (req, res) => {
 router.get('/depreciation', async (req, res) => {
   try {
     const { assetId, status, year, page = 1, limit: rawLimit = 20 } = req.query;
-    const filter = {};
+    // branch-scope the depreciation schedule (AssetDepreciationSchedule has a
+    // branchId) — was unscoped → a restricted user could read every branch's
+    // depreciation amounts / net book values.
+    const filter = mergeTenantFilter(req);
     if (assetId) filter.assetId = assetId;
     if (status) filter.status = status;
     if (year) filter.periodYear = +year;
@@ -303,10 +306,20 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
     if (!assetId || !periodYear || !periodMonth || !depreciationAmount) {
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
     }
-    const schedule = await AssetDepreciationSchedule.create({
+    // verify the target asset belongs to the caller's branch (else a restricted
+    // user could attach depreciation to another branch's asset) + stamp branchId
+    // so the schedule is itself branch-scoped (mirrors the /work-orders pattern).
+    const scope = branchFilter(req);
+    if (Object.keys(scope).length) {
+      const owned = await Asset.findOne({ _id: assetId, ...scope }).select('_id').lean();
+      if (!owned) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
+    }
+    const depPayload = {
       ...stripUpdateMeta(req.body),
       createdBy: req.user?.id,
-    });
+    };
+    if (req.branchScope?.branchId) depPayload.branchId = req.branchScope.branchId;
+    const schedule = await AssetDepreciationSchedule.create(depPayload);
     res.status(201).json({ success: true, data: schedule, message: 'تم إنشاء جدول الإهلاك' });
   } catch (err) {
     safeError(res, err, 'depreciation create error');
@@ -317,12 +330,18 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
 router.patch('/depreciation/:id/post', authorize(['admin', 'manager']), async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    const schedule = await AssetDepreciationSchedule.findByIdAndUpdate(
-      req.params.id,
+    // branch-scope the match + require status 'scheduled' (was unscoped by id →
+    // a restricted user could post another branch's depreciation to the ledger,
+    // and a 'reversed' entry could be silently re-posted).
+    const schedule = await AssetDepreciationSchedule.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req), status: 'scheduled' },
       { status: 'posted', postedBy: req.user?.id, postedAt: new Date() },
       { returnDocument: 'after' }
     ).lean();
-    if (!schedule) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
+    if (!schedule)
+      return res
+        .status(404)
+        .json({ success: false, message: 'السجل غير موجود أو تمّ ترحيله مسبقاً' });
     res.json({ success: true, data: schedule, message: 'تم ترحيل الإهلاك' });
   } catch (err) {
     safeError(res, err, 'depreciation post error');
@@ -543,11 +562,14 @@ router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (r
   if (!validId(req, res)) return;
   try {
     const transfer = await AssetTransfer.findOneAndUpdate(
-      scopedById(req, req.params.id),
+      { ...scopedById(req, req.params.id), status: 'pending' },
       { status: 'approved', approvedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
-    if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
+    if (!transfer)
+      return res
+        .status(404)
+        .json({ success: false, message: 'طلب النقل غير موجود أو ليس قيد الانتظار' });
     res.json({ success: true, data: transfer, message: 'تمت الموافقة على النقل' });
   } catch (err) {
     safeError(res, err, 'transfers approve error');
@@ -559,14 +581,25 @@ router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (r
   try {
     const transfer = await AssetTransfer.findOne(scopedById(req, req.params.id));
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
+    // only an approved transfer can be received (was unconditional → a pending
+    // transfer could be received without approval, or an already-received one
+    // re-received).
+    if (transfer.status !== 'approved') {
+      return res
+        .status(409)
+        .json({ success: false, message: 'لا يمكن استلام النقل (يجب أن يكون معتمداً)' });
+    }
     transfer.status = 'received';
     transfer.receivedDate = new Date();
     transfer.receivedBy = req.user?.id;
     if (req.body.conditionAfter) transfer.conditionAfter = req.body.conditionAfter;
     await transfer.save();
-    // Update asset's current location
+    // Move the asset to the destination branch + location — the whole point of a
+    // transfer (receive previously updated only location, so a completed
+    // inter-branch transfer left the asset owned by the source branch).
     await Asset.findByIdAndUpdate(transfer.assetId, {
       location: transfer.toLocation || 'Transferred',
+      ...(transfer.toBranchId && { branchId: transfer.toBranchId }),
     });
     res.json({ success: true, data: transfer, message: 'تم استلام الأصل' });
   } catch (err) {
@@ -578,11 +611,14 @@ router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (re
   if (!validId(req, res)) return;
   try {
     const transfer = await AssetTransfer.findOneAndUpdate(
-      scopedById(req, req.params.id),
+      { ...scopedById(req, req.params.id), status: 'pending' },
       { status: 'rejected', updatedBy: req.user?.id },
       { returnDocument: 'after' }
     ).lean();
-    if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
+    if (!transfer)
+      return res
+        .status(404)
+        .json({ success: false, message: 'طلب النقل غير موجود أو ليس قيد الانتظار' });
     res.json({ success: true, data: transfer, message: 'تم رفض طلب النقل' });
   } catch (err) {
     safeError(res, err, 'transfers reject error');
@@ -806,9 +842,9 @@ router.get('/dashboard', async (req, res) => {
       warrantyExpiringSoon,
       activeBookingsToday,
     ] = await Promise.all([
-      Asset.countDocuments(),
-      Asset.countDocuments({ status: 'active' }),
-      Asset.countDocuments({ status: 'maintenance' }),
+      Asset.countDocuments(tenant),
+      Asset.countDocuments({ ...tenant, status: 'active' }),
+      Asset.countDocuments({ ...tenant, status: 'maintenance' }),
       MaintenanceWorkOrder.countDocuments({ ...tenant, status: 'pending' }),
       MaintenanceWorkOrder.countDocuments({
         ...tenant,
@@ -816,8 +852,11 @@ router.get('/dashboard', async (req, res) => {
         status: { $in: ['pending', 'approved'] },
       }),
       AssetTransfer.countDocuments({ ...tenant, status: 'pending' }),
-      Asset.countDocuments({ lastMaintenanceDate: { $lte: now }, status: 'active' }),
-      Asset.countDocuments({ warrantyExpiryDate: { $gte: now, $lte: soon60 } }),
+      Asset.countDocuments({ ...tenant, lastMaintenanceDate: { $lte: now }, status: 'active' }),
+      // NOTE: warrantyExpiryDate is not a declared Asset field → this count is
+      // always 0 (kept branch-scoped + key preserved for FE compat; add a warranty
+      // field to the Asset schema to make the metric real).
+      Asset.countDocuments({ ...tenant, warrantyExpiryDate: { $gte: now, $lte: soon60 } }),
       ResourceBooking.countDocuments({
         ...tenant,
         bookingDate: {

@@ -47,7 +47,6 @@ describe('W1424n WhatsApp retention sweeper', () => {
 
   test('invalid/missing days is a safe no-op (never deletes)', async () => {
     for (const days of [0, -5, NaN, undefined]) {
-      // eslint-disable-next-line no-await-in-loop
       const r = await sweepExpired({ days, logger: noLog });
       expect(r.ok).toBe(false);
       expect(r.deleted).toBe(0);

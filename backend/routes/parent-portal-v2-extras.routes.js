@@ -82,7 +82,11 @@ router.get('/children/:id/invoices', async (req, res) => {
       (acc, inv) => {
         acc.total += inv.totalAmount || 0;
         if (inv.status === 'PAID') acc.paid += inv.totalAmount || 0;
-        else if (['PENDING', 'PARTIAL', 'OVERDUE'].includes(inv.status))
+        // W1556: the Invoice.status enum is DRAFT|ISSUED|PARTIALLY_PAID|PAID|
+        // CANCELLED|OVERDUE — the old 'PENDING'/'PARTIAL' values never exist, so
+        // ISSUED/PARTIALLY_PAID invoices counted as neither paid nor outstanding
+        // and the parent saw an understated balance.
+        else if (['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(inv.status))
           acc.outstanding += inv.totalAmount || 0;
         return acc;
       },
@@ -173,7 +177,10 @@ router.post('/appointments/request', async (req, res) => {
       type: type || 'follow_up',
       date,
       startTime: preferredTime || '09:00',
-      status: 'requested',
+      // W1556: Appointment.status enum is UPPERCASE (PENDING|CONFIRMED|...); 'requested'
+      // is not a member → .save() validators threw ValidationError → every parent
+      // appointment request 500'd. PENDING = awaiting admin/therapist confirmation.
+      status: 'PENDING',
       priority: 'normal',
       reason: reason || '',
       notes: notes || '',
@@ -208,13 +215,17 @@ router.put('/appointments/:id/cancel', async (req, res) => {
       return res.status(403).json({ success: false, message: 'لا تملك صلاحية إلغاء هذا الموعد' });
     }
 
-    if (['cancelled', 'completed', 'no_show'].includes(appt.status)) {
+    // W1556: Appointment.status enum is UPPERCASE — the lowercase guard never matched
+    // real docs (so an already-COMPLETED/NO_SHOW appointment could be "cancelled"),
+    // and the lowercase status value below was not in the enum → .save() threw → the
+    // cancel never persisted anyway.
+    if (['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(appt.status)) {
       return res
         .status(400)
         .json({ success: false, message: `لا يمكن إلغاء موعد بحالة ${appt.status}` });
     }
 
-    appt.status = 'cancelled';
+    appt.status = 'CANCELLED';
     appt.notes =
       `${appt.notes || ''}\n[ملغي من ولي الأمر: ${req.body?.reason || 'بدون سبب'}]`.trim();
     await appt.save();

@@ -432,6 +432,18 @@ const beneficiarySchema = new mongoose.Schema(
     isArchived: { type: Boolean, default: false, index: true },
     archivedDate: Date,
     archivedReason: String,
+
+    // Mood check-in log (student/parent portal $pushes here; therapist portal reads
+    // the last 7 for pre-session context). Was UNDECLARED, so the student-portal
+    // `$push: { moodLog }` was silently dropped under strict mode and the therapist
+    // read always returned []. Capped at the last 365 via the writer's $slice.
+    moodLog: [
+      {
+        date: { type: Date, default: Date.now },
+        mood: { type: Number },
+        note: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

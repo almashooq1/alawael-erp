@@ -63,16 +63,24 @@ jest.mock('../models/Notification', () => ({ insertMany: jest.fn() }));
 jest.mock('../models/auditLog.model', () => ({ create: jest.fn(() => ({ catch: () => null })) }), {
   virtual: true,
 });
-jest.mock('../domains/goals/models/MeasureReassessmentTask', () => ({
+jest.mock('../domains/goals/models/MeasureReassessmentTask', () => {
+  const m = {
   aggregate: jest.fn(),
   find: jest.fn(),
   findById: jest.fn(),
-}));
-jest.mock('../domains/goals/models/MeasureAlert', () => ({
+};
+  m.MeasureReassessmentTask = m;
+  return m;
+});
+jest.mock('../domains/goals/models/MeasureAlert', () => {
+  const m = {
   aggregate: jest.fn(),
   find: jest.fn(),
   findById: jest.fn(),
-}));
+};
+  m.MeasureAlert = m;
+  return m;
+});
 jest.mock('../domains/goals/models/Measure', () => ({ find: jest.fn() }));
 
 jest.mock('../services/reassessmentLifecycle.service', () => ({

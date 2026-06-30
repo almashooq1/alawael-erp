@@ -10,7 +10,7 @@
   },
   "extends": ["eslint:recommended"],
   "rules": {
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "ignoreRestSiblings": true }],
     "no-console": "off",
     "no-process-exit": "off",
     "no-empty": ["error", { "allowEmptyCatch": true }],

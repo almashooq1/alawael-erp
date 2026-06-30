@@ -108,6 +108,7 @@ router.get('/stats', async (req, res) => {
         status: 'received',
       }),
       RecruitmentInterview.countDocuments({
+        ...branchFilter(req),
         ...filter,
         scheduledAt: { $gte: weekStart, $lt: weekEnd },
         status: 'scheduled',
@@ -268,8 +269,37 @@ router.post('/postings/:id/apply', async (req, res) => {
     if (!req.body.consentObtained)
       return fail(res, 'يجب الموافقة على شروط وأحكام استخدام البيانات');
 
+    // This is the candidate-facing apply route (no requireHr) — untrusted input.
+    // Whitelist applicant-provided fields so a candidate can't forge HR-managed /
+    // lifecycle fields (overallScore, assignedTo, hrNotes, source, referredBy,
+    // status, *At timestamps).
+    const APPLICANT_SUBMITTABLE = [
+      'applicantName',
+      'applicantEmail',
+      'applicantPhone',
+      'nationalId',
+      'gender',
+      'nationality',
+      'isSaudi',
+      'hasDisability',
+      'disabilityType',
+      'educationLevel',
+      'educationMajor',
+      'university',
+      'yearsOfExperience',
+      'currentJobTitle',
+      'currentEmployer',
+      'currentSalary',
+      'expectedSalary',
+      'cvPath',
+      'coverLetterPath',
+      'certificatesPaths',
+      'consentObtained',
+    ];
+    const applicantData = {};
+    for (const k of APPLICANT_SUBMITTABLE) if (k in req.body) applicantData[k] = req.body[k];
     const doc = await JobApplication.create({
-      ...req.body,
+      ...applicantData,
       uuid: uuidv4(),
       jobPostingId: posting._id,
       branchId: posting.branchId,
@@ -478,8 +508,11 @@ router.get('/interviews', async (req, res) => {
 router.patch('/interviews/:id/complete', requireHr, async (req, res) => {
   try {
     const { score, feedback, strengths, weaknesses, recommendation } = req.body;
-    const doc = await RecruitmentInterview.findByIdAndUpdate(
-      req.params.id,
+    // branch-scope the match (this was the one write in the file missing it → a
+    // cross-branch IDOR overwriting another tenant's interview evaluation) +
+    // runValidators so score(min:0,max:100)/recommendation(enum) can't be forged.
+    const doc = await RecruitmentInterview.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         status: 'completed',
         completedAt: new Date(),
@@ -489,7 +522,7 @@ router.patch('/interviews/:id/complete', requireHr, async (req, res) => {
         weaknesses,
         recommendation,
       },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return fail(res, 'المقابلة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم تسجيل نتيجة المقابلة بنجاح' });
@@ -548,15 +581,23 @@ router.patch('/offers/:id/respond', async (req, res) => {
     const offer = await JobOffer.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W448 */
     if (!offer) return fail(res, 'العرض غير موجود', 404);
 
+    // atomic + conditional: only a 'sent' offer may be responded to. Without the
+    // status precondition a draft/expired/withdrawn offer could be "accepted"
+    // (flipping the application→hired + posting→filled + spawning onboarding HR
+    // never authorized), and a replay on an already-accepted offer created a
+    // DUPLICATE OnboardingChecklist + re-stamped hiredAt.
     const updatedOffer = await JobOffer.findOneAndUpdate(
-      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
+      { _id: req.params.id, ...branchFilter(req), status: 'sent' } /* W448 */,
       {
         status: accepted ? 'accepted' : 'rejected',
         respondedAt: new Date(),
         rejectionReason: accepted ? undefined : rejectionReason,
       },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true }
     );
+    if (!updatedOffer) {
+      return fail(res, 'لا يمكن الرد على هذا العرض (غير مُرسَل أو تمّ الرد عليه)', 409);
+    }
 
     if (accepted) {
       // تحديث حالة الطلب
@@ -628,7 +669,10 @@ router.patch('/onboarding/:id/task', requireHr, async (req, res) => {
     const { taskId, status: taskStatus, notes } = req.body;
     if (!taskId) return fail(res, 'taskId مطلوب');
 
-    const checklist = await OnboardingChecklist.findById(req.params.id);
+    const checklist = await OnboardingChecklist.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!checklist) return fail(res, 'قائمة الإعداد غير موجودة', 404);
 
     const tasks = checklist.tasks.map(t => {
@@ -652,8 +696,8 @@ router.patch('/onboarding/:id/task', requireHr, async (req, res) => {
           ? 'in_progress'
           : 'pending';
 
-    const doc = await OnboardingChecklist.findByIdAndUpdate(
-      req.params.id,
+    const doc = await OnboardingChecklist.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         tasks,
         completionPercentage,
@@ -747,9 +791,9 @@ router.get('/reports/cost', async (req, res) => {
 
     const [totalPostings, filledPostings, totalApplications, totalHired, hiredApps] =
       await Promise.all([
-        JobPosting.countDocuments(filter),
+        JobPosting.countDocuments({ ...branchFilter(req), ...filter }),
         JobPosting.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, status: 'filled' }),
-        JobApplication.countDocuments(filter),
+        JobApplication.countDocuments({ ...branchFilter(req), ...filter }),
         JobApplication.countDocuments({
           ...branchFilter(req),
           /* W448 */ ...filter,

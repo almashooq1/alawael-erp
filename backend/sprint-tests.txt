@@ -1093,3 +1093,4 @@ __tests__/check-mass-assignment-spread-script.test.js
 =======
 __tests__/asset-management-idor.test.js
 >>>>>>> f7e7c81d1 (fix(asset-management): depreciation IDOR + dashboard leak + transfer state machine)
+__tests__/digital-wallet-route-service-contract.test.js

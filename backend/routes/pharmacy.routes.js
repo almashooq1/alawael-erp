@@ -20,7 +20,7 @@ const {
   DrugInteraction,
 } = require('../models/pharmacy.model');
 const logger = require('../utils/logger');
-const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const { escapeRegex } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');

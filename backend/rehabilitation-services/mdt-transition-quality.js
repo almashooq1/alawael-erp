@@ -13,13 +13,28 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // auth middleware) with no router-level auth, and this app has no global
 // app.use(authenticate), so it was reachable ANONYMOUSLY (cross-branch PHI). Require
 // authentication + branch access, matching the app-wide standard and the sibling
-// routes/iep.routes.js. Per-query branch scoping of :beneficiaryId path params is a
-// documented follow-up (see W1556 PR / smart-iep W1555).
+// routes/iep.routes.js. Per-query branch scoping of :beneficiaryId path params added
+// in W1557 (see branchScope helper below).
 router.use(authenticate);
 router.use(requireBranchAccess);
 const mongoose = require('mongoose');
 const safeError = require('../utils/safeError');
 const { Schema } = mongoose;
+
+// W1557 — per-query branch isolation (the authed cross-branch IDOR left open by W1556).
+// MDTMeeting/TransitionPlan/QualityKPI all carry snake_case branch_id. requireBranchAccess
+// sets req.branchScope but does NOT auto-filter, so each query scopes itself: restricted
+// users → own branch (client branch_id ignored); cross-branch/HQ → all, or a requested
+// branch. Casts to ObjectId so aggregate $match matches too.
+const branchScope = (req, requested) => {
+  const s = req.branchScope || {};
+  const toOid = v => (mongoose.isValidObjectId(v) ? new mongoose.Types.ObjectId(v) : v);
+  if (s.branchId) return { branch_id: toOid(s.branchId) };
+  if (requested && mongoose.isValidObjectId(requested)) return { branch_id: toOid(requested) };
+  return {};
+};
+const callerBranch = req =>
+  req.branchScope && req.branchScope.branchId ? String(req.branchScope.branchId) : null;
 
 // ══════════════════════════════════════════════════════════════
 // PRIORITY 6 - MDT (Multidisciplinary Team) System
@@ -443,7 +458,10 @@ class KPICalculator {
 
 router.post('/mdt/meetings', async (req, res) => {
   try {
-    const meeting = new MdtQualityMDTMeeting(req.body);
+    const body = { ...req.body };
+    const cb = callerBranch(req);
+    if (cb) body.branch_id = cb; // restricted users cannot create in another branch
+    const meeting = new MdtQualityMDTMeeting(body);
     await meeting.save();
     res.status(201).json({ success: true, message: 'تم جدولة اجتماع الفريق', data: meeting });
   } catch (err) {
@@ -453,7 +471,10 @@ router.post('/mdt/meetings', async (req, res) => {
 
 router.get('/mdt/meetings/beneficiary/:id', async (req, res) => {
   try {
-    const meetings = await MdtQualityMDTMeeting.find({ beneficiary_id: req.params.id }).sort({
+    const meetings = await MdtQualityMDTMeeting.find({
+      beneficiary_id: req.params.id,
+      ...branchScope(req),
+    }).sort({
       meeting_date: -1,
     });
     res.json({ success: true, count: meetings.length, data: meetings });
@@ -464,7 +485,7 @@ router.get('/mdt/meetings/beneficiary/:id', async (req, res) => {
 
 router.get('/mdt/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MdtQualityMDTMeeting.findById(req.params.id);
+    const meeting = await MdtQualityMDTMeeting.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting });
   } catch (err) {
@@ -474,9 +495,14 @@ router.get('/mdt/meetings/:id', async (req, res) => {
 
 router.patch('/mdt/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MdtQualityMDTMeeting.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: 'after',
-    });
+    const updates = { ...req.body };
+    delete updates.branch_id; // prevent cross-branch reassignment
+    delete updates.beneficiary_id;
+    const meeting = await MdtQualityMDTMeeting.findOneAndUpdate(
+      { _id: req.params.id, ...branchScope(req) },
+      updates,
+      { returnDocument: 'after' }
+    );
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم تحديث الاجتماع', data: meeting });
   } catch (err) {
@@ -486,7 +512,7 @@ router.patch('/mdt/meetings/:id', async (req, res) => {
 
 router.post('/mdt/meetings/:id/decisions/:decisionIndex/complete', async (req, res) => {
   try {
-    const meeting = await MdtQualityMDTMeeting.findById(req.params.id);
+    const meeting = await MdtQualityMDTMeeting.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     const idx = parseInt(req.params.decisionIndex);
     if (meeting.decisions[idx]) {
@@ -502,7 +528,7 @@ router.post('/mdt/meetings/:id/decisions/:decisionIndex/complete', async (req, r
 router.get('/mdt/branch/:branchId/upcoming', async (req, res) => {
   try {
     const meetings = await MdtQualityMDTMeeting.find({
-      branch_id: req.params.branchId,
+      ...branchScope(req, req.params.branchId),
       status: 'scheduled',
       meeting_date: { $gte: new Date() },
     })
@@ -530,6 +556,8 @@ router.post('/transition/plans', async (req, res) => {
     const planData = req.body;
     planData.transition_type_ar =
       TRANSITION_LABELS[planData.transition_type] || planData.transition_type;
+    const cb = callerBranch(req);
+    if (cb) planData.branch_id = cb; // stamp caller's branch; restricted can't target another
     const plan = new TransitionPlan(planData);
     await plan.save();
     res.status(201).json({ success: true, message: 'تم إنشاء خطة الانتقال', data: plan });
@@ -540,7 +568,10 @@ router.post('/transition/plans', async (req, res) => {
 
 router.get('/transition/plans/beneficiary/:id', async (req, res) => {
   try {
-    const plans = await TransitionPlan.find({ beneficiary_id: req.params.id }).sort({
+    const plans = await TransitionPlan.find({
+      beneficiary_id: req.params.id,
+      ...branchScope(req),
+    }).sort({
       createdAt: -1,
     });
     res.json({ success: true, count: plans.length, data: plans });
@@ -551,7 +582,7 @@ router.get('/transition/plans/beneficiary/:id', async (req, res) => {
 
 router.get('/transition/plans/:id', async (req, res) => {
   try {
-    const plan = await TransitionPlan.findById(req.params.id);
+    const plan = await TransitionPlan.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!plan) return res.status(404).json({ success: false, error: 'خطة الانتقال غير موجودة' });
     const readiness = plan.calculateReadiness();
     res.json({ success: true, readiness_percentage: readiness, data: plan });
@@ -562,9 +593,14 @@ router.get('/transition/plans/:id', async (req, res) => {
 
 router.patch('/transition/plans/:id', async (req, res) => {
   try {
-    const plan = await TransitionPlan.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: 'after',
-    });
+    const updates = { ...req.body };
+    delete updates.branch_id; // prevent cross-branch reassignment
+    delete updates.beneficiary_id;
+    const plan = await TransitionPlan.findOneAndUpdate(
+      { _id: req.params.id, ...branchScope(req) },
+      updates,
+      { returnDocument: 'after' }
+    );
     if (!plan) return res.status(404).json({ success: false, error: 'خطة الانتقال غير موجودة' });
     plan.calculateReadiness();
     await plan.save();
@@ -576,7 +612,7 @@ router.patch('/transition/plans/:id', async (req, res) => {
 
 router.patch('/transition/plans/:id/readiness/:itemIndex', async (req, res) => {
   try {
-    const plan = await TransitionPlan.findById(req.params.id);
+    const plan = await TransitionPlan.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     const idx = parseInt(req.params.itemIndex);
     if (plan.readiness_checklist[idx]) {
@@ -602,7 +638,8 @@ router.get('/quality/kpis/:branchId', async (req, res) => {
     const { period } = req.query;
     const currentPeriod =
       period || `${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`;
-    const kpi = await KPICalculator.calculateBranchKPIs(req.params.branchId, currentPeriod);
+    const effBranch = callerBranch(req) || req.params.branchId; // restricted → own branch only
+    const kpi = await KPICalculator.calculateBranchKPIs(effBranch, currentPeriod);
     res.json({ success: true, data: kpi });
   } catch (err) {
     safeError(res, err, 'mdt-transition-quality');
@@ -611,7 +648,7 @@ router.get('/quality/kpis/:branchId', async (req, res) => {
 
 router.get('/quality/kpis/:branchId/history', async (req, res) => {
   try {
-    const history = await QualityKPI.find({ branch_id: req.params.branchId })
+    const history = await QualityKPI.find({ ...branchScope(req, req.params.branchId) })
       .sort({ createdAt: -1 })
       .limit(8);
     res.json({ success: true, data: history });
@@ -623,7 +660,7 @@ router.get('/quality/kpis/:branchId/history', async (req, res) => {
 router.get('/quality/dashboard/network', async (req, res) => {
   try {
     const currentPeriod = `${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`;
-    const allKPIs = await QualityKPI.find({ period: currentPeriod })
+    const allKPIs = await QualityKPI.find({ period: currentPeriod, ...branchScope(req) })
       .populate('branch_id', 'name city')
       .sort({ overall_quality_score: -1 });
 
@@ -657,8 +694,9 @@ router.post('/quality/kpis/:branchId/action-plans', async (req, res) => {
     const { period } = req.body;
     const currentPeriod =
       period || `${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`;
+    const effBranch = callerBranch(req) || req.params.branchId;
     const kpi = await QualityKPI.findOneAndUpdate(
-      { branch_id: req.params.branchId, period: currentPeriod },
+      { branch_id: effBranch, period: currentPeriod },
       { $push: { action_plans: { $each: [req.body.action_plan], $slice: -100 } } },
       { returnDocument: 'after', upsert: false }
     );

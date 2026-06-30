@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
       - 'backend/__tests__/invoice-admin-lifecycle-mass-assign-wave1551.test.js'
       - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
@@ -2063,6 +2064,10 @@ on:
       - 'backend/__tests__/whatsapp-template-request-model.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/forgotten-stub-models.test.js'
       - 'backend/package.json'
@@ -3200,6 +3205,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
       - 'backend/__tests__/invoice-admin-lifecycle-mass-assign-wave1551.test.js'
       - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
@@ -4105,6 +4111,10 @@ on:
       - 'backend/__tests__/whatsapp-template-request-model.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/forgotten-stub-models.test.js'
       - 'backend/package.json'

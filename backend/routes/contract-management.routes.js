@@ -67,6 +67,47 @@ function scopedById(req, id) {
   return { _id: id, ...branchFilter(req) };
 }
 
+// Business-content fields a client may set on create/update. Lifecycle (status,
+// executionDate, termination, amendments, approvals, alerts), identity
+// (contractNumber, branchId) and audit (createdBy/At) are EXCLUDED — they move
+// only through the dedicated transition endpoints. Spreading raw ...req.body let
+// a manager PUT {status:'ACTIVE'} (skipping approve/sign) or {branchId:'<other>'}
+// (re-home the contract) or forge contractValue/executionDate/approvals.
+const CONTRACT_WRITABLE = [
+  'contractTitle',
+  'contractType',
+  'supplier',
+  'organization',
+  'startDate',
+  'endDate',
+  'renewalTerms',
+  'financialTerms',
+  'deliveryTerms',
+  'obligations',
+  'terms',
+  'confidentiality',
+  'products',
+  'generalterms',
+  'liabilityInsurance',
+  'indemnification',
+  'forceMAjeure',
+  'performanceMetrics',
+  'disputes',
+  'contractValue',
+  'reviewSchedule',
+  'documents',
+  'contractDocument',
+  'notes',
+  'internalNotes',
+  'tags',
+];
+const pickWritable = body => {
+  const out = {};
+  const src = body || {};
+  for (const k of CONTRACT_WRITABLE) if (k in src) out[k] = src[k];
+  return out;
+};
+
 async function loadContractOr404(req, res, id = req.params.id) {
   if (!mongoose.isValidObjectId(id)) {
     res.status(400).json({ success: false, message: 'معرف غير صالح' });
@@ -221,7 +262,7 @@ router.post('/contracts', authorize(['admin', 'manager']), async (req, res) => {
         .json({ success: false, message: 'العنوان، النوع، وتاريخ البدء والانتهاء مطلوبة' });
     const contractNumber = genContractNumber();
     const contract = await Contract.create({
-      ...req.body,
+      ...pickWritable(req.body),
       branchId: req.branchScope?.branchId || req.body.branchId || null,
       contractNumber,
       status: 'DRAFT',
@@ -278,7 +319,7 @@ router.put('/contracts/:id', authorize(['admin', 'manager']), async (req, res) =
     }
     const contract = await Contract.findOneAndUpdate(
       scopedById(req, req.params.id),
-      { ...req.body, updatedBy: req.user?.id, updatedAt: new Date() },
+      { ...pickWritable(req.body), updatedBy: req.user?.id, updatedAt: new Date() },
       { returnDocument: 'after', runValidators: true }
     ).lean();
     res.json({ success: true, data: contract, message: 'تم تحديث العقد' });
@@ -364,10 +405,20 @@ router.post(
 router.post('/contracts/:id/sign', async (req, res) => {
   if (!validId(req, res)) return;
   try {
-    if (!(await loadContractOr404(req, res))) return;
+    const contract = await loadContractOr404(req, res);
+    if (!contract) return;
+    // can't sign (and thus can't auto-activate) a contract that's already
+    // terminated/expired — the auto-activate below would resurrect it.
+    if (['TERMINATED', 'EXPIRED'].includes(contract.status)) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'لا يمكن التوقيع على عقد بحالته الحالية' });
+    }
     const { partyId, signatureMethod, signatureData } = req.body;
     if (!partyId || !signatureMethod)
       return res.status(400).json({ success: false, message: 'بيانات التوقيع ناقصة' });
+    if (!mongoose.isValidObjectId(partyId))
+      return res.status(400).json({ success: false, message: 'معرّف الطرف غير صالح' });
     const party = await ContractParty.findOneAndUpdate(
       { _id: partyId, contractId: req.params.id },
       {
@@ -403,10 +454,33 @@ router.post('/contracts/:id/renew', authorize(['admin', 'manager']), async (req,
   try {
     const contract = await Contract.findOne(scopedById(req, req.params.id));
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
-    const months =
-      req.body.months || contract.renewalTerms?.renewalPeriod?.replace(/[^0-9]/g, '') || 12;
+    // only an active/expired contract may be renewed — was unconditional, so a
+    // DRAFT/TERMINATED could be forced to ACTIVE (resurrecting a terminated one).
+    if (!['ACTIVE', 'EXPIRED'].includes(contract.status)) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'لا يمكن تجديد عقد بحالته الحالية' });
+    }
+    // months must be a positive integer; the renewalPeriod fallback must respect
+    // year vs month units (the old code stripped non-digits, so "1 year" → 1 MONTH
+    // and a negative req.body.months moved endDate backwards).
+    let months = 12;
+    if (req.body.months != null) {
+      months = parseInt(req.body.months, 10);
+      if (!Number.isInteger(months) || months <= 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'عدد أشهر التجديد يجب أن يكون عدداً صحيحاً موجباً' });
+      }
+    } else if (contract.renewalTerms?.renewalPeriod) {
+      const period = String(contract.renewalTerms.renewalPeriod);
+      const num = parseInt(period.replace(/[^0-9]/g, ''), 10);
+      if (Number.isInteger(num) && num > 0) {
+        months = /year|annual|سن/i.test(period) ? num * 12 : num;
+      }
+    }
     const newEnd = new Date(contract.endDate);
-    newEnd.setMonth(newEnd.getMonth() + +months);
+    newEnd.setMonth(newEnd.getMonth() + months);
     contract.startDate = contract.endDate;
     contract.endDate = newEnd;
     contract.status = 'ACTIVE';
@@ -424,12 +498,23 @@ router.post('/contracts/:id/terminate', authorize(['admin', 'manager']), async (
   try {
     const { reason } = req.body;
     if (!reason) return res.status(400).json({ success: false, message: 'سبب الإنهاء مطلوب' });
+    // only an active/suspended contract may be terminated (was unconditional → a
+    // DRAFT jumped straight to TERMINATED, and a TERMINATED one was re-terminated);
+    // the reason goes in termination.terminationForCause, NOT over the free-text
+    // notes field (which the old code clobbered).
     const contract = await Contract.findOneAndUpdate(
-      scopedById(req, req.params.id),
-      { status: 'TERMINATED', notes: reason, updatedBy: req.user?.id },
-      { returnDocument: 'after' }
+      { ...scopedById(req, req.params.id), status: { $in: ['ACTIVE', 'SUSPENDED'] } },
+      {
+        status: 'TERMINATED',
+        'termination.terminationForCause': reason,
+        updatedBy: req.user?.id,
+      },
+      { returnDocument: 'after', runValidators: true }
     ).lean();
-    if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
+    if (!contract)
+      return res
+        .status(404)
+        .json({ success: false, message: 'العقد غير موجود أو لا يمكن إنهاؤه بحالته الحالية' });
     res.json({ success: true, data: contract, message: 'تم إنهاء العقد' });
   } catch (err) {
     safeError(res, err, 'terminate contract error');

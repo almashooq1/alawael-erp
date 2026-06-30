@@ -89,7 +89,9 @@ router.post(
       req.params.id,
       req.body.amount,
       req.body.reason,
-      req.user._id
+      req.user._id,
+      // W1552: confine refunds to the caller's branch (null = cross-branch/HQ).
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data });
   })
@@ -115,7 +117,14 @@ router.get(
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const PaymentTransaction = require('../models/PaymentTransaction');
-    const tx = await PaymentTransaction.findOne({ _id: req.params.id, deletedAt: null });
+    // W1552: branch-scope the single-transaction read (its sibling list/stats
+    // endpoints already do via effectiveBranchScope). null = cross-branch/HQ.
+    const _branch = effectiveBranchScope(req);
+    const tx = await PaymentTransaction.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...(_branch ? { branchId: _branch } : {}),
+    });
     if (!tx) return res.status(404).json({ success: false, message: 'المعاملة غير موجودة' });
     res.json({ success: true, data: tx });
   })

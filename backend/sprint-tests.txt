@@ -1083,14 +1083,9 @@ __tests__/phantom-write-document-center.test.js
 __tests__/phantom-schema-fields.test.js
 __tests__/waitlist-capacity-phantom.test.js
 __tests__/insurance-claims-integrity.test.js
-<<<<<<< HEAD
 __tests__/appointment-mass-assignment.test.js
-=======
 __tests__/recruitment-idor-statemachine.test.js
->>>>>>> b12989617 (fix(recruitment): cross-branch IDOR + offer state machine + candidate mass-assign)
-<<<<<<< HEAD
 __tests__/check-mass-assignment-spread-script.test.js
-=======
 __tests__/asset-management-idor.test.js
->>>>>>> f7e7c81d1 (fix(asset-management): depreciation IDOR + dashboard leak + transfer state machine)
 __tests__/digital-wallet-route-service-contract.test.js
+__tests__/payroll-mfa-tier-wave1461.test.js

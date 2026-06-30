@@ -50,6 +50,7 @@
     "capacitor-plugin-safe-area": "^3.0.0",
     "chart.js": "^4.4.0",
     "date-fns": "^2.30.0",
+    "dompurify": "^3.4.11",
     "exceljs": "^4.4.0",
     "framer-motion": "^10.16.0",
     "lodash": "^4.17.21",

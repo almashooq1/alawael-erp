@@ -264,6 +264,27 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
   const fromPhone = msg?.from;
   if (!fromPhone) return;
 
+  // Idempotency (W1424f) — Meta re-delivers the webhook on any 5xx/timeout/drop
+  // during the ACK window. Without this guard a redelivered inbound is
+  // re-classified, re-pushed, unreadCount re-incremented, and the auto-reply / bot
+  // FSM re-fires → duplicate reply + duplicate DB row (+ duplicate emergency
+  // alert for a crisis message). Skip if this providerMessageId is already
+  // persisted. `messages.providerMessageId` is indexed (WhatsAppConversation.js).
+  // (Residual: a tiny race if two redeliveries arrive concurrently before the
+  // first $push commits — the FSM optimistic-lock hardening covers that class.)
+  if (msg.id) {
+    const ConversationDedup = getConversationModel();
+    if (ConversationDedup) {
+      const seen = await ConversationDedup.exists({
+        'messages.providerMessageId': msg.id,
+      }).catch(() => null);
+      if (seen) {
+        logger.debug(`[WhatsApp] duplicate inbound ${msg.id} — skipping (Meta redelivery)`);
+        return;
+      }
+    }
+  }
+
   const content = normalizeMessageContent(msg);
   const senderName = contact?.profile?.name || fromPhone;
   const timestamp = new Date(parseInt(msg.timestamp || Date.now() / 1000) * 1000);

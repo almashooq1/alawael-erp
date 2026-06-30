@@ -401,8 +401,8 @@ class EarlyWarningService {
   /**
    * جلب تنبيهات مستفيد معين
    */
-  static async getBeneficiaryAlerts(beneficiaryId, status = 'active') {
-    return EarlyWarningAlert.find({ beneficiary_id: beneficiaryId, status })
+  static async getBeneficiaryAlerts(beneficiaryId, status = 'active', scope = {}) {
+    return EarlyWarningAlert.find({ beneficiary_id: beneficiaryId, status, ...scope })
       .sort({ severity: 1, createdAt: -1 })
       .lean();
   }
@@ -429,9 +429,9 @@ class EarlyWarningService {
   /**
    * الإقرار بتنبيه
    */
-  static async acknowledgeAlert(alertId, userId, notes) {
-    return EarlyWarningAlert.findByIdAndUpdate(
-      alertId,
+  static async acknowledgeAlert(alertId, userId, notes, scope = {}) {
+    return EarlyWarningAlert.findOneAndUpdate(
+      { _id: alertId, ...scope },
       {
         status: 'acknowledged',
         acknowledged_by: userId,
@@ -445,9 +445,9 @@ class EarlyWarningService {
   /**
    * حل تنبيه
    */
-  static async resolveAlert(alertId, userId, notes) {
-    return EarlyWarningAlert.findByIdAndUpdate(
-      alertId,
+  static async resolveAlert(alertId, userId, notes, scope = {}) {
+    return EarlyWarningAlert.findOneAndUpdate(
+      { _id: alertId, ...scope },
       {
         status: 'resolved',
         resolved_by: userId,
@@ -505,10 +505,22 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // auth middleware) with no router-level auth, and this app has no global
 // app.use(authenticate), so it was reachable ANONYMOUSLY (cross-branch PHI). Require
 // authentication + branch access, matching the app-wide standard and the sibling
-// routes/iep.routes.js. Per-query branch scoping of :beneficiaryId path params is a
-// documented follow-up (see W1556 PR / smart-iep W1555).
+// routes/iep.routes.js. Per-query branch scoping of :beneficiaryId path params added
+// in W1558 (see branchScope helper below).
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W1558 — per-query branch isolation (the authed cross-branch IDOR left open by W1556).
+// EarlyWarningAlert carries snake_case branch_id (stamped on scan). requireBranchAccess
+// sets req.branchScope but does NOT auto-filter; restricted users are forced to their own
+// branch (client branch/:id ignored), cross-branch/HQ see all. Service methods take a
+// `scope` filter the routes compute here; internal callers (scan/cron) pass nothing.
+const branchScope = req => {
+  const s = req.branchScope || {};
+  return s.branchId ? { branch_id: new mongoose.Types.ObjectId(String(s.branchId)) } : {};
+};
+const callerBranch = req =>
+  req.branchScope && req.branchScope.branchId ? String(req.branchScope.branchId) : null;
 
 /**
  * POST /early-warning/scan
@@ -516,7 +528,7 @@ router.use(requireBranchAccess);
  */
 router.post('/scan', async (req, res) => {
   try {
-    const result = await EarlyWarningService.runFullScan(req.body.branch_id);
+    const result = await EarlyWarningService.runFullScan(callerBranch(req) || req.body.branch_id);
     res.json({
       success: true,
       message: `تم الفحص: ${result.alerts_generated} تنبيه جديد`,
@@ -532,7 +544,11 @@ router.post('/scan', async (req, res) => {
  */
 router.get('/beneficiary/:id', async (req, res) => {
   try {
-    const alerts = await EarlyWarningService.getBeneficiaryAlerts(req.params.id, req.query.status);
+    const alerts = await EarlyWarningService.getBeneficiaryAlerts(
+      req.params.id,
+      req.query.status,
+      branchScope(req)
+    );
     res.json({ success: true, count: alerts.length, data: alerts });
   } catch (err) {
     safeError(res, err, 'early-warning-system');
@@ -544,7 +560,10 @@ router.get('/beneficiary/:id', async (req, res) => {
  */
 router.get('/branch/:branchId', async (req, res) => {
   try {
-    const alerts = await EarlyWarningService.getBranchAlerts(req.params.branchId, req.query.status);
+    const alerts = await EarlyWarningService.getBranchAlerts(
+      callerBranch(req) || req.params.branchId,
+      req.query.status
+    );
     res.json({ success: true, data: alerts });
   } catch (err) {
     safeError(res, err, 'early-warning-system');
@@ -556,7 +575,7 @@ router.get('/branch/:branchId', async (req, res) => {
  */
 router.get('/dashboard', async (req, res) => {
   try {
-    const stats = await EarlyWarningService.getDashboardStats(req.query.branch_id);
+    const stats = await EarlyWarningService.getDashboardStats(callerBranch(req) || req.query.branch_id);
     res.json({ success: true, data: stats });
   } catch (err) {
     safeError(res, err, 'early-warning-system');
@@ -571,8 +590,10 @@ router.patch('/:id/acknowledge', async (req, res) => {
     const alert = await EarlyWarningService.acknowledgeAlert(
       req.params.id,
       req.user?.id || req.body.user_id,
-      req.body.notes
+      req.body.notes,
+      branchScope(req)
     );
+    if (!alert) return res.status(404).json({ success: false, error: 'التنبيه غير موجود' });
     res.json({ success: true, data: alert });
   } catch (err) {
     safeError(res, err, 'early-warning-system');
@@ -587,8 +608,10 @@ router.patch('/:id/resolve', async (req, res) => {
     const alert = await EarlyWarningService.resolveAlert(
       req.params.id,
       req.user?.id || req.body.user_id,
-      req.body.notes
+      req.body.notes,
+      branchScope(req)
     );
+    if (!alert) return res.status(404).json({ success: false, error: 'التنبيه غير موجود' });
     res.json({ success: true, data: alert });
   } catch (err) {
     safeError(res, err, 'early-warning-system');

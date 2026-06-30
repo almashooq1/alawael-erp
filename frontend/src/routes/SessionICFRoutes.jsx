@@ -5,7 +5,7 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const SessionICFProgress = lazyWithRetry(() => import('../pages/sessions/SessionICFProgress'));
+const SessionICFProgress = lazyWithRetry(() => import('../pages/Sessions/SessionICFProgress'));
 
 export default function SessionICFRoutes() {
   return (

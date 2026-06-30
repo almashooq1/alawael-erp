@@ -758,7 +758,7 @@ const ROUTES = [
   {
     path: '/api/v1/whatsapp',
     file: 'routes/whatsapp.routes',
-    auth: true,
+    auth: false, // W1424c — webhook GET/POST /webhook are PUBLIC (Meta calls them, HMAC-verified); router self-gates the rest via router.use(authenticate)
     phase: 'communication',
     description: 'WhatsApp',
   },

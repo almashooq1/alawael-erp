@@ -17,6 +17,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../../utils/logger');
+const { maskPhone } = require('./phone'); // W1424p — PDPL: never log raw E.164
 const whatsappTemplates = require('./whatsappTemplates.service');
 const rateLimit = require('./rateLimit.service');
 
@@ -168,7 +169,7 @@ async function runCampaign(id, branchScope) {
         );
         outcomes.push(r && r.success ? 'sent' : 'failed');
       } catch (err) {
-        logger?.warn?.(`[wa-campaign] send failed for ${phone}: ${err.message}`);
+        logger?.warn?.(`[wa-campaign] send failed for ${maskPhone(phone)}: ${err.message}`);
         outcomes.push('failed');
       }
     }

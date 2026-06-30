@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter: branchScope } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 
 const {
@@ -83,13 +83,12 @@ router.get('/', async (req, res) => {
       slaBreached,
       dateFrom,
       dateTo,
-      branchId,
       page = 1,
       limit = 15,
     } = req.query;
 
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (category) filter.category = category;
@@ -130,9 +129,8 @@ router.get('/', async (req, res) => {
 /** GET /api/complaints-enhanced/stats — dashboard stats */
 router.get('/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     const closedStatuses = ['resolved', 'closed', 'rejected'];
 
     const [total, open, slaBreached, resolvedToday, byStatus, byPriority, byCategory, bySentiment] =
@@ -212,9 +210,9 @@ router.get('/stats', async (req, res) => {
 /** GET /api/complaints-enhanced/analytics — detailed analytics report */
 router.get('/analytics', async (req, res) => {
   try {
-    const { branchId, dateFrom, dateTo } = req.query;
+    const { dateFrom, dateTo } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     if (dateFrom || dateTo) {
       filter.createdAt = {};
       if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
@@ -278,10 +276,9 @@ router.get('/analytics', async (req, res) => {
 /** GET /api/complaints-enhanced/form-options */
 router.get('/form-options', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const branchFilter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
+    const catScope = { deletedAt: null, ...branchScope(req) }; // ignore client ?branchId
 
-    const categories = await ComplaintCategory.find({ ...branchFilter, isActive: true })
+    const categories = await ComplaintCategory.find({ ...catScope, isActive: true })
       .select('name nameAr parentId slaHours defaultPriority')
       .sort({ sortOrder: 1 })
       .lean();
@@ -332,9 +329,8 @@ router.get('/form-options', async (req, res) => {
 /** GET /api/complaints-enhanced/public-form — public complaint portal */
 router.get('/public-form', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const branchFilter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
-    const categories = await ComplaintCategory.find({ ...branchFilter, isActive: true })
+    const catScope = { deletedAt: null, ...branchScope(req) }; // ignore client ?branchId
+    const categories = await ComplaintCategory.find({ ...catScope, isActive: true })
       .select('name nameAr')
       .sort({ sortOrder: 1 })
       .lean();
@@ -411,7 +407,7 @@ router.get('/:id', async (req, res, next) => {
   try {
     // Non-ObjectId id → fall through to literal siblings (/categories, /sla-configs, /feedback).
     if (!mongoose.isValidObjectId(req.params.id)) return next();
-    const complaint = await ComplaintV2.findById(req.params.id)
+    const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) })
       .populate('assignedTo', 'name email')
       .populate('departmentId', 'name')
       .populate('patientId', 'name fileNumber')
@@ -479,8 +475,8 @@ router.put(
     try {
       if (!mongoose.isValidObjectId(req.params.id))
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-      const complaint = await ComplaintV2.findByIdAndUpdate(
-        req.params.id,
+      const complaint = await ComplaintV2.findOneAndUpdate(
+        { _id: req.params.id, deletedAt: null, ...branchScope(req) },
         // W1448: whitelist editable fields; status transitions go through POST /:id/status
         { ...pickFields(req.body, COMPLAINT_UPDATABLE), updatedBy: req.user?._id || req.userId },
         { returnDocument: 'after', runValidators: true }
@@ -509,7 +505,7 @@ router.post(
       if (!validStatuses.includes(status))
         return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
 
-      const complaint = await ComplaintV2.findById(req.params.id);
+      const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) });
       if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
 
       const oldStatus = complaint.status;
@@ -551,7 +547,7 @@ router.post('/:id/escalate', authorize(['admin', 'super_admin', 'manager']), asy
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const complaint = await ComplaintV2.findById(req.params.id);
+    const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) });
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
 
     const newLevel = req.body.level || complaint.escalationLevel + 1;
@@ -568,6 +564,10 @@ router.post('/:id/escalate', authorize(['admin', 'super_admin', 'manager']), asy
     const escalationUserField = `level${newLevel}EscalationUser`;
     const escalatedTo = slaConfig?.[escalationUserField] || null;
 
+    // snapshot the prior status BEFORE mutating (the audit step recorded
+    // fromStatus AFTER status was already set to 'escalated' → every escalation
+    // logged fromStatus:'escalated', losing the real prior status).
+    const oldStatus = complaint.status;
     complaint.status = 'escalated';
     complaint.escalationLevel = newLevel;
     complaint.escalatedAt = new Date();
@@ -579,7 +579,7 @@ router.post('/:id/escalate', authorize(['admin', 'super_admin', 'manager']), asy
       complaintId: complaint._id,
       action: 'escalated',
       notes: req.body.reason || `تصعيد تلقائي إلى المستوى ${newLevel}`,
-      fromStatus: complaint.status,
+      fromStatus: oldStatus,
       toStatus: 'escalated',
       performedBy: req.user?._id || req.userId,
       performedAt: new Date(),
@@ -603,8 +603,8 @@ router.post('/:id/rate', async (req, res) => {
     if (!rating || rating < 1 || rating > 5)
       return res.status(400).json({ success: false, message: 'التقييم يجب أن يكون بين 1 و 5' });
 
-    const complaint = await ComplaintV2.findByIdAndUpdate(
-      req.params.id,
+    const complaint = await ComplaintV2.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
       { satisfactionRating: rating, satisfactionComment: comment || null },
       { returnDocument: 'after' }
     );
@@ -620,7 +620,7 @@ router.delete('/:id', authorize(['admin', 'super_admin']), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await ComplaintV2.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await ComplaintV2.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
   } catch (err) {
     safeError(res, err, 'Complaint delete error');
@@ -634,9 +634,8 @@ router.delete('/:id', authorize(['admin', 'super_admin']), async (req, res) => {
 /** GET /api/complaints-enhanced/categories */
 router.get('/categories', async (req, res) => {
   try {
-    const { branchId } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     const data = await ComplaintCategory.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
@@ -664,8 +663,8 @@ router.put('/categories/:id', authorize(['admin', 'super_admin', 'manager']), as
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const category = await ComplaintCategory.findByIdAndUpdate(
-      req.params.id,
+    const category = await ComplaintCategory.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
       { ...req.body, updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after', runValidators: true }
     );
@@ -681,7 +680,7 @@ router.delete('/categories/:id', authorize(['admin', 'super_admin']), async (req
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await ComplaintCategory.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await ComplaintCategory.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف التصنيف بنجاح' });
   } catch (err) {
     safeError(res, err, 'Complaint category delete error');
@@ -695,9 +694,8 @@ router.delete('/categories/:id', authorize(['admin', 'super_admin']), async (req
 /** GET /api/complaints-enhanced/sla-configs */
 router.get('/sla-configs', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const { branchId } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     const data = await ComplaintSlaConfig.find(filter).lean();
     res.json({ success: true, data });
   } catch (err) {
@@ -723,8 +721,8 @@ router.put('/sla-configs/:id', authorize(['admin', 'super_admin']), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const config = await ComplaintSlaConfig.findByIdAndUpdate(
-      req.params.id,
+    const config = await ComplaintSlaConfig.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
       { ...req.body, updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after', runValidators: true }
     );
@@ -742,9 +740,9 @@ router.put('/sla-configs/:id', authorize(['admin', 'super_admin']), async (req, 
 /** GET /api/complaints-enhanced/feedback — list feedback */
 router.get('/feedback', async (req, res) => {
   try {
-    const { type, status, sentiment, search, branchId, page = 1, limit = 15 } = req.query;
+    const { type, status, sentiment, search, page = 1, limit = 15 } = req.query;
     const filter = { deletedAt: null };
-    if (branchId) filter.branchId = branchId;
+    Object.assign(filter, branchScope(req)); // branch isolation — ignore client ?branchId
     if (type) filter.type = type;
     if (status) filter.status = status;
     if (sentiment) filter.sentiment = sentiment;
@@ -776,8 +774,7 @@ router.get('/feedback', async (req, res) => {
 /** GET /api/complaints-enhanced/feedback/stats */
 router.get('/feedback/stats', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const filter = branchId ? { branchId, deletedAt: null } : { deletedAt: null };
+    const filter = { deletedAt: null, ...branchScope(req) }; // ignore client ?branchId
     const [total, newUnreviewed, positive, negative, byType] = await Promise.all([
       CrmFeedback.countDocuments(filter),
       CrmFeedback.countDocuments({ ...filter, status: 'new' }),
@@ -796,7 +793,7 @@ router.get('/feedback/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const feedback = await CrmFeedback.findById(req.params.id)
+    const feedback = await CrmFeedback.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) })
       .populate('respondedBy', 'name email')
       .lean();
     if (!feedback) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
@@ -843,8 +840,8 @@ router.post(
       if (!req.body.response)
         return res.status(400).json({ success: false, message: 'نص الرد مطلوب' });
 
-      const feedback = await CrmFeedback.findByIdAndUpdate(
-        req.params.id,
+      const feedback = await CrmFeedback.findOneAndUpdate(
+        { _id: req.params.id, deletedAt: null, ...branchScope(req) },
         {
           response: req.body.response,
           respondedAt: new Date(),
@@ -868,8 +865,8 @@ router.put('/feedback/:id', authorize(['admin', 'super_admin', 'manager']), asyn
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const feedback = await CrmFeedback.findByIdAndUpdate(
-      req.params.id,
+    const feedback = await CrmFeedback.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
       { ...req.body, updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after', runValidators: true }
     );
@@ -885,7 +882,7 @@ router.delete('/feedback/:id', authorize(['admin', 'super_admin']), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await CrmFeedback.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await CrmFeedback.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الملاحظة بنجاح' });
   } catch (err) {
     safeError(res, err, 'Feedback delete error');

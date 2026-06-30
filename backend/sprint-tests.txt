@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/smart-iep-auth-branch-isolation-wave1555.test.js
 __tests__/quality-incident-branch-isolation-wave1554.test.js
 __tests__/finance-module-payment-refund-role-gate-wave1553.test.js
 __tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js
@@ -1126,3 +1127,4 @@ __tests__/whatsapp-delivery-observability-wave1424j.test.js
 __tests__/beneficiary-attendance-model-name.test.js
 __tests__/transport-idor-deadhandlers-wave1553.test.js
 __tests__/enum-value-query-mismatch.test.js
+__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js

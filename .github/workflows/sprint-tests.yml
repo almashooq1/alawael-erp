@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/smart-iep-auth-branch-isolation-wave1555.test.js'
       - 'backend/__tests__/quality-incident-branch-isolation-wave1554.test.js'
       - 'backend/__tests__/finance-module-payment-refund-role-gate-wave1553.test.js'
       - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
@@ -2076,6 +2077,8 @@ on:
       - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-value-query-mismatch.test.js'
       - 'backend/package.json'
@@ -3213,6 +3216,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/smart-iep-auth-branch-isolation-wave1555.test.js'
       - 'backend/__tests__/quality-incident-branch-isolation-wave1554.test.js'
       - 'backend/__tests__/finance-module-payment-refund-role-gate-wave1553.test.js'
       - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
@@ -4131,6 +4135,8 @@ on:
       - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/enum-value-query-mismatch.test.js'
       - 'backend/package.json'

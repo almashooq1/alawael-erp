@@ -58,6 +58,7 @@ __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
 __tests__/branch-isolation-scheduling-module-wave1547.test.js
+__tests__/branch-isolation-scheduling-module-behavioral-wave1547.test.js
 __tests__/asset-management-work-orders-branch-isolation-wave912.test.js
 __tests__/assistive-device-behavioral-wave359.test.js
 __tests__/assistive-device-return-core-linkage-wave1028.test.js

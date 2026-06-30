@@ -167,20 +167,24 @@ jobs:
                 exit 1
               fi
 
-              cat > .env << 'EOF'
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
-REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-SETUP_SECRET_KEY=${{ secrets.SETUP_SECRET_KEY }}
-ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL:-admin@alawael.com }}
-FRONTEND_URL=${{ secrets.FRONTEND_URL:-http://localhost }}
-CORS_ORIGINS=${{ secrets.CORS_ORIGINS:-http://localhost:3004,http://localhost:3000 }}
-TZ=Asia/Riyadh
-NODE_ENV=production
-EOF
+              # NOTE: written via indented `echo` lines (not a column-0
+              # heredoc) so the surrounding YAML script block scalar is
+              # not terminated early. Defaults use GHA "or" (not shell
+              # colon-dash, which is invalid inside a GHA expression).
+              {
+                echo "MONGO_ROOT_USER=admin"
+                echo "MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}"
+                echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
+                echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
+                echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}"
+                echo "SETUP_SECRET_KEY=${{ secrets.SETUP_SECRET_KEY }}"
+                echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}"
+                echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL || 'admin@alawael.com' }}"
+                echo "FRONTEND_URL=${{ secrets.FRONTEND_URL || 'http://localhost' }}"
+                echo "CORS_ORIGINS=${{ secrets.CORS_ORIGINS || 'http://localhost:3004,http://localhost:3000' }}"
+                echo "TZ=Asia/Riyadh"
+                echo "NODE_ENV=production"
+              } > .env
               echo "✅ .env created from GitHub secrets"
             else
               echo "✅ .env is complete"

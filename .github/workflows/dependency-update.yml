@@ -140,7 +140,7 @@ jobs:
           branch: ${{ env.BRANCH_PREFIX }}-${{ github.run_id }}
           delete-branch: true
           commit-message: 'chore(deps): weekly dependency update'
-          title: 'chore(deps): weekly dependency update — ${{ github.event.schedule || "manual" }}'
+          title: "chore(deps): weekly dependency update — ${{ github.event.schedule || 'manual' }}"
           body: |
             ## Weekly Dependency Update
 

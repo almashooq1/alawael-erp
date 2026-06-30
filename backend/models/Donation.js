@@ -48,7 +48,12 @@ const donationSchema = new mongoose.Schema(
 
     // التخصيص
     purpose: { type: String, trim: true },
-    campaign: { type: String, trim: true },
+    campaign: { type: String, trim: true }, // free-text campaign name (legacy)
+    // canonical campaign link — the route writes/queries campaignId, but it was
+    // never declared so strict mode dropped it (campaign donations were
+    // un-linkable + GET /campaign/:id always returned [] while Campaign
+    // .collectedAmount was still incremented → unreconcilable).
+    campaignId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campaign', index: true },
     restrictedTo: { type: String, trim: true },
 
     // الحالة

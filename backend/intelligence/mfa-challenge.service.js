@@ -604,9 +604,70 @@ function createMfaChallengeService({
     if (userId) userMfaState.delete(userId);
   }
 
+  // ─── enrollSetup / enrollVerify (W1461b) ──────────────────────────────
+  // Real TOTP enrollment for the STEP-UP store (`MFASettings.totpSecret`,
+  // base32 — matching `verifier`'s encoding). Closes the gap where
+  // `routes/mfa.js` /totp/setup|/verify were stubs and `securityService`
+  // wrote a HEX secret to a DIFFERENT store (`User.mfa`) the step-up never
+  // reads. Without this, EVERY `requireMfaTier(2)` gate (payroll, access-
+  // review, care-planning, equity-audit) is uncompletable — nobody can reach
+  // tier-2. Setup stores the secret (enrolled:false) + returns the otpauth
+  // URL for the QR; verify confirms the user holds the authenticator before
+  // marking enrolled:true.
+  async function enrollSetup({ userId, accountName = 'AlAwael ERP' }) {
+    if (!userId) return { ok: false, reason: REASON.USER_REQUIRED };
+    if (!mfaSettingsModel) return { ok: false, reason: 'MFA_STORE_UNAVAILABLE' };
+    let speakeasy;
+    try {
+      speakeasy = require('speakeasy');
+    } catch {
+      return { ok: false, reason: 'TOTP_LIB_UNAVAILABLE' };
+    }
+    const secret = speakeasy.generateSecret({ length: 20, name: `${accountName}:${userId}` });
+    await mfaSettingsModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          userId,
+          totpSecret: secret.base32,
+          methods: ['totp'],
+          enrolled: false,
+          totpPendingAt: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+    return { ok: true, otpauthUrl: secret.otpauth_url, secret: secret.base32 };
+  }
+
+  async function enrollVerify({ userId, token }) {
+    if (!userId) return { ok: false, reason: REASON.USER_REQUIRED };
+    if (!token || typeof token !== 'string' || !token.trim()) {
+      return { ok: false, reason: 'INVALID_TOKEN' };
+    }
+    if (!mfaSettingsModel) return { ok: false, reason: 'MFA_STORE_UNAVAILABLE' };
+    const enrollment = await _loadEnrollment(userId);
+    if (!enrollment || !enrollment.totpSecret) {
+      return { ok: false, reason: REASON.USER_NOT_ENROLLED };
+    }
+    const valid = await verifier({
+      method: 'totp',
+      secret: enrollment.totpSecret,
+      token: token.trim(),
+    });
+    if (!valid) return { ok: false, reason: 'INVALID_TOKEN' };
+    await mfaSettingsModel.findOneAndUpdate(
+      { userId },
+      { $set: { enrolled: true, totpEnrolledAt: new Date() } }
+    );
+    return { ok: true, enrolled: true };
+  }
+
   return {
     createChallenge,
     verifyChallenge,
+    enrollSetup,
+    enrollVerify,
     getChallengeStatus,
     requireMfa,
     unlockUser,

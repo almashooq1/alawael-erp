@@ -1109,3 +1109,4 @@ __tests__/parent-portal-reschedule-careplan.test.js
 __tests__/therapist-clinical-signals-import-shape.test.js
 __tests__/whatsapp-enhanced-branch-isolation-wave1424d.test.js
 __tests__/whatsapp-consent-gate-bulk-interactive-wave1424e.test.js
+__tests__/whatsapp-inbound-idempotency-wave1424f.test.js

@@ -3,6 +3,7 @@
  * Handles: /api/donations
  */
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
@@ -148,6 +149,9 @@ router.get('/', async (req, res) => {
 // GET /donor/:donorId — donations by donor
 router.get('/donor/:donorId', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.donorId)) {
+      return res.status(400).json({ success: false, message: 'معرّف المتبرّع غير صالح' });
+    }
     const Donation = require('../models/Donation');
     const data = await Donation.find({
       donorId: req.params.donorId,
@@ -164,6 +168,9 @@ router.get('/donor/:donorId', async (req, res) => {
 // GET /campaign/:campaignId — donations by campaign
 router.get('/campaign/:campaignId', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.campaignId)) {
+      return res.status(400).json({ success: false, message: 'معرّف الحملة غير صالح' });
+    }
     const Donation = require('../models/Donation');
     const data = await Donation.find({
       campaignId: req.params.campaignId,
@@ -194,9 +201,13 @@ router.post('/', async (req, res) => {
     const fields = pickFields(req.body, ALLOWED_DONATION_FIELDS);
     const amount = Number(fields.amount) || 0;
 
-    // Auto-generate receipt number
-    const count = await Donation.countDocuments();
-    const receiptNo = `DON-${String(count + 1).padStart(6, '0')}`;
+    // Auto-generate a UNIQUE receipt number. countDocuments()+1 was non-atomic
+    // (two concurrent donations → same number → E11000 on the unique
+    // donationNumber → the 2nd donation 500s) and not delete-safe. Use a
+    // timestamp+random token instead (monotonic-ish, collision-resistant).
+    const receiptNo = `DON-${Date.now().toString(36).toUpperCase()}-${Math.floor(
+      100 + Math.random() * 900
+    )}`;
 
     const donation = await Donation.create({
       ...fields,

@@ -136,6 +136,25 @@ const assessmentSchema = new mongoose.Schema(
   { _id: true }
 );
 
+// ─── Risk Flags (W1559) ─────────────────────────────────────────────────────
+// The DDD service + routes (POST /:id/risk-flags, /:id/risk-flags/:flagId/resolve,
+// /at-risk, /high-risk) call addRiskFlag/resolveRiskFlag + query overallRiskLevel —
+// all MISSING after the W1457 migration → the risk-flag routes 500'd and the
+// high-risk / at-risk lists silently returned [].
+const riskFlagSchema = new mongoose.Schema(
+  {
+    type: { type: String, required: true },
+    severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
+    description: String,
+    status: { type: String, enum: ['active', 'resolved'], default: 'active', index: true },
+    raisedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    raisedAt: { type: Date, default: Date.now },
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    resolvedAt: Date,
+  },
+  { _id: true }
+);
+
 // ─── Main Beneficiary Schema ────────────────────────────────────────────────
 
 const beneficiarySchema = new mongoose.Schema(
@@ -433,6 +452,15 @@ const beneficiarySchema = new mongoose.Schema(
     archivedDate: Date,
     archivedReason: String,
 
+    // W1559 — risk flags + derived overall level (queried by repository.findHighRisk).
+    riskFlags: { type: [riskFlagSchema], default: [] },
+    overallRiskLevel: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'critical'],
+      default: 'low',
+      index: true,
+    },
+
     // Mood check-in log (student/parent portal $pushes here; therapist portal reads
     // the last 7 for pre-session context). Was UNDECLARED, so the student-portal
     // `$push: { moodLog }` was silently dropped under strict mode and the therapist
@@ -633,6 +661,49 @@ beneficiarySchema.methods.unarchive = function (userId = null) {
   this.lastLifecycleAt = new Date();
   if (userId) this.lastModifiedBy = userId;
   return this.save();
+};
+
+// ─── Risk-flag instance methods (W1559) ─────────────────────────────────────
+const RISK_ORDER = { low: 0, medium: 1, high: 2, critical: 3 };
+
+beneficiarySchema.methods.recomputeRiskLevel = function () {
+  let max = 'low';
+  for (const f of this.riskFlags || []) {
+    if (f.status === 'active' && (RISK_ORDER[f.severity] || 0) > (RISK_ORDER[max] || 0)) {
+      max = f.severity;
+    }
+  }
+  this.overallRiskLevel = max;
+  return max;
+};
+
+beneficiarySchema.methods.addRiskFlag = async function (flag = {}) {
+  this.riskFlags.push({
+    type: flag.type,
+    severity: flag.severity || 'medium',
+    description: flag.description,
+    raisedBy: flag.raisedBy || flag.userId || null,
+    raisedAt: new Date(),
+    status: 'active',
+  });
+  this.recomputeRiskLevel();
+  await this.save();
+  return this.riskFlags[this.riskFlags.length - 1];
+};
+
+beneficiarySchema.methods.resolveRiskFlag = async function (flagId, userId = null) {
+  const flag = this.riskFlags.id(flagId);
+  if (!flag) {
+    const error = new Error('علم المخاطر غير موجود');
+    error.statusCode = 404;
+    throw error;
+  }
+  flag.status = 'resolved';
+  flag.resolvedBy = userId;
+  flag.resolvedAt = new Date();
+  this.recomputeRiskLevel();
+  await this.save();
+  return flag;
 };
 
 // ─── Static Methods ─────────────────────────────────────────────────────────

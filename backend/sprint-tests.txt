@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/files-module-branch-isolation-wave1560.test.js
 __tests__/rehabilitation-routes-no-db-tripwire-wave1559.test.js
 __tests__/early-warning-branch-isolation-wave1558.test.js
 __tests__/mdt-transition-quality-branch-isolation-wave1557.test.js
@@ -1140,4 +1141,5 @@ __tests__/quality-complaint-createdby.test.js
 __tests__/write-side-enum-status.test.js
 __tests__/smart-iep-mass-assignment-wave1558.test.js
 __tests__/early-intervention-milestone-derived-wave1560.test.js
+__tests__/therapy-sessions-conflict-massassign-wave1561.test.js
 __tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js

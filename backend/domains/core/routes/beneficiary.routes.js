@@ -6,6 +6,40 @@
 const { effectiveBranchScope } = require('../../../middleware/assertBranchMatch');
 const { escapeFormulaInjection } = require('../../../services/importExport/format-helpers');
 
+// W1558 — mass-assignment guard: caller-supplied privileged fields that POST/PUT
+// /beneficiaries must NOT be able to self-set (each verified against the canonical
+// models/Beneficiary.js). status → the dedicated /:id/status endpoint; branchId →
+// server-derived; account/audit/archived/computed-progress are server-owned.
+const PROTECTED_CREATE_UPDATE_FIELDS = new Set([
+  '_id',
+  'status',
+  'branchId',
+  'createdBy',
+  'lastModifiedBy',
+  'isArchived',
+  'archivedDate',
+  'archivedReason',
+  'accountStatus',
+  'accountVerified',
+  'accountVerificationCode',
+  'password',
+  'passwordResetToken',
+  'passwordResetExpires',
+  'twoFactorSecret',
+  'twoFactorEnabled',
+  'registrationDate',
+  'progress',
+]);
+
+function stripProtectedFields(body) {
+  if (!body || typeof body !== 'object') return {};
+  const clean = {};
+  for (const k of Object.keys(body)) {
+    if (!PROTECTED_CREATE_UPDATE_FIELDS.has(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 // ── Sort parser ──────────────────────────────────────────────────────────────
 // Supports both MongoDB JSON sort (`{"createdAt":-1}`) and string shorthand
 // (`-createdAt` or `createdAt`) sent by the admin UI.
@@ -314,9 +348,11 @@ function createBeneficiaryRoutes(router, service) {
     try {
       const context = {
         userId: req.user?._id || req.user?.id,
-        branchId: req.user?.branchId,
+        // W1558 — server-derived branch (req.user.branchId is never populated); the
+        // body cannot set branchId (stripped below), so beforeCreate stamps this.
+        branchId: effectiveBranchScope(req),
       };
-      const beneficiary = await service.create(req.body, context);
+      const beneficiary = await service.create(stripProtectedFields(req.body), context);
       res.status(201).json({ success: true, data: beneficiary });
     } catch (error) {
       next(error);
@@ -330,7 +366,11 @@ function createBeneficiaryRoutes(router, service) {
       const context = {
         userId: req.user?._id || req.user?.id,
       };
-      const updated = await service.update(req.params.beneficiaryId, req.body, context);
+      const updated = await service.update(
+        req.params.beneficiaryId,
+        stripProtectedFields(req.body),
+        context
+      );
       res.json({ success: true, data: updated });
     } catch (error) {
       next(error);

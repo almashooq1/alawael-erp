@@ -1088,3 +1088,4 @@ __tests__/appointment-mass-assignment.test.js
 =======
 __tests__/recruitment-idor-statemachine.test.js
 >>>>>>> b12989617 (fix(recruitment): cross-branch IDOR + offer state machine + candidate mass-assign)
+__tests__/check-mass-assignment-spread-script.test.js

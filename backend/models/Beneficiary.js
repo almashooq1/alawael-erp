@@ -493,6 +493,7 @@ beneficiarySchema.index({ 'disability.type': 1 });
 // فهرس مركّب للفرع — ضروري لعزل بيانات الفروع (multi-tenant)
 beneficiarySchema.index({ branchId: 1, status: 1 });
 beneficiarySchema.index({ branchId: 1, isArchived: 1 });
+beneficiarySchema.index({ 'address.city': 1 }); // W1561 — getCities distinct + city-filter regex
 
 // ─── Lifecycle Alignment Helpers (W0-LifecycleAlign) ───────────────────────
 

@@ -2037,6 +2037,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-meta-provider-wave1424b.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-portal-reschedule-careplan.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-never-set-req-fields.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4051,6 +4053,8 @@ on:
       - 'backend/__tests__/mdt-coordination-lean-idor.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-meta-provider-wave1424b.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-portal-reschedule-careplan.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-never-set-req-fields.test.js'
       - 'backend/package.json'

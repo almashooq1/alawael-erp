@@ -96,7 +96,21 @@ const appointmentSchema = new mongoose.Schema(
     // Reason / notes
     reason: { type: String },
     notes: { type: String },
-    internalNotes: { type: String }, // Staff-only notes
+    internalNotes: { type: String }, // Staff-only notes (also holds the SOAP report envelope)
+
+    // Parent-portal reschedule requests. These were previously $push'd into the
+    // String `internalNotes` field (a CastError that 500'd every request + would
+    // have corrupted the SOAP envelope) and flagged via a phantom
+    // `rescheduleRequested` key — both now real fields.
+    rescheduleRequested: { type: Boolean, default: false },
+    rescheduleRequests: [
+      {
+        requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        reason: { type: String },
+        requestedAt: { type: Date, default: Date.now },
+        status: { type: String, enum: ['pending', 'handled'], default: 'pending' },
+      },
+    ],
 
     // Recurrence
     recurrence: {

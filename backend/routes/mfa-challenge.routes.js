@@ -133,6 +133,7 @@ function createMfaChallengeRouter({ service, logger = console } = {}) {
         userId,
         requiredTier,
         method,
+        email: req.user?.email || req.user?.emailAddress || null, // W1461c email-OTP
         actor: actorFrom(req),
       });
       return respond(res, result);

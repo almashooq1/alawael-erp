@@ -687,16 +687,19 @@ router.post('/appointments/:appointmentId/reschedule-request', authenticate, asy
     // Record the reschedule request as a note on the appointment.
     // The clinic staff sees it via the admin appointment panel and handles it
     // manually. A dedicated reschedule-request model can replace this in v2.
+    // Push to the real rescheduleRequests[] array (was $push to the String
+    // internalNotes field → CastError → every request 500'd + never recorded);
+    // flag via the real rescheduleRequested boolean ($set, not a top-level mix).
     await Appointment().findByIdAndUpdate(req.params.appointmentId, {
       $push: {
-        internalNotes: JSON.stringify({
-          type: 'RESCHEDULE_REQUEST',
-          requestedAt: new Date().toISOString(),
-          requestedBy: String(userId),
+        rescheduleRequests: {
+          requestedBy: userId,
           reason: reason.trim(),
-        }),
+          requestedAt: new Date(),
+          status: 'pending',
+        },
       },
-      rescheduleRequested: true,
+      $set: { rescheduleRequested: true },
     });
 
     return res.json({ ok: true, appointmentId: req.params.appointmentId });
@@ -1073,6 +1076,14 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
       if (!(await guardianOwnsBeneficiary(userId, String(plan.beneficiary)))) {
         // W411: unify with 404 (anti-existence-probe).
         return res.status(404).json({ error: 'NotFound', message: 'not found' });
+      }
+      // The plan must actually be awaiting signature (mirror the /approvals list
+      // filter). Without this, a guardian could REJECT an already-ACTIVE/signed
+      // plan back to DRAFT (halting in-progress therapy) or re-sign a signed one.
+      if (!plan.requiresSignature || plan.signedAt) {
+        return res
+          .status(409)
+          .json({ error: 'Conflict', message: 'هذه الخطة ليست بانتظار التوقيع' });
       }
       if (decision === 'APPROVE') {
         plan.signedAt = new Date();

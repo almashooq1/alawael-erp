@@ -40,7 +40,9 @@ router.post('/', async (req, res) => {
     const TrafficAccident = require('../models/Traffic/TrafficAccident');
     const accident = await TrafficAccident.create({
       ...req.body,
-      status: 'open',
+      // TrafficAccident.status enum is {pending,investigating,resolved,disputed};
+      // 'open' is not valid → create threw → POST /traffic-accidents failed every time.
+      status: 'pending',
       reportedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: accident });
@@ -94,7 +96,10 @@ router.patch('/:id/close', authorize('admin', 'manager'), async (req, res) => {
     const accident = await TrafficAccident.findByIdAndUpdate(
       req.params.id,
       {
-        status: 'closed',
+        // enum has no 'closed' → terminal state is 'resolved' (this /:id/close endpoint
+        // supplies resolution/totalCost/liabilityNotes). 'closed' wrote an invalid status
+        // (or threw under runValidators).
+        status: 'resolved',
         resolution,
         totalCost,
         liabilityNotes,

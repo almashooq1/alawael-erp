@@ -295,6 +295,8 @@
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js",
     "check:phantom-writes": "node scripts/check-phantom-schema-writes.js",
+    "check:mass-assign": "node scripts/check-mass-assignment-spread.js",
+    "check:mass-assign:json": "node scripts/check-mass-assignment-spread.js --json",
     "check:core-linkage": "node scripts/check-core-linkage.js",
     "check:core-linkage:json": "node scripts/check-core-linkage.js --json"
   },

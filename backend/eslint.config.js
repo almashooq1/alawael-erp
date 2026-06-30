@@ -57,7 +57,7 @@ module.exports = [
       ...js.configs.recommended.rules,
       'no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_', ignoreRestSiblings: true },
       ],
       'no-console': 'off',
       'no-process-exit': 'off',

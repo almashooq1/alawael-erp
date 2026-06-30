@@ -99,6 +99,7 @@ function generateId() {
 function createMfaChallengeService({
   mfaSettingsModel = null,
   totpVerifier = null,
+  emailSender = null, // W1461c — ({ to, code, userId, requiredTier, expiresAt }) => Promise; for email-OTP step-up
   sessionUpdater = null,
   auditLogger = null,
   logger = console,
@@ -221,7 +222,7 @@ function createMfaChallengeService({
    * the service exposes the user's enrolled methods so the UI can
    * present the right prompt.
    */
-  async function createChallenge({ userId, requiredTier, actor = {}, method = 'totp' }) {
+  async function createChallenge({ userId, requiredTier, actor = {}, method = 'totp', email = null }) {
     if (!userId) return { ok: false, reason: REASON.USER_REQUIRED };
     if (![2, 3].includes(requiredTier)) {
       return { ok: false, reason: REASON.INVALID_TIER };
@@ -286,6 +287,24 @@ function createMfaChallengeService({
       // store shape is the same.
       _totpSecret: enrollment?.totpSecret || null,
     };
+    // W1461c — email-OTP: generate a per-challenge 6-digit code, keep it on
+    // the challenge (never returned outward), and email it. For users with no
+    // TOTP authenticator/device. Same rate-limit + lockout + expiry as TOTP.
+    if (method === 'email') {
+      const code = String(require('crypto').randomInt(100000, 1000000));
+      challenge._emailCode = code;
+      const to = email || actor?.email || null;
+      if (to && typeof emailSender === 'function') {
+        try {
+          await emailSender({ to, code, userId, requiredTier, expiresAt });
+        } catch (err) {
+          logger.warn && logger.warn(`[mfa] email-OTP send failed: ${err && err.message}`);
+        }
+      } else {
+        logger.warn && logger.warn('[mfa] email-OTP: no recipient or emailSender not wired');
+      }
+    }
+
     store.set(id, challenge);
 
     await _audit('mfa.challenge.created', actor, {
@@ -319,6 +338,9 @@ function createMfaChallengeService({
       return tier >= 3
         ? 'Confirm via biometric on your registered device'
         : 'Confirm via biometric';
+    }
+    if (method === 'email') {
+      return 'أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى بريدك الإلكتروني';
     }
     return 'Provide the requested verification token';
   }
@@ -380,13 +402,24 @@ function createMfaChallengeService({
 
     let pass = false;
     try {
-      pass = await verifier({
-        method: c.method,
-        secret: c._totpSecret,
-        token,
-        userId: c.userId,
-        tier: c.requiredTier,
-      });
+      if (c.method === 'email') {
+        // W1461c — email-OTP: compare the entered code to the per-challenge
+        // code (constant-time). For users without a TOTP authenticator/device.
+        const crypto = require('crypto');
+        const got = typeof token === 'string' ? token.trim() : '';
+        pass =
+          !!c._emailCode &&
+          got.length === c._emailCode.length &&
+          crypto.timingSafeEqual(Buffer.from(got), Buffer.from(c._emailCode));
+      } else {
+        pass = await verifier({
+          method: c.method,
+          secret: c._totpSecret,
+          token,
+          userId: c.userId,
+          tier: c.requiredTier,
+        });
+      }
     } catch (err) {
       logger.warn && logger.warn(`[mfa] verifier threw: ${err.message}`);
       pass = false;

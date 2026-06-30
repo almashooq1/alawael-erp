@@ -73,9 +73,34 @@ function wireMfaChallenge(app, deps = {}) {
       /* audit optional — challenge still works, no audit row */
     }
 
+    // W1461c — email-OTP step-up sender (for users with no TOTP device).
+    let emailSender = null;
+    try {
+      const sendEmail = require('../services/emailService');
+      emailSender = async ({ to, code, expiresAt }) => {
+        const mins = expiresAt
+          ? Math.max(1, Math.round((new Date(expiresAt).getTime() - Date.now()) / 60000))
+          : 5;
+        await sendEmail({
+          to,
+          subject: 'رمز التحقق — منصّة الأوائل',
+          html:
+            '<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;font-size:15px;color:#1f2937">' +
+            '<p>رمز التحقق الخاص بك لتنفيذ عملية حسّاسة تتطلّب رفع مستوى التحقق:</p>' +
+            `<p style="font-size:30px;font-weight:bold;letter-spacing:6px;color:#1B4A8A">${code}</p>` +
+            `<p style="color:#6b7280">صالح لمدة ${mins} دقائق. لا تشاركه مع أحد. إن لم تطلبه، تجاهل هذه الرسالة.</p>` +
+            '</div>',
+          text: `رمز التحقق: ${code} (صالح ${mins} دقائق). لا تشاركه مع أحد.`,
+        });
+      };
+    } catch (e) {
+      logger.warn('[MFA] email-OTP sender not wired:', e && e.message);
+    }
+
     const mfaSvc = createMfaChallengeService({
       mfaSettingsModel,
       auditLogger,
+      emailSender,
       sessionUpdater: (...args) => app._mfaSessionUpdater(...args),
       logger,
     });

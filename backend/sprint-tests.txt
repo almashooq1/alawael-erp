@@ -1115,3 +1115,4 @@ __tests__/crm-enhanced-branch-leak.test.js
 __tests__/whatsapp-template-request-model.test.js
 __tests__/whatsapp-notification-dlq-wave1424g.test.js
 __tests__/whatsapp-secondary-webhook-failclosed-wave1424h.test.js
+__tests__/whatsapp-meta-transport-parity-wave1424i.test.js

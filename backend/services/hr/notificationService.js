@@ -135,6 +135,37 @@ class HRNotificationService {
   }
 
   /**
+   * إشعار بتقديم طلب إجازة جديد (في انتظار الموافقة).
+   * Called by routes/attendance.routes.js after a leave request is created. The
+   * route used to call this method before it existed → TypeError, which the
+   * handler's outer catch turned into a misleading 400 even though the leave was
+   * actually saved. Mirrors notifyLeaveApproved (static + sendNotification).
+   */
+  static async notifyLeaveRequest(employee, leaveData) {
+    try {
+      const message = {
+        title: 'تم استلام طلب إجازتك',
+        body: `تم استلام طلب إجازتك من ${leaveData.startDate} إلى ${leaveData.endDate} وهو قيد المراجعة`,
+        channels: ['email', 'in-app'],
+        priority: 'normal',
+        type: 'LEAVE_REQUEST',
+        data: {
+          leaveId: leaveData._id,
+          startDate: leaveData.startDate,
+          endDate: leaveData.endDate,
+          leaveType: leaveData.type,
+          days: leaveData.days,
+          status: leaveData.status || 'pending',
+        },
+      };
+
+      return await this.sendNotification(employee._id, message, employee);
+    } catch (error) {
+      throw new Error(`خطأ في إشعار طلب الإجازة: ${error.message}`);
+    }
+  }
+
+  /**
    * إشعار الترقية
    */
   static async notifyPromotion(employee, promotionData) {

@@ -185,10 +185,11 @@ router.get(
 router.get(
   '/audit/verify-chain',
   wrap(async (req, res) => {
-    const result = await auditService.getAuditLog({
-      documentId: req.query.documentId,
-      type: 'integrity_check',
-    });
+    // getAuditLog(documentId, options) is POSITIONAL — passing a filter OBJECT as
+    // documentId cast-errored (→ 500). Chain verification wants the document's full
+    // audit log (DocumentAuditLog has no 'type' field, so the old type filter was a
+    // no-op anyway).
+    const result = await auditService.getAuditLog(req.query.documentId, {});
     res.json(result);
   })
 );
@@ -197,7 +198,13 @@ router.get(
 router.get(
   '/audit/suspicious',
   wrap(async (req, res) => {
-    const result = await auditService.getAuditLog({ ...req.query, severity: 'high' });
+    // Cross-document high-severity query: documentId is optional (null → all docs);
+    // 'severity' is a real DocumentAuditLog field. (Was passing the whole filter as
+    // the documentId positional arg → CastError 500.)
+    const result = await auditService.getAuditLog(req.query.documentId || null, {
+      ...req.query,
+      severity: 'high',
+    });
     res.json(result);
   })
 );

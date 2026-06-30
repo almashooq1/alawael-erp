@@ -170,9 +170,9 @@ function auditAsync(entry) {
   M.create(entry).catch(() => {});
 }
 
-const routeOptimizer = new RouteOptimizationService();
+const _routeOptimizer = new RouteOptimizationService();
 const _inspectionService = new PreTripInspectionService();
-const notificationService = new ParentNotificationService();
+const _notificationService = new ParentNotificationService();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

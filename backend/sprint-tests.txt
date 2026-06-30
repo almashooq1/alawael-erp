@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js
 __tests__/emr-body-branch-isolation-wave1549.test.js
 __tests__/appointment-slot-booking-atomic-wave1548.test.js
 __tests__/branch-isolation-scheduling-module-wave1547.test.js

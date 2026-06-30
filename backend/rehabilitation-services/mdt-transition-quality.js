@@ -6,6 +6,17 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+
+// W1556 — this clinical router was mounted via safeMount/dualMount (which inject NO
+// auth middleware) with no router-level auth, and this app has no global
+// app.use(authenticate), so it was reachable ANONYMOUSLY (cross-branch PHI). Require
+// authentication + branch access, matching the app-wide standard and the sibling
+// routes/iep.routes.js. Per-query branch scoping of :beneficiaryId path params is a
+// documented follow-up (see W1556 PR / smart-iep W1555).
+router.use(authenticate);
+router.use(requireBranchAccess);
 const mongoose = require('mongoose');
 const safeError = require('../utils/safeError');
 const { Schema } = mongoose;

@@ -272,7 +272,7 @@ class BeneficiaryService extends BaseService {
       throw error;
     }
 
-    // W1561 — validate every id is a real ObjectId (a bad id → CastError 500 mid-loop,
+    // W1563 — validate every id is a real ObjectId (a bad id → CastError 500 mid-loop,
     // leaving a PARTIAL bulk mutation) and enforce per-id branch ownership. The URL
     // param-hook only guards :beneficiaryId and bodyScopedBeneficiaryGuard only checks
     // body.beneficiaryId — NEITHER covers body.ids[], so a branch-restricted caller could

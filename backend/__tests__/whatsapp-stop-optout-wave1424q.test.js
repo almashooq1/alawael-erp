@@ -30,7 +30,8 @@ describe('W1424q STOP keyword self-opt-out', () => {
   });
 
   test('calls setConsent(..., false) for an explicit withdrawal', () => {
-    expect(SRC).toMatch(/setConsent\([^)]*,\s*false/);
+    // NB: the first arg is normalizePhone(fromPhone) — inner ')' breaks a [^)]* match.
+    expect(SRC).toMatch(/setConsent\(.*\bfalse\b/);
   });
 
   test('STOP matcher includes stop/unsubscribe + Arabic stop words', () => {

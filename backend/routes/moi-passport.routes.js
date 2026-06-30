@@ -412,26 +412,12 @@ router.get('/metrics', (req, res) => {
   }
 });
 
-/**
- * GET /api/moi/health
- * Health Check
- */
-router.get('/health', async (_req, res) => {
-  try {
-    const healthStatus = await passportService.healthCheck();
-
-    res.json({
-      success: healthStatus.status === 'healthy',
-      data: healthStatus,
-    });
-  } catch {
-    res.status(503).json({
-      success: false,
-      error: 'Health check failed',
-      details: 'حدث خطأ في الخادم',
-    });
-  }
-});
+// NOTE: GET /health is declared earlier (a static always-healthy stub, the LIVE
+// handler). A second handler used to live here that called
+// `passportService.healthCheck()` and returned 503 on failure — it was UNREACHABLE
+// (Express first-match) so it never ran. Removed to fix the duplicate. To make
+// /health reflect real passportService health, promote that logic INTO the earlier
+// handler deliberately (it changes the response shape + can return 503).
 
 // ============================================================================
 // AUDIT LOG ENDPOINTS

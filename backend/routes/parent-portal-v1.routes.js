@@ -651,48 +651,12 @@ router.get('/home', authenticate, async (req, res) => {
 });
 
 // ── Appointments ──────────────────────────────────────────────────────────────
-router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => {
-  try {
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
-    if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      // W411: unify with 404 so caller can't distinguish "exists but not yours"
-      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
-      return res.status(404).json({ error: 'NotFound', message: 'not found' });
-    }
-
-    const { status, from, to, limit = '50' } = req.query;
-    const filter = { beneficiary: req.params.id };
-    if (status) filter.status = String(status).toUpperCase();
-    if (from || to) {
-      filter.date = {};
-      if (from) filter.date.$gte = new Date(from);
-      if (to) filter.date.$lte = new Date(to);
-    }
-
-    const lim = Math.min(200, parseInt(limit, 10) || 50);
-    const appts = await Appointment()
-      .find(filter)
-      .sort({ date: -1 })
-      .limit(lim)
-      .populate('therapistId', 'name_ar specialization')
-      .lean();
-
-    const data = appts.map(a => ({
-      id: String(a._id),
-      date: composeDateTimeISO(a.date, a.startTime),
-      endDate: composeDateTimeISO(a.date, a.endTime),
-      status: APPT_STATUS_PUBLIC[a.status] || a.status || 'SCHEDULED',
-      therapistName: a.therapistId?.name_ar || '—',
-      discipline: a.therapistId?.specialization || a.discipline || '—',
-      location: a.location || a.room || null,
-      notes: null, // clinical notes not exposed in parent portal
-    }));
-
-    return res.json({ count: data.length, appointments: data });
-  } catch {
-    return res.status(500).json({ error: 'InternalError', message: 'failed' });
-  }
-});
+// NOTE: GET /beneficiaries/:id/appointments is declared earlier in this file (the
+// live handler returns the `PortalAppointment[]` array — { sessionDate, serviceType,
+// programNameAr, therapistNameAr, canReschedule } — that web-portal's api.ts consumes).
+// A second, divergent handler used to live here: it was UNREACHABLE (Express
+// first-match wins) AND returned an incompatible `{ count, appointments }` envelope
+// with different field names, so promoting it would have broken the portal. Removed.
 
 router.post('/appointments/:appointmentId/reschedule-request', authenticate, async (req, res) => {
   try {

@@ -22,6 +22,32 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 const ICFAssessment = require('../models/assessment/ICFAssessmentLegacy');
 
+// stripUpdateMeta is a prototype-pollution BLACKLIST, not a field whitelist — it
+// doesn't strip domain-privileged fields. On the generic PUT bodies, also drop
+// lifecycle/identity/audit fields so a caller can't forge status (bypassing the
+// dedicated transition endpoints + approval chain), beneficiary (re-point to a
+// foreign-branch beneficiary; branchId is only derived in pre('save'), which
+// findByIdAndUpdate skips → tenancy desync), branchId (relocate the record), or
+// the approvals/history audit arrays.
+const MDT_PRIVILEGED = [
+  'status',
+  'branchId',
+  'beneficiary',
+  'organizer',
+  'leadTherapist',
+  'approvals',
+  'history',
+  'response',
+  'outcome',
+  'madeBy',
+  'approvedBy',
+];
+const safeUpdateBody = body => {
+  const out = stripUpdateMeta(body);
+  for (const k of MDT_PRIVILEGED) delete out[k];
+  return out;
+};
+
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -157,7 +183,7 @@ router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) =>
     // findByIdAndUpdate let a branch-A manager rewrite branch-B's meeting.
     const meeting = await MDTMeeting.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
-      stripUpdateMeta(req.body),
+      safeUpdateBody(req.body),
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
@@ -190,7 +216,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.attendees.push(req.body);
@@ -208,7 +234,7 @@ router.patch(
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const attendee = meeting.attendees.id(req.params.attendeeId);
@@ -231,7 +257,7 @@ router.post(
   validate([body('beneficiary').notEmpty().withMessage('المستفيد مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.cases.push({
@@ -252,7 +278,7 @@ router.patch(
   authorize(['admin', 'manager', 'therapist', 'doctor']),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const caseItem = meeting.cases.id(req.params.caseId);
@@ -274,7 +300,7 @@ router.post(
   validate([body('title').trim().notEmpty().withMessage('عنوان القرار مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const caseItem = meeting.cases.id(req.params.caseId);
@@ -299,7 +325,7 @@ router.post(
   validate([body('topic').trim().notEmpty().withMessage('موضوع جدول الأعمال مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const order = meeting.agenda.length + 1;
@@ -457,9 +483,9 @@ router.post(
 // ─── Update Plan ─────────────────────────────────────────────────────────────
 router.put('/plans/:id', authorize(['admin', 'manager', 'therapist']), async (req, res) => {
   try {
-    const plan = await UnifiedRehabPlan.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
+    const plan = await UnifiedRehabPlan.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      safeUpdateBody(req.body),
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
@@ -496,7 +522,7 @@ router.post(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const exists = plan.teamMembers.some(m => m.therapist?.toString() === req.body.therapist);
@@ -522,7 +548,7 @@ router.delete(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.teamMembers.pull({ _id: req.params.memberId });
@@ -547,7 +573,7 @@ router.post(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.goals.push({
@@ -574,7 +600,7 @@ router.patch(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const goal = plan.goals.id(req.params.goalId);
@@ -609,7 +635,7 @@ router.put(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const goal = plan.goals.id(req.params.goalId);
@@ -634,7 +660,7 @@ router.post(
       const plan = await UnifiedRehabPlan.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.reviews.push({
@@ -660,7 +686,7 @@ router.post('/plans/:id/approve', authorize(['admin', 'manager']), async (req, r
     const plan = await UnifiedRehabPlan.findOne({
       _id: req.params.id,
       ...branchFilter(req),
-    }).lean();
+    });
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
     plan.approvals.push({
@@ -833,9 +859,9 @@ router.post(
 // ─── Update Referral Ticket ──────────────────────────────────────────────────
 router.put('/referrals/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const ticket = await ReferralTicket.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
+    const ticket = await ReferralTicket.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      safeUpdateBody(req.body),
       { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!ticket)
@@ -855,7 +881,7 @@ router.post(
       const ticket = await ReferralTicket.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -892,7 +918,7 @@ router.post(
       const ticket = await ReferralTicket.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -929,7 +955,7 @@ router.post(
       const ticket = await ReferralTicket.findOne({
         _id: req.params.id,
         ...branchFilter(req),
-      }).lean();
+      });
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -1286,7 +1312,7 @@ router.post(
   validate([body('content').trim().notEmpty().withMessage('محتوى المحضر مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.minutes = {
@@ -1307,7 +1333,7 @@ router.post(
 // ─── Approve Meeting Minutes ─────────────────────────────────────────────────
 router.post('/meetings/:id/minutes/approve', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+    const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
     if (!meeting.minutes?.content) {
@@ -1332,7 +1358,7 @@ router.post(
   validate([body('title').trim().notEmpty().withMessage('عنوان القرار مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.generalDecisions.push({
@@ -1358,15 +1384,27 @@ router.patch(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const decision = meeting.generalDecisions.id(req.params.decisionId);
       if (!decision) return res.status(404).json({ success: false, message: 'القرار غير موجود' });
 
+      // a terminal decision (rejected/implemented) can't transition further
+      if (['REJECTED', 'IMPLEMENTED'].includes(decision.status)) {
+        return res
+          .status(409)
+          .json({ success: false, message: 'لا يمكن تغيير حالة قرار في حالته النهائية' });
+      }
       decision.status = req.body.status;
       if (req.body.status === 'IMPLEMENTED') decision.implementedAt = new Date();
-      if (req.body.status === 'APPROVED') decision.approvedBy.push(req.user.id);
+      // dedupe approver ids — repeated APPROVE calls were inflating approvedBy
+      if (
+        req.body.status === 'APPROVED' &&
+        !decision.approvedBy.some(id => String(id) === String(req.user.id))
+      ) {
+        decision.approvedBy.push(req.user.id);
+      }
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث حالة القرار' });
     } catch (error) {
@@ -1382,7 +1420,7 @@ router.post(
   validate([body('description').trim().notEmpty().withMessage('وصف المهمة مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.generalActionItems.push({
@@ -1408,7 +1446,7 @@ router.patch(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
+      const meeting = await MDTMeeting.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const item = meeting.generalActionItems.id(req.params.itemId);

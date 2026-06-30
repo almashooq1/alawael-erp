@@ -58,6 +58,10 @@ onboardingChecklistSchema.index({ branchId: 1, status: 1 });
 onboardingChecklistSchema.index({ applicationId: 1 });
 onboardingChecklistSchema.index({ startDate: 1 });
 onboardingChecklistSchema.index({ deletedAt: 1 });
+// one onboarding per accepted offer — defense-in-depth against a duplicate
+// checklist if the offer-respond accept branch is ever replayed (the route now
+// also guards with an atomic status:'sent' precondition).
+onboardingChecklistSchema.index({ offerId: 1 }, { unique: true });
 
 onboardingChecklistSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });

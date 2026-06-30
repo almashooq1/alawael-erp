@@ -1083,4 +1083,8 @@ __tests__/phantom-write-document-center.test.js
 __tests__/phantom-schema-fields.test.js
 __tests__/waitlist-capacity-phantom.test.js
 __tests__/insurance-claims-integrity.test.js
+<<<<<<< HEAD
 __tests__/appointment-mass-assignment.test.js
+=======
+__tests__/recruitment-idor-statemachine.test.js
+>>>>>>> b12989617 (fix(recruitment): cross-branch IDOR + offer state machine + candidate mass-assign)

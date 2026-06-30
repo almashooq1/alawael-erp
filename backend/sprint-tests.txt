@@ -1126,4 +1126,5 @@ __tests__/ticketing-branch-idor-wave1552.test.js
 __tests__/whatsapp-delivery-observability-wave1424j.test.js
 __tests__/beneficiary-attendance-model-name.test.js
 __tests__/transport-idor-deadhandlers-wave1553.test.js
+__tests__/enum-value-query-mismatch.test.js
 __tests__/smart-assessment-massassign-deadmodel-wave1555.test.js

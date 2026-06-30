@@ -263,7 +263,9 @@ class AnalyticsService {
       'hr_overview',
       async () => {
         const totalEmployees = (await Employee.countDocuments()) || 0;
-        const activeEmployees = (await Employee.countDocuments({ status: 'Active' })) || 0;
+        // Employee.status enum is lowercase ('active'); 'Active' matched NOTHING →
+        // the HR-overview "active employees" metric was always 0.
+        const activeEmployees = (await Employee.countDocuments({ status: 'active' })) || 0;
 
         return {
           totalEmployees,

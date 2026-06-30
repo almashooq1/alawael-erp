@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/rehabilitation-routes-no-db-tripwire-wave1559.test.js'
       - 'backend/__tests__/early-warning-branch-isolation-wave1558.test.js'
       - 'backend/__tests__/mdt-transition-quality-branch-isolation-wave1557.test.js'
       - 'backend/__tests__/rehabilitation-routers-auth-wave1556.test.js'
@@ -2094,6 +2095,8 @@ on:
       - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/quality-complaint-createdby.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-mass-assignment-wave1558.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/write-side-enum-status.test.js'
       - 'backend/package.json'
@@ -3231,6 +3234,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/rehabilitation-routes-no-db-tripwire-wave1559.test.js'
       - 'backend/__tests__/early-warning-branch-isolation-wave1558.test.js'
       - 'backend/__tests__/mdt-transition-quality-branch-isolation-wave1557.test.js'
       - 'backend/__tests__/rehabilitation-routers-auth-wave1556.test.js'
@@ -4167,6 +4171,8 @@ on:
       - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/quality-complaint-createdby.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-mass-assignment-wave1558.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/write-side-enum-status.test.js'
       - 'backend/package.json'

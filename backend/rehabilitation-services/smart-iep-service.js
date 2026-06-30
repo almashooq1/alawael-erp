@@ -760,11 +760,12 @@ class SessionLogService {
   /**
    * إحصائيات جلسات مستفيد عبر الزمن
    */
-  static async getSessionAnalytics(beneficiaryId, days = 90) {
+  static async getSessionAnalytics(beneficiaryId, days = 90, scope = {}) {
     const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     const sessions = await SessionLog.find({
       beneficiary_id: beneficiaryId,
       session_date: { $gte: from },
+      ...scope,
     })
       .sort({ session_date: 1 })
       .lean();

@@ -2101,6 +2101,8 @@ on:
       - 'backend/__tests__/write-side-enum-status.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-milestone-derived-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4179,6 +4181,8 @@ on:
       - 'backend/__tests__/write-side-enum-status.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-milestone-derived-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

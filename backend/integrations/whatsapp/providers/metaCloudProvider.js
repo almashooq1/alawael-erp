@@ -24,7 +24,21 @@ class MetaCloudProvider extends BaseWhatsAppProvider {
     this.phoneId = config.phoneId || process.env.WHATSAPP_PHONE_ID || process.env.WA_PHONE_NUMBER_ID;
     this.apiVersion = config.apiVersion || process.env.WHATSAPP_API_VERSION || 'v21.0';
     this.baseUrl = config.baseUrl || `https://graph.facebook.com/${this.apiVersion}`;
+    // appsecret_proof — required when the Meta app has "Require App Secret Proof
+    // for Server API calls" enabled. = HMAC-SHA256(access_token, app_secret).
+    // The app secret is the same value used to verify webhook signatures.
+    this.appSecret =
+      config.appSecret || process.env.WHATSAPP_APP_SECRET || process.env.WHATSAPP_WEBHOOK_SECRET;
     this.enabled = !!(this.token && this.phoneId);
+  }
+
+  _withProof(url) {
+    if (!this.appSecret) return url;
+    const proof = require('crypto')
+      .createHmac('sha256', this.appSecret)
+      .update(this.token)
+      .digest('hex');
+    return url + (url.includes('?') ? '&' : '?') + 'appsecret_proof=' + proof;
   }
 
   validateConfig() {
@@ -34,7 +48,7 @@ class MetaCloudProvider extends BaseWhatsAppProvider {
   }
 
   async _request(payload) {
-    const url = `${this.baseUrl}/${this.phoneId}/messages`;
+    const url = this._withProof(`${this.baseUrl}/${this.phoneId}/messages`);
     let response;
     let data;
     try {
@@ -198,7 +212,9 @@ class MetaCloudProvider extends BaseWhatsAppProvider {
     try {
       // GET the phone number's metadata — verifies the token + phone-id are
       // valid WITHOUT sending a message.
-      const url = `${this.baseUrl}/${this.phoneId}?fields=verified_name,quality_rating,display_phone_number`;
+      const url = this._withProof(
+        `${this.baseUrl}/${this.phoneId}?fields=verified_name,quality_rating,display_phone_number`
+      );
       const res = await fetch(url, { headers: { Authorization: `Bearer ${this.token}` } });
       const data = await res.json().catch(() => ({}));
       return {

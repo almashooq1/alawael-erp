@@ -1088,4 +1088,8 @@ __tests__/appointment-mass-assignment.test.js
 =======
 __tests__/recruitment-idor-statemachine.test.js
 >>>>>>> b12989617 (fix(recruitment): cross-branch IDOR + offer state machine + candidate mass-assign)
+<<<<<<< HEAD
 __tests__/check-mass-assignment-spread-script.test.js
+=======
+__tests__/asset-management-idor.test.js
+>>>>>>> f7e7c81d1 (fix(asset-management): depreciation IDOR + dashboard leak + transfer state machine)

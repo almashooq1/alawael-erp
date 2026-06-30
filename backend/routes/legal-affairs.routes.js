@@ -8,6 +8,9 @@ const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+// Register the consultations model so safeModel('LegalConsultation') resolves it.
+// (It was never built when the domain was scaffolded → POST/PUT /consultations 500-ed.)
+require('../models/LegalConsultation');
 function safeModel(name) {
   try {
     return require('mongoose').model(name);

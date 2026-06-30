@@ -28,6 +28,16 @@ const storageService = require('../services/storage/storage.service');
 router.use(authenticate);
 router.use(requireBranchAccess);
 
+// W1560 — FileRecord/FileFolder carry snake_case branch_id (stamped on create via
+// effectiveBranchScope). requireBranchAccess does NOT auto-filter, and branchFilter()
+// emits camelCase `branchId` (a phantom field on these snake_case models → silent
+// no-op), so scope with snake `branch_id`. Restricted users → own branch (client value
+// ignored); cross-branch/HQ → unscoped. Closes a cross-branch PHI file download/list IDOR.
+const scopeF = req => {
+  const s = effectiveBranchScope(req);
+  return s ? { branch_id: s } : {};
+};
+
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 // ══════════════════════════════════════════════════════════════
 // FOLDERS — المجلدات
@@ -37,7 +47,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 
 router.get('/folders', async (req, res) => {
   try {
     const { parent_folder_id } = req.query;
-    const filter = { deleted_at: null, is_active: true };
+    const filter = { deleted_at: null, is_active: true, ...scopeF(req) };
     if (parent_folder_id) filter.parent_folder_id = parent_folder_id;
     else filter.parent_folder_id = null; // المجلدات الجذرية
 
@@ -70,10 +80,11 @@ router.post('/folders', async (req, res) => {
 // GET /folders/:id
 router.get('/folders/:id', async (req, res) => {
   try {
-    const folder = await FileFolder.findOne({ _id: req.params.id, deleted_at: null }).populate(
-      'parent_folder_id',
-      'name_ar'
-    );
+    const folder = await FileFolder.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...scopeF(req),
+    }).populate('parent_folder_id', 'name_ar');
     if (!folder) return res.status(404).json({ success: false, error: 'المجلد غير موجود' });
     res.json({ success: true, data: folder });
   } catch (err) {
@@ -85,8 +96,10 @@ router.get('/folders/:id', async (req, res) => {
 router.get('/folders/:id/contents', async (req, res) => {
   try {
     const [subfolders, files] = await Promise.all([
-      FileFolder.find({ parent_folder_id: req.params.id, deleted_at: null }).sort({ name_ar: 1 }),
-      FileRecord.find({ deleted_at: null }).sort({ createdAt: -1 }),
+      FileFolder.find({ parent_folder_id: req.params.id, deleted_at: null, ...scopeF(req) }).sort({
+        name_ar: 1,
+      }),
+      FileRecord.find({ deleted_at: null, ...scopeF(req) }).sort({ createdAt: -1 }),
     ]);
     res.json({ success: true, data: { subfolders, files } });
   } catch (err) {
@@ -98,7 +111,7 @@ router.get('/folders/:id/contents', async (req, res) => {
 router.put('/folders/:id', async (req, res) => {
   try {
     const folder = await FileFolder.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, is_system: { $ne: true } },
+      { _id: req.params.id, deleted_at: null, is_system: { $ne: true }, ...scopeF(req) },
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -112,7 +125,11 @@ router.put('/folders/:id', async (req, res) => {
 // DELETE /folders/:id
 router.delete('/folders/:id', async (req, res) => {
   try {
-    const folder = await FileFolder.findOne({ _id: req.params.id, is_system: { $ne: true } });
+    const folder = await FileFolder.findOne({
+      _id: req.params.id,
+      is_system: { $ne: true },
+      ...scopeF(req),
+    });
     if (!folder) return res.status(404).json({ success: false, error: 'المجلد غير موجود أو محمي' });
     await FileFolder.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف المجلد' });
@@ -137,7 +154,7 @@ router.get('/files', async (req, res) => {
       is_archived,
       search,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...scopeF(req) };
     if (category) filter.category = category;
     if (reference_type) filter.reference_type = reference_type;
     if (reference_id) filter.reference_id = reference_id;
@@ -225,6 +242,7 @@ router.get('/files/expiring', async (req, res) => {
     const expirySoon = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     const files = await FileRecord.find({
       deleted_at: null,
+      ...scopeF(req),
       expiry_date: { $lte: expirySoon, $gte: new Date() },
     })
       .populate('uploaded_by', 'name')
@@ -240,6 +258,7 @@ router.get('/files/reference/:type/:id', async (req, res) => {
   try {
     const files = await FileRecord.find({
       deleted_at: null,
+      ...scopeF(req),
       reference_type: req.params.type,
       reference_id: req.params.id,
     })
@@ -254,7 +273,7 @@ router.get('/files/reference/:type/:id', async (req, res) => {
 // GET /files/:id
 router.get('/files/:id', async (req, res) => {
   try {
-    const file = await FileRecord.findOne({ _id: req.params.id, deleted_at: null })
+    const file = await FileRecord.findOne({ _id: req.params.id, deleted_at: null, ...scopeF(req) })
       .populate('uploaded_by', 'name')
       .populate('signed_by', 'name');
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
@@ -273,9 +292,16 @@ router.get('/files/:id', async (req, res) => {
 // PUT /files/:id
 router.put('/files/:id', async (req, res) => {
   try {
+    const updates = stripUpdateMeta(req.body);
+    // never reassign tenancy/storage identity via PUT
+    delete updates.branch_id;
+    delete updates.file_path;
+    delete updates.checksum;
+    delete updates.uploaded_by;
+    delete updates.download_count;
     const file = await FileRecord.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
-      { ...req.body, updated_by: req.user._id },
+      { _id: req.params.id, deleted_at: null, ...scopeF(req) },
+      { ...updates, updated_by: req.user._id },
       { returnDocument: 'after', runValidators: true }
     );
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
@@ -289,7 +315,7 @@ router.put('/files/:id', async (req, res) => {
 router.get('/files/:id/download', async (req, res) => {
   try {
     const file = await FileRecord.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...scopeF(req) },
       { $inc: { download_count: 1 }, last_accessed_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -315,7 +341,7 @@ router.get('/files/:id/download', async (req, res) => {
 // POST /files/:id/new-version — إضافة إصدار جديد
 router.post('/files/:id/new-version', async (req, res) => {
   try {
-    const file = await FileRecord.findOne({ _id: req.params.id, deleted_at: null });
+    const file = await FileRecord.findOne({ _id: req.params.id, deleted_at: null, ...scopeF(req) });
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
 
     // حفظ الإصدار القديم في التاريخ
@@ -343,11 +369,12 @@ router.post('/files/:id/new-version', async (req, res) => {
 // POST /files/:id/archive — أرشفة ملف
 router.post('/files/:id/archive', async (req, res) => {
   try {
-    const file = await FileRecord.findByIdAndUpdate(
-      req.params.id,
+    const file = await FileRecord.findOneAndUpdate(
+      { _id: req.params.id, deleted_at: null, ...scopeF(req) },
       { is_archived: true, archived_at: new Date(), archived_by: req.user._id },
       { returnDocument: 'after' }
     );
+    if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     res.json({ success: true, data: file, message: 'تم أرشفة الملف' });
   } catch (err) {
     safeError(res, err);
@@ -357,7 +384,12 @@ router.post('/files/:id/archive', async (req, res) => {
 // DELETE /files/:id
 router.delete('/files/:id', async (req, res) => {
   try {
-    await FileRecord.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
+    const file = await FileRecord.findOneAndUpdate(
+      { _id: req.params.id, deleted_at: null, ...scopeF(req) },
+      { deleted_at: new Date() },
+      { returnDocument: 'after' }
+    );
+    if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     res.json({ success: true, message: 'تم حذف الملف' });
   } catch (err) {
     safeError(res, err);

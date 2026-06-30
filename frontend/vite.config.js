@@ -1,9 +1,31 @@
-import { defineConfig, transformWithEsbuild } from 'vite';
+import { defineConfig, loadEnv, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // App code + the startup env-validation read process.env.REACT_APP_*, but
+  // Vite does not expose REACT_APP_* to the client by default (no envPrefix /
+  // define). Without injecting process.env, it is empty in the bundle and
+  // validateFrontendEnv() throws in production → blank screen (prod outage
+  // 2026-06-30). Load REACT_APP_* (and VITE_* as a fallback) from the .env
+  // files for this mode and bake a process.env shim. Same-origin /api/v1 is
+  // the safe default when nothing is provided at build time.
+  const env = loadEnv(mode, process.cwd(), ['REACT_APP_', 'VITE_']);
+  const isProd = mode === 'production';
+  const processEnv = {
+    NODE_ENV: isProd ? 'production' : 'development',
+    REACT_APP_API_URL: env.REACT_APP_API_URL || env.VITE_API_BASE_URL || '/api/v1',
+    REACT_APP_API_V1_URL: env.REACT_APP_API_V1_URL || env.VITE_API_V1_URL || '/api/v1',
+    REACT_APP_WS_URL: env.REACT_APP_WS_URL || env.VITE_WS_URL || '',
+    REACT_APP_API_TIMEOUT: env.REACT_APP_API_TIMEOUT || '10000',
+    REACT_APP_ENVIRONMENT: env.REACT_APP_ENVIRONMENT || (isProd ? 'production' : 'development'),
+  };
+
+  return {
+  define: {
+    'process.env': JSON.stringify(processEnv),
+  },
   plugins: [
     {
       name: 'treat-js-files-as-jsx',
@@ -99,4 +121,5 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', '@mui/material', '@mui/icons-material'],
   },
+  };
 });

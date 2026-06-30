@@ -2065,6 +2065,8 @@ on:
       - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4107,6 +4109,8 @@ on:
       - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

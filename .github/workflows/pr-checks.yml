@@ -50,8 +50,11 @@ jobs:
 
       - name: Check PR title format
         continue-on-error: true
+        env:
+          # Pass the untrusted PR title via env (never inline into the script)
+          # to prevent shell injection from a crafted title.
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
           PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|design|wip)(\(.+\))?: .{3,}"
           if echo "$TITLE" | grep -qE "$PATTERN"; then
             echo "✅ Title OK: $TITLE"

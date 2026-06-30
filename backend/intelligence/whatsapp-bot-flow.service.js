@@ -31,6 +31,10 @@ const i18n = require('./whatsapp-bot-flow.i18n');
 
 const IDLE = Object.freeze({ unit: null, step: 0, collected: {}, phase: null });
 
+// W1424k — auto-escalate to a human after this many consecutive unmatched /
+// confirm re-prompt turns, so a confused guardian is never stuck looping.
+const MAX_UNMATCHED = 3;
+
 // W1382: TTL after which an untouched active flow is considered abandoned.
 const FLOW_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -179,6 +183,18 @@ function menuResult(ctx, prefix, opts) {
   return plan;
 }
 
+// W1424k — terminal escalation result: tell the guardian a human will follow up,
+// reset to idle, and flag escalate:true so the dispatcher marks the conversation
+// requiresHumanReview / status=escalated.
+function escalateResult(ctx) {
+  const lang = i18n.normLang(ctx.lang);
+  const reply =
+    lang === 'en'
+      ? "I'm connecting you with a team member who will follow up with you shortly. 🙋"
+      : "سأحوّلك إلى أحد موظفينا للمتابعة معك قريبًا. 🙋";
+  return { reply, nextFlowState: { ...IDLE, lang }, sideEffect: null, handled: true, escalate: true };
+}
+
 /**
  * Enter a unit from idle: zero-step units finalize immediately (and emit any
  * side effect); multi-step units start collecting at step 0.
@@ -282,8 +298,14 @@ function handleTurn(flowState, rawText, ctx = {}) {
   if (!active) {
     const unitId = reg.resolveUnitId(text);
     if (unitId) return enterUnit(unitId, lctx);
+    // W1424k — count consecutive unmatched idle turns; auto-escalate after N so a
+    // confused guardian isn't re-shown the menu forever.
+    const n = ((flowState && flowState.unmatchedCount) || 0) + 1;
+    if (n >= MAX_UNMATCHED) return escalateResult(lctx);
     // W1417: nothing matched — show the menu AND flag the phrase for tuning.
-    return menuResult(lctx, undefined, { unmatched: true, unmatchedText: text });
+    const plan = menuResult(lctx, undefined, { unmatched: true, unmatchedText: text });
+    plan.nextFlowState = { ...plan.nextFlowState, unmatchedCount: n };
+    return plan;
   }
 
   // ─── Active flow ─────────────────────────────────────────────────────────
@@ -330,7 +352,12 @@ function handleTurn(flowState, rawText, ctx = {}) {
         lang,
       });
     }
-    return result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
+    // W1424k — neither yes nor no: count confirm re-prompts; escalate after N.
+    const n = (flowState.unmatchedCount || 0) + 1;
+    if (n >= MAX_UNMATCHED) return escalateResult(lctx);
+    const reprompt = result(i18n.fw('confirmPrompt', lang), withLang(flowState, lang));
+    reprompt.nextFlowState = { ...reprompt.nextFlowState, unmatchedCount: n };
+    return reprompt;
   }
 
   // Collecting phase.

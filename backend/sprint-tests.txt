@@ -1128,4 +1128,5 @@ __tests__/beneficiary-attendance-model-name.test.js
 __tests__/transport-idor-deadhandlers-wave1553.test.js
 __tests__/enum-value-query-mismatch.test.js
 __tests__/smart-assessment-massassign-deadmodel-wave1555.test.js
+__tests__/branch-enhanced-appointment-enum.test.js
 __tests__/parent-v2-extras-enum-mismatch-wave1556.test.js

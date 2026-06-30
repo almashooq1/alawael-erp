@@ -14,6 +14,27 @@ const { GoalsBank, SmartIEP, SessionLog } = require('../models/SmartIEP');
 // Import services
 const { GoalsBankService, SmartIEPService, SessionLogService } = require('./smart-iep-service');
 const safeError = require('../utils/safeError');
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+
+// W1555 — this router was mounted via safeMount (NO auth middleware) with no
+// router-level auth, so /api/smart-iep/* exposed special-category student PHI
+// (IEP present-levels, disability data, behavioral ABC logs, parent consent)
+// ANONYMOUSLY and across all branches. Require authentication + branch scope.
+// SmartIEP/SessionLog use snake_case branch_id; requireBranchAccess sets
+// req.branchScope but does NOT auto-filter, so every IEP query must scope itself:
+// restricted users → their own branch (client branch_id ignored); cross-branch/HQ
+// → all, or a requested branch. Cast to ObjectId so aggregate $match also matches.
+router.use(authenticate);
+router.use(requireBranchAccess);
+
+const branchScope = (req, requested) => {
+  const s = req.branchScope || {};
+  const toOid = v => (mongoose.isValidObjectId(v) ? new mongoose.Types.ObjectId(v) : v);
+  if (s.branchId) return { branch_id: toOid(s.branchId) };
+  if (requested && mongoose.isValidObjectId(requested)) return { branch_id: toOid(requested) };
+  return {};
+};
 
 // ─── Goals Bank Routes ─────────────────────────────────────────────────────────
 
@@ -139,10 +160,9 @@ router.get('/iep', async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
 
-    const filter = {};
+    const filter = { ...branchScope(req, branch_id) };
     if (status) filter.status = status;
     if (plan_type) filter.plan_type = plan_type;
-    if (mongoose.Types.ObjectId.isValid(branch_id)) filter.branch_id = branch_id;
     if (mongoose.Types.ObjectId.isValid(beneficiary_id)) filter.beneficiary_id = beneficiary_id;
 
     const [items, total] = await Promise.all([
@@ -185,7 +205,7 @@ router.post('/iep/:id/transition', async (req, res) => {
       return res.status(400).json({ success: false, error: 'to مطلوب' });
     }
 
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const allowed = ALLOWED_TRANSITIONS[iep.status] || [];
@@ -237,8 +257,8 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
     if (!guardian_name) {
       return res.status(400).json({ success: false, error: 'guardian_name مطلوب' });
     }
-    const iep = await SmartIEP.findByIdAndUpdate(
-      req.params.id,
+    const iep = await SmartIEP.findOneAndUpdate(
+      { _id: req.params.id, ...branchScope(req) },
       {
         $set: {
           parent_consent: {
@@ -287,7 +307,7 @@ router.post('/iep', async (req, res) => {
  */
 router.get('/iep/beneficiary/:beneficiaryId', async (req, res) => {
   try {
-    const ieps = await SmartIEP.find({ beneficiary_id: req.params.beneficiaryId })
+    const ieps = await SmartIEP.find({ beneficiary_id: req.params.beneficiaryId, ...branchScope(req) })
       .select('iep_number plan_start plan_end status overall_progress annual_goals review_schedule')
       .sort({ createdAt: -1 });
     res.json({ success: true, count: ieps.length, data: ieps });
@@ -302,7 +322,7 @@ router.get('/iep/beneficiary/:beneficiaryId', async (req, res) => {
  */
 router.get('/iep/:id', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id)
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) })
       .populate('beneficiary_id', 'name birth_date disability_types branch_id')
       .populate(
         'annual_goals.goal_bank_ref',
@@ -349,7 +369,7 @@ router.patch('/iep/:id', async (req, res) => {
     });
     updates.updated_at = new Date();
 
-    const iep = await SmartIEP.findByIdAndUpdate(req.params.id, updates, {
+    const iep = await SmartIEP.findOneAndUpdate({ _id: req.params.id, ...branchScope(req) }, updates, {
       returnDocument: 'after',
     });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
@@ -367,7 +387,7 @@ router.patch('/iep/:id', async (req, res) => {
  */
 router.post('/iep/:id/goals', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const goalData = req.body;
@@ -407,7 +427,7 @@ router.post('/iep/:id/goals', async (req, res) => {
  */
 router.patch('/iep/:id/goals/:goalId/progress', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const goal = iep.annual_goals.id(req.params.goalId);
@@ -482,7 +502,7 @@ router.post('/iep/:id/analyze', async (req, res) => {
  */
 router.post('/iep/:id/meetings', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const meetingData = req.body;
@@ -642,6 +662,11 @@ router.get('/sessions/abc-analysis/:beneficiaryId', async (req, res) => {
  */
 router.get('/iep/branch/:branchId/summary', async (req, res) => {
   try {
+    // W1555 — a restricted user may only summarize their own branch.
+    const _s = req.branchScope || {};
+    if (_s.branchId && String(_s.branchId) !== String(req.params.branchId)) {
+      return res.status(403).json({ success: false, error: 'غير مصرح بهذا الفرع' });
+    }
     const summary = await SmartIEP.aggregate([
       {
         $lookup: {

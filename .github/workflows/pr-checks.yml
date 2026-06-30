@@ -175,11 +175,13 @@ jobs:
 
       - name: Run frontend tests
         working-directory: frontend
-        # Frontend was migrated CRA → Vite + Jest. react-scripts is no
-        # longer in package.json; use the `test` script there which now
-        # points at bare jest. `--passWithNoTests` matches the package
-        # script and keeps a subset-run (npm test -- some.test.js) safe.
-        run: npm test -- --watchAll=false --no-coverage --ci --passWithNoTests
+        # Frontend test runner is now Vitest (CRA → Vite → Vitest). The `test`
+        # script is `vitest run ...` (single-run, no watch, no coverage by
+        # default). Jest-only flags (--watchAll / --ci) make Vitest's CAC
+        # parser throw `CACError: Unknown option`, which broke this gate on
+        # every PR. Pass only Vitest-valid flags; --passWithNoTests is a safe
+        # no-op when a targeted subset has no tests.
+        run: npm test -- --passWithNoTests
         env:
           CI: "true"
 

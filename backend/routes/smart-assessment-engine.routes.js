@@ -1027,6 +1027,10 @@ router.put(
     // blacklist stripped NOTHING and a caller could forge the auto-scored clinical
     // interpretation, the workflow status, the recorded assessor, and re-point the
     // beneficiary/branch. Strip the actual privileged identity/score/lifecycle fields.
+    /* eslint-disable no-unused-vars -- destructure-to-omit (W1555): these privileged
+       identity/score/lifecycle keys are intentionally pulled out of req.body so they
+       are EXCLUDED from `safeUpdate`. The binding names MUST equal the real schema
+       field names (no underscore) to actually strip them, so they cannot be _-prefixed. */
     const {
       _id,
       __v,
@@ -1056,6 +1060,7 @@ router.put(
       rescored_at,
       ...safeUpdate
     } = req.body;
+    /* eslint-enable no-unused-vars */
     safeUpdate.updatedBy = req.user?._id || req.user?.id;
     safeUpdate.lastModified = new Date();
 

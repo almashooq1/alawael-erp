@@ -18,6 +18,14 @@
  *   GET    /analytics                  WhatsApp analytics
  *   GET    /conversations              list all conversations (enhanced view)
  *   GET    /conversations/:id/timeline full message timeline
+ *
+ * W1424d — BRANCH ISOLATION FIX: this router previously scoped every query by
+ * `req.user.branchId`, which NO middleware ever sets (always undefined) — so the
+ * filter became `{branchId: undefined}` and matched only null-branch docs for
+ * EVERY caller (the W269/W1407 isolation applied to whatsapp.routes.js was never
+ * applied here). All queries now use `effectiveBranchScope(req)` (the canonical
+ * helper): restricted users → their branch, cross-branch roles → no constraint.
+ * Also closes mass-assignment on POST /template-requests (was `...req.body`).
  */
 
 const express = require('express');
@@ -25,6 +33,7 @@ const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
 
 const router = express.Router();
@@ -39,20 +48,33 @@ const safeModel = name => {
   }
 };
 
+// Branch-scoped filter for find()/countDocuments() (Mongoose casts string→ObjectId).
+// Restricted user → {branchId}; cross-branch role → {} (sees all). NEVER req.user.branchId.
+const scopedFilter = (req, extra = {}) => {
+  const b = effectiveBranchScope(req);
+  return { ...(b ? { branchId: b } : {}), ...extra };
+};
+
+// Branch-scoped $match for aggregate() — the pipeline does NOT auto-cast, so a
+// valid ObjectId string must be cast explicitly.
+const scopedMatch = (req, extra = {}) => {
+  const b = effectiveBranchScope(req);
+  if (!b) return { ...extra };
+  return {
+    branchId: mongoose.Types.ObjectId.isValid(b) ? new mongoose.Types.ObjectId(b) : b,
+    ...extra,
+  };
+};
+
+const validId = id => mongoose.isValidObjectId(id);
+
 // ── Broadcast Groups ───────────────────────────────────────────────────────
 router.get('/broadcast-groups', async (req, res) => {
   try {
     const WA = safeModel('WhatsAppConversation');
     if (!WA) return res.json({ success: true, data: [] });
     const groups = await WA.aggregate([
-      {
-        $match: {
-          branchId: mongoose.Types.ObjectId.isValid(req.user.branchId)
-            ? new mongoose.Types.ObjectId(req.user.branchId)
-            : req.user.branchId,
-          type: 'broadcast_group',
-        },
-      },
+      { $match: scopedMatch(req, { type: 'broadcast_group' }) },
       {
         $group: {
           _id: '$broadcastGroupId',
@@ -129,7 +151,7 @@ router.get('/template-requests', async (req, res) => {
     const { status } = req.query;
     const NotifTmpl = safeModel('NotificationTemplate');
     if (!NotifTmpl) return res.json({ success: true, data: [] });
-    const filter = { branchId: req.user.branchId, type: 'whatsapp_template' };
+    const filter = scopedFilter(req, { type: 'whatsapp_template' });
     if (status) filter.approvalStatus = status;
     const data = await NotifTmpl.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
@@ -143,11 +165,23 @@ router.post('/template-requests', async (req, res) => {
     const NotifTmpl = safeModel('NotificationTemplate');
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    // Whitelist creatable fields — NEVER spread req.body (mass-assignment: a caller
+    // could otherwise set approvalStatus / branchId / reviewedBy / arbitrary fields).
+    const { name, language, body, category, components, description, headerText, footerText } =
+      req.body || {};
+    if (!name) return res.status(400).json({ success: false, message: 'name is required' });
     const doc = await NotifTmpl.create({
-      ...req.body,
+      name,
+      language,
+      body,
+      category,
+      components,
+      description,
+      headerText,
+      footerText,
       type: 'whatsapp_template',
       approvalStatus: 'pending',
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, data: doc });
@@ -158,6 +192,8 @@ router.post('/template-requests', async (req, res) => {
 
 router.patch('/template-requests/:id', requireRole('admin', 'manager'), async (req, res) => {
   try {
+    if (!validId(req.params.id))
+      return res.status(404).json({ success: false, message: 'Template request not found' });
     const { status, reviewNotes } = req.body;
     if (!['approved', 'rejected'].includes(status))
       return res
@@ -167,9 +203,9 @@ router.patch('/template-requests/:id', requireRole('admin', 'manager'), async (r
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await NotifTmpl.findOneAndUpdate(
-      { _id: req.params.id, branchId: req.user.branchId },
+      scopedFilter(req, { _id: req.params.id }),
       { approvalStatus: status, reviewNotes, reviewedBy: req.user._id, reviewedAt: new Date() },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Template request not found' });
@@ -185,9 +221,9 @@ router.get('/opt-status', requireRole('admin', 'manager', 'supervisor'), async (
     const WA = safeModel('WhatsAppConversation');
     if (!WA) return res.json({ success: true, data: [], summary: { optIn: 0, optOut: 0 } });
     const [optIn, optOut, data] = await Promise.all([
-      WA.countDocuments({ branchId: req.user.branchId, optStatus: 'opted_in' }),
-      WA.countDocuments({ branchId: req.user.branchId, optStatus: 'opted_out' }),
-      WA.find({ branchId: req.user.branchId })
+      WA.countDocuments(scopedFilter(req, { optStatus: 'opted_in' })),
+      WA.countDocuments(scopedFilter(req, { optStatus: 'opted_out' })),
+      WA.find(scopedFilter(req))
         .select('contactPhone contactName optStatus optStatusUpdatedAt')
         .sort({ contactName: 1 })
         .limit(100)
@@ -201,6 +237,8 @@ router.get('/opt-status', requireRole('admin', 'manager', 'supervisor'), async (
 
 router.patch('/opt-status/:contactId', requireRole('admin', 'manager'), async (req, res) => {
   try {
+    if (!validId(req.params.contactId))
+      return res.status(404).json({ success: false, message: 'Contact not found' });
     const { status } = req.body;
     if (!['opted_in', 'opted_out'].includes(status))
       return res
@@ -210,9 +248,9 @@ router.patch('/opt-status/:contactId', requireRole('admin', 'manager'), async (r
     if (!WA)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await WA.findOneAndUpdate(
-      { _id: req.params.contactId, branchId: req.user.branchId },
+      scopedFilter(req, { _id: req.params.contactId }),
       { optStatus: status, optStatusUpdatedAt: new Date(), optStatusUpdatedBy: req.user._id },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, data: doc });
@@ -235,14 +273,13 @@ router.get('/analytics', requireRole('admin', 'manager', 'supervisor'), async (r
           avgResponseTimeMinutes: 0,
         },
       });
-    const base = { branchId: req.user.branchId };
     const [total, open, resolved] = await Promise.all([
-      WA.countDocuments(base),
+      WA.countDocuments(scopedFilter(req)),
       // W1488: "open" = non-terminal. WhatsAppConversation status enum is
       // [active, resolved, pending_review, escalated, archived]; the literal 'open'
       // is not in it (→ always 0). Open = not resolved and not archived.
-      WA.countDocuments({ ...base, status: { $nin: ['resolved', 'archived'] } }),
-      WA.countDocuments({ ...base, status: 'resolved' }),
+      WA.countDocuments(scopedFilter(req, { status: { $nin: ['resolved', 'archived'] } })),
+      WA.countDocuments(scopedFilter(req, { status: 'resolved' })),
     ]);
     res.json({
       success: true,
@@ -266,7 +303,7 @@ router.get('/conversations', async (req, res) => {
     const WA = safeModel('WhatsAppConversation');
     if (!WA) return res.json({ success: true, data: [] });
     const { page = 1, limit = 20, status, assignedTo } = req.query;
-    const filter = { branchId: req.user.branchId };
+    const filter = scopedFilter(req);
     if (status) filter.status = status;
     if (assignedTo) filter.assignedTo = assignedTo;
     const skip = (Number(page) - 1) * Number(limit);
@@ -286,10 +323,12 @@ router.get('/conversations', async (req, res) => {
 
 router.get('/conversations/:id/timeline', async (req, res) => {
   try {
+    if (!validId(req.params.id))
+      return res.status(404).json({ success: false, message: 'Conversation not found' });
     const WA = safeModel('WhatsAppConversation');
     if (!WA)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const conv = await WA.findOne({ _id: req.params.id, branchId: req.user.branchId }).lean();
+    const conv = await WA.findOne(scopedFilter(req, { _id: req.params.id })).lean();
     if (!conv) return res.status(404).json({ success: false, message: 'Conversation not found' });
     res.json({
       success: true,

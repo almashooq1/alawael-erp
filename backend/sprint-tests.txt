@@ -1097,3 +1097,4 @@ __tests__/attendance-leave-request-notify-phantom.test.js
 __tests__/donations-campaign-receipt.test.js
 __tests__/enterprise-risk-idor.test.js
 __tests__/mfa-email-otp-wave1461c.test.js
+__tests__/no-duplicate-route-declaration.test.js

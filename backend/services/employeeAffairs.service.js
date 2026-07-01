@@ -264,6 +264,9 @@ class EmployeeAffairsService {
 
     const leaveRequest = new LR({
       employee: data.employeeId,
+      // W1569 — LeaveRequest.branchId is required; stamp it from the employee's branch
+      // (was unset → save() would fail validation, and leaves weren't branch-scoped).
+      branchId: employee.branch_id,
       employeeId: employee.employeeId,
       employeeName: `${employee.firstName} ${employee.lastName}`,
       department: employee.department,
@@ -296,9 +299,9 @@ class EmployeeAffairsService {
   /**
    * موافقة المدير على الإجازة
    */
-  async approveLeaveByManager(leaveId, approverId, approverName, comments) {
+  async approveLeaveByManager(leaveId, approverId, approverName, comments, branchScope = null) {
     const LR = getLeaveRequest();
-    const leave = await LR.findById(leaveId);
+    const leave = await LR.findOne({ _id: leaveId, ...(branchScope && { branchId: branchScope }) });
     if (!leave) throw new Error('طلب الإجازة غير موجود');
     if (leave.status !== 'pending') throw new Error('لا يمكن الموافقة على هذا الطلب');
     return leave.approveByManager(approverId, approverName, comments);
@@ -307,10 +310,10 @@ class EmployeeAffairsService {
   /**
    * موافقة HR على الإجازة
    */
-  async approveLeaveByHR(leaveId, approverId, approverName, comments) {
+  async approveLeaveByHR(leaveId, approverId, approverName, comments, branchScope = null) {
     const LR = getLeaveRequest();
     const Emp = getEmployee();
-    const leave = await LR.findById(leaveId);
+    const leave = await LR.findOne({ _id: leaveId, ...(branchScope && { branchId: branchScope }) });
     if (!leave) throw new Error('طلب الإجازة غير موجود');
     if (leave.status !== 'manager_approved') throw new Error('يجب موافقة المدير أولاً');
 
@@ -331,9 +334,9 @@ class EmployeeAffairsService {
   /**
    * رفض طلب الإجازة
    */
-  async rejectLeave(leaveId, rejecterId, rejectorName, comments, stage) {
+  async rejectLeave(leaveId, rejecterId, rejectorName, comments, stage, branchScope = null) {
     const LR = getLeaveRequest();
-    const leave = await LR.findById(leaveId);
+    const leave = await LR.findOne({ _id: leaveId, ...(branchScope && { branchId: branchScope }) });
     if (!leave) throw new Error('طلب الإجازة غير موجود');
     return leave.reject(rejecterId, rejectorName, comments, stage || 'hr');
   }
@@ -341,10 +344,10 @@ class EmployeeAffairsService {
   /**
    * إلغاء طلب إجازة
    */
-  async cancelLeave(leaveId, userId, reason) {
+  async cancelLeave(leaveId, userId, reason, branchScope = null) {
     const LR = getLeaveRequest();
     const Emp = getEmployee();
-    const leave = await LR.findById(leaveId);
+    const leave = await LR.findOne({ _id: leaveId, ...(branchScope && { branchId: branchScope }) });
     if (!leave) throw new Error('طلب الإجازة غير موجود');
     if (leave.status === 'cancelled') throw new Error('الطلب ملغي بالفعل');
 
@@ -390,9 +393,10 @@ class EmployeeAffairsService {
   /**
    * قائمة الإجازات مع فلترة
    */
-  async listLeaves(filters = {}) {
+  async listLeaves(filters = {}, branchScope = null) {
     const LR = getLeaveRequest();
-    const query = {};
+    // W1569 — scope leaves to the caller's branch (LeaveRequest.branchId is camelCase).
+    const query = branchScope ? { branchId: branchScope } : {};
     const {
       employeeId,
       department,

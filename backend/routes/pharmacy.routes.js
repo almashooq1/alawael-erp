@@ -21,7 +21,7 @@ const {
 } = require('../models/pharmacy.model');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 const Beneficiary = require('../models/Beneficiary');
@@ -30,6 +30,24 @@ const safeError = require('../utils/safeError');
 // All pharmacy routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W1565 — controlled-substance / prescription actions were gated by authenticate ONLY,
+// so any authenticated branch user (caregiver, therapist, …) could prescribe, verify,
+// dispense, cancel, or toggle a drug's controlledSubstance flag. Mirror the role-list
+// gating already in the sibling mar.routes.js / medication-reconciliation.routes.js.
+const RX_WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'physician', 'doctor'];
+// nurse + clinical_supervisor included (owner-confirmed 2026-07-01): in this
+// rehab/day-care deployment nurses & clinical supervisors handle dispensing —
+// a dedicated `pharmacist` role is barely used.
+const PHARMACY_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'manager',
+  'pharmacist',
+  'nurse',
+  'clinical_supervisor',
+];
 
 async function beneficiaryScopeFilter(req) {
   const bf = branchFilter(req);
@@ -157,7 +175,7 @@ router.get('/medications/:id', async (req, res) => {
   }
 });
 
-router.post('/medications', async (req, res) => {
+router.post('/medications', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const medication = new Medication({
       ...pick(req.body, MEDICATION_FIELDS),
@@ -171,7 +189,7 @@ router.post('/medications', async (req, res) => {
   }
 });
 
-router.put('/medications/:id', async (req, res) => {
+router.put('/medications/:id', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const medication = await Medication.findByIdAndUpdate(
       req.params.id,
@@ -185,7 +203,7 @@ router.put('/medications/:id', async (req, res) => {
   }
 });
 
-router.delete('/medications/:id', async (req, res) => {
+router.delete('/medications/:id', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const medication = await Medication.findByIdAndUpdate(
       req.params.id,
@@ -250,7 +268,7 @@ router.get('/prescriptions/:id', async (req, res) => {
   }
 });
 
-router.post('/prescriptions', async (req, res) => {
+router.post('/prescriptions', requireRole(RX_WRITE_ROLES), async (req, res) => {
   try {
     const beneficiaryId = req.body.beneficiary || req.body.patient;
     if (beneficiaryId) await enforceBeneficiaryBranch(req, beneficiaryId);
@@ -266,7 +284,7 @@ router.post('/prescriptions', async (req, res) => {
   }
 });
 
-router.put('/prescriptions/:id', async (req, res) => {
+router.put('/prescriptions/:id', requireRole(RX_WRITE_ROLES), async (req, res) => {
   try {
     const existing = await scopedPrescriptionById(req, req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -296,7 +314,7 @@ router.put('/prescriptions/:id', async (req, res) => {
   }
 });
 
-router.patch('/prescriptions/:id/verify', async (req, res) => {
+router.patch('/prescriptions/:id/verify', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const existing = await scopedPrescriptionById(req, req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -319,7 +337,7 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
   }
 });
 
-router.patch('/prescriptions/:id/cancel', async (req, res) => {
+router.patch('/prescriptions/:id/cancel', requireRole(RX_WRITE_ROLES), async (req, res) => {
   try {
     const existing = await scopedPrescriptionById(req, req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -364,7 +382,7 @@ router.get('/dispensing', async (req, res) => {
   }
 });
 
-router.post('/dispensing', async (req, res) => {
+router.post('/dispensing', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const beneficiaryId = req.body.beneficiary || req.body.patient;
     if (beneficiaryId) await enforceBeneficiaryBranch(req, beneficiaryId);
@@ -424,7 +442,7 @@ router.post('/dispensing', async (req, res) => {
   }
 });
 
-router.patch('/dispensing/:id/return', async (req, res) => {
+router.patch('/dispensing/:id/return', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const existing = await scopedDispensingById(req, req.params.id);
     if (!existing) return res.status(404).json({ success: false, message: 'سجل الصرف غير موجود' });
@@ -481,7 +499,7 @@ router.get('/inventory', async (req, res) => {
   }
 });
 
-router.post('/inventory', async (req, res) => {
+router.post('/inventory', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const batch = new PharmacyInventory({
       ...pick(req.body, INVENTORY_FIELDS),
@@ -508,7 +526,7 @@ const INVENTORY_UPDATE_FIELDS = [
   'minimumStock',
 ];
 
-router.put('/inventory/:id', async (req, res) => {
+router.put('/inventory/:id', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const updates = {};
     for (const key of INVENTORY_UPDATE_FIELDS) {
@@ -591,7 +609,7 @@ router.get('/interactions', async (req, res) => {
   }
 });
 
-router.post('/interactions', async (req, res) => {
+router.post('/interactions', requireRole(PHARMACY_ROLES), async (req, res) => {
   try {
     const interaction = new DrugInteraction({
       ...pick(req.body, INTERACTION_FIELDS),

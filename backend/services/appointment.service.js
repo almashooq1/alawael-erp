@@ -26,7 +26,10 @@ const APPOINTMENT_CREATABLE = [
   'therapist', 'therapistName', 'department', 'type', 'date', 'startTime',
   'endTime', 'duration', 'room', 'location', 'priority', 'reason', 'notes',
   'recurrence', 'recurrenceEnd', 'reminders', 'insuranceApprovalRequired',
-  'estimatedCost', 'source', 'branchId',
+  'estimatedCost', 'source',
+  // NOTE: `branchId` intentionally removed from CREATABLE (W1583). It is stamped
+  // server-side from the caller's scope — a restricted user can no longer plant an
+  // appointment into a foreign branch via req.body.branchId.
 ];
 // Update keeps the tracked `status` path (see updateAppointment) + edit fields,
 // but never the audit/system fields (statusHistory/cancelledBy/cancelledAt/
@@ -44,13 +47,22 @@ const pick = (obj, fields) => {
   return out;
 };
 
+// W1583 — cross-branch isolation. The routes previously passed only query/id/body into
+// this service and NO branch scope, so every read/write ran unfiltered → any authenticated
+// user in branch A could list/read/edit/cancel/check-in/convert/delete branch B's
+// appointments (beneficiary PII + lifecycle). `requireBranchAccess` does NOT auto-filter.
+// Every public method now takes a trailing `scope` = effectiveBranchScope(req): a branchId
+// (truthy) for a restricted user, or null/undefined for a cross-branch/HQ role. `branchQ`
+// turns it into a Mongoose query fragment (Appointment.branchId is camelCase ObjectId).
+const branchQ = scope => (scope ? { branchId: scope } : {});
+
 class AppointmentService {
   // ─── APPOINTMENT CRUD ───────────────────────────────────────────────
 
   /**
    * Create a new appointment with validation
    */
-  async createAppointment(data, userId) {
+  async createAppointment(data, userId, scope) {
     // Validate: no double-booking for therapist
     if (data.therapist && data.date && data.startTime) {
       const conflict = await this.checkTherapistConflict(
@@ -79,6 +91,8 @@ class AppointmentService {
 
     const appointment = new Appointment({
       ...pick(data, APPOINTMENT_CREATABLE),
+      // Restricted caller → forced to own branch; cross-branch/HQ → may target a branch via body.
+      branchId: scope || data.branchId,
       createdBy: userId,
       bookedBy: userId,
       reminders: data.reminders || [
@@ -100,7 +114,7 @@ class AppointmentService {
   /**
    * List appointments with pagination, filters
    */
-  async listAppointments(query = {}) {
+  async listAppointments(query = {}, scope) {
     const {
       page = 1,
       limit = 20,
@@ -117,7 +131,7 @@ class AppointmentService {
       sortOrder = 'asc',
     } = query;
 
-    const filter = {};
+    const filter = { ...branchQ(scope) };
     if (status) filter.status = status.toUpperCase();
     if (type) filter.type = type;
     if (therapist) filter.therapist = therapist;
@@ -169,8 +183,8 @@ class AppointmentService {
   /**
    * Get single appointment by ID
    */
-  async getAppointment(id) {
-    const apt = await Appointment.findById(id)
+  async getAppointment(id, scope) {
+    const apt = await Appointment.findOne({ _id: id, ...branchQ(scope) })
       .populate('beneficiary', 'firstName lastName fullName')
       .populate('therapist', 'firstName lastName fullName specialization')
       .populate('room', 'name type capacity')
@@ -183,8 +197,8 @@ class AppointmentService {
   /**
    * Update appointment
    */
-  async updateAppointment(id, data, userId) {
-    const apt = await Appointment.findById(id);
+  async updateAppointment(id, data, userId, scope) {
+    const apt = await Appointment.findOne({ _id: id, ...branchQ(scope) });
     if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
 
     // Prevent editing completed/cancelled appointments
@@ -243,7 +257,7 @@ class AppointmentService {
   /**
    * Cancel appointment
    */
-  async cancelAppointment(id, reason, userId) {
+  async cancelAppointment(id, reason, userId, scope) {
     // W432: atomic state-flip. Pre-W432 did findById → push
     // statusHistory → set status='CANCELLED' → save. Two concurrent
     // cancels (UI double-tap, retry, receptionist + auto-cancel cron
@@ -259,7 +273,7 @@ class AppointmentService {
     // the same atomic op.
     const now = new Date();
     const apt = await Appointment.findOneAndUpdate(
-      { _id: id, status: { $ne: 'CANCELLED' } },
+      { _id: id, status: { $ne: 'CANCELLED' }, ...branchQ(scope) },
       [
         {
           $set: {
@@ -276,11 +290,16 @@ class AppointmentService {
           },
         },
       ],
-      { returnDocument: 'after' }
+      // W1583 — Mongoose 9 requires `updatePipeline: true` when the update is an
+      // aggregation-pipeline array; without it findOneAndUpdate throws and this atomic
+      // cancel 500'd on every call since the M9 upgrade.
+      { returnDocument: 'after', updatePipeline: true }
     );
     if (apt) return apt;
-    // Disambiguate the failure case.
-    const existing = await Appointment.findById(id).select('status').lean();
+    // Disambiguate the failure case (scoped: a foreign-branch id reads as not-found).
+    const existing = await Appointment.findOne({ _id: id, ...branchQ(scope) })
+      .select('status')
+      .lean();
     if (!existing) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
     throw new AppError('الموعد ملغى مسبقاً', 409, 'ALREADY_CANCELLED');
   }
@@ -288,7 +307,7 @@ class AppointmentService {
   /**
    * Check-in patient
    */
-  async checkIn(id, userId) {
+  async checkIn(id, userId, scope) {
     // W432: atomic state-flip. Pre-W432 did findById → push
     // statusHistory → set status='CHECKED_IN' → save. Concurrent
     // check-ins from the same kiosk-touch or retry-loop would both
@@ -302,7 +321,9 @@ class AppointmentService {
     // startTime). We compute once, then atomically write — filter
     // `status: {$ne: 'CHECKED_IN'}` prevents the double-flip.
     const checkInTime = new Date();
-    const apt = await Appointment.findOne({ _id: id }).select('date startTime status').lean();
+    const apt = await Appointment.findOne({ _id: id, ...branchQ(scope) })
+      .select('date startTime status')
+      .lean();
     if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
     if (apt.status === 'CHECKED_IN') {
       throw new AppError('الموعد مسجل وصول مسبقاً', 409, 'ALREADY_CHECKED_IN');
@@ -315,7 +336,7 @@ class AppointmentService {
     const waitTimeMinutes = Math.max(0, Math.round((checkInTime - scheduledTime) / 60000));
 
     const updated = await Appointment.findOneAndUpdate(
-      { _id: id, status: { $ne: 'CHECKED_IN' } },
+      { _id: id, status: { $ne: 'CHECKED_IN' }, ...branchQ(scope) },
       [
         {
           $set: {
@@ -331,7 +352,9 @@ class AppointmentService {
           },
         },
       ],
-      { returnDocument: 'after' }
+      // W1583 — Mongoose 9 needs `updatePipeline: true` for the aggregation-pipeline
+      // update (see cancelAppointment); this atomic check-in 500'd otherwise.
+      { returnDocument: 'after', updatePipeline: true }
     );
     if (updated) return updated;
     // Race lost — someone else just flipped to CHECKED_IN between our
@@ -342,8 +365,8 @@ class AppointmentService {
   /**
    * Convert appointment to therapy session
    */
-  async convertToSession(appointmentId, sessionData, userId) {
-    const apt = await Appointment.findById(appointmentId);
+  async convertToSession(appointmentId, sessionData, userId, scope) {
+    const apt = await Appointment.findOne({ _id: appointmentId, ...branchQ(scope) });
     if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
 
     const session = new TherapySession({
@@ -382,9 +405,11 @@ class AppointmentService {
   /**
    * Get appointment statistics
    */
-  async getAppointmentStats(query = {}) {
+  async getAppointmentStats(query = {}, scope) {
     const { startDate, endDate, therapist } = query;
     const match = {};
+    // Aggregate $match does NOT auto-cast — branchId must be an ObjectId here.
+    if (scope) match.branchId = new mongoose.Types.ObjectId(String(scope));
     if (therapist) match.therapist = new mongoose.Types.ObjectId(therapist);
     if (startDate || endDate) {
       match.date = {};

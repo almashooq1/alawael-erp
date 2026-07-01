@@ -10,12 +10,22 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope, enforceEmployeeBranch } = require('../middleware/assertBranchMatch');
 const service = require('../services/employeeAffairs.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // ─── Async wrapper ──────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// W1566 — every route is authenticated + requireBranchAccess, but requireBranchAccess
+// does NOT auto-filter and the service never received the branch scope, so any caller
+// could read/write another branch's employee PII (national_id / iqama / iban / salary)
+// by enumerating ids. Employee.branch_id is snake_case (camel branchFilter would be a
+// phantom no-op). Every employee-keyed handler enforces branch via enforceEmployeeBranch
+// (called INSIDE the handler, after requireBranchAccess has populated req.branchScope — a
+// router.param guard would run BEFORE that middleware and no-op). It no-ops for
+// cross-branch/HQ callers; listEmployees scopes on branch_id.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // لوحة المعلومات (MUST come before /:id)
@@ -78,6 +88,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const balance = await service.getLeaveBalance(req.params.employeeId);
     res.json({ success: true, data: balance });
   })
@@ -183,6 +194,7 @@ router.get(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { month = new Date().getMonth() + 1, year = new Date().getFullYear() } = req.query;
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const report = await service.getMonthlyAttendanceReport(req.params.employeeId, month, year);
     res.json({ success: true, data: report });
   })
@@ -199,6 +211,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'manager']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const review = await service.createPerformanceReview(req.params.employeeId, {
       ...req.body,
       reviewer: req.user?.id || req.user?._id,
@@ -213,6 +226,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const history = await service.getPerformanceHistory(req.params.employeeId);
     res.json({ success: true, data: history });
   })
@@ -225,6 +239,7 @@ router.put(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'manager']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const goals = await service.setEmployeeGoals(req.params.employeeId, req.body.goals);
     res.json({ success: true, data: goals });
   })
@@ -255,6 +270,7 @@ router.post(
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { endDate, contractType } = req.body;
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const employee = await service.renewContract(req.params.employeeId, endDate, contractType);
     res.json({ success: true, data: employee });
   })
@@ -272,6 +288,7 @@ router.post(
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { toPosition, newSalary, reason } = req.body;
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const result = await service.promoteEmployee(
       req.params.employeeId,
       toPosition,
@@ -289,6 +306,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const certs = await service.addCertification(req.params.employeeId, req.body);
     res.json({ success: true, data: certs });
   })
@@ -301,6 +319,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const trainings = await service.addTraining(req.params.employeeId, req.body);
     res.json({ success: true, data: trainings });
   })
@@ -312,6 +331,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const skills = await service.addSkill(req.params.employeeId, req.body);
     res.json({ success: true, data: skills });
   })
@@ -328,6 +348,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const docs = await service.addDocument(req.params.employeeId, req.body);
     res.json({ success: true, data: docs });
   })
@@ -339,6 +360,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.employeeId);
     const docs = await service.getDocuments(req.params.employeeId);
     res.json({ success: true, data: docs });
   })
@@ -354,7 +376,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const result = await service.listEmployees(req.query);
+    const result = await service.listEmployees(req.query, effectiveBranchScope(req));
     res.json({ success: true, ...result });
   })
 );
@@ -377,6 +399,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const employee = await service.getEmployeeById(req.params.id);
     res.json({ success: true, data: employee });
   })
@@ -388,6 +411,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const profile = await service.getEmployeeProfile(req.params.id);
     res.json({ success: true, data: profile });
   })
@@ -400,6 +424,7 @@ router.put(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const employee = await service.updateEmployee(req.params.id, req.body);
     res.json({ success: true, data: employee });
   })
@@ -412,6 +437,7 @@ router.post(
   requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const { reason, terminationDate } = req.body;
     const employee = await service.terminateEmployee(req.params.id, reason, terminationDate);
     res.json({ success: true, data: employee });
@@ -454,6 +480,7 @@ router.get(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const data = await service.getEmployeeGovernmentSummary(req.params.id);
     res.json({ success: true, data });
   })
@@ -466,6 +493,7 @@ router.put(
   requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const data = await service.updateEmployeeMOLData(req.params.id, req.body);
     res.json({ success: true, data });
   })
@@ -478,6 +506,7 @@ router.put(
   requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
+    await enforceEmployeeBranch(req, req.params.id);
     const data = await service.updateEmployeeSponsorshipData(req.params.id, req.body);
     res.json({ success: true, data });
   })
@@ -485,6 +514,11 @@ router.put(
 
 // ─── Error handler ──────────────────────────────────────────────────────────
 router.use((err, req, res, _next) => {
+  // W1566 — honor explicit status carried by branch-scope guards (403/404/503) before
+  // the message-based mapping below (which would otherwise default them to 500).
+  if (err && Number.isInteger(err.status) && err.status >= 400 && err.status < 600) {
+    return res.status(err.status).json({ success: false, message: err.message });
+  }
   logger.error(`[EmployeeAffairs Route Error] ${err.message}`);
   const statusCode = err.message.includes('غير موجود')
     ? 404

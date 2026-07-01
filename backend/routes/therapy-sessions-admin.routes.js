@@ -83,6 +83,17 @@ const STATUS_VALUES = [
   'RESCHEDULED',
 ];
 
+// Finalized states that must not be re-opened via the generic status endpoint.
+// A session that is done/cancelled/no-show carries downstream attendance +
+// billing effects; moving it back to SCHEDULED/IN_PROGRESS silently corrupts
+// them. Genuine corrections go through POST /:id/amend, not here.
+const TERMINAL_STATUSES = [
+  'COMPLETED',
+  'CANCELLED_BY_PATIENT',
+  'CANCELLED_BY_CENTER',
+  'NO_SHOW',
+];
+
 function parseDateRange(q) {
   const out = {};
   if (q.from) {
@@ -518,6 +529,16 @@ router.post('/:id/status', requireRole(WRITE_ROLES), async (req, res) => {
     if (denied) return;
     const from = doc.status;
     if (from === status) return res.json({ success: true, data: doc, message: 'لا تغيير' });
+    // Transition precondition: a finalized session (completed/cancelled/no-show)
+    // cannot be re-opened here — that would desync attendance + billing. Use amend.
+    if (TERMINAL_STATUSES.includes(from)) {
+      return res.status(409).json({
+        success: false,
+        message:
+          'لا يمكن تغيير حالة جلسة منتهية (مكتملة/ملغاة/تخلّف عن الحضور) — استخدم التعديل (amend)',
+        code: 'TERMINAL_STATUS',
+      });
+    }
     doc.status = status;
     if (status === 'CANCELLED_BY_CENTER' || status === 'CANCELLED_BY_PATIENT') {
       doc.cancellationReason = reason || doc.cancellationReason;
@@ -545,10 +566,21 @@ router.post('/:id/check-in', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     // Pre-fetch to enforce branch gate. Check-in marks the session
     // IN_PROGRESS and stamps attendance — both must require ownership.
-    const existing = await TherapySession.findById(req.params.id).select('beneficiary').lean();
+    const existing = await TherapySession.findById(req.params.id)
+      .select('beneficiary status')
+      .lean();
     if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
     const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
     if (denied) return;
+    // Don't re-open a finalized session by checking it in (would force a
+    // completed/cancelled/no-show session back to IN_PROGRESS + stamp attendance).
+    if (TERMINAL_STATUSES.includes(existing.status)) {
+      return res.status(409).json({
+        success: false,
+        message: 'لا يمكن تسجيل حضور لجلسة منتهية (مكتملة/ملغاة/تخلّف عن الحضور)',
+        code: 'TERMINAL_STATUS',
+      });
+    }
 
     const { arrivalTime, lateMinutes } = req.body || {};
     const now = new Date();

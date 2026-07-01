@@ -24,7 +24,7 @@ const {
 } = require('../../../middleware/assertBranchMatch');
 const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
 
-// W1564 — CRITICAL: populate req.branchScope so the param/body guards below (and
+// W1566 — CRITICAL: populate req.branchScope so the param/body guards below (and
 // effectiveBranchScope() in the handlers) actually FIRE. The live /api/v1/core
 // registry mount applies `authenticate` ONLY (no requireBranchAccess), so
 // req.branchScope was NEVER set and EVERY branch-isolation guard on the central

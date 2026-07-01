@@ -1165,3 +1165,4 @@ __tests__/risk-sweep-branch-isolation-behavioral.test.js
 __tests__/documents-list-visibility-wave1563.test.js
 __tests__/route-registry-files-resolve-wave1576.test.js
 __tests__/pharmacy-role-gates-wave1565.test.js
+__tests__/header-branch-bypass-wave1575.test.js

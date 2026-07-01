@@ -32,6 +32,13 @@ const stripIncidentUpdate = body => {
   for (const k of HSE_IMMUTABLE) delete b[k];
   return b;
 };
+// W1604 — SafetyInspection identity fields (branchId derives from the inspector's User.branchId
+// in the model pre-save hook; inspectionNumber is auto-generated; inspector is set server-side).
+const stripInspection = body => {
+  const b = stripUpdateMeta(body || {});
+  for (const k of ['branchId', 'inspectionNumber', 'inspector']) delete b[k];
+  return b;
+};
 
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
@@ -54,8 +61,8 @@ router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => 
       SafetyIncident.countDocuments({ status: 'reported', ...bf }),
       SafetyIncident.countDocuments({ status: 'under_investigation', ...bf }),
       SafetyIncident.countDocuments({ status: 'closed', ...bf }),
-      SafetyInspection.countDocuments(),
-      SafetyInspection.countDocuments({ status: 'scheduled' }),
+      SafetyInspection.countDocuments({ ...bf }), // W1604 — SafetyInspection now has branchId
+      SafetyInspection.countDocuments({ status: 'scheduled', ...bf }),
     ]);
 
     const bySeverity = await SafetyIncident.aggregate([
@@ -196,7 +203,7 @@ router.delete(
 router.get('/inspections', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 20, status } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1604 — restricted → own branch only
     if (status) filter.status = status;
     const docs = await SafetyInspection.find(filter)
       .sort({ scheduledDate: -1 })
@@ -216,7 +223,11 @@ router.get('/inspections', authenticate, requireBranchAccess, async (req, res) =
 
 router.post('/inspections', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const doc = new SafetyInspection({ ...req.body, inspector: req.user._id || req.user.id });
+    // W1604 — branchId derives from the inspector's User.branchId (pre-save); strip spoof/identity.
+    const doc = new SafetyInspection({
+      ...stripInspection(req.body),
+      inspector: req.user._id || req.user.id,
+    });
     await doc.save();
     res.status(201).json({ success: true, data: doc });
   } catch (error) {
@@ -228,10 +239,12 @@ router.post('/inspections', authenticate, requireBranchAccess, async (req, res) 
 
 router.put('/inspections/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    // W1604 — scoped update (foreign branch → not-found) + strip identity fields.
+    const doc = await SafetyInspection.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripInspection(req.body),
+      { returnDocument: 'after', runValidators: true }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
     res.json({ success: true, data: doc });
   } catch (error) {
@@ -249,7 +262,11 @@ router.delete(
   authorize('admin', 'hse_manager'),
   async (req, res) => {
     try {
-      const doc = await SafetyInspection.findByIdAndDelete(req.params.id);
+      // W1604 — scoped delete: no cross-branch inspection deletion.
+      const doc = await SafetyInspection.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
       if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
       res.json({ success: true, message: 'تم حذف التفتيش بنجاح' });
     } catch (error) {

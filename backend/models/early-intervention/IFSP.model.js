@@ -229,6 +229,7 @@ const ifspSchema = new mongoose.Schema(
 
     notes: { type: String },
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1599
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },

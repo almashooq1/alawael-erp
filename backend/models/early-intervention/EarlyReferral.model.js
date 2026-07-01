@@ -6,6 +6,7 @@ const earlyReferralSchema = new mongoose.Schema(
   {
     referralNumber: { type: String, unique: true },
     child: { type: mongoose.Schema.Types.ObjectId, ref: 'EarlyInterventionChild' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1599
 
     // ── Direction ──
     referralDirection: {

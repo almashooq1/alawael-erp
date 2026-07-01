@@ -1866,6 +1866,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
       - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
       - 'backend/__tests__/care-crm-funnel-branch-isolation-wave1599.test.js'
       - 'backend/__tests__/financeoperations-invoice-massassign-wave1590.test.js'
@@ -2198,6 +2199,8 @@ on:
       - 'backend/__tests__/drilldown-branch-scope-wave1601.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-subresource-isolation-wave1602.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/portfolio-speech-idor-wave1603.test.js'
       - 'backend/package.json'
@@ -4044,6 +4047,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
       - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
       - 'backend/__tests__/care-crm-funnel-branch-isolation-wave1599.test.js'
       - 'backend/__tests__/financeoperations-invoice-massassign-wave1590.test.js'
@@ -4375,6 +4379,8 @@ on:
       - 'backend/__tests__/drilldown-branch-scope-wave1601.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-subresource-isolation-wave1602.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/portfolio-speech-idor-wave1603.test.js'
       - 'backend/package.json'

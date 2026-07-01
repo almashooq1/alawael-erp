@@ -1156,3 +1156,4 @@ __tests__/cdss-header-branch-idor-wave1565.test.js
 __tests__/compensation-incentives-read-gate-wave1565.test.js
 __tests__/mongoose9-doc-remove-wave1571.test.js
 __tests__/cdss-id-branch-scope-wave1566.test.js
+__tests__/care-plan-branch-isolation-wave1551.test.js

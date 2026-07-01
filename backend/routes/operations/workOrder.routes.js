@@ -129,7 +129,8 @@ router.get(
   wrap(async (req, res) => {
     try {
       const filter = { ...branchFilter(req) };
-      if (req.query.branchId) filter.branchId = req.query.branchId;
+      // W1578: guard so a branch-restricted caller can't spoof to a foreign branch
+      if (!filter.branchId && req.query.branchId) filter.branchId = req.query.branchId;
       if (req.query.status) filter.status = req.query.status;
       if (req.query.priority) filter.priority = req.query.priority;
       if (req.query.type) filter.type = req.query.type;

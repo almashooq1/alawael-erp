@@ -160,7 +160,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.decisionType && DECISION_TYPES.includes(String(req.query.decisionType))) {
@@ -251,7 +251,7 @@ router.get('/pending-review', requireRole(READ_ROLES), async (req, res) => {
       status: 'finalized',
       nextReviewDue: { $lte: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await DecisionRightsAssessment.find(filter)
@@ -276,7 +276,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req),
       assessedAt: { $gte: from, $lte: to },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await DecisionRightsAssessment.find(filter)

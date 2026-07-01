@@ -116,7 +116,7 @@ router.get('/chapters', requireRole(READ_ROLES), async (_req, res) => {
 router.get('/attestations', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W447 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -186,7 +186,7 @@ router.get('/attestations/by-standard/:key', requireRole(READ_ROLES), async (req
 router.get('/attestations/dashboard', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W447 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Attestation.find(filter)
@@ -245,7 +245,7 @@ router.get('/attestations/due-reassessment', requireRole(READ_ROLES), async (req
       ...branchFilter(req), // W447
       nextReassessmentDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Attestation.find(filter).sort({ nextReassessmentDue: 1 }).limit(200).lean();

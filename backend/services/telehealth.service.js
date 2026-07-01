@@ -30,7 +30,7 @@ function generateMeetingLink(platform, roomId) {
 
 // ─── 1. Schedule Telehealth Session ──────────────────────────────────────────
 
-async function scheduleTelehealthSession(data) {
+async function scheduleTelehealthSession(data, scope) {
   const roomId = generateRoomId();
   const meetingLink = data.meetingLink || generateMeetingLink(data.platform || 'zoom', roomId);
 
@@ -38,6 +38,8 @@ async function scheduleTelehealthSession(data) {
     sessionId: data.sessionId,
     beneficiaryId: data.beneficiaryId,
     therapistId: data.therapistId,
+    // W1586 — restricted caller → forced to own branch; cross-branch/HQ → may target via body.
+    branch: scope || data.branch || null,
     scheduledAt: data.scheduledAt,
     duration: data.duration || 45,
     status: 'scheduled',

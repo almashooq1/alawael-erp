@@ -24,7 +24,8 @@ const { authenticate } = require('../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 
 function getService(req) {
   return req.app._speechAnalysisService;
@@ -33,6 +34,7 @@ function getService(req) {
 router.use(authenticate);
 router.use(attachMfaActor);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(requireBranchAccess); // W1603: set req.branchScope so effectiveBranchScope() is reliable
 
 // ── Health probe ───────────────────────────────────────────────────────
 router.get('/health', (req, res) => {
@@ -55,7 +57,7 @@ router.post('/recordings/register', requireMfaTier(2), async (req, res) => {
       beneficiaryId: req.body.beneficiaryId,
       sessionId: req.body.sessionId || null,
       therapistId: req.user?._id || req.user?.id,
-      branchId: req.user?.branchId || null,
+      branchId: effectiveBranchScope(req) || req.user?.branchId || null, // W1603: canonical scope first
       consentRecordId: req.body.consentRecordId,
       storageBucket: req.body.storageBucket,
       storageKey: req.body.storageKey,
@@ -118,7 +120,7 @@ router.get('/recordings/:id', requireMfaTier(1), async (req, res) => {
     // W413: branch isolation — pre-W413 distinguished cross-branch via a
     // dedicated 403 code; unifying with the not-found 404 closes the
     // existence-probe side channel. See parent-portal W411/W412 doctrine.
-    const userBranch = req.user?.branchId;
+    const userBranch = effectiveBranchScope(req); // W1603: reliable (req.user.branchId can be unset)
     if (userBranch && rec.branchId && String(rec.branchId) !== String(userBranch)) {
       return res.status(404).json({ success: false, code: 'SPEECH_RECORDING_NOT_FOUND' });
     }
@@ -138,7 +140,8 @@ router.get('/recordings', requireMfaTier(1), async (req, res) => {
     }
     const query = { beneficiaryId };
     // Branch isolation
-    if (req.user?.branchId) query.branchId = req.user.branchId;
+    const _scope = effectiveBranchScope(req); // W1603: reliable branch filter for the list
+    if (_scope) query.branchId = _scope;
     const items = await Recording.find(query)
       .sort({ createdAt: -1 })
       .limit(Math.min(parseInt(req.query.limit, 10) || 50, 200))

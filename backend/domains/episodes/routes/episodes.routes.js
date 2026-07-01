@@ -52,6 +52,39 @@ try {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// W1592 — episode lifecycle (advance-phase / discharge / suspend / resume) is driven by
+// dedicated endpoints. But POST /episodes and PUT /:episodeId forwarded req.body raw to
+// BaseService create/update (validators don't whitelist; beforeCreate only stamps createdBy/
+// branchId), so a caller could POST { status:'completed', actualEndDate, dischargedBy,
+// dischargeReason, dischargeSummary } to CREATE an already-discharged episode with a forged
+// discharge record, or PUT the same to falsify a discharge — bypassing the /discharge
+// endpoint (clinical-record forgery) — or tamper createdBy/isDeleted/version. And
+// addTeamMember spread ...member into the careTeam subdoc, letting a caller set isPrimary:true
+// (self-designate as primary therapist). Strip the discharge/status/server fields on
+// create+update and the server-managed team fields on add.
+const EPISODE_SERVER_FIELDS = [
+  '_id',
+  'branchId',
+  'createdBy',
+  'lastModifiedBy',
+  'status',
+  'actualEndDate',
+  'dischargedBy',
+  'dischargeReason',
+  'dischargeSummary',
+  'dischargeType',
+  'isDeleted',
+  'version',
+];
+const TEAM_MEMBER_SERVER_FIELDS = ['isPrimary', 'isActive', 'assignedAt'];
+function stripFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 /** Guard: return 503 if the domain service is not initialised yet */
 const requireDomain = (req, res, next) => {
   if (!episodesDomain?.service) {
@@ -202,7 +235,7 @@ router.post(
   validate(validateCreateEpisode),
   asyncHandler(async (req, res) => {
     const context = { userId: req.user?._id, branchId: req.user?.branchId };
-    const episode = await svc().create(req.body, context);
+    const episode = await svc().create(stripFields(req.body, EPISODE_SERVER_FIELDS), context);
     res.status(201).json({ success: true, data: episode });
   })
 );
@@ -214,7 +247,11 @@ router.put(
   validate(validateUpdateEpisode),
   asyncHandler(async (req, res) => {
     const context = { userId: req.user?._id };
-    const updated = await svc().update(req.params.episodeId, req.body, context);
+    const updated = await svc().update(
+      req.params.episodeId,
+      stripFields(req.body, EPISODE_SERVER_FIELDS),
+      context
+    );
     res.json({ success: true, data: updated });
   })
 );
@@ -304,7 +341,10 @@ router.post(
   requireDomain,
   validate(validateAddTeamMember),
   asyncHandler(async (req, res) => {
-    const result = await svc().addTeamMember(req.params.episodeId, req.body);
+    const result = await svc().addTeamMember(
+      req.params.episodeId,
+      stripFields(req.body, TEAM_MEMBER_SERVER_FIELDS)
+    );
     res.json({ success: true, data: result });
   })
 );

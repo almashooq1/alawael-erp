@@ -156,7 +156,7 @@ router.get(
 
       const employees = await Employee.find(empFilter)
         .select('name employeeNumber currentShiftId shiftHistory')
-        .populate('currentShiftId', 'name nameAr code startTime endTime')
+        
         .skip((page - 1) * limit)
         .limit(Number(limit))
         .lean();
@@ -247,7 +247,7 @@ router.get(
         deletedAt: null,
       })
         .select('name currentShiftId shiftHistory')
-        .populate('currentShiftId')
+        
         .lean();
 
       if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });

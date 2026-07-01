@@ -15,11 +15,36 @@
 const express = require('express');
 const { CctvViewAudit, CctvAccessGrant } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 const auditRoles = ['admin', 'dpo', 'auditor', 'security_officer'];
+
+// A CctvAccessGrant is the authorization primitive for viewing child footage.
+// Spreading `...req.body` into create() let any authorized issuer set arbitrary
+// grant fields — and injected keys the schema might gain later. Whitelist the
+// intended fields only. `grantedBy`/`status` are set by the route.
+const GRANT_CREATABLE = [
+  'grantType',
+  'grantedTo',
+  'grantedToRole',
+  'coGrantedBy',
+  'scope',
+  'purpose',
+  'legalBasis',
+  'consentSignatureRef',
+  'incidentRef',
+  'validFrom',
+  'validUntil',
+  'maxConcurrentSessions',
+  'requireWatermark',
+  'allowDownload',
+  'allowPlayback',
+];
 
 router.get('/', requireRole(auditRoles), async (req, res) => {
   const q = {};
@@ -73,8 +98,19 @@ router.get('/grants', requireRole(auditRoles), async (req, res) => {
 
 router.post('/grants', requireRole(['admin', 'dpo', 'manager']), async (req, res) => {
   try {
+    const payload = {};
+    for (const k of GRANT_CREATABLE) {
+      if (req.body[k] !== undefined) payload[k] = req.body[k];
+    }
+    // Pin the grant scope to the issuer's own branch when they are restricted
+    // (a branch manager must not mint a grant scoped to another branch's child
+    // cameras). Cross-branch issuers (admin/dpo → resolver null) keep their scope.
+    const callerCode = await callerCctvBranchCode(req);
+    if (callerCode) {
+      payload.scope = { ...(payload.scope || {}), branchCode: callerCode };
+    }
     const g = await CctvAccessGrant.create({
-      ...req.body,
+      ...payload,
       grantedBy: req.user?.id,
       status: 'active',
     });

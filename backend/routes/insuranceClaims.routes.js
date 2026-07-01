@@ -26,6 +26,26 @@ const {
 const Beneficiary = require('../models/Beneficiary');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+
+// W1597 — money/lifecycle/approval fields a client must NOT self-set at CREATE time on the
+// insurance models. The claim PUT was already whitelisted (CLAIM_UPDATABLE) but the CREATEs
+// were raw: new InsuranceClaim({...req.body}) let a caller forge a PAID claim
+// (status:'paid' + adjudication + payment.amount), new PreAuthorization({...req.body}) let a
+// caller SELF-APPROVE a pre-auth (status:'approved' + approvalDetails.approvedAmount, bypassing
+// /pre-auth/:id/approve), and new InsuranceContract({...req.body}) let a caller self-activate.
+// status/adjudication/payment/approval flow ONLY through the dedicated /submit /adjudicate
+// /approve endpoints. stripUpdateMeta only blocks proto-pollution/creds — not these — so the
+// contract PUT is wrapped too.
+const CLAIM_PROTECTED = ['_id', 'status', 'claimNumber', 'submissionDate', 'adjudication', 'payment', 'resubmission', 'nphiesData', 'totalNet', 'totalGross', 'patientShare', 'insuranceShare', 'approvedAmount', 'paidAmount', 'isDeleted', 'createdBy'];
+const PREAUTH_PROTECTED = ['_id', 'status', 'preAuthNumber', 'approvalDetails', 'isDeleted', 'requestedBy', 'createdBy'];
+const CONTRACT_PROTECTED = ['_id', 'status', 'contractNumber', 'isDeleted', 'createdBy'];
+function stripInsuranceFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
 const { body, param, validationResult } = require('express-validator');
 const safeError = require('../utils/safeError');
 
@@ -268,7 +288,7 @@ router.post(
   ],
   async (req, res) => {
     try {
-      const contract = new InsuranceContract({ ...req.body, createdBy: req.user?.id });
+      const contract = new InsuranceContract({ ...stripInsuranceFields(req.body, CONTRACT_PROTECTED), createdBy: req.user?.id });
       await contract.save();
       logger.info(`[InsuranceClaims] Contract created: ${contract.contractNumber}`);
       res.status(201).json({ success: true, data: contract });
@@ -285,7 +305,7 @@ router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
     const contract = await InsuranceContract.findByIdAndUpdate(
       req.params.id,
-      stripUpdateMeta(req.body),
+      stripInsuranceFields(stripUpdateMeta(req.body), CONTRACT_PROTECTED),
       { returnDocument: 'after', runValidators: true }
     );
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
@@ -394,7 +414,7 @@ router.post(
     try {
       const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
       if (denied) return;
-      const preAuth = new PreAuthorization({ ...req.body, requestedBy: req.user?.id });
+      const preAuth = new PreAuthorization({ ...stripInsuranceFields(req.body, PREAUTH_PROTECTED), requestedBy: req.user?.id });
       await preAuth.save();
       logger.info(`[InsuranceClaims] Pre-auth created: ${preAuth.preAuthNumber}`);
       res.status(201).json({ success: true, data: preAuth });
@@ -571,7 +591,7 @@ router.post(
       const denied = await assertBeneficiaryInScope(req, req.body?.beneficiary, res);
       if (denied) return;
       const { items, ...claimData } = req.body;
-      const claim = new InsuranceClaim({ ...claimData, createdBy: req.user?.id });
+      const claim = new InsuranceClaim({ ...stripInsuranceFields(claimData, CLAIM_PROTECTED), createdBy: req.user?.id });
       await claim.save();
 
       // Create claim items if provided

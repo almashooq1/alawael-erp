@@ -39,10 +39,21 @@ const { body, param, query, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/care/crm.registry');
-const { bodyScopedBeneficiaryGuard } = require('../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const {
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+  assertBranchMatch,
+} = require('../../middleware/assertBranchMatch');
 
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+// W1599 — the Phase-17 funnel had ZERO tenant isolation: authenticated but no
+// requireBranchAccess, the service did raw findById on every :id op, and lists filtered by
+// branch only when the client volunteered ?branchId= → any authed user could read/mutate any
+// branch's lead/inquiry PHI by enumerating IDs (P0 cross-branch IDOR). requireBranchAccess
+// populates req.branchScope so effectiveBranchScope()/assertBranchMatch() below can enforce it.
+router.use(requireBranchAccess);
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -72,6 +83,11 @@ function mapError(err, res) {
   if (err.code === 'CONFLICT') {
     return res.status(409).json({ success: false, error: err.message });
   }
+  // W1599 — assertBranchMatch throws with err.status (not err.statusCode, which safeError
+  // honours), so surface a 4xx (e.g. 403 cross-branch) instead of degrading it to a 500.
+  if (Number.isInteger(err.status) && err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ success: false, error: err.message });
+  }
   return safeError(res, err);
 }
 
@@ -88,6 +104,29 @@ function _fallback() {
     leadModel: require('../../models/care/Lead.model'),
   });
   return _fb;
+}
+
+// W1599 — load a doc via the service and assert branch ownership before any :id read/mutate.
+// CareLead keys on `preferredBranchId`; Inquiry on `branchId`. Cross-branch/HQ roles no-op.
+async function assertLeadScope(req, id) {
+  const doc = await getService().findLeadById(id);
+  if (!doc) {
+    const e = new Error('Lead not found');
+    e.code = 'NOT_FOUND';
+    throw e;
+  }
+  assertBranchMatch(req, doc.preferredBranchId, 'lead');
+  return doc;
+}
+async function assertInquiryScope(req, id) {
+  const doc = await getService().findInquiryById(id);
+  if (!doc) {
+    const e = new Error('Inquiry not found');
+    e.code = 'NOT_FOUND';
+    throw e;
+  }
+  assertBranchMatch(req, doc.branchId, 'inquiry');
+  return doc;
 }
 
 // ── reference + stats ──────────────────────────────────────────────
@@ -125,7 +164,7 @@ router.get(
   wrap(async (req, res) => {
     try {
       const stats = await getService().getFunnelStats({
-        branchId: req.query.branchId,
+        branchId: effectiveBranchScope(req), // W1599 — restricted→own branch (ignore client ?branchId=); HQ→query|all
         windowDays: req.query.windowDays ? Number(req.query.windowDays) : 30,
       });
       res.json({ success: true, data: stats });
@@ -154,7 +193,7 @@ router.get(
       const rows = await getService().listInquiries({
         status: req.query.status,
         channel: req.query.channel,
-        branchId: req.query.branchId,
+        branchId: effectiveBranchScope(req), // W1599 — restricted→own branch (ignore client ?branchId=); HQ→query|all
         ownerUserId: req.query.ownerUserId,
         limit: req.query.limit ? Number(req.query.limit) : 100,
         skip: req.query.skip ? Number(req.query.skip) : 0,
@@ -175,6 +214,7 @@ router.get(
     try {
       const doc = await getService().findInquiryById(req.params.id);
       if (!doc) return res.status(404).json({ success: false, error: 'Inquiry not found' });
+      assertBranchMatch(req, doc.branchId, 'inquiry'); // W1599 — no cross-branch inquiry PHI read
       res.json({ success: true, data: doc });
     } catch (err) {
       mapError(err, res);
@@ -196,6 +236,9 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      // W1599 — pin a restricted caller's inquiry to their own branch (can't plant in a foreign one)
+      const _scope = effectiveBranchScope(req);
+      if (_scope) req.body.branchId = _scope;
       const doc = await getService().createInquiry(req.body, {
         actorId: req.user?._id,
       });
@@ -214,6 +257,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertInquiryScope(req, req.params.id); // W1599 — no cross-branch inquiry mutation
       const doc = await getService().acknowledgeInquiry(req.params.id, {
         actorId: req.user?._id,
       });
@@ -232,6 +276,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertInquiryScope(req, req.params.id); // W1599 — no cross-branch inquiry mutation
       const doc = await getService().routeInquiry(req.params.id, {
         ownerUserId: req.body.ownerUserId,
         ownerNameSnapshot: req.body.ownerNameSnapshot,
@@ -252,6 +297,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertInquiryScope(req, req.params.id); // W1599 — no cross-branch inquiry mutation
       const doc = await getService().closeInquiry(req.params.id, {
         closureReason: req.body.closureReason,
         actorId: req.user?._id,
@@ -271,6 +317,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertInquiryScope(req, req.params.id); // W1599 — no cross-branch inquiry mutation
       const doc = await getService().markInquirySpam(req.params.id, {
         actorId: req.user?._id,
       });
@@ -289,6 +336,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertInquiryScope(req, req.params.id); // W1599 — no cross-branch inquiry promote
       const result = await getService().promoteInquiry(req.params.id, req.body || {}, {
         actorId: req.user?._id,
       });
@@ -317,7 +365,7 @@ router.get(
     try {
       const rows = await getService().listLeads({
         status: req.query.status,
-        branchId: req.query.branchId,
+        branchId: effectiveBranchScope(req), // W1599 — restricted→own branch (ignore client ?branchId=); HQ→query|all
         ownerUserId: req.query.ownerUserId,
         referralSource: req.query.referralSource,
         limit: req.query.limit ? Number(req.query.limit) : 100,
@@ -339,6 +387,7 @@ router.get(
     try {
       const doc = await getService().findLeadById(req.params.id);
       if (!doc) return res.status(404).json({ success: false, error: 'Lead not found' });
+      assertBranchMatch(req, doc.preferredBranchId, 'lead'); // W1599 — no cross-branch lead PHI read
       res.json({ success: true, data: doc });
     } catch (err) {
       mapError(err, res);
@@ -360,6 +409,10 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      // W1599 — pin a restricted caller's lead to their own branch (preferredBranchId is not
+      // checked by requireBranchAccess, so a foreign value would otherwise be honoured).
+      const _scope = effectiveBranchScope(req);
+      if (_scope) req.body.preferredBranchId = _scope;
       const doc = await getService().createLead(req.body, {
         actorId: req.user?._id,
       });
@@ -382,6 +435,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertLeadScope(req, req.params.id); // W1599 — no cross-branch lead mutation
       const doc = await getService().logActivity(req.params.id, req.body, {
         actorId: req.user?._id,
       });
@@ -405,6 +459,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertLeadScope(req, req.params.id); // W1599 — no cross-branch lead mutation
       const doc = await getService().transitionLead(req.params.id, req.body.toStatus, {
         actorId: req.user?._id,
         notes: req.body.notes,
@@ -425,6 +480,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertLeadScope(req, req.params.id); // W1599 — no cross-branch lead convert
       const doc = await getService().convertLead(req.params.id, {
         beneficiaryId: req.body.beneficiaryId,
         actorId: req.user?._id,
@@ -444,6 +500,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertLeadScope(req, req.params.id); // W1599 — no cross-branch lead mutation
       const doc = await getService().markLost(req.params.id, {
         lostReason: req.body.lostReason,
         lostDetail: req.body.lostDetail,
@@ -464,6 +521,7 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
+      await assertLeadScope(req, req.params.id); // W1599 — no cross-branch lead mutation
       const doc = await getService().cancelLead(req.params.id, {
         notes: req.body?.notes,
         actorId: req.user?._id,

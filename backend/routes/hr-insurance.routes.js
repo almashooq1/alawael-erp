@@ -93,7 +93,7 @@ router.get('/expiring', authenticateToken, requireBranchAccess, async (req, res)
 /**
  * GET / — قائمة وثائق التأمين مع الفلترة والبحث
  */
-router.get('/', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']), async (req, res) => {
   try {
     const {
       page = 1,
@@ -166,7 +166,7 @@ router.get('/', authenticateToken, requireBranchAccess, async (req, res) => {
 /**
  * GET /:id — تفاصيل وثيقة تأمين
  */
-router.get('/:id', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/:id', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']), async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id).populate(
       'employee',
@@ -425,7 +425,7 @@ router.delete(
 /**
  * GET /:id/claims — مطالبات وثيقة تأمين
  */
-router.get('/:id/claims', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/:id/claims', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']), async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id).select(
       'claims employeeName policyNumber'
@@ -758,7 +758,7 @@ router.get(
 /**
  * GET /employee/:employeeId — وثائق تأمين موظف محدد
  */
-router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']), async (req, res) => {
   try {
     const policies = await EmployeeInsurance.find({
       $or: [{ employee: req.params.employeeId }, { employeeId: req.params.employeeId }],

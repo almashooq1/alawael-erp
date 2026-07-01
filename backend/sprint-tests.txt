@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/smart-insurance-branch-isolation-wave1573.test.js
 __tests__/employee-affairs-leaves-scope-wave1569.test.js
 __tests__/employee-affairs-dashboard-scope-wave1568.test.js
 __tests__/transfer-execute-branch-move-wave1567.test.js

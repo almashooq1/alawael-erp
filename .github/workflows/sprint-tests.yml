@@ -1157,7 +1157,10 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
-      - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
+      - 'backend/__tests__/employee-affairs-leaves-scope-wave1569.test.js'
+      - 'backend/__tests__/employee-affairs-dashboard-scope-wave1568.test.js'
+      - 'backend/__tests__/transfer-execute-branch-move-wave1567.test.js'
+      - 'backend/__tests__/employee-affairs-branch-isolation-wave1566.test.js'
       - 'backend/__tests__/pharmacy-dispensing-items-wave1564.test.js'
       - 'backend/__tests__/medical-files-download-branch-isolation-wave1561.test.js'
       - 'backend/__tests__/files-module-branch-isolation-wave1560.test.js'
@@ -2115,6 +2118,31 @@ on:
       - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/objectid-new-mongoose9-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-header-branch-idor-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/compensation-incentives-read-gate-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-gps-vehicle-branch-wave1574.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
+      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-list-visibility-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/route-registry-files-resolve-wave1576.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -3250,7 +3278,10 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
-      - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
+      - 'backend/__tests__/employee-affairs-leaves-scope-wave1569.test.js'
+      - 'backend/__tests__/employee-affairs-dashboard-scope-wave1568.test.js'
+      - 'backend/__tests__/transfer-execute-branch-move-wave1567.test.js'
+      - 'backend/__tests__/employee-affairs-branch-isolation-wave1566.test.js'
       - 'backend/__tests__/pharmacy-dispensing-items-wave1564.test.js'
       - 'backend/__tests__/medical-files-download-branch-isolation-wave1561.test.js'
       - 'backend/__tests__/files-module-branch-isolation-wave1560.test.js'
@@ -4207,6 +4238,31 @@ on:
       - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/objectid-new-mongoose9-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-header-branch-idor-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/compensation-incentives-read-gate-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-gps-vehicle-branch-wave1574.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
+      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-list-visibility-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/route-registry-files-resolve-wave1576.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

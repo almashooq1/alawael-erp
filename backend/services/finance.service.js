@@ -145,7 +145,7 @@ class FinanceService {
         {
           $match: {
             userId: require('mongoose').Types.ObjectId.isValid(userId)
-              ? new require('mongoose').Types.ObjectId(userId)
+              ? new (require('mongoose').Types.ObjectId)(userId)
               : userId,
             type: 'income',
             status: 'completed',
@@ -163,7 +163,7 @@ class FinanceService {
         {
           $match: {
             userId: require('mongoose').Types.ObjectId.isValid(userId)
-              ? new require('mongoose').Types.ObjectId(userId)
+              ? new (require('mongoose').Types.ObjectId)(userId)
               : userId,
             type: 'expense',
             status: 'completed',
@@ -294,7 +294,7 @@ class FinanceService {
             {
               $match: {
                 userId: require('mongoose').Types.ObjectId.isValid(userId)
-                  ? new require('mongoose').Types.ObjectId(userId)
+                  ? new (require('mongoose').Types.ObjectId)(userId)
                   : userId,
                 category: budget.category,
                 type: 'expense',

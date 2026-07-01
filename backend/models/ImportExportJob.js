@@ -299,7 +299,7 @@ importExportJobSchema.statics.getModuleStats = async function (module) {
 // Static: get overall dashboard stats
 importExportJobSchema.statics.getDashboardStats = async function (userId, dateRange) {
   const match = { isDeleted: false };
-  if (userId) match.createdBy = mongoose.Types.ObjectId(userId);
+  if (userId) match.createdBy = new mongoose.Types.ObjectId(userId);
   if (dateRange) {
     match.createdAt = {};
     if (dateRange.from) match.createdAt.$gte = new Date(dateRange.from);

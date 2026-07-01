@@ -201,7 +201,7 @@ achievementSchema.statics.findByType = function (beneficiaryId, type) {
 
 achievementSchema.statics.calculateTotalPoints = function (beneficiaryId) {
   return this.aggregate([
-    { $match: { beneficiaryId: mongoose.Types.ObjectId(beneficiaryId) } },
+    { $match: { beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId) } },
     { $group: { _id: null, totalPoints: { $sum: '$pointsAwarded' } } },
   ]);
 };

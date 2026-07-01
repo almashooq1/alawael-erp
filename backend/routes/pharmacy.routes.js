@@ -36,7 +36,18 @@ router.use(requireBranchAccess);
 // dispense, cancel, or toggle a drug's controlledSubstance flag. Mirror the role-list
 // gating already in the sibling mar.routes.js / medication-reconciliation.routes.js.
 const RX_WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'physician', 'doctor'];
-const PHARMACY_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'pharmacist'];
+// nurse + clinical_supervisor included (owner-confirmed 2026-07-01): in this
+// rehab/day-care deployment nurses & clinical supervisors handle dispensing —
+// a dedicated `pharmacist` role is barely used.
+const PHARMACY_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'manager',
+  'pharmacist',
+  'nurse',
+  'clinical_supervisor',
+];
 
 async function beneficiaryScopeFilter(req) {
   const bf = branchFilter(req);

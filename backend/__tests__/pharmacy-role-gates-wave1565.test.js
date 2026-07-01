@@ -70,10 +70,12 @@ describe('W1565 — pharmacy controlled-action role gates', () => {
     expect(r.status).toBe(403);
   });
 
-  it('POST /dispensing — a pharmacist passes the role gate', async () => {
-    asRole('pharmacist');
-    const r = await request(app).post('/api/pharmacy/dispensing').send({});
-    expect(r.status).not.toBe(403); // gate passed; handler may 400/500 on empty body
+  it('POST /dispensing — pharmacist / nurse / clinical_supervisor pass the gate', async () => {
+    for (const role of ['pharmacist', 'nurse', 'clinical_supervisor']) {
+      asRole(role);
+      const r = await request(app).post('/api/pharmacy/dispensing').send({});
+      expect(r.status).not.toBe(403); // gate passed; handler may 400/500 on empty body
+    }
   });
 
   it('POST /prescriptions — a therapist cannot prescribe', async () => {

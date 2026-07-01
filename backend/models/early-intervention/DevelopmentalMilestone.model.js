@@ -60,6 +60,7 @@ const developmentalMilestoneSchema = new mongoose.Schema(
     ],
 
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1599
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

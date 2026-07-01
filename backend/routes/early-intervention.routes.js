@@ -15,6 +15,7 @@ const router = express.Router();
 const { validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1599
 const earlyInterventionService = require('../services/earlyIntervention.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -90,7 +91,11 @@ router.post(
   handleValidation,
   async (req, res) => {
     try {
-      const child = await earlyInterventionService.createChild(req.body, req.user.id);
+      const child = await earlyInterventionService.createChild(
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.status(201).json({
         success: true,
         message: 'تم تسجيل الطفل بنجاح',
@@ -135,7 +140,11 @@ router.get(
         sortOrder: req.query.sortOrder === 'asc' ? 1 : -1,
       };
 
-      const result = await earlyInterventionService.getChildren(filters, pagination);
+      const result = await earlyInterventionService.getChildren(
+        filters,
+        pagination,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب قائمة الأطفال بنجاح', ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching children');
@@ -156,7 +165,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const child = await earlyInterventionService.getChildById(req.params.id);
+      const child = await earlyInterventionService.getChildById(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: child });
     } catch (error) {
       logger.error('[EIS] Error fetching child:', error);
@@ -178,7 +190,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const profile = await earlyInterventionService.getChildFullProfile(req.params.id);
+      const profile = await earlyInterventionService.getChildFullProfile(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب الملف الكامل بنجاح', data: profile });
     } catch (error) {
       logger.error('[EIS] Error fetching full profile:', error);
@@ -203,7 +218,8 @@ router.put(
       const child = await earlyInterventionService.updateChild(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث ملف الطفل بنجاح', data: child });
     } catch (error) {
@@ -226,7 +242,7 @@ router.delete(
   handleValidation,
   async (req, res) => {
     try {
-      await earlyInterventionService.deleteChild(req.params.id);
+      await earlyInterventionService.deleteChild(req.params.id, effectiveBranchScope(req));
       res.json({ success: true, message: 'تم حذف ملف الطفل بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting child:', error);
@@ -281,7 +297,11 @@ router.post(
   handleValidation,
   async (req, res) => {
     try {
-      const screening = await earlyInterventionService.createScreening(req.body, req.user.id);
+      const screening = await earlyInterventionService.createScreening(
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.status(201).json({
         success: true,
         message: 'تم إنشاء سجل الفحص بنجاح',
@@ -443,7 +463,11 @@ router.post(
   handleValidation,
   async (req, res) => {
     try {
-      const milestone = await earlyInterventionService.createMilestone(req.body, req.user.id);
+      const milestone = await earlyInterventionService.createMilestone(
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.status(201).json({
         success: true,
         message: 'تم إضافة المعلم التنموي بنجاح',
@@ -620,7 +644,11 @@ router.post(
   handleValidation,
   async (req, res) => {
     try {
-      const ifsp = await earlyInterventionService.createIFSP(req.body, req.user.id);
+      const ifsp = await earlyInterventionService.createIFSP(
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.status(201).json({
         success: true,
         message: 'تم إنشاء خطة IFSP بنجاح',
@@ -831,7 +859,11 @@ router.post(
   handleValidation,
   async (req, res) => {
     try {
-      const referral = await earlyInterventionService.createReferral(req.body, req.user.id);
+      const referral = await earlyInterventionService.createReferral(
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.status(201).json({
         success: true,
         message: 'تم إنشاء الإحالة بنجاح',

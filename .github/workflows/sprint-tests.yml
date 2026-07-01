@@ -2182,6 +2182,8 @@ on:
       - 'backend/__tests__/branchid-clinical-slice4-wave1585.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-objectid-guard-wave1588.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4341,6 +4343,8 @@ on:
       - 'backend/__tests__/branchid-clinical-slice4-wave1585.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-objectid-guard-wave1588.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

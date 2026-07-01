@@ -1151,3 +1151,4 @@ __tests__/measurements-approve-idor-wave1563.test.js
 __tests__/esignature-pdf-download-idor-wave1564.test.js
 __tests__/objectid-new-mongoose9-wave1565.test.js
 __tests__/cdss-header-branch-idor-wave1565.test.js
+__tests__/compensation-incentives-read-gate-wave1565.test.js

@@ -35,7 +35,7 @@ const Program = require('../models/AdaptiveSportsProgram');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -106,7 +106,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.sport && SPORTS.includes(String(req.query.sport))) {
@@ -161,7 +161,7 @@ router.get('/by-sport/:sport', requireRole(READ_ROLES), async (req, res) => {
       return res.status(404).json({ success: false, message: 'الرياضة غير موجودة في الكتالوج' });
     }
     const filter = { ...branchFilter(req), sport: req.params.sport }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -179,7 +179,7 @@ router.get('/by-sport/:sport', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Program.find(filter).select('sport status sessions achievements').lean();
@@ -238,7 +238,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const doc = await Program.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sport: body.sport,
       sportLabelAr: String(body.sportLabelAr || '').slice(0, 100),
       category: CATEGORIES.includes(String(body.category)) ? String(body.category) : 'individual',

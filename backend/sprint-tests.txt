@@ -57,6 +57,7 @@ __tests__/assessment-measure-bridge-behavioral-wave1153.test.js
 __tests__/assessment-measure-bridge-wave1153.test.js
 __tests__/assessments-goals-behavior-branch-isolation-wave1155.test.js
 __tests__/asset-catalog-branch-isolation-wave917.test.js
+__tests__/treatment-authorization-branch-isolation-wave1574.test.js
 __tests__/smart-insurance-branch-isolation-wave1573.test.js
 __tests__/employee-affairs-leaves-scope-wave1569.test.js
 __tests__/employee-affairs-dashboard-scope-wave1568.test.js
@@ -1168,4 +1169,7 @@ __tests__/route-registry-files-resolve-wave1576.test.js
 __tests__/pharmacy-role-gates-wave1565.test.js
 __tests__/header-branch-bypass-wave1575.test.js
 __tests__/workflowpro-approval-authz-wave1559.test.js
+__tests__/therapy-session-status-precondition-wave1578.test.js
+__tests__/clinical-branch-isolation-wave1575.test.js
+__tests__/branchid-override-clinical-assessment-wave1577.test.js
 __tests__/branchid-override-slice3-wave1578.test.js

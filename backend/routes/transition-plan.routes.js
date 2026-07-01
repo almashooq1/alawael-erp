@@ -34,7 +34,7 @@ const Plan = require('../models/TransitionPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -98,7 +98,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.transitionType && TRANSITION_TYPES.includes(String(req.query.transitionType))) {
@@ -152,7 +152,7 @@ router.get('/overdue', requireRole(READ_ROLES), async (req, res) => {
       status: 'in_progress',
       plannedTransitionDate: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Plan.find(filter).sort({ plannedTransitionDate: 1 }).limit(200).lean();
@@ -167,7 +167,7 @@ router.get('/overdue', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Plan.find(filter)
@@ -238,7 +238,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const doc = await Plan.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       transitionType: body.transitionType,
       currentAgeMonths: typeof body.currentAgeMonths === 'number' ? body.currentAgeMonths : null,
       currentPlacement: String(body.currentPlacement || '').slice(0, 200),

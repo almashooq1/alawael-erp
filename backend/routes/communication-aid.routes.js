@@ -30,7 +30,7 @@ const Profile = require('../models/CommunicationAidProfile');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -85,7 +85,7 @@ async function hydrate(items) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (
@@ -148,7 +148,7 @@ router.get('/due-reassessment', requireRole(READ_ROLES), async (req, res) => {
       lifecycleStatus: 'active',
       nextReassessmentDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Profile.find(filter).sort({ nextReassessmentDue: 1 }).limit(200).lean();
@@ -163,7 +163,7 @@ router.get('/due-reassessment', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Profile.find(filter)
@@ -239,7 +239,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const doc = await Profile.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       carePlanVersionId:
         body.carePlanVersionId && mongoose.isValidObjectId(body.carePlanVersionId)

@@ -9,7 +9,28 @@ const TreatmentAuthorizationService = require('../services/treatmentAuthorizatio
 const { authenticateToken, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
+const { TreatmentAuthorization } = require('../models/treatmentAuthorization.model');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// W1574 — the service never branch-scopes and the model's branch field is `branch`
+// (not branchId/branch_id → branchFilter would be a phantom no-op). requireBranchAccess
+// doesn't auto-filter, so every :id read/write/action was cross-branch PHI IDOR
+// (national IDs, medical justifications, insurance policy #). This guard loads the doc
+// and asserts branch ownership; it runs AFTER requireBranchAccess (so req.branchScope is
+// populated — a router.param guard would run BEFORE it and no-op). No-op for cross-branch/HQ.
+const enforceAuthzBranch = asyncHandler(async (req, res, next) => {
+  const scope = effectiveBranchScope(req);
+  if (!scope) return next();
+  const doc = await TreatmentAuthorization.findOne({ _id: req.params.id, isDeleted: false })
+    .select('branch')
+    .lean();
+  if (!doc) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+  if (String(doc.branch || '') !== String(scope)) {
+    return res.status(403).json({ success: false, message: 'غير مصرح بالوصول إلى هذا الطلب' });
+  }
+  next();
+});
 
 const AUTH_ROLES = [
   'admin',
@@ -45,7 +66,7 @@ router.get(
   requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
-    const result = await TreatmentAuthorizationService.getRequests(req.query);
+    const result = await TreatmentAuthorizationService.getRequests(req.query, effectiveBranchScope(req));
     res.json({ success: true, data: result });
   })
 );
@@ -58,7 +79,7 @@ router.get(
   requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
-    const data = await TreatmentAuthorizationService.getDashboard(req.query.branch);
+    const data = await TreatmentAuthorizationService.getDashboard(effectiveBranchScope(req) || req.query.branch);
     res.json({ success: true, data });
   })
 );
@@ -83,6 +104,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.getRequestById(req.params.id);
     if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
@@ -97,6 +119,7 @@ router.put(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.updateRequest(
       req.params.id,
@@ -114,6 +137,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitForReview(
       req.params.id,
@@ -130,6 +154,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitToInsurer(
       req.params.id,
@@ -146,6 +171,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.recordInsurerResponse(
       req.params.id,
@@ -163,6 +189,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitAppeal(
       req.params.id,
@@ -180,6 +207,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const { decision, notes } = req.body;
     const request = await TreatmentAuthorizationService.recordAppealDecision(
@@ -199,6 +227,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.recordSessionUsage(
       req.params.id,
@@ -217,6 +246,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   authorize(AUTH_ROLES),
+  enforceAuthzBranch,
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.addFollowUp(
       req.params.id,

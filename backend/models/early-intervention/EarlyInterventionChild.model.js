@@ -268,6 +268,10 @@ const earlyInterventionChildSchema = new mongoose.Schema(
 
     // ── Refs ──
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+    // W1599: branch tenancy — stamped on create from the caller's branch so
+    // 0-3yr children's PHI can be branch-isolated (org-tenancy alone left it
+    // cross-branch readable). Legacy docs (no branchId) stay visible until backfilled.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },

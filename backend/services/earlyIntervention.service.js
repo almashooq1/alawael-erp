@@ -19,22 +19,47 @@ const {
 } = require('../models/EarlyIntervention');
 const logger = require('../utils/logger');
 
+// W1599: compose a branch-scope onto a base query. When branchId is falsy (a
+// cross-branch role, or a caller with no branch) the base query is returned
+// unchanged — behavior identical to before this wave, so existing callers/tests
+// that pass no branchId keep working. When branchId is set (a branch-restricted
+// caller) the query is $and-wrapped with an $or that matches the caller's own
+// branch OR legacy docs that predate this migration (no branchId) — so nothing
+// existing disappears while every NEW branch-stamped record is isolated.
+const scopedFilter = (base, branchId) =>
+  branchId
+    ? {
+        $and: [
+          base,
+          { $or: [{ branchId }, { branchId: { $exists: false } }, { branchId: null }] },
+        ],
+      }
+    : base;
+
+// W1599: post-load branch check for id-keyed reads/writes (kept findById-based so
+// the existing service unit tests, which mock findById, still pass). Same
+// legacy-null-escape: a null/undefined branchId on the caller OR on the doc passes;
+// only a doc with a DIFFERENT branch is rejected (surfaced as the same "not found").
+const sameBranchOrLegacy = (doc, branchId) =>
+  !branchId || !doc || !doc.branchId || String(doc.branchId) === String(branchId);
+
 class EarlyInterventionService {
   // ═══════════════════════════════════════════════════════════════════════════
   // CHILDREN — إدارة ملفات الأطفال
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async createChild(data, userId) {
+  async createChild(data, userId, branchId) {
     data.createdBy = userId;
+    if (branchId) data.branchId = branchId; // W1599: stamp caller's branch
     const child = new EarlyInterventionChild(data);
     await child.save();
     logger.info(`[EIS] Child created: ${child.childNumber} by user ${userId}`);
     return child;
   }
 
-  async getChildren(filters = {}, pagination = {}) {
+  async getChildren(filters = {}, pagination = {}, branchId) {
     const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = -1 } = pagination;
-    const query = this._buildChildQuery(filters);
+    const query = scopedFilter(this._buildChildQuery(filters), branchId);
 
     const [data, total] = await Promise.all([
       EarlyInterventionChild.find(query)
@@ -60,19 +85,26 @@ class EarlyInterventionService {
     };
   }
 
-  async getChildById(id) {
+  async getChildById(id, branchId) {
     const child = await EarlyInterventionChild.findById(id)
       .populate('primaryCoordinator', 'name email')
       .populate('careTeam.member', 'name email')
       .populate('pediatricianRef', 'name email')
       .populate('createdBy', 'name email')
       .lean();
-    if (!child) throw new Error('ملف الطفل غير موجود');
+    // W1599: deny a foreign-branch child as "not found" (legacy null-branch passes).
+    if (!child || !sameBranchOrLegacy(child, branchId)) throw new Error('ملف الطفل غير موجود');
     return child;
   }
 
-  async updateChild(id, data, userId) {
+  async updateChild(id, data, userId, branchId) {
     data.updatedBy = userId;
+    // W1599: verify branch ownership before mutating (only for branch-restricted callers).
+    if (branchId) {
+      const existing = await EarlyInterventionChild.findById(id).select('branchId').lean();
+      if (existing && !sameBranchOrLegacy(existing, branchId))
+        throw new Error('ملف الطفل غير موجود');
+    }
     const child = await EarlyInterventionChild.findByIdAndUpdate(id, data, {
       returnDocument: 'after',
       runValidators: true,
@@ -82,7 +114,13 @@ class EarlyInterventionService {
     return child;
   }
 
-  async deleteChild(id) {
+  async deleteChild(id, branchId) {
+    // W1599: verify branch ownership before deleting (only for branch-restricted callers).
+    if (branchId) {
+      const existing = await EarlyInterventionChild.findById(id).select('branchId').lean();
+      if (existing && !sameBranchOrLegacy(existing, branchId))
+        throw new Error('ملف الطفل غير موجود');
+    }
     const child = await EarlyInterventionChild.findByIdAndDelete(id);
     if (!child) throw new Error('ملف الطفل غير موجود');
     // Cascade: remove related records
@@ -96,9 +134,10 @@ class EarlyInterventionService {
     return child;
   }
 
-  async getChildFullProfile(childId) {
+  async getChildFullProfile(childId, branchId) {
+    // getChildById enforces branch ownership → a foreign child throws → no fan-out.
     const [child, screenings, milestones, ifsps, referrals] = await Promise.all([
-      this.getChildById(childId),
+      this.getChildById(childId, branchId),
       DevelopmentalScreening.find({ child: childId }).sort({ screeningDate: -1 }).lean(),
       DevelopmentalMilestone.find({ child: childId }).sort({ expectedAgeMonths: 1 }).lean(),
       IFSP.find({ child: childId }).sort({ startDate: -1 }).lean(),
@@ -154,12 +193,13 @@ class EarlyInterventionService {
   // DEVELOPMENTAL SCREENINGS — الفحص والكشف المبكر
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async createScreening(data, userId) {
+  async createScreening(data, userId, branchId) {
     // Verify child exists
     const child = await EarlyInterventionChild.findById(data.child);
     if (!child) throw new Error('ملف الطفل غير موجود');
 
     data.createdBy = userId;
+    if (branchId) data.branchId = branchId; // W1599
     const screening = new DevelopmentalScreening(data);
     await screening.save();
     logger.info(
@@ -260,7 +300,7 @@ class EarlyInterventionService {
   // DEVELOPMENTAL MILESTONES — المعالم التنموية
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async createMilestone(data, userId) {
+  async createMilestone(data, userId, branchId) {
     const child = await EarlyInterventionChild.findById(data.child);
     if (!child) throw new Error('ملف الطفل غير موجود');
 
@@ -282,6 +322,7 @@ class EarlyInterventionService {
     }
 
     data.createdBy = userId;
+    if (branchId) data.branchId = branchId; // W1599
     const milestone = new DevelopmentalMilestone(data);
     await milestone.save();
     logger.info(`[EIS] Milestone created for child ${child.childNumber}: ${data.milestone}`);
@@ -425,11 +466,12 @@ class EarlyInterventionService {
   // IFSP — خطط الخدمات الأسرية الفردية
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async createIFSP(data, userId) {
+  async createIFSP(data, userId, branchId) {
     const child = await EarlyInterventionChild.findById(data.child);
     if (!child) throw new Error('ملف الطفل غير موجود');
 
     data.createdBy = userId;
+    if (branchId) data.branchId = branchId; // W1599
     const ifsp = new IFSP(data);
     await ifsp.save();
     logger.info(`[EIS] IFSP created: ${ifsp.planNumber} for child ${child.childNumber}`);
@@ -553,13 +595,14 @@ class EarlyInterventionService {
   // REFERRALS — الإحالات المبكرة
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async createReferral(data, userId) {
+  async createReferral(data, userId, branchId) {
     if (data.child) {
       const child = await EarlyInterventionChild.findById(data.child);
       if (!child) throw new Error('ملف الطفل غير موجود');
     }
 
     data.createdBy = userId;
+    if (branchId) data.branchId = branchId; // W1599
     const referral = new EarlyReferral(data);
     await referral.save();
     logger.info(`[EIS] Referral created: ${referral.referralNumber}`);

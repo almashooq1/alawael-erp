@@ -361,6 +361,10 @@ const rehabTelehealthSessionSchema = new Schema(
     sessionId: { type: Schema.Types.ObjectId, ref: 'ClinicalSession' },
     beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     therapistId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // W1586 — tenant isolation. Every other Telehealth schema carries `branch`; this one
+    // did not, so its routes (list + :id + lifecycle) leaked Zoom/Meet meetingLink+roomId
+    // + beneficiary PHI across branches. Additive (pre-adoption, no backfill).
+    branch: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
     scheduledAt: { type: Date, required: true },
     duration: { type: Number, default: 45 }, // minutes
     status: {

@@ -17,20 +17,42 @@
 
 const express = require('express');
 const cctvIntegrationService = require('../../services/cctvIntegration.service');
+const { CctvCamera } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode, branchCodeVisible } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 const ROLES = ['admin', 'super_admin', 'manager', 'security_officer'];
+
+// Assert the caller may access the given camera's branch (keyed by cameraId).
+// Returns true, or sends 404/403 and returns false.
+async function assertCameraBranch(req, res, cameraId) {
+  const cam = await CctvCamera.findById(cameraId).select('branchCode').lean();
+  if (!cam) {
+    res.status(404).json({ success: false, message: 'CAMERA_NOT_FOUND' });
+    return false;
+  }
+  const callerCode = await callerCctvBranchCode(req);
+  if (!branchCodeVisible(callerCode, cam.branchCode)) {
+    res.status(403).json({ success: false, message: 'CROSS_BRANCH_DENIED' });
+    return false;
+  }
+  return true;
+}
 
 /**
  * GET /cameras
  * List cameras by branch (or all if no branchId)
  */
 router.get('/cameras', requireRole(ROLES), async (req, res) => {
-  const cameras = await cctvIntegrationService.getCameraList(req.query.branchId);
+  // Restricted callers pinned to their own branch; cross-branch may pass a code.
+  const callerCode = await callerCctvBranchCode(req);
+  const cameras = await cctvIntegrationService.getCameraList(callerCode || req.query.branchId);
   res.json({ success: true, data: cameras });
 });
 
@@ -39,8 +61,9 @@ router.get('/cameras', requireRole(ROLES), async (req, res) => {
  * Live feed URL for a camera
  */
 router.get('/cameras/:cameraId/feed', requireRole(ROLES), async (req, res) => {
+  if (!(await assertCameraBranch(req, res, req.params.cameraId))) return undefined;
   const feed = await cctvIntegrationService.getLiveFeed(req.params.cameraId);
-  res.json({ success: true, data: feed });
+  return res.json({ success: true, data: feed });
 });
 
 /**
@@ -48,12 +71,16 @@ router.get('/cameras/:cameraId/feed', requireRole(ROLES), async (req, res) => {
  * List recordings for a camera within a date range
  */
 router.get('/recordings', requireRole(ROLES), async (req, res) => {
+  // Recordings are keyed by cameraId — verify the camera is in the caller's branch.
+  if (req.query.cameraId && !(await assertCameraBranch(req, res, req.query.cameraId))) {
+    return undefined;
+  }
   const recordings = await cctvIntegrationService.getRecordingList(
     req.query.cameraId,
     req.query.startDate,
     req.query.endDate
   );
-  res.json({ success: true, data: recordings });
+  return res.json({ success: true, data: recordings });
 });
 
 /**
@@ -86,9 +113,11 @@ router.get('/attendance', requireRole(ROLES), async (req, res) => {
  * Security alerts
  */
 router.get('/alerts', requireRole(ROLES), async (req, res) => {
+  const callerCode = await callerCctvBranchCode(req);
   const alerts = await cctvIntegrationService.getSecurityAlerts(
     req.query.startDate,
-    req.query.endDate
+    req.query.endDate,
+    callerCode || req.query.branchCode
   );
   res.json({ success: true, data: alerts });
 });
@@ -98,8 +127,9 @@ router.get('/alerts', requireRole(ROLES), async (req, res) => {
  * Analytics: people count, heatmap, peak hours
  */
 router.get('/analytics', requireRole(ROLES), async (req, res) => {
+  const callerCode = await callerCctvBranchCode(req);
   const analytics = await cctvIntegrationService.getAnalytics(
-    req.query.branchId,
+    callerCode || req.query.branchId,
     req.query.period || 'today'
   );
   res.json({ success: true, data: analytics });

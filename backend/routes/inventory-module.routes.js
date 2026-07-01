@@ -148,10 +148,12 @@ router.get('/transactions', async (req, res) => {
       page = 1,
       limit = 25,
     } = req.query;
-    const filter = { deleted_at: null };
+    const scope = branchScope(req);
+    const filter = { deleted_at: null, ...scope };
     if (item_id) filter.item_id = item_id;
     if (transaction_type) filter.transaction_type = transaction_type;
-    if (branch_id) filter.branch_id = branch_id;
+    // Restricted users pinned to own branch; only cross-branch roles may narrow by query branch_id.
+    if (branch_id && !scope.branch_id) filter.branch_id = branch_id;
     if (date_from || date_to) {
       filter.transaction_date = {};
       if (date_from) filter.transaction_date.$gte = new Date(date_from);
@@ -465,8 +467,10 @@ router.delete('/purchase-orders/:id', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const { branch_id } = req.query;
-    const baseFilter = { deleted_at: null };
-    if (branch_id) baseFilter.branch_id = new mongoose.Types.ObjectId(branch_id);
+    const scope = branchScope(req);
+    const baseFilter = { deleted_at: null, ...scope };
+    if (branch_id && !scope.branch_id)
+      baseFilter.branch_id = new mongoose.Types.ObjectId(branch_id);
 
     const [totalItems, lowStockItems, categorySummary, recentTransactions, pendingPOs] =
       await Promise.all([
@@ -485,14 +489,17 @@ router.get('/stats', async (req, res) => {
             },
           },
         ]),
-        InventoryTransaction.find({ deleted_at: null, ...(branch_id ? { branch_id } : {}) })
+        InventoryTransaction.find({
+          deleted_at: null,
+          ...(baseFilter.branch_id ? { branch_id: baseFilter.branch_id } : {}),
+        })
           .sort({ transaction_date: -1 })
           .limit(5)
           .populate('item_id', 'name_ar item_code'),
         PurchaseOrder.countDocuments({
           deleted_at: null,
           status: { $in: ['pending_approval', 'approved', 'sent'] },
-          ...(branch_id ? { branch_id } : {}),
+          ...(baseFilter.branch_id ? { branch_id: baseFilter.branch_id } : {}),
         }),
       ]);
 

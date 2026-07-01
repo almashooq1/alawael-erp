@@ -2114,6 +2114,8 @@ on:
       - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4205,6 +4207,8 @@ on:
       - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

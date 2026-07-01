@@ -329,7 +329,7 @@ router.get('/leave-balances/:employeeId', requireAuth, requireBranchAccess, asyn
       employee: req.params.employeeId,
       year,
       ...branchFilterFor(req, 'branch'),
-    }).populate('employee', 'nameAr employeeNumber');
+    }).populate('employeeId', 'nameAr employeeNumber');
     ok(res, balances, { year, total: balances.length });
   } catch (err) {
     serverError(res, err);
@@ -353,7 +353,7 @@ router.get('/leave-balances', requireAuth, requireBranchAccess, async (req, res)
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
       LeaveBalance.find(filter)
-        .populate('employee', 'nameAr employeeNumber department')
+        .populate('employeeId', 'nameAr employeeNumber department')
         .sort({ 'employee.nameAr': 1 })
         .skip(skip)
         .limit(parseInt(limit)),

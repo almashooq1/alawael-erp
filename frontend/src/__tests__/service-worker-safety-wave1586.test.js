@@ -16,7 +16,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const PUBLIC = path.resolve(__dirname, '..', '..', 'public'); // frontend/public
+// Every public/ dir in the 66666 repo that can ship a browser SW. Both the main
+// legacy frontend AND the supply-chain-management frontend had the same
+// aggressive pattern — cover both so the class stays closed project-wide.
+const PUBLIC_DIRS = [
+  path.resolve(__dirname, '..', '..', 'public'), // frontend/public
+  path.resolve(__dirname, '..', '..', '..', 'supply-chain-management', 'frontend', 'public'),
+  path.resolve(__dirname, '..', '..', '..', 'backend', 'public'), // backend serves /service-worker.js too
+];
 
 // Strip block + line comments so a SW's own doc-comment (which may DESCRIBE the
 // old bad pattern) can't trip the code-pattern checks below.
@@ -25,14 +32,18 @@ function stripComments(src) {
 }
 
 function swScripts() {
-  return fs
-    .readdirSync(PUBLIC)
-    .filter((f) => f.endsWith('.js'))
-    .map((f) => {
-      const src = fs.readFileSync(path.join(PUBLIC, f), 'utf8');
-      return { name: f, src, code: stripComments(src) };
-    })
-    .filter((f) => /self\.addEventListener\(\s*['"](install|activate|fetch)['"]/.test(f.code));
+  const out = [];
+  for (const dir of PUBLIC_DIRS) {
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
+      const src = fs.readFileSync(path.join(dir, f), 'utf8');
+      const code = stripComments(src);
+      if (/self\.addEventListener\(\s*['"](install|activate|fetch)['"]/.test(code)) {
+        out.push({ name: f, dir, src, code });
+      }
+    }
+  }
+  return out;
 }
 
 describe('service-worker safety — no stale app-shell (W1586)', () => {
@@ -55,12 +66,15 @@ describe('service-worker safety — no stale app-shell (W1586)', () => {
     expect(offenders).toEqual([]);
   });
 
-  test('service-worker.js is a kill-switch — purges caches + unregisters (recovers stuck clients)', () => {
-    const sw = files.find((f) => f.name === 'service-worker.js');
-    expect(sw).toBeTruthy();
-    expect(sw.code).toMatch(/caches\.delete/);
-    expect(sw.code).toMatch(/registration\.unregister/);
-    // must not reintroduce the old permanent named app-shell cache
-    expect(sw.code).not.toMatch(/CACHE_NAME\s*=\s*['"]alawael-v1['"]/);
+  test('the previously-aggressive SWs are now kill-switches (purge caches + unregister)', () => {
+    // Both files precached the shell under a fixed cache name before the fix.
+    for (const name of ['service-worker.js', 'serviceWorker.js']) {
+      const sw = files.find((f) => f.name === name);
+      expect(sw, `${name} missing — must exist as a kill-switch so stuck clients recover`).toBeTruthy();
+      expect(sw.code).toMatch(/caches\.delete/);
+      expect(sw.code).toMatch(/registration\.unregister/);
+      // must not reintroduce a permanent named app-shell cache
+      expect(sw.code).not.toMatch(/CACHE_NAME\s*=\s*['"](alawael-v1|erp-app-v1)['"]/);
+    }
   });
 });

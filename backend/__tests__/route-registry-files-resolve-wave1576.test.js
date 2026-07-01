@@ -33,17 +33,12 @@ const { ROUTES } = require('../config/unifiedRouteRegistry');
 
 // Registry `file:` targets that currently do NOT resolve. NON-login-critical.
 // Ratchet-DOWN: when the underlying mount is fixed/removed, delete its entry.
-const KNOWN_MISSING_FILES = new Set([
-  // `/api/docs` — Swagger docs. Several candidate files exist
-  // (config/swagger.js, ./swagger.js); the intended one has not been wired.
-  'routes/swagger',
-  // `/api/v1/admin/beneficiaries` — legacy. The beneficiary admin surface
-  // moved to `/api/v1/core/beneficiaries` (W1457). Repointing this at
-  // domains/core/routes/beneficiary.routes WITHOUT the beneficiaryId
-  // ownership hook could reintroduce the W1146/W1160 IDOR — deliberately
-  // left unmounted until decided.
-  'routes/beneficiary.routes',
-]);
+// BASELINE NOW EMPTY (W1600): the two dead entries — `/api/docs → routes/swagger`
+// (redundant; /api/docs is served by routes/openapi-integration.routes + app.js)
+// and `/api/v1/admin/beneficiaries → routes/beneficiary.routes` (deleted in the
+// W1457 DDD migration) — were removed from the registry, so EVERY registry
+// `file:` now resolves. Any new unresolved mount fails the test below.
+const KNOWN_MISSING_FILES = new Set([]);
 
 function resolvesToModule(file) {
   try {

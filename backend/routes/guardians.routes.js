@@ -232,7 +232,7 @@ router.get('/:id', validateId, async (req, res) => {
       ...guardianBeneficiaryClause(req.params.id),
     })
       .select('fileNumber firstName_ar lastName_ar status disabilityType branch')
-      .populate('branch', 'nameAr code')
+      .populate('branchId', 'nameAr code')
       .lean();
 
     return ok(res, { ...guardian, beneficiaries });

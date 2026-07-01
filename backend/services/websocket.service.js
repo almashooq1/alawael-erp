@@ -151,7 +151,7 @@ class WebSocketService {
     // Request current vehicle status
     socket.on('request:vehicle-status', async vehicleId => {
       try {
-        const vehicle = await Vehicle.findById(vehicleId).populate('driver', 'name email').lean();
+        const vehicle = await Vehicle.findById(vehicleId).populate('assignedDriver', 'name email').lean();
 
         if (!vehicle) {
           return socket.emit('error', { message: 'Vehicle not found' });
@@ -205,7 +205,7 @@ class WebSocketService {
         const trip = await Trip.findById(tripId)
           .populate('route')
           .populate('vehicle')
-          .populate('driver', 'name email')
+          .populate('assignedDriver', 'name email')
           .lean();
 
         if (!trip) {

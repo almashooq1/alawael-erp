@@ -24,9 +24,11 @@ class ResearchService extends BaseService {
   }
 
   /* ── List studies ── */
-  async listStudies({ status, type, piId, keyword, page = 1, limit = 20 } = {}) {
+  async listStudies({ status, type, piId, keyword, page = 1, limit = 20, branchFilter = {} } = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    const q = { isDeleted: { $ne: true } };
+    // W1602 — branchFilter = {branchId} for a restricted caller (own branch only), {} for
+    // cross-branch/HQ. Was unscoped → cross-branch read of every study.
+    const q = { isDeleted: { $ne: true }, ...branchFilter };
     if (status) q.status = status;
     if (type) q.type = type;
     if (piId) q.principalInvestigator = piId;
@@ -47,26 +49,30 @@ class ResearchService extends BaseService {
   }
 
   /* ── Get study ── */
-  async getStudy(id) {
+  async getStudy(id, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    return ResearchStudy.findById(id)
+    // W1602 — only `principalInvestigator` exists on the canonical ResearchStudy schema.
+    // The former coInvestigators.userId / researchTeam.userId / participants.beneficiaryId
+    // populates targeted paths the canonical schema does NOT declare → Mongoose strictPopulate
+    // threw on EVERY getStudy call (500, pre-existing model↔service divergence). Reduced to the
+    // real path so the branch-scoped read actually returns the study.
+    return ResearchStudy.findOne({ _id: id, ...branchFilter })
       .populate('principalInvestigator', 'name email')
-      .populate('coInvestigators.userId', 'name email')
-      .populate('researchTeam.userId', 'name email')
-      .populate('participants.beneficiaryId', 'firstName lastName fileNumber')
       .lean();
   }
 
   /* ── Update study ── */
-  async updateStudy(id, data) {
+  async updateStudy(id, data, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    return ResearchStudy.findByIdAndUpdate(id, data, { returnDocument: 'after' });
+    return ResearchStudy.findOneAndUpdate({ _id: id, ...branchFilter }, data, {
+      returnDocument: 'after',
+    });
   }
 
   /* ── Transition status ── */
-  async transitionStatus(id, newStatus, userId, reason) {
+  async transitionStatus(id, newStatus, userId, reason, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    const study = await ResearchStudy.findById(id);
+    const study = await ResearchStudy.findOne({ _id: id, ...branchFilter });
     if (!study) throw new Error('Study not found');
     const oldStatus = study.status;
     study.status = newStatus;
@@ -77,9 +83,9 @@ class ResearchService extends BaseService {
   }
 
   /* ── Enroll participant ── */
-  async enrollParticipant(studyId, participantData) {
+  async enrollParticipant(studyId, participantData, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    const study = await ResearchStudy.findById(studyId);
+    const study = await ResearchStudy.findOne({ _id: studyId, ...branchFilter });
     if (!study) throw new Error('Study not found');
 
     const count = study.participants.length;
@@ -101,9 +107,10 @@ class ResearchService extends BaseService {
   }
 
   /* ── Withdraw participant ── */
-  async withdrawParticipant(studyId, beneficiaryId, reason) {
+  async withdrawParticipant(studyId, beneficiaryId, reason, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    const study = await ResearchStudy.findById(studyId);
+    const study = await ResearchStudy.findOne({ _id: studyId, ...branchFilter });
+    if (!study) throw new Error('Study not found');
     const p = study.participants.find(pp => pp.beneficiaryId?.toString() === beneficiaryId);
     if (p) {
       p.status = 'withdrawn';
@@ -119,10 +126,10 @@ class ResearchService extends BaseService {
   }
 
   /* ── Record consent ── */
-  async recordConsent(studyId, beneficiaryId, consentStatus) {
+  async recordConsent(studyId, beneficiaryId, consentStatus, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
     return ResearchStudy.findOneAndUpdate(
-      { _id: studyId, 'participants.beneficiaryId': beneficiaryId },
+      { _id: studyId, ...branchFilter, 'participants.beneficiaryId': beneficiaryId },
       {
         $set: {
           'participants.$.consentStatus': consentStatus,
@@ -134,20 +141,20 @@ class ResearchService extends BaseService {
   }
 
   /* ── Add milestone ── */
-  async addMilestone(studyId, milestone) {
+  async addMilestone(studyId, milestone, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    return ResearchStudy.findByIdAndUpdate(
-      studyId,
+    return ResearchStudy.findOneAndUpdate(
+      { _id: studyId, ...branchFilter },
       { $push: { milestones: milestone } },
       { returnDocument: 'after' }
     );
   }
 
   /* ── Add publication ── */
-  async addPublication(studyId, publication) {
+  async addPublication(studyId, publication, branchFilter = {}) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    return ResearchStudy.findByIdAndUpdate(
-      studyId,
+    return ResearchStudy.findOneAndUpdate(
+      { _id: studyId, ...branchFilter },
       { $push: { publications: publication } },
       { returnDocument: 'after' }
     );

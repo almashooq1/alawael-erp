@@ -218,6 +218,15 @@ const researchStudySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Organization',
     },
+    // W1602 — tenant isolation. The study had no branch field, so ResearchService
+    // could not scope reads/writes → any authed user read/mutated every branch's study
+    // + enrolled-beneficiary PHI. Additive (pre-adoption, no backfill); stamped on create
+    // from effectiveBranchScope(req) and filtered via branchFilter(req) on every op.
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      index: true,
+    },
     isActive: { type: Boolean, default: true },
   },
   {

@@ -82,7 +82,7 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
     const filter = { ...branchFilter(req), date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {

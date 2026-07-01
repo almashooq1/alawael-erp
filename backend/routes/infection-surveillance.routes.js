@@ -88,7 +88,7 @@ async function hydrate(items) {
 router.get('/active', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), caseStatus: { $in: ACTIVE_STATUSES } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -110,7 +110,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -174,7 +174,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       : startOfDay(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
     const filter = { ...branchFilter(req), date: { $gte: from, $lte: to } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await InfectionSurveillanceCase.find(filter)

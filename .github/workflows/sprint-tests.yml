@@ -2145,6 +2145,8 @@ on:
       - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/header-branch-bypass-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4267,6 +4269,8 @@ on:
       - 'backend/__tests__/pharmacy-role-gates-wave1565.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/header-branch-bypass-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

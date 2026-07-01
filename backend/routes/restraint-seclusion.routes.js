@@ -98,7 +98,7 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W447
       date: { $gte: startOfDay(d), $lte: endOfDay(d) },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await RSEvent.find(filter).sort({ startTime: -1 }).lean();

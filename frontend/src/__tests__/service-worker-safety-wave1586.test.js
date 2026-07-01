@@ -22,6 +22,7 @@ const path = require('path');
 const PUBLIC_DIRS = [
   path.resolve(__dirname, '..', '..', 'public'), // frontend/public
   path.resolve(__dirname, '..', '..', '..', 'supply-chain-management', 'frontend', 'public'),
+  path.resolve(__dirname, '..', '..', '..', 'backend', 'public'), // backend serves /service-worker.js too
 ];
 
 // Strip block + line comments so a SW's own doc-comment (which may DESCRIBE the

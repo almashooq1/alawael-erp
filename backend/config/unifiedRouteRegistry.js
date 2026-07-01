@@ -82,13 +82,9 @@ const ROUTES = [
     phase: 'core',
     description: 'Landing config',
   },
-  {
-    path: '/api/docs',
-    file: 'routes/swagger',
-    auth: false,
-    phase: 'core',
-    description: 'Swagger docs',
-  },
+  // NOTE: /api/docs is served by the `routes/openapi-integration.routes` entry
+  // further down (+ app.js). The old `routes/swagger` entry here was dead
+  // (no such file) and redundant — removed (W1600).
 
   // ═══════════════════════════════════════════════════════════════════════
   // 2. AUTHENTICATION (public)
@@ -127,14 +123,12 @@ const ROUTES = [
     phase: 'core',
     description: 'Modules',
   },
-  {
-    path: '/api/v1/admin/beneficiaries',
-    file: 'routes/beneficiary.routes',
-    auth: true,
-    roles: ['admin', 'manager'],
-    phase: 'core',
-    description: 'Beneficiary CRUD',
-  },
+  // NOTE: the '/api/v1/admin/beneficiaries' entry was removed (W1600) — it
+  // pointed at `routes/beneficiary.routes`, deleted in the W1457 DDD migration
+  // (beneficiaries moved to /api/v1/core/beneficiaries). It was dead (skipped)
+  // and never mounted. The legacy admin-beneficiaries UI is superseded by
+  // web-admin; wiring a compat endpoint (with the beneficiaryId ownership hook)
+  // is a separate decision, not this dead-cruft removal.
   {
     path: '/api/v1/admin',
     file: 'routes/admin.routes',

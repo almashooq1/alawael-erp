@@ -9,8 +9,8 @@
  * requires the same roles. (compensation.model has no branchId → org-global HR
  * data; the protection is role-based, not branch-based.)
  *
- * NOTE: this restricts a previously-open read → the PR is LEFT IN REVIEW for the
- * owner to confirm the HR role set. The test locks the behavior either way.
+ * Role set owner-confirmed 2026-07-01: admin / super_admin / hr_manager / manager
+ * (the codebase's canonical HR-read set, matching the sibling leave/payroll routes).
  */
 jest.unmock('mongoose');
 jest.setTimeout(60000);
@@ -75,23 +75,20 @@ describe('W1565 — compensation GET /incentives requires an HR role', () => {
     expect(r.status).toBe(403);
   });
 
-  it('admin can list incentives (200)', async () => {
-    as('admin');
-    const r = await request(app).get('/api/compensation/incentives');
-    expect(r.status).toBe(200);
+  it('the canonical HR-read roles can list incentives (200)', async () => {
+    for (const role of ['admin', 'super_admin', 'hr_manager', 'manager']) {
+      as(role);
+      const r = await request(app).get('/api/compensation/incentives');
+      expect(r.status).toBe(200);
+    }
   });
 
-  it('manager can list incentives (200)', async () => {
-    as('manager');
-    const r = await request(app).get('/api/compensation/incentives');
-    expect(r.status).toBe(200);
-  });
-
-  it('static: GET /incentives carries an authorize gate', () => {
+  it('static: GET /incentives carries the HR-role authorize gate', () => {
     const src = fs.readFileSync(
       path.join(__dirname, '..', 'routes', 'compensation.routes.js'),
       'utf8'
     );
     expect(src).toMatch(/router\.get\('\/incentives',\s*authorize\(\[/);
+    expect(src).toMatch(/'hr_manager'/);
   });
 });

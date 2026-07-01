@@ -9,11 +9,9 @@ router.use(authenticate);
 router.use(requireBranchAccess);
 // GET /incentives — sensitive HR compensation data (every employee's bonus
 // amounts + names + performance scores). Was ungated (any authenticated user
-// could list it) while POST/PUT already require admin/manager. Gate the READ to
-// the same roles. NOTE: owner should confirm the role set (add 'hr'/'finance' if
-// those roles legitimately view compensation) — this restricts a previously-open
-// read, so the PR is shipped for review.
-router.get('/incentives', authorize(['admin', 'manager']), async (req, res) => {
+// could list it). Gated to the codebase's canonical HR-read role set (matches the
+// sibling leave/payroll routes), owner-confirmed 2026-07-01.
+router.get('/incentives', authorize(['admin', 'super_admin', 'hr_manager', 'manager']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
     const { page = 1, limit = 20, status } = req.query;

@@ -60,8 +60,10 @@ const safeError = require('../utils/safeError');
 router.get('/devices', async (req, res) => {
   try {
     const { branchId, status, isActive } = req.query;
-    const query = {};
-    if (branchId) query.branchId = branchId;
+    const bf = branchFilter(req);
+    const query = { ...bf };
+    // Restricted users pinned to own branch; only cross-branch roles may pass ?branchId.
+    if (branchId && !bf.branchId) query.branchId = branchId;
     if (status) query.status = status;
     if (isActive !== undefined) query.isActive = isActive === 'true';
 
@@ -219,8 +221,10 @@ router.post('/devices/push-data', async (req, res) => {
 router.get('/shifts', async (req, res) => {
   try {
     const { branchId, shiftType, isActive } = req.query;
-    const query = {};
-    if (branchId) query.branchId = branchId;
+    const bf = branchFilter(req);
+    const query = { ...bf };
+    // Restricted users pinned to own branch; only cross-branch roles may pass ?branchId.
+    if (branchId && !bf.branchId) query.branchId = branchId;
     if (shiftType) query.shiftType = shiftType;
     if (isActive !== undefined) query.isActive = isActive === 'true';
 
@@ -312,8 +316,10 @@ router.post('/shifts/assign', requireMfaTier(2), async (req, res) => {
 router.get('/logs', async (req, res) => {
   try {
     const { branchId, employeeId, dateFrom, dateTo, punchType, page = 1, perPage = 20 } = req.query;
-    const query = {};
-    if (branchId) query.branchId = branchId;
+    const bf = branchFilter(req);
+    const query = { ...bf };
+    // Restricted users pinned to own branch; only cross-branch roles may pass ?branchId.
+    if (branchId && !bf.branchId) query.branchId = branchId;
     if (employeeId) query.employeeId = employeeId;
     if (punchType) query.punchType = punchType;
     if (dateFrom || dateTo) {
@@ -546,8 +552,10 @@ router.post('/mobile-checkin', async (req, res) => {
 router.get('/overtime', async (req, res) => {
   try {
     const { branchId, employeeId, status, page = 1, perPage = 15 } = req.query;
-    const query = {};
-    if (branchId) query.branchId = branchId;
+    const bf = branchFilter(req);
+    const query = { ...bf };
+    // Restricted users pinned to own branch; only cross-branch roles may pass ?branchId.
+    if (branchId && !bf.branchId) query.branchId = branchId;
     if (employeeId) query.employeeId = employeeId;
     if (status) query.status = status;
 
@@ -608,7 +616,9 @@ router.put('/overtime/:id/approve', requireMfaTier(2), async (req, res) => {
 router.get('/policies', async (req, res) => {
   try {
     const { branchId } = req.query;
-    const query = branchId ? { branchId } : {};
+    const bf = branchFilter(req);
+    const query = { ...bf };
+    if (branchId && !bf.branchId) query.branchId = branchId;
     const policies = await AttendancePolicyModel.find(query).sort({ isDefault: -1, createdAt: -1 });
     res.json({ success: true, data: policies });
   } catch (err) {

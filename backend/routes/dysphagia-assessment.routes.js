@@ -119,7 +119,7 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       date: { $gte: startOfDay(d), $lte: endOfDay(d) },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await DysphagiaAssessment.find(filter).sort({ date: -1 }).lean();
@@ -153,7 +153,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.screeningTool && TOOLS.includes(String(req.query.screeningTool))) {
@@ -203,7 +203,7 @@ router.get('/unsafe', requireRole(READ_ROLES), async (req, res) => {
         { silentAspirationSuspected: true },
       ],
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     // Latest assessment per beneficiary is what matters operationally; sort
@@ -263,7 +263,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       date: { $gte: from, $lte: to },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {

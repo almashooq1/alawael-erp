@@ -42,7 +42,7 @@ const Device = require('../models/AssistiveDevice');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { escapeRegex } = require('../utils/sanitize');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
@@ -135,7 +135,7 @@ async function hydrateLoans(items) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; // W443: enforce caller's branch scope
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       // Allow narrowing to a sub-branch only if caller can already see it
       // (branchFilter constrains the OR-set; this is an AND-narrow).
       filter.branchId = req.query.branchId;
@@ -178,7 +178,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 router.get('/available', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), availability: 'available' }; // W443
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -200,7 +200,7 @@ router.get('/due-maintenance', requireRole(READ_ROLES), async (req, res) => {
       availability: { $ne: 'retired' },
       nextMaintenanceDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Device.find(filter).sort({ nextMaintenanceDue: 1 }).limit(200).lean();
@@ -219,7 +219,7 @@ router.get('/overdue-loans', requireRole(READ_ROLES), async (req, res) => {
       availability: 'loaned',
       currentLoanExpectedReturnAt: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Device.find(filter)
@@ -237,7 +237,7 @@ router.get('/overdue-loans', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; // W443
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Device.find(filter)
@@ -320,7 +320,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       category: body.category,
       manufacturer: String(body.manufacturer || '').slice(0, 100),
       modelNumber: String(body.modelNumber || '').slice(0, 100),
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       storageLocation: String(body.storageLocation || '').slice(0, 200),
       acquiredAt: body.acquiredAt ? new Date(body.acquiredAt) : null,
       acquiredFrom: String(body.acquiredFrom || '').slice(0, 200),

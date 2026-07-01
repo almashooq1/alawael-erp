@@ -105,7 +105,7 @@ function sanitizeStrings(arr, max, len) {
 router.get('/active', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), status: { $in: OPEN_STATUSES } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await PressureInjuryRecord.find(filter).sort({ stage: -1, date: 1 }).lean();
@@ -123,7 +123,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.stage && STAGES.includes(String(req.query.stage))) {
@@ -189,7 +189,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       : startOfDay(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
     const filter = { ...branchFilter(req), date: { $gte: from, $lte: to } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {

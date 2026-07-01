@@ -552,7 +552,7 @@ router.put(
  * الحصول على إحصائيات الرواتب
  * GET /api/payroll/stats/:month/:year
  */
-router.get('/stats/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/stats/:month/:year', authenticateToken, requireBranchAccess, requireRole('hr', 'admin', 'payroll'), async (req, res) => {
   try {
     const { month, year } = req.params;
 
@@ -584,7 +584,7 @@ router.get('/stats/:month/:year', authenticateToken, requireBranchAccess, async 
  * الحصول على هياكل الحوافز
  * GET /api/compensation/structures
  */
-router.get('/compensation/structures', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/compensation/structures', authenticateToken, requireBranchAccess, requireRole('hr', 'manager', 'admin'), async (req, res) => {
   try {
     const structures = await CompensationStructure.find({ isActive: true }).sort({ createdAt: -1 });
 
@@ -643,6 +643,7 @@ router.get(
   '/compensation/incentives/pending',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'manager', 'admin'),
   async (req, res) => {
     try {
       const incentives = await IndividualIncentive.getPendingIncentives();
@@ -933,7 +934,7 @@ router.get(
   '/compensation/benefits-summary/:employeeId/:year',
   authenticateToken,
   requireBranchAccess,
-  requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { employeeId, year } = req.params;
@@ -974,6 +975,7 @@ router.get(
   '/reports/wps/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;
@@ -997,6 +999,7 @@ router.get(
   '/reports/gosi/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;
@@ -1020,6 +1023,7 @@ router.get(
   '/reports/bank-transfer/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;
@@ -1043,6 +1047,7 @@ router.get(
   '/reports/department-comparison/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;
@@ -1066,6 +1071,7 @@ router.get(
   '/reports/annual-summary/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { year } = req.params;
@@ -1089,6 +1095,7 @@ router.get(
   '/reports/variance/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;
@@ -1112,6 +1119,7 @@ router.get(
   '/reports/employee-cost/:employeeId/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { employeeId, year } = req.params;
@@ -1135,6 +1143,7 @@ router.get(
   '/reports/deductions/:month/:year',
   authenticateToken,
   requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
   async (req, res) => {
     try {
       const { month, year } = req.params;

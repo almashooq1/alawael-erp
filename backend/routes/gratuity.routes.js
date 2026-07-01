@@ -243,7 +243,7 @@ router.post(
  * GET /api/gratuity/:gratuityId
  * جلب تفاصيل سجل محدد
  */
-router.get('/:gratuityId', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/:gratuityId', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
   try {
     const gratuity = await Gratuity.findById(req.params.gratuityId)
       .populate('employeeId', 'name position department')
@@ -266,7 +266,7 @@ router.get('/:gratuityId', authenticateToken, requireBranchAccess, async (req, r
  * GET /api/gratuity/employee/:employeeId
  * جلب سجلات المكافآت للموظف
  */
-router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
   try {
     const gratuities = await Gratuity.find({ employeeId: req.params.employeeId })
       .sort({ createdAt: -1 })
@@ -552,7 +552,7 @@ router.post(
  * GET /api/gratuity/:gratuityId/audit-trail
  * جلب سجل التدقيق الكامل
  */
-router.get('/:gratuityId/audit-trail', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/:gratuityId/audit-trail', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
   try {
     const auditLogs = await GratuityService.getAuditTrail(req.params.gratuityId);
 

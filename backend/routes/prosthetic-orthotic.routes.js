@@ -152,7 +152,7 @@ router.get('/overdue-followups', requireRole(READ_ROLES), async (req, res) => {
       stage: { $nin: ['completed', 'cancelled'] },
       followUpDueDate: { $ne: null, $lt: new Date() },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await ProstheticOrthoticOrder.find(filter)
@@ -173,7 +173,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.deviceCategory && CATEGORIES.includes(String(req.query.deviceCategory))) {
@@ -251,7 +251,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       : startOfDay(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
     const filter = { ...branchFilter(req), prescribedDate: { $gte: from, $lte: to } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {

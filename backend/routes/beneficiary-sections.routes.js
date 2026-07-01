@@ -74,7 +74,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
       filter.status = String(req.query.status);
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {

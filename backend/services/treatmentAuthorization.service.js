@@ -45,11 +45,13 @@ class TreatmentAuthorizationService {
   /**
    * جلب الطلبات مع التصفية
    */
-  static async getRequests(filters = {}) {
+  static async getRequests(filters = {}, branchScope = null) {
     const query = { isDeleted: false };
     if (filters.status) query.status = filters.status;
     if (filters.beneficiary) query.beneficiary = filters.beneficiary;
-    if (filters.branch) query.branch = filters.branch;
+    // W1574 — restricted callers forced to own branch (client `branch` ignored); cross/HQ honor filter.
+    if (branchScope) query.branch = branchScope;
+    else if (filters.branch) query.branch = filters.branch;
     if (filters.priority) query.priority = filters.priority;
     if (filters.requestType) query.requestType = filters.requestType;
     if (filters.insuranceProvider) query['insurance.provider'] = filters.insuranceProvider;

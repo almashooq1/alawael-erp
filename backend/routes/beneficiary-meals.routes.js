@@ -20,10 +20,12 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const MealEvent = require('../models/BeneficiaryMealEvent');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(requireBranchAccess); // W1580: reject explicit foreign branchId + set req.branchScope
 
 const READ_ROLES = [
   'admin',
@@ -79,8 +81,8 @@ async function hydrate(items) {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    const filter = { ...branchFilter(req), date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.mealType && MEAL_TYPES.includes(String(req.query.mealType))) {
@@ -99,7 +101,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await MealEvent.find({ beneficiaryId: req.params.id })
+    const items = await MealEvent.find({ ...branchFilter(req), beneficiaryId: req.params.id })
       .sort({ date: -1, servedAt: -1 })
       .limit(120)
       .lean();
@@ -113,6 +115,12 @@ router.get('/summary', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
     const match = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    // W1580: scope the aggregate for branch-restricted callers. $match does NOT auto-cast
+    // string→ObjectId, so build an explicit ObjectId (branchFilter's string would match nothing).
+    const scope = effectiveBranchScope(req);
+    if (scope && mongoose.isValidObjectId(scope)) {
+      match.branchId = new mongoose.Types.ObjectId(scope);
+    }
     const rows = await MealEvent.aggregate([
       { $match: match },
       {

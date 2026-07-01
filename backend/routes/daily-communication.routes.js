@@ -27,9 +27,11 @@ const DailyCommunicationLog = require('../models/DailyCommunicationLog');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(requireBranchAccess); // W1580: reject explicit foreign branchId + set req.branchScope
 
 const READ_ROLES = [
   'admin',
@@ -82,14 +84,14 @@ async function hydrate(items) {
 // ── GET / ───────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
     if (req.query.sectionId && mongoose.isValidObjectId(req.query.sectionId)) {
       filter.sectionId = req.query.sectionId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.parentSeen === 'true' || req.query.parentSeen === 'false') {
@@ -128,7 +130,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    const filter = { ...branchFilter(req), date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
     if (req.query.sectionId && mongoose.isValidObjectId(req.query.sectionId)) {
       filter.sectionId = req.query.sectionId;
     }
@@ -146,7 +148,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await DailyCommunicationLog.find({ beneficiaryId: req.params.id })
+    const items = await DailyCommunicationLog.find({ ...branchFilter(req), beneficiaryId: req.params.id })
       .sort({ date: -1 })
       .limit(60)
       .lean();
@@ -162,7 +164,9 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await DailyCommunicationLog.findById(req.params.id).lean();
+    // W1580: scope the single-record read so a restricted caller can't read another
+    // branch's log by guessing its id (findById had no branch check → IDOR).
+    const row = await DailyCommunicationLog.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });

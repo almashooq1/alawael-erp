@@ -42,7 +42,7 @@ const {
 } = require('../middleware/assertBranchMatch');
 
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
@@ -164,7 +164,7 @@ router.post(
 router.get(
   '/rules/:id',
   asyncHandler(async (req, res) => {
-    const rule = await ClinicalRule.findOne({ _id: req.params.id, deletedAt: null });
+    const rule = await ClinicalRule.findOne({ _id: req.params.id, deletedAt: null, ...branchFilter(req) });
     if (!rule) return res.status(404).json({ message: 'القاعدة السريرية غير موجودة' });
     res.json({ data: rule });
   })
@@ -175,7 +175,7 @@ router.put(
   authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const rule = await ClinicalRule.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { returnDocument: 'after', runValidators: true }
     );
@@ -189,7 +189,7 @@ router.delete(
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     const rule = await ClinicalRule.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { deletedAt: new Date(), updatedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -320,7 +320,7 @@ router.patch(
   '/alerts/:id/acknowledge',
   asyncHandler(async (req, res) => {
     const alert = await CdssAlert.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       {
         status: 'acknowledged',
         acknowledgedAt: new Date(),
@@ -342,7 +342,7 @@ router.patch(
       return res.status(400).json({ message: 'سبب التجاوز مطلوب ولا يقل عن 10 حروف' });
     }
     const alert = await CdssAlert.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       {
         status: 'overridden',
         overrideReason,
@@ -376,7 +376,7 @@ router.patch(
   '/alerts/:id/resolve',
   asyncHandler(async (req, res) => {
     const alert = await CdssAlert.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { status: 'resolved', resolvedAt: new Date(), updatedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -433,7 +433,7 @@ router.post(
 router.get(
   '/drugs/:id',
   asyncHandler(async (req, res) => {
-    const drug = await DrugLibrary.findOne({ _id: req.params.id, deletedAt: null });
+    const drug = await DrugLibrary.findOne({ _id: req.params.id, deletedAt: null, ...branchFilter(req) });
     if (!drug) return res.status(404).json({ message: 'الدواء غير موجود' });
     res.json({ data: drug });
   })
@@ -444,7 +444,7 @@ router.put(
   authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const drug = await DrugLibrary.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { returnDocument: 'after', runValidators: true }
     );
@@ -458,7 +458,7 @@ router.delete(
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     const drug = await DrugLibrary.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { deletedAt: new Date(), updatedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -592,6 +592,7 @@ router.get(
     const assessment = await CdssRiskAssessment.findOne({
       _id: req.params.id,
       deletedAt: null,
+      ...branchFilter(req),
     })
       .populate('beneficiaryId', 'fullName fullNameAr')
       .populate('assessedBy', 'name');
@@ -660,7 +661,7 @@ router.patch(
   '/rehab-suggestions/:id/accept',
   asyncHandler(async (req, res) => {
     const suggestion = await RehabPlanSuggestion.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       {
         status: 'accepted',
         acceptedAt: new Date(),
@@ -692,7 +693,7 @@ router.patch(
   '/rehab-suggestions/:id/reject',
   asyncHandler(async (req, res) => {
     const suggestion = await RehabPlanSuggestion.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       { status: 'rejected', clinicianNotes: req.body.reason, updatedBy: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -742,7 +743,7 @@ router.patch(
   '/differential-diagnoses/:id/confirm',
   asyncHandler(async (req, res) => {
     const diagnosis = await DifferentialDiagnosis.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       {
         status: 'confirmed',
         confirmedDiagnosisId: req.body.confirmedDiagnosisId,

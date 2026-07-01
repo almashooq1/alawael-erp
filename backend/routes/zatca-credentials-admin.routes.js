@@ -33,12 +33,19 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 const ZatcaCredential = require('../models/zatca/ZatcaCredential');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
 router.use(authenticateToken);
+// W1607: ZATCA e-invoicing credentials are per-branch. READ/WRITE_ROLES include branch-level
+// roles (manager/finance/accountant) which are NOT in CROSS_BRANCH_ROLES → restricted. Pre-W1607
+// every findById/list/create was unscoped → a branch caller could read/modify/delete ANOTHER
+// branch's credentials by id. requireBranchAccess sets req.branchScope; branchFilter scopes below.
+router.use(requireBranchAccess);
 
 const READ_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'finance', 'accountant'];
 const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'finance'];
@@ -104,8 +111,9 @@ function redact(doc) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const { branchId, isActive, q, page = 1, limit = 25 } = req.query;
-    const filter = {};
-    if (branchId && mongoose.Types.ObjectId.isValid(branchId)) filter.branchId = branchId;
+    const filter = { ...branchFilter(req) }; // W1607: scope the list to the caller's branch
+    if (!filter.branchId && branchId && mongoose.Types.ObjectId.isValid(branchId))
+      filter.branchId = branchId;
     if (isActive !== undefined && isActive !== '') filter.isActive = String(isActive) === 'true';
     if (q) {
       const rx = { $regex: String(q), $options: 'i' };
@@ -141,7 +149,7 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_id' });
     }
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
     return res.json({ ok: true, row: redact(row) });
   } catch (err) {
@@ -159,6 +167,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(body.branchId)) {
       return res.status(400).json({ ok: false, error: 'invalid_branch_id' });
     }
+    // W1607: a branch-restricted caller can only create a credential for their OWN branch;
+    // cross-branch roles may target the branch they named.
+    const scope = effectiveBranchScope(req);
+    if (scope) body.branchId = String(scope);
 
     const existing = await ZatcaCredential.findOne({ branchId: body.branchId });
     if (existing) {
@@ -196,7 +208,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       }
     }
 
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
 
     Object.assign(row, updates);
@@ -218,7 +230,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_id' });
     }
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
     row.isActive = false;
     await row.save();
@@ -234,7 +246,7 @@ router.post('/:id/restore', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_id' });
     }
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
     row.isActive = true;
     await row.save();
@@ -255,7 +267,7 @@ router.post('/:id/onboard', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_id' });
     }
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
 
     // The existing zatca-phase2.service exposes performOnboarding.
@@ -275,7 +287,7 @@ router.post('/:id/onboard', requireRole(WRITE_ROLES), async (req, res) => {
     });
 
     // Re-fetch to return the latest persisted state (service mutated it).
-    const fresh = await ZatcaCredential.findById(req.params.id);
+    const fresh = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     return res.json({ ok: true, row: redact(fresh), serviceResult: result });
   } catch (err) {
     return safeError(res, err, 'failed to onboard credential', { shape: 'ok' });
@@ -288,7 +300,7 @@ router.post('/:id/production', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_id' });
     }
-    const row = await ZatcaCredential.findById(req.params.id);
+    const row = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
 
     const zatca = require('../services/zatca-phase2.service');
@@ -303,7 +315,7 @@ router.post('/:id/production', requireRole(WRITE_ROLES), async (req, res) => {
       actor: req.user?._id,
     });
 
-    const fresh = await ZatcaCredential.findById(req.params.id);
+    const fresh = await ZatcaCredential.findOne({ _id: req.params.id, ...branchFilter(req) });
     return res.json({ ok: true, row: redact(fresh), serviceResult: result });
   } catch (err) {
     return safeError(res, err, 'failed to obtain production csid', { shape: 'ok' });

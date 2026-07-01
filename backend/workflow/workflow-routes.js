@@ -345,7 +345,7 @@ router.get('/tasks', authMiddleware, async (req, res) => {
 
     // Count by status
     const counts = await TaskInstance.aggregate([
-      { $match: { assignee: mongoose.Types.ObjectId(req.user.id) } },
+      { $match: { assignee: new mongoose.Types.ObjectId(req.user.id) } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
 

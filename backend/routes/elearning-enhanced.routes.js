@@ -561,7 +561,7 @@ router.get(
           branchId: filter.branchId,
           status: 'verified',
           deletedAt: null,
-          ...(userId ? { userId: require('mongoose').Types.ObjectId(userId) } : {}),
+          ...(userId ? { userId: new (require('mongoose').Types.ObjectId)(userId) } : {}),
           ...(year ? { year: Number(year) } : {}),
         },
       },

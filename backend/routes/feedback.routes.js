@@ -53,7 +53,7 @@ router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { therapist, startDate, endDate } = req.query;
     const match = { ...branchFilter(req) };
-    if (therapist) match.therapist = require('mongoose').Types.ObjectId(therapist);
+    if (therapist) match.therapist = new (require('mongoose').Types.ObjectId)(therapist);
     if (startDate || endDate) {
       match.createdAt = {};
       if (startDate) match.createdAt.$gte = new Date(startDate);

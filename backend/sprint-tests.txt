@@ -1149,3 +1149,4 @@ __tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js
 __tests__/transport-vehicle-delete-status-enum-wave1562.test.js
 __tests__/measurements-approve-idor-wave1563.test.js
 __tests__/esignature-pdf-download-idor-wave1564.test.js
+__tests__/objectid-new-mongoose9-wave1565.test.js

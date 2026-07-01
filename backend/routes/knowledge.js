@@ -366,7 +366,7 @@ router.post('/articles/:id/rate', authMiddleware, requireBranchAccess, async (re
 
     // Update article ratings
     const ratings = await KnowledgeRating.aggregate([
-      { $match: { article: new require('mongoose').Types.ObjectId(req.params.id) } },
+      { $match: { article: new (require('mongoose').Types.ObjectId)(req.params.id) } },
       {
         $group: {
           _id: null,

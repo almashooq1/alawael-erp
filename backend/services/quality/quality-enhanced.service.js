@@ -347,7 +347,7 @@ class QualityEnhancedService {
       Incident.aggregate([
         {
           $match: {
-            branchId: require('mongoose').Types.ObjectId(branchId),
+            branchId: new (require('mongoose').Types.ObjectId)(branchId),
             createdAt: { $gte: startDate },
           },
         },
@@ -368,7 +368,7 @@ class QualityEnhancedService {
       Complaint.aggregate([
         {
           $match: {
-            branchId: require('mongoose').Types.ObjectId(branchId),
+            branchId: new (require('mongoose').Types.ObjectId)(branchId),
             resolvedAt: { $ne: null },
             createdAt: { $gte: startDate },
           },

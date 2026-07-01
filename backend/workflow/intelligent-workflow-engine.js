@@ -844,7 +844,7 @@ class IntelligentWorkflowEngine {
   async getWorkflowStatistics(workflowId = null, startDate = null, endDate = null) {
     const matchStage = {};
 
-    if (workflowId) matchStage.definition = mongoose.Types.ObjectId(workflowId);
+    if (workflowId) matchStage.definition = new mongoose.Types.ObjectId(workflowId);
     if (startDate || endDate) {
       matchStage.startedAt = {};
       if (startDate) matchStage.startedAt.$gte = new Date(startDate);
@@ -884,7 +884,7 @@ class IntelligentWorkflowEngine {
   async getTaskStatistics(userId = null, startDate = null, endDate = null) {
     const matchStage = {};
 
-    if (userId) matchStage.assignee = mongoose.Types.ObjectId(userId);
+    if (userId) matchStage.assignee = new mongoose.Types.ObjectId(userId);
     if (startDate || endDate) {
       matchStage.createdAt = {};
       if (startDate) matchStage.createdAt.$gte = new Date(startDate);

@@ -2129,8 +2129,12 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
+      - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-gps-vehicle-branch-wave1574.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
+      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4237,8 +4241,12 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
+      - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-gps-vehicle-branch-wave1574.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
+      - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

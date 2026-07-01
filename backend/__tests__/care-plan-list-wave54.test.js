@@ -267,6 +267,13 @@ describe('GET / route — care-plan list', () => {
     app.use(express.json());
     app.use((req, _res, next) => {
       req.user = { id: 'U-1', role, ...(branchId ? { branchId } : {}) };
+      // W1551: simulate requireBranchAccess output. The JWT never carries branchId
+      // in prod, so list scoping reads req.branchScope (via effectiveBranchScope),
+      // not req.user.branchId. A test that passes a branchId models a branch-restricted
+      // user; no branchId models a cross-branch role (allBranches).
+      req.branchScope = branchId
+        ? { restricted: true, branchId, allBranches: false }
+        : { restricted: false, branchId: null, allBranches: true };
       next();
     });
     app.use('/api/v1/care-plans', createCarePlanRouter({ service: svc, governance: gov }));

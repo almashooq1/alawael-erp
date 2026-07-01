@@ -998,9 +998,11 @@ function createCarePlanService({
     };
   }
 
-  async function getVersionHistory(planId) {
+  async function getVersionHistory(planId, branchId = null) {
     if (typeof planVersionModel.find !== 'function') return [];
-    const q = planVersionModel.find({ planId });
+    // W1551: when the caller is branch-restricted, scope to their branch so a
+    // logical planId from another branch can't enumerate its version history.
+    const q = planVersionModel.find({ planId, ...(branchId ? { branchId } : {}) });
     // Support both real Mongoose and the lightweight test mock
     if (q && typeof q.sort === 'function') {
       const sorted = q.sort({ versionNumber: -1 });

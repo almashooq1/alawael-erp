@@ -1200,3 +1200,4 @@ __tests__/early-intervention-branch-isolation-wave1599.test.js
 __tests__/smart-attendance-model-path-wave1602.test.js
 __tests__/early-intervention-subresource-isolation-wave1602.test.js
 __tests__/portfolio-speech-idor-wave1603.test.js
+__tests__/early-intervention-create-massassign-wave1605.test.js

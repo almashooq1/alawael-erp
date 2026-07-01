@@ -1850,6 +1850,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const { since, days } = periodFilter(req.query);
     const driverTrips = await Trip.find({
+      ...branchScope(req), // W1601: scope to caller's branch (foreign driver → empty, no leak)
       driver_id: req.params.driverId,
       deleted_at: null,
       trip_date: { $gte: since },
@@ -1886,6 +1887,7 @@ router.get(
     startOfDay.setHours(0, 0, 0, 0);
 
     const todayTrips = await Trip.find({
+      ...branchScope(req), // W1601: scope to caller's branch (no cross-branch fatigue read)
       driver_id: req.params.driverId,
       deleted_at: null,
       trip_date: { $gte: startOfDay },
@@ -1923,6 +1925,7 @@ router.get(
 
     // اجمع كل السائقين الذين قادوا في الفترة
     const trips = await Trip.find({
+      ...branchScope(req), // W1601: leaderboard is per-branch (no cross-branch driver names/phones/scores)
       deleted_at: null,
       trip_date: { $gte: since },
     })

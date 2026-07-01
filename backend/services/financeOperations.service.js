@@ -21,6 +21,24 @@ const CreditNote = require('../models/CreditNote');
 const logger = require('../utils/logger');
 const escapeRegex = require('../utils/escapeRegex');
 
+// W1590 — anti-mass-assignment for Invoice create/update. These fields are server-controlled
+// (lifecycle status, ZATCA envelope/hash, payment audit, tenant branch, issuer, invoice number)
+// and must NEVER be settable from the caller payload — otherwise a caller could forge
+// status:'PAID'/'ISSUED', forge a ZATCA hash/envelope, mark an invoice paid, or re-home it to
+// another branch. Status moves only via the pay/cancel transitions; branchId derives from the
+// beneficiary (Invoice pre-save hook). Mirrors the invoices-admin.routes.js whitelist (W1551).
+// NOTE: subTotal/totalAmount are deliberately NOT stripped — the model requires them and the
+// caller-supplied-totals-without-items undercharge is a separate product-decision follow-up
+// (whether manual-total invoices with no line items are permitted).
+const INVOICE_CALLER_STRIP = [
+  'status', 'zatca', 'paidAt', 'paidBy', 'paidAmount', 'balance', 'paymentMethod',
+  'branchId', 'issuer', 'invoiceNumber',
+];
+function stripInvoiceCallerControlled(data) {
+  if (data && typeof data === 'object') for (const k of INVOICE_CALLER_STRIP) delete data[k];
+  return data;
+}
+
 // ─── Helper: Standard list with pagination ───────────────────────────────────
 const paginate = async (Model, filter, query, populateFields = '') => {
   const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = query;
@@ -71,6 +89,7 @@ class FinanceOperationsService {
   }
 
   async createInvoice(data, userId) {
+    stripInvoiceCallerControlled(data); // W1590 — server owns status/totals/zatca/branch/issuer
     const year = new Date().getFullYear();
     data.issuer = userId;
 
@@ -109,7 +128,7 @@ class FinanceOperationsService {
     if (['PAID', 'CANCELLED'].includes(invoice.status)) {
       throw Object.assign(new Error('لا يمكن تعديل فاتورة مدفوعة أو ملغاة'), { status: 400 });
     }
-    delete data.invoiceNumber;
+    stripInvoiceCallerControlled(data); // W1590 — block forging status/totals/zatca/branch on update
     delete data._id;
 
     // Recalculate totals if items changed

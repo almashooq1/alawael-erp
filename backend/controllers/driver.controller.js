@@ -108,8 +108,8 @@ class DriverController {
       }
 
       const drivers = await Driver.find(query)
-        .populate('userId', 'name email phone')
-        .populate('manager', 'name email')
+        
+        
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .sort(sortBy);
@@ -140,8 +140,8 @@ class DriverController {
       const { id } = req.params;
 
       const driver = await Driver.findById(id)
-        .populate('userId', 'name email phone')
-        .populate('manager', 'name email')
+        
+        
         .populate('assignedVehicles.vehicle', 'vehicleNumber plateNumber type');
 
       if (!driver) {
@@ -177,8 +177,8 @@ class DriverController {
         returnDocument: 'after',
         runValidators: true,
       })
-        .populate('userId', 'name email phone')
-        .populate('manager', 'name email');
+        
+        ;
 
       if (!driver) {
         return res.status(404).json({

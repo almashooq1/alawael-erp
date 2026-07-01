@@ -117,7 +117,7 @@ router.get(
     const total = await Appointment.countDocuments(filter);
     const appointments = await Appointment.find(filter)
       .populate('beneficiary_id', 'full_name_ar file_number phone')
-      .populate('therapist_id', 'name specialization')
+      .populate('requested_therapist_id', 'name specialization')
       .populate('room_id', 'room_name room_number')
       .sort({ appointment_date: 1, start_time: 1 })
       .skip(skip)
@@ -635,7 +635,7 @@ router.get(
 
     const recurrences = await AppointmentRecurrence.find(filter)
       .populate('beneficiary_id', 'full_name_ar file_number')
-      .populate('therapist_id', 'name specialization')
+      .populate('requested_therapist_id', 'name specialization')
       .sort({ created_at: -1 });
 
     res.json({ success: true, data: recurrences, count: recurrences.length });
@@ -905,9 +905,9 @@ router.get(
         'beneficiary_id',
         'full_name_ar file_number date_of_birth disability_type disability_severity'
       )
-      .populate('therapist_id', 'name specialization')
+      .populate('requested_therapist_id', 'name specialization')
       .populate('branch_id', 'name_ar')
-      .populate('referred_by', 'name');
+      ;
     if (!entry) return res.status(404).json({ success: false, message: 'الإدخال غير موجود' });
     res.json({ success: true, data: entry });
   })

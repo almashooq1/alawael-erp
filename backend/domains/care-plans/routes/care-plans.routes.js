@@ -45,6 +45,38 @@ try {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// W1591 — UnifiedCarePlan lifecycle (approve/activate/reject) is driven by dedicated
+// endpoints (/approve → activatePlan sets status:'active'; /reject). But the generic
+// PUT /:planId did findByIdAndUpdate($set: req.body) with no whitelist, so a caller could
+// PUT { status:'active', approvedBy, approvedAt } to SELF-APPROVE/activate a care plan
+// bypassing the approval endpoint, or tamper the integrity seals (evidenceHash/signatureChain),
+// version history, audit (createdBy), or soft-delete. createPlan is already SAFE (explicit
+// payload, status forced 'draft'). Strip server/approval/integrity fields on update; block
+// self-activation to 'active' (other lifecycle transitions stay settable).
+const CAREPLAN_SERVER_FIELDS = [
+  '_id',
+  'branchId',
+  'createdBy',
+  'lastModifiedBy',
+  'approvedBy',
+  'approvedAt',
+  'approvals',
+  'version',
+  'previousVersionId',
+  'evidenceHash',
+  'signatureChain',
+  'isDeleted',
+];
+function stripCarePlanFields(body) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!CAREPLAN_SERVER_FIELDS.includes(k)) clean[k] = body[k];
+  }
+  // activation is approval-only (/approve → activatePlan stamps status:'active')
+  if (clean.status === 'active') delete clean.status;
+  return clean;
+}
+
 const requireService = (req, res, next) => {
   if (!carePlansService) {
     return res.status(503).json({ success: false, message: 'CarePlansService unavailable' });
@@ -178,7 +210,10 @@ router.put(
   requireService,
   validate(validateUpdateCarePlan),
   asyncHandler(async (req, res) => {
-    const plan = await carePlansService.updatePlan(req.params.planId, req.body);
+    const plan = await carePlansService.updatePlan(
+      req.params.planId,
+      stripCarePlanFields(req.body)
+    );
     res.json({ success: true, data: plan });
   })
 );

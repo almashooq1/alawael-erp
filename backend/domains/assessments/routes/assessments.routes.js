@@ -45,6 +45,38 @@ try {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// W1582 — the completion/scoring outputs of a ClinicalAssessment are set ONLY by the
+// dedicated PUT /:assessmentId/complete endpoint (completeAssessment stamps status:'completed'
+// + score + scoreBreakdown + interpretation + results + summary + recommendations + duration).
+// The generic PUT /:assessmentId did findByIdAndUpdate($set: req.body) with no whitelist, so a
+// caller could FORGE a completed clinical assessment with fabricated scores. Strip those (+ the
+// identity/server fields) from the generic update; scoring stays complete-only.
+const ASSESSMENT_PROTECTED_FIELDS = [
+  '_id',
+  'branchId',
+  'beneficiary',
+  'beneficiaryId',
+  'status',
+  'score',
+  'scoreBreakdown',
+  'interpretation',
+  'results',
+  'summary',
+  'recommendations',
+  'duration',
+  'completedBy',
+  'completedAt',
+  'createdBy',
+  'isDeleted',
+];
+function stripAssessmentFields(body) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!ASSESSMENT_PROTECTED_FIELDS.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 /* ─── Service guard ───────────────────────────────────────────────────────── */
 const requireService = (req, res, next) => {
   if (!assessmentsService) {
@@ -133,7 +165,10 @@ router.put(
   requireService,
   validate(validateUpdateAssessment),
   asyncHandler(async (req, res) => {
-    const assessment = await assessmentsService.updateAssessment(req.params.assessmentId, req.body);
+    const assessment = await assessmentsService.updateAssessment(
+      req.params.assessmentId,
+      stripAssessmentFields(req.body)
+    );
     res.json({ success: true, data: assessment });
   })
 );

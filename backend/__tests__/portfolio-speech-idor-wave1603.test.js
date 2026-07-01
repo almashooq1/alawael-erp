@@ -36,4 +36,17 @@ describe('W1603 portfolio + speech branch-scoped reads', () => {
     // no branch-CHECK still keyed off a bare req.user.branchId compare
     expect(s).not.toMatch(/const userBranch = req\.user\?\.branchId/);
   });
+
+  test('notification-enhanced scopes broadcast/escalation reads by branch', () => {
+    const s = read('notification-enhanced.routes.js');
+    expect(s).toMatch(/branchFilter/);
+    expect(s).not.toMatch(/BroadcastMessage\.findById\(\s*req\.params\.id\s*\)/);
+    expect(s).not.toMatch(/Escalation\.findById\(\s*req\.params\.id\s*\)/);
+  });
+
+  test('maintenance scopes the request read by branch', () => {
+    const s = read('maintenance.js');
+    expect(s).toMatch(/branchFilter/);
+    expect(s).not.toMatch(/MaintenanceRequest\.findById\(\s*req\.params\.id\s*\)/);
+  });
 });

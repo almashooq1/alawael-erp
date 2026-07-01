@@ -4,7 +4,7 @@ const express = require('express');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
 const safeError = require('../utils/safeError');
@@ -184,7 +184,8 @@ router.post('/broadcasts', authenticate, requireBranchAccess, async (req, res) =
 router.get('/broadcasts/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
-    const broadcast = await BroadcastMessage.findById(req.params.id);
+    // W1603: scope by branch so a restricted caller can't read another branch's broadcast by id.
+    const broadcast = await BroadcastMessage.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!broadcast) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
     res.json({ success: true, data: broadcast });
   } catch (err) {
@@ -280,7 +281,8 @@ router.post('/escalations', authenticate, requireBranchAccess, async (req, res) 
 router.get('/escalations/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
-    const escalation = await Escalation.findById(req.params.id);
+    // W1603: scope by branch so a restricted caller can't read another branch's escalation by id.
+    const escalation = await Escalation.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!escalation) return res.status(404).json({ success: false, message: 'التصعيد غير موجود' });
     res.json({ success: true, data: escalation });
   } catch (err) {

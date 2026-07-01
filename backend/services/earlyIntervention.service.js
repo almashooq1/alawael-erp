@@ -43,6 +43,24 @@ const scopedFilter = (base, branchId) =>
 const sameBranchOrLegacy = (doc, branchId) =>
   !branchId || !doc || !doc.branchId || String(doc.branchId) === String(branchId);
 
+// W1605: lifecycle/workflow fields that must NOT be settable at create time —
+// each carries a schema default or is set only via its own review / consent /
+// discharge flow. Stripping them from the create body stops a caller forging an
+// ELIGIBLE eligibility, a DISCHARGED child, or already-obtained parental
+// consent/signature on an IFSP. (Clinical INPUT like overallResult / scores stays;
+// createdBy/branchId are stamped server-side after the spread and are unaffected.)
+const CREATE_STRIP = {
+  child: ['status', 'eligibilityStatus', 'eligibilityDate', 'dischargeDate', 'dischargeReason'],
+  screening: ['status'],
+  milestone: ['status'],
+  ifsp: ['status', 'parentConsent', 'parentSignature'],
+  referral: ['status', 'parentConsent'],
+};
+const stripCreate = (data, resource) => {
+  if (data) for (const k of CREATE_STRIP[resource]) delete data[k];
+  return data;
+};
+
 class EarlyInterventionService {
   // ═══════════════════════════════════════════════════════════════════════════
   // CHILDREN — إدارة ملفات الأطفال
@@ -51,6 +69,7 @@ class EarlyInterventionService {
   async createChild(data, userId, branchId) {
     data.createdBy = userId;
     if (branchId) data.branchId = branchId; // W1599: stamp caller's branch
+    stripCreate(data, 'child'); // W1605
     const child = new EarlyInterventionChild(data);
     await child.save();
     logger.info(`[EIS] Child created: ${child.childNumber} by user ${userId}`);
@@ -200,6 +219,7 @@ class EarlyInterventionService {
 
     data.createdBy = userId;
     if (branchId) data.branchId = branchId; // W1599
+    stripCreate(data, 'screening'); // W1605
     const screening = new DevelopmentalScreening(data);
     await screening.save();
     logger.info(
@@ -324,6 +344,7 @@ class EarlyInterventionService {
 
     data.createdBy = userId;
     if (branchId) data.branchId = branchId; // W1599
+    stripCreate(data, 'milestone'); // W1605
     const milestone = new DevelopmentalMilestone(data);
     await milestone.save();
     logger.info(`[EIS] Milestone created for child ${child.childNumber}: ${data.milestone}`);
@@ -474,6 +495,7 @@ class EarlyInterventionService {
 
     data.createdBy = userId;
     if (branchId) data.branchId = branchId; // W1599
+    stripCreate(data, 'ifsp'); // W1605
     const ifsp = new IFSP(data);
     await ifsp.save();
     logger.info(`[EIS] IFSP created: ${ifsp.planNumber} for child ${child.childNumber}`);
@@ -606,6 +628,7 @@ class EarlyInterventionService {
 
     data.createdBy = userId;
     if (branchId) data.branchId = branchId; // W1599
+    stripCreate(data, 'referral'); // W1605
     const referral = new EarlyReferral(data);
     await referral.save();
     logger.info(`[EIS] Referral created: ${referral.referralNumber}`);

@@ -63,7 +63,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const result = await service.listLeaves(req.query);
+    const result = await service.listLeaves(req.query, effectiveBranchScope(req));
     res.json({ success: true, ...result });
   })
 );
@@ -74,6 +74,8 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    // W1569 — a restricted caller may only file a leave for an employee in their branch.
+    await enforceEmployeeBranch(req, req.body.employeeId);
     const leave = await service.requestLeave({
       ...req.body,
       createdBy: req.user?.id || req.user?._id,
@@ -105,7 +107,8 @@ router.post(
       req.params.id,
       req.user?.id || req.user?._id,
       req.user?.name || 'Manager',
-      req.body.comments
+      req.body.comments,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -122,7 +125,8 @@ router.post(
       req.params.id,
       req.user?.id || req.user?._id,
       req.user?.name || 'HR',
-      req.body.comments
+      req.body.comments,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -140,7 +144,8 @@ router.post(
       req.user?.id || req.user?._id,
       req.user?.name || 'Reviewer',
       req.body.comments,
-      req.body.stage
+      req.body.stage,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -155,7 +160,8 @@ router.post(
     const leave = await service.cancelLeave(
       req.params.id,
       req.user?.id || req.user?._id,
-      req.body.reason
+      req.body.reason,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })

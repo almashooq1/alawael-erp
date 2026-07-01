@@ -2173,6 +2173,8 @@ on:
       - 'backend/__tests__/transport-trip-complete-dropoff-wave1585.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/employee-create-massassign-role-gate-wave1586.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mdt-subdoc-massassign-wave1587.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4323,6 +4325,8 @@ on:
       - 'backend/__tests__/transport-trip-complete-dropoff-wave1585.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/employee-create-massassign-role-gate-wave1586.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mdt-subdoc-massassign-wave1587.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

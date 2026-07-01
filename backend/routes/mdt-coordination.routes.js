@@ -48,6 +48,22 @@ const safeUpdateBody = body => {
   return out;
 };
 
+// The nested-subdoc PATCH/PUT handlers used Object.assign(subdoc, stripUpdateMeta(body)) —
+// which (unlike safeUpdateBody) does NOT strip domain-privileged fields. Route those
+// through their dedicated endpoints instead of letting a generic edit forge them:
+//   • goal.progress / status / achievedDate / progressNotes → owned by
+//     PATCH /plans/:id/goals/:goalId/progress (0–100 validation, auto-ACHIEVED at
+//     100%, progressNotes audit trail). The generic PUT let a caller set status
+//     'ACHIEVED' without progress, forge achievedDate, or skip the audit note.
+//   • case.decisions → owned by POST /meetings/:id/cases/:caseId/decisions.
+const GOAL_PRIVILEGED = ['progress', 'status', 'achievedDate', 'progressNotes'];
+const CASE_PRIVILEGED = ['decisions'];
+const stripSubdocUpdate = (body, privileged) => {
+  const out = stripUpdateMeta(body);
+  for (const k of privileged) delete out[k];
+  return out;
+};
+
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -284,7 +300,7 @@ router.patch(
       const caseItem = meeting.cases.id(req.params.caseId);
       if (!caseItem) return res.status(404).json({ success: false, message: 'الحالة غير موجودة' });
 
-      Object.assign(caseItem, stripUpdateMeta(req.body));
+      Object.assign(caseItem, stripSubdocUpdate(req.body, CASE_PRIVILEGED));
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث بيانات الحالة' });
     } catch (error) {
@@ -641,7 +657,7 @@ router.put(
       const goal = plan.goals.id(req.params.goalId);
       if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
 
-      Object.assign(goal, stripUpdateMeta(req.body));
+      Object.assign(goal, stripSubdocUpdate(req.body, GOAL_PRIVILEGED));
       await plan.save();
       res.json({ success: true, data: plan, message: 'تم تحديث الهدف بنجاح' });
     } catch (error) {

@@ -130,7 +130,8 @@ class Beneficiary360Service {
       id: b._id,
       fileNumber: b.fileNumber || b.mrn,
       mrn: b.mrn,
-      nationalId: b.nationalId,
+      // W1563 — PDPL: mask national id in the 360 summary (this surface has no role gate).
+      nationalId: b.nationalId ? '•••••' + String(b.nationalId).slice(-4) : null,
       name:
         b.personalInfo?.fullNameAr ||
         `${b.personalInfo?.firstName?.ar || b.firstName || ''} ${b.personalInfo?.lastName?.ar || b.lastName || ''}`.trim(),
@@ -356,26 +357,44 @@ class Beneficiary360Service {
 
     if (!plan) return { hasPlan: false };
 
-    // Count goals and interventions per section
+    // W1567 — count goals/interventions per DOMAIN sub-section. UnifiedCarePlan nests
+    // sections as plan.<group>.domains.<name> (each a sectionSchema with goals/
+    // interventions/frequency/specialistId), NOT plan.<key>.goals — the old
+    // ['educational','therapeutic','lifeSkills','behavioral','multidisciplinary'] loop read
+    // .goals on the wrapper (always undefined → every count 0) and 'behavioral'/
+    // 'multidisciplinary' aren't even top-level keys. Global goals/interventions live at the
+    // plan root. approvalStatus is not a field — derived from the approvals[] array.
     const sections = {};
-    const sectionKeys = [
-      'educational',
-      'therapeutic',
-      'lifeSkills',
-      'behavioral',
-      'multidisciplinary',
-    ];
-    for (const key of sectionKeys) {
-      const section = plan[key];
-      if (section) {
-        sections[key] = {
-          goalsCount: section.goals?.length || 0,
-          interventionsCount: section.interventions?.length || 0,
+    let totalGoals = (plan.globalGoals || []).length;
+    let totalInterventions = (plan.globalInterventions || []).length;
+    for (const group of ['educational', 'therapeutic', 'lifeSkills']) {
+      const domains = plan[group]?.domains;
+      if (!domains) continue;
+      for (const [name, section] of Object.entries(domains)) {
+        if (!section) continue;
+        const goalsCount = section.goals?.length || 0;
+        const interventionsCount = section.interventions?.length || 0;
+        sections[`${group}.${name}`] = {
+          name: section.name || name,
+          goalsCount,
+          interventionsCount,
           frequency: section.frequency,
-          specialist: section.specialist,
+          specialistId: section.specialistId || null,
         };
+        totalGoals += goalsCount;
+        totalInterventions += interventionsCount;
       }
     }
+
+    const approvals = plan.approvals || [];
+    const approvalStatus =
+      approvals.length === 0
+        ? 'none'
+        : approvals.some(a => a.status === 'rejected')
+          ? 'rejected'
+          : approvals.every(a => a.status === 'approved')
+            ? 'approved'
+            : 'pending';
 
     return {
       hasPlan: true,
@@ -384,10 +403,10 @@ class Beneficiary360Service {
       startDate: plan.startDate,
       endDate: plan.endDate,
       sections,
-      totalGoals: Object.values(sections).reduce((s, sec) => s + sec.goalsCount, 0),
-      totalInterventions: Object.values(sections).reduce((s, sec) => s + sec.interventionsCount, 0),
+      totalGoals,
+      totalInterventions,
       nextReviewDate: plan.nextReviewDate,
-      approvalStatus: plan.approvalStatus,
+      approvalStatus,
     };
   }
 
@@ -416,7 +435,9 @@ class Beneficiary360Service {
       // الأخيرة
       ClinicalSession.find({
         beneficiaryId: bid,
-        status: { $in: ['completed', 'documented'] },
+        // W1567 — 'documented' is not a ClinicalSession.status enum value (completion is
+        // 'completed'; documentation is tracked separately via documentedAt) → matched none.
+        status: { $in: ['completed'] },
       })
         .sort({ scheduledDate: -1 })
         .limit(limit)
@@ -443,8 +464,11 @@ class Beneficiary360Service {
     const mapSession = s => ({
       id: s._id,
       type: s.type,
+      specialty: s.specialty, // W1567 — clinical discipline (was omitted from the widget)
       scheduledDate: s.scheduledDate,
-      duration: s.duration,
+      // W1567 — schema has scheduledDurationMinutes (planned) + actualDurationMinutes
+      // (completed); there is no `duration` field, so the widget showed a blank duration.
+      duration: s.actualDurationMinutes ?? s.scheduledDurationMinutes,
       therapist: s.therapistId,
       status: s.status,
       attendanceStatus: s.attendance?.status,

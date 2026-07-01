@@ -11,6 +11,34 @@ const { Measure } = require('./models/Measure');
 require('./models/MeasureApplication'); // Register MeasureApplication model
 const measuresRoutes = require('./routes/measures.routes');
 const logger = require('../../utils/logger');
+const {
+  effectiveBranchScope,
+  enforceBeneficiaryBranch,
+  assertBranchMatch,
+} = require('../../middleware/assertBranchMatch');
+const { branchFilter } = require('../../middleware/branchScope.middleware');
+
+// W1569 — server-owned fields a POST/PUT /goals caller must NOT self-set on the
+// canonical TherapeuticGoal (branchId → server-derived; goalNumber/progress/audit →
+// server-managed; achieved state via the /achieve endpoint).
+const GOAL_PROTECTED_FIELDS = new Set([
+  '_id',
+  'branchId',
+  'goalNumber',
+  'createdBy',
+  'lastModifiedBy',
+  'currentProgress',
+  'achievedDate',
+  'isDeleted',
+]);
+function stripGoalFields(body) {
+  if (!body || typeof body !== 'object') return {};
+  const clean = {};
+  for (const k of Object.keys(body)) {
+    if (!GOAL_PROTECTED_FIELDS.has(k)) clean[k] = body[k];
+  }
+  return clean;
+}
 
 // ─── Goal Repository ──────────────────────────────────────────────────────────
 
@@ -29,9 +57,9 @@ class GoalRepository extends BaseRepository {
     });
   }
 
-  async findForEpisode(episodeId) {
+  async findForEpisode(episodeId, branchScope = {}) {
     return this.model
-      .find({ episodeId, isDeleted: { $ne: true } })
+      .find({ episodeId, isDeleted: { $ne: true }, ...branchScope })
       .sort({ type: 1, priority: 1 })
       .populate('assignedTo', 'firstName lastName')
       .lean({ virtuals: true });
@@ -115,8 +143,8 @@ class GoalService extends BaseService {
     return this.repository.findForBeneficiary(beneficiaryId, options);
   }
 
-  async getForEpisode(episodeId) {
-    return this.repository.findForEpisode(episodeId);
+  async getForEpisode(episodeId, branchScope = {}) {
+    return this.repository.findForEpisode(episodeId, branchScope);
   }
 
   async getGoalTree(beneficiaryId, episodeId) {
@@ -226,6 +254,7 @@ class GoalsDomain extends BaseDomainModule {
     router.get('/goals', async (req, res, next) => {
       try {
         const result = await goalSvc.list({
+          filter: { ...branchFilter(req), isDeleted: { $ne: true } },
           page: parseInt(req.query.page) || 1,
           limit: parseInt(req.query.limit) || 20,
           sort: { createdAt: -1 },
@@ -238,7 +267,11 @@ class GoalsDomain extends BaseDomainModule {
 
     router.get('/goals/statistics', async (req, res, next) => {
       try {
-        const stats = await goalSvc.getStatistics(req.query);
+        const stats = await goalSvc.getStatistics({
+          beneficiaryId: req.query.beneficiaryId,
+          episodeId: req.query.episodeId,
+          branchId: effectiveBranchScope(req) || req.query.branchId,
+        });
         res.json({ success: true, data: stats });
       } catch (e) {
         next(e);
@@ -247,7 +280,7 @@ class GoalsDomain extends BaseDomainModule {
 
     router.get('/goals/overdue', async (req, res, next) => {
       try {
-        const data = await goalSvc.getOverdue(req.query.branchId);
+        const data = await goalSvc.getOverdue(effectiveBranchScope(req) || req.query.branchId);
         res.json({ success: true, data, total: data.length });
       } catch (e) {
         next(e);
@@ -256,6 +289,7 @@ class GoalsDomain extends BaseDomainModule {
 
     router.get('/goals/beneficiary/:beneficiaryId', async (req, res, next) => {
       try {
+        await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
         const result = await goalSvc.getForBeneficiary(req.params.beneficiaryId, req.query);
         res.json({ success: true, ...result });
       } catch (e) {
@@ -265,6 +299,7 @@ class GoalsDomain extends BaseDomainModule {
 
     router.get('/goals/beneficiary/:beneficiaryId/tree', async (req, res, next) => {
       try {
+        await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
         const tree = await goalSvc.getGoalTree(req.params.beneficiaryId, req.query.episodeId);
         res.json({ success: true, data: tree });
       } catch (e) {
@@ -274,7 +309,7 @@ class GoalsDomain extends BaseDomainModule {
 
     router.get('/goals/episode/:episodeId', async (req, res, next) => {
       try {
-        const data = await goalSvc.getForEpisode(req.params.episodeId);
+        const data = await goalSvc.getForEpisode(req.params.episodeId, branchFilter(req));
         res.json({ success: true, data });
       } catch (e) {
         next(e);
@@ -291,6 +326,12 @@ class GoalsDomain extends BaseDomainModule {
             { path: 'childGoals' },
           ],
         });
+        if (!data) {
+          const e = new Error('الهدف غير موجود');
+          e.statusCode = 404;
+          throw e;
+        }
+        assertBranchMatch(req, data.branchId, 'goal');
         res.json({ success: true, data });
       } catch (e) {
         next(e);
@@ -299,8 +340,10 @@ class GoalsDomain extends BaseDomainModule {
 
     router.post('/goals', async (req, res, next) => {
       try {
-        const context = { userId: req.user?._id, branchId: req.user?.branchId };
-        const goal = await goalSvc.create(req.body, context);
+        // W1569 — server-derived branch (req.user.branchId is never populated) +
+        // mass-assignment strip on the raw body.
+        const context = { userId: req.user?._id, branchId: effectiveBranchScope(req) };
+        const goal = await goalSvc.create(stripGoalFields(req.body), context);
         res.status(201).json({ success: true, data: goal });
       } catch (e) {
         next(e);
@@ -309,8 +352,15 @@ class GoalsDomain extends BaseDomainModule {
 
     router.put('/goals/:id', async (req, res, next) => {
       try {
+        const existing = await goalSvc.getById(req.params.id);
+        if (!existing) {
+          const e = new Error('الهدف غير موجود');
+          e.statusCode = 404;
+          throw e;
+        }
+        assertBranchMatch(req, existing.branchId, 'goal');
         const context = { userId: req.user?._id };
-        const updated = await goalSvc.update(req.params.id, req.body, context);
+        const updated = await goalSvc.update(req.params.id, stripGoalFields(req.body), context);
         res.json({ success: true, data: updated });
       } catch (e) {
         next(e);
@@ -319,6 +369,13 @@ class GoalsDomain extends BaseDomainModule {
 
     router.post('/goals/:id/progress', async (req, res, next) => {
       try {
+        const existing = await goalSvc.getById(req.params.id);
+        if (!existing) {
+          const e = new Error('الهدف غير موجود');
+          e.statusCode = 404;
+          throw e;
+        }
+        assertBranchMatch(req, existing.branchId, 'goal');
         const entry = { ...req.body, recordedBy: req.user?._id, date: new Date() };
         const result = await goalSvc.recordProgress(req.params.id, entry);
         res.json({ success: true, data: result });
@@ -329,6 +386,13 @@ class GoalsDomain extends BaseDomainModule {
 
     router.post('/goals/:id/achieve', async (req, res, next) => {
       try {
+        const existingGoal = await goalSvc.getById(req.params.id);
+        if (!existingGoal) {
+          const e = new Error('الهدف غير موجود');
+          e.statusCode = 404;
+          throw e;
+        }
+        assertBranchMatch(req, existingGoal.branchId, 'goal');
         const result = await goalSvc.achieveGoal(req.params.id, req.user?._id);
         res.json({ success: true, data: result });
       } catch (e) {

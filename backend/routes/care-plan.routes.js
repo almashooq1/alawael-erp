@@ -77,7 +77,11 @@ const auditTrail = require('../intelligence/care-plan-audit-trail.service');
 const programsLibrary = require('../intelligence/care-plan-programs-library.registry');
 const groupPlanService = require('../intelligence/group-plan.service');
 const reportGenerator = require('../intelligence/care-plan-report-generator.service');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const {
+  bodyScopedBeneficiaryGuard,
+  branchScopedResourceParam,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -166,6 +170,18 @@ function createCarePlanRouter({ service, governance, logger = console } = {}) {
 
   const router = express.Router();
   router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+  // W1551: every `/:id` route resolves a CarePlanVersion by _id; load it once here and
+  // assert it belongs to the caller's branch (403 otherwise) so the whole :id surface
+  // (read + write + state-machine) can't be driven cross-branch. No-ops for cross-branch
+  // roles (req.branchScope.allBranches) and when req.branchScope is unset.
+  router.param(
+    'id',
+    branchScopedResourceParam({
+      modelName: 'CarePlanVersion',
+      label: 'care plan',
+      loadModel: () => require('../models/CarePlanVersion'),
+    })
+  );
 
   function ensurePermission(req, res, permissionCode) {
     const actor = actorFrom(req);
@@ -390,9 +406,12 @@ function createCarePlanRouter({ service, governance, logger = console } = {}) {
       }
 
       const actor = actorFrom(req);
-      // Pick the actor's branch from the JWT/session if available so
-      // branch-scope enforcement kicks in.
-      const actorBranchId = req.user?.branchId || null;
+      // W1551: derive the ENFORCED branch from req.branchScope (set by
+      // requireBranchAccess) — req.user.branchId is never in the JWT, so the prior
+      // line was always null and the service's branch safety-belt never fired,
+      // leaking every branch's plans. effectiveBranchScope returns null for
+      // cross-branch roles (they keep the optional ?branchId filter).
+      const actorBranchId = effectiveBranchScope(req);
 
       const result = await service.listPlans({
         filters: {
@@ -926,7 +945,11 @@ function createCarePlanRouter({ service, governance, logger = console } = {}) {
           reason: 'HISTORY_NOT_WIRED',
         });
       }
-      const versions = await service.getVersionHistory(req.params.planId);
+      // W1551: scope version history to the caller's branch (null = cross-branch role).
+      const versions = await service.getVersionHistory(
+        req.params.planId,
+        effectiveBranchScope(req)
+      );
       return res.json({
         success: true,
         data: { versions, count: versions.length },

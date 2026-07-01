@@ -325,6 +325,16 @@ router.get(
   '/vehicles/:id/location',
   validateObjectId(),
   asyncHandler(async (req, res) => {
+    // W1574: GpsTracking has no branch field — gate on the vehicle's branch so a
+    // foreign vehicle's GPS position can't be read cross-branch.
+    const veh = await Vehicle.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...branchScope(req),
+    })
+      .select('_id')
+      .lean();
+    if (!veh) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     const lastGps = await GpsTracking.findOne({ vehicle_id: req.params.id })
       .sort({ timestamp: -1 })
       .select('latitude longitude speed heading timestamp');
@@ -914,6 +924,18 @@ router.delete(
 router.get(
   '/gps/:vehicleId/live',
   asyncHandler(async (req, res) => {
+    // W1574: gate on the vehicle's branch (GpsTracking has no branch field) so a
+    // foreign vehicle's live position/track can't be read cross-branch.
+    if (!mongoose.isValidObjectId(req.params.vehicleId))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const veh = await Vehicle.findOne({
+      _id: req.params.vehicleId,
+      deleted_at: null,
+      ...branchScope(req),
+    })
+      .select('_id')
+      .lean();
+    if (!veh) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     const lastPoint = await GpsTracking.findOne({ vehicle_id: req.params.vehicleId })
       .sort({ timestamp: -1 })
       .select('latitude longitude speed heading altitude accuracy timestamp trip_id');
@@ -1067,6 +1089,17 @@ router.post(
 router.get(
   '/gps/:vehicleId/history',
   asyncHandler(async (req, res) => {
+    // W1574: gate on the vehicle's branch (GpsTracking has no branch field).
+    if (!mongoose.isValidObjectId(req.params.vehicleId))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const veh = await Vehicle.findOne({
+      _id: req.params.vehicleId,
+      deleted_at: null,
+      ...branchScope(req),
+    })
+      .select('_id')
+      .lean();
+    if (!veh) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     const { from_date, to_date, trip_id, limit = 500 } = req.query;
     const filter = { vehicle_id: req.params.vehicleId };
 

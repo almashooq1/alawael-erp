@@ -22,6 +22,16 @@ const {
   branchScopedBeneficiaryParam,
   bodyScopedBeneficiaryGuard,
 } = require('../../../middleware/assertBranchMatch');
+const { requireBranchAccess } = require('../../../middleware/branchScope.middleware');
+
+// W1566 — CRITICAL: populate req.branchScope so the param/body guards below (and
+// effectiveBranchScope() in the handlers) actually FIRE. The live /api/v1/core
+// registry mount applies `authenticate` ONLY (no requireBranchAccess), so
+// req.branchScope was NEVER set and EVERY branch-isolation guard on the central
+// beneficiary-PHI surface silently no-op'd → a cross-tenant PHI read/write leak
+// (same class as #769). authenticate runs earlier in the mount chain, so req.user
+// is set here; on the DDD /api/v2/core mount this is idempotent.
+router.use(requireBranchAccess);
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
 router.use(bodyScopedBeneficiaryGuard);
 

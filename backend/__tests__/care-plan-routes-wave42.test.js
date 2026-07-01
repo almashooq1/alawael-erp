@@ -570,7 +570,9 @@ describe('GET /plan/:planId/versions — history', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.count).toBe(2);
     expect(res.body.data.versions[0].versionNumber).toBe(2);
-    expect(service.getVersionHistory).toHaveBeenCalledWith('plan-A');
+    // W1551: route now passes the caller's enforced branch scope (null in this
+    // unit path — no requireBranchAccess middleware simulated).
+    expect(service.getVersionHistory).toHaveBeenCalledWith('plan-A', null);
   });
 });
 

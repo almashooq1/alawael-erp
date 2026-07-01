@@ -155,6 +155,7 @@ __tests__/branch-config-mfa-service-layer-wave275f.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-community-service-wave1445.test.js
+__tests__/research-study-branch-isolation-wave1602.test.js
 __tests__/care-crm-funnel-branch-isolation-wave1599.test.js
 __tests__/financeoperations-invoice-massassign-wave1590.test.js
 __tests__/appointments-branch-isolation-wave1583.test.js
@@ -1195,4 +1196,5 @@ __tests__/finance-statements-branch-scope-wave1595.test.js
 __tests__/transport-driver-safety-branch-wave1601.test.js
 __tests__/drilldown-branch-scope-wave1601.test.js
 __tests__/early-intervention-branch-isolation-wave1599.test.js
+__tests__/smart-attendance-model-path-wave1602.test.js
 __tests__/early-intervention-subresource-isolation-wave1602.test.js

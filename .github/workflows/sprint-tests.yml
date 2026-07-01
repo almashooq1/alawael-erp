@@ -122,6 +122,7 @@ on:
       - 'backend/__tests__/sprint-test-files-exist.test.js'
       - 'backend/__tests__/test-files-have-describe.test.js'
       - 'backend/__tests__/test-script-dedupe.test.js'
+      - 'backend/__tests__/smart-attendance-model-path-wave1602.test.js'
       # Wave-intelligence + care-plan suites that call jest.unmock('mongoose')
       # (added to test:sprint in 89b4d7304 + 2488ef4d6 + 399404dc1 + 3fddb9a65).
       # The ci-path-triggers-exist drift guard requires each test:sprint entry
@@ -1865,6 +1866,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
       - 'backend/__tests__/care-crm-funnel-branch-isolation-wave1599.test.js'
       - 'backend/__tests__/financeoperations-invoice-massassign-wave1590.test.js'
       - 'backend/__tests__/appointments-branch-isolation-wave1583.test.js'
@@ -2298,6 +2300,7 @@ on:
       - 'backend/__tests__/sprint-test-files-exist.test.js'
       - 'backend/__tests__/test-files-have-describe.test.js'
       - 'backend/__tests__/test-script-dedupe.test.js'
+      - 'backend/__tests__/smart-attendance-model-path-wave1602.test.js'
       # Wave-intelligence + care-plan suites that call jest.unmock('mongoose')
       # (added to test:sprint in 89b4d7304 + 2488ef4d6 + 399404dc1 + 3fddb9a65).
       # The ci-path-triggers-exist drift guard requires each test:sprint entry
@@ -4041,6 +4044,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
       - 'backend/__tests__/care-crm-funnel-branch-isolation-wave1599.test.js'
       - 'backend/__tests__/financeoperations-invoice-massassign-wave1590.test.js'
       - 'backend/__tests__/appointments-branch-isolation-wave1583.test.js'

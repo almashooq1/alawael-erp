@@ -202,7 +202,7 @@ const RULES = [
       // Try modern SmartAttendance first, fall back to legacy Attendance
       const { Employee } = models;
       const SmartAttendance =
-        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+        models.SmartAttendance || safeRequire('../../models/advanced_attendance.model');
       if (!SmartAttendance) return [];
 
       const since = new Date(now.getTime() - (params.windowDays ?? 14) * DAY_MS);
@@ -663,7 +663,7 @@ const RULES = [
     requires: ['Employee'],
     async evaluate({ models, now, params }) {
       const SmartAttendance =
-        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+        models.SmartAttendance || safeRequire('../../models/advanced_attendance.model');
       if (!SmartAttendance) return [];
       const { Employee } = models;
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -709,7 +709,7 @@ const RULES = [
     requires: ['Employee'],
     async evaluate({ models, now, params }) {
       const SmartAttendance =
-        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+        models.SmartAttendance || safeRequire('../../models/advanced_attendance.model');
       if (!SmartAttendance) return [];
       const { Employee } = models;
       const cutoff = new Date(now.getTime() - (params.inactiveDays ?? 30) * DAY_MS);
@@ -913,7 +913,7 @@ const RULES = [
     requires: ['Employee'],
     async evaluate({ models, now, params }) {
       const SmartAttendance =
-        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+        models.SmartAttendance || safeRequire('../../models/advanced_attendance.model');
       if (!SmartAttendance) return [];
       const since = new Date(now.getTime() - (params.windowDays ?? 30) * DAY_MS);
       const stats = await SmartAttendance.aggregate([

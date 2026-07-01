@@ -36,6 +36,7 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const {
   bodyScopedBeneficiaryGuard,
   effectiveBranchScope,
@@ -51,6 +52,15 @@ const router = express.Router();
 router.use(authenticate);
 router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+
+// W1588: every :id route keys on `:id`. Without a cast guard a malformed id hits
+// Mongoose and throws a CastError → safeError returns 500 (monitoring noise +
+// wrong contract). One router.param covers all 13 :id handlers → 400 on bad input.
+router.param('id', (req, res, next, id) => {
+  if (!mongoose.isValidObjectId(id))
+    return res.status(400).json({ message: 'معرّف غير صالح' });
+  next();
+});
 const ClinicalRule = require('../models/ClinicalRule');
 const DrugLibrary = require('../models/DrugLibrary');
 const CdssAlert = require('../models/CdssAlert');

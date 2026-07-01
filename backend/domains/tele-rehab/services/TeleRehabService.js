@@ -85,10 +85,19 @@ class TeleRehabService extends BaseService {
   /* ── Complete ── */
   async completeSession(id, payload) {
     const TeleSession = mongoose.model('TeleSession');
+    // W1593 — server/billing fields a client must NOT self-set on completion. The raw
+    // ...payload spread (placed AFTER the forced fields) let a caller forge status, flip
+    // billing.billable:false / reduce billing.effectiveMinutes (charge evasion), or override
+    // endedAt. Strip those; the forced completion fields go LAST so they win.
+    const TELE_SERVER_FIELDS = ['_id', 'branchId', 'isDeleted', 'status', 'billing', 'endedAt'];
+    const cleanPayload = {};
+    for (const k of Object.keys(payload || {})) {
+      if (!TELE_SERVER_FIELDS.includes(k)) cleanPayload[k] = payload[k];
+    }
     const update = {
+      ...cleanPayload,
       status: 'completed',
       endedAt: new Date(),
-      ...payload,
     };
     if (update.startedAt && update.endedAt) {
       update.durationMinutes = Math.round(

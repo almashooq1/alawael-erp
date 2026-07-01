@@ -1197,3 +1197,4 @@ __tests__/transport-driver-safety-branch-wave1601.test.js
 __tests__/drilldown-branch-scope-wave1601.test.js
 __tests__/early-intervention-branch-isolation-wave1599.test.js
 __tests__/smart-attendance-model-path-wave1602.test.js
+__tests__/early-intervention-subresource-isolation-wave1602.test.js

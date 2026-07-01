@@ -37,6 +37,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Asset = require('../models/FacilityAsset');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1575
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -87,7 +88,7 @@ function pushCappedInspection(doc, entry) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -128,7 +129,7 @@ router.get('/due-inspection', requireRole(READ_ROLES), async (req, res) => {
       status: { $ne: 'retired' },
       nextInspectionDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Asset.find(filter).sort({ nextInspectionDue: 1 }).limit(200).lean();
@@ -147,7 +148,7 @@ router.get('/due-maintenance', requireRole(READ_ROLES), async (req, res) => {
       status: { $ne: 'retired' },
       nextMaintenanceDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Asset.find(filter).sort({ nextMaintenanceDue: 1 }).limit(200).lean();
@@ -164,7 +165,7 @@ router.get('/out-of-service', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       status: { $in: ['out_of_service', 'inspection_failed'] },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Asset.find(filter)
@@ -185,7 +186,7 @@ router.get('/expired-certificates', requireRole(READ_ROLES), async (req, res) =>
       ...branchFilter(req), // W445
       'certificates.expiresAt': { $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await Asset.find(filter).limit(200).lean();
@@ -199,7 +200,7 @@ router.get('/expired-certificates', requireRole(READ_ROLES), async (req, res) =>
 router.get('/life-safety', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), criticality: 'life_safety' }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -216,7 +217,7 @@ router.get('/life-safety', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Asset.find(filter)
@@ -336,7 +337,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       nameAr: String(body.nameAr || '').slice(0, 200),
       category: body.category,
       description: String(body.description || '').slice(0, 1000),
-      branchId: body.branchId,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       building: String(body.building || '').slice(0, 100),
       floor: String(body.floor || '').slice(0, 50),
       room: String(body.room || '').slice(0, 100),

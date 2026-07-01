@@ -66,13 +66,50 @@ const requireService = (req, res, next) => {
   next();
 };
 
+// W1585 — the clinical completion OUTPUTS of a ClinicalSession are written ONLY by the
+// dedicated /complete + /documentation endpoints (status='completed', SOAP notes,
+// goalProgress, actual durations, vitals, signature). scheduleSession spread ...data and
+// updateSession did $set:data with no whitelist, and /attend + /start put ...req.body AFTER
+// the forced fields — so a caller could POST { status:'completed', subjective, goalProgress }
+// to /attend and forge a completed clinical session with fabricated notes/scores, bypassing
+// golden-thread enforcement. Strip the outputs here; forced fields go LAST so they win.
+const SESSION_OUTPUT_FIELDS = [
+  '_id',
+  'isDeleted',
+  'status',
+  'subjective',
+  'objective',
+  'assessment',
+  'plan',
+  'soapNotes',
+  'documentedAt',
+  'actualStartTime',
+  'actualEndTime',
+  'actualDurationMinutes',
+  'duration',
+  'goalProgress',
+  'vitalSigns',
+  'attendance',
+  'attendanceStatus',
+  'signature',
+  'score',
+  'scoreBreakdown',
+];
+function stripSessionOutputs(body) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!SESSION_OUTPUT_FIELDS.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 /* ─── POST /sessions — Schedule a session ────────────────────────────────── */
 router.post(
   '/',
   requireService,
   validate(validateCreateSession),
   asyncHandler(async (req, res) => {
-    const session = await sessionsService.scheduleSession(req.body);
+    const session = await sessionsService.scheduleSession(stripSessionOutputs(req.body));
     res.status(201).json({ success: true, data: session });
   })
 );
@@ -411,10 +448,10 @@ router.post(
   requireService,
   asyncHandler(async (req, res) => {
     const session = await sessionsService.updateSession(req.params.sessionId, {
+      ...stripSessionOutputs(req.body),
       status: 'in_progress',
       checkInTime: new Date(),
       attendanceStatus: 'attended',
-      ...req.body,
     });
     res.json({ success: true, data: session });
   })
@@ -426,10 +463,10 @@ router.post(
   requireService,
   asyncHandler(async (req, res) => {
     const session = await sessionsService.updateSession(req.params.sessionId, {
+      ...stripSessionOutputs(req.body),
       status: 'in_progress',
       checkInTime: new Date(),
       attendanceStatus: 'attended',
-      ...req.body,
     });
     res.json({ success: true, data: session });
   })

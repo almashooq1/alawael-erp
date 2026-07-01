@@ -23,9 +23,11 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Portfolio = require('../models/BeneficiaryPortfolioItem');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(requireBranchAccess); // W1603: reject explicit foreign branchId + set req.branchScope
 
 const READ_ROLES = [
   'admin',
@@ -71,7 +73,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const filter = { beneficiaryId: req.params.id, ...visibilityFilter(req) };
+    const filter = { beneficiaryId: req.params.id, ...branchFilter(req), ...visibilityFilter(req) };
     if (req.query.type && TYPES.includes(String(req.query.type))) {
       filter.type = String(req.query.type);
     }
@@ -95,6 +97,7 @@ router.get('/milestones/:id', requireRole(READ_ROLES), async (req, res) => {
     const items = await Portfolio.find({
       beneficiaryId: req.params.id,
       isMilestone: true,
+      ...branchFilter(req),
       ...visibilityFilter(req),
     })
       .sort({ achievementDate: -1 })
@@ -112,7 +115,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Portfolio.findById(req.params.id).lean();
+    // W1603: scope by branch so a restricted caller can't read another branch's item by id.
+    const row = await Portfolio.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
     if (!row) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
     // Parents can't see staff_only items even by direct ID.
     const role = String(req.user?.role || req.user?.roleCode || '').toLowerCase();

@@ -18,6 +18,7 @@ const { Schema } = mongoose;
 
 const behaviorIncidentSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     incident_id: {
       type: String,
       unique: true,
@@ -121,6 +122,7 @@ const behaviorIncidentSchema = new Schema(
 
 const behaviorPlanSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     plan_id: {
       type: String,
       unique: true,
@@ -316,6 +318,7 @@ const behaviorPlanSchema = new Schema(
 
 const vocationalProfileSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     profile_id: {
       type: String,
       unique: true,
@@ -493,6 +496,7 @@ const vocationalProfileSchema = new Schema(
 
 const jobCoachLogSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     log_id: {
       type: String,
       unique: true,
@@ -575,6 +579,7 @@ const jobCoachLogSchema = new Schema(
 
 const homeProgramSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     program_id: {
       type: String,
       unique: true,
@@ -697,6 +702,7 @@ const homeProgramSchema = new Schema(
 
 const medicationRecordSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     record_id: {
       type: String,
       unique: true,
@@ -813,6 +819,7 @@ const medicationRecordSchema = new Schema(
 
 const autismProfileSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     profile_id: {
       type: String,
       unique: true,
@@ -995,6 +1002,7 @@ const autismProfileSchema = new Schema(
 
 const therapySessionSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     session_id: {
       type: String,
       unique: true,
@@ -1127,6 +1135,7 @@ const therapySessionSchema = new Schema(
 
 const nutritionPlanSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     plan_id: {
       type: String,
       unique: true,
@@ -1277,6 +1286,7 @@ const nutritionPlanSchema = new Schema(
 
 const resourceRoomSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     room_id: {
       type: String,
       unique: true,
@@ -1387,6 +1397,7 @@ const resourceRoomSchema = new Schema(
 
 const staffCertificationSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     certification_id: {
       type: String,
       unique: true,
@@ -1481,6 +1492,7 @@ const staffCertificationSchema = new Schema(
 
 const dischargePlanSchema = new Schema(
   {
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true }, // W1577 branch isolation
     discharge_id: {
       type: String,
       unique: true,

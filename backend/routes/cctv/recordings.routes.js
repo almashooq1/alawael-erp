@@ -10,13 +10,20 @@
 const express = require('express');
 const { CctvRecording } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode, branchCodeVisible } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 router.get('/', async (req, res) => {
   const q = {};
-  if (req.query.branchCode) q.branchCode = String(req.query.branchCode).toUpperCase();
+  // CCTV keys on branchCode (String), not branchId — pin restricted callers to
+  // their own branch; only cross-branch roles may narrow by ?branchCode.
+  const callerCode = await callerCctvBranchCode(req);
+  if (callerCode) q.branchCode = callerCode;
+  else if (req.query.branchCode) q.branchCode = String(req.query.branchCode).toUpperCase();
   if (req.query.cameraId) q.cameraId = req.query.cameraId;
   if (req.query.from) q.startTime = { ...(q.startTime || {}), $gte: new Date(req.query.from) };
   if (req.query.to) q.startTime = { ...(q.startTime || {}), $lte: new Date(req.query.to) };
@@ -31,6 +38,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const r = await CctvRecording.findById(req.params.id).lean();
   if (!r) return res.status(404).json({ success: false, message: 'NOT_FOUND' });
+  const callerCode = await callerCctvBranchCode(req);
+  if (!branchCodeVisible(callerCode, r.branchCode)) {
+    return res.status(403).json({ success: false, message: 'CROSS_BRANCH_DENIED' });
+  }
   res.json({ success: true, data: r });
 });
 

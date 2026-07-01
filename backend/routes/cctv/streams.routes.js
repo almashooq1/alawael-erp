@@ -19,23 +19,46 @@ const cameraService = require('../../services/cctv/cameraService');
 const { CctvViewAudit } = require('../../models/cctv');
 const adapter = require('../../services/cctv/adapter');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode, branchCodeVisible } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 function ipMetaOf(req) {
   return { ip: req.ip, userAgent: req.headers['user-agent'] };
 }
 
-router.post('/live', async (req, res) => {
+// Assert the caller may view the given camera's branch. Returns the camera doc
+// (so the handler needn't reload it) or sends the 403/404 and returns null.
+async function loadCameraInScope(req, res, cameraId) {
+  const cam = await cameraService.getById(cameraId);
+  if (!cam) {
+    res.status(404).json({ success: false, message: 'CAMERA_NOT_FOUND' });
+    return null;
+  }
+  const callerCode = await callerCctvBranchCode(req);
+  if (!branchCodeVisible(callerCode, cam.branchCode)) {
+    res.status(403).json({ success: false, message: 'CROSS_BRANCH_DENIED' });
+    return null;
+  }
+  return cam;
+}
+
+router.post('/live', requireRole(['admin', 'manager', 'security_officer']), async (req, res) => {
+  // Staff live-view is privileged + branch-scoped; parents use /cctv/parent-portal
+  // (grant-scoped). Ignore any client-supplied requireGrant (force enforcement).
+  const cam = await loadCameraInScope(req, res, req.body.cameraId);
+  if (!cam) return undefined;
   const r = await streamService.startLive({
     userId: req.user?.id,
     cameraId: req.body.cameraId,
     watermarkText: req.user?.email || req.user?.id,
-    requireGrant: req.body.requireGrant !== false,
+    requireGrant: true,
     ipMeta: ipMetaOf(req),
   });
-  res.status(r.ok ? 200 : 403).json({ success: r.ok, ...r });
+  return res.status(r.ok ? 200 : 403).json({ success: r.ok, ...r });
 });
 
 router.post(
@@ -46,6 +69,7 @@ router.post(
     if (!cameraId || !from || !to) {
       return res.status(400).json({ success: false, message: 'cameraId/from/to required' });
     }
+    if (!(await loadCameraInScope(req, res, cameraId))) return undefined;
     const r = await streamService.startPlayback({
       userId: req.user?.id,
       cameraId,
@@ -68,29 +92,33 @@ router.post('/:sessionId/stop', async (req, res) => {
   res.json({ success: true, data: s });
 });
 
-router.post('/snapshot/:cameraId', async (req, res) => {
-  const cam = await cameraService.getById(req.params.cameraId);
-  if (!cam) return res.status(404).json({ success: false, message: 'CAMERA_NOT_FOUND' });
-  const r = await adapter.snapshot({
-    ip: cam.ip,
-    port: cam.port,
-    channel: cam.channel,
-    username: cam.auth?.username,
-    password: process.env[cam.auth?.passwordRef || ''] || '',
-  });
-  if (!r.ok) return res.status(502).json({ success: false, ...r });
-  await CctvViewAudit.create({
-    userId: req.user?.id,
-    branchCode: cam.branchCode,
-    cameraId: cam._id,
-    cameraCode: cam.code,
-    action: 'snapshot_view',
-    sourceIp: req.ip,
-    userAgent: req.headers['user-agent'],
-  });
-  res.setHeader('Content-Type', r.data.contentType || 'image/jpeg');
-  res.send(r.data.bytes);
-});
+router.post(
+  '/snapshot/:cameraId',
+  requireRole(['admin', 'manager', 'security_officer']),
+  async (req, res) => {
+    const cam = await loadCameraInScope(req, res, req.params.cameraId);
+    if (!cam) return undefined;
+    const r = await adapter.snapshot({
+      ip: cam.ip,
+      port: cam.port,
+      channel: cam.channel,
+      username: cam.auth?.username,
+      password: process.env[cam.auth?.passwordRef || ''] || '',
+    });
+    if (!r.ok) return res.status(502).json({ success: false, ...r });
+    await CctvViewAudit.create({
+      userId: req.user?.id,
+      branchCode: cam.branchCode,
+      cameraId: cam._id,
+      cameraCode: cam.code,
+      action: 'snapshot_view',
+      sourceIp: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+    res.setHeader('Content-Type', r.data.contentType || 'image/jpeg');
+    res.send(r.data.bytes);
+  }
+);
 
 router.post('/ptz/:cameraId', requireRole(['admin', 'security_officer']), async (req, res) => {
   const cam = await cameraService.getById(req.params.cameraId);

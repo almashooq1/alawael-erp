@@ -12,13 +12,18 @@ const express = require('express');
 const eventService = require('../../services/cctv/eventService');
 const { CctvEvent } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode, branchCodeVisible } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 
 router.get('/', async (req, res) => {
+  // Restricted callers pinned to their own branchCode; cross-branch may pass ?branchCode.
+  const callerCode = await callerCctvBranchCode(req);
   const rows = await eventService.listForBranch(
-    req.query.branchCode || req.user?.branchCode || '',
+    callerCode || (req.query.branchCode ? String(req.query.branchCode).toUpperCase() : ''),
     {
       type: req.query.type,
       severity: req.query.severity,
@@ -32,12 +37,20 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/stats/last-hour', async (req, res) => {
-  res.json({ success: true, data: await eventService.countsLastHour(req.query.branchCode) });
+  const callerCode = await callerCctvBranchCode(req);
+  res.json({
+    success: true,
+    data: await eventService.countsLastHour(callerCode || req.query.branchCode),
+  });
 });
 
 router.get('/:eventId', async (req, res) => {
   const ev = await CctvEvent.findOne({ eventId: req.params.eventId }).lean();
   if (!ev) return res.status(404).json({ success: false, message: 'EVENT_NOT_FOUND' });
+  const callerCode = await callerCctvBranchCode(req);
+  if (!branchCodeVisible(callerCode, ev.branchCode)) {
+    return res.status(403).json({ success: false, message: 'CROSS_BRANCH_DENIED' });
+  }
   res.json({ success: true, data: ev });
 });
 

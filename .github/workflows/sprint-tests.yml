@@ -1865,6 +1865,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/appointments-branch-isolation-wave1583.test.js'
       - 'backend/__tests__/portal-notifications-guardian-idor-wave1582.test.js'
       - 'backend/__tests__/cctv-async-router-wave1445.test.js'
       - 'backend/__tests__/cctv-event-bus-wiring-wave1447.test.js'
@@ -4012,6 +4013,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/appointments-branch-isolation-wave1583.test.js'
       - 'backend/__tests__/portal-notifications-guardian-idor-wave1582.test.js'
       - 'backend/__tests__/cctv-async-router-wave1445.test.js'
       - 'backend/__tests__/cctv-event-bus-wiring-wave1447.test.js'

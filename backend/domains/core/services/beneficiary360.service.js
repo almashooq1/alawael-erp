@@ -130,7 +130,8 @@ class Beneficiary360Service {
       id: b._id,
       fileNumber: b.fileNumber || b.mrn,
       mrn: b.mrn,
-      nationalId: b.nationalId,
+      // W1563 — PDPL: mask national id in the 360 summary (this surface has no role gate).
+      nationalId: b.nationalId ? '•••••' + String(b.nationalId).slice(-4) : null,
       name:
         b.personalInfo?.fullNameAr ||
         `${b.personalInfo?.firstName?.ar || b.firstName || ''} ${b.personalInfo?.lastName?.ar || b.lastName || ''}`.trim(),

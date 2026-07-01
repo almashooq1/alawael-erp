@@ -2153,6 +2153,8 @@ on:
       - 'backend/__tests__/therapy-session-status-precondition-wave1578.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-branch-isolation-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4283,6 +4285,8 @@ on:
       - 'backend/__tests__/therapy-session-status-precondition-wave1578.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-branch-isolation-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

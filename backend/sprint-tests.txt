@@ -1171,3 +1171,4 @@ __tests__/header-branch-bypass-wave1575.test.js
 __tests__/workflowpro-approval-authz-wave1559.test.js
 __tests__/therapy-session-status-precondition-wave1578.test.js
 __tests__/clinical-branch-isolation-wave1575.test.js
+__tests__/branchid-override-clinical-assessment-wave1577.test.js

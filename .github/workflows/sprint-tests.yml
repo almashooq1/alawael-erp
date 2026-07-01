@@ -2193,6 +2193,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-driver-safety-branch-wave1601.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/drilldown-branch-scope-wave1601.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4363,6 +4365,8 @@ on:
       - 'backend/__tests__/finance-statements-branch-scope-wave1595.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-driver-safety-branch-wave1601.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/drilldown-branch-scope-wave1601.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-branch-isolation-wave1599.test.js'
       - 'backend/package.json'

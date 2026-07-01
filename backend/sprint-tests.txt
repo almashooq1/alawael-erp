@@ -1193,4 +1193,5 @@ __tests__/hr-dashboard-role-gate-wave1589.test.js
 __tests__/m9-strict-populate-wave1595.test.js
 __tests__/finance-statements-branch-scope-wave1595.test.js
 __tests__/transport-driver-safety-branch-wave1601.test.js
+__tests__/drilldown-branch-scope-wave1601.test.js
 __tests__/early-intervention-branch-isolation-wave1599.test.js

@@ -1,133 +1,50 @@
+/* eslint-disable no-undef, no-restricted-globals */
 /**
- * Service Worker — Al-Awael Mobile PWA
- * Offline caching with network-first API strategy
+ * KILL-SWITCH service worker.
+ *
+ * Supersedes the old cache-first SW (CACHE_NAME 'alawael-v1') that precached
+ * '/index.html' and served it cache-first with a version string that NEVER
+ * changed — so once a browser registered it, every later deploy's new routes
+ * 404'd (it kept serving the stale app shell + old chunk hashes; e.g. the
+ * /student-management "404"). Because the old activate handler only deleted
+ * caches != 'alawael-v1', the stale shell survived forever.
+ *
+ * This replacement purges EVERY cache, unregisters itself, and reloads any open
+ * page — so any browser still running the old SW recovers on its next visit and
+ * all subsequent loads go straight to the network (content-hashed assets are
+ * already immutable-cached by HTTP; index.html is served no-cache by nginx).
+ *
+ * It intentionally does NO caching. This app is an online admin tool; correctness
+ * (never a stale shell) outweighs offline support.
  */
-const CACHE_NAME = 'alawael-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/mobile',
-  '/index.html',
-  '/manifest.json',
-  '/alawael-logo.svg',
-  // MUI fonts + core chunks will be cached on first visit via runtime caching
-];
 
-const API_CACHE_NAME = 'alawael-api-v1';
-const OFFLINE_PAGE = '/index.html';
-
-/* ─── Install ─────────────────────────────────────────────────────── */
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {
-        // Some assets may be missing in dev — silently continue
-      });
-    })
-  );
 });
 
-/* ─── Activate ────────────────────────────────────────────────────── */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.map((key) => {
-            if (key !== CACHE_NAME && key !== API_CACHE_NAME) {
-              return caches.delete(key);
-            }
-          })
-        )
-      )
-      .then(() => self.clients.claim())
-  );
-});
-
-/* ─── Fetch ─────────────────────────────────────────────────────────── */
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== 'GET') return;
-
-  // 1. API calls — Network first, fallback to cache
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  // 2. Static assets — Cache first, fallback to network
-  event.respondWith(cacheFirst(request));
-});
-
-/* ─── Strategies ──────────────────────────────────────────────────── */
-
-async function networkFirst(request) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.ok) {
-      const cache = await caches.open(API_CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (err) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    // Return a generic offline JSON for API calls
-    return new Response(
-      JSON.stringify({
-        error: 'offline',
-        message: 'لا يوجد اتصال بالإنترنت',
-      }),
-      {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
+    (async () => {
+      // 1. Nuke every cache (busts the stale 'alawael-v1' app shell).
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+      // 2. Take control of open pages, then remove this registration entirely.
+      await self.clients.claim();
+      await self.registration.unregister();
+      // 3. Force open tabs to reload — they come back with fresh network content.
+      const windows = await self.clients.matchAll({ type: 'window' });
+      for (const client of windows) {
+        try {
+          client.navigate(client.url);
+        } catch {
+          /* navigate not supported on this client — next manual load recovers */
+        }
       }
-    );
-  }
-}
-
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (err) {
-    // For navigation requests, fallback to offline page
-    if (request.mode === 'navigate') {
-      const fallback = await caches.match(OFFLINE_PAGE);
-      if (fallback) return fallback;
-    }
-    return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
-  }
-}
-
-/* ─── Push notifications (placeholder) ────────────────────────────── */
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {};
-  event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Al-Awael', {
-      body: data.body ?? 'لديك إشعار جديد',
-      icon: '/icon-192.png',
-      badge: '/icon-96.png',
-      tag: data.tag ?? 'default',
-      requireInteraction: false,
-      data: data.url ? { url: data.url } : undefined,
-    })
+    })()
   );
 });
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const url = event.notification.data?.url ?? '/mobile';
-  event.waitUntil(self.clients.openWindow(url));
+// Pure network passthrough while this SW is briefly alive.
+self.addEventListener('fetch', (event) => {
+  event.respondWith(fetch(event.request));
 });

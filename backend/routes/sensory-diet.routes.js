@@ -28,7 +28,7 @@ const SensoryDietProgram = require('../models/SensoryDietProgram');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
@@ -111,7 +111,7 @@ router.get('/review-due', requireRole(READ_ROLES), async (req, res) => {
       status: 'active',
       reviewDate: { $ne: null, $lt: new Date() },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await SensoryDietProgram.find(filter).sort({ reviewDate: 1 }).limit(200).lean();
@@ -129,7 +129,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -180,7 +180,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await SensoryDietProgram.find(filter)
@@ -242,7 +242,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const doc = await SensoryDietProgram.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       carePlanVersionId:
         body.carePlanVersionId && mongoose.isValidObjectId(body.carePlanVersionId)
           ? body.carePlanVersionId

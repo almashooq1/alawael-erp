@@ -216,11 +216,14 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (!body.branchId || !mongoose.isValidObjectId(body.branchId)) {
       return res.status(400).json({ success: false, message: 'branchId مطلوب' });
     }
+    // W1584: a branch-restricted caller is forced to their own branch — a foreign
+    // body.branchId can no longer allocate a seat (or probe capacity) in another branch.
+    const targetBranchId = effectiveBranchScope(req) || body.branchId;
 
     // Guard: a beneficiary may hold only one active seat at a branch.
     const existing = await SeatAllocation.findOne({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId,
+      branchId: targetBranchId,
       status: 'active',
     }).lean();
     if (existing) {
@@ -233,11 +236,11 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
 
     // Capacity gate: never over-subscribe a branch.
     const Branch = lazyModel('Branch');
-    const branch = Branch ? await Branch.findById(body.branchId).select('capacity').lean() : null;
+    const branch = Branch ? await Branch.findById(targetBranchId).select('capacity').lean() : null;
     const capacity = branch?.capacity?.max_patients || 0;
     if (capacity > 0) {
       const allocated = await SeatAllocation.countDocuments({
-        branchId: body.branchId,
+        branchId: targetBranchId,
         status: 'active',
       });
       if (allocated >= capacity) {
@@ -252,7 +255,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
 
     const doc = await SeatAllocation.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId,
+      branchId: targetBranchId,
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       seatLabel: String(body.seatLabel || '').slice(0, 50),
       daysOfWeek: Array.isArray(body.daysOfWeek)

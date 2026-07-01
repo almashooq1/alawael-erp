@@ -738,3 +738,42 @@ Pushed as the next commit on `feat/medical-upload` (PR #605).
   otherwise `sprint-test-files-exist` and `ci-path-triggers-exist` go red.
 - Keep untracked feature files in the same commit as their consumers to avoid
   half-merged pushes that break `require` chains in CI.
+
+## DDD + legacy mass-assignment / IDOR sweep — 2026-07-01/02
+
+A full-codebase security sweep (partly via a 6-agent parallel audit) shipped **19 additive
+input-hardening + branch-isolation fixes** across the DDD `domains/` tree and the high-value
+legacy `routes/` financial surfaces. All merged + deployed; prod healthy throughout.
+
+### Fixes (all whitelist-strip / branch-scope — auto-merge class)
+
+- **core**: W1563 (findById delete-filter + bulkAction IDOR + city index) · W1567 (360
+  carePlan/sessions field-drift) · W1568 (persistent PHI audit trail) · **W1566/#828 mount
+  `requireBranchAccess`** — closed the P0-A systemic `/api/v1/core` cross-tenant PHI leak.
+- **goals**: W1569 (DDD-mount isolation + mass-assign) · W1573 (goals.routes LIVE-path mass-assign).
+- **behavior** W1577 (self-approval bypass) · **group-therapy** W1579 (nested-array member
+  injection past the top-level body guard) · **family** W1581 (portalAccess privilege escalation) ·
+  **assessments** W1582 (completion forgery) · **sessions** W1585 (completion forgery via
+  /attend·/start) · **care-plans** W1591 (self-approve) · **episodes** W1592 (discharge forgery +
+  team isPrimary) · **tele-rehab** W1593 (charge evasion) · **field-training** W1594 · **research**
+  W1595 + W1602 (self-publish strip + branchId migration/IDOR).
+- **legacy**: insurance W1597 (paid-claim fabrication + pre-auth self-approval) · finance W1599
+  (post an unapproved journal entry).
+
+### Two enduring lessons (each cost real hunting time)
+
+1. **The gate-bypass discriminator** — a raw `...req.body` create/update is a REAL mass-assignment
+   vuln ONLY when a **dedicated lifecycle/approval endpoint** exists that the generic write
+   bypasses (`/pre-auth/:id/approve`, `/journal-entries/:id/approve`, `/plans/:id/approve`, …).
+   Where NO such gate exists, the CRUD **is** the intended data-entry path and status/score/amount
+   **is** the data → by-design; stripping breaks entry. Verify-don't-trust cleared ~6 false
+   positives (assessments-admin, care-plans-admin, disability-assessment, compensationBenefits,
+   aiDiagnostic [in-memory], controlledDocument [MFA-gated]). **Find the gate FIRST.**
+2. **Scan `origin/main`, not the working tree** — a long session's local checkout can run 100+
+   commits behind `origin/main` (this session: 124), so `grep routes/` surfaces already-fixed bugs.
+   Every FIX must fetch fresh (`git show origin/main:PATH`); every SCAN must use
+   `git grep -nE PATTERN origin/main -- 'backend/**/*.js'`. Verified clean on main 2026-07-02:
+   ObjectId-without-`new`=0, `req.branchId`=0, callback-`pre('save')`=0, unescaped-`RegExp(req.*)`=0,
+   uncaught-`JSON.parse(req.*)`=0, `$where`=0.
+
+Full per-domain detail: `~/.claude/projects/.../memory/project_ddd_clinical_routes_massassign_sweep_2026-07-01.md`.

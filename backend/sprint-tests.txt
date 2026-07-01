@@ -1159,3 +1159,5 @@ __tests__/mongoose9-doc-remove-wave1571.test.js
 __tests__/cdss-id-branch-scope-wave1566.test.js
 __tests__/care-plan-branch-isolation-wave1551.test.js
 __tests__/transport-gps-vehicle-branch-wave1574.test.js
+__tests__/risk-sweep-branch-isolation.test.js
+__tests__/risk-sweep-branch-isolation-behavioral.test.js

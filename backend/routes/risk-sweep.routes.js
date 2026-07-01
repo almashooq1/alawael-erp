@@ -24,6 +24,8 @@ const router = express.Router();
 
 const { authenticate } = require('../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -32,16 +34,22 @@ function getService(req) {
 }
 
 function actorBranchOrQuery(req) {
-  const own = req.user && req.user.branchId;
-  const queried = typeof req.query.branchId === 'string' ? req.query.branchId : null;
-  // Tier-2 actors may scope to any branch via query; everyone else gets
-  // forced to their own branch (defense-in-depth — no cross-branch peek).
-  if (req.mfaActor && req.mfaActor.tier >= 2 && queried) return queried;
-  return own || queried || null;
+  // W269 canonical branch source. The old logic was doubly broken: the MFA-actor
+  // field it read was NEVER set (the middleware populates `req.actor`), so the
+  // tier-2 branch was dead, and the fallthrough returned a SPOOFABLE `?branchId` when
+  // req.user.branchId was absent — and it IS on this router (no W930 enrich runs
+  // without requireBranchAccess). effectiveBranchScope pins restricted actors to
+  // their own branch (ignoring ?branchId spoofing) and lets cross-branch roles
+  // honour an explicit ?branchId (or see all = null).
+  return effectiveBranchScope(req);
 }
 
 router.use(authenticate);
 router.use(attachMfaActor);
+// W269: populate req.branchScope + reject any explicit FOREIGN branchId in
+// query/body for branch-restricted actors. Required for effectiveBranchScope /
+// branchFilter to resolve a real scope (and to run the W930 user-branch enrich).
+router.use(requireBranchAccess);
 
 // ── MANUAL TRIGGER ─────────────────────────────────────────────────────
 // Tier 2: writes RiskSnapshot rows + can emit AiAlerts. Same trust level
@@ -129,7 +137,8 @@ router.get('/beneficiary/:id/trend', requireMfaTier(1), async (req, res) => {
       return res.status(400).json({ success: false, code: 'BENEFICIARY_REQUIRED' });
 
     const limit = Math.min(parseInt(req.query.limit, 10) || 30, 365);
-    const items = await RiskSnapshot.find({ beneficiaryId })
+    // PRIMARY scope: restricted actors only ever query their own branch's rows.
+    const items = await RiskSnapshot.find({ beneficiaryId, ...branchFilter(req) })
       .sort({ computedAt: -1 })
       .limit(limit)
       .select(
@@ -137,11 +146,12 @@ router.get('/beneficiary/:id/trend', requireMfaTier(1), async (req, res) => {
       )
       .lean();
 
-    // Branch scope enforcement: if any returned snapshot belongs to a
-    // branch other than the actor's (and actor is tier <2), reject.
-    if (req.mfaActor && req.mfaActor.tier < 2 && req.user && req.user.branchId) {
-      const actorBranch = String(req.user.branchId);
-      const foreign = items.find(i => i.branchId && String(i.branchId) !== actorBranch);
+    // Defense-in-depth: reject any foreign snapshot that slipped through.
+    // effectiveBranchScope is non-null only for restricted actors; cross-branch
+    // roles legitimately see all branches.
+    const scope = effectiveBranchScope(req);
+    if (scope) {
+      const foreign = items.find(i => i.branchId && String(i.branchId) !== scope);
       if (foreign) return res.status(403).json({ success: false, code: 'CROSS_BRANCH_FORBIDDEN' });
     }
 
@@ -310,14 +320,16 @@ router.post('/triggered-reviews/:id/acknowledge', requireMfaTier(1), async (req,
       return res.status(status).json({ success: false, code: result.reason });
     }
 
-    // Defense-in-depth branch check: confirm the acknowledged review's
-    // beneficiary lives in the actor's branch (tier <2 cannot cross).
-    if (req.mfaActor && req.mfaActor.tier < 2 && result.review && result.review.beneficiary) {
+    // Defense-in-depth branch check: confirm the acknowledged review's beneficiary
+    // lives in the restricted actor's branch. effectiveBranchScope is non-null only
+    // for restricted actors; cross-branch roles legitimately acknowledge any branch.
+    const scope = effectiveBranchScope(req);
+    if (scope && result.review && result.review.beneficiary) {
       try {
         const mongoose = require('mongoose');
         const Beneficiary = mongoose.model('Beneficiary');
         const ben = await Beneficiary.findById(result.review.beneficiary).select('branchId').lean();
-        if (ben && String(ben.branchId) !== String(branchId)) {
+        if (ben && String(ben.branchId) !== String(scope)) {
           return res.status(403).json({ success: false, code: 'CROSS_BRANCH_FORBIDDEN' });
         }
       } catch {

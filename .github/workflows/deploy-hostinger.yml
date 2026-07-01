@@ -433,6 +433,24 @@ jobs:
             echo "✅ Deploy complete"
             cat "$DIAG"
           DEPLOY_FRONTEND
+      - name: Prune stale frontend assets (fix cp -rf accumulation)
+        if: steps.check_frontend.outputs.has_frontend == 'true'
+        continue-on-error: true
+        run: |
+          # The dist -> nginx-root copy above uses `cp -rf` (additive, no delete),
+          # so content-hashed chunks from old deploys pile up in the nginx root
+          # (observed 184 MB / 4606 orphans) and a stale Service Worker can then
+          # serve an old app shell (the /student-management "404"). Reconcile the
+          # nginx build root with a reference-closure prune: only assets NOTHING
+          # reachable from index.html references are removed — never a live chunk.
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            frontend/scripts/prune-build-orphans.mjs \
+            "$SSH_TARGET:/tmp/prune-build-orphans.mjs" || echo "⚠️ prune scp failed (non-fatal)"
+          $SSH_CMD "$SSH_TARGET" \
+            "node /tmp/prune-build-orphans.mjs ${{ env.APP_DIR }}/frontend/build --delete; rm -f /tmp/prune-build-orphans.mjs" \
+            || echo "⚠️ frontend asset prune failed (non-fatal)"
       - name: Download diagnostics
         if: steps.check_frontend.outputs.has_frontend == 'true'
         continue-on-error: true

@@ -16,6 +16,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const svc = require('../services/therapistPortal.service');
 
 router.use(authenticateToken);
@@ -213,7 +214,7 @@ router.delete(
 router.get(
   '/safety',
   wrap(async (req, res) => {
-    const data = await svc.getSafetyProtocols(req.user.id);
+    const data = await svc.getSafetyProtocols(req.user.id, effectiveBranchScope(req)); // W1606
     res.json({ success: true, data });
   })
 );
@@ -221,7 +222,7 @@ router.get(
 router.post(
   '/safety',
   wrap(async (req, res) => {
-    const data = await svc.createSafetyProtocol(req.body);
+    const data = await svc.createSafetyProtocol(req.body, effectiveBranchScope(req)); // W1606
     res.status(201).json({ success: true, data });
   })
 );
@@ -229,7 +230,7 @@ router.post(
 router.put(
   '/safety/:id',
   wrap(async (req, res) => {
-    const data = await svc.updateSafetyProtocol(req.params.id, req.body);
+    const data = await svc.updateSafetyProtocol(req.params.id, req.body, effectiveBranchScope(req)); // W1606
     res.json({ success: true, data });
   })
 );
@@ -237,7 +238,7 @@ router.put(
 router.post(
   '/safety/:id/incidents',
   wrap(async (req, res) => {
-    const data = await svc.reportIncident(req.params.id, req.body);
+    const data = await svc.reportIncident(req.params.id, req.body, effectiveBranchScope(req)); // W1606
     res.status(201).json({ success: true, data });
   })
 );
@@ -245,7 +246,7 @@ router.post(
 router.patch(
   '/safety/:protocolId/incidents/:incidentId/resolve',
   wrap(async (req, res) => {
-    const data = await svc.resolveIncident(req.params.protocolId, req.params.incidentId);
+    const data = await svc.resolveIncident(req.params.protocolId, req.params.incidentId, effectiveBranchScope(req)); // W1606
     res.json({ success: true, data });
   })
 );
@@ -253,7 +254,7 @@ router.patch(
 router.delete(
   '/safety/:id',
   wrap(async (req, res) => {
-    const data = await svc.deleteSafetyProtocol(req.params.id);
+    const data = await svc.deleteSafetyProtocol(req.params.id, effectiveBranchScope(req)); // W1606
     res.json({ success: true, data });
   })
 );

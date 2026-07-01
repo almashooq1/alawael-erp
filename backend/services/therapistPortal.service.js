@@ -2128,43 +2128,69 @@ class TherapistPortalService {
 
   // ─── Safety Protocols ────────────────────────────────────────────────────
 
-  async getSafetyProtocols(_therapistId) {
-    const SafetyProtocol = require('../models/SafetyProtocol');
-    return SafetyProtocol.find({ deletedAt: null, status: { $ne: 'archived' } }).sort({
-      createdAt: -1,
-    });
+  // W1606 — SafetyProtocol has a `branch` field (ObjectId ref Branch) that was NEVER consulted:
+  // getSafetyProtocols returned every branch's protocols, and every :id op did a bare findById
+  // with no ownership check → cross-branch IDOR read/update/delete/incident-push + mass-assignment
+  // (a caller could set branch/status/deletedAt via the raw patch). `branchScope` = the caller's
+  // branch (effectiveBranchScope(req)) — a string id; find/findOne auto-casts; null for
+  // cross-branch/HQ. `_branchQ` turns it into a `{branch}` filter fragment.
+  _branchQ(branchScope) {
+    return branchScope ? { branch: branchScope } : {};
   }
 
-  async createSafetyProtocol(data) {
+  async getSafetyProtocols(_therapistId, branchScope) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    return SafetyProtocol.find({
+      deletedAt: null,
+      status: { $ne: 'archived' },
+      ...this._branchQ(branchScope),
+    }).sort({ createdAt: -1 });
+  }
+
+  async createSafetyProtocol(data, branchScope) {
     const SafetyProtocol = require('../models/SafetyProtocol');
     const year = new Date().getFullYear();
     const count = await SafetyProtocol.countDocuments({
       protocolNumber: { $regex: `^SP-${year}` },
     });
     const protocolNumber = `SP-${year}-${String(count + 1).padStart(4, '0')}`;
-    return SafetyProtocol.create({ ...data, protocolNumber });
+    // Restricted caller → forced to own branch; cross-branch/HQ → may target a branch via body.
+    return SafetyProtocol.create({
+      ...data,
+      protocolNumber,
+      branch: branchScope || data.branch || null,
+    });
   }
 
-  async updateSafetyProtocol(id, patch) {
+  async updateSafetyProtocol(id, patch, branchScope) {
     const SafetyProtocol = require('../models/SafetyProtocol');
-    return SafetyProtocol.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
+    // Strip server-controlled / identity fields (no re-home, no forged number/soft-delete;
+    // incidents are managed via the dedicated incident endpoints).
+    const clean = { ...(patch || {}) };
+    for (const k of ['branch', 'protocolNumber', 'deletedAt', 'incidents']) delete clean[k];
+    return SafetyProtocol.findOneAndUpdate({ _id: id, ...this._branchQ(branchScope) }, clean, {
+      returnDocument: 'after',
+    });
   }
 
-  async reportIncident(protocolId, incident) {
+  async reportIncident(protocolId, incident, branchScope) {
     const SafetyProtocol = require('../models/SafetyProtocol');
     if (!incident?.description) {
       throw Object.assign(new Error('incident.description required'), { status: 400 });
     }
-    return SafetyProtocol.findByIdAndUpdate(
-      protocolId,
+    return SafetyProtocol.findOneAndUpdate(
+      { _id: protocolId, ...this._branchQ(branchScope) },
       { $push: { incidents: { ...incident, reportedAt: new Date() } } },
       { returnDocument: 'after' }
     );
   }
 
-  async resolveIncident(protocolId, incidentId) {
+  async resolveIncident(protocolId, incidentId, branchScope) {
     const SafetyProtocol = require('../models/SafetyProtocol');
-    const protocol = await SafetyProtocol.findById(protocolId);
+    const protocol = await SafetyProtocol.findOne({
+      _id: protocolId,
+      ...this._branchQ(branchScope),
+    });
     if (!protocol) return null;
     const inc = protocol.incidents.id(incidentId);
     if (!inc) return null;
@@ -2174,10 +2200,10 @@ class TherapistPortalService {
     return protocol;
   }
 
-  async deleteSafetyProtocol(id) {
+  async deleteSafetyProtocol(id, branchScope) {
     const SafetyProtocol = require('../models/SafetyProtocol');
-    return SafetyProtocol.findByIdAndUpdate(
-      id,
+    return SafetyProtocol.findOneAndUpdate(
+      { _id: id, ...this._branchQ(branchScope) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );

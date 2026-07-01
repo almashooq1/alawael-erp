@@ -208,9 +208,9 @@ class EarlyInterventionService {
     return screening;
   }
 
-  async getScreenings(filters = {}, pagination = {}) {
+  async getScreenings(filters = {}, pagination = {}, branchId) {
     const { page = 1, limit = 20, sortBy = 'screeningDate', sortOrder = -1 } = pagination;
-    const query = this._buildScreeningQuery(filters);
+    const query = scopedFilter(this._buildScreeningQuery(filters), branchId); // W1602
 
     const [data, total] = await Promise.all([
       DevelopmentalScreening.find(query)
@@ -236,13 +236,14 @@ class EarlyInterventionService {
     };
   }
 
-  async getScreeningById(id) {
+  async getScreeningById(id, branchId) {
     const screening = await DevelopmentalScreening.findById(id)
       .populate('child', 'childNumber firstName lastName firstNameAr lastNameAr birthInfo')
       .populate('screener', 'name email')
       .populate('referralId')
       .lean();
-    if (!screening) throw new Error('سجل الفحص غير موجود');
+    if (!screening || !sameBranchOrLegacy(screening, branchId))
+      throw new Error('سجل الفحص غير موجود'); // W1602
     return screening;
   }
 
@@ -329,9 +330,9 @@ class EarlyInterventionService {
     return milestone;
   }
 
-  async getMilestones(filters = {}, pagination = {}) {
+  async getMilestones(filters = {}, pagination = {}, branchId) {
     const { page = 1, limit = 50, sortBy = 'expectedAgeMonths', sortOrder = 1 } = pagination;
-    const query = this._buildMilestoneQuery(filters);
+    const query = scopedFilter(this._buildMilestoneQuery(filters), branchId); // W1602
 
     const [data, total] = await Promise.all([
       DevelopmentalMilestone.find(query)
@@ -357,12 +358,13 @@ class EarlyInterventionService {
     };
   }
 
-  async getMilestoneById(id) {
+  async getMilestoneById(id, branchId) {
     const milestone = await DevelopmentalMilestone.findById(id)
       .populate('child', 'childNumber firstName lastName birthInfo')
       .populate('assessedBy', 'name email')
       .lean();
-    if (!milestone) throw new Error('المعلم التنموي غير موجود');
+    if (!milestone || !sameBranchOrLegacy(milestone, branchId))
+      throw new Error('المعلم التنموي غير موجود'); // W1602
     return milestone;
   }
 
@@ -478,9 +480,9 @@ class EarlyInterventionService {
     return ifsp;
   }
 
-  async getIFSPs(filters = {}, pagination = {}) {
+  async getIFSPs(filters = {}, pagination = {}, branchId) {
     const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = -1 } = pagination;
-    const query = this._buildIFSPQuery(filters);
+    const query = scopedFilter(this._buildIFSPQuery(filters), branchId); // W1602
 
     const [data, total] = await Promise.all([
       IFSP.find(query)
@@ -506,7 +508,7 @@ class EarlyInterventionService {
     };
   }
 
-  async getIFSPById(id) {
+  async getIFSPById(id, branchId) {
     const ifsp = await IFSP.findById(id)
       .populate('child', 'childNumber firstName lastName firstNameAr lastNameAr birthInfo')
       .populate('serviceCoordinator', 'name email')
@@ -514,7 +516,8 @@ class EarlyInterventionService {
       .populate('services.provider', 'name email')
       .populate('createdBy', 'name email')
       .lean();
-    if (!ifsp) throw new Error('خطة IFSP غير موجودة');
+    if (!ifsp || !sameBranchOrLegacy(ifsp, branchId))
+      throw new Error('خطة IFSP غير موجودة'); // W1602
     return ifsp;
   }
 
@@ -609,9 +612,9 @@ class EarlyInterventionService {
     return referral;
   }
 
-  async getReferrals(filters = {}, pagination = {}) {
+  async getReferrals(filters = {}, pagination = {}, branchId) {
     const { page = 1, limit = 20, sortBy = 'referralDate', sortOrder = -1 } = pagination;
-    const query = this._buildReferralQuery(filters);
+    const query = scopedFilter(this._buildReferralQuery(filters), branchId); // W1602
 
     const [data, total] = await Promise.all([
       EarlyReferral.find(query)
@@ -637,13 +640,14 @@ class EarlyInterventionService {
     };
   }
 
-  async getReferralById(id) {
+  async getReferralById(id, branchId) {
     const referral = await EarlyReferral.findById(id)
       .populate('child', 'childNumber firstName lastName firstNameAr lastNameAr birthInfo')
       .populate('referringPhysicianId', 'name email')
       .populate('createdBy', 'name email')
       .lean();
-    if (!referral) throw new Error('الإحالة غير موجودة');
+    if (!referral || !sameBranchOrLegacy(referral, branchId))
+      throw new Error('الإحالة غير موجودة'); // W1602
     return referral;
   }
 

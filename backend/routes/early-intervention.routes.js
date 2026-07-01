@@ -344,7 +344,11 @@ router.get(
         sortOrder: req.query.sortOrder === 'asc' ? 1 : -1,
       };
 
-      const result = await earlyInterventionService.getScreenings(filters, pagination);
+      const result = await earlyInterventionService.getScreenings(
+        filters,
+        pagination,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب قائمة الفحوصات بنجاح', ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching screenings');
@@ -365,7 +369,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const screening = await earlyInterventionService.getScreeningById(req.params.id);
+      const screening = await earlyInterventionService.getScreeningById(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: screening });
     } catch (error) {
       logger.error('[EIS] Error fetching screening:', error);
@@ -507,7 +514,11 @@ router.get(
         sortOrder: req.query.sortOrder === 'desc' ? -1 : 1,
       };
 
-      const result = await earlyInterventionService.getMilestones(filters, pagination);
+      const result = await earlyInterventionService.getMilestones(
+        filters,
+        pagination,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب المعالم التنموية بنجاح', ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching milestones');
@@ -528,7 +539,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const milestone = await earlyInterventionService.getMilestoneById(req.params.id);
+      const milestone = await earlyInterventionService.getMilestoneById(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: milestone });
     } catch (error) {
       logger.error('[EIS] Error fetching milestone:', error);
@@ -690,7 +704,11 @@ router.get(
         sortOrder: req.query.sortOrder === 'asc' ? 1 : -1,
       };
 
-      const result = await earlyInterventionService.getIFSPs(filters, pagination);
+      const result = await earlyInterventionService.getIFSPs(
+        filters,
+        pagination,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب قائمة الخطط بنجاح', ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching IFSPs');
@@ -711,7 +729,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const ifsp = await earlyInterventionService.getIFSPById(req.params.id);
+      const ifsp = await earlyInterventionService.getIFSPById(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: ifsp });
     } catch (error) {
       logger.error('[EIS] Error fetching IFSP:', error);
@@ -907,7 +928,11 @@ router.get(
         sortOrder: req.query.sortOrder === 'asc' ? 1 : -1,
       };
 
-      const result = await earlyInterventionService.getReferrals(filters, pagination);
+      const result = await earlyInterventionService.getReferrals(
+        filters,
+        pagination,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم جلب قائمة الإحالات بنجاح', ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching referrals');
@@ -928,7 +953,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const referral = await earlyInterventionService.getReferralById(req.params.id);
+      const referral = await earlyInterventionService.getReferralById(
+        req.params.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: referral });
     } catch (error) {
       logger.error('[EIS] Error fetching referral:', error);

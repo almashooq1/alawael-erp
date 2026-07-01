@@ -34,6 +34,7 @@
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const router = express.Router();
 const _mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -75,7 +76,11 @@ const fail = (res, msg, status = 400) => res.status(status).json({ success: fals
 // ─────────────────────────────────────────────
 router.get('/stats', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    // W1575: never trust the client `x-branch-id` header (it bypasses
+    // requireBranchAccess, which only validates query/body/params). Derive the branch
+    // from the server scope; restricted callers get their own branch, cross-branch
+    // roles fall back to the requireBranchAccess-validated ?branchId.
+    const branchId = effectiveBranchScope(req) || req.query.branchId;
     const filter = branchId ? { branchId } : {};
 
     const [total, active, pending, totalHoursAgg] = await Promise.all([

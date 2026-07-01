@@ -717,19 +717,31 @@ router.post(
 
     await trip.save();
 
-    // Notify each passenger's guardian of arrival. notifyDropoff is STATIC and
-    // takes (tripId, beneficiaryId) — the old single instance-call with the trip
-    // doc threw (undefined method + wrong args) and rejected /complete AFTER the
-    // trip was already saved. allSettled so one bad notification can't fail it.
-    const recipients = (trip.passengers || []).filter(p => p.beneficiary_id);
-    await Promise.allSettled(
-      recipients.map(p => ParentNotificationService.notifyDropoff(trip._id, p.beneficiary_id))
+    // Drop off + notify ONLY the passengers who actually boarded (status
+    // 'picked_up'). notifyDropoff sets passenger.status='dropped_off' + saves,
+    // so:
+    //   • filtering to picked_up avoids force-marking absent/cancelled/never-
+    //     picked-up children as "delivered home" (corrupts the attendance record);
+    //   • running SEQUENTIALLY (one at a time) avoids the lost-update race —
+    //     each call re-loads the trip, mutates one passenger, saves; run
+    //     concurrently they overwrite each other's saves and only one sticks.
+    const recipients = (trip.passengers || []).filter(
+      p => p.beneficiary_id && p.status === 'picked_up'
     );
+    let notified = 0;
+    for (const p of recipients) {
+      try {
+        await ParentNotificationService.notifyDropoff(trip._id, p.beneficiary_id);
+        notified++;
+      } catch {
+        // one bad notification must not fail the trip completion
+      }
+    }
 
     res.json({
       success: true,
       data: trip,
-      notifications_sent: recipients.length,
+      notifications_sent: notified,
       message: 'تم إنهاء الرحلة',
     });
   })

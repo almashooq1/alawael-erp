@@ -67,6 +67,23 @@ const _insuranceClaimService = new InsuranceClaimService();
 // ─── Middleware helpers ───────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// W1599 — a JournalEntry is POSTED only via the dedicated POST /journal-entries/:id/approve
+// endpoint (guarded on status:'draft' + is_balanced:true; stamps status:'posted' + approved_by
+// + approved_at). But new JournalEntry({ ...req.body }) was raw, so a caller could create an
+// entry already status:'posted' with approved_by/posted_by/posted_at → post an unapproved
+// journal entry (accounting fraud), bypassing the approval gate. Likewise ChartOfAccount create
+// let a caller set current_balance / is_active. Strip the lifecycle/posting/computed fields on
+// create; posting flows only through /approve.
+const JOURNAL_PROTECTED = ['_id', 'status', 'posted_by', 'posted_at', 'approved_by', 'approved_at', 'reversed_by', 'reversed_at', 'reversal_entry', 'created_by', 'deleted_at'];
+const ACCOUNT_PROTECTED = ['_id', 'created_by', 'current_balance', 'is_active', 'deleted_at'];
+function stripFinanceFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 const validateObjectId =
   (param = 'id') =>
   (req, res, next) => {
@@ -155,7 +172,7 @@ router.post(
   '/accounts',
   asyncHandler(async (req, res) => {
     const account = new ChartOfAccount({
-      ...req.body,
+      ...stripFinanceFields(req.body, ACCOUNT_PROTECTED),
       created_by: req.user?._id,
     });
     await account.save();
@@ -273,7 +290,7 @@ router.post(
       });
     }
     const entry = new JournalEntry({
-      ...req.body,
+      ...stripFinanceFields(req.body, JOURNAL_PROTECTED),
       created_by: req.user?._id,
     });
     await entry.save();

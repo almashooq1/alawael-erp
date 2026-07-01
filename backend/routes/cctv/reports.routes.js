@@ -20,13 +20,30 @@
 const express = require('express');
 const reports = require('../../services/cctv/reports.service');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { callerCctvBranchCode } = require('../../middleware/cctvBranchScope');
 
 const router = require('./asyncRouter')(express.Router());
 router.use(authenticateToken);
+router.use(requireBranchAccess);
 router.use(requireRole(['admin', 'manager', 'security_officer', 'hr_manager']));
 
-function branchOf(req) {
-  return req.query.branchCode || req.user?.branchCode || '';
+// CCTV-event side is keyed by branchCode (String). For a restricted caller we
+// pin to their own branch code (ignoring any ?branchCode= spoof); a cross-branch
+// caller (resolver → null) may pass ?branchCode= to scope a specific branch.
+// NOTE: `req.user.branchCode` was never populated, so the old fallback provided
+// zero isolation — any authed caller could read another branch's child camera data.
+async function branchCodeOf(req) {
+  const callerCode = await callerCctvBranchCode(req);
+  return callerCode || req.query.branchCode || '';
+}
+
+// Hikvision workforce side is keyed by branchId (ObjectId). Pin a restricted
+// caller to their own branchId; cross-branch callers may pass ?branchId=.
+function branchIdOf(req) {
+  const bs = req && req.branchScope;
+  if (bs && !bs.allBranches && bs.branchId) return String(bs.branchId);
+  return req.query.branchId;
 }
 
 function wrap(fn) {
@@ -48,7 +65,7 @@ router.get(
   '/employees',
   wrap(req =>
     reports.employeesReport({
-      branchId: req.query.branchId,
+      branchId: branchIdOf(req),
       from: req.query.from,
       to: req.query.to,
       limit: req.query.limit,
@@ -70,9 +87,9 @@ router.get(
 
 router.get(
   '/plates',
-  wrap(req =>
+  wrap(async req =>
     reports.platesReport({
-      branchCode: branchOf(req),
+      branchCode: await branchCodeOf(req),
       from: req.query.from,
       to: req.query.to,
       limit: req.query.limit,
@@ -82,10 +99,10 @@ router.get(
 
 router.get(
   '/plates/:plate',
-  wrap(req =>
+  wrap(async req =>
     reports.plateHistory({
       plate: req.params.plate,
-      branchCode: branchOf(req),
+      branchCode: await branchCodeOf(req),
       from: req.query.from,
       to: req.query.to,
       limit: req.query.limit,
@@ -95,9 +112,9 @@ router.get(
 
 router.get(
   '/visitors',
-  wrap(req =>
+  wrap(async req =>
     reports.visitorsReport({
-      branchCode: branchOf(req),
+      branchCode: await branchCodeOf(req),
       from: req.query.from,
       to: req.query.to,
       limit: req.query.limit,
@@ -107,9 +124,9 @@ router.get(
 
 router.get(
   '/ai-overview',
-  wrap(req =>
+  wrap(async req =>
     reports.aiOverview({
-      branchCode: branchOf(req),
+      branchCode: await branchCodeOf(req),
       from: req.query.from,
       to: req.query.to,
     })

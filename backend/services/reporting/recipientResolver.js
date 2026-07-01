@@ -98,7 +98,15 @@ function createRecipientResolver({
 } = {}) {
   const effectiveRoleMap = roleMap || _defaultRoleMap();
   function getModel(m) {
-    return m && (m.model || m);
+    if (!m) return null;
+    // A real Mongoose model exposes `.find` — use it directly. Only a
+    // `{ model: RealModel }` proxy needs unwrapping. NOTE: a Mongoose model ALSO
+    // has a `.model` static method (truthy), so the old `m.model || m` wrongly
+    // returned that METHOD for real models → `User.find is not a function`
+    // (W1604 — broke notification recipient resolution for every role).
+    if (typeof m.find === 'function') return m;
+    if (m.model && typeof m.model.find === 'function') return m.model;
+    return m;
   }
   const Beneficiary = getModel(BeneficiaryModel);
   const Guardian = getModel(GuardianModel);

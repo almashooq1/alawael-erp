@@ -122,6 +122,7 @@ on:
       - 'backend/__tests__/sprint-test-files-exist.test.js'
       - 'backend/__tests__/test-files-have-describe.test.js'
       - 'backend/__tests__/test-script-dedupe.test.js'
+      - 'backend/__tests__/reporting-recipient-and-approval-wave1604.test.js'
       - 'backend/__tests__/smart-attendance-model-path-wave1602.test.js'
       # Wave-intelligence + care-plan suites that call jest.unmock('mongoose')
       # (added to test:sprint in 89b4d7304 + 2488ef4d6 + 399404dc1 + 3fddb9a65).
@@ -2206,6 +2207,8 @@ on:
       - 'backend/__tests__/portfolio-speech-idor-wave1603.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-create-massassign-wave1605.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-phase2b-isolation-wave1606.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -2306,6 +2309,7 @@ on:
       - 'backend/__tests__/sprint-test-files-exist.test.js'
       - 'backend/__tests__/test-files-have-describe.test.js'
       - 'backend/__tests__/test-script-dedupe.test.js'
+      - 'backend/__tests__/reporting-recipient-and-approval-wave1604.test.js'
       - 'backend/__tests__/smart-attendance-model-path-wave1602.test.js'
       # Wave-intelligence + care-plan suites that call jest.unmock('mongoose')
       # (added to test:sprint in 89b4d7304 + 2488ef4d6 + 399404dc1 + 3fddb9a65).
@@ -4389,6 +4393,8 @@ on:
       - 'backend/__tests__/portfolio-speech-idor-wave1603.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-create-massassign-wave1605.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-phase2b-isolation-wave1606.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

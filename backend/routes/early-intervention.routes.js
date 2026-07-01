@@ -394,10 +394,11 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const result = await earlyInterventionService.getScreeningsByChild(req.params.childId, {
-        page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 20,
-      });
+      const result = await earlyInterventionService.getScreeningsByChild(
+        req.params.childId,
+        { page: parseInt(req.query.page) || 1, limit: parseInt(req.query.limit) || 20 },
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, ...result });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching child screenings');
@@ -421,7 +422,8 @@ router.put(
       const screening = await earlyInterventionService.updateScreening(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث الفحص بنجاح', data: screening });
     } catch (error) {
@@ -444,7 +446,7 @@ router.delete(
   handleValidation,
   async (req, res) => {
     try {
-      await earlyInterventionService.deleteScreening(req.params.id);
+      await earlyInterventionService.deleteScreening(req.params.id, effectiveBranchScope(req));
       res.json({ success: true, message: 'تم حذف الفحص بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting screening:', error);
@@ -564,7 +566,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const milestones = await earlyInterventionService.getMilestonesByChild(req.params.childId);
+      const milestones = await earlyInterventionService.getMilestonesByChild(
+        req.params.childId,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: milestones });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching child milestones');
@@ -585,7 +590,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const report = await earlyInterventionService.getMilestoneReport(req.params.childId);
+      const report = await earlyInterventionService.getMilestoneReport(
+        req.params.childId,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم إنشاء تقرير المعالم التنموية', data: report });
     } catch (error) {
       safeError(res, error, '[EIS] Error generating milestone report');
@@ -609,7 +617,8 @@ router.put(
       const milestone = await earlyInterventionService.updateMilestone(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث المعلم التنموي بنجاح', data: milestone });
     } catch (error) {
@@ -632,7 +641,7 @@ router.delete(
   handleValidation,
   async (req, res) => {
     try {
-      await earlyInterventionService.deleteMilestone(req.params.id);
+      await earlyInterventionService.deleteMilestone(req.params.id, effectiveBranchScope(req));
       res.json({ success: true, message: 'تم حذف المعلم التنموي بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting milestone:', error);
@@ -754,7 +763,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const ifsps = await earlyInterventionService.getIFSPsByChild(req.params.childId);
+      const ifsps = await earlyInterventionService.getIFSPsByChild(
+        req.params.childId,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: ifsps });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching child IFSPs');
@@ -775,7 +787,12 @@ router.put(
   handleValidation,
   async (req, res) => {
     try {
-      const ifsp = await earlyInterventionService.updateIFSP(req.params.id, req.body, req.user.id);
+      const ifsp = await earlyInterventionService.updateIFSP(
+        req.params.id,
+        req.body,
+        req.user.id,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, message: 'تم تحديث خطة IFSP بنجاح', data: ifsp });
     } catch (error) {
       logger.error('[EIS] Error updating IFSP:', error);
@@ -797,7 +814,7 @@ router.delete(
   handleValidation,
   async (req, res) => {
     try {
-      await earlyInterventionService.deleteIFSP(req.params.id);
+      await earlyInterventionService.deleteIFSP(req.params.id, effectiveBranchScope(req));
       res.json({ success: true, message: 'تم حذف خطة IFSP بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting IFSP:', error);
@@ -822,7 +839,8 @@ router.post(
       const ifsp = await earlyInterventionService.addIFSPReview(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.status(201).json({
         success: true,
@@ -853,7 +871,8 @@ router.put(
         req.params.id,
         req.params.goalId,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث تقدم الهدف بنجاح', data: ifsp });
     } catch (error) {
@@ -978,7 +997,10 @@ router.get(
   handleValidation,
   async (req, res) => {
     try {
-      const referrals = await earlyInterventionService.getReferralsByChild(req.params.childId);
+      const referrals = await earlyInterventionService.getReferralsByChild(
+        req.params.childId,
+        effectiveBranchScope(req)
+      );
       res.json({ success: true, data: referrals });
     } catch (error) {
       safeError(res, error, '[EIS] Error fetching child referrals');
@@ -1002,7 +1024,8 @@ router.put(
       const referral = await earlyInterventionService.updateReferral(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث الإحالة بنجاح', data: referral });
     } catch (error) {
@@ -1025,7 +1048,7 @@ router.delete(
   handleValidation,
   async (req, res) => {
     try {
-      await earlyInterventionService.deleteReferral(req.params.id);
+      await earlyInterventionService.deleteReferral(req.params.id, effectiveBranchScope(req));
       res.json({ success: true, message: 'تم حذف الإحالة بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting referral:', error);
@@ -1050,7 +1073,8 @@ router.patch(
       const referral = await earlyInterventionService.updateReferralStatus(
         req.params.id,
         req.body.status,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.json({ success: true, message: 'تم تحديث حالة الإحالة بنجاح', data: referral });
     } catch (error) {
@@ -1076,7 +1100,8 @@ router.post(
       const referral = await earlyInterventionService.addReferralCommunication(
         req.params.id,
         req.body,
-        req.user.id
+        req.user.id,
+        effectiveBranchScope(req)
       );
       res.status(201).json({
         success: true,

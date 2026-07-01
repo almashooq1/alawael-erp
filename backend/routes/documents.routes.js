@@ -42,6 +42,7 @@ const documentLinkService = require('../services/documents/documentLink.service'
 const storageService = require('../services/storage/storage.service');
 const { single: singleUpload } = require('../middleware/documentUpload.middleware');
 const { requireDocumentAccess } = require('../middleware/documentAccess.middleware');
+const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Storage configuration
@@ -112,6 +113,32 @@ router.use(authenticate);
 router.use(requireBranchAccess);
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// W1563 — Document has NO branchId; the bulk list/search returned every document's
+// metadata (title / filename / beneficiary-linkage / uploader) to any authenticated
+// user regardless of branch. For branch-restricted callers, scope the bulk reads to
+// documents they own, are shared on, or that are public — the same access model
+// GET /:id already enforces via requireDocumentAccess. Cross-branch/HQ callers
+// (req.branchScope.restricted falsy) stay unscoped. NOTE: this changes what a restricted
+// user sees in the document list → owner verifies the role classification
+// (LEAVE IN REVIEW per the #769/#828 merge doctrine).
+function visibilityFilter(req) {
+  if (!req.branchScope || !req.branchScope.restricted) return null;
+  const uid = req.user && (req.user._id || req.user.id);
+  return { $or: [{ uploadedBy: uid }, { 'sharedWith.userId': uid }, { isPublic: true }] };
+}
+function applyVisibility(filter, req) {
+  const vis = visibilityFilter(req);
+  if (!vis) return filter;
+  if (filter.$or) {
+    // preserve an existing search $or by combining both under $and
+    filter.$and = [{ $or: filter.$or }, vis];
+    delete filter.$or;
+  } else {
+    Object.assign(filter, vis);
+  }
+  return filter;
+}
 
 // W933 — map the web-admin English category codes onto the model's Arabic enum.
 const DOC_CATEGORY_MAP = {
@@ -475,6 +502,8 @@ router.get(
       if (dateTo) filter.createdAt.$lte = new Date(dateTo);
     }
 
+    applyVisibility(filter, req); // W1563 — restricted callers: own/shared/public only
+
     const skip = (Number(page) - 1) * Number(limit);
     const [documents, total] = await Promise.all([
       Document.find(filter)
@@ -544,6 +573,8 @@ router.get(
       if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
       if (dateTo) filter.createdAt.$lte = new Date(dateTo);
     }
+
+    applyVisibility(filter, req); // W1563 — restricted callers: own/shared/public only
 
     const skip = (Number(page) - 1) * Number(limit);
 
@@ -815,6 +846,18 @@ router.post(
 router.get(
   '/entity/:type/:id',
   wrap(async (req, res) => {
+    // W1563 — a restricted caller may only list a beneficiary's documents if that
+    // beneficiary is in their branch (scope via the linked beneficiary, as Document
+    // itself has no branchId).
+    if (req.params.type === 'Beneficiary') {
+      try {
+        await enforceBeneficiaryBranch(req, req.params.id);
+      } catch (e) {
+        return res
+          .status(e && e.status ? e.status : 403)
+          .json({ success: false, message: 'غير مصرح بالوصول إلى مستندات هذا المستفيد' });
+      }
+    }
     const result = await documentLinkService.getDocumentsForEntity(req.params.type, req.params.id, {
       page: req.query.page,
       limit: req.query.limit,

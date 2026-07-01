@@ -389,11 +389,13 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         });
       }
     }
+    const wantConflictCheck = !body.force;
     delete body.force;
 
     // Create parent + recurring children
     const parent = await TherapySession.create(body);
     const created = [parent];
+    const skipped = [];
 
     if (body.recurrence && body.recurrence !== 'none' && body.recurrenceEnd) {
       const stepDays = {
@@ -403,15 +405,40 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         monthly: 30,
       }[body.recurrence];
       if (stepDays) {
+        // Children are single occurrences, not series roots — strip the
+        // recurrence rule so each child isn't itself treated as a parent
+        // (it links back via recurrenceParent only).
+        const childBase = { ...body };
+        delete childBase.recurrence;
+        delete childBase.recurrenceEnd;
         const endDate = new Date(body.recurrenceEnd);
         const cursor = new Date(body.date);
         cursor.setDate(cursor.getDate() + stepDays);
         let safety = 0;
         while (cursor <= endDate && safety < 100) {
           safety++;
+          const childDate = new Date(cursor);
+          // Each occurrence gets its OWN conflict check (the parent check only
+          // covered the first date) — skip a clashing date instead of silently
+          // double-booking the room/therapist. Honour the same force override.
+          if (wantConflictCheck) {
+            const childConflicts = await findConflicts({
+              therapist: body.therapist,
+              room: body.room,
+              date: childDate,
+              startTime: body.startTime,
+              endTime: body.endTime,
+              scope: branchFilter(req),
+            });
+            if (childConflicts.length > 0) {
+              skipped.push(childDate.toISOString().slice(0, 10));
+              cursor.setDate(cursor.getDate() + stepDays);
+              continue;
+            }
+          }
           const child = await TherapySession.create({
-            ...body,
-            date: new Date(cursor),
+            ...childBase,
+            date: childDate,
             recurrenceParent: parent._id,
             status: 'SCHEDULED',
           });
@@ -430,7 +457,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       success: true,
       data: parent,
       recurringCreated: created.length - 1,
-      message: `تم إنشاء الجلسة${created.length > 1 ? ` + ${created.length - 1} جلسة متكررة` : ''}`,
+      skippedConflicts: skipped,
+      message: `تم إنشاء الجلسة${created.length > 1 ? ` + ${created.length - 1} جلسة متكررة` : ''}${
+        skipped.length ? ` (تم تخطّي ${skipped.length} موعداً للتعارض)` : ''
+      }`,
     });
   } catch (err) {
     if (err?.name === 'ValidationError')

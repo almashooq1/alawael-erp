@@ -14,8 +14,17 @@
  * @version 1.0.0
  */
 
+const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+
+// W1568 — branch filter for the HR dashboard/stats reads (completes W1566, which scoped
+// the id-keyed + roster surfaces). find/countDocuments accept a string branchScope
+// (Mongoose casts it); aggregate $match needs an ObjectId. Empty object when unscoped
+// (cross-branch/HQ) so the query is unchanged.
+const _bf = s => (s ? { branch_id: s } : {});
+const _bfOid = s =>
+  s && mongoose.isValidObjectId(s) ? { branch_id: new mongoose.Types.ObjectId(s) } : {};
 
 // Lazy model loaders (safe for test environments)
 let Employee, LeaveRequest;
@@ -600,13 +609,14 @@ class EmployeeAffairsService {
   /**
    * العقود المنتهية أو القريبة من الانتهاء
    */
-  async getExpiringContracts(daysThreshold = 30) {
+  async getExpiringContracts(daysThreshold = 30, branchScope = null) {
     const Emp = getEmployee();
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + daysThreshold);
 
     const employees = await Emp.find({
       status: 'active',
+      ..._bf(branchScope),
       'contract.endDate': { $lte: futureDate, $gte: new Date() },
     })
       .select('employeeId firstName lastName department position contract')
@@ -745,9 +755,11 @@ class EmployeeAffairsService {
   /**
    * لوحة معلومات شؤون الموظفين الشاملة
    */
-  async getDashboard() {
+  async getDashboard(branchScope = null) {
     const Emp = getEmployee();
     const LR = getLeaveRequest();
+    const bf = _bf(branchScope);
+    const bfOid = _bfOid(branchScope);
 
     const [
       totalEmployees,
@@ -759,18 +771,18 @@ class EmployeeAffairsService {
       expiringContracts,
       recentHires,
     ] = await Promise.all([
-      Emp.countDocuments(),
-      Emp.countDocuments({ status: 'active' }),
-      Emp.countDocuments({ status: 'on-leave' }),
+      Emp.countDocuments(bf),
+      Emp.countDocuments({ status: 'active', ...bf }),
+      Emp.countDocuments({ status: 'on-leave', ...bf }),
       Emp.aggregate([
-        { $match: { status: 'active' } },
+        { $match: { status: 'active', ...bfOid } },
         { $group: { _id: '$department', count: { $sum: 1 }, avgSalary: { $avg: '$salary.base' } } },
         { $sort: { count: -1 } },
       ]),
-      Emp.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Emp.aggregate([{ $match: bfOid }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
       LR.countDocuments({ status: { $in: ['pending', 'manager_approved'] } }),
-      this.getExpiringContracts(30),
-      Emp.find({ status: 'active' })
+      this.getExpiringContracts(30, branchScope),
+      Emp.find({ status: 'active', ...bf })
         .sort({ hireDate: -1 })
         .limit(5)
         .select('employeeId firstName lastName position department hireDate')
@@ -784,6 +796,7 @@ class EmployeeAffairsService {
         onLeave: onLeaveCount,
         terminatedThisMonth: await Emp.countDocuments({
           status: 'terminated',
+          ...bf,
           updatedAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
         }),
       },
@@ -810,12 +823,12 @@ class EmployeeAffairsService {
   /**
    * إحصائيات الأقسام
    */
-  async getDepartmentStatistics(department) {
+  async getDepartmentStatistics(department, branchScope = null) {
     const Emp = getEmployee();
     const LR = getLeaveRequest();
 
     const [employees, leaveStats] = await Promise.all([
-      Emp.find({ department, status: 'active' })
+      Emp.find({ department, status: 'active', ..._bf(branchScope) })
         .select(
           'employeeId firstName lastName position salary.base performance.currentRating attendance'
         )
@@ -966,12 +979,12 @@ class EmployeeAffairsService {
   /**
    * تقرير المستندات المنتهية / القريبة من الانتهاء
    */
-  async getExpiringDocumentsReport(daysThreshold = 30) {
+  async getExpiringDocumentsReport(daysThreshold = 30, branchScope = null) {
     const Emp = getEmployee();
     const now = new Date();
     const cutoff = new Date(now.getTime() + daysThreshold * 24 * 60 * 60 * 1000);
 
-    const employees = await Emp.find({ status: 'active' })
+    const employees = await Emp.find({ status: 'active', ..._bf(branchScope) })
       .select(
         'employeeId firstName lastName mol.workPermitExpiry sponsorship.visaExpiry insurance.insuranceExpiry medicalCheckup.lastCheckupDate medicalCheckup.nextCheckupDate'
       )
@@ -1033,9 +1046,11 @@ class EmployeeAffairsService {
   /**
    * تقرير نسبة السعودة
    */
-  async getSaudizationReport() {
+  async getSaudizationReport(branchScope = null) {
     const Emp = getEmployee();
-    const employees = await Emp.find({ status: 'active' }).select('nationality department').lean();
+    const employees = await Emp.find({ status: 'active', ..._bf(branchScope) })
+      .select('nationality department')
+      .lean();
 
     const total = employees.length;
     const saudi = employees.filter(

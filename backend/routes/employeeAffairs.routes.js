@@ -37,7 +37,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const data = await service.getDashboard();
+    const data = await service.getDashboard(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -48,7 +48,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const data = await service.getDepartmentStatistics(req.params.department);
+    const data = await service.getDepartmentStatistics(req.params.department, effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -257,7 +257,7 @@ router.get(
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days) || 30;
-    const contracts = await service.getExpiringContracts(days);
+    const contracts = await service.getExpiringContracts(days, effectiveBranchScope(req));
     res.json({ success: true, data: contracts, count: contracts.length });
   })
 );
@@ -455,7 +455,7 @@ router.get(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
-    const data = await service.getSaudizationReport();
+    const data = await service.getSaudizationReport(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -468,7 +468,7 @@ router.get(
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days, 10) || 30;
-    const data = await service.getExpiringDocumentsReport(days);
+    const data = await service.getExpiringDocumentsReport(days, effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );

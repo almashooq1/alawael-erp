@@ -29,6 +29,23 @@ function createHrDashboardRouter({ service, auditService = null, logger = consol
 
   const router = express.Router();
 
+  // W1589 — SECURITY: the router mounts behind `authenticate` ONLY
+  // (app.js: `app.use('/api/v1/hr', authenticate, dashboardRouter)`), so before
+  // this gate ANY authenticated principal (therapist, receptionist, a portal
+  // token) could read the executive HR rollup — headcount, salary/leave-balance
+  // aggregates, compliance state — for any `?branchId`. The file header assumed
+  // the caller applied RBAC at mount time; it never did. Gate to the SAME role
+  // tier as the twin executive surface `hr-smart-analytics.routes.js`
+  // (both expose org-level HR analytics).
+  router.use((req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'auth required' });
+    const allowed = ['admin', 'hr_manager', 'manager', 'superadmin', 'super_admin'];
+    if (!allowed.includes(req.user.role)) {
+      return res.status(403).json({ error: 'insufficient permissions' });
+    }
+    next();
+  });
+
   router.get('/dashboard', async (req, res) => {
     try {
       const { branchId, overflowThresholdDays } = req.query;

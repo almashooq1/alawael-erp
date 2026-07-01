@@ -76,7 +76,11 @@ const ReportApprovalRequestSchema = new mongoose.Schema(
     periodKey: { type: String, required: true },
     scopeKey: { type: String, default: null },
 
-    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // Optional: scheduled/system-generated report runs have no human requester
+    // (the reports scheduler creates the approval with requestedBy=null).
+    // Requiring it crashed EVERY scheduled report (monthly/quarterly/semiannual
+    // exec/finance/quality reports never generated). W1604.
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
 
     state: {
       type: String,

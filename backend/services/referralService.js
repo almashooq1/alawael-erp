@@ -385,7 +385,7 @@ async function getAnalytics(branchId, filters = {}) {
   const [total, byStatus, bySpecialty, urgentPending, avgProcessing] = await Promise.all([
     Referral.countDocuments({ branch: branchId }),
     Referral.aggregate([
-      { $match: { branch: require('mongoose').Types.ObjectId(branchId) } },
+      { $match: { branch: new (require('mongoose').Types.ObjectId)(branchId) } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]).catch(() => Referral.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }])),
     Referral.aggregate([

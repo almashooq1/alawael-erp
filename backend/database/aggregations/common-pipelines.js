@@ -26,7 +26,7 @@ const stages = {
    * Match by branch
    */
   byBranch: branchId => ({
-    $match: { branch: { $eq: require('mongoose').Types.ObjectId(branchId) } },
+    $match: { branch: { $eq: new (require('mongoose').Types.ObjectId)(branchId) } },
   }),
 
   /**

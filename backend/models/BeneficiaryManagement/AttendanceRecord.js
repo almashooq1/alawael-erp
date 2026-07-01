@@ -179,7 +179,7 @@ attendanceRecordSchema.statics.getAttendanceRate = function (beneficiaryId, star
   return this.aggregate([
     {
       $match: {
-        beneficiaryId: mongoose.Types.ObjectId(beneficiaryId),
+        beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
         attendanceDate: { $gte: startDate, $lte: endDate },
       },
     },

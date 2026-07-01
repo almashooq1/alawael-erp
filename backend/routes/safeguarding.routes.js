@@ -135,7 +135,7 @@ router.get('/open', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W444
       status: { $nin: ['closed', 'unsubstantiated'] },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Concern.find(filter).sort({ reportedAt: -1 }).lean();
@@ -163,7 +163,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     ) {
       filter.subjectBeneficiaryId = req.query.subjectBeneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -231,7 +231,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W444
       reportedAt: { $gte: from, $lte: to },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Concern.find(filter)

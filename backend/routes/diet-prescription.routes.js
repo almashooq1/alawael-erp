@@ -100,7 +100,7 @@ async function hydrate(items) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -159,7 +159,7 @@ router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
       status: 'active',
       nextReviewDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).sort({ nextReviewDue: 1 }).limit(200).lean();
@@ -174,7 +174,7 @@ router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
 router.get('/npo-active', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), status: 'active', npo: true }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).sort({ npoStartedAt: -1 }).limit(200).lean();
@@ -193,7 +193,7 @@ router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
       status: 'active',
       'enteralFeeding.active': true,
     }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).limit(200).lean();
@@ -208,7 +208,7 @@ router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter)

@@ -2128,6 +2128,8 @@ on:
       - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-wave1573.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4233,6 +4235,8 @@ on:
       - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-wave1573.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

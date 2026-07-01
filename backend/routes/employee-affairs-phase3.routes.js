@@ -113,9 +113,12 @@ router.patch('/transfers/:id/execute', authorize('admin', 'hr_manager'), async (
     if (!transfer) return res.status(404).json({ success: false, message: 'Transfer not found' });
     // Update employee department
     const Employee = require('../models/HR/Employee');
+    // W1567 — the Employee branch field is snake `branch_id`; writing `branch` was a
+    // phantom no-op (strict mode dropped it) → an executed transfer silently never moved
+    // the employee's branch. Use branch_id so the transfer actually takes effect.
     await Employee.findByIdAndUpdate(transfer.employeeId, {
       department: transfer.toDepartment,
-      branch: transfer.toBranch,
+      branch_id: transfer.toBranch,
     });
     res.json({ success: true, data: transfer });
   } catch (err) {

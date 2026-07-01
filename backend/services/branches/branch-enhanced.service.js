@@ -363,14 +363,14 @@ class BranchEnhancedService {
       const [totalInvoiced, totalPaid] = await Promise.all([
         Invoice.aggregate([
           {
-            $match: { branchId: mongoose.Types.ObjectId(branchId), issueDate: { $gte: startDate } },
+            $match: { branchId: new mongoose.Types.ObjectId(branchId), issueDate: { $gte: startDate } },
           },
           { $group: { _id: null, total: { $sum: '$totalAmount' } } },
         ]),
         Invoice.aggregate([
           {
             $match: {
-              branchId: mongoose.Types.ObjectId(branchId),
+              branchId: new mongoose.Types.ObjectId(branchId),
               issueDate: { $gte: startDate },
               status: 'paid',
             },

@@ -146,7 +146,14 @@ function wireCarePlanning(app, deps = {}) {
         });
 
         const { authenticate: cpAuthMw } = require('../middleware/auth');
-        app.use('/api/v1/care-plans', cpAuthMw, careplan.router);
+        // W1551: the router carries branch-isolation machinery (bodyScopedBeneficiaryGuard,
+        // router.param('id', branchScopedResourceParam), effectiveBranchScope in listPlans),
+        // but ALL of it no-ops unless requireBranchAccess has populated req.branchScope.
+        // Without this middleware the entire care-plan surface (beneficiary PHI + clinical
+        // lifecycle) was open cross-branch IDOR. requireBranchAccess resolves the user's
+        // branch from the JWT or the W930 DB-enrichment and sets req.branchScope.
+        const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+        app.use('/api/v1/care-plans', cpAuthMw, requireBranchAccess, careplan.router);
 
         // Expose service + sub-modules on app for cross-feature integration
         app._carePlanService = careplan.service;

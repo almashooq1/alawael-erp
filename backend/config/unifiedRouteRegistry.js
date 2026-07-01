@@ -95,14 +95,14 @@ const ROUTES = [
   // ═══════════════════════════════════════════════════════════════════════
   {
     path: '/api/auth',
-    file: 'routes/auth.routes',
+    file: 'api/routes/auth.routes',
     auth: false,
     phase: 'core',
     description: 'Auth endpoints',
   },
   {
     path: '/api/v1/auth',
-    file: 'routes/auth.routes',
+    file: 'api/routes/auth.routes',
     auth: false,
     phase: 'core',
     description: 'Auth v1',

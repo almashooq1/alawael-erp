@@ -57,7 +57,7 @@ router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { programId } = req.query;
     const match = { ...branchFilter(req) };
-    if (programId) match.programId = require('mongoose').Types.ObjectId(programId);
+    if (programId) match.programId = new (require('mongoose').Types.ObjectId)(programId);
 
     const [byStatus, byType] = await Promise.all([
       Activity.aggregate([

@@ -37,7 +37,9 @@ router.post('/requests', async (req, res) => {
     const MaintenanceRequest = require('../models/Maintenance/MaintenanceRequest');
     const request = await MaintenanceRequest.create({
       ...req.body,
-      status: 'open',
+      // MaintenanceRequest.status enum is {new,assigned,in_progress,completed,cancelled};
+      // 'open' is not valid → create threw ValidationError → POST /requests 400'd every time.
+      status: 'new',
       reportedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: request });

@@ -286,7 +286,28 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
  */
 router.post('/iep', async (req, res) => {
   try {
-    const iepData = req.body;
+    // Whitelist creatable fields — NEVER pass req.body straight into createIEP.
+    // The service does `new SmartIEP({ ...data })`, so spreading req.body would let
+    // a caller forge privileged/computed fields (status, approved_by, approval_date,
+    // linked_assessments, ai_analysis, overall_progress, version, previous_iep_id).
+    const IEP_CREATABLE = [
+      'beneficiary_id',
+      'plan_type',
+      'plan_period',
+      'present_level',
+      'services',
+      'family_involvement',
+      'iep_team',
+      'notes',
+    ];
+    const iepData = {};
+    for (const f of IEP_CREATABLE) {
+      if (req.body[f] !== undefined) iepData[f] = req.body[f];
+    }
+    // branch_id is server-authoritative: a restricted user gets their own branch
+    // (any body value is ignored); cross-branch roles may target a branch.
+    const scoped = branchScope(req);
+    iepData.branch_id = scoped.branch_id || req.body.branch_id;
     if (!iepData.beneficiary_id || !iepData.branch_id) {
       return res.status(400).json({ success: false, error: 'beneficiary_id و branch_id مطلوبان' });
     }
@@ -354,13 +375,15 @@ router.get('/iep/:id', async (req, res) => {
  */
 router.patch('/iep/:id', async (req, res) => {
   try {
+    // `status` (use POST /iep/:id/transition — the state machine sets approval_date
+    // /approved_by) and `parent_consent` (use POST /iep/:id/parent-consent) are
+    // intentionally EXCLUDED: allowing them here lets a caller self-approve a plan
+    // or forge parental consent on a clinical document.
     const allowedFields = [
       'plan_end',
-      'status',
       'present_level',
       'services',
       'family_involvement',
-      'parent_consent',
       'iep_team',
     ];
     const updates = {};
@@ -475,6 +498,9 @@ router.patch('/iep/:id/goals/:goalId/progress', async (req, res) => {
  */
 router.get('/iep/:id/report', async (req, res) => {
   try {
+    // ownership gate — 404 a foreign-branch plan before the service reads its PHI
+    const owned = await SmartIEP.exists({ _id: req.params.id, ...branchScope(req) });
+    if (!owned) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     const report = await SmartIEPService.generateProgressReport(req.params.id);
     res.json({ success: true, data: report });
   } catch (err) {
@@ -488,6 +514,9 @@ router.get('/iep/:id/report', async (req, res) => {
  */
 router.post('/iep/:id/analyze', async (req, res) => {
   try {
+    // ownership gate — 404 a foreign-branch plan before the service reads its PHI
+    const owned = await SmartIEP.exists({ _id: req.params.id, ...branchScope(req) });
+    if (!owned) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     const analysis = await SmartIEPService.analyzeIEP(req.params.id);
     res.json({ success: true, data: analysis });
   } catch (err) {
@@ -532,10 +561,14 @@ router.post('/iep/:id/meetings', async (req, res) => {
  */
 router.post('/sessions', async (req, res) => {
   try {
-    const sessionData = req.body;
+    const sessionData = { ...req.body };
     if (!sessionData.iep_id || !sessionData.beneficiary_id) {
       return res.status(400).json({ success: false, error: 'iep_id و beneficiary_id مطلوبان' });
     }
+    // branch_id is server-authoritative: a restricted user's sessions are stamped
+    // with their own branch (any body value ignored) — no cross-branch planting.
+    const scoped = branchScope(req);
+    if (scoped.branch_id) sessionData.branch_id = scoped.branch_id;
     const session = await SessionLogService.createSession(sessionData);
     res.status(201).json({
       success: true,
@@ -555,7 +588,11 @@ router.post('/sessions', async (req, res) => {
 router.get('/sessions/beneficiary/:beneficiaryId/analytics', async (req, res) => {
   try {
     const weeks = parseInt(req.query.weeks) || 4;
-    const analytics = await SessionLogService.getSessionAnalytics(req.params.beneficiaryId, weeks);
+    const analytics = await SessionLogService.getSessionAnalytics(
+      req.params.beneficiaryId,
+      weeks,
+      branchScope(req)
+    );
     res.json({ success: true, data: analytics });
   } catch (err) {
     safeError(res, err, 'smart-iep');
@@ -571,13 +608,19 @@ router.get('/sessions/beneficiary/:beneficiaryId', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
     const skip = parseInt(req.query.skip) || 0;
-    const sessions = await SessionLog.find({ beneficiary_id: req.params.beneficiaryId })
+    const sessions = await SessionLog.find({
+      beneficiary_id: req.params.beneficiaryId,
+      ...branchScope(req),
+    })
       .sort({ session_date: -1 })
       .skip(skip)
       .limit(limit)
       .populate('therapist_id', 'name specialty');
 
-    const total = await SessionLog.countDocuments({ beneficiary_id: req.params.beneficiaryId });
+    const total = await SessionLog.countDocuments({
+      beneficiary_id: req.params.beneficiaryId,
+      ...branchScope(req),
+    });
 
     res.json({
       success: true,

@@ -7,8 +7,11 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
-// GET /incentives
-router.get('/incentives', async (req, res) => {
+// GET /incentives — sensitive HR compensation data (every employee's bonus
+// amounts + names + performance scores). Was ungated (any authenticated user
+// could list it). Gated to the codebase's canonical HR-read role set (matches the
+// sibling leave/payroll routes), owner-confirmed 2026-07-01.
+router.get('/incentives', authorize(['admin', 'super_admin', 'hr_manager', 'manager']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
     const { page = 1, limit = 20, status } = req.query;

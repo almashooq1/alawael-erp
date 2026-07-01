@@ -88,7 +88,7 @@ class QualityEnhancedService {
   // الشكاوى (Complaints)
   // ============================================================
 
-  async createComplaint(data) {
+  async createComplaint(data, createdBy = null) {
     const year = new Date().getFullYear();
     const count = await Complaint.countDocuments({ complaintNumber: { $regex: `^CMP-${year}` } });
     const complaintNumber = `CMP-${year}-${String(count + 1).padStart(4, '0')}`;
@@ -113,6 +113,9 @@ class QualityEnhancedService {
       complaintNumber,
       status: 'open',
       slaTracking: slaDeadlines[data.priority || 'medium'],
+      // server-authoritative (after the spread so a client `createdBy` can't override it);
+      // the route already passes req.user._id — it was previously dropped.
+      ...(createdBy ? { createdBy } : {}),
     });
   }
 
@@ -344,7 +347,7 @@ class QualityEnhancedService {
       Incident.aggregate([
         {
           $match: {
-            branchId: require('mongoose').Types.ObjectId(branchId),
+            branchId: new (require('mongoose').Types.ObjectId)(branchId),
             createdAt: { $gte: startDate },
           },
         },
@@ -365,7 +368,7 @@ class QualityEnhancedService {
       Complaint.aggregate([
         {
           $match: {
-            branchId: require('mongoose').Types.ObjectId(branchId),
+            branchId: new (require('mongoose').Types.ObjectId)(branchId),
             resolvedAt: { $ne: null },
             createdAt: { $gte: startDate },
           },

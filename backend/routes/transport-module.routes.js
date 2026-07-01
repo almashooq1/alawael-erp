@@ -1163,7 +1163,7 @@ router.get(
     const total = await VehicleMaintenance.countDocuments(filter);
     const records = await VehicleMaintenance.find(filter)
       .populate('vehicle_id', 'plate_number vehicle_number make model')
-      .populate('performed_by', 'name')
+      
       .sort({ maintenance_date: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -1201,8 +1201,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const record = await VehicleMaintenance.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate('vehicle_id', 'plate_number make model year')
-      .populate('performed_by', 'name')
-      .populate('approved_by', 'name');
+      
+      ;
     if (!record) return res.status(404).json({ success: false, message: 'سجل الصيانة غير موجود' });
     res.json({ success: true, data: record });
   })

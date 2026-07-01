@@ -163,7 +163,7 @@ router.post('/initiate/:beneficiaryId', async (req, res) => {
     today.setHours(0, 0, 0, 0);
     if (parsedDate < today) return fail(res, 'تاريخ النقل يجب أن يكون اليوم أو في المستقبل', 422);
 
-    const beneficiary = await Beneficiary.findById(beneficiaryId).populate('branch', 'code');
+    const beneficiary = await Beneficiary.findById(beneficiaryId).populate('branchId', 'code');
     if (!beneficiary) return fail(res, 'المستفيد غير موجود', 404);
 
     if (beneficiary.status !== 'active') {

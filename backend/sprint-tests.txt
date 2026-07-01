@@ -1186,3 +1186,4 @@ __tests__/employee-create-massassign-role-gate-wave1586.test.js
 __tests__/mdt-subdoc-massassign-wave1587.test.js
 __tests__/telehealth-consultation-branch-isolation-wave1584.test.js
 __tests__/branchid-clinical-slice4-wave1585.test.js
+__tests__/m9-strict-populate-wave1595.test.js

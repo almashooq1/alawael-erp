@@ -71,7 +71,7 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     set('DisciplinaryAction', '../../models/HR/DisciplinaryAction');
     set('LeaveBalance', '../../models/LeaveBalance');
     set('PayrollRun', '../../models/HR/PayrollRun');
-    set('SmartAttendance', '../../models/smart-attendance');
+    set('SmartAttendance', '../../models/advanced_attendance.model');
     set('PerformanceEvaluation', '../../models/PerformanceEvaluation');
     set('User', '../../models/User');
     return engineModels;

@@ -26,6 +26,8 @@
 
 const express = require('express');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   KPI_NOT_FOUND: 404,
@@ -65,11 +67,18 @@ function paramsFromQuery(query) {
 }
 
 function actorFrom(req) {
+  const params = paramsFromQuery(req.query);
+  // W1601: lock a branch-restricted caller to their OWN branch's KPI drill-down. A foreign
+  // ?branchId= is already 403'd by requireBranchAccess; here we also FORCE the scoped branch
+  // so an omitted branchId can't drill across all branches. Cross-branch roles
+  // (effectiveBranchScope → null) keep the ?branchId= they passed.
+  const scope = effectiveBranchScope(req);
+  if (scope) params.branchId = String(scope);
   return {
     userId: req.user?.id || req.user?._id || null,
     role: req.user?.role || req.user?.roleCode || null,
     ip: req.ip,
-    params: paramsFromQuery(req.query),
+    params,
   };
 }
 
@@ -105,6 +114,11 @@ function createDrilldownRouter({
   void logger;
 
   const router = express.Router();
+  // W1601: branch-scope KPI drill-down. Mount applies `authenticate` but no branch guard,
+  // so any authed user could drill into another branch's KPI via ?branchId=. requireBranchAccess
+  // sets req.branchScope + rejects an explicit foreign branchId; actorFrom() then forces the
+  // scoped branch for restricted callers (cross-branch roles keep full drill-in).
+  router.use(requireBranchAccess);
 
   // GET / — list all registered KPIs (id + title + category)
   router.get('/', async (_req, res) => {
@@ -190,7 +204,9 @@ function createDrilldownRouter({
   router.get('/:kpiId/owner', async (req, res) => {
     try {
       const ctx = actorFrom(req);
-      ctx.branchId = req.query.branchId || ctx.params.branchId || null;
+      // W1601: use the branch already resolved+scoped in actorFrom (restricted → own branch)
+      // instead of the raw ?branchId= so owner resolution can't cross branches either.
+      ctx.branchId = ctx.params.branchId || null;
       const result = await drilldown.resolveOwner({
         kpiId: req.params.kpiId,
         ctx,

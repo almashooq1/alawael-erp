@@ -219,12 +219,15 @@ async function getAttendanceFromCCTV(beneficiaryId, date) {
 /**
  * 6. getSecurityAlerts — unauthorized access, face not recognized, camera offline
  */
-async function getSecurityAlerts(startDate, endDate) {
+async function getSecurityAlerts(startDate, endDate, branchCode) {
   try {
     const query = {
       severity: { $in: ['medium', 'high', 'critical'] },
       status: { $in: ['open', 'acknowledged', 'investigating'] },
     };
+    // Scope to the caller's branch when provided (restricted users). CctvAlert
+    // keys on branchCode (String, uppercase).
+    if (branchCode) query.branchCode = String(branchCode).toUpperCase();
     if (startDate || endDate) {
       query.firstEventAt = {};
       if (startDate) query.firstEventAt.$gte = new Date(startDate);

@@ -29,7 +29,7 @@ const HearingScreening = require('../models/HearingScreening');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 router.use(requireBranchAccess); // W445
@@ -314,7 +314,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
 
     const doc = await HearingScreening.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       carePlanVersionId:
         body.carePlanVersionId && mongoose.isValidObjectId(body.carePlanVersionId)

@@ -1181,4 +1181,5 @@ __tests__/measurements-effectiveness-idor-wave1583.test.js
 __tests__/branch-remaining3-wave1582.test.js
 __tests__/create-injection-slice-wave1583.test.js
 __tests__/transport-trip-complete-dropoff-wave1585.test.js
+__tests__/employee-create-massassign-role-gate-wave1586.test.js
 __tests__/mdt-subdoc-massassign-wave1587.test.js

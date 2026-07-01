@@ -35,6 +35,7 @@
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
@@ -88,7 +89,11 @@ const DEFAULT_ONBOARDING_TASKS = [
 // ─────────────────────────────────────────────
 router.get('/stats', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    // W1575: never trust the client `x-branch-id` header (it bypasses
+    // requireBranchAccess, which only validates query/body/params). Server scope:
+    // restricted callers get their own branch, cross-branch roles fall back to the
+    // requireBranchAccess-validated ?branchId.
+    const branchId = effectiveBranchScope(req) || req.query.branchId;
     const filter = branchId ? { branchId } : {};
     const now = new Date();
     const weekStart = new Date(now);
@@ -754,7 +759,11 @@ router.post('/talent-pool', requireHr, async (req, res) => {
 // تقرير نطاقات والسعودة
 router.get('/reports/nitaqat', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    // W1575: never trust the client `x-branch-id` header (it bypasses
+    // requireBranchAccess, which only validates query/body/params). Server scope:
+    // restricted callers get their own branch, cross-branch roles fall back to the
+    // requireBranchAccess-validated ?branchId.
+    const branchId = effectiveBranchScope(req) || req.query.branchId;
     const filter = { status: 'hired', ...(branchId ? { branchId } : {}) };
 
     const [total, saudis] = await Promise.all([
@@ -786,7 +795,11 @@ router.get('/reports/nitaqat', async (req, res) => {
 // تقرير تكاليف التوظيف
 router.get('/reports/cost', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    // W1575: never trust the client `x-branch-id` header (it bypasses
+    // requireBranchAccess, which only validates query/body/params). Server scope:
+    // restricted callers get their own branch, cross-branch roles fall back to the
+    // requireBranchAccess-validated ?branchId.
+    const branchId = effectiveBranchScope(req) || req.query.branchId;
     const filter = branchId ? { branchId } : {};
 
     const [totalPostings, filledPostings, totalApplications, totalHired, hiredApps] =

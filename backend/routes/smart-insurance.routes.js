@@ -37,8 +37,8 @@ const InsuranceClaim = require('../models/SmartInsuranceClaim');
 const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const _logger = require('../utils/logger');
 const _safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
@@ -61,7 +61,7 @@ router.get(
   '/stats',
   authorize(['admin', 'finance', 'manager', 'insurance_officer']),
   wrap(async (req, res) => {
-    const branchId = req.query.branch_id || req.user.branchId;
+    const branchId = effectiveBranchScope(req) || req.query.branch_id;
     const data = await smartInsuranceService.getStats(branchId);
     res.json({ success: true, data });
   })
@@ -102,7 +102,7 @@ router.post(
   wrap(async (req, res) => {
     const company = await InsuranceCompany.create({
       ...req.body,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, data: company });
@@ -141,12 +141,11 @@ router.get(
   authorize(['admin', 'finance', 'manager', 'insurance_officer']),
   wrap(async (req, res) => {
     const days = parseInt(req.query.days) || 30;
-    const branchId = req.query.branch_id || req.user.branchId;
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() + days);
 
     const policies = await InsurancePolicy.find({
-      branchId,
+      ...branchFilter(req),
       status: 'active',
       endDate: { $gte: new Date(), $lte: cutoff },
       deletedAt: null,
@@ -172,8 +171,9 @@ router.get(
     const limit = parseInt(req.query.per_page) || 15;
     const query = { deletedAt: null };
 
-    if (req.query.branch_id) query.branchId = req.query.branch_id;
-    else if (req.user.branchId) query.branchId = req.user.branchId;
+    // W1573 — scope via req.branchScope (branchFilter), not the never-populated
+    // req.user.branchId (W930) which left the query unscoped → all-branch leak.
+    Object.assign(query, branchFilter(req));
 
     if (req.query.status) query.status = req.query.status;
     if (req.query.beneficiary_id) query.beneficiaryId = req.query.beneficiary_id;
@@ -222,7 +222,7 @@ router.post(
       policyNumber: policy_number,
       memberId: member_id,
       ...rest,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       createdBy: req.user._id,
       policyUuid: require('crypto').randomUUID(),
     });
@@ -237,7 +237,11 @@ router.post(
 router.get(
   '/policies/:id',
   wrap(async (req, res) => {
-    const policy = await InsurancePolicy.findOne({ _id: req.params.id, deletedAt: null })
+    const policy = await InsurancePolicy.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchFilter(req),
+    })
       .populate('beneficiaryId', 'name nationalId phone birthDate')
       .populate('insuranceCompanyId')
       .lean();
@@ -254,9 +258,13 @@ router.put(
   '/policies/:id',
   authorize(['admin', 'finance', 'insurance_officer']),
   wrap(async (req, res) => {
+    // W1573 — scope to caller branch + never let the body reassign tenancy/identity.
+    const { branchId: _b, beneficiaryId: _bd, ...safeBody } = req.body;
+    void _b;
+    void _bd;
     const policy = await InsurancePolicy.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
-      { ...req.body, updatedBy: req.user._id },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
+      { ...safeBody, updatedBy: req.user._id },
       { returnDocument: 'after', runValidators: true }
     );
     if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
@@ -272,11 +280,11 @@ router.delete(
   '/policies/:id',
   authorize(['admin']),
   wrap(async (req, res) => {
-    await InsurancePolicy.findByIdAndUpdate(req.params.id, {
-      deletedAt: new Date(),
-      status: 'cancelled',
-      updatedBy: req.user._id,
-    });
+    const deleted = await InsurancePolicy.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
+      { deletedAt: new Date(), status: 'cancelled', updatedBy: req.user._id }
+    );
+    if (!deleted) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
     res.json({ success: true, message: 'تم حذف الوثيقة بنجاح' });
   })
 );
@@ -288,10 +296,19 @@ router.delete(
 router.post(
   '/policies/:id/check-eligibility',
   wrap(async (req, res) => {
+    // W1573 — the service reads the policy unscoped; verify branch ownership first.
+    const owned = await InsurancePolicy.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchFilter(req),
+    })
+      .select('_id')
+      .lean();
+    if (!owned) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
     const result = await smartInsuranceService.checkEligibility(req.params.id, {
       checkType: req.body.service_type || 'general',
       serviceCode: req.body.service_code,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       userId: req.user._id,
     });
     res.json({ success: true, data: result });
@@ -311,6 +328,14 @@ router.post(
         .status(400)
         .json({ success: false, message: 'amount مطلوب ويجب أن يكون أكبر من 0' });
     }
+    const owned = await InsurancePolicy.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchFilter(req),
+    })
+      .select('_id')
+      .lean();
+    if (!owned) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
     const result = await smartInsuranceService.calculateCopay(req.params.id, parseFloat(amount));
     res.json({ success: true, data: result });
   })
@@ -332,7 +357,7 @@ router.get(
     if (!date_from || !date_to) {
       return res.status(400).json({ success: false, message: 'date_from و date_to مطلوبان' });
     }
-    const branchId = branch_id || req.user.branchId;
+    const branchId = effectiveBranchScope(req) || branch_id;
     const data = await smartInsuranceService.getRejectionAnalytics(branchId, date_from, date_to);
     res.json({ success: true, data });
   })
@@ -350,8 +375,9 @@ router.get(
     const limit = parseInt(req.query.per_page) || 15;
     const query = { deletedAt: null };
 
-    if (req.query.branch_id) query.branchId = req.query.branch_id;
-    else if (req.user.branchId) query.branchId = req.user.branchId;
+    // W1573 — scope via req.branchScope (branchFilter), not the never-populated
+    // req.user.branchId (W930) which left the query unscoped → all-branch leak.
+    Object.assign(query, branchFilter(req));
 
     if (req.query.status) query.status = req.query.status;
     if (req.query.policy_id) query.policyId = req.query.policy_id;
@@ -403,7 +429,7 @@ router.post(
       serviceSessionId: req.body.service_session_id || null,
       priorAuthId: req.body.prior_auth_id || null,
       notes: req.body.notes || '',
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       userId: req.user._id,
     });
     res.status(201).json({ success: true, data: claim, message: 'تم تقديم المطالبة بنجاح' });
@@ -417,7 +443,11 @@ router.post(
 router.get(
   '/claims/:id',
   wrap(async (req, res) => {
-    const claim = await InsuranceClaim.findOne({ _id: req.params.id, deletedAt: null })
+    const claim = await InsuranceClaim.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchFilter(req),
+    })
       .populate('policyId')
       .populate('beneficiaryId', 'name nationalId phone')
       .populate('priorAuthId', 'authNumber status validFrom validUntil')
@@ -445,7 +475,7 @@ router.patch(
     } = req.body;
 
     const claim = await InsuranceClaim.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
+      { _id: req.params.id, deletedAt: null, ...branchFilter(req) },
       {
         approvedAmount: approved_amount || 0,
         patientShare: patient_share || 0,
@@ -479,8 +509,9 @@ router.get(
     const limit = parseInt(req.query.per_page) || 15;
     const query = { deletedAt: null };
 
-    if (req.query.branch_id) query.branchId = req.query.branch_id;
-    else if (req.user.branchId) query.branchId = req.user.branchId;
+    // W1573 — scope via req.branchScope (branchFilter), not the never-populated
+    // req.user.branchId (W930) which left the query unscoped → all-branch leak.
+    Object.assign(query, branchFilter(req));
 
     if (req.query.status) query.status = req.query.status;
     if (req.query.policy_id) query.policyId = req.query.policy_id;
@@ -527,7 +558,7 @@ router.post(
       serviceType: service_type,
       clinicalJustification: clinical_justification,
       requestedServices: requested_services,
-      branchId: req.user.branchId,
+      branchId: effectiveBranchScope(req),
       userId: req.user._id,
     });
     res.status(201).json({ success: true, data: pa, message: 'تم إرسال طلب الموافقة المسبقة' });
@@ -541,7 +572,11 @@ router.post(
 router.get(
   '/prior-auth/:id',
   wrap(async (req, res) => {
-    const pa = await PriorAuthorization.findOne({ _id: req.params.id, deletedAt: null })
+    const pa = await PriorAuthorization.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchFilter(req),
+    })
       .populate('policyId')
       .populate('beneficiaryId', 'name nationalId phone')
       .lean();
@@ -564,7 +599,7 @@ router.get(
   wrap(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.per_page) || 20;
-    const query = { deletedAt: null };
+    const query = { deletedAt: null, ...branchFilter(req) };
 
     if (req.query.policy_id) query.policyId = req.query.policy_id;
     if (req.query.beneficiary_id) query.beneficiaryId = req.query.beneficiary_id;

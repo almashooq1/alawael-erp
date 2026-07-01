@@ -37,7 +37,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const data = await service.getDashboard();
+    const data = await service.getDashboard(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -48,7 +48,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const data = await service.getDepartmentStatistics(req.params.department);
+    const data = await service.getDepartmentStatistics(req.params.department, effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -63,7 +63,7 @@ router.get(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const result = await service.listLeaves(req.query);
+    const result = await service.listLeaves(req.query, effectiveBranchScope(req));
     res.json({ success: true, ...result });
   })
 );
@@ -74,6 +74,8 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    // W1569 — a restricted caller may only file a leave for an employee in their branch.
+    await enforceEmployeeBranch(req, req.body.employeeId);
     const leave = await service.requestLeave({
       ...req.body,
       createdBy: req.user?.id || req.user?._id,
@@ -105,7 +107,8 @@ router.post(
       req.params.id,
       req.user?.id || req.user?._id,
       req.user?.name || 'Manager',
-      req.body.comments
+      req.body.comments,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -122,7 +125,8 @@ router.post(
       req.params.id,
       req.user?.id || req.user?._id,
       req.user?.name || 'HR',
-      req.body.comments
+      req.body.comments,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -140,7 +144,8 @@ router.post(
       req.user?.id || req.user?._id,
       req.user?.name || 'Reviewer',
       req.body.comments,
-      req.body.stage
+      req.body.stage,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -155,7 +160,8 @@ router.post(
     const leave = await service.cancelLeave(
       req.params.id,
       req.user?.id || req.user?._id,
-      req.body.reason
+      req.body.reason,
+      effectiveBranchScope(req)
     );
     res.json({ success: true, data: leave });
   })
@@ -257,7 +263,7 @@ router.get(
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days) || 30;
-    const contracts = await service.getExpiringContracts(days);
+    const contracts = await service.getExpiringContracts(days, effectiveBranchScope(req));
     res.json({ success: true, data: contracts, count: contracts.length });
   })
 );
@@ -455,7 +461,7 @@ router.get(
   requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
-    const data = await service.getSaudizationReport();
+    const data = await service.getSaudizationReport(effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );
@@ -468,7 +474,7 @@ router.get(
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days, 10) || 30;
-    const data = await service.getExpiringDocumentsReport(days);
+    const data = await service.getExpiringDocumentsReport(days, effectiveBranchScope(req));
     res.json({ success: true, data });
   })
 );

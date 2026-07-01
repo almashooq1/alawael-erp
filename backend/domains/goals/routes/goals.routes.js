@@ -47,6 +47,32 @@ function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
 
+// W1573 — schema-defined fields TherapeuticGoal manages itself; a create/update caller
+// must NOT self-set them. The validate() validators only check presence/enum — they do
+// not whitelist — so the raw ...req.body spread let a caller forge currentProgress /
+// achievedDate / status / goalNumber / isDeleted / createdBy on the canonical goal
+// (mongoose strict already drops NON-schema keys; these are the in-schema ones). branchId/
+// beneficiaryId are ownership/identity: branchId is server-pinned on create + immutable on
+// update; beneficiaryId is immutable on update.
+const GOAL_SERVER_FIELDS = [
+  '_id',
+  'branchId',
+  'goalNumber',
+  'createdBy',
+  'lastModifiedBy',
+  'currentProgress',
+  'achievedDate',
+  'isDeleted',
+];
+function stripGoalWriteFields(body, { update = false } = {}) {
+  const drop = new Set(update ? [...GOAL_SERVER_FIELDS, 'beneficiaryId'] : GOAL_SERVER_FIELDS);
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!drop.has(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // GET /goals/beneficiary/:beneficiaryId — list by beneficiary (must be before /:id)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -97,7 +123,7 @@ router.post(
     // W1178 — restricted callers cannot spoof branchId on create; pin to own branch
     const createScope = effectiveBranchScope(req);
     const goal = new TherapeuticGoal({
-      ...req.body,
+      ...stripGoalWriteFields(req.body),
       ...(createScope ? { branchId: createScope } : {}),
     });
     await goal.save();
@@ -171,8 +197,8 @@ router.put(
     if (!mongoose.Types.ObjectId.isValid(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
-    // W1178 — ownership/identity fields are immutable via generic update
-    const { branchId: _branchId, beneficiaryId: _beneficiaryId, ...safeUpdate } = req.body;
+    // W1178 + W1573 — ownership/identity + server-owned fields are immutable via update
+    const safeUpdate = stripGoalWriteFields(req.body, { update: true });
     const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.goalId, safeUpdate, {
       returnDocument: 'after',
       runValidators: true,
@@ -196,7 +222,11 @@ router.post(
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
 
     goal.progressHistory = goal.progressHistory || [];
-    goal.progressHistory.push({ ...req.body, date: req.body.date || new Date() });
+    goal.progressHistory.push({
+      ...req.body,
+      recordedBy: req.user?._id, // W1573 — server-stamped, not client-supplied
+      date: req.body.date || new Date(),
+    });
 
     if (typeof req.body.progress === 'number') {
       goal.progress = req.body.progress;

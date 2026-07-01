@@ -450,6 +450,10 @@ router.post('/escalations/process', async (req, res) => {
         'sla.deadline': { $lt: new Date() },
       }).lean();
 
+      // W1558: per-rule counter — the cumulative `escalated` was being $inc'd onto
+      // EACH rule, so every rule after the first was over-credited with prior rules'
+      // escalations (inflated stats.totalTriggered on every cron run).
+      let ruleEscalated = 0;
       for (const task of overdueTasks) {
         processed++;
         const existingLog = await WorkflowEscalationLog.findOne({
@@ -471,14 +475,17 @@ router.post('/escalations/process', async (req, res) => {
               status: 'active',
             });
             escalated++;
+            ruleEscalated++;
           }
         }
       }
 
-      await WorkflowEscalationRule.findByIdAndUpdate(rule._id, {
-        $inc: { 'stats.totalTriggered': escalated },
-        'stats.lastTriggered': new Date(),
-      });
+      if (ruleEscalated > 0) {
+        await WorkflowEscalationRule.findByIdAndUpdate(rule._id, {
+          $inc: { 'stats.totalTriggered': ruleEscalated },
+          'stats.lastTriggered': new Date(),
+        });
+      }
     }
 
     res.json({
@@ -1300,8 +1307,11 @@ router.post('/approval-chains/:id/start', async (req, res) => {
       initiatedBy: uid(req),
     });
 
-    chain.stats.timesUsed = (chain.stats.timesUsed || 0) + 1;
-    await chain.save();
+    // W1558: atomic increment (was read-modify-write + save → lost concurrent updates).
+    await WorkflowApprovalChain.updateOne(
+      { _id: chain._id },
+      { $inc: { 'stats.timesUsed': 1 } }
+    );
 
     res.status(201).json({ success: true, data: instance, message: 'تم بدء سلسلة الموافقات' });
   } catch (err) {
@@ -1359,6 +1369,47 @@ router.post('/approval-chains/instances/:id/decide', async (req, res) => {
       return res.status(400).json({ success: false, message: 'لا يمكن اتخاذ قرار على هذا المثيل' });
     }
 
+    // W1558: authorize the caller as the DESIGNATED approver for the current step.
+    // Previously the handler recorded `approver: uid(req)` with NO check → ANY
+    // authenticated user could approve/reject any financial/HR/legal chain (full
+    // approval bypass). Resolve the step + match the caller (mirrors /my-pending).
+    const chain = await WorkflowApprovalChain.findById(instance.approvalChain);
+    const step = chain && chain.steps && chain.steps[instance.currentStep];
+    if (!step) {
+      return res.status(400).json({ success: false, message: 'خطوة الموافقة غير موجودة' });
+    }
+    const callerId = String(uid(req));
+    const callerRole = req.user && req.user.role;
+    let isApprover = false;
+    if (step.approverType === 'specific_user') {
+      isApprover = String(step.approverUser) === callerId;
+    } else if (step.approverType === 'group') {
+      isApprover = (step.approverGroup || []).some(u => String(u) === callerId);
+    } else if (step.approverType === 'role') {
+      isApprover = !!callerRole && callerRole === step.approverRole;
+    } else {
+      // department_head / direct_manager / skip_level_manager need org-chart
+      // resolution that isn't implemented → fail CLOSED (don't let anyone approve).
+      return res.status(403).json({
+        success: false,
+        message: 'نوع المُوافِق غير مدعوم بعد (يتطلب هيكلاً تنظيمياً) — استخدم مستخدماً/دوراً/مجموعة محددة',
+      });
+    }
+    if (!isApprover) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'لست المُوافِق المُعيَّن لهذه الخطوة' });
+    }
+    // W1558: one approver can't decide the same step twice (no self-quorum bypass).
+    const alreadyDecided = (instance.stepResults || []).some(
+      r => r.stepOrder === instance.currentStep && String(r.approver) === callerId
+    );
+    if (alreadyDecided) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'لقد اتخذت قراراً على هذه الخطوة بالفعل' });
+    }
+
     instance.stepResults.push({
       stepOrder: instance.currentStep,
       approver: uid(req),
@@ -1367,8 +1418,7 @@ router.post('/approval-chains/instances/:id/decide', async (req, res) => {
       decidedAt: new Date(),
     });
 
-    const chain = await WorkflowApprovalChain.findById(instance.approvalChain);
-    const totalSteps = chain?.steps?.length || 1;
+    const totalSteps = chain.steps.length || 1;
 
     if (decision === 'rejected') {
       instance.status = 'rejected';

@@ -66,6 +66,26 @@ const whatsappRehabOutcomes = require('../services/whatsapp/whatsappRehabOutcome
 const whatsappAppointmentSync = require('../services/whatsapp/whatsappAppointmentSync.service');
 const { can } = require('../authorization/can');
 const { authenticate, authorize } = require('../middleware/auth');
+// W1424m — OWNER REVIEW: roles permitted to message guardians via WhatsApp.
+// Previously ANY authenticated user could send (only `authenticate`). This is a
+// broad-but-staff-only allow-list — excludes beneficiary-portal accounts +
+// read-only / finance / HR-clerk roles. Tighten or widen per role taxonomy.
+const SEND_ROLES = [
+  'admin',
+  'super_admin',
+  'manager',
+  'branch_manager',
+  'supervisor',
+  'coordinator',
+  'receptionist',
+  'social_worker',
+  'case_manager',
+  'therapist',
+  'doctor',
+  'nurse',
+  'independent_advocate',
+  'cultural_officer',
+];
 const logger = require('../utils/logger');
 const socketEmitter = require('../utils/socketEmitter');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -697,6 +717,7 @@ router.post(
 /** POST /send/text */
 router.post(
   '/send/text',
+  authorize(SEND_ROLES),
   asyncHandler(async (req, res) => {
     validate(['to', 'text'], stripUpdateMeta(req.body));
     const {
@@ -768,6 +789,7 @@ router.post(
 /** POST /send/template */
 router.post(
   '/send/template',
+  authorize(SEND_ROLES),
   asyncHandler(async (req, res) => {
     validate(['to', 'templateName'], req.body);
     const { to, templateName, language, components, skipConsentCheck } = req.body;
@@ -799,6 +821,7 @@ router.post(
 /** POST /send/document */
 router.post(
   '/send/document',
+  authorize(SEND_ROLES),
   asyncHandler(async (req, res) => {
     validate(['to', 'url'], req.body);
     const { to, url, caption, filename, skipConsentCheck } = req.body;
@@ -830,6 +853,7 @@ router.post(
 /** POST /send/interactive */
 router.post(
   '/send/interactive',
+  authorize(SEND_ROLES),
   asyncHandler(async (req, res) => {
     validate(['to', 'type', 'bodyText'], req.body);
     const {
@@ -916,6 +940,7 @@ router.post(
  */
 router.post(
   '/bulk',
+  authorize(SEND_ROLES),
   asyncHandler(async (req, res) => {
     validate(['messages'], req.body);
     const { messages, templateKey, bulkId: callerBulkId } = req.body;
@@ -1337,6 +1362,7 @@ router.get(
 /** POST /consent/:phone/opt-in  — record opt-in. */
 router.post(
   '/consent/:phone/opt-in',
+  authorize('admin', 'super_admin', 'manager'),
   asyncHandler(async (req, res) => {
     const phone = whatsappService.normalizePhone(req.params.phone);
     const doc = await getConsentModel().setConsent(phone, true, {
@@ -1353,6 +1379,7 @@ router.post(
 /** POST /consent/:phone/opt-out — record opt-out (right-to-be-forgotten lite). */
 router.post(
   '/consent/:phone/opt-out',
+  authorize('admin', 'super_admin', 'manager'),
   asyncHandler(async (req, res) => {
     const phone = whatsappService.normalizePhone(req.params.phone);
     const doc = await getConsentModel().setConsent(phone, false, {

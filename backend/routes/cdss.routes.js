@@ -36,7 +36,10 @@
  */
 
 const express = require('express');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const {
+  bodyScopedBeneficiaryGuard,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
@@ -59,7 +62,15 @@ const CdssDecisionLog = require('../models/CdssDecisionLog');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-const getBranchId = req => req.user?.branchId || req.headers['x-branch-id'];
+// W1565: `req.user.branchId` is NEVER populated (the JWT omits it), so the old
+// fallback resolved to the CLIENT-CONTROLLED `x-branch-id` header — any restricted
+// user could read/write ANOTHER branch's clinical PHI (risk assessments, prescription
+// validations, alerts, decision logs) by sending one HTTP header. Derive the branch
+// from the server-side scope (requireBranchAccess → req.branchScope) instead:
+// effectiveBranchScope returns the restricted caller's OWN branch (so the header is
+// ignored for them — the exploit is closed), and null for cross-branch roles, who may
+// still target a branch via the header since they are allowed to access any branch.
+const getBranchId = req => effectiveBranchScope(req) || req.headers['x-branch-id'];
 
 // ─── CDSS Stats ───────────────────────────────────────────────────────────────
 router.get(

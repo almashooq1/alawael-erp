@@ -42,6 +42,31 @@ const {
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
+
+// W1594 — server-owned fields a client must NOT self-set. Validators only check presence
+// (no whitelist), updateProgram forwards req.body raw to findByIdAndUpdate, and
+// completeTraining spreads ...completionData AFTER the forced { status:'completed',
+// completedAt } — so a caller could tamper createdBy/code/isDeleted on a program, or backdate
+// completion + inject currentGoals (goal-completion spoofing) on a trainee record.
+const PROGRAM_SERVER_FIELDS = ['_id', 'branchId', 'createdBy', 'code', 'isDeleted'];
+const TRAINEE_SERVER_FIELDS = [
+  '_id',
+  'branchId',
+  'status',
+  'completedAt',
+  'code',
+  'isDeleted',
+  'currentGoals',
+  'startedAt',
+  'expectedCompletionDate',
+];
+function stripFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
 function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
@@ -84,7 +109,10 @@ router.get(
 router.put(
   '/programs/:programId',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.updateProgram(req.params.programId, req.body);
+    const data = await fieldTrainingService.updateProgram(
+      req.params.programId,
+      stripFields(req.body, PROGRAM_SERVER_FIELDS)
+    );
     res.json({ success: true, data });
   })
 );
@@ -192,7 +220,10 @@ router.post(
 router.put(
   '/trainees/:traineeRecordId/complete',
   asyncHandler(async (req, res) => {
-    const data = await fieldTrainingService.completeTraining(req.params.traineeRecordId, req.body);
+    const data = await fieldTrainingService.completeTraining(
+      req.params.traineeRecordId,
+      stripFields(req.body, TRAINEE_SERVER_FIELDS)
+    );
     res.json({ success: true, data });
   })
 );

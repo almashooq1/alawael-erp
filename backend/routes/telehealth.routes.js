@@ -65,6 +65,23 @@ function telehealthBranchFilter(req) {
 function scopedById(req, id) {
   return { _id: id, ...telehealthBranchFilter(req) };
 }
+
+// W1584 — several handlers below delegate to telehealthService, which does a bare
+// findById(id) with NO branch check, then mints WebRTC/Agora room + join tokens (start,
+// participants) or writes clinical notes / prescriptions / waiting-room state. Any authed
+// user could target ANOTHER branch's consultation by id → cross-branch live-video
+// join-credential disclosure + PHI write. Mirrors the W1550 direct-model pattern: verify
+// branch ownership (Telehealth models key on `branch`) BEFORE calling the service. Returns
+// false (and sends 404) when the id is not in the caller's branch; a cross-branch/HQ role
+// passes (telehealthBranchFilter → {}).
+async function assertInBranch(req, res, Model, id, notFoundMsg) {
+  const owned = await Model.findOne(scopedById(req, id)).select('_id').lean();
+  if (!owned) {
+    res.status(404).json({ success: false, message: notFoundMsg });
+    return false;
+  }
+  return true;
+}
 // ─── Dashboard & Stats ────────────────────────────────────────────────────────
 
 /**
@@ -276,6 +293,8 @@ router.post(
   authorize(['admin', 'branch_admin', 'doctor', 'therapist', 'medical_director']),
   async (req, res) => {
     try {
+      if (!(await assertInBranch(req, res, Teleconsultation, req.params.id, 'الاستشارة غير موجودة')))
+        return;
       const tokens = await startConsultation(req.params.id);
       res.json({ success: true, message: 'تم بدء الجلسة', data: tokens });
     } catch (err) {
@@ -293,6 +312,8 @@ router.post(
   authorize(['admin', 'branch_admin', 'doctor', 'therapist', 'medical_director']),
   async (req, res) => {
     try {
+      if (!(await assertInBranch(req, res, Teleconsultation, req.params.id, 'الاستشارة غير موجودة')))
+        return;
       const consultation = await endConsultation(req.params.id, req.body);
       res.json({ success: true, message: 'تم إنهاء الجلسة بنجاح', data: consultation });
     } catch (err) {
@@ -307,6 +328,8 @@ router.post(
  */
 router.post('/consultations/:id/participants', async (req, res) => {
   try {
+    if (!(await assertInBranch(req, res, Teleconsultation, req.params.id, 'الاستشارة غير موجودة')))
+      return;
     const result = await addParticipant(req.params.id, req.body);
     res.json({ success: true, data: result });
   } catch (err) {
@@ -324,6 +347,8 @@ router.post('/consultations/:id/adjust-quality', async (req, res) => {
     if (!bandwidthKbps) {
       return res.status(400).json({ success: false, message: 'bandwidthKbps مطلوب' });
     }
+    if (!(await assertInBranch(req, res, Teleconsultation, req.params.id, 'الاستشارة غير موجودة')))
+      return;
     const settings = await detectAndAdjustQuality(req.params.id, Number(bandwidthKbps));
     res.json({ success: true, data: settings });
   } catch (err) {
@@ -373,6 +398,16 @@ router.get('/waiting-room/:consultationId', async (req, res) => {
  */
 router.post('/waiting-room/:consultationId/join', async (req, res) => {
   try {
+    if (
+      !(await assertInBranch(
+        req,
+        res,
+        Teleconsultation,
+        req.params.consultationId,
+        'الاستشارة غير موجودة'
+      ))
+    )
+      return;
     const waitingRoom = await joinWaitingRoom(req.params.consultationId, req.body);
     res.json({
       success: true,
@@ -391,6 +426,16 @@ router.post('/waiting-room/:consultationId/join', async (req, res) => {
  */
 router.patch('/waiting-room/:id/device-test', async (req, res) => {
   try {
+    if (
+      !(await assertInBranch(
+        req,
+        res,
+        TelehealthWaitingRoom,
+        req.params.id,
+        'غرفة الانتظار غير موجودة'
+      ))
+    )
+      return;
     const { room, isReady } = await updateDeviceTest(req.params.id, req.body);
     res.json({ success: true, data: room, isReady });
   } catch (err) {
@@ -424,6 +469,8 @@ router.post(
   authorize(['admin', 'medical_director', 'doctor']),
   async (req, res) => {
     try {
+      if (!(await assertInBranch(req, res, Teleconsultation, req.params.id, 'الاستشارة غير موجودة')))
+        return;
       const prescriberId = req.user.employeeId || req.user._id;
       const prescription = await issuePrescription(req.params.id, prescriberId, req.body);
       res.status(201).json({

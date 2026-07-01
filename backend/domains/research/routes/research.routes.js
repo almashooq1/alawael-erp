@@ -29,6 +29,30 @@ const {
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
+// W1595 — server/approval-controlled fields a client must NOT self-set on a ResearchStudy.
+// updateStudy forwarded req.body raw to findByIdAndUpdate (no whitelist), so a caller could
+// PUT { status:'published', ethicsApproval:{ approved:true } } to bypass the ethics-review
+// workflow (status transitions belong to the dedicated /:id/status endpoint; ethics approval
+// is committee-controlled), or tamper createdBy/organizationId/isActive/statusHistory.
+// NOTE: ResearchStudy has NO branchId field, so the :id routes are cross-branch (IDOR) —
+// that needs a branchId schema migration + backfill and is FLAGGED for owner (not fixed here,
+// since adding the field without backfill would hide every existing study).
+const RESEARCH_SERVER_FIELDS = [
+  '_id',
+  'createdBy',
+  'organizationId',
+  'isActive',
+  'status',
+  'statusHistory',
+  'ethicsApproval',
+];
+function stripStudyFields(body) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!RESEARCH_SERVER_FIELDS.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
 function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
@@ -87,7 +111,7 @@ router.get(
 router.put(
   '/:id',
   asyncHandler(async (req, res) => {
-    const data = await researchService.updateStudy(req.params.id, req.body);
+    const data = await researchService.updateStudy(req.params.id, stripStudyFields(req.body));
     res.json({ success: true, data });
   })
 );

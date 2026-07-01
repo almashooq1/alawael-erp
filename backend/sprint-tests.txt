@@ -155,6 +155,7 @@ __tests__/branch-config-mfa-service-layer-wave275f.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-community-service-wave1445.test.js
+__tests__/care-crm-funnel-branch-isolation-wave1599.test.js
 __tests__/financeoperations-invoice-massassign-wave1590.test.js
 __tests__/appointments-branch-isolation-wave1583.test.js
 __tests__/portal-notifications-guardian-idor-wave1582.test.js

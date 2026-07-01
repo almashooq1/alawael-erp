@@ -2137,6 +2137,8 @@ on:
       - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
       - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-list-visibility-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/route-registry-files-resolve-wave1576.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4251,6 +4253,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/risk-sweep-branch-isolation.test.js'
       - 'backend/__tests__/risk-sweep-branch-isolation-behavioral.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/documents-list-visibility-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/route-registry-files-resolve-wave1576.test.js'
       - 'backend/package.json'

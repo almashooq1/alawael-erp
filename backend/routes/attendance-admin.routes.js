@@ -30,9 +30,11 @@ const Beneficiary = require('../models/Beneficiary');
 const attendance = require('../services/sessionAttendanceService');
 const safeError = require('../utils/safeError');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
+router.use(requireBranchAccess); // W1580: reject explicit foreign branchId + set req.branchScope
 
 const READ_ROLES = [
   'admin',
@@ -59,15 +61,18 @@ const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_
 
 const STATUSES = ['present', 'late', 'absent', 'no_show', 'cancelled'];
 
-function buildFilter(query) {
+function buildFilter(query, scopedBranchId) {
   const filter = {};
+  // W1580: lock a branch-restricted caller to their own branch; a foreign ?branchId=
+  // can no longer widen the query (was a total-leak — reads had no branch scope at all).
+  if (scopedBranchId) filter.branchId = scopedBranchId;
   if (query.beneficiaryId && mongoose.isValidObjectId(query.beneficiaryId)) {
     filter.beneficiaryId = query.beneficiaryId;
   }
   if (query.therapistId && mongoose.isValidObjectId(query.therapistId)) {
     filter.therapistId = query.therapistId;
   }
-  if (query.branchId && mongoose.isValidObjectId(query.branchId)) {
+  if (!filter.branchId && query.branchId && mongoose.isValidObjectId(query.branchId)) {
     filter.branchId = query.branchId;
   }
   if (query.status && STATUSES.includes(String(query.status))) {
@@ -88,7 +93,7 @@ function buildFilter(query) {
 // ── GET / — paginated list ──────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, branchFilter(req).branchId);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -116,8 +121,8 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
     start.setHours(0, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 59, 999);
-    const filter = { scheduledDate: { $gte: start, $lte: end } };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    const filter = { ...branchFilter(req), scheduledDate: { $gte: start, $lte: end } };
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const items = await SessionAttendance.find(filter).sort({ scheduledDate: 1 }).lean();
@@ -132,7 +137,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
     const windowDays = attendance.THRESHOLDS.windowDays;
     const windowStart = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
-    const records = await SessionAttendance.find({ scheduledDate: { $gte: windowStart } }).lean();
+    const records = await SessionAttendance.find({ ...branchFilter(req), scheduledDate: { $gte: windowStart } }).lean();
     const summary = attendance.summarize(records, { windowStart });
     const grouped = attendance.groupByBeneficiary(records);
     const buckets = attendance.bucketByNoShowRisk(grouped);
@@ -177,7 +182,7 @@ router.get('/beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await SessionAttendance.find({ beneficiaryId: req.params.id })
+    const items = await SessionAttendance.find({ ...branchFilter(req), beneficiaryId: req.params.id })
       .sort({ scheduledDate: -1 })
       .limit(500)
       .lean();
@@ -301,7 +306,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
 // ── GET /export.csv ─────────────────────────────────────────────────────
 router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, branchFilter(req).branchId);
     const EXPORT_LIMIT = 10_000;
     const totalMatching = await SessionAttendance.countDocuments(filter);
     const items = await SessionAttendance.find(filter)

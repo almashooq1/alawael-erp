@@ -155,6 +155,7 @@ __tests__/branch-config-mfa-service-layer-wave275f.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-community-service-wave1445.test.js
+__tests__/financeoperations-invoice-massassign-wave1590.test.js
 __tests__/appointments-branch-isolation-wave1583.test.js
 __tests__/portal-notifications-guardian-idor-wave1582.test.js
 __tests__/branch-isolation-hr-attendance-wave1137.test.js
@@ -1186,4 +1187,6 @@ __tests__/employee-create-massassign-role-gate-wave1586.test.js
 __tests__/mdt-subdoc-massassign-wave1587.test.js
 __tests__/telehealth-consultation-branch-isolation-wave1584.test.js
 __tests__/branchid-clinical-slice4-wave1585.test.js
+__tests__/cdss-objectid-guard-wave1588.test.js
+__tests__/hr-dashboard-role-gate-wave1589.test.js
 __tests__/m9-strict-populate-wave1595.test.js

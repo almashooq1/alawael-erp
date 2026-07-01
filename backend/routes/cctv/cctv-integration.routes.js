@@ -21,6 +21,7 @@ const { CctvCamera } = require('../../models/cctv');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
 const { callerCctvBranchCode, branchCodeVisible } = require('../../middleware/cctvBranchScope');
+const { assertBeneficiaryInScope } = require('../../middleware/assertBranchMatch');
 
 const router = require('./asyncRouter')(express.Router());
 
@@ -88,12 +89,17 @@ router.get('/recordings', requireRole(ROLES), async (req, res) => {
  * Face recognition log for a beneficiary
  */
 router.get('/face-recognition', requireRole(ROLES), async (req, res) => {
+  // Face-recognition logs are beneficiary PHI — verify the beneficiary is in the
+  // caller's branch (Beneficiary keys on branchId, so use the beneficiary guard).
+  if (req.query.beneficiaryId && (await assertBeneficiaryInScope(req, req.query.beneficiaryId, res))) {
+    return undefined;
+  }
   const logs = await cctvIntegrationService.getFaceRecognitionLog(
     req.query.beneficiaryId,
     req.query.startDate,
     req.query.endDate
   );
-  res.json({ success: true, data: logs });
+  return res.json({ success: true, data: logs });
 });
 
 /**
@@ -101,11 +107,14 @@ router.get('/face-recognition', requireRole(ROLES), async (req, res) => {
  * Attendance check via face recognition for a specific date
  */
 router.get('/attendance', requireRole(ROLES), async (req, res) => {
+  if (req.query.beneficiaryId && (await assertBeneficiaryInScope(req, req.query.beneficiaryId, res))) {
+    return undefined;
+  }
   const attendance = await cctvIntegrationService.getAttendanceFromCCTV(
     req.query.beneficiaryId,
     req.query.date || new Date().toISOString().slice(0, 10)
   );
-  res.json({ success: true, data: attendance });
+  return res.json({ success: true, data: attendance });
 });
 
 /**

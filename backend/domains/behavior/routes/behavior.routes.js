@@ -49,13 +49,35 @@ function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
 
+// W1577 — server-owned fields a client must NOT self-set. The validators only
+// enum-check status — they do NOT whitelist — so the raw ...req.body spread let a
+// caller SELF-APPROVE a behavior plan (status:'active' + approvedBy/approvedAt bypass
+// the /plans/:planId/approve endpoint — a clinical authorization bypass), tamper
+// version/isDeleted/createdBy, or forge a reviewed behavior record.
+const PLAN_SERVER_FIELDS = ['_id', 'branchId', 'createdBy', 'approvedBy', 'approvedAt', 'version', 'isDeleted'];
+const RECORD_SERVER_FIELDS = ['_id', 'branchId', 'reportedBy', 'status', 'reviewedBy', 'reviewedAt', 'reviewNotes'];
+function stripFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+function stripPlanFields(body) {
+  const clean = stripFields(body, PLAN_SERVER_FIELDS);
+  // activation is approval-only: /plans/:planId/approve is the sole path to 'active'
+  // (it also stamps approvedBy + approvedAt). Block self-activation via create/update.
+  if (clean.status === 'active') delete clean.status;
+  return clean;
+}
+
 /* ── Records ── */
 router.post(
   '/records',
   validate(validateCreateRecord),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.createRecord({
-      ...req.body,
+      ...stripFields(req.body, RECORD_SERVER_FIELDS),
       reportedBy: getUserId(req),
       // W1171 — pin: restricted callers cannot spoof a foreign branch
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
@@ -104,7 +126,7 @@ router.post(
   validate(validateCreatePlan),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.createPlan({
-      ...req.body,
+      ...stripPlanFields(req.body),
       createdBy: getUserId(req),
       // W1171 — pin: restricted callers cannot spoof a foreign branch
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
@@ -136,7 +158,7 @@ router.put(
   '/plans/:planId',
   validate(validateUpdatePlan),
   asyncHandler(async (req, res) => {
-    const data = await behaviorService.updatePlan(req.params.planId, req.body);
+    const data = await behaviorService.updatePlan(req.params.planId, stripPlanFields(req.body));
     res.json({ success: true, data });
   })
 );

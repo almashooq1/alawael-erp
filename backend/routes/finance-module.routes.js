@@ -99,7 +99,7 @@ router.get(
     }
 
     const accounts = await ChartOfAccount.find(filter)
-      .populate('parent_account_id', 'account_code account_name_ar')
+      
       .sort({ account_code: 1 });
 
     res.json({ success: true, data: accounts, count: accounts.length });
@@ -224,7 +224,7 @@ router.get(
     const entries = await JournalEntry.find(filter)
       .populate('lines.account_id', 'account_code account_name_ar')
       .populate('created_by', 'name')
-      .populate('approved_by', 'name')
+      
       .sort({ entry_date: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -250,7 +250,7 @@ router.get(
     const entry = await JournalEntry.findOne({ _id: req.params.id, deleted_at: null })
       .populate('lines.account_id', 'account_code account_name_ar account_type')
       .populate('created_by', 'name')
-      .populate('approved_by', 'name');
+      ;
     if (!entry) return res.status(404).json({ success: false, message: 'القيد غير موجود' });
     res.json({ success: true, data: entry });
   })

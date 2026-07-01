@@ -458,7 +458,7 @@ router.get('/children/:id/sessions', async (req, res) => {
         .sort({ sessionDate: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('specialistId', 'nameAr nameEn specialty')
+        
         .lean();
     } catch (e) {
       logger.warn('Failed to fetch sessions for child', {

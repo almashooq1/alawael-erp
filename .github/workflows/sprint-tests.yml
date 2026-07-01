@@ -2110,6 +2110,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-vehicle-delete-status-enum-wave1562.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
@@ -4197,6 +4199,8 @@ on:
       - 'backend/__tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/transport-vehicle-delete-status-enum-wave1562.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
       - 'backend/package.json'

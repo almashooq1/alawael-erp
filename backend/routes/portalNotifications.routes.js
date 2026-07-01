@@ -22,6 +22,31 @@ const toId = v => {
   }
 };
 
+// W1582 — PortalNotification is keyed on `guardianId` (ref Guardian) and has NO branch
+// field, so branchFilter(req) is a phantom no-op here. The mount only requires requireAuth,
+// which admits BOTH staff tokens AND guardian tokens (guardian JWTs carry role:'guardian' +
+// guardianId=String(guardian._id); see parent-portal-v1.routes.js). The guardianId-keyed
+// routes therefore let a guardian ENUMERATE any other guardian's portal notifications
+// (beneficiary PII) — a horizontal IDOR. Minimal, staff-safe gate: a guardian (the
+// untrusted, enumerable portal principal) may only act on its OWN guardianId; staff /
+// internal roles are left unchanged (they legitimately serve every guardian). The
+// guardianId is read from params, body, or query so it covers /guardian/:id, /mark-all-read
+// (body), and /stats (query).
+const guardianOwnershipGuard = (req, res, next) => {
+  const role = req.user && req.user.role;
+  if (role === 'guardian') {
+    const gid = String(
+      req.params.guardianId || req.body.guardianId || req.query.guardianId || ''
+    );
+    if (!gid || String((req.user && req.user.guardianId) || '') !== gid) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'غير مصرح بالوصول إلى إشعارات هذا الولي' });
+    }
+  }
+  return next();
+};
+
 // ── GET / — list notifications (filter by guardian, beneficiary, type, priority, status, read) ──
 router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
@@ -73,7 +98,7 @@ router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
 });
 
 // ── GET /stats — notification statistics for a guardian ─────────────────
-router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, guardianOwnershipGuard, async (req, res) => {
   try {
     const { guardianId } = req.query;
     if (!guardianId) {
@@ -115,7 +140,7 @@ router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
 });
 
 // ── GET /guardian/:guardianId — shortcut: all notifications for guardian ──
-router.get('/guardian/:guardianId', requireAuth, requireBranchAccess, async (req, res) => {
+router.get('/guardian/:guardianId', requireAuth, requireBranchAccess, guardianOwnershipGuard, async (req, res) => {
   try {
     const { limit = 50 } = req.query;
     const data = await PortalNotification.getForGuardian(req.params.guardianId, Number(limit));
@@ -126,7 +151,7 @@ router.get('/guardian/:guardianId', requireAuth, requireBranchAccess, async (req
 });
 
 // ── GET /guardian/:guardianId/unread — unread notifications ─────────────
-router.get('/guardian/:guardianId/unread', requireAuth, requireBranchAccess, async (req, res) => {
+router.get('/guardian/:guardianId/unread', requireAuth, requireBranchAccess, guardianOwnershipGuard, async (req, res) => {
   try {
     const data = await PortalNotification.getUnreadForGuardian(req.params.guardianId);
     const count = await PortalNotification.getUnreadCountForGuardian(req.params.guardianId);
@@ -137,7 +162,7 @@ router.get('/guardian/:guardianId/unread', requireAuth, requireBranchAccess, asy
 });
 
 // ── GET /guardian/:guardianId/urgent — urgent unread ────────────────────
-router.get('/guardian/:guardianId/urgent', requireAuth, requireBranchAccess, async (req, res) => {
+router.get('/guardian/:guardianId/urgent', requireAuth, requireBranchAccess, guardianOwnershipGuard, async (req, res) => {
   try {
     const data = await PortalNotification.getUrgentNotifications(req.params.guardianId);
     res.json({ success: true, data, count: data.length });
@@ -291,7 +316,7 @@ router.patch('/:id/unarchive', requireAuth, requireBranchAccess, async (req, res
 });
 
 // ── POST /mark-all-read — mark all as read for guardian ────────────────
-router.post('/mark-all-read', requireAuth, requireBranchAccess, async (req, res) => {
+router.post('/mark-all-read', requireAuth, requireBranchAccess, guardianOwnershipGuard, async (req, res) => {
   try {
     const { guardianId } = req.body;
     if (!guardianId) {

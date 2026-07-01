@@ -542,6 +542,20 @@ router.get('/reports/:beneficiaryId/comprehensive', async (req, res) => {
  */
 router.get('/programs/effectiveness/:progressId', async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.isValidObjectId(req.params.progressId))
+      return res.status(400).json({ success: false, error: 'معرّف غير صالح' });
+    // W1583: this :progressId route bypasses the W440 :beneficiaryId param guard, so it
+    // had NO ownership check — any branch-restricted user could read another branch's
+    // program-effectiveness analytics (attendance / objectives-met / skill-acquisition /
+    // engagement / overall score). ProgramProgress has beneficiaryId (no branchId) →
+    // enforce via the beneficiary's branch before invoking the engine.
+    const progress = await ProgramProgress.findById(req.params.progressId).select('beneficiaryId');
+    if (!progress)
+      return res.status(404).json({ success: false, error: 'سجل تقدم البرنامج غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, progress.beneficiaryId, res);
+    if (denied) return;
+
     const smartEngine = new SmartEngine();
     const effectiveness = await smartEngine.trackProgramEffectiveness(req.params.progressId);
 

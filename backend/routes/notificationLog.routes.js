@@ -22,7 +22,7 @@ const express = require('express');
 const { param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 const router = express.Router();
@@ -67,13 +67,13 @@ router.get(
     if (!NotificationLog) {
       return res.json({ success: true, data: [] });
     }
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1582: scope to caller's branch (was: all branches on omit)
     if (req.query.status) filter.status = req.query.status;
     if (req.query.priority) filter.priority = req.query.priority;
     if (req.query.policyId) filter.policyId = req.query.policyId;
     if (req.query.eventName) filter.eventName = req.query.eventName;
     if (req.query.channel) filter.channel = req.query.channel;
-    if (req.query.branchId) filter.branchId = req.query.branchId;
+    if (!filter.branchId && req.query.branchId) filter.branchId = req.query.branchId;
     try {
       const rows = await NotificationLog.find(filter)
         .sort({ createdAt: -1 })
@@ -105,8 +105,8 @@ router.get(
     }
     const hours = Number(req.query.hours) || 24;
     const since = new Date(Date.now() - hours * 3600000);
-    const filter = { createdAt: { $gte: since } };
-    if (req.query.branchId) filter.branchId = req.query.branchId;
+    const filter = { ...branchFilter(req), createdAt: { $gte: since } }; // W1582
+    if (!filter.branchId && req.query.branchId) filter.branchId = req.query.branchId;
 
     try {
       const rows = await NotificationLog.find(filter).select('status priority channel').lean();

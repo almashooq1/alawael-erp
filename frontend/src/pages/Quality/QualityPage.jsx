@@ -38,7 +38,10 @@ const MODULES = [
     key: 'dashboard',
     label: 'لوحة التحكم',
     description: 'نظرة عامة على مؤشرات الجودة والامتثال',
-    path: '/quality/dashboard',
+    // W1582: was '/quality/dashboard' — no route was ever mounted there (dead 404
+    // link). Repointed to the real QualityCompliancePage, which is the quality
+    // /compliance overview and had no other nav entry.
+    path: '/quality/management',
     icon: <DashboardIcon />,
     color: '#7c3aed',
   },

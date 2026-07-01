@@ -20,7 +20,7 @@ const {
   DrugInteraction,
 } = require('../models/pharmacy.model');
 const logger = require('../utils/logger');
-const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const { escapeRegex } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { enforceBeneficiaryBranch } = require('../middleware/assertBranchMatch');
@@ -85,7 +85,7 @@ const DISPENSING_FIELDS = [
   'prescription',
   'patient',
   'beneficiary',
-  'medications',
+  'items',
   'notes',
   'quantity',
   'instructions',
@@ -372,8 +372,18 @@ router.post('/dispensing', async (req, res) => {
       const rx = await scopedPrescriptionById(req, req.body.prescription);
       if (!rx) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     }
+    // W1564 — the schema field is `items` (was whitelisted as `medications`, a
+    // non-schema key dropped by strict mode → dispensing.items was ALWAYS empty, so the
+    // inventory deduction loop below never ran and dispensing records carried no line
+    // items). Capture `items`, accept a legacy `medications` body, and set the required
+    // `beneficiary` from the resolved id (covers the `patient` alias).
+    const dispensingData = pick(req.body, DISPENSING_FIELDS);
+    if (!dispensingData.items && Array.isArray(req.body.medications)) {
+      dispensingData.items = req.body.medications;
+    }
     const dispensing = new Dispensing({
-      ...pick(req.body, DISPENSING_FIELDS),
+      ...dispensingData,
+      beneficiary: beneficiaryId || dispensingData.beneficiary,
       pharmacist: req.user?.id,
       createdBy: req.user?.id,
     });

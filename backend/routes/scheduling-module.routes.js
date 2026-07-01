@@ -52,6 +52,20 @@ const validateObjectId =
     next();
   };
 
+// W1547: branch-isolation filter for the snake_case scheduling models (Appointment,
+// AppointmentRecurrence, RoomBooking, WaitlistEntry — each declares a REQUIRED
+// `branch_id`). Mirrors the W663 translation already used in /reports/therapist-workload:
+// a restricted user is FORCED to their own branch (any client-supplied branch_id is
+// ignored); a cross-branch / HQ role may optionally narrow by `requested`, else sees all.
+// requireBranchAccess only rejects an EXPLICIT foreign branchId — it does NOT auto-filter,
+// so every query/transition must spread this in itself.
+const branchScopeFilter = (req, requested) => {
+  const _bf = branchFilter(req);
+  if (_bf.branchId !== undefined) return { branch_id: _bf.branchId };
+  if (requested) return { branch_id: requested };
+  return {};
+};
+
 // ══════════════════════════════════════════════════════════════════════════════
 // 1. APPOINTMENTS — المواعيد
 // ══════════════════════════════════════════════════════════════════════════════
@@ -74,14 +88,13 @@ router.get(
       page = 1,
       limit = 25,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeFilter(req, branch_id) };
 
     if (status) filter.status = status;
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (therapist_id) filter.therapist_id = therapist_id;
     if (service_type) filter.service_type = service_type;
     if (room_id) filter.room_id = room_id;
-    if (branch_id) filter.branch_id = branch_id;
     if (date) {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
@@ -130,7 +143,7 @@ router.get(
   (req, res, next) => (/^[0-9a-fA-F]{24}$/.test(req.params.id) ? next() : next('route')),
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const appointment = await Appointment.findOne({ _id: req.params.id, deleted_at: null })
+    const appointment = await Appointment.findOne({ _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) })
       .populate('beneficiary_id', 'full_name_ar file_number date_of_birth disability_type')
       .populate('therapist_id', 'name specialization phone')
       .populate('room_id', 'room_name room_number floor building')
@@ -220,7 +233,7 @@ router.put(
   '/appointments/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const existing = await Appointment.findOne({ _id: req.params.id, deleted_at: null });
+    const existing = await Appointment.findOne({ _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) });
     if (!existing) return res.status(404).json({ success: false, message: 'الموعد غير موجود' });
 
     if (['completed', 'cancelled'].includes(existing.status)) {
@@ -250,7 +263,13 @@ router.put(
     }
 
     const updateData = stripUpdateMeta(req.body);
+    // W1547: lock tenant + identity + lifecycle fields against mass-assignment.
+    // branch_id (cross-tenant move) and beneficiary_id (re-link) must never change via a
+    // generic PUT; status transitions go through the confirm/complete/cancel endpoints.
     delete updateData.appointment_number;
+    delete updateData.branch_id;
+    delete updateData.beneficiary_id;
+    delete updateData.status;
     Object.assign(existing, updateData);
     existing.updated_at = new Date();
     await existing.save();
@@ -265,7 +284,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const appointment = await Appointment.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'pending' },
+      { _id: req.params.id, deleted_at: null, status: 'pending', ...branchScopeFilter(req) },
       { status: 'confirmed', confirmed_at: new Date(), confirmed_by: req.user?._id },
       { returnDocument: 'after' }
     );
@@ -288,6 +307,7 @@ router.post(
         _id: req.params.id,
         deleted_at: null,
         status: { $in: ['confirmed', 'in_progress'] },
+        ...branchScopeFilter(req),
       },
       {
         status: 'completed',
@@ -316,6 +336,7 @@ router.post(
         _id: req.params.id,
         deleted_at: null,
         status: { $in: ['pending', 'confirmed'] },
+        ...branchScopeFilter(req),
       },
       {
         status: 'cancelled',
@@ -339,7 +360,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const { new_date, new_start_time, new_end_time, reason } = req.body;
-    const existing = await Appointment.findOne({ _id: req.params.id, deleted_at: null });
+    const existing = await Appointment.findOne({ _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) });
     if (!existing) return res.status(404).json({ success: false, message: 'الموعد غير موجود' });
 
     // كشف تعارضات للوقت الجديد
@@ -384,7 +405,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const appointment = await Appointment.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'pending' },
+      { _id: req.params.id, deleted_at: null, status: 'pending', ...branchScopeFilter(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -423,9 +444,9 @@ router.get(
       deleted_at: null,
       appointment_date: { $gte: startDate, $lte: endDate },
       status: { $nin: ['cancelled'] },
+      ...branchScopeFilter(req, branch_id),
     };
     if (therapist_id) filter.therapist_id = therapist_id;
-    if (branch_id) filter.branch_id = branch_id;
 
     const appointments = await Appointment.find(filter)
       .populate('beneficiary_id', 'full_name_ar')
@@ -606,7 +627,7 @@ router.get(
   '/recurrences',
   asyncHandler(async (req, res) => {
     const { beneficiary_id, therapist_id, status } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeFilter(req) };
 
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (therapist_id) filter.therapist_id = therapist_id;
@@ -646,7 +667,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'active' },
+      { _id: req.params.id, deleted_at: null, status: 'active', ...branchScopeFilter(req) },
       { status: 'paused', pause_reason: req.body.reason, paused_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -673,7 +694,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'paused' },
+      { _id: req.params.id, deleted_at: null, status: 'paused', ...branchScopeFilter(req) },
       { status: 'active', resumed_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -710,7 +731,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) },
       { deleted_at: new Date(), status: 'cancelled' },
       { returnDocument: 'after' }
     );
@@ -740,7 +761,7 @@ router.get(
   '/rooms/bookings',
   asyncHandler(async (req, res) => {
     const { room_id, date, from_date, to_date, status } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScopeFilter(req) };
 
     if (room_id) filter.room_id = room_id;
     if (status) filter.status = status;
@@ -809,7 +830,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const booking = await RoomBooking.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) },
       { deleted_at: new Date(), status: 'cancelled' },
       { returnDocument: 'after' }
     );
@@ -851,7 +872,12 @@ router.get(
   asyncHandler(async (req, res) => {
     const { service_type, branch_id, status = 'waiting', page = 1, limit = 25 } = req.query;
 
-    const waitlist = await waitlistService.getWaitlist({ service_type, branch_id, status });
+    // W1547: restricted users are forced to their own branch; client branch_id ignored.
+    const waitlist = await waitlistService.getWaitlist({
+      service_type,
+      branch_id: branchScopeFilter(req, branch_id).branch_id,
+      status,
+    });
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const paginatedData = waitlist.slice(skip, skip + parseInt(limit));
@@ -874,7 +900,7 @@ router.get(
   '/waitlist/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const entry = await WaitlistEntry.findOne({ _id: req.params.id, deleted_at: null })
+    const entry = await WaitlistEntry.findOne({ _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) })
       .populate(
         'beneficiary_id',
         'full_name_ar file_number date_of_birth disability_type disability_severity'
@@ -939,7 +965,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { _created_by, _priority_score, ...updateData } = req.body;
     const entry = await WaitlistEntry.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) },
       { ...updateData, updated_at: new Date() },
       { returnDocument: 'after', runValidators: true }
     );
@@ -954,7 +980,7 @@ router.post(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const entry = await WaitlistEntry.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScopeFilter(req) },
       {
         status: 'removed',
         removed_reason: req.body.reason,
@@ -977,14 +1003,14 @@ router.get(
   '/reports/summary',
   asyncHandler(async (req, res) => {
     const { from_date, to_date, branch_id, therapist_id } = req.query;
-    const filter = { deleted_at: null };
+    const _scope = branchScopeFilter(req, branch_id);
+    const filter = { deleted_at: null, ..._scope };
 
     if (from_date || to_date) {
       filter.appointment_date = {};
       if (from_date) filter.appointment_date.$gte = new Date(from_date);
       if (to_date) filter.appointment_date.$lte = new Date(to_date);
     }
-    if (branch_id) filter.branch_id = branch_id;
     if (therapist_id) filter.therapist_id = therapist_id;
 
     const [statusSummary, serviceTypeSummary, waitlistCount] = await Promise.all([
@@ -1010,7 +1036,7 @@ router.get(
           },
         },
       ]),
-      WaitlistEntry.countDocuments({ status: 'waiting', deleted_at: null }),
+      WaitlistEntry.countDocuments({ status: 'waiting', deleted_at: null, ..._scope }),
     ]);
 
     // حساب نسبة الحضور
@@ -1103,6 +1129,7 @@ router.get(
     const filter = {
       deleted_at: null,
       attendance_status: 'no_show',
+      ...branchScopeFilter(req),
     };
 
     if (from_date || to_date) {

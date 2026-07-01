@@ -170,9 +170,9 @@ function auditAsync(entry) {
   M.create(entry).catch(() => {});
 }
 
-const routeOptimizer = new RouteOptimizationService();
+const _routeOptimizer = new RouteOptimizationService();
 const _inspectionService = new PreTripInspectionService();
-const notificationService = new ParentNotificationService();
+const _notificationService = new ParentNotificationService();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -203,11 +203,14 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScope(req) }; // W1553: enforce branch isolation
 
     if (status) filter.status = status;
     if (vehicle_type) filter.vehicle_type = vehicle_type;
-    if (branch_id) filter.branch_id = branch_id;
+    // W1553: only cross-branch roles may filter by an explicit branch_id; for a
+    // restricted user branchScope already pinned filter.branch_id, so ignore the
+    // client value (otherwise ?branch_id=<foreign> would override the enforced scope).
+    if (branch_id && !branchScope(req).branch_id) filter.branch_id = branch_id;
     if (wheelchair_accessible !== undefined)
       filter.wheelchair_accessible = wheelchair_accessible === 'true';
     if (search) {
@@ -230,7 +233,7 @@ router.get(
 
     // إحصاءات الأسطول
     const fleetStats = await Vehicle.aggregate([
-      { $match: { deleted_at: null } },
+      { $match: { deleted_at: null, ...branchScope(req) } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
 
@@ -253,7 +256,7 @@ router.get(
   '/vehicles/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const vehicle = await Vehicle.findOne({ _id: req.params.id, deleted_at: null })
+    const vehicle = await Vehicle.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate('current_driver_id', 'name phone license_number')
       .populate('branch_id', 'name_ar');
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
@@ -289,7 +292,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { _plate_number, _vehicle_number, _created_by, ...updateData } = req.body;
     const vehicle = await Vehicle.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { ...updateData, updated_at: new Date() },
       { returnDocument: 'after', runValidators: true }
     );
@@ -304,8 +307,12 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const vehicle = await Vehicle.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
-      { deleted_at: new Date(), status: 'decommissioned' },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
+      // W1562: 'decommissioned' is NOT in the Vehicle.status enum
+      // {active,maintenance,out_of_service,retired}; findOneAndUpdate skips enum
+      // validation by default, so this soft-delete was persisting an invalid status.
+      // 'retired' is the enum's terminal "permanently removed from service" value.
+      { deleted_at: new Date(), status: 'retired' },
       { returnDocument: 'after' }
     );
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
@@ -335,7 +342,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { driver_id } = req.body;
     const vehicle = await Vehicle.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { current_driver_id: driver_id, updated_at: new Date() },
       { returnDocument: 'after' }
     ).populate('current_driver_id', 'name phone');
@@ -353,10 +360,13 @@ router.get(
   '/routes',
   asyncHandler(async (req, res) => {
     const { status, branch_id, day_of_week, search, page = 1, limit = 20 } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScope(req) }; // W1553: enforce branch isolation
 
     if (status) filter.status = status;
-    if (branch_id) filter.branch_id = branch_id;
+    // W1553: only cross-branch roles may filter by an explicit branch_id; for a
+    // restricted user branchScope already pinned filter.branch_id, so ignore the
+    // client value (otherwise ?branch_id=<foreign> would override the enforced scope).
+    if (branch_id && !branchScope(req).branch_id) filter.branch_id = branch_id;
     if (day_of_week) filter.operating_days = day_of_week;
     if (search) {
       filter.$or = [
@@ -393,7 +403,7 @@ router.get(
   '/routes/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null })
+    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate('vehicle_id', 'plate_number vehicle_type capacity wheelchair_accessible')
       .populate('driver_id', 'name phone license_number')
       .populate('waypoints.beneficiary_id', 'full_name_ar file_number address');
@@ -406,7 +416,9 @@ router.get(
 router.post(
   '/routes',
   asyncHandler(async (req, res) => {
-    const route = new TransportRoute({ ...req.body, created_by: req.user?._id });
+    // W1553: pin branch_id to the caller's branch (don't let the body plant a route
+    // in another branch); cross-branch roles keep the body value (branchScope → {}).
+    const route = new TransportRoute({ ...req.body, ...branchScope(req), created_by: req.user?._id });
     await route.save();
     res.status(201).json({ success: true, data: route, message: 'تم إنشاء المسار بنجاح' });
   })
@@ -419,7 +431,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { _route_number, _created_by, ...updateData } = req.body;
     const route = await TransportRoute.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { ...updateData, updated_at: new Date() },
       { returnDocument: 'after', runValidators: true }
     );
@@ -434,7 +446,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const route = await TransportRoute.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { deleted_at: new Date(), status: 'inactive' },
       { returnDocument: 'after' }
     );
@@ -448,7 +460,7 @@ router.post(
   '/routes/:id/optimize',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null });
+    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!route) return res.status(404).json({ success: false, message: 'المسار غير موجود' });
 
     if (!route.waypoints || route.waypoints.length < 2) {
@@ -461,30 +473,22 @@ router.post(
       lat: route.start_location?.lat,
       lng: route.start_location?.lng,
     };
-    const optimized = routeOptimizer.optimizeRoute(route.waypoints, startPoint);
-
-    // تحديث ترتيب المحطات
-    const reorderedWaypoints = optimized.optimizedOrder.map((idx, newOrder) => ({
-      ...route.waypoints[idx],
-      stop_order: newOrder + 1,
-    }));
-
-    route.waypoints = reorderedWaypoints;
-    route.estimated_duration_minutes = Math.round(optimized.totalDistance * 2); // تقدير زمني بسيط
-    route.total_distance_km = parseFloat(optimized.totalDistance.toFixed(2));
-    await route.save();
+    void startPoint;
+    // W1553: optimizeRoute is a STATIC method on RouteOptimizationService that takes
+    // a routeId, re-fetches, runs nearest-neighbour + 2-opt, writes the waypoint
+    // `order` field (the real schema field — the old inline code wrote a dropped
+    // `stop_order`), and saves. The previous code invoked it on the service INSTANCE
+    // → undefined → TypeError → every optimize request 500'd. Delegate to the static
+    // (branch ownership already verified by the scoped findOne above).
+    const optimizedRoute = await RouteOptimizationService.optimizeRoute(req.params.id);
 
     res.json({
       success: true,
       data: {
-        route,
+        route: optimizedRoute,
         optimizationResult: {
-          originalDistance: optimized.originalDistance,
-          optimizedDistance: optimized.totalDistance,
-          improvement: optimized.improvement,
-          estimatedTimeSaved: Math.round(
-            (optimized.originalDistance - optimized.totalDistance) * 2
-          ),
+          optimizedDistance: optimizedRoute.total_distance_km,
+          estimatedDurationMinutes: optimizedRoute.estimated_duration_minutes,
         },
       },
       message: 'تم تحسين المسار بنجاح',
@@ -497,12 +501,14 @@ router.post(
   '/routes/:id/add-waypoint',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null });
+    const route = await TransportRoute.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) });
     if (!route) return res.status(404).json({ success: false, message: 'المسار غير موجود' });
 
     const newWaypoint = {
       ...req.body,
-      stop_order: (route.waypoints?.length || 0) + 1,
+      // W1553: the schema field is `order`, not `stop_order` (strict mode silently
+      // dropped stop_order → new stops sorted as order:undefined → collapsed to front).
+      order: (route.waypoints?.length || 0) + 1,
     };
 
     route.waypoints = route.waypoints || [];
@@ -532,7 +538,7 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScope(req) }; // W1553: enforce branch isolation
 
     if (status) filter.status = status;
     if (vehicle_id) filter.vehicle_id = vehicle_id;
@@ -921,12 +927,20 @@ router.get(
       ...branchScope(req),
     }).select('trip_number route_id passengers');
 
+    // W1553: getTrackingLink is a STATIC async method on ParentNotificationService —
+    // it was called on an INSTANCE (`notificationService.…`) → undefined → TypeError
+    // → every live-GPS request 500'd; the args were also swapped. Call the static with
+    // the correct (tripId, vehicleId) order and await it before responding.
+    const trackingLink = await ParentNotificationService.getTrackingLink(
+      activeTrip?._id,
+      req.params.vehicleId
+    );
     res.json({
       success: true,
       data: {
         gps: lastPoint,
         active_trip: activeTrip,
-        tracking_link: notificationService.getTrackingLink(req.params.vehicleId, activeTrip?._id),
+        tracking_link: trackingLink,
       },
     });
   })
@@ -1089,7 +1103,7 @@ router.get(
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...branchScope(req) }; // W1553: enforce branch isolation
 
     if (vehicle_id) filter.vehicle_id = vehicle_id;
     if (maintenance_type) filter.maintenance_type = maintenance_type;
@@ -1111,7 +1125,7 @@ router.get(
 
     // تكلفة إجمالية
     const costStats = await VehicleMaintenance.aggregate([
-      { $match: { deleted_at: null } },
+      { $match: { deleted_at: null, ...branchScope(req) } },
       {
         $group: {
           _id: '$maintenance_type',
@@ -1140,7 +1154,7 @@ router.get(
   '/maintenance/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const record = await VehicleMaintenance.findOne({ _id: req.params.id, deleted_at: null })
+    const record = await VehicleMaintenance.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) })
       .populate('vehicle_id', 'plate_number make model year')
       .populate('performed_by', 'name')
       .populate('approved_by', 'name');
@@ -1153,8 +1167,11 @@ router.get(
 router.post(
   '/maintenance',
   asyncHandler(async (req, res) => {
+    // W1553: pin branch_id to the caller's branch (don't let the body plant a
+    // maintenance record in another branch); cross-branch roles keep the body value.
     const record = new VehicleMaintenance({
       ...req.body,
+      ...branchScope(req),
       created_by: req.user?._id,
     });
     await record.save();
@@ -1179,7 +1196,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { _created_by, ...updateData } = req.body;
     const record = await VehicleMaintenance.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { ...updateData, updated_at: new Date() },
       { returnDocument: 'after', runValidators: true }
     );
@@ -1194,7 +1211,7 @@ router.delete(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const record = await VehicleMaintenance.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
+      { _id: req.params.id, deleted_at: null, ...branchScope(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -1235,7 +1252,7 @@ router.get(
   '/reports/summary',
   asyncHandler(async (req, res) => {
     const { from_date, to_date, branch_id } = req.query;
-    const tripFilter = { deleted_at: null };
+    const tripFilter = { deleted_at: null, ...branchScope(req) }; // W1553: enforce branch isolation
     if (from_date || to_date) {
       tripFilter.trip_date = {};
       if (from_date) tripFilter.trip_date.$gte = new Date(from_date);
@@ -1256,11 +1273,11 @@ router.get(
         },
       ]),
       Vehicle.aggregate([
-        { $match: { deleted_at: null } },
+        { $match: { deleted_at: null, ...branchScope(req) } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       VehicleMaintenance.aggregate([
-        { $match: { deleted_at: null } },
+        { $match: { deleted_at: null, ...branchScope(req) } },
         {
           $group: {
             _id: null,
@@ -1461,7 +1478,7 @@ router.post(
       return res.status(400).json({ success: false, message: 'إحداثيات GPS مطلوبة' });
     }
 
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null }).populate({
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, ...branchScope(req) }).populate({
       path: 'route_id',
       select: 'waypoints',
     });
@@ -1671,7 +1688,7 @@ router.get(
   '/live-fleet',
   asyncHandler(async (req, res) => {
     const { branch_id } = req.query;
-    const vehicleFilter = { deleted_at: null, status: 'active' };
+    const vehicleFilter = { deleted_at: null, status: 'active', ...branchScope(req) }; // W1553: enforce branch isolation
     if (branch_id) vehicleFilter.branch_id = branch_id;
 
     const vehicles = await Vehicle.find(vehicleFilter)

@@ -233,7 +233,8 @@ class MeasurementService {
           ...updateData,
           updatedAt: new Date(),
         },
-        { returnDocument: 'after' }
+        // W1563: runValidators so an invalid status/priority enum can't persist silently.
+        { returnDocument: 'after', runValidators: true }
       );
 
       return updated;

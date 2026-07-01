@@ -169,7 +169,7 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const { beneficiary, age_months, items, form_type, notes } = req.body;
+    const { beneficiary, items, form_type, notes } = req.body;
     if (!beneficiary)
       return res.status(400).json({ success: false, message: 'حقل المستفيد مطلوب' });
     if (!items || typeof items !== 'object')
@@ -177,27 +177,28 @@ router.post(
 
     const scoring = SmartAssessmentEngine.scoreCARS2(items, form_type || 'ST');
 
-    // ── حفظ في قاعدة البيانات (كان مفقوداً) ──
-    const StandardAssessment = mongoose.models.StandardAssessment;
-    let saved = null;
-    if (StandardAssessment) {
-      saved = await StandardAssessment.create({
-        beneficiary,
-        assessor: req.user?._id || req.user?.id,
-        branch: effectiveBranchScope(req),
-        assessment_type: 'CARS-2',
-        form_type: form_type || 'ST',
-        age_months,
-        items,
-        total_score: scoring.total_score,
-        severity_classification: scoring.classification,
-        severity_classification_ar: scoring.classification_ar,
-        auto_scored: true,
-        scoring_details: scoring,
-        status: 'completed',
-        notes,
-      });
-    }
+    // ── حفظ في قاعدة البيانات ──
+    // W1555: the previous code referenced `mongoose.models.StandardAssessment` — a
+    // model that is NOT registered (StandardAssessment.js was archived to
+    // _archived/dead-models; the live model is StandardizedAssessment). So every
+    // CARS-2 POST returned 201 with data:null and persisted NOTHING — silent clinical
+    // data loss. Persist to the canonical StandardizedAssessment (its schema comment
+    // explicitly lists "CARS" as an example name). branchId is required and
+    // effectiveBranchScope is null for cross-branch roles, so derive it from the
+    // beneficiary (whose branch the assessment belongs to). Full scoring detail is
+    // still returned to the caller in `scoring`.
+    const StandardizedAssessment = require('../models/StandardizedAssessment');
+    const benDoc = await Beneficiary.findById(beneficiary).select('branchId').lean();
+    const saved = await StandardizedAssessment.create({
+      beneficiary,
+      evaluator: req.user?._id || req.user?.id,
+      branchId: benDoc?.branchId || effectiveBranchScope(req),
+      name: 'CARS-2',
+      date: new Date(),
+      totalScore: scoring.total_score,
+      interpretation: scoring.classification_ar || scoring.classification,
+      recommendations: notes,
+    });
 
     res.status(201).json({ success: true, data: saved, scoring });
   })
@@ -487,8 +488,13 @@ router.post(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
+    // W1555: unlike the other create handlers, this one forced no server-side status,
+    // so a caller could create an FBA already at 'bip_active'/'reviewed' with a forged
+    // bcba_supervisor — bypassing the draft→assessment_complete→bip_active→reviewed
+    // lifecycle + supervisory sign-off. Strip those caller-forgeable fields.
+    const { status: _s, bcba_supervisor: _b, reviewedBy: _r, ...fbaBody } = req.body;
     const assessment = await BehavioralFunctionAssessment.create({
-      ...req.body,
+      ...fbaBody,
       assessor: req.user?._id || req.user?.id,
       branch: effectiveBranchScope(req),
     });
@@ -1016,7 +1022,45 @@ router.put(
         .json({ success: false, message: `نوع تقييم غير معروف: ${req.params.type}` });
 
     // حماية الحقول الحساسة
-    const { _id, __v, _createdAt, _assessor, _branch, ...safeUpdate } = req.body;
+    // W1555: the previous guard keys were underscore-prefixed TYPOS (_createdAt /
+    // _assessor / _branch) — the real schema fields have no underscore, so the
+    // blacklist stripped NOTHING and a caller could forge the auto-scored clinical
+    // interpretation, the workflow status, the recorded assessor, and re-point the
+    // beneficiary/branch. Strip the actual privileged identity/score/lifecycle fields.
+    /* eslint-disable no-unused-vars -- destructure-to-omit (W1555): these privileged
+       identity/score/lifecycle keys are intentionally pulled out of req.body so they
+       are EXCLUDED from `safeUpdate`. The binding names MUST equal the real schema
+       field names (no underscore) to actually strip them, so they cannot be _-prefixed. */
+    const {
+      _id,
+      __v,
+      id,
+      createdAt,
+      updatedAt,
+      beneficiary,
+      branch,
+      branchId,
+      assessor,
+      evaluator,
+      analyst,
+      bcba_supervisor,
+      status,
+      total_score,
+      totalScore,
+      total_risk_score,
+      total_t_score,
+      risk_level,
+      severity_classification,
+      severity_classification_ar,
+      interpretation,
+      scoring_details,
+      auto_scored,
+      reviewedBy,
+      rescored_by,
+      rescored_at,
+      ...safeUpdate
+    } = req.body;
+    /* eslint-enable no-unused-vars */
     safeUpdate.updatedBy = req.user?._id || req.user?.id;
     safeUpdate.lastModified = new Date();
 
@@ -1085,6 +1129,14 @@ router.post(
     const { doc, denied } = await fetchScopedByBeneficiary(Model, req.params.id, req, res);
     if (denied) return;
     if (!doc) return res.status(404).json({ success: false, message: 'لم يتم العثور على التقييم' });
+
+    // W1555: don't silently overwrite a finalized or soft-deleted assessment's scores.
+    if (['reviewed', 'referred', 'deleted'].includes(doc.status)) {
+      return res.status(409).json({
+        success: false,
+        message: 'لا يمكن إعادة تصحيح تقييم مُراجَع أو محال أو محذوف',
+      });
+    }
 
     let scoring;
     const type = req.params.type;

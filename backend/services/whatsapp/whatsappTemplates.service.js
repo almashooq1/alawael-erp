@@ -237,7 +237,7 @@ async function sendTemplate(templateKey, phone, buildArgs = []) {
   if (!template) throw new Error(`Unknown template: ${templateKey}`);
 
   const components = template.build(...buildArgs);
-  logger.info(`[WhatsApp Templates] Sending ${templateKey} → ${phone}`);
+  logger.info(`[WhatsApp Templates] Sending ${templateKey} → ${whatsappService.maskPhone(phone)}`);
   return whatsappService.sendTemplate(phone, template.name, template.language, components);
 }
 

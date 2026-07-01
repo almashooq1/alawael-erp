@@ -99,9 +99,10 @@ class EmployeeAffairsService {
   /**
    * قائمة الموظفين مع فلترة وترقيم
    */
-  async listEmployees(filters = {}) {
+  async listEmployees(filters = {}, branchScope = null) {
     const Emp = getEmployee();
-    const query = {};
+    // W1566 — scope the roster to the caller's branch (snake branch_id). null = cross-branch/HQ.
+    const query = branchScope ? { branch_id: branchScope } : {};
     const {
       department,
       status,

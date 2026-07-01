@@ -210,7 +210,12 @@ router.post('/:id/transition', requireMfaTier(1), async (req, res) => {
     if (!owned) return res.status(404).json({ success: false, code: 'CAPA_NOT_FOUND' });
     const svc = _service(req);
     const actorUserId = req.user?._id || req.user?.id;
-    const mfaTier = req.mfaActor?.tier ?? null;
+    // `req.mfaActor` is set by NO middleware → always undefined → mfaTier was null,
+    // which the service coerces to tier 0 (enforceMfa:true) → VERIFIED→CLOSED and
+    // ANY→REJECTED (lib-enforced tier 2) were PERMANENTLY blocked, even after MFA
+    // step-up. The canonical actor is `req.actor` (set by attachMfaActor /
+    // requireMfaTier) with `.mfaLevel` (same 0–3 scale as the lib's `tier`).
+    const mfaTier = req.actor?.mfaLevel ?? null;
     const { to, reasonCode = null, notes = null } = req.body || {};
     const doc = await svc.transitionCapaItem({
       capaId: req.params.id,

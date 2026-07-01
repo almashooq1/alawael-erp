@@ -339,19 +339,25 @@ router.post('/consultations/:id/adjust-quality', async (req, res) => {
  */
 router.get('/waiting-room/:consultationId', async (req, res) => {
   try {
+    // W1550: resolve the branch-scoped consultation FIRST. A foreign-branch id
+    // yields null → 404, so we never leak another branch's waiting-room
+    // (beneficiary name + device info), which was previously returned regardless.
+    const consultation = await Teleconsultation.findOne(scopedById(req, req.params.consultationId))
+      .populate('beneficiary', 'name')
+      .populate('provider', 'name')
+      .lean();
+    if (!consultation) {
+      return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
+    }
+
     const waitingRoom = await TelehealthWaitingRoom.findOne({
       teleconsultation: req.params.consultationId,
     })
       .populate('beneficiary', 'name')
       .lean();
 
-    const consultation = await Teleconsultation.findOne(scopedById(req, req.params.consultationId))
-      .populate('beneficiary', 'name')
-      .populate('provider', 'name')
-      .lean();
-
     const queueLength = await TelehealthWaitingRoom.countDocuments({
-      branch: consultation?.branch,
+      branch: consultation.branch,
       status: 'waiting',
     });
 
@@ -802,8 +808,19 @@ router.patch('/virtual-sessions/:id/whiteboard', async (req, res) => {
  */
 router.get('/recordings/:consultationId', async (req, res) => {
   try {
+    // W1550: gate the recording behind its parent consultation's branch scope.
+    // The recording carries clinical-video PHI (filePath / storageBucket /
+    // transcription / encryptionKeyId) and was returned to ANY authenticated
+    // caller who knew or guessed a consultationId, across all branches.
+    const consultation = await Teleconsultation.findOne(
+      scopedById(req, req.params.consultationId)
+    ).lean();
+    if (!consultation) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تسجيل لهذه الجلسة' });
+    }
     const recording = await SessionRecording.findOne({
       teleconsultation: req.params.consultationId,
+      ...telehealthBranchFilter(req),
     }).lean();
     if (!recording) {
       return res.status(404).json({ success: false, message: 'لا يوجد تسجيل لهذه الجلسة' });

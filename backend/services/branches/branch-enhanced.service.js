@@ -230,6 +230,13 @@ class BranchEnhancedService {
       );
 
       // إلغاء المواعيد القادمة في الفرع القديم
+      // ⚠ KNOWN-BROKEN (flagged, not auto-fixed): Appointment.status enum is UPPERCASE
+      // with no 'scheduled' value, so this filter (`status: 'scheduled'`) matches NOTHING
+      // → a branch transfer currently leaves the beneficiary's old-branch appointments
+      // UNCANCELLED, and the update `status: 'cancelled'` would also be an invalid enum
+      // value. Fixing it is a product call (which non-terminal states to cancel — e.g.
+      // { $in: ['PENDING','CONFIRMED','RESCHEDULED'] } → 'CANCELLED'); a destructive write,
+      // so left for the transfer-flow owner rather than guessed.
       try {
         const Appointment = require('../../models/Appointment');
         await Appointment.updateMany(
@@ -332,10 +339,12 @@ class BranchEnhancedService {
   async _getSessionStats(branchId, startDate) {
     try {
       const Appointment = require('../../models/Appointment');
+      // Appointment.status enum is UPPERCASE (PENDING/CONFIRMED/…/COMPLETED/CANCELLED);
+      // the lowercase 'completed'/'cancelled' matched NOTHING → these branch KPIs were always 0.
       const [total, completed, cancelled] = await Promise.all([
         Appointment.countDocuments({ branchId, date: { $gte: startDate } }),
-        Appointment.countDocuments({ branchId, date: { $gte: startDate }, status: 'completed' }),
-        Appointment.countDocuments({ branchId, date: { $gte: startDate }, status: 'cancelled' }),
+        Appointment.countDocuments({ branchId, date: { $gte: startDate }, status: 'COMPLETED' }),
+        Appointment.countDocuments({ branchId, date: { $gte: startDate }, status: 'CANCELLED' }),
       ]);
       return {
         total,
@@ -354,14 +363,14 @@ class BranchEnhancedService {
       const [totalInvoiced, totalPaid] = await Promise.all([
         Invoice.aggregate([
           {
-            $match: { branchId: mongoose.Types.ObjectId(branchId), issueDate: { $gte: startDate } },
+            $match: { branchId: new mongoose.Types.ObjectId(branchId), issueDate: { $gte: startDate } },
           },
           { $group: { _id: null, total: { $sum: '$totalAmount' } } },
         ]),
         Invoice.aggregate([
           {
             $match: {
-              branchId: mongoose.Types.ObjectId(branchId),
+              branchId: new mongoose.Types.ObjectId(branchId),
               issueDate: { $gte: startDate },
               status: 'paid',
             },

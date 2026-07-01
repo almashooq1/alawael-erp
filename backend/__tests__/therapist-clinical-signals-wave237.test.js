@@ -68,12 +68,20 @@ jest.mock('../models/auditLog.model', () => ({ create: jest.fn(() => ({ catch: (
   virtual: true,
 });
 
-jest.mock('../domains/goals/models/MeasureReassessmentTask', () => ({
+jest.mock('../domains/goals/models/MeasureReassessmentTask', () => {
+  const m = {
   aggregate: jest.fn(),
-}));
-jest.mock('../domains/goals/models/MeasureAlert', () => ({
+};
+  m.MeasureReassessmentTask = m;
+  return m;
+});
+jest.mock('../domains/goals/models/MeasureAlert', () => {
+  const m = {
   aggregate: jest.fn(),
-}));
+};
+  m.MeasureAlert = m;
+  return m;
+});
 
 const Employee = require('../models/HR/Employee');
 const Beneficiary = require('../models/Beneficiary');

@@ -115,6 +115,17 @@ if [ "${RUN_HEAVY_GATE:-0}" = "1" ]; then
   cd ..
 fi
 
+# Backend lint was missing from this block even though the header claims "all
+# subprojects" — so backend no-unused-vars (and friends) slipped straight to
+# CI's "Lint Backend" gate, which hard-fails on --max-warnings=0 and SKIPS every
+# downstream job. Catch it locally like the other subprojects. (Recurred: PR
+# #753 + #793.) Bypass for emergencies: SKIP_BACKEND_LINT=1 git push.
+if [ "${SKIP_BACKEND_LINT:-0}" != "1" ]; then
+  echo "[pre-push] backend lint (--max-warnings=0)…"
+  cd backend && npm run lint
+  cd ..
+fi
+
 echo "[pre-push] frontend lint (--max-warnings=0)…"
 cd frontend && npm run lint
 cd ..

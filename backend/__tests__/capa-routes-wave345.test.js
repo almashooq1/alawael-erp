@@ -51,8 +51,10 @@ describe('W345 — CAPA REST surface contract', () => {
     expect(ROUTES_SRC).toMatch(
       /router\.post\(\s*['"]\/:id\/transition['"]\s*,\s*requireMfaTier\(\s*1\s*\)/
     );
-    // Reads req.mfaActor.tier and passes it to the service
-    expect(ROUTES_SRC).toMatch(/mfaTier\s*=\s*req\.mfaActor\??.tier/);
+    // Reads the actor's MFA level from the canonical req.actor (NOT the never-set
+    // req.mfaActor — that bug coerced every actor to tier 0 and blocked
+    // VERIFIED→CLOSED / →REJECTED forever) and passes it to the service.
+    expect(ROUTES_SRC).toMatch(/mfaTier\s*=\s*req\.actor\??\.mfaLevel/);
   });
 
   it('POST /sweep requires tier 2 (admin action)', () => {

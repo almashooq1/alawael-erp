@@ -558,7 +558,7 @@ router.delete(
         }
       }
 
-      file.remove();
+      file.deleteOne(); // W1571: subdoc.remove() removed in Mongoose 9 (persisted by caseDoc.save() below)
       caseDoc.lastModifiedBy = req.user._id;
       await caseDoc.save();
 

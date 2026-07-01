@@ -72,12 +72,12 @@ describe('never-set req.<field> reads (W269h generalization)', () => {
 
   test('req.mfaActor reads stay confined to the known baseline (canonical is req.actor.mfaLevel)', () => {
     // SECURITY DEBT — ratchet DOWN only. Fixing a file => remove it here same commit.
-    // risk-sweep.routes.js FIXED (the dead check was the ONLY branch isolation on
-    // /snapshots + /beneficiary/:id/trend → live cross-branch leak) → req.actor /
-    // effectiveBranchScope, removed from baseline.
-    const KNOWN = [
-      'routes/quality/capa.routes.js',
-    ];
+    // BOTH cleared: capa.routes.js (fixed on main — mfaTier was always tier 0 →
+    // CAPA close/reject blocked → req.actor.mfaLevel) AND risk-sweep.routes.js
+    // (fixed in #750 — the dead req.mfaActor check was the ONLY branch isolation on
+    // /snapshots + /beneficiary/:id/trend → live cross-branch leak → req.actor +
+    // effectiveBranchScope). Baseline now EMPTY.
+    const KNOWN = [];
     expect(filesReading('mfaActor')).toEqual(KNOWN.sort());
   });
 });

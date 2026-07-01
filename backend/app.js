@@ -460,6 +460,15 @@ try {
   logger.warn('[WhatsappReminder] bootstrap skipped:', err.message);
 }
 
+// W1424n: PDPL data-minimisation sweeper for WhatsApp conversations. Env-gated
+// (ENABLE_WHATSAPP_RETENTION_SWEEPER + WHATSAPP_RETENTION_DAYS); OFF by default.
+try {
+  const { bootstrapWhatsappRetention } = require('./startup/whatsappRetentionBootstrap');
+  bootstrapWhatsappRetention({ logger });
+} catch (err) {
+  logger.warn('[WhatsappRetention] bootstrap skipped:', err.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 7.5 BENEFICIARY-360 RED-FLAG SYSTEM
 //     (registry → engine → store → routes — Commits 1–10)

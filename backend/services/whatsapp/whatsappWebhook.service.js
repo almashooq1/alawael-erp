@@ -264,7 +264,50 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
   const fromPhone = msg?.from;
   if (!fromPhone) return;
 
+  // Idempotency (W1424f) — Meta re-delivers the webhook on any 5xx/timeout/drop
+  // during the ACK window. Without this guard a redelivered inbound is
+  // re-classified, re-pushed, unreadCount re-incremented, and the auto-reply / bot
+  // FSM re-fires → duplicate reply + duplicate DB row (+ duplicate emergency
+  // alert for a crisis message). Skip if this providerMessageId is already
+  // persisted. `messages.providerMessageId` is indexed (WhatsAppConversation.js).
+  // (Residual: a tiny race if two redeliveries arrive concurrently before the
+  // first $push commits — the FSM optimistic-lock hardening covers that class.)
+  if (msg.id) {
+    const ConversationDedup = getConversationModel();
+    if (ConversationDedup) {
+      const seen = await ConversationDedup.exists({
+        'messages.providerMessageId': msg.id,
+      }).catch(() => null);
+      if (seen) {
+        logger.debug(`[WhatsApp] duplicate inbound ${msg.id} — skipping (Meta redelivery)`);
+        return;
+      }
+    }
+  }
+
   const content = normalizeMessageContent(msg);
+
+  // W1424q — PDPL self-service withdrawal. A guardian replying STOP / إيقاف /
+  // إلغاء الاشتراك opts OUT of WhatsApp messaging. Checked BEFORE recordInbound
+  // (which would otherwise re-open the 24h window + implicitly re-opt-in). Whole-
+  // message match only, so the bot's bare 'إلغاء' (cancel) keyword is not caught.
+  if (
+    content.text &&
+    /^\s*(stop|unsubscribe|إيقاف|ايقاف|توقف|(?:إلغاء|الغاء)\s+الاشتراك)\s*$/i.test(content.text)
+  ) {
+    const ConsentStop = getConsentModel();
+    if (ConsentStop) {
+      await ConsentStop.setConsent(whatsappService.normalizePhone(fromPhone), false, {
+        reason: 'user_request',
+        channel: 'whatsapp_reply',
+      }).catch(err => logger.warn(`[WhatsApp] STOP opt-out failed: ${err.message}`));
+    }
+    await whatsappService
+      .sendText(fromPhone, 'تم إيقاف رسائل واتساب لهذا الرقم بناءً على طلبك. 🛑')
+      .catch(() => {});
+    logger.info(`[WhatsApp] ${whatsappService.maskPhone(fromPhone)} opted out via STOP keyword`);
+    return;
+  }
   const senderName = contact?.profile?.name || fromPhone;
   const timestamp = new Date(parseInt(msg.timestamp || Date.now() / 1000) * 1000);
 
@@ -515,6 +558,22 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           interactiveEnabled,
           botCtx,
         });
+        // W1424k — the bot auto-escalated after N unmatched / confirm-reprompt
+        // turns. Flag the conversation for staff (mirrors the classified
+        // escalation block below) so a stuck guardian gets a human follow-up.
+        if (plan.escalate && conv && conv._id) {
+          await Conversation.findOneAndUpdate(
+            { _id: conv._id },
+            {
+              $set: {
+                requiresHumanReview: true,
+                status: 'escalated',
+                escalationReason: 'bot_unmatched_limit',
+                escalatedAt: new Date(),
+              },
+            }
+          ).catch(err => logger.warn(`[WhatsApp] bot escalation flag failed: ${err.message}`));
+        }
         return; // bot owns this turn; skip the stateless auto-reply path
       }
     } catch (err) {

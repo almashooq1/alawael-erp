@@ -59,6 +59,32 @@ function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
 
+// W1580 — server-owned / access-control fields a client must NOT self-set on a
+// FamilyMember. The validators don't whitelist, so raw ...req.body let a caller grant
+// guardian-PORTAL ACCESS to themselves (portalAccess.enabled:true + role:'full_access',
+// or link portalAccess.userId to an arbitrary User) — a privilege escalation — and forge
+// engagement metrics / soft-delete. portalAccess is provisioned server-side, never via
+// generic member CRUD. NOTE: isLegalGuardian / isPrimaryContact / status stay settable
+// (legit staff designations) — the correct control there is a ROLE GATE on this endpoint
+// (no requireRole today) → flagged for owner review, not stripped here.
+const MEMBER_SERVER_FIELDS = [
+  '_id',
+  'branchId',
+  'createdBy',
+  'isDeleted',
+  'engagementScore',
+  'totalInteractions',
+  'portalAccess',
+];
+const COMM_SERVER_FIELDS = ['_id', 'branchId', 'isDeleted', 'status'];
+function stripFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Family Members
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -69,7 +95,7 @@ router.post(
   validate(validateAddFamilyMember),
   asyncHandler(async (req, res) => {
     const data = await familyService.addFamilyMember({
-      ...req.body,
+      ...stripFields(req.body, MEMBER_SERVER_FIELDS),
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
     });
@@ -93,7 +119,10 @@ router.put(
   '/members/:memberId',
   validate(validateUpdateFamilyMember),
   asyncHandler(async (req, res) => {
-    const data = await familyService.updateFamilyMember(req.params.memberId, req.body);
+    const data = await familyService.updateFamilyMember(
+      req.params.memberId,
+      stripFields(req.body, MEMBER_SERVER_FIELDS)
+    );
     res.json({ success: true, data });
   })
 );
@@ -148,7 +177,7 @@ router.post(
   validate(validateLogCommunication),
   asyncHandler(async (req, res) => {
     const data = await familyService.logCommunication({
-      ...req.body,
+      ...stripFields(req.body, COMM_SERVER_FIELDS),
       staffId: getUserId(req),
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
       organizationId: req.user?.organizationId || req.body.organizationId,
@@ -207,7 +236,7 @@ router.post(
   validate(validateAssignHomework),
   asyncHandler(async (req, res) => {
     const data = await familyService.assignHomework({
-      ...req.body,
+      ...stripFields(req.body, COMM_SERVER_FIELDS),
       staffId: getUserId(req),
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
     });

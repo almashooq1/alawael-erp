@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/inventory/inventory-enhanced.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
@@ -155,7 +155,9 @@ router.post(
 router.get('/warehouses', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Warehouse = require('../models/Warehouse');
-    const warehouses = await Warehouse.find({ isActive: true }).populate('branchId');
+    const warehouses = await Warehouse.find({ isActive: true, ...branchFilter(req) }).populate(
+      'branchId'
+    );
     res.json({ success: true, data: warehouses });
   } catch (err) {
     safeError(res, err);
@@ -181,7 +183,10 @@ router.post(
 router.get('/warehouses/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Warehouse = require('../models/Warehouse');
-    const warehouse = await Warehouse.findById(req.params.id).populate('branchId');
+    const warehouse = await Warehouse.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }).populate('branchId');
     if (!warehouse) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data: warehouse });
   } catch (err) {
@@ -356,9 +361,10 @@ router.get('/purchase-orders', authenticate, requireBranchAccess, async (req, re
   try {
     const { PurchaseOrder } = require('../models/InventoryStock');
     const { status, branchId } = req.query;
-    const filter = {};
+    const bf = branchFilter(req);
+    const filter = { ...bf };
     if (status) filter.status = status;
-    if (branchId) filter.branchId = branchId;
+    if (branchId && !bf.branchId) filter.branchId = branchId;
     const orders = await PurchaseOrder.find(filter)
       .populate('supplierId branchId warehouseId requestedBy')
       .sort({ createdAt: -1 });
@@ -392,7 +398,7 @@ router.post('/purchase-orders', authenticate, requireBranchAccess, async (req, r
 router.get('/purchase-orders/:poId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { PurchaseOrder } = require('../models/InventoryStock');
-    const po = await PurchaseOrder.findById(req.params.poId).populate(
+    const po = await PurchaseOrder.findOne({ _id: req.params.poId, ...branchFilter(req) }).populate(
       'supplierId branchId warehouseId requestedBy approvedBy items.itemId'
     );
     if (!po) return res.status(404).json({ success: false, message: 'أمر الشراء غير موجود' });
@@ -444,8 +450,9 @@ router.get('/assets', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
     const { branchId, status, category } = req.query;
-    const filter = {};
-    if (branchId) filter.branchId = branchId;
+    const bf = branchFilter(req);
+    const filter = { ...bf };
+    if (branchId && !bf.branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (category) filter.category = category;
     const assets = await Asset.find(filter).populate('branchId warehouseId assignedTo');
@@ -464,7 +471,19 @@ router.post(
   async (req, res) => {
     try {
       const { Asset } = require('../models/InventoryStock');
-      const asset = await Asset.create(stripUpdateMeta(req.body));
+      // Strip privileged/lifecycle fields; stamp branch from caller scope (cross-branch
+      // creators may pass branchId explicitly). branchId is required on Asset.
+      const payload = stripUpdateMeta(req.body) || {};
+      ['status', 'currentValue', 'disposedAt', 'disposalValue'].forEach(k => delete payload[k]);
+      const assetBranch =
+        req.branchScope?.branchId ||
+        (req.branchScope?.allBranches ? payload.branchId || payload.branch_id : undefined);
+      delete payload.branchId;
+      delete payload.branch_id;
+      const asset = await Asset.create({
+        ...payload,
+        ...(assetBranch ? { branchId: assetBranch } : {}),
+      });
       res.status(201).json({ success: true, data: asset });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -475,7 +494,10 @@ router.post(
 router.get('/assets/:assetId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
-    const asset = await Asset.findById(req.params.assetId).populate('branchId assignedTo');
+    const asset = await Asset.findOne({
+      _id: req.params.assetId,
+      ...branchFilter(req),
+    }).populate('branchId assignedTo');
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset });
   } catch (err) {
@@ -492,9 +514,18 @@ router.put(
   async (req, res) => {
     try {
       const { Asset } = require('../models/InventoryStock');
-      const asset = await Asset.findByIdAndUpdate(req.params.assetId, stripUpdateMeta(req.body), {
-        returnDocument: 'after',
-      });
+      // Branch-scoped update; strip branch/lifecycle/value fields (no forging another
+      // branch's ownership, status, or asset value via a plain PUT).
+      const payload = stripUpdateMeta(req.body) || {};
+      ['branchId', 'branch_id', 'status', 'currentValue', 'disposedAt', 'disposalValue'].forEach(
+        k => delete payload[k]
+      );
+      const asset = await Asset.findOneAndUpdate(
+        { _id: req.params.assetId, ...branchFilter(req) },
+        payload,
+        { returnDocument: 'after', runValidators: true }
+      );
+      if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
       res.json({ success: true, data: asset });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -505,7 +536,7 @@ router.put(
 router.get('/assets/:assetId/depreciation', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
-    const asset = await Asset.findById(req.params.assetId);
+    const asset = await Asset.findOne({ _id: req.params.assetId, ...branchFilter(req) });
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     const data = svc.calculateDepreciation(asset);
     res.json({ success: true, data });
@@ -518,8 +549,8 @@ router.post('/assets/:assetId/maintenance', authenticate, requireBranchAccess, a
   try {
     const { Asset } = require('../models/InventoryStock');
     const { notes, nextMaintenanceDate, cost } = req.body;
-    const asset = await Asset.findByIdAndUpdate(
-      req.params.assetId,
+    const asset = await Asset.findOneAndUpdate(
+      { _id: req.params.assetId, ...branchFilter(req) },
       {
         lastMaintenanceDate: new Date(),
         nextMaintenanceDate,
@@ -542,7 +573,15 @@ router.post('/assets/:assetId/maintenance', authenticate, requireBranchAccess, a
 router.get('/stock-counts', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { StockCount } = require('../models/InventoryStock');
-    const counts = await StockCount.find()
+    // StockCount has no branchId; scope through the owning warehouse for restricted users.
+    const bf = branchFilter(req);
+    let scFilter = {};
+    if (bf.branchId) {
+      const Warehouse = require('../models/Warehouse');
+      const whIds = await Warehouse.find({ branchId: bf.branchId }).distinct('_id');
+      scFilter = { warehouseId: { $in: whIds } };
+    }
+    const counts = await StockCount.find(scFilter)
       .populate('warehouseId initiatedBy')
       .sort({ createdAt: -1 });
     res.json({ success: true, data: counts });

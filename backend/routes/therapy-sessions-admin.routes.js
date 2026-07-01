@@ -106,7 +106,7 @@ function timeToMin(hhmm) {
   return h * 60 + m;
 }
 
-async function findConflicts({ therapist, room, date, startTime, endTime, excludeId }) {
+async function findConflicts({ therapist, room, date, startTime, endTime, excludeId, scope = {} }) {
   if (!date || !startTime || !endTime) return [];
   const dayStart = new Date(date);
   dayStart.setHours(0, 0, 0, 0);
@@ -122,6 +122,11 @@ async function findConflicts({ therapist, room, date, startTime, endTime, exclud
   if (or.length === 0) return [];
 
   const query = {
+    // W1561: branch isolation — the conflict result projects `beneficiary` + `title`,
+    // so an unscoped query leaked cross-branch beneficiary IDs + clinical labels to
+    // any user who named a shared room/therapist. TherapySession.branchId (W647) is
+    // the tenant field; callers pass branchFilter(req).
+    ...scope,
     date: { $gte: dayStart, $lte: dayEnd },
     status: { $nin: ['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER', 'NO_SHOW'] },
     $or: or,
@@ -329,7 +334,15 @@ router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('TherapySession'), asy
 router.post('/conflicts', requireRole(STAFF_ROLES), async (req, res) => {
   try {
     const { therapist, room, date, startTime, endTime, excludeId } = req.body || {};
-    const conflicts = await findConflicts({ therapist, room, date, startTime, endTime, excludeId });
+    const conflicts = await findConflicts({
+      therapist,
+      room,
+      date,
+      startTime,
+      endTime,
+      excludeId,
+      scope: branchFilter(req),
+    });
     res.json({ success: true, hasConflicts: conflicts.length > 0, conflicts });
   } catch (err) {
     return safeError(res, err, 'therapy-sessions.conflicts');
@@ -355,6 +368,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
         date: body.date,
         startTime: body.startTime,
         endTime: body.endTime,
+        scope: branchFilter(req),
       });
       if (conflicts.length > 0) {
         return res.status(409).json({
@@ -431,6 +445,22 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.createdBy;
     delete body.statusHistory;
     delete body.beneficiary; // forbid moving a session to another beneficiary
+    // W1561: privileged / workflow-gated / derived fields must NOT be settable via the
+    // generic PATCH. `status` goes through POST /:id/status (so statusHistory is logged);
+    // finalize signing through /finalize; branchId is denormalized by the pre-save hook
+    // (which findByIdAndUpdate skips, so a forged value would stick + re-tenant the row).
+    [
+      'status',
+      'branchId',
+      'noteStatus',
+      'signedBy',
+      'signedAt',
+      'isBilled',
+      'invoiceId',
+      'sourceClinicalSessionId',
+      'amendments',
+      'attendance',
+    ].forEach(k => delete body[k]);
 
     // Conflict re-check if scheduling fields touched
     if (
@@ -446,6 +476,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
           startTime: body.startTime || current.startTime,
           endTime: body.endTime || current.endTime,
           excludeId: req.params.id,
+          scope: branchFilter(req),
         });
         if (conflicts.length > 0) {
           return res.status(409).json({
@@ -475,6 +506,8 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/status — status transition ─────────────────────────────────
 router.post('/:id/status', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const { status, reason } = req.body || {};
     if (!STATUS_VALUES.includes(status))
       return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
@@ -544,6 +577,8 @@ router.post('/:id/check-in', requireRole(WRITE_ROLES), async (req, res) => {
 // Only works when noteStatus is 'draft' and session is COMPLETED.
 router.post('/:id/finalize', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const session = await TherapySession.findById(req.params.id);
     if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
     const denied = await assertBeneficiaryInScope(req, session.beneficiary, res);
@@ -578,6 +613,8 @@ router.post('/:id/finalize', requireRole(WRITE_ROLES), async (req, res) => {
 // Outside the window → 403 (supervisor override via X-Override-Approval header in future phase).
 router.post('/:id/amend', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const session = await TherapySession.findById(req.params.id);
     if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
     const denied = await assertBeneficiaryInScope(req, session.beneficiary, res);

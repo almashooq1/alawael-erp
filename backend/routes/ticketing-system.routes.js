@@ -26,7 +26,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Models
@@ -190,7 +190,6 @@ router.get('/', async (req, res) => {
       priority,
       type,
       assignedTo,
-      branchId,
       search,
       overdue,
       myTickets,
@@ -201,12 +200,15 @@ router.get('/', async (req, res) => {
       perPage = 20,
     } = req.query;
 
-    const filter = { deletedAt: null };
+    // W1552: enforce branch isolation — ignore the optional client ?branchId.
+    // branchFilter(req) returns {branchId: caller's branch} for restricted users,
+    // {} for cross-branch roles. requireBranchAccess does NOT auto-filter, so the
+    // prior optional-client-branchId pattern leaked every branch's tickets.
+    const filter = { deletedAt: null, ...branchFilter(req) };
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (type) filter.type = type;
     if (assignedTo) filter.assignedTo = assignedTo;
-    if (branchId) filter.branchId = branchId;
     if (myTickets === 'true') filter.createdBy = req.user.id;
     if (assignedToMe === 'true') filter.assignedTo = req.user.id;
 
@@ -270,8 +272,10 @@ router.get('/', async (req, res) => {
  */
 router.get('/dashboard', async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const branchFilter = branchId ? { branchId } : {};
+    // W1552: previously a LOCAL var sourced from the optional client query that
+    // SHADOWED the imported helper, so a restricted user omitting ?branchId got an
+    // empty filter and the dashboard aggregated ALL branches. Now the real helper.
+    const scope = branchFilter(req);
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     const [
@@ -287,32 +291,32 @@ router.get('/dashboard', async (req, res) => {
       slaTotal,
     ] = await Promise.all([
       TicketEnhanced.countDocuments({
-        ...branchFilter,
+        ...scope,
         status: { $in: OPEN_STATUSES },
         deletedAt: null,
       }),
       TicketEnhanced.countDocuments({
-        ...branchFilter,
+        ...scope,
         status: { $in: OPEN_STATUSES },
         $or: [{ slaResponseBreached: true }, { slaResolutionBreached: true }],
         deletedAt: null,
       }),
       TicketEnhanced.aggregate([
-        { $match: { ...branchFilter, status: { $in: OPEN_STATUSES }, deletedAt: null } },
+        { $match: { ...scope, status: { $in: OPEN_STATUSES }, deletedAt: null } },
         { $group: { _id: '$priority', count: { $sum: 1 } } },
       ]),
       TicketEnhanced.aggregate([
-        { $match: { ...branchFilter, status: { $in: OPEN_STATUSES }, deletedAt: null } },
+        { $match: { ...scope, status: { $in: OPEN_STATUSES }, deletedAt: null } },
         { $group: { _id: '$type', count: { $sum: 1 } } },
       ]),
       TicketEnhanced.aggregate([
-        { $match: { ...branchFilter, deletedAt: null } },
+        { $match: { ...scope, deletedAt: null } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       TicketEnhanced.aggregate([
         {
           $match: {
-            ...branchFilter,
+            ...scope,
             firstResponseAt: { $ne: null },
             createdAt: { $gte: monthStart },
             deletedAt: null,
@@ -330,7 +334,7 @@ router.get('/dashboard', async (req, res) => {
       TicketEnhanced.aggregate([
         {
           $match: {
-            ...branchFilter,
+            ...scope,
             resolvedAt: { $ne: null },
             createdAt: { $gte: monthStart },
             deletedAt: null,
@@ -348,7 +352,7 @@ router.get('/dashboard', async (req, res) => {
       TicketEnhanced.aggregate([
         {
           $match: {
-            ...branchFilter,
+            ...scope,
             satisfactionRating: { $ne: null },
             createdAt: { $gte: monthStart },
             deletedAt: null,
@@ -357,14 +361,14 @@ router.get('/dashboard', async (req, res) => {
         { $group: { _id: null, avg: { $avg: '$satisfactionRating' } } },
       ]),
       TicketEnhanced.countDocuments({
-        ...branchFilter,
+        ...scope,
         slaResolutionDeadline: { $ne: null },
         slaResolutionBreached: true,
         createdAt: { $gte: monthStart },
         deletedAt: null,
       }),
       TicketEnhanced.countDocuments({
-        ...branchFilter,
+        ...scope,
         slaResolutionDeadline: { $ne: null },
         createdAt: { $gte: monthStart },
         deletedAt: null,
@@ -466,7 +470,7 @@ router.get('/:id', async (req, res, next) => {
   try {
     // Non-ObjectId id → fall through to literal siblings (/sla-configs, /escalation-rules, /auto-assignments).
     if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) return next();
-    const ticket = await TicketEnhanced.findById(req.params.id)
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('createdBy', 'name email')
       .populate('assignedTo', 'name email')
       .populate('branchId', 'nameAr nameEn')
@@ -511,7 +515,7 @@ router.put('/:id/status', async (req, res) => {
       return res.status(422).json({ success: false, message: 'الحالة غير صحيحة' });
     }
 
-    const ticket = await TicketEnhanced.findById(req.params.id);
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!ticket) {
       return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     }
@@ -544,13 +548,22 @@ router.put('/:id/status', async (req, res) => {
     }
 
     const oldStatus = ticket.status;
+    // W1552: a ticket can only be reopened from a resolved/closed state — otherwise
+    // a cancelled or never-closed ticket could be flipped to 'reopened'.
+    if (status === 'reopened' && !['resolved', 'closed'].includes(oldStatus)) {
+      return res
+        .status(409)
+        .json({ success: false, message: 'لا يمكن إعادة فتح تذكرة غير محلولة أو مغلقة' });
+    }
     ticket.status = status;
 
     if (status === 'in_progress' && !ticket.firstResponseAt) {
       ticket.firstResponseAt = new Date();
     }
-    if (status === 'resolved') ticket.resolvedAt = new Date();
-    if (status === 'closed') ticket.closedAt = new Date();
+    // W1552: don't overwrite SLA timestamps on repeat calls (corrupts the
+    // resolution-time metric the dashboard averages).
+    if (status === 'resolved' && !ticket.resolvedAt) ticket.resolvedAt = new Date();
+    if (status === 'closed' && !ticket.closedAt) ticket.closedAt = new Date();
 
     await ticket.save();
 
@@ -587,7 +600,7 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
       return res.status(422).json({ success: false, message: 'المُعين إليه مطلوب' });
     }
 
-    const ticket = await TicketEnhanced.findById(req.params.id);
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!ticket) {
       return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     }
@@ -621,7 +634,7 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
  */
 router.get('/:id/comments', async (req, res) => {
   try {
-    const ticket = await TicketEnhanced.findById(req.params.id);
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!ticket) {
       return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     }
@@ -654,7 +667,7 @@ router.post('/:id/comments', async (req, res) => {
       return res.status(422).json({ success: false, message: 'محتوى التعليق مطلوب' });
     }
 
-    const ticket = await TicketEnhanced.findById(req.params.id);
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!ticket) {
       return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     }
@@ -702,7 +715,7 @@ router.post('/:id/rate', async (req, res) => {
       return res.status(422).json({ success: false, message: 'التقييم يجب أن يكون بين 1 و 5' });
     }
 
-    const ticket = await TicketEnhanced.findById(req.params.id);
+    const ticket = await TicketEnhanced.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!ticket) {
       return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     }
@@ -786,7 +799,7 @@ router.put('/sla-configs/:id', requireAdmin, async (req, res) => {
     const config = await TicketSlaConfig.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true } // W1552: reject invalid enum/number that would break calculateSla
     );
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     return res.json({ success: true, message: 'تم تحديث إعداد SLA', data: config });
@@ -852,7 +865,7 @@ router.put('/escalation-rules/:id', requireAdmin, async (req, res) => {
     const rule = await TicketEscalationRule.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { returnDocument: 'after' }
+      { returnDocument: 'after', runValidators: true } // W1552: reject invalid enum/number that would break calculateSla
     );
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     return res.json({ success: true, message: 'تم تحديث قاعدة التصعيد', data: rule });

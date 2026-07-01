@@ -69,7 +69,9 @@ async function checkNoProgress(branchId) {
     for (const b of beneficiaries) {
       const stagnantGoals = await Goal.find({
         beneficiary_id: b._id,
-        status: 'in_progress',
+        // Goal.status enum is hyphenated ('in-progress'); 'in_progress' matched
+        // NOTHING → the stagnant-goal proactive alert never fired.
+        status: 'in-progress',
         updated_at: { $lte: threeMonthsAgo },
       }).lean();
 

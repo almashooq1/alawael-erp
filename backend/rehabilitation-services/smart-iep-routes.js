@@ -14,6 +14,27 @@ const { GoalsBank, SmartIEP, SessionLog } = require('../models/SmartIEP');
 // Import services
 const { GoalsBankService, SmartIEPService, SessionLogService } = require('./smart-iep-service');
 const safeError = require('../utils/safeError');
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+
+// W1555 — this router was mounted via safeMount (NO auth middleware) with no
+// router-level auth, so /api/smart-iep/* exposed special-category student PHI
+// (IEP present-levels, disability data, behavioral ABC logs, parent consent)
+// ANONYMOUSLY and across all branches. Require authentication + branch scope.
+// SmartIEP/SessionLog use snake_case branch_id; requireBranchAccess sets
+// req.branchScope but does NOT auto-filter, so every IEP query must scope itself:
+// restricted users → their own branch (client branch_id ignored); cross-branch/HQ
+// → all, or a requested branch. Cast to ObjectId so aggregate $match also matches.
+router.use(authenticate);
+router.use(requireBranchAccess);
+
+const branchScope = (req, requested) => {
+  const s = req.branchScope || {};
+  const toOid = v => (mongoose.isValidObjectId(v) ? new mongoose.Types.ObjectId(v) : v);
+  if (s.branchId) return { branch_id: toOid(s.branchId) };
+  if (requested && mongoose.isValidObjectId(requested)) return { branch_id: toOid(requested) };
+  return {};
+};
 
 // ─── Goals Bank Routes ─────────────────────────────────────────────────────────
 
@@ -139,10 +160,9 @@ router.get('/iep', async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
 
-    const filter = {};
+    const filter = { ...branchScope(req, branch_id) };
     if (status) filter.status = status;
     if (plan_type) filter.plan_type = plan_type;
-    if (mongoose.Types.ObjectId.isValid(branch_id)) filter.branch_id = branch_id;
     if (mongoose.Types.ObjectId.isValid(beneficiary_id)) filter.beneficiary_id = beneficiary_id;
 
     const [items, total] = await Promise.all([
@@ -185,7 +205,7 @@ router.post('/iep/:id/transition', async (req, res) => {
       return res.status(400).json({ success: false, error: 'to مطلوب' });
     }
 
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const allowed = ALLOWED_TRANSITIONS[iep.status] || [];
@@ -237,8 +257,8 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
     if (!guardian_name) {
       return res.status(400).json({ success: false, error: 'guardian_name مطلوب' });
     }
-    const iep = await SmartIEP.findByIdAndUpdate(
-      req.params.id,
+    const iep = await SmartIEP.findOneAndUpdate(
+      { _id: req.params.id, ...branchScope(req) },
       {
         $set: {
           parent_consent: {
@@ -266,7 +286,28 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
  */
 router.post('/iep', async (req, res) => {
   try {
-    const iepData = req.body;
+    // Whitelist creatable fields — NEVER pass req.body straight into createIEP.
+    // The service does `new SmartIEP({ ...data })`, so spreading req.body would let
+    // a caller forge privileged/computed fields (status, approved_by, approval_date,
+    // linked_assessments, ai_analysis, overall_progress, version, previous_iep_id).
+    const IEP_CREATABLE = [
+      'beneficiary_id',
+      'plan_type',
+      'plan_period',
+      'present_level',
+      'services',
+      'family_involvement',
+      'iep_team',
+      'notes',
+    ];
+    const iepData = {};
+    for (const f of IEP_CREATABLE) {
+      if (req.body[f] !== undefined) iepData[f] = req.body[f];
+    }
+    // branch_id is server-authoritative: a restricted user gets their own branch
+    // (any body value is ignored); cross-branch roles may target a branch.
+    const scoped = branchScope(req);
+    iepData.branch_id = scoped.branch_id || req.body.branch_id;
     if (!iepData.beneficiary_id || !iepData.branch_id) {
       return res.status(400).json({ success: false, error: 'beneficiary_id و branch_id مطلوبان' });
     }
@@ -287,7 +328,7 @@ router.post('/iep', async (req, res) => {
  */
 router.get('/iep/beneficiary/:beneficiaryId', async (req, res) => {
   try {
-    const ieps = await SmartIEP.find({ beneficiary_id: req.params.beneficiaryId })
+    const ieps = await SmartIEP.find({ beneficiary_id: req.params.beneficiaryId, ...branchScope(req) })
       .select('iep_number plan_start plan_end status overall_progress annual_goals review_schedule')
       .sort({ createdAt: -1 });
     res.json({ success: true, count: ieps.length, data: ieps });
@@ -302,7 +343,7 @@ router.get('/iep/beneficiary/:beneficiaryId', async (req, res) => {
  */
 router.get('/iep/:id', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id)
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) })
       .populate('beneficiary_id', 'name birth_date disability_types branch_id')
       .populate(
         'annual_goals.goal_bank_ref',
@@ -334,13 +375,15 @@ router.get('/iep/:id', async (req, res) => {
  */
 router.patch('/iep/:id', async (req, res) => {
   try {
+    // `status` (use POST /iep/:id/transition — the state machine sets approval_date
+    // /approved_by) and `parent_consent` (use POST /iep/:id/parent-consent) are
+    // intentionally EXCLUDED: allowing them here lets a caller self-approve a plan
+    // or forge parental consent on a clinical document.
     const allowedFields = [
       'plan_end',
-      'status',
       'present_level',
       'services',
       'family_involvement',
-      'parent_consent',
       'iep_team',
     ];
     const updates = {};
@@ -349,7 +392,7 @@ router.patch('/iep/:id', async (req, res) => {
     });
     updates.updated_at = new Date();
 
-    const iep = await SmartIEP.findByIdAndUpdate(req.params.id, updates, {
+    const iep = await SmartIEP.findOneAndUpdate({ _id: req.params.id, ...branchScope(req) }, updates, {
       returnDocument: 'after',
     });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
@@ -367,7 +410,7 @@ router.patch('/iep/:id', async (req, res) => {
  */
 router.post('/iep/:id/goals', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const goalData = req.body;
@@ -407,7 +450,7 @@ router.post('/iep/:id/goals', async (req, res) => {
  */
 router.patch('/iep/:id/goals/:goalId/progress', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const goal = iep.annual_goals.id(req.params.goalId);
@@ -455,6 +498,9 @@ router.patch('/iep/:id/goals/:goalId/progress', async (req, res) => {
  */
 router.get('/iep/:id/report', async (req, res) => {
   try {
+    // ownership gate — 404 a foreign-branch plan before the service reads its PHI
+    const owned = await SmartIEP.exists({ _id: req.params.id, ...branchScope(req) });
+    if (!owned) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     const report = await SmartIEPService.generateProgressReport(req.params.id);
     res.json({ success: true, data: report });
   } catch (err) {
@@ -468,6 +514,9 @@ router.get('/iep/:id/report', async (req, res) => {
  */
 router.post('/iep/:id/analyze', async (req, res) => {
   try {
+    // ownership gate — 404 a foreign-branch plan before the service reads its PHI
+    const owned = await SmartIEP.exists({ _id: req.params.id, ...branchScope(req) });
+    if (!owned) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     const analysis = await SmartIEPService.analyzeIEP(req.params.id);
     res.json({ success: true, data: analysis });
   } catch (err) {
@@ -482,7 +531,7 @@ router.post('/iep/:id/analyze', async (req, res) => {
  */
 router.post('/iep/:id/meetings', async (req, res) => {
   try {
-    const iep = await SmartIEP.findById(req.params.id);
+    const iep = await SmartIEP.findOne({ _id: req.params.id, ...branchScope(req) });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     const meetingData = req.body;
@@ -512,10 +561,14 @@ router.post('/iep/:id/meetings', async (req, res) => {
  */
 router.post('/sessions', async (req, res) => {
   try {
-    const sessionData = req.body;
+    const sessionData = { ...req.body };
     if (!sessionData.iep_id || !sessionData.beneficiary_id) {
       return res.status(400).json({ success: false, error: 'iep_id و beneficiary_id مطلوبان' });
     }
+    // branch_id is server-authoritative: a restricted user's sessions are stamped
+    // with their own branch (any body value ignored) — no cross-branch planting.
+    const scoped = branchScope(req);
+    if (scoped.branch_id) sessionData.branch_id = scoped.branch_id;
     const session = await SessionLogService.createSession(sessionData);
     res.status(201).json({
       success: true,
@@ -535,7 +588,11 @@ router.post('/sessions', async (req, res) => {
 router.get('/sessions/beneficiary/:beneficiaryId/analytics', async (req, res) => {
   try {
     const weeks = parseInt(req.query.weeks) || 4;
-    const analytics = await SessionLogService.getSessionAnalytics(req.params.beneficiaryId, weeks);
+    const analytics = await SessionLogService.getSessionAnalytics(
+      req.params.beneficiaryId,
+      weeks,
+      branchScope(req)
+    );
     res.json({ success: true, data: analytics });
   } catch (err) {
     safeError(res, err, 'smart-iep');
@@ -551,13 +608,19 @@ router.get('/sessions/beneficiary/:beneficiaryId', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
     const skip = parseInt(req.query.skip) || 0;
-    const sessions = await SessionLog.find({ beneficiary_id: req.params.beneficiaryId })
+    const sessions = await SessionLog.find({
+      beneficiary_id: req.params.beneficiaryId,
+      ...branchScope(req),
+    })
       .sort({ session_date: -1 })
       .skip(skip)
       .limit(limit)
       .populate('therapist_id', 'name specialty');
 
-    const total = await SessionLog.countDocuments({ beneficiary_id: req.params.beneficiaryId });
+    const total = await SessionLog.countDocuments({
+      beneficiary_id: req.params.beneficiaryId,
+      ...branchScope(req),
+    });
 
     res.json({
       success: true,
@@ -642,6 +705,11 @@ router.get('/sessions/abc-analysis/:beneficiaryId', async (req, res) => {
  */
 router.get('/iep/branch/:branchId/summary', async (req, res) => {
   try {
+    // W1555 — a restricted user may only summarize their own branch.
+    const _s = req.branchScope || {};
+    if (_s.branchId && String(_s.branchId) !== String(req.params.branchId)) {
+      return res.status(403).json({ success: false, error: 'غير مصرح بهذا الفرع' });
+    }
     const summary = await SmartIEP.aggregate([
       {
         $lookup: {

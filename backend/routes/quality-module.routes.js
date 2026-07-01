@@ -17,6 +17,25 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// W1554 — IncidentReport.branch_id is snake_case + REQUIRED; the canonical
+// branchFilter emits camelCase `branchId` (a phantom no-op here). requireBranchAccess
+// sets req.branchScope but does NOT auto-filter, so every incident query must scope
+// itself, or any authed user reads/edits/closes another branch's safety incident
+// (beneficiary PHI: name/file/DOB). Restricted users are FORCED to their own branch
+// (client branch_id ignored); cross-branch/HQ (allBranches) may narrow by a requested
+// branch, else see all. NOTE: quality indicators/measurements are org-global
+// (branch_id optional + never stamped on create), so they are deliberately NOT
+// force-scoped here — only the PHI-bearing incidents are.
+const incidentBranchScope = (req, requested) => {
+  const s = req.branchScope || {};
+  // cast to ObjectId so aggregate $match (which does NOT auto-cast like find) matches too.
+  const toOid = v => (mongoose.isValidObjectId(v) ? new mongoose.Types.ObjectId(v) : v);
+  if (s.branchId) return { branch_id: toOid(s.branchId) };
+  if (requested) return { branch_id: toOid(requested) };
+  return {};
+};
+
 // ═══════════════════════════════════════════════════════
 // مؤشرات الجودة — Quality Indicators
 // ═══════════════════════════════════════════════════════
@@ -304,11 +323,10 @@ router.get('/incidents', async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = { deleted_at: null };
+    const filter = { deleted_at: null, ...incidentBranchScope(req, branch_id) };
     if (incident_type) filter.incident_type = incident_type;
     if (severity) filter.severity = severity;
     if (status) filter.status = status;
-    if (branch_id) filter.branch_id = branch_id;
     if (date_from || date_to) {
       filter.incident_date = {};
       if (date_from) filter.incident_date.$gte = new Date(date_from);
@@ -334,7 +352,11 @@ router.get('/incidents', async (req, res) => {
 // GET /api/quality-module/incidents/:id
 router.get('/incidents/:id', async (req, res) => {
   try {
-    const incident = await IncidentReport.findOne({ _id: req.params.id, deleted_at: null })
+    const incident = await IncidentReport.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...incidentBranchScope(req),
+    })
       .populate('reported_by', 'name')
       .populate('involved_beneficiary_id', 'full_name_ar file_number date_of_birth')
       .populate('involved_employee_id', 'name employee_id')
@@ -375,7 +397,7 @@ router.post('/incidents', async (req, res) => {
 router.put('/incidents/:id', async (req, res) => {
   try {
     const incident = await IncidentReport.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] } },
+      { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] }, ...incidentBranchScope(req) },
       stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
@@ -391,7 +413,7 @@ router.post('/incidents/:id/investigate', async (req, res) => {
   try {
     const { root_cause, contributing_factors, corrective_actions } = req.body;
     const incident = await IncidentReport.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'reported' },
+      { _id: req.params.id, deleted_at: null, status: 'reported', ...incidentBranchScope(req) },
       {
         status: 'under_investigation',
         root_cause,
@@ -416,6 +438,7 @@ router.post('/incidents/:id/close', async (req, res) => {
         _id: req.params.id,
         deleted_at: null,
         status: { $in: ['under_investigation', 'action_taken'] },
+        ...incidentBranchScope(req),
       },
       {
         status: 'closed',
@@ -436,7 +459,7 @@ router.post('/incidents/:id/close', async (req, res) => {
 router.post('/incidents/:id/escalate', async (req, res) => {
   try {
     const incident = await IncidentReport.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] } },
+      { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] }, ...incidentBranchScope(req) },
       { status: 'escalated', is_reported_to_authority: true, authority_report_date: new Date() },
       { returnDocument: 'after' }
     );
@@ -450,7 +473,11 @@ router.post('/incidents/:id/escalate', async (req, res) => {
 // POST /api/quality-module/incidents/:id/corrective-action/:actionId/complete — إكمال إجراء تصحيحي
 router.post('/incidents/:id/corrective-action/:actionId/complete', async (req, res) => {
   try {
-    const incident = await IncidentReport.findOne({ _id: req.params.id, deleted_at: null });
+    const incident = await IncidentReport.findOne({
+      _id: req.params.id,
+      deleted_at: null,
+      ...incidentBranchScope(req),
+    });
     if (!incident) return res.status(404).json({ error: 'الحادثة غير موجودة' });
 
     const action = incident.corrective_actions.id(req.params.actionId);
@@ -474,7 +501,7 @@ router.post('/incidents/:id/corrective-action/:actionId/complete', async (req, r
 router.delete('/incidents/:id', async (req, res) => {
   try {
     const incident = await IncidentReport.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null, status: 'reported' },
+      { _id: req.params.id, deleted_at: null, status: 'reported', ...incidentBranchScope(req) },
       { deleted_at: new Date() },
       { returnDocument: 'after' }
     );
@@ -495,6 +522,9 @@ router.get('/dashboard', async (req, res) => {
     const { branch_id, _period_type = 'monthly' } = req.query;
     const baseFilter = { deleted_at: null };
     if (branch_id) baseFilter.branch_id = new mongoose.Types.ObjectId(branch_id);
+    // W1554 — incidents carry PHI → force-scope to the caller's branch. Indicators/
+    // measurements stay on baseFilter (org-global, optional/unstamped branch_id).
+    const incScope = incidentBranchScope(req, branch_id);
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -534,17 +564,19 @@ router.get('/dashboard', async (req, res) => {
       ]),
 
       IncidentReport.countDocuments({
-        ...baseFilter,
+        deleted_at: null,
+        ...incScope,
         status: { $nin: ['closed'] },
       }),
 
       IncidentReport.aggregate([
-        { $match: { ...baseFilter, createdAt: { $gte: thirtyDaysAgo } } },
+        { $match: { deleted_at: null, ...incScope, createdAt: { $gte: thirtyDaysAgo } } },
         { $group: { _id: '$severity', count: { $sum: 1 } } },
       ]),
 
       IncidentReport.find({
-        ...baseFilter,
+        deleted_at: null,
+        ...incScope,
         severity: { $in: ['critical', 'sentinel'] },
         status: { $nin: ['closed'] },
       })

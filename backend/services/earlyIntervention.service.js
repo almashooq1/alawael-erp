@@ -264,6 +264,12 @@ class EarlyInterventionService {
     const child = await EarlyInterventionChild.findById(data.child);
     if (!child) throw new Error('ملف الطفل غير موجود');
 
+    // W1560: delayMonths/isDelayed/delaySeverity are SERVER-derived from the ages —
+    // strip any client-supplied values so they can only be computed below.
+    delete data.delayMonths;
+    delete data.isDelayed;
+    delete data.delaySeverity;
+
     // Calculate delay
     if (data.actualAgeMonths && data.expectedAgeMonths) {
       data.delayMonths = data.actualAgeMonths - data.expectedAgeMonths;
@@ -320,6 +326,13 @@ class EarlyInterventionService {
   }
 
   async updateMilestone(id, data, _userId) {
+    // W1560: delayMonths/isDelayed/delaySeverity are SERVER-derived — never accept
+    // them from the client. A PUT of delaySeverity with no ages previously overwrote
+    // the computed value, desyncing it from the ages and corrupting the milestone
+    // report + dashboard delayed-count. Strip them; recompute only when ages change.
+    delete data.delayMonths;
+    delete data.isDelayed;
+    delete data.delaySeverity;
     // Recalculate delay if ages changed
     if (data.actualAgeMonths !== undefined || data.expectedAgeMonths !== undefined) {
       const existing = await DevelopmentalMilestone.findById(id);

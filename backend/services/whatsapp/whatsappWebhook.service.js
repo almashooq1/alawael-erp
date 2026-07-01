@@ -286,6 +286,28 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
   }
 
   const content = normalizeMessageContent(msg);
+
+  // W1424q — PDPL self-service withdrawal. A guardian replying STOP / إيقاف /
+  // إلغاء الاشتراك opts OUT of WhatsApp messaging. Checked BEFORE recordInbound
+  // (which would otherwise re-open the 24h window + implicitly re-opt-in). Whole-
+  // message match only, so the bot's bare 'إلغاء' (cancel) keyword is not caught.
+  if (
+    content.text &&
+    /^\s*(stop|unsubscribe|إيقاف|ايقاف|توقف|(?:إلغاء|الغاء)\s+الاشتراك)\s*$/i.test(content.text)
+  ) {
+    const ConsentStop = getConsentModel();
+    if (ConsentStop) {
+      await ConsentStop.setConsent(whatsappService.normalizePhone(fromPhone), false, {
+        reason: 'user_request',
+        channel: 'whatsapp_reply',
+      }).catch(err => logger.warn(`[WhatsApp] STOP opt-out failed: ${err.message}`));
+    }
+    await whatsappService
+      .sendText(fromPhone, 'تم إيقاف رسائل واتساب لهذا الرقم بناءً على طلبك. 🛑')
+      .catch(() => {});
+    logger.info(`[WhatsApp] ${whatsappService.maskPhone(fromPhone)} opted out via STOP keyword`);
+    return;
+  }
   const senderName = contact?.profile?.name || fromPhone;
   const timestamp = new Date(parseInt(msg.timestamp || Date.now() / 1000) * 1000);
 
@@ -536,6 +558,22 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
           interactiveEnabled,
           botCtx,
         });
+        // W1424k — the bot auto-escalated after N unmatched / confirm-reprompt
+        // turns. Flag the conversation for staff (mirrors the classified
+        // escalation block below) so a stuck guardian gets a human follow-up.
+        if (plan.escalate && conv && conv._id) {
+          await Conversation.findOneAndUpdate(
+            { _id: conv._id },
+            {
+              $set: {
+                requiresHumanReview: true,
+                status: 'escalated',
+                escalationReason: 'bot_unmatched_limit',
+                escalatedAt: new Date(),
+              },
+            }
+          ).catch(err => logger.warn(`[WhatsApp] bot escalation flag failed: ${err.message}`));
+        }
         return; // bot owns this turn; skip the stateless auto-reply path
       }
     } catch (err) {

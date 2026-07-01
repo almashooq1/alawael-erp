@@ -1157,6 +1157,20 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/transfer-execute-branch-move-wave1567.test.js'
+      - 'backend/__tests__/employee-affairs-branch-isolation-wave1566.test.js'
+      - 'backend/__tests__/pharmacy-dispensing-items-wave1564.test.js'
+      - 'backend/__tests__/medical-files-download-branch-isolation-wave1561.test.js'
+      - 'backend/__tests__/files-module-branch-isolation-wave1560.test.js'
+      - 'backend/__tests__/rehabilitation-routes-no-db-tripwire-wave1559.test.js'
+      - 'backend/__tests__/early-warning-branch-isolation-wave1558.test.js'
+      - 'backend/__tests__/mdt-transition-quality-branch-isolation-wave1557.test.js'
+      - 'backend/__tests__/rehabilitation-routers-auth-wave1556.test.js'
+      - 'backend/__tests__/smart-iep-auth-branch-isolation-wave1555.test.js'
+      - 'backend/__tests__/quality-incident-branch-isolation-wave1554.test.js'
+      - 'backend/__tests__/finance-module-payment-refund-role-gate-wave1553.test.js'
+      - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
+      - 'backend/__tests__/invoice-admin-lifecycle-mass-assign-wave1551.test.js'
       - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
       - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
@@ -2056,6 +2070,64 @@ on:
       - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-notification-dlq-wave1424g.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-secondary-webhook-failclosed-wave1424h.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-template-request-model.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/forgotten-stub-models.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/enum-value-query-mismatch.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-v2-extras-enum-mismatch-wave1556.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-enhanced-appointment-enum.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-audit-getauditlog-shape.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-complaint-createdby.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-mass-assignment-wave1558.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/write-side-enum-status.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-milestone-derived-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-sessions-conflict-massassign-wave1561.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-vehicle-delete-status-enum-wave1562.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/objectid-new-mongoose9-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-header-branch-idor-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/compensation-incentives-read-gate-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
       - 'backend/package.json'
@@ -3193,6 +3265,20 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/transfer-execute-branch-move-wave1567.test.js'
+      - 'backend/__tests__/employee-affairs-branch-isolation-wave1566.test.js'
+      - 'backend/__tests__/pharmacy-dispensing-items-wave1564.test.js'
+      - 'backend/__tests__/medical-files-download-branch-isolation-wave1561.test.js'
+      - 'backend/__tests__/files-module-branch-isolation-wave1560.test.js'
+      - 'backend/__tests__/rehabilitation-routes-no-db-tripwire-wave1559.test.js'
+      - 'backend/__tests__/early-warning-branch-isolation-wave1558.test.js'
+      - 'backend/__tests__/mdt-transition-quality-branch-isolation-wave1557.test.js'
+      - 'backend/__tests__/rehabilitation-routers-auth-wave1556.test.js'
+      - 'backend/__tests__/smart-iep-auth-branch-isolation-wave1555.test.js'
+      - 'backend/__tests__/quality-incident-branch-isolation-wave1554.test.js'
+      - 'backend/__tests__/finance-module-payment-refund-role-gate-wave1553.test.js'
+      - 'backend/__tests__/payment-gateway-transaction-branch-isolation-wave1552.test.js'
+      - 'backend/__tests__/invoice-admin-lifecycle-mass-assign-wave1551.test.js'
       - 'backend/__tests__/telehealth-recording-waitingroom-isolation-wave1550.test.js'
       - 'backend/__tests__/emr-body-branch-isolation-wave1549.test.js'
       - 'backend/__tests__/appointment-slot-booking-atomic-wave1548.test.js'
@@ -4091,6 +4177,64 @@ on:
       - 'backend/__tests__/crm-enhanced-branch-leak.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/whatsapp-notification-dlq-wave1424g.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-secondary-webhook-failclosed-wave1424h.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-template-request-model.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-meta-transport-parity-wave1424i.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/ticketing-branch-idor-wave1552.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/whatsapp-delivery-observability-wave1424j.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/forgotten-stub-models.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-idor-deadhandlers-wave1553.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/beneficiary-attendance-model-name.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-assessment-massassign-deadmodel-wave1555.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/enum-value-query-mismatch.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/parent-v2-extras-enum-mismatch-wave1556.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branch-enhanced-appointment-enum.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/document-audit-getauditlog-shape.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/enterprise-ultra-validators-nullderef-wave1557.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/quality-complaint-createdby.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-mass-assignment-wave1558.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/write-side-enum-status.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/early-intervention-milestone-derived-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-sessions-conflict-massassign-wave1561.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-iep-sessionlog-branch-isolation-wave1560.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/transport-vehicle-delete-status-enum-wave1562.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measurements-approve-idor-wave1563.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/esignature-pdf-download-idor-wave1564.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/inventory-branch-isolation-wave1570.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/objectid-new-mongoose9-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-header-branch-idor-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/compensation-incentives-read-gate-wave1565.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/mongoose9-doc-remove-wave1571.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cdss-id-branch-scope-wave1566.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/care-plan-branch-isolation-wave1551.test.js'
       - 'backend/package.json'

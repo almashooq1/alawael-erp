@@ -220,7 +220,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     body.taxAmount = totals.taxAmount;
     body.totalAmount = totals.totalAmount;
     body.issuer = req.user?.id;
-    body.status = body.status || 'DRAFT';
+    // W1551: new invoices always start DRAFT — PAID/ISSUED only via /pay & /issue
+    // (the latter builds the ZATCA envelope). Don't accept caller payment state.
+    body.status = 'DRAFT';
+    for (const f of ['paidAt', 'paidAmount', 'balance', 'paymentMethod']) delete body[f];
     if (req.branchScope?.branchId) body.branchId = req.branchScope.branchId;
 
     const doc = await Invoice.create(body);
@@ -244,6 +247,27 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body._id;
     delete body.createdAt;
     delete body.zatca; // ZATCA envelope only via /issue
+    // W1551: server-owned fields — a generic PATCH must NOT set lifecycle/payment
+    // state or computed totals. status transitions go through /issue, /pay,
+    // /cancel (which carry the ZATCA envelope + status guards); totals are
+    // recomputed from items below; branch/issuer/number are immutable identity.
+    // Without this, a write-role user could PATCH {status:'PAID'} (skip the pay
+    // flow), {status:'ISSUED'} (skip the ZATCA envelope → break the hash chain),
+    // or {totalAmount:1} (undercharge), bypassing every controlled endpoint.
+    for (const f of [
+      'status',
+      'totalAmount',
+      'subTotal',
+      'paidAt',
+      'paidAmount',
+      'balance',
+      'paymentMethod',
+      'branchId',
+      'issuer',
+      'invoiceNumber',
+    ]) {
+      delete body[f];
+    }
     if (body.items) {
       const totals = recalcTotals(body);
       body.items = totals.items;

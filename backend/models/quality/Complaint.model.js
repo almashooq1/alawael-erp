@@ -15,6 +15,10 @@ const complaintSchema = new mongoose.Schema(
     complainantId: { type: mongoose.Schema.Types.ObjectId, default: null },
     complainantName: { type: String, default: null },
     complainantPhone: { type: String, default: null },
+    // The authenticated user who ENTERED the complaint (audit trail) — distinct from
+    // the complainant (who the complaint is from, which may be a Beneficiary/Guardian).
+    // Set server-side from req.user; the route already passed it but the service dropped it.
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     category: {
       type: String,
       enum: [

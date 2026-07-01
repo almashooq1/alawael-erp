@@ -450,6 +450,18 @@ router.get('/download/:id', async (req, res) => {
     const doc = await ESignature.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
+    // Access gate — a signed certificate is NOT public; only its creator, a named
+    // signer, or an admin may download it by id (external parties verify via the
+    // public verification-code endpoint). Without this, any authenticated user
+    // could stream any signature certificate PDF by id.
+    const uid = String(req.user?._id || req.user?.id || '');
+    const isAdmin = ['admin', 'super_admin', 'superadmin'].includes(req.user?.role);
+    const isCreator = String(doc.createdBy) === uid;
+    const isSigner = (doc.signers || []).some(s => String(s.userId) === uid);
+    if (!isAdmin && !isCreator && !isSigner) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بتنزيل هذا المستند' });
+    }
+
     // Find the latest generated PDF
     const genDir = path.join(__dirname, '..', 'uploads', 'signatures', 'generated');
     if (!fs.existsSync(genDir)) {
@@ -475,8 +487,17 @@ router.get('/download/:id', async (req, res) => {
    ═══════════════════════════════════════════════════════════════════════════ */
 router.get('/stamped/:stampId', async (req, res) => {
   try {
-    const stamp = await EStamp.findById(req.params.stampId).select('stampId name_ar').lean();
+    // Full doc (not lean) for the model's isUserAuthorized() ACL check
+    const stamp = await EStamp.findById(req.params.stampId);
     if (!stamp) return res.status(404).json({ success: false, message: 'الختم غير موجود' });
+
+    // Access gate — only the stamp's creator / an authorized user / an admin may
+    // download its stamped PDFs (was: any authenticated user by stamp id).
+    const uid = String(req.user?._id || req.user?.id || '');
+    const isAdmin = ['admin', 'super_admin', 'superadmin'].includes(req.user?.role);
+    if (!isAdmin && !stamp.isUserAuthorized(uid)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بتنزيل هذا المستند' });
+    }
 
     const stampedDir = path.join(__dirname, '..', 'uploads', 'signatures', 'stamped');
     if (!fs.existsSync(stampedDir)) {

@@ -233,7 +233,7 @@ exports.deletePayment = async (req, res) => {
       });
     }
 
-    await payment.remove();
+    await payment.deleteOne(); // W1571: doc.remove() removed in Mongoose 9
 
     res.json({
       success: true,

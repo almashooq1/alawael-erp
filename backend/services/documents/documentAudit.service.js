@@ -266,7 +266,12 @@ class DocumentAuditService {
    */
   async getDocumentAuditLog(documentId, options = {}) {
     try {
-      const query = { documentId };
+      // documentId is optional: cross-document queries (e.g. /audit/suspicious by
+      // severity) pass null. Forcing `{ documentId }` here cast-errored when a route
+      // accidentally passed a filter OBJECT as documentId (→ 500), and made
+      // documentId-less queries impossible.
+      const query = {};
+      if (documentId) query.documentId = documentId;
       if (options.action) query.action = options.action;
       if (options.userId) query.userId = options.userId;
       if (options.severity) query.severity = options.severity;

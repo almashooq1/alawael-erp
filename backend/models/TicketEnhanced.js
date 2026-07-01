@@ -149,7 +149,17 @@ ticketSchema.pre('save', async function () {
 const ticketCommentSchema = new mongoose.Schema(
   {
     ticketId: { type: mongoose.Schema.Types.ObjectId, ref: 'TicketEnhanced', required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // W1552: system/automated comments (SLA escalation) legitimately have no user.
+    // Previously `required: true` → the SLA sweeper's `userId: null` create threw a
+    // ValidationError that aborted the whole escalation batch and never wrote the
+    // audit comment. Required only for human-authored comments.
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: function () {
+        return !this.isSystem;
+      },
+    },
     content: { type: String, required: true, maxlength: 5000 },
     isInternal: { type: Boolean, default: false }, // ملاحظة داخلية
     isSystem: { type: Boolean, default: false }, // رسالة نظام تلقائية

@@ -29,8 +29,10 @@ describe('W1561 — conflict detection is branch-scoped', () => {
     expect(SRC).toMatch(/\.\.\.scope,/); // spread into the conflict query
     expect(SRC).toMatch(/status: \{ \$nin/); // confirms it's the conflict query shape
   });
-  test('all three callers pass scope: branchFilter(req)', () => {
-    expect((SRC.match(/scope: branchFilter\(req\)/g) || []).length).toBe(3);
+  test('all scoped conflict callers pass scope: branchFilter(req)', () => {
+    // 3 original (POST /conflicts, POST / parent, PATCH /:id re-check) + 1 added
+    // in W1580 (per-child conflict check in the recurrence-expansion loop).
+    expect((SRC.match(/scope: branchFilter\(req\)/g) || []).length).toBe(4);
   });
 });
 

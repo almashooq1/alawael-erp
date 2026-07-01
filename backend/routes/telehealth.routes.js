@@ -891,7 +891,7 @@ router.post(
   authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'receptionist']),
   async (req, res) => {
     try {
-      const session = await scheduleTelehealthSession(req.body);
+      const session = await scheduleTelehealthSession(req.body, effectiveBranchScope(req));
       res.status(201).json({
         success: true,
         message: 'تم جدولة جلسة التأهيل عن بُعد بنجاح',
@@ -910,7 +910,8 @@ router.post(
 router.get('/sessions', async (req, res) => {
   try {
     const { status, beneficiaryId, therapistId, from, to, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    // W1586 — scope the list to the caller's branch (RehabTelehealthSession now has `branch`).
+    const filter = { ...telehealthBranchFilter(req) };
     if (status) filter.status = status;
     if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
     if (therapistId) filter.therapistId = therapistId;
@@ -942,7 +943,7 @@ router.get('/sessions', async (req, res) => {
  */
 router.get('/sessions/:id', async (req, res) => {
   try {
-    const session = await RehabTelehealthSession.findById(req.params.id)
+    const session = await RehabTelehealthSession.findOne(scopedById(req, req.params.id))
       .populate('beneficiaryId', 'name nationalId phone dateOfBirth')
       .populate('therapistId', 'name email specialty')
       .populate('sessionId', 'sessionNumber type status')
@@ -966,6 +967,8 @@ router.patch(
   authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'medical_director']),
   async (req, res) => {
     try {
+      if (!(await assertInBranch(req, res, RehabTelehealthSession, req.params.id, 'الجلسة غير موجودة')))
+        return;
       const session = await startRehabSession(req.params.id);
       res.json({ success: true, message: 'تم بدء الجلسة', data: session });
     } catch (err) {
@@ -983,6 +986,8 @@ router.patch(
   authorize(['admin', 'branch_admin', 'therapist', 'doctor', 'medical_director']),
   async (req, res) => {
     try {
+      if (!(await assertInBranch(req, res, RehabTelehealthSession, req.params.id, 'الجلسة غير موجودة')))
+        return;
       const { notes, goalsProgress } = req.body;
       const session = await completeSession(req.params.id, notes, goalsProgress);
       res.json({ success: true, message: 'تم إنهاء الجلسة بنجاح', data: session });
@@ -998,6 +1003,8 @@ router.patch(
  */
 router.post('/sessions/:id/materials', async (req, res) => {
   try {
+    if (!(await assertInBranch(req, res, RehabTelehealthSession, req.params.id, 'الجلسة غير موجودة')))
+      return;
     const materials = await addSessionMaterial(req.params.id, req.body);
     res.json({ success: true, data: materials });
   } catch (err) {
@@ -1011,6 +1018,8 @@ router.post('/sessions/:id/materials', async (req, res) => {
  */
 router.get('/sessions/:id/materials', async (req, res) => {
   try {
+    if (!(await assertInBranch(req, res, RehabTelehealthSession, req.params.id, 'الجلسة غير موجودة')))
+      return;
     const materials = await getSessionMaterials(req.params.id);
     res.json({ success: true, data: materials });
   } catch (err) {
@@ -1024,6 +1033,8 @@ router.get('/sessions/:id/materials', async (req, res) => {
  */
 router.post('/sessions/:id/technical-issues', async (req, res) => {
   try {
+    if (!(await assertInBranch(req, res, RehabTelehealthSession, req.params.id, 'الجلسة غير موجودة')))
+      return;
     const issues = await recordTechnicalIssue(req.params.id, req.body);
     res.json({ success: true, data: issues });
   } catch (err) {

@@ -1191,3 +1191,4 @@ __tests__/cdss-objectid-guard-wave1588.test.js
 __tests__/hr-dashboard-role-gate-wave1589.test.js
 __tests__/m9-strict-populate-wave1595.test.js
 __tests__/finance-statements-branch-scope-wave1595.test.js
+__tests__/transport-driver-safety-branch-wave1601.test.js

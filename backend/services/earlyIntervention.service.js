@@ -267,8 +267,12 @@ class EarlyInterventionService {
     return screening;
   }
 
-  async updateScreening(id, data, userId) {
+  async updateScreening(id, data, userId, branchId) {
     data.updatedBy = userId;
+    if (branchId) {
+      const e = await DevelopmentalScreening.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('سجل الفحص غير موجود');
+    }
     const screening = await DevelopmentalScreening.findByIdAndUpdate(id, data, {
       returnDocument: 'after',
       runValidators: true,
@@ -278,15 +282,19 @@ class EarlyInterventionService {
     return screening;
   }
 
-  async deleteScreening(id) {
+  async deleteScreening(id, branchId) {
+    if (branchId) {
+      const e = await DevelopmentalScreening.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('سجل الفحص غير موجود');
+    }
     const screening = await DevelopmentalScreening.findByIdAndDelete(id);
     if (!screening) throw new Error('سجل الفحص غير موجود');
     return screening;
   }
 
-  async getScreeningsByChild(childId, pagination = {}) {
+  async getScreeningsByChild(childId, pagination = {}, branchId) {
     const { page = 1, limit = 20 } = pagination;
-    const query = { child: childId };
+    const query = scopedFilter({ child: childId }, branchId);
 
     const [data, total] = await Promise.all([
       DevelopmentalScreening.find(query)
@@ -389,7 +397,11 @@ class EarlyInterventionService {
     return milestone;
   }
 
-  async updateMilestone(id, data, _userId) {
+  async updateMilestone(id, data, _userId, branchId) {
+    if (branchId) {
+      const e = await DevelopmentalMilestone.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('المعلم التنموي غير موجود');
+    }
     // W1560: delayMonths/isDelayed/delaySeverity are SERVER-derived — never accept
     // them from the client. A PUT of delaySeverity with no ages previously overwrote
     // the computed value, desyncing it from the ages and corrupting the milestone
@@ -422,21 +434,27 @@ class EarlyInterventionService {
     return milestone;
   }
 
-  async deleteMilestone(id) {
+  async deleteMilestone(id, branchId) {
+    if (branchId) {
+      const e = await DevelopmentalMilestone.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('المعلم التنموي غير موجود');
+    }
     const milestone = await DevelopmentalMilestone.findByIdAndDelete(id);
     if (!milestone) throw new Error('المعلم التنموي غير موجود');
     return milestone;
   }
 
-  async getMilestonesByChild(childId) {
-    return DevelopmentalMilestone.find({ child: childId })
+  async getMilestonesByChild(childId, branchId) {
+    return DevelopmentalMilestone.find(scopedFilter({ child: childId }, branchId))
       .populate('assessedBy', 'name email')
       .sort({ domain: 1, expectedAgeMonths: 1 })
       .lean();
   }
 
-  async getMilestoneReport(childId) {
-    const milestones = await DevelopmentalMilestone.find({ child: childId }).lean();
+  async getMilestoneReport(childId, branchId) {
+    const milestones = await DevelopmentalMilestone.find(
+      scopedFilter({ child: childId }, branchId)
+    ).lean();
     const domains = [
       'COGNITIVE',
       'COMMUNICATION',
@@ -543,8 +561,12 @@ class EarlyInterventionService {
     return ifsp;
   }
 
-  async updateIFSP(id, data, userId) {
+  async updateIFSP(id, data, userId, branchId) {
     data.updatedBy = userId;
+    if (branchId) {
+      const e = await IFSP.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('خطة IFSP غير موجودة');
+    }
     const ifsp = await IFSP.findByIdAndUpdate(id, data, {
       returnDocument: 'after',
       runValidators: true,
@@ -554,22 +576,26 @@ class EarlyInterventionService {
     return ifsp;
   }
 
-  async deleteIFSP(id) {
+  async deleteIFSP(id, branchId) {
+    if (branchId) {
+      const e = await IFSP.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('خطة IFSP غير موجودة');
+    }
     const ifsp = await IFSP.findByIdAndDelete(id);
     if (!ifsp) throw new Error('خطة IFSP غير موجودة');
     return ifsp;
   }
 
-  async getIFSPsByChild(childId) {
-    return IFSP.find({ child: childId })
+  async getIFSPsByChild(childId, branchId) {
+    return IFSP.find(scopedFilter({ child: childId }, branchId))
       .populate('serviceCoordinator', 'name email')
       .sort({ startDate: -1 })
       .lean();
   }
 
-  async addIFSPReview(ifspId, reviewData, userId) {
+  async addIFSPReview(ifspId, reviewData, userId, branchId) {
     const ifsp = await IFSP.findById(ifspId);
-    if (!ifsp) throw new Error('خطة IFSP غير موجودة');
+    if (!ifsp || !sameBranchOrLegacy(ifsp, branchId)) throw new Error('خطة IFSP غير موجودة');
 
     reviewData.reviewer = userId;
     ifsp.reviews.push(reviewData);
@@ -582,9 +608,9 @@ class EarlyInterventionService {
     return ifsp;
   }
 
-  async updateIFSPGoalProgress(ifspId, goalId, progressData, userId) {
+  async updateIFSPGoalProgress(ifspId, goalId, progressData, userId, branchId) {
     const ifsp = await IFSP.findById(ifspId);
-    if (!ifsp) throw new Error('خطة IFSP غير موجودة');
+    if (!ifsp || !sameBranchOrLegacy(ifsp, branchId)) throw new Error('خطة IFSP غير موجودة');
 
     const goal = ifsp.goals.id(goalId);
     if (!goal) throw new Error('الهدف غير موجود');
@@ -674,8 +700,12 @@ class EarlyInterventionService {
     return referral;
   }
 
-  async updateReferral(id, data, userId) {
+  async updateReferral(id, data, userId, branchId) {
     data.updatedBy = userId;
+    if (branchId) {
+      const e = await EarlyReferral.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('الإحالة غير موجودة');
+    }
     const referral = await EarlyReferral.findByIdAndUpdate(id, data, {
       returnDocument: 'after',
       runValidators: true,
@@ -685,22 +715,26 @@ class EarlyInterventionService {
     return referral;
   }
 
-  async deleteReferral(id) {
+  async deleteReferral(id, branchId) {
+    if (branchId) {
+      const e = await EarlyReferral.findById(id).select('branchId').lean();
+      if (e && !sameBranchOrLegacy(e, branchId)) throw new Error('الإحالة غير موجودة');
+    }
     const referral = await EarlyReferral.findByIdAndDelete(id);
     if (!referral) throw new Error('الإحالة غير موجودة');
     return referral;
   }
 
-  async getReferralsByChild(childId) {
-    return EarlyReferral.find({ child: childId })
+  async getReferralsByChild(childId, branchId) {
+    return EarlyReferral.find(scopedFilter({ child: childId }, branchId))
       .populate('referringPhysicianId', 'name email')
       .sort({ referralDate: -1 })
       .lean();
   }
 
-  async addReferralCommunication(referralId, commData, userId) {
+  async addReferralCommunication(referralId, commData, userId, branchId) {
     const referral = await EarlyReferral.findById(referralId);
-    if (!referral) throw new Error('الإحالة غير موجودة');
+    if (!referral || !sameBranchOrLegacy(referral, branchId)) throw new Error('الإحالة غير موجودة');
 
     commData.recordedBy = userId;
     referral.communications.push(commData);
@@ -708,9 +742,9 @@ class EarlyInterventionService {
     return referral;
   }
 
-  async updateReferralStatus(referralId, status, userId) {
+  async updateReferralStatus(referralId, status, userId, branchId) {
     const referral = await EarlyReferral.findById(referralId);
-    if (!referral) throw new Error('الإحالة غير موجودة');
+    if (!referral || !sameBranchOrLegacy(referral, branchId)) throw new Error('الإحالة غير موجودة');
 
     referral.status = status;
     referral.updatedBy = userId;

@@ -36,6 +36,7 @@ const Attestation = require('../models/CbahiAttestation');
 const registry = require('../intelligence/cbahi-standards.registry');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1584
 
 router.use(authenticateToken);
 // W447: branch-scope every endpoint. Model carries `branchId`; pre-W447
@@ -281,9 +282,11 @@ router.post('/attestations', requireRole(WRITE_ROLES), async (req, res) => {
     if (!standard) {
       return res.status(400).json({ success: false, message: 'standardKey غير موجود في السجل' });
     }
+    // W1584: a branch-restricted caller is forced to their own branch — a foreign
+    // body.branchId can no longer file (or probe) an attestation in another branch.
+    const targetBranchId = effectiveBranchScope(req) || body.branchId;
     const existing = await Attestation.findOne({
-      ...branchFilter(req),
-      /* W447 */ branchId: body.branchId,
+      branchId: targetBranchId,
       standardKey: body.standardKey,
     }).lean();
     if (existing) {
@@ -294,7 +297,7 @@ router.post('/attestations', requireRole(WRITE_ROLES), async (req, res) => {
       });
     }
     const doc = await Attestation.create({
-      branchId: body.branchId,
+      branchId: targetBranchId,
       standardKey: body.standardKey,
       standardChapter: standard.chapter,
       standardCode: standard.code,

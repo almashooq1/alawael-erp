@@ -27,7 +27,7 @@ const CreativeArtsTherapySession = require('../models/CreativeArtsTherapySession
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
@@ -234,7 +234,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const format = FORMATS.includes(String(body.format)) ? String(body.format) : 'individual';
     const doc = await CreativeArtsTherapySession.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       carePlanVersionId:
         body.carePlanVersionId && mongoose.isValidObjectId(body.carePlanVersionId)
           ? body.carePlanVersionId

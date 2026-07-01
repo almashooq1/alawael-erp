@@ -25,7 +25,7 @@ const DayRehabBusRoute = require('../models/DayRehabBusRoute');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W448: branch-scope every endpoint. Model(s) carry `branchId`; pre-W448
@@ -137,7 +137,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const route = await DayRehabBusRoute.create({
       name: body.name.trim(),
       code: body.code.trim(),
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       direction: ['pickup', 'dropoff', 'both'].includes(body.direction) ? body.direction : 'both',
       stops: Array.isArray(body.stops) ? body.stops : [],
       driverId: body.driverId && mongoose.isValidObjectId(body.driverId) ? body.driverId : null,

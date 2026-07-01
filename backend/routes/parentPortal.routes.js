@@ -48,7 +48,7 @@ const express = require('express');
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const _mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -1167,11 +1167,12 @@ router.get('/admin/complaints', async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 20, 1000); // W1182 — DoS cap
     const skip = (page - 1) * limit;
 
-    const query = {};
+    // W1582: scope staff complaint list to the caller's branch (was: all branches on omit)
+    const query = { ...branchFilter(req) };
     if (req.query.status) query.status = req.query.status;
     if (req.query.type) query.type = req.query.type;
     if (req.query.priority) query.priority = req.query.priority;
-    if (req.query.branchId) query.branchId = req.query.branchId;
+    if (!query.branchId && req.query.branchId) query.branchId = req.query.branchId;
 
     const total = await ParentComplaint.countDocuments(query);
     const complaints = await ParentComplaint.find(query)

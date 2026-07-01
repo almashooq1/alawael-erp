@@ -31,7 +31,7 @@ const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize'); // W450
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W447: branch-scope every endpoint. Model carries `branchId`; pre-W447
@@ -229,7 +229,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const startTime = body.startTime ? new Date(body.startTime) : new Date();
     const doc = await RSEvent.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       behaviorPlanId:
         body.behaviorPlanId && mongoose.isValidObjectId(body.behaviorPlanId)

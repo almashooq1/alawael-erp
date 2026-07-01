@@ -109,7 +109,7 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       date: { $gte: startOfDay(d), $lte: endOfDay(d) },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await HearingScreening.find(filter).sort({ date: -1 }).lean();
@@ -127,7 +127,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.screeningMethod && METHODS.includes(String(req.query.screeningMethod))) {
@@ -175,7 +175,7 @@ router.get('/needs-referral', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       outcome: 'refer',
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await HearingScreening.find(filter).sort({ date: -1 }).limit(300).lean();
@@ -194,7 +194,7 @@ router.get('/due', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       reassessmentDue: { $ne: null, $lte: by },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await HearingScreening.find(filter).sort({ reassessmentDue: 1 }).limit(300).lean();
@@ -243,7 +243,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W445
       date: { $gte: from, $lte: to },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {

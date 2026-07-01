@@ -114,7 +114,7 @@ router.get('/pending-results', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req),
       status: { $in: ['ordered', 'scheduled'] },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await InstrumentalSwallowStudy.find(filter)
@@ -135,7 +135,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.studyType && STUDY_TYPES.includes(String(req.query.studyType))) {
@@ -189,7 +189,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await InstrumentalSwallowStudy.find(filter)

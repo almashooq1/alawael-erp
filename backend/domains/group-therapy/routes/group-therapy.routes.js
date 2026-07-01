@@ -50,13 +50,29 @@ function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
 
+// W1579 — server-owned fields a client must NOT self-set. The validators only
+// enum-check — they do NOT whitelist. Critically, bodyScopedBeneficiaryGuard checks the
+// TOP-LEVEL body.beneficiaryId only, so a create/update body carrying a members[] /
+// memberAttendance[] array of foreign-branch beneficiaryIds would INJECT cross-branch
+// members bypassing the guard. Membership flows through the guarded addMember endpoint;
+// attendance through the /complete endpoint. Strip both arrays + audit/computed/lifecycle.
+const GROUP_SERVER_FIELDS = ['_id', 'branchId', 'createdBy', 'isDeleted', 'currentSize', 'members'];
+const SESSION_SERVER_FIELDS = ['_id', 'branchId', 'isDeleted', 'status', 'memberAttendance'];
+function stripFields(body, fields) {
+  const clean = {};
+  for (const k of Object.keys(body || {})) {
+    if (!fields.includes(k)) clean[k] = body[k];
+  }
+  return clean;
+}
+
 // Groups
 router.post(
   '/',
   validate(validateCreateGroup),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.createGroup({
-      ...req.body,
+      ...stripFields(req.body, GROUP_SERVER_FIELDS),
       createdBy: getUserId(req),
       // W1171 — pin: restricted callers cannot spoof a foreign branch
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,
@@ -107,7 +123,10 @@ router.put(
   '/:groupId',
   validate(validateUpdateGroup),
   asyncHandler(async (req, res) => {
-    const data = await groupTherapyService.updateGroup(req.params.groupId, req.body);
+    const data = await groupTherapyService.updateGroup(
+      req.params.groupId,
+      stripFields(req.body, GROUP_SERVER_FIELDS)
+    );
     res.json({ success: true, data });
   })
 );
@@ -139,7 +158,7 @@ router.post(
   validate(validateCreateGroupSession),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.createGroupSession({
-      ...req.body,
+      ...stripFields(req.body, SESSION_SERVER_FIELDS),
       groupId: req.params.groupId,
       // W1171 — pin: restricted callers cannot spoof a foreign branch
       branchId: effectiveBranchScope(req) || req.user?.branchId || req.body.branchId,

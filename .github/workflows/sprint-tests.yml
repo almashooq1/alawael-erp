@@ -1157,6 +1157,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/rehabilitation-advanced-branchid-wave1577.test.js'
       - 'backend/__tests__/treatment-authorization-branch-isolation-wave1574.test.js'
       - 'backend/__tests__/smart-insurance-branch-isolation-wave1573.test.js'
       - 'backend/__tests__/employee-affairs-leaves-scope-wave1569.test.js'
@@ -2149,6 +2150,16 @@ on:
       - 'backend/__tests__/header-branch-bypass-wave1575.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/workflowpro-approval-authz-wave1559.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-session-status-precondition-wave1578.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-branch-isolation-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-slice3-wave1578.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-session-recurring-conflict-wave1580.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-total-leak-wave1580.test.js'
       - 'backend/package.json'
@@ -3286,6 +3297,7 @@ on:
       - 'backend/__tests__/strategic-planning-branch-isolation-wave915.test.js'
       - 'backend/__tests__/medical-equipment-branch-isolation-wave916.test.js'
       - 'backend/__tests__/asset-catalog-branch-isolation-wave917.test.js'
+      - 'backend/__tests__/rehabilitation-advanced-branchid-wave1577.test.js'
       - 'backend/__tests__/treatment-authorization-branch-isolation-wave1574.test.js'
       - 'backend/__tests__/smart-insurance-branch-isolation-wave1573.test.js'
       - 'backend/__tests__/employee-affairs-leaves-scope-wave1569.test.js'
@@ -4277,6 +4289,16 @@ on:
       - 'backend/__tests__/header-branch-bypass-wave1575.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/workflowpro-approval-authz-wave1559.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-session-status-precondition-wave1578.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/clinical-branch-isolation-wave1575.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-clinical-assessment-wave1577.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/branchid-override-slice3-wave1578.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/therapy-session-recurring-conflict-wave1580.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/branch-total-leak-wave1580.test.js'
       - 'backend/package.json'

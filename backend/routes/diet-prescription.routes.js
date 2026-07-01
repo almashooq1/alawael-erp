@@ -35,7 +35,7 @@ const Rx = require('../models/BeneficiaryDietPrescription');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -100,7 +100,7 @@ async function hydrate(items) {
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
@@ -159,7 +159,7 @@ router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
       status: 'active',
       nextReviewDue: { $ne: null, $lt: now },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).sort({ nextReviewDue: 1 }).limit(200).lean();
@@ -174,7 +174,7 @@ router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
 router.get('/npo-active', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req), status: 'active', npo: true }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).sort({ npoStartedAt: -1 }).limit(200).lean();
@@ -193,7 +193,7 @@ router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
       status: 'active',
       'enteralFeeding.active': true,
     }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter).limit(200).lean();
@@ -208,7 +208,7 @@ router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
     const filter = { ...branchFilter(req) }; /* W445 */
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Rx.find(filter)
@@ -285,7 +285,7 @@ router.post('/', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     }
     const doc = await Rx.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       foodIddsiLevel: FOOD_IDDSI.includes(Number(body.foodIddsiLevel))
         ? Number(body.foodIddsiLevel)
         : null,

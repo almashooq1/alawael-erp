@@ -37,6 +37,7 @@ const Concern = require('../models/SafeguardingConcern');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1575
 
 router.use(authenticateToken);
 // W444: branch-scope every safeguarding endpoint. Pre-W444 the model
@@ -135,7 +136,7 @@ router.get('/open', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W444
       status: { $nin: ['closed', 'unsubstantiated'] },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Concern.find(filter).sort({ reportedAt: -1 }).lean();
@@ -163,7 +164,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     ) {
       filter.subjectBeneficiaryId = req.query.subjectBeneficiaryId;
     }
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -231,7 +232,7 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ...branchFilter(req), // W444
       reportedAt: { $gte: from, $lte: to },
     };
-    if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+    if (!filter.branchId && req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
     const raw = await Concern.find(filter)
@@ -321,7 +322,7 @@ router.post('/', requireRole(INTAKE_ROLES), async (req, res) => {
           ? body.subjectBeneficiaryId
           : null,
       subjectName: String(body.subjectName || '').slice(0, 200),
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       reportedBy: req.user?.id || null,
       reportedByName: req.user?.name || body.reportedByName || '',

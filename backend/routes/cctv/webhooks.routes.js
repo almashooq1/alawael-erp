@@ -82,9 +82,15 @@ router.post('/nvr/:nvrCode', async (req, res) => {
   const nvr = await CctvNvr.findOne({ code: String(req.params.nvrCode).toUpperCase() });
   if (!nvr) return res.status(404).json({ success: false, message: 'NVR_NOT_FOUND' });
 
+  // W1601: fail CLOSED. Previously a missing webhookSecret skipped HMAC entirely,
+  // so anyone who knew an NVR code could inject forged CCTV events (fake
+  // face/plate/alert data on a child-safety system). Require a configured secret
+  // AND a valid signature.
   const secret = nvr.eventPush?.webhookSecret;
-  if (secret && !verifyHmac(secret, req.body, req.headers['x-hikvision-signature'])) {
-    return res.status(401).json({ success: false, message: 'BAD_SIGNATURE' });
+  if (!secret || !verifyHmac(secret, req.body, req.headers['x-hikvision-signature'])) {
+    return res
+      .status(401)
+      .json({ success: false, message: secret ? 'BAD_SIGNATURE' : 'WEBHOOK_NOT_CONFIGURED' });
   }
 
   const parsed = parseHikvisionBody(req.body, req.headers['content-type']);
@@ -124,9 +130,22 @@ router.post('/camera/:code', async (req, res) => {
       message: `ingestion saturated (${bp.depth}/${bp.cap})`,
     });
   }
+  // W1601: this direct-push path had NO authentication at all — any anonymous
+  // caller could inject forged events for any camera code. Resolve the camera's
+  // owning NVR and require an HMAC over its webhookSecret, same as /nvr/:nvrCode.
+  const camera = await cameraService.findByCode(req.params.code).catch(() => null);
+  if (!camera) return res.status(404).json({ success: false, message: 'CAMERA_NOT_FOUND' });
+  const nvr = camera.nvrId ? await CctvNvr.findById(camera.nvrId) : null;
+  const secret = nvr?.eventPush?.webhookSecret;
+  if (!secret || !verifyHmac(secret, req.body, req.headers['x-hikvision-signature'])) {
+    return res
+      .status(401)
+      .json({ success: false, message: secret ? 'BAD_SIGNATURE' : 'WEBHOOK_NOT_CONFIGURED' });
+  }
   const parsed = parseHikvisionBody(req.body, req.headers['content-type']);
   const r = await eventService.ingestFromHikvision({
-    cameraCode: req.params.code,
+    cameraCode: camera.code,
+    cameraId: camera._id,
     type: parsed.eventType,
     dateTime: parsed.dateTime,
     raw: parsed,

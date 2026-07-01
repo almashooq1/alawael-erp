@@ -98,7 +98,10 @@ router.delete('/anpr/:id', requireRole(['admin', 'security_officer']), async (re
 });
 
 // ─── Zones ─────────────────────────────────────────────────────────────
-router.get('/zones/:cameraId', async (req, res) => {
+// W1601: zones list was the only route in this file with NO role gate — any
+// authenticated user (parent/therapist/etc.) could read a camera's detection
+// zone layout. Match the sibling zone mutations' role set.
+router.get('/zones/:cameraId', requireRole(['admin', 'security_officer']), async (req, res) => {
   const rows = await CctvZone.find({ cameraId: req.params.cameraId }).lean();
   res.json({ success: true, data: rows });
 });

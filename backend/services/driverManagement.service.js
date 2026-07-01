@@ -405,7 +405,7 @@ class DriverManagementService {
    */
   static async generateComprehensiveReport(driverId) {
     try {
-      const driver = await Driver.findById(driverId).populate('userId', 'name email phone');
+      const driver = await Driver.findById(driverId);
 
       if (!driver) throw new Error('Driver not found');
 

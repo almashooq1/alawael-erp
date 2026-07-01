@@ -35,7 +35,7 @@ const Program = require('../models/AdaptiveSportsProgram');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -238,7 +238,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     }
     const doc = await Program.create({
       beneficiaryId: body.beneficiaryId,
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sport: body.sport,
       sportLabelAr: String(body.sportLabelAr || '').slice(0, 100),
       category: CATEGORIES.includes(String(body.category)) ? String(body.category) : 'individual',

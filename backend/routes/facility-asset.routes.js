@@ -37,6 +37,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Asset = require('../models/FacilityAsset');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1575
 
 router.use(authenticateToken);
 // W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
@@ -336,7 +337,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       nameAr: String(body.nameAr || '').slice(0, 200),
       category: body.category,
       description: String(body.description || '').slice(0, 1000),
-      branchId: body.branchId,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       building: String(body.building || '').slice(0, 100),
       floor: String(body.floor || '').slice(0, 50),
       room: String(body.room || '').slice(0, 100),

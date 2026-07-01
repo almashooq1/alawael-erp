@@ -37,6 +37,7 @@ const Concern = require('../models/SafeguardingConcern');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1575
 
 router.use(authenticateToken);
 // W444: branch-scope every safeguarding endpoint. Pre-W444 the model
@@ -321,7 +322,7 @@ router.post('/', requireRole(INTAKE_ROLES), async (req, res) => {
           ? body.subjectBeneficiaryId
           : null,
       subjectName: String(body.subjectName || '').slice(0, 200),
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       sectionId: body.sectionId && mongoose.isValidObjectId(body.sectionId) ? body.sectionId : null,
       reportedBy: req.user?.id || null,
       reportedByName: req.user?.name || body.reportedByName || '',

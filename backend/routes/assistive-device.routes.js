@@ -42,7 +42,7 @@ const Device = require('../models/AssistiveDevice');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { escapeRegex } = require('../utils/sanitize');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
@@ -320,7 +320,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       category: body.category,
       manufacturer: String(body.manufacturer || '').slice(0, 100),
       modelNumber: String(body.modelNumber || '').slice(0, 100),
-      branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+      branchId: effectiveBranchScope(req) || (body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null),
       storageLocation: String(body.storageLocation || '').slice(0, 200),
       acquiredAt: body.acquiredAt ? new Date(body.acquiredAt) : null,
       acquiredFrom: String(body.acquiredFrom || '').slice(0, 200),

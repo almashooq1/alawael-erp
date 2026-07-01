@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * W1573 — cross-branch IDOR via `?branchId=` override on the W356-W370 clinical routes.
+ * W1575 — cross-branch IDOR via `?branchId=` override on the W356-W370 clinical routes.
  *
  * Each list/read handler built its filter with `{ ...branchFilter(req) }` (which locks a
  * restricted user to their own branch) but then UNCONDITIONALLY overrode it:
@@ -35,7 +35,7 @@ function strip(s) {
     .replace(/(^|[^:])\/\/[^\n]*/g, (m, p1) => p1 + ''.padEnd(m.length - p1.length, ' '));
 }
 
-describe('W1573 clinical routes: branchId override cannot defeat branchFilter', () => {
+describe('W1575 clinical routes: branchId override cannot defeat branchFilter', () => {
   for (const file of FILES) {
     const src = strip(fs.readFileSync(path.join(ROUTES, file), 'utf8'));
 
@@ -60,6 +60,18 @@ describe('W1573 clinical routes: branchId override cannot defeat branchFilter', 
 
     test(`${file}: still scopes the filter with branchFilter(req)`, () => {
       expect(src).toMatch(/branchFilter\s*\(\s*req\s*\)/);
+    });
+
+    test(`${file}: create does NOT set branchId from client body unforced (branch-injection)`, () => {
+      // the create handler must force effectiveBranchScope(req) before any body.branchId
+      // (restricted user → own branch; cross-branch admin → validated body.branchId).
+      // No raw `branchId: body.branchId` / `branchId: req.body.branchId` may remain.
+      expect(src).not.toMatch(/branchId:\s*body\.branchId\s*[,)]/);
+      expect(src).not.toMatch(/branchId:\s*req\.body\.branchId\s*[,)]/);
+      expect(src).not.toMatch(/branchId:\s*body\.branchId\s*&&\s*mongoose\.isValidObjectId\(body\.branchId\)\s*\?\s*body\.branchId\s*:\s*null/);
+      // and it must import + use effectiveBranchScope
+      expect(src).toMatch(/effectiveBranchScope/);
+      expect(src).toMatch(/branchId:\s*effectiveBranchScope\(req\)\s*\|\|/);
     });
   }
 });

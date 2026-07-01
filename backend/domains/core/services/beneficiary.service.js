@@ -67,6 +67,14 @@ class BeneficiaryService extends BaseService {
       disabilityType: entity.disability?.primaryDiagnosis || '',
       disabilityLevel: entity.disability?.severity || '',
     });
+
+    // W1568 — persistent PHI audit trail (durable, in addition to the in-process event).
+    await this._writeAudit('data.created', {
+      entityId: entity._id,
+      userId: _context?.userId,
+      message: `Beneficiary created (${entity.mrn || 'no-mrn'})`,
+      custom: { mrn: entity.mrn || null },
+    });
   }
 
   async beforeUpdate(_id, data, _existing, context) {
@@ -92,6 +100,16 @@ class BeneficiaryService extends BaseService {
         newStatus: entity.status,
         reason: context?.reason || entity.statusReason || 'unspecified',
       });
+      await this._writeAudit('data.updated', {
+        entityId: entity._id,
+        userId: context?.userId,
+        message: `Beneficiary status changed: ${previous.status} → ${entity.status}`,
+        changes: {
+          before: { status: previous.status },
+          after: { status: entity.status },
+          fields: ['status'],
+        },
+      });
     } else {
       // Status unchanged → fire profile-updated for the other-field-change path.
       // updatedFields list sourced from entity.modifiedPaths() when available;
@@ -107,7 +125,54 @@ class BeneficiaryService extends BaseService {
           updatedFields,
           updatedBy: context?.userId || entity.lastModifiedBy || 'system',
         });
+        await this._writeAudit('data.updated', {
+          entityId: entity._id,
+          userId: context?.userId,
+          message: 'Beneficiary profile updated',
+          changes: { fields: updatedFields },
+        });
       }
+    }
+  }
+
+  // ─── Persistent PHI Audit ───────────────────────────────────────────
+
+  /**
+   * W1568 — write a durable audit record for a beneficiary PHI mutation.
+   * Best-effort + never throws: an audit failure must not roll back the mutation.
+   * Uses the canonical AuditLog model (models/auditLog.model.js).
+   */
+  async _writeAudit(eventType, { entityId, userId, message, changes, custom } = {}) {
+    try {
+      const mongoose = require('mongoose');
+      let AuditLog = mongoose.models && mongoose.models.AuditLog;
+      if (!AuditLog) {
+        try {
+          AuditLog = require('../../../models/auditLog.model').AuditLog;
+        } catch {
+          return;
+        }
+      }
+      if (!AuditLog || typeof AuditLog.create !== 'function') return;
+      await AuditLog.create({
+        eventType,
+        eventCategory: 'data',
+        severity: 'info',
+        status: 'success',
+        userId: userId || undefined,
+        resource: entityId ? `Beneficiary/${entityId}` : 'Beneficiary',
+        message,
+        changes: changes || undefined,
+        metadata: {
+          custom: {
+            entityType: 'Beneficiary',
+            entityId: entityId ? String(entityId) : null,
+            ...(custom || {}),
+          },
+        },
+      });
+    } catch (err) {
+      logger.warn(`[BeneficiaryService] audit write failed (${eventType}): ${err.message}`);
     }
   }
 
@@ -160,6 +225,13 @@ class BeneficiaryService extends BaseService {
     const result = await beneficiary.archive(reason, userId);
     this._invalidateCache();
     this.emit('archived', { beneficiaryId: id, reason });
+    await this._writeAudit('data.updated', {
+      entityId: id,
+      userId,
+      message: 'Beneficiary archived',
+      changes: { fields: ['isArchived'] },
+      custom: { reason },
+    });
     return result;
   }
 
@@ -176,6 +248,12 @@ class BeneficiaryService extends BaseService {
     const result = await beneficiary.unarchive(userId);
     this._invalidateCache();
     this.emit('unarchived', { beneficiaryId: id });
+    await this._writeAudit('data.updated', {
+      entityId: id,
+      userId,
+      message: 'Beneficiary unarchived',
+      changes: { fields: ['isArchived'] },
+    });
     return result;
   }
 
@@ -192,6 +270,12 @@ class BeneficiaryService extends BaseService {
     const result = await beneficiary.addRiskFlag(flag);
     this._invalidateCache();
     this.emit('riskFlagAdded', { beneficiaryId, flag });
+    await this._writeAudit('data.updated', {
+      entityId: beneficiaryId,
+      userId: flag?.raisedBy,
+      message: 'Risk flag added',
+      custom: { flagType: flag?.type, severity: flag?.severity },
+    });
     return result;
   }
 
@@ -208,6 +292,12 @@ class BeneficiaryService extends BaseService {
     const result = await beneficiary.resolveRiskFlag(flagId, userId);
     this._invalidateCache();
     this.emit('riskFlagResolved', { beneficiaryId, flagId });
+    await this._writeAudit('data.updated', {
+      entityId: beneficiaryId,
+      userId,
+      message: 'Risk flag resolved',
+      custom: { flagId: String(flagId) },
+    });
     return result;
   }
 
@@ -260,6 +350,20 @@ class BeneficiaryService extends BaseService {
    */
   async updateStatus(id, status, context = {}) {
     return this.update(id, { status, statusReason: context.reason || '' }, context);
+  }
+
+  /**
+   * W1568 — soft-delete with a durable audit record. The route DELETE and
+   * bulkAction 'delete' both route here.
+   */
+  async delete(id, context = {}) {
+    const result = await super.delete(id, context);
+    await this._writeAudit('data.deleted', {
+      entityId: id,
+      userId: context?.userId,
+      message: 'Beneficiary deleted (soft)',
+    });
+    return result;
   }
 
   /**

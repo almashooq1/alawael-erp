@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const appointmentService = require('../services/appointment.service');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
@@ -23,7 +24,7 @@ router.use(requireBranchAccess);
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const result = await appointmentService.listAppointments(req.query);
+    const result = await appointmentService.listAppointments(req.query, effectiveBranchScope(req));
     return res.json({ success: true, ...result });
   })
 );
@@ -35,7 +36,7 @@ router.get(
 router.get(
   '/stats',
   asyncHandler(async (req, res) => {
-    const stats = await appointmentService.getAppointmentStats(req.query);
+    const stats = await appointmentService.getAppointmentStats(req.query, effectiveBranchScope(req));
     return res.json({ success: true, data: stats });
   })
 );
@@ -47,10 +48,13 @@ router.get(
 router.get(
   '/my',
   asyncHandler(async (req, res) => {
-    const result = await appointmentService.listAppointments({
-      ...req.query,
-      bookedBy: req.user._id || req.user.id,
-    });
+    const result = await appointmentService.listAppointments(
+      {
+        ...req.query,
+        bookedBy: req.user._id || req.user.id,
+      },
+      effectiveBranchScope(req)
+    );
     return res.json({ success: true, ...result });
   })
 );
@@ -127,7 +131,8 @@ router.post(
   asyncHandler(async (req, res) => {
     const appointment = await appointmentService.createAppointment(
       req.body,
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.status(201).json({
       success: true,
@@ -146,7 +151,7 @@ router.post(
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const apt = await appointmentService.getAppointment(req.params.id);
+    const apt = await appointmentService.getAppointment(req.params.id, effectiveBranchScope(req));
     return res.json({ success: true, data: apt });
   })
 );
@@ -161,7 +166,8 @@ router.put(
     const apt = await appointmentService.updateAppointment(
       req.params.id,
       req.body,
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({ success: true, message: 'تم تحديث الموعد', data: apt });
   })
@@ -176,7 +182,13 @@ router.delete(
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     const Appointment = require('../models/Appointment');
-    const apt = await Appointment.findByIdAndDelete(req.params.id);
+    // W1583 — scope the delete so a branch-restricted admin/manager cannot delete
+    // another branch's appointment (findByIdAndDelete had no ownership check).
+    const scope = effectiveBranchScope(req);
+    const apt = await Appointment.findOneAndDelete({
+      _id: req.params.id,
+      ...(scope ? { branchId: scope } : {}),
+    });
     if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
     return res.json({ success: true, message: 'تم حذف الموعد بنجاح' });
   })
@@ -194,7 +206,8 @@ router.post(
     const apt = await appointmentService.updateAppointment(
       req.params.id,
       { status: 'CONFIRMED', statusChangeReason: 'تأكيد الموعد' },
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({ success: true, message: 'تم تأكيد الموعد', data: apt });
   })
@@ -210,7 +223,8 @@ router.post(
     const apt = await appointmentService.cancelAppointment(
       req.params.id,
       req.body.reason || 'إلغاء بدون سبب',
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({ success: true, message: 'تم إلغاء الموعد', data: apt });
   })
@@ -223,7 +237,11 @@ router.post(
 router.post(
   '/:id/check-in',
   asyncHandler(async (req, res) => {
-    const apt = await appointmentService.checkIn(req.params.id, req.user._id || req.user.id);
+    const apt = await appointmentService.checkIn(
+      req.params.id,
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
+    );
     return res.json({ success: true, message: 'تم تسجيل الحضور', data: apt });
   })
 );
@@ -238,7 +256,8 @@ router.post(
     const apt = await appointmentService.updateAppointment(
       req.params.id,
       { status: 'NO_SHOW', statusChangeReason: req.body.reason || 'لم يحضر' },
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({ success: true, message: 'تم تسجيل عدم الحضور', data: apt });
   })
@@ -259,7 +278,8 @@ router.post(
         checkOutTime: new Date(),
         internalNotes: req.body.notes,
       },
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({ success: true, message: 'تم إتمام الموعد', data: apt });
   })
@@ -275,7 +295,8 @@ router.post(
     const result = await appointmentService.convertToSession(
       req.params.id,
       req.body,
-      req.user._id || req.user.id
+      req.user._id || req.user.id,
+      effectiveBranchScope(req)
     );
     return res.json({
       success: true,

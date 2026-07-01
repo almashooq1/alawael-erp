@@ -59,7 +59,7 @@ function getUserId(req) {
   return req.user?._id || req.user?.id || null;
 }
 
-// W1580 — server-owned / access-control fields a client must NOT self-set on a
+// W1581 — server-owned / access-control fields a client must NOT self-set on a
 // FamilyMember. The validators don't whitelist, so raw ...req.body let a caller grant
 // guardian-PORTAL ACCESS to themselves (portalAccess.enabled:true + role:'full_access',
 // or link portalAccess.userId to an arbitrary User) — a privilege escalation — and forge

@@ -155,6 +155,7 @@ __tests__/branch-config-mfa-service-layer-wave275f.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-community-service-wave1445.test.js
+__tests__/therapy-equipment-branch-isolation-wave1613.test.js
 __tests__/enterprise-ehs-branch-isolation-wave1609.test.js
 __tests__/fleet-safety-branch-isolation-wave1607.test.js
 __tests__/safety-protocol-branch-isolation-wave1606.test.js

@@ -706,6 +706,8 @@ const SafetyIncidentSchema = new Schema(
     lostWorkDays: { type: Number, default: 0 },
     estimatedCost: Number,
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
+    // W1609 — tenant isolation (EHS models had only `organization`, no branch).
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
@@ -750,6 +752,8 @@ const SafetyInspectionSchema = new Schema(
     },
     nextInspectionDate: Date,
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
+    // W1609 — tenant isolation (EHS models had only `organization`, no branch).
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
@@ -800,6 +804,8 @@ const HazardRegisterSchema = new Schema(
     reviewDate: Date,
     responsiblePerson: { type: Schema.Types.ObjectId, ref: 'User' },
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
+    // W1609 — tenant isolation (EHS models had only `organization`, no branch).
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );
@@ -842,6 +848,8 @@ const PPERecordSchema = new Schema(
     issuedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     acknowledgement: { signed: { type: Boolean, default: false }, signedAt: Date },
     organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
+    // W1609 — tenant isolation (EHS models had only `organization`, no branch).
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
   },
   { timestamps: true }
 );

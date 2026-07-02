@@ -1326,6 +1326,27 @@ const ROUTES = [
     phase: 'student',
     description: 'Parent portal v2',
   },
+  // W1610 — RESTORE the parent-v2 guardian portal co-mount dropped during the
+  // legacy->unified registry migration (was `dualMount(app, 'parent-v2', ...)` in commit
+  // 3dcd9f1e7). The routes self-gate (authenticateToken + ALLOWED_ROLES guardian/parent +
+  // guardian-ownership). Frontend AuthenticatedShell consumes /parent-v2; without this every
+  // /api/parent-v2/* returned 404 (broken My Children page + red parent-portal-v2.api.test).
+  {
+    path: '/api/parent-v2',
+    file: 'routes/parent-portal-v2.routes',
+    auth: true,
+    roles: ['parent', 'guardian', 'admin', 'super_admin'],
+    phase: 'student',
+    description: 'Parent portal v2 (guardian) — me/children/complaints/notifications',
+  },
+  {
+    path: '/api/parent-v2',
+    file: 'routes/parent-portal-v2-extras.routes',
+    auth: true,
+    roles: ['parent', 'guardian', 'admin', 'super_admin'],
+    phase: 'student',
+    description: 'Parent portal v2 extras — invoices/appointments/messages/devices',
+  },
   {
     path: '/api/chat-v2',
     file: 'routes/chat-v2.routes',

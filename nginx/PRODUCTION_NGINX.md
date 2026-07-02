@@ -22,6 +22,19 @@ live config changes (re-fetch: `ssh … 'cat /etc/nginx/sites-enabled/alawael'`)
    SW pinned a stale app shell → routes 404'd; the kill-switch that fixes it can
    only reach browsers if the SW script itself is `no-cache`).
 
+   **`/registerSW.js` is overridden to a cleanup shim (2026-07-02, W1611).** It
+   is `alias`ed to `/etc/nginx/overrides/registerSW.js` (snapshotted in this repo
+   at `nginx/overrides/registerSW.js`) instead of `try_files $uri`, so it
+   registers NO service worker and instead **unregisters any existing SW +
+   purges all caches** on load. WHY: the legacy frontend used to register a
+   root-scope (`scope:'/'`) SW that served the stale legacy shell for EVERY
+   navigation — including sibling apps `/rehab` and `/admin` — causing the
+   recurring "404 on most of the site". Deploy-proof (a frontend rebuild can't
+   revert nginx) and belt-and-suspenders with the source fix (W1611 removed all
+   3 SW-registration paths from `frontend/`) + the `/service-worker.js`
+   kill-switch. Old cached shells that still request `/registerSW.js` get the
+   cleanup; new shells no longer reference it.
+
 2. **`/etc/nginx/sites-enabled/` contains ONLY `alawael`.** nginx `include`s
    `sites-enabled/*` with **no extension filter**, so any `*.bak` file there is
    loaded as a **duplicate `server_name` block** that can shadow the live config
@@ -36,11 +49,15 @@ live config changes (re-fetch: `ssh … 'cat /etc/nginx/sites-enabled/alawael'`)
 ## Restore / apply on the server
 
 ```sh
+# the config aliases /registerSW.js to /etc/nginx/overrides/registerSW.js — copy it FIRST
+ssh root@72.60.84.56 'mkdir -p /etc/nginx/overrides'
+scp nginx/overrides/registerSW.js root@72.60.84.56:/etc/nginx/overrides/registerSW.js
 scp nginx/production-alawael.conf root@72.60.84.56:/etc/nginx/sites-enabled/alawael
 ssh root@72.60.84.56 'nginx -t && nginx -s reload'
 # verify:
-curl -sI https://alaweal.org/service-worker.js | grep -i cache-control   # -> no-cache
-ls /etc/nginx/sites-enabled/                                              # -> only "alawael"
+curl -sI https://alaweal.org/service-worker.js | grep -i cache-control      # -> no-cache
+curl -s  https://alaweal.org/registerSW.js       | grep -c CLEANUP           # -> 1 (cleanup shim)
+ls /etc/nginx/sites-enabled/                                                 # -> only "alawael"
 ```
 
 > Note: `ssl_certificate` / `ssl_certificate_key` are Let's Encrypt **paths**

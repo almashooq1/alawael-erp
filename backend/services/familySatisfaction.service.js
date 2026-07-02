@@ -202,8 +202,11 @@ class FamilySatisfactionService {
   /**
    * جلب استجابة واحدة بالتفاصيل
    */
-  static async getResponseById(id) {
-    return SurveyResponse.findOne({ _id: id, isDeleted: false })
+  static async getResponseById(id, branch) {
+    // W1618: scope by the caller's branch (null for cross-branch roles → no filter)
+    // so a restricted user can't read another branch's response (beneficiary name +
+    // nationalId). The model's tenancy field is `branch` (not branchId).
+    return SurveyResponse.findOne({ _id: id, isDeleted: false, ...(branch && { branch }) })
       .populate('template')
       .populate('beneficiary', 'name nationalId')
       .populate('followUp.assignedTo', 'name');

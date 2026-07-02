@@ -27,6 +27,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const CpeRecord = require('../models/CpeRecord');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 const Employee = require('../models/HR/Employee');
 const cpe = require('../services/cpeService');
 const safeError = require('../utils/safeError');
@@ -199,7 +200,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (denied) return;
 
     const row = await CpeRecord.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       category: String(category),
       creditHours: Number(creditHours),
       activityDate: new Date(activityDate),

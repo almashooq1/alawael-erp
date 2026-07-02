@@ -90,6 +90,57 @@ jobs:
           echo "Health check PASSED."
 
   # ═══════════════════════════════════════════════════════════════════
+  # sw_guard — runtime anti-regression for the stale-shell 404 class (W1611)
+  # Independent of `ping` on purpose: a failure here fails the run VISIBLY but
+  # does NOT trigger the incident-issue `notify` job (which needs `ping`), so it
+  # can't spam issues. The source has CI drift guards (W1586/W1611) and the repo
+  # has an nginx snapshot, but nothing verified these invariants at RUNTIME on
+  # prod — this closes that gap (the nginx `/registerSW.js` override + SW
+  # no-cache headers are edited on the server directly, outside the deploy).
+  # ═══════════════════════════════════════════════════════════════════
+  sw_guard:
+    name: SW / stale-shell anti-regression (runtime)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_URL: ${{ secrets.PROD_BASE_URL || 'https://alaweal.org' }}
+    steps:
+      - name: Assert the SW-404 fix still holds in prod
+        run: |
+          set -euo pipefail
+          echo "Base: $BASE_URL"
+          CURL="curl -fsSL --retry 2 --retry-delay 3 --max-time 30"
+
+          # (1) The app shell must NOT register a root-scope service worker. A
+          # `<script src="/registerSW.js">` tag (vite-plugin-pwa injectRegister)
+          # or an inline `serviceWorker.register` is the exact regression that
+          # served a stale legacy shell for every navigation → 404 on /rehab,
+          # /admin, etc. (W1611).
+          SHELL_HTML=$($CURL "$BASE_URL/")
+          if printf '%s' "$SHELL_HTML" | grep -qiE 'registerSW\.js|serviceWorker\.register'; then
+            echo "::error::REGRESSION — the app shell registers a service worker again (W1611 stale-shell 404 class)."
+            exit 1
+          fi
+          echo "OK: shell registers no service worker."
+
+          # (2) /registerSW.js must be the nginx cleanup shim (unregister + purge),
+          # not a real registration. Guards the deploy-proof nginx override.
+          if ! $CURL "$BASE_URL/registerSW.js" | grep -q 'CLEANUP'; then
+            echo "::error::REGRESSION — /registerSW.js is not the cleanup shim (nginx override reverted?)."
+            exit 1
+          fi
+          echo "OK: /registerSW.js is the cleanup shim."
+
+          # (3) SW scripts must be served no-cache so a bad SW can always be superseded.
+          if ! curl -fsSI --retry 2 --max-time 30 "$BASE_URL/service-worker.js" | grep -qi 'cache-control: *no-cache'; then
+            echo "::error::REGRESSION — /service-worker.js is not served no-cache."
+            exit 1
+          fi
+          echo "OK: /service-worker.js served no-cache."
+
+          echo "SW-404 anti-regression checks PASSED."
+
+  # ═══════════════════════════════════════════════════════════════════
   # notify — If health check failed, create an issue and send webhook
   # ═══════════════════════════════════════════════════════════════════
   notify:

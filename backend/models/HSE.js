@@ -122,6 +122,9 @@ const inspectionSchema = new mongoose.Schema(
     scheduledDate: { type: Date, required: true },
     completedDate: { type: Date },
     inspector: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // W1614 — branch tenancy (mirrors SafetyIncident): derived from the (required)
+    // inspector's User.branchId in the pre-save hook below so inspections are scopeable.
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     findings: [
       {
         description: String,
@@ -143,6 +146,18 @@ inspectionSchema.pre('validate', async function () {
   if (!this.inspectionNumber) {
     const count = await mongoose.model('SafetyInspection').countDocuments();
     this.inspectionNumber = `INSP-${String(count + 1).padStart(5, '0')}`;
+  }
+});
+
+// W1614 — denormalize branchId from the (required) inspector's User.branchId.
+inspectionSchema.pre('save', async function deriveBranchFromInspector() {
+  if (this.branchId || !this.inspector) return;
+  try {
+    const User = mongoose.model('User');
+    const u = await User.findById(this.inspector).select('branchId').lean();
+    if (u && u.branchId) this.branchId = u.branchId;
+  } catch (_e) {
+    /* best-effort denormalization */
   }
 });
 

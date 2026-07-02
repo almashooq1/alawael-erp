@@ -20,7 +20,7 @@ Periodic bundles also live in `OneDrive/المستندات/04-10-2025/_backups/*
 
 **Strategic direction (decided 2026-05-29, after a topology audit — full detail in [docs/MIGRATION_LEDGER.md](docs/MIGRATION_LEDGER.md)).** The system is **three layers**, not two:
 
-1. **`66666/backend`** (Express + Mongo) — the **live, canonical backend API**. 501 route files; serves every web-admin surface via `/api/v1` on port 3001.
+1. **`66666/backend`** (Express + Mongo) — the **live, canonical backend API**. 584 route files; serves every web-admin surface via `/api/v1` on port 3001.
 2. **`alawael-rehab-platform/apps/web-admin`** (Next.js) — the **live, go-forward UI** (~190 surfaces). Runs _on the 66666 API_ (`NEXT_PUBLIC_API_URL` → 66666).
 3. **`alawael-rehab-platform/services/*`** (NestJS + Prisma) — an **early V4 micro-services skeleton, ~5% built** (`core` = 20 modules; the other 16 service dirs are stubs/empty; no API gateway; port-collides with 66666 on 3001). **FROZEN** — the live UI does **not** consume it.
 
@@ -72,22 +72,22 @@ cd ../../alawael-rehab-platform/apps/web-admin && npm run lint
 cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 ```
 
-## Test surface map (as of 2026-05-26, re-counted)
+## Test surface map (as of 2026-07-02, re-counted)
 
-- `backend/__tests__/` — **792** .test.js files. Sprint enumeration covers **244** of these (251 total entries in `sprint-tests.txt`; remaining 7 are from `tests/` paths). _Previously claimed 523 + 103 sprint coverage (2026-05-19 snapshot); grew +269 files and +141 sprint entries since._
-- `backend/tests/` — **~31** .test.js files (non-unit subset of `tests/` = 1,414 total - 1,383 unit). Included via `roots:['__tests__','tests']` in jest.config.
-- `backend/tests/unit/` — **1,383** .test.js files. Auto-generated model/route/service smoke tests.
-- `frontend/src/__tests__/` — **1,303** .test.js files. ~11,094 tests. CI gates on full suite in both `ci.yml` (push) and `pr-checks.yml::frontend-tests` (PR).
+- `backend/__tests__/` — **1919** .test.js files (2026-07-02 re-count; was 792 on 2026-05-26). Sprint enumeration (`sprint-tests.txt`) now lists **~1209** `__tests__/` entries. _The surface roughly doubled across the 2026-06/07 hardening + auto-gen waves._
+- `backend/tests/` — **~36** .test.js files (non-unit subset of `tests/` = ~1376 total − 1340 unit). Included via `roots:['__tests__','tests']` in jest.config.
+- `backend/tests/unit/` — **1340** .test.js files. Auto-generated model/route/service smoke tests.
+- `frontend/src/__tests__/` — **1307** .test.js files. ~11,094 tests. CI gates on full suite in both `ci.yml` (push) and `pr-checks.yml::frontend-tests` (PR).
 - `alawael-rehab-platform/` — zero tests. Health = `npm run typecheck` + `npm run lint` only.
 
 **Re-count commands** (run on doc-truthing audits to verify these stay current):
 
 ```bash
-find backend/__tests__ -name "*.test.js" | wc -l            # ← 792
-grep -c "^__tests__/" backend/sprint-tests.txt              # ← 244
+find backend/__tests__ -name "*.test.js" | wc -l            # ← 1919 (2026-07-02)
+grep -c "^__tests__/" backend/sprint-tests.txt              # ← ~1209 (2026-07-02)
 find backend/tests -name "*.test.js" | wc -l                # ← 1414 (all tests/)
-find backend/tests/unit -name "*.test.js" | wc -l           # ← 1383
-find frontend/src/__tests__ -name "*.test.js" | wc -l       # ← 1303
+find backend/tests/unit -name "*.test.js" | wc -l           # ← 1340 (2026-07-02)
+find frontend/src/__tests__ -name "*.test.js" | wc -l       # ← 1307 (2026-07-02)
 ```
 
 **Skipped-tests audit (2026-05-21)**: full-tree sweep for `describe.skip` / `it.skip` / `test.skip` / `xdescribe` / `xit` / `xtest` patterns. Backend has **zero** real skips (W209 closed the last 13 in eStamp + eSignaturePdf). Frontend has **one** legitimately skipped suite (`frontend/tests/tests/DocumentList.component.test.js`) with a documented TODO — assertions target the pre-refactor inline-table component; new orchestrator-shape rewrite required, not a quick win. Mobile + web-admin have zero skips. **Heuristic**: when searching for `.skip(` patterns, anchor with `\b` or use `(describe|it|test)\.skip\(` — bare `xit\(` regex generates false positives from every `process.exit(` in the codebase.
@@ -226,7 +226,7 @@ Proven on W325c — **58 phantoms → 0 across ~12 waves** (W324 / W326 / W327+W
 
 ## Critical conventions
 
-- **Wave numbering**: features ship in numbered "Waves" (currently at **W521+** as of 2026-05-27 — re-verify with `git log -50 --oneline | grep -oE 'W[0-9]+' | sort -u | tail -5`; this CLAUDE.md snapshot has been stale by 60-300 waves multiple times — never trust it, always re-verify). Numbers are assigned at commit time — parallel sessions sometimes collide. Use `git log --oneline -20` to see the latest before claiming a number. **Wave-collision recipe** (proven 3× in 2026-05-27 Phase B session): rename file via `mv old.test.js new.test.js`, then `Edit replace_all` for `Wave NNN` / `WNNN` / `waveNNN` in all 3 source files (route + test + registry comment), then `npm run sync:sprint-paths`, then MANUALLY remove stale entries from `.github/workflows/sprint-tests.yml` (the auto-syncer only appends, never deletes). ~5 minutes once internalized.
+- **Wave numbering**: features ship in numbered "Waves" (currently at **W1612+** as of 2026-07-02 — re-verify with `git log -50 --oneline | grep -oE 'W[0-9]+' | sort -u | tail -5`; this CLAUDE.md snapshot has been stale by 60-300 waves multiple times — never trust it, always re-verify). Numbers are assigned at commit time — parallel sessions sometimes collide. Use `git log --oneline -20` to see the latest before claiming a number. **Wave-collision recipe** (proven 3× in 2026-05-27 Phase B session): rename file via `mv old.test.js new.test.js`, then `Edit replace_all` for `Wave NNN` / `WNNN` / `waveNNN` in all 3 source files (route + test + registry comment), then `npm run sync:sprint-paths`, then MANUALLY remove stale entries from `.github/workflows/sprint-tests.yml` (the auto-syncer only appends, never deletes). ~5 minutes once internalized.
 - **Atomic commit pattern**: stage + commit in ONE Bash call (`git add files && git commit -m "..."`) — separate `git add` then `git commit` calls have lost work to cross-agent races (Waves 131+134 absorbed into other sessions). See memory entries for W137/138/139 for the proven recipe.
 - **Wave-18 invariants**: every new Mongoose model must declare cross-field invariants via virtual paths (see `backend/intelligence/hash-chain.lib.js` callers for examples).
 - **Pair every static drift guard with a behavioral counterpart (W356-W384 lesson, proven 11×)**: regex-based static guards (read source as string, match `invalidate(/regex/)` patterns) catch source-text shape but NOT runtime behavior. A Wave-18 invariant whose regex looks right can still fail to fire if: (a) the conditional path is unreachable, (b) the enum value the test passes isn't actually in the schema (caught W358 `'speech_natural'` vs real `'speech'`), (c) a `required: true` on a referenced model is missed (caught W357 `reportedBy`), (d) mongoose schema option overrides the validator. **Recipe**: for every `__tests__/<module>-waveNNN.test.js` (static), add `__tests__/<module>-behavioral-waveNNN.test.js` (instantiate against `MongoMemoryServer`, call `.create()` + `.save()`, `await expect(p.save()).rejects.toThrow(/fieldName/)` per invariant + assert virtuals compute on persisted docs + assert defaults on round-trip + assert compound indexes exist). Template: copy `backend/__tests__/caregiver-support-program-behavioral-wave384.test.js`. **Both** files go into `sprint-tests.txt`. Combined W356-W384 series totals: 401 static + 249 behavioral = 650 assertions across 22 sprint suites in ~6s.

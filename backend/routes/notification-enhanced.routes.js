@@ -3,8 +3,16 @@
 const express = require('express');
 
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+
+// W1612 — management roles for notification-admin actions (approve/send org-wide
+// broadcasts + create/edit/delete notification templates). Before this, these
+// endpoints had `authenticate + requireBranchAccess` but NO role gate, so any
+// authenticated principal could self-approve + send a broadcast to every recipient
+// or rewrite notification templates. Drafting a broadcast stays open (the draft →
+// approve → send workflow keeps staff able to draft; only approval/send needs authority).
+const NOTIF_ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager'];
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
 const safeError = require('../utils/safeError');
@@ -29,7 +37,7 @@ router.get('/templates', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.post('/templates', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/templates', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.create({
@@ -53,7 +61,7 @@ router.get('/templates/:id', authenticate, requireBranchAccess, async (req, res)
   }
 });
 
-router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.put('/templates/:id', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.findByIdAndUpdate(
@@ -68,7 +76,7 @@ router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res)
   }
 });
 
-router.delete('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.delete('/templates/:id', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     await NotificationTemplate.findByIdAndUpdate(req.params.id, { isActive: false });
@@ -193,7 +201,7 @@ router.get('/broadcasts/:id', authenticate, requireBranchAccess, async (req, res
   }
 });
 
-router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const broadcast = await BroadcastMessage.findOneAndUpdate(
@@ -207,8 +215,16 @@ router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async 
   }
 });
 
-router.post('/broadcasts/:id/send', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/broadcasts/:id/send', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
+    // W1612 — verify the broadcast belongs to the caller's branch before sending
+    // (the service loads by id only; a restricted caller must not send another
+    // branch's broadcast to its recipients).
+    const BroadcastMessage = require('../models/BroadcastMessage');
+    const owned = await BroadcastMessage.findOne({ _id: req.params.id, ...branchFilter(req) })
+      .select('_id')
+      .lean();
+    if (!owned) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
     const result = await notifSvc.sendBroadcast(req.params.id);
     res.json({ success: true, data: result });
   } catch (err) {

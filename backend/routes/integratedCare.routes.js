@@ -5,6 +5,7 @@ const { requireBranchAccess, _branchFilter } = require('../middleware/branchScop
 const _logger = require('../utils/logger');
 const CarePlan = require('../models/CarePlan');
 const safeError = require('../utils/safeError');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -12,7 +13,7 @@ router.use(requireBranchAccess);
 router.post('/sessions', async (req, res) => {
   try {
     const TherapySession = require('../models/TherapySession');
-    const session = await TherapySession.create({ ...req.body, therapist: req.user?.id });
+    const session = await TherapySession.create({ ...stripApprovalAttribution(req.body), therapist: req.user?.id });
     res.status(201).json({ success: true, data: session, message: 'تم إنشاء الجلسة' });
   } catch (err) {
     safeError(res, err, 'Integrated care session error');
@@ -22,7 +23,7 @@ router.post('/sessions', async (req, res) => {
 // POST /plans
 router.post('/plans', async (req, res) => {
   try {
-    const plan = await CarePlan.create({ ...req.body, createdBy: req.user?.id });
+    const plan = await CarePlan.create({ ...stripApprovalAttribution(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data: plan, message: 'تم إنشاء خطة الرعاية' });
   } catch (err) {
     safeError(res, err, 'Care plan create error');

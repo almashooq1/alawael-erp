@@ -127,12 +127,53 @@ const stripProtectedFinanceFields = obj => {
   return clean;
 };
 
+/**
+ * Approval / signature / verification ATTRIBUTION fields — the "who did it and when" of a
+ * governance action (approved / signed / verified / reviewed / finalized / rejected). These are
+ * ALWAYS set server-side by the dedicated transition endpoint (POST /:id/approve etc.), never by
+ * a client-supplied create or update body. Spreading `...req.body` into `Model.create()` without
+ * stripping them lets a caller forge a record that is already "approved by X" / "signed by Y" —
+ * approval-workflow and clinical-signature forgery. Actor+time only (NOT `status` or the signature
+ * payload, which are context-dependent per model). W1614. Complements stripProtectedFinanceFields.
+ */
+const APPROVAL_ATTRIBUTION_FIELDS = new Set([
+  'approvedBy', 'approvedAt', 'approvedDate', 'approvalDate',
+  'rejectedBy', 'rejectedAt', 'rejectionDate',
+  'signedBy', 'signedAt', 'signedDate', 'signatureDate',
+  'verifiedBy', 'verifiedAt', 'verifiedDate', 'verificationDate',
+  'reviewedBy', 'reviewedAt', 'reviewedDate',
+  'finalizedBy', 'finalizedAt',
+  'endorsedBy', 'endorsedAt',
+  'witnessedBy', 'witnessedAt',
+  'closedBy', 'closedAt',
+  'lockedBy', 'lockedAt',
+]);
+
+/**
+ * Shallow-strip approval/signature/verification attribution fields from a user-supplied write
+ * body. Use at `Model.create({ ...stripApprovalAttribution(req.body), ... })` on any model whose
+ * approval/signature state is owned by a dedicated transition endpoint. Returns a cleaned copy;
+ * non-object input passes through unchanged. W1614.
+ * @param {object} obj - request body
+ * @returns {object} cleaned copy with attribution fields removed
+ */
+const stripApprovalAttribution = obj => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (!APPROVAL_ATTRIBUTION_FIELDS.has(key)) clean[key] = obj[key];
+  }
+  return clean;
+};
+
 module.exports = {
   escapeRegex,
   stripDangerousKeys,
   stripUpdateMeta,
   sanitizeMongoFilter,
   stripProtectedFinanceFields,
+  stripApprovalAttribution,
+  APPROVAL_ATTRIBUTION_FIELDS,
   DANGEROUS_KEYS,
   UPDATE_BLACKLIST,
   FINANCE_PROTECTED_FIELDS,

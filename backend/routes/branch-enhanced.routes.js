@@ -22,7 +22,7 @@ router.get('/compare', authenticate, requireBranchAccess, async (req, res) => {
 router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Branch = require('../models/Branch');
-    const branches = await Branch.find({ isActive: true }).select('-__v');
+    const branches = await Branch.find({ status: 'active' }).select('-__v');
     res.json({ success: true, data: branches });
   } catch (err) {
     safeError(res, err);

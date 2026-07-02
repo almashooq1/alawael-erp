@@ -1228,3 +1228,4 @@ __tests__/insurance-claim-status-forgery-wave1618.test.js
 __tests__/family-satisfaction-branch-idor-wave1618.test.js
 __tests__/query-field-drift-wave1620.test.js
 __tests__/query-field-drift-b2-wave1621.test.js
+__tests__/query-field-drift-b3-wave1622.test.js

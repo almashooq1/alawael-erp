@@ -1867,6 +1867,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/fleet-safety-branch-isolation-wave1607.test.js'
       - 'backend/__tests__/safety-protocol-branch-isolation-wave1606.test.js'
       - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
       - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
@@ -2209,6 +2210,8 @@ on:
       - 'backend/__tests__/early-intervention-create-massassign-wave1605.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-phase2b-isolation-wave1606.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/zatca-credentials-branch-isolation-wave1607.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/onboarding-branch-isolation-wave1608.test.js'
       - 'backend/package.json'
@@ -4056,6 +4059,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/fleet-safety-branch-isolation-wave1607.test.js'
       - 'backend/__tests__/safety-protocol-branch-isolation-wave1606.test.js'
       - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
       - 'backend/__tests__/research-study-branch-isolation-wave1602.test.js'
@@ -4397,6 +4401,8 @@ on:
       - 'backend/__tests__/early-intervention-create-massassign-wave1605.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/early-intervention-phase2b-isolation-wave1606.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/zatca-credentials-branch-isolation-wave1607.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/onboarding-branch-isolation-wave1608.test.js'
       - 'backend/package.json'

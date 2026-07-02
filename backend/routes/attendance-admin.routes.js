@@ -279,7 +279,7 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     delete body.sessionId;
     delete body.beneficiaryId;
     if (body.scheduledDate) body.scheduledDate = new Date(body.scheduledDate);
-    const row = await SessionAttendance.findByIdAndUpdate(req.params.id, body, {
+    const row = await SessionAttendance.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) }, body, {
       returnDocument: 'after',
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -295,7 +295,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SessionAttendance.findByIdAndDelete(req.params.id);
+    const row = await SessionAttendance.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

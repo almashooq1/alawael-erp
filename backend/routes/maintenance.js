@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
@@ -51,7 +51,8 @@ router.post('/requests', async (req, res) => {
 router.get('/requests/:id', async (req, res) => {
   try {
     const MaintenanceRequest = require('../models/Maintenance/MaintenanceRequest');
-    const request = await MaintenanceRequest.findById(req.params.id).lean();
+    // W1610: scope by branch so a restricted caller can't read another branch's request by id.
+    const request = await MaintenanceRequest.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
     if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
     res.json({ success: true, data: request });
   } catch (err) {
@@ -66,8 +67,8 @@ router.patch(
     try {
       const MaintenanceRequest = require('../models/Maintenance/MaintenanceRequest');
       const { technicianId, scheduledDate } = req.body;
-      const request = await MaintenanceRequest.findByIdAndUpdate(
-        req.params.id,
+      const request = await MaintenanceRequest.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         { status: 'assigned', technicianId, scheduledDate, assignedBy: req.user._id },
         { returnDocument: 'after' }
       );
@@ -83,8 +84,8 @@ router.patch('/requests/:id/complete', async (req, res) => {
   try {
     const MaintenanceRequest = require('../models/Maintenance/MaintenanceRequest');
     const { resolution, laborCost, partsCost, notes } = req.body;
-    const request = await MaintenanceRequest.findByIdAndUpdate(
-      req.params.id,
+    const request = await MaintenanceRequest.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         status: 'completed',
         resolution,

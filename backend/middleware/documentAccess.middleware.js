@@ -10,6 +10,7 @@ const mongoose = require('mongoose');
 const Document = require('../models/Document');
 const documentACLService = require('../services/documents/documentACL.service');
 const { DocumentShareAccessLog } = require('../services/documents/documentSharing.service');
+const { assertBeneficiaryInScope } = require('./assertBranchMatch');
 
 const ACTIONS = ['view', 'download', 'edit', 'share', 'delete'];
 
@@ -73,6 +74,16 @@ function requireDocumentAccess(action = 'view', options = {}) {
         // For now, allow if user has a relevant role (modules can refine)
         const allowedRoles = ['admin', 'superadmin', 'super_admin', 'manager'];
         if (allowedRoles.includes(req.user?.role)) {
+          // W1610 — SECURITY: `Document` has no branchId, so this role-only fallback
+          // previously let a branch-RESTRICTED admin/manager reach ANOTHER branch's
+          // beneficiary-linked PHI (medical reports, consent forms, ID scans). For
+          // Beneficiary-linked docs, derive the branch from the linked Beneficiary and
+          // deny cross-branch restricted callers; unrestricted / cross-branch roles
+          // still pass (assertBeneficiaryInScope → enforceBeneficiaryBranch honors that).
+          if (doc.entityType === 'Beneficiary') {
+            const denied = await assertBeneficiaryInScope(req, doc.entityId, res);
+            if (denied) return; // 403 already written to res
+          }
           req.document = doc;
           return next();
         }

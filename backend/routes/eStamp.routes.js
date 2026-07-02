@@ -31,7 +31,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripApprovalAttribution } = require('../utils/sanitize');
 const _validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
 
@@ -293,7 +293,7 @@ router.post('/', async (req, res) => {
     const verificationSecret = require('crypto').randomBytes(16).toString('hex');
 
     const stamp = new EStamp({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       stampId,
       verificationSecret,
       createdBy: req.user?._id || req.user?.id,

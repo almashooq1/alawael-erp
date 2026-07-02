@@ -3,7 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/branches/branch-enhanced.service');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // مقارنة أداء الفروع
@@ -71,7 +71,7 @@ router.post('/transfers', authenticate, requireBranchAccess, async (req, res) =>
   try {
     const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
     const transfer = await BeneficiaryTransfer.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       requestedBy: req.user._id,
       status: 'pending',
     });

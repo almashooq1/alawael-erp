@@ -611,9 +611,11 @@ function createSocialCaseService({
 
   // ── Reads ──────────────────────────────────────────────────────
 
-  async function findById(id) {
+  async function findById(id, branchId) {
     const doc = await caseModel.findById(id);
     if (!doc || doc.deleted_at) return null;
+    // W1622: deny a foreign-branch case (null branchId = cross-branch role → allowed).
+    if (branchId && doc.branchId && String(doc.branchId) !== String(branchId)) return null;
     return doc;
   }
 

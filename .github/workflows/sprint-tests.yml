@@ -2250,6 +2250,8 @@ on:
       - 'backend/__tests__/query-field-drift-b2-wave1621.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/field-training-list-branch-isolation-wave1622.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/social-case-branch-idor-wave1622.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4477,6 +4479,8 @@ on:
       - 'backend/__tests__/query-field-drift-b2-wave1621.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/field-training-list-branch-isolation-wave1622.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/social-case-branch-idor-wave1622.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

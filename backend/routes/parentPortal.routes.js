@@ -452,10 +452,10 @@ router.get('/children/:id/sessions', async (req, res) => {
     let sessions = [];
     let total = 0;
     try {
-      const Session = require('../models/Session');
-      total = await Session.countDocuments({ beneficiaryId: req.params.id });
-      sessions = await Session.find({ beneficiaryId: req.params.id })
-        .sort({ sessionDate: -1 })
+      const TherapySession = require('../models/TherapySession');
+      total = await TherapySession.countDocuments({ beneficiary: req.params.id });
+      sessions = await TherapySession.find({ beneficiary: req.params.id })
+        .sort({ date: -1 })
         .skip(skip)
         .limit(limit)
         

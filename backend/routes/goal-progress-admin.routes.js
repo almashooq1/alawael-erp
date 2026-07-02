@@ -25,7 +25,7 @@ const GoalProgressEntry = require('../models/GoalProgressEntry');
 const Beneficiary = require('../models/Beneficiary');
 const gp = require('../services/goalProgressService');
 const safeError = require('../utils/safeError');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { bodyScopedBeneficiaryGuard, assertBeneficiaryInScope } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
@@ -113,6 +113,9 @@ router.get('/beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // W1611: GoalProgressEntry has no branchId — isolate via the beneficiary's branch.
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const items = await GoalProgressEntry.find({ beneficiaryId: req.params.id }).lean();
     const summary = gp.summarizeByBeneficiary(items);
     const byGoal = gp.groupByGoal(items);
@@ -198,6 +201,11 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.goalId;
     delete body.beneficiaryId;
     if (body.progressPercent != null) body.progressPercent = Number(body.progressPercent);
+    // W1611: verify the entry's beneficiary is in the caller's branch before modifying it.
+    const existing = await GoalProgressEntry.findById(req.params.id).select('beneficiaryId');
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     const row = await GoalProgressEntry.findByIdAndUpdate(req.params.id, body, {
       returnDocument: 'after',
     });
@@ -212,6 +220,11 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // W1611: verify the entry's beneficiary is in the caller's branch before deleting it.
+    const existing = await GoalProgressEntry.findById(req.params.id).select('beneficiaryId');
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiaryId, res);
+    if (denied) return;
     const row = await GoalProgressEntry.findByIdAndDelete(req.params.id);
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });

@@ -2219,6 +2219,8 @@ on:
       - 'backend/__tests__/backfill-ei-branch-wave1608.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-beneficiary-branch-wave1610.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-progress-beneficiary-scope-wave1611.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4415,6 +4417,8 @@ on:
       - 'backend/__tests__/backfill-ei-branch-wave1608.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-beneficiary-branch-wave1610.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/goal-progress-beneficiary-scope-wave1611.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

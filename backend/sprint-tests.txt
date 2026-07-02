@@ -1210,3 +1210,4 @@ __tests__/onboarding-branch-isolation-wave1608.test.js
 __tests__/backfill-ei-branch-wave1608.test.js
 __tests__/hr-modules-create-massassign-wave1609.test.js
 __tests__/document-access-beneficiary-branch-wave1610.test.js
+__tests__/goal-progress-beneficiary-scope-wave1611.test.js

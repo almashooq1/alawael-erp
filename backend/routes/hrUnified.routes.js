@@ -21,7 +21,7 @@ router.get('/dashboard', authorize('admin', 'hr_manager', 'manager'), async (req
     const [totalActive, newThisMonth, byDepartment, byJobType] = await Promise.all([
       Employee.countDocuments({ status: 'active' }),
       Employee.countDocuments({
-        joinDate: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+        hire_date: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
       }),
       Employee.aggregate([
         { $match: { status: 'active' } },
@@ -90,8 +90,8 @@ router.get('/reports/turnover', authorize('admin', 'hr_manager'), async (req, re
     const start = new Date(+year, 0, 1);
     const end = new Date(+year, 11, 31);
     const [terminated, hired] = await Promise.all([
-      Employee.countDocuments({ terminationDate: { $gte: start, $lte: end } }),
-      Employee.countDocuments({ joinDate: { $gte: start, $lte: end } }),
+      Employee.countDocuments({ termination_date: { $gte: start, $lte: end } }),
+      Employee.countDocuments({ hire_date: { $gte: start, $lte: end } }),
     ]);
     res.json({ success: true, data: { year: +year, hired, terminated, net: hired - terminated } });
   } catch (err) {

@@ -491,7 +491,7 @@ router.post('/mobile-checkin', async (req, res) => {
 
     // الحصول على الموظف من المستخدم الحالي
     const Employee = require('../models/HR/Employee');
-    const employee = await Employee.findOne({ userId: req.user?._id });
+    const employee = await Employee.findOne({ user_id: req.user?._id });
     if (!employee) return res.status(404).json({ success: false, message: 'سجل الموظف غير موجود' });
 
     // التحقق من النطاق الجغرافي

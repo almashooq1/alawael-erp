@@ -29,7 +29,7 @@ router.use(requireBranchAccess);
 // is employeeId → Employee._id. Resolve the caller's Employee record once;
 // the user-id fallbacks keep any legacy rows readable.
 async function resolveLeaveIdentity(req) {
-  const employee = await Employee.findOne({ userId: req.user.id })
+  const employee = await Employee.findOne({ user_id: req.user.id })
     .select('_id branchId name department')
     .lean();
   const ids = [employee && employee._id, req.user._id, req.user.id].filter(Boolean);
@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
 // ─── Get profile ─────────────────────────────────────────────────────────────
 router.get('/profile', async (req, res) => {
   try {
-    const employee = await Employee.findOne({ userId: req.user.id }).lean();
+    const employee = await Employee.findOne({ user_id: req.user.id }).lean();
     if (!employee) {
       return res.json({
         success: true,
@@ -90,7 +90,7 @@ router.put('/profile', async (req, res) => {
     allowed.forEach(f => {
       if (req.body[f] !== undefined) updates[f] = req.body[f];
     });
-    const employee = await Employee.findOneAndUpdate({ userId: req.user.id }, updates, {
+    const employee = await Employee.findOneAndUpdate({ user_id: req.user.id }, updates, {
       returnDocument: 'after',
       upsert: false,
     }).lean();

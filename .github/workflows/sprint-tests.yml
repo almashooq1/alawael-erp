@@ -2242,6 +2242,8 @@ on:
       - 'backend/__tests__/insurance-claim-status-forgery-wave1618.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/family-satisfaction-branch-idor-wave1618.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/query-field-drift-wave1620.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4461,6 +4463,8 @@ on:
       - 'backend/__tests__/insurance-claim-status-forgery-wave1618.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/family-satisfaction-branch-idor-wave1618.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/query-field-drift-wave1620.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

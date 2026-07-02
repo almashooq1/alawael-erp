@@ -14,8 +14,8 @@ router.get('/stats', async (req, res) => {
   try {
     const [total, sent, received] = await Promise.all([
       Communication.countDocuments(),
-      Communication.countDocuments({ direction: 'outgoing' }),
-      Communication.countDocuments({ direction: 'incoming' }),
+      Communication.countDocuments({ type: 'outgoing' }),
+      Communication.countDocuments({ type: 'incoming' }),
     ]);
     res.json({ success: true, data: { total, sent, received, pending: 0 } });
   } catch (err) {

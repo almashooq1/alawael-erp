@@ -1216,3 +1216,4 @@ __tests__/document-access-beneficiary-branch-wave1610.test.js
 __tests__/write-idor-branch-scope-wave1610.test.js
 __tests__/notification-broadcast-authz-wave1612.test.js
 __tests__/mass-assign-attribution-wave1614.test.js
+__tests__/biometric-write-idor-wave1612.test.js

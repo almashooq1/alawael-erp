@@ -626,7 +626,7 @@ router.post(
         .lean(),
       Appointment.find({
         branch_id,
-        appointment_date: { $gte: weekStartDate, $lte: weekEnd },
+        date: { $gte: weekStartDate, $lte: weekEnd },
         status: { $ne: 'cancelled' },
       }).lean(),
       User
@@ -703,7 +703,7 @@ router.post(
         .lean(),
       Appointment.find({
         branch_id,
-        appointment_date: { $gte: weekStartDate, $lte: weekEnd },
+        date: { $gte: weekStartDate, $lte: weekEnd },
         status: { $ne: 'cancelled' },
       }).lean(),
       User
@@ -1039,7 +1039,7 @@ async function buildFinancialPrediction(branchId) {
 
     const scheduledNextMonth = await Appointment.countDocuments({
       ...branchFilter,
-      appointment_date: { $gte: nextMonthStart, $lte: nextMonthEnd },
+      date: { $gte: nextMonthStart, $lte: nextMonthEnd },
       status: { $ne: 'cancelled' },
     });
 

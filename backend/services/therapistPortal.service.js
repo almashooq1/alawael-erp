@@ -2031,24 +2031,33 @@ class TherapistPortalService {
 
   // ─── Equipment (booking) ─────────────────────────────────────────────────
 
-  async getEquipment(_therapistId) {
+  // W1613 — TherapyEquipment carries a `branch` field but it was NEVER consulted:
+  // getEquipment listed EVERY branch's equipment (cross-branch read leak), and each :id op
+  // did a bare findById → cross-branch book/return/update/delete. `branchScope` =
+  // effectiveBranchScope(req) (own branch for restricted callers; null → all for cross-branch/HQ).
+  // Reuses _branchQ (returns {branch: scope} | {}).
+  async getEquipment(_therapistId, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.find({ deletedAt: null }).sort({ name: 1 });
+    return TherapyEquipment.find({ deletedAt: null, ...this._branchQ(branchScope) }).sort({ name: 1 });
   }
 
-  async createEquipment(data) {
+  async createEquipment(data, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.create(data);
+    return TherapyEquipment.create({ ...data, branch: branchScope || data.branch || null });
   }
 
-  async updateEquipment(id, patch) {
+  async updateEquipment(id, patch, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
+    const clean = { ...(patch || {}) };
+    delete clean.branch; // no re-home
+    return TherapyEquipment.findOneAndUpdate({ _id: id, ...this._branchQ(branchScope) }, clean, {
+      returnDocument: 'after',
+    });
   }
 
-  async bookEquipment(id, bookedBy, until) {
+  async bookEquipment(id, bookedBy, until, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    const eq = await TherapyEquipment.findById(id);
+    const eq = await TherapyEquipment.findOne({ _id: id, ...this._branchQ(branchScope) });
     if (!eq) return null;
     if (eq.status !== 'available') {
       throw Object.assign(new Error('equipment not available'), { status: 400 });
@@ -2065,9 +2074,9 @@ class TherapistPortalService {
     return eq;
   }
 
-  async returnEquipment(id) {
+  async returnEquipment(id, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    const eq = await TherapyEquipment.findById(id);
+    const eq = await TherapyEquipment.findOne({ _id: id, ...this._branchQ(branchScope) });
     if (!eq) return null;
     const open = eq.bookings.find(b => !b.returnedAt);
     if (open) open.returnedAt = new Date();
@@ -2077,10 +2086,10 @@ class TherapistPortalService {
     return eq;
   }
 
-  async deleteEquipment(id) {
+  async deleteEquipment(id, branchScope) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.findByIdAndUpdate(
-      id,
+    return TherapyEquipment.findOneAndUpdate(
+      { _id: id, ...this._branchQ(branchScope) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );

@@ -126,7 +126,7 @@ router.delete(
 router.get(
   '/equipment',
   wrap(async (req, res) => {
-    const data = await svc.getEquipment(req.user.id);
+    const data = await svc.getEquipment(req.user.id, effectiveBranchScope(req)); // W1613
     res.json({ success: true, data });
   })
 );
@@ -134,7 +134,7 @@ router.get(
 router.post(
   '/equipment',
   wrap(async (req, res) => {
-    const data = await svc.createEquipment(req.body);
+    const data = await svc.createEquipment(req.body, effectiveBranchScope(req)); // W1613
     res.status(201).json({ success: true, data });
   })
 );
@@ -142,7 +142,7 @@ router.post(
 router.put(
   '/equipment/:id',
   wrap(async (req, res) => {
-    const data = await svc.updateEquipment(req.params.id, req.body);
+    const data = await svc.updateEquipment(req.params.id, req.body, effectiveBranchScope(req)); // W1613
     res.json({ success: true, data });
   })
 );
@@ -150,7 +150,7 @@ router.put(
 router.patch(
   '/equipment/:id/book',
   wrap(async (req, res) => {
-    const data = await svc.bookEquipment(req.params.id, req.body.therapistName, req.body.until);
+    const data = await svc.bookEquipment(req.params.id, req.body.therapistName, req.body.until, effectiveBranchScope(req)); // W1613
     res.json({ success: true, data });
   })
 );
@@ -158,7 +158,7 @@ router.patch(
 router.patch(
   '/equipment/:id/return',
   wrap(async (req, res) => {
-    const data = await svc.returnEquipment(req.params.id);
+    const data = await svc.returnEquipment(req.params.id, effectiveBranchScope(req)); // W1613
     res.json({ success: true, data });
   })
 );
@@ -166,7 +166,7 @@ router.patch(
 router.delete(
   '/equipment/:id',
   wrap(async (req, res) => {
-    const data = await svc.deleteEquipment(req.params.id);
+    const data = await svc.deleteEquipment(req.params.id, effectiveBranchScope(req)); // W1613
     res.json({ success: true, data });
   })
 );

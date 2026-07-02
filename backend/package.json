@@ -34,6 +34,8 @@
     "seed:forms-catalog:dry": "node scripts/seed-forms-catalog.js --dry-run",
     "seed:forms-catalog:reset": "node scripts/seed-forms-catalog.js --reset",
     "seed:rag-policies": "node scripts/seed-rag-policies.js",
+    "backfill:ei-branch": "node scripts/backfill-ei-branch.js",
+    "backfill:ei-branch:apply": "node scripts/backfill-ei-branch.js --apply",
     "smoke:careplan": "node scripts/smoke-careplan-chain.js",
     "smoke:launch-spine": "node scripts/smoke-launch-spine.js",
     "smoke:clinical-spine": "node scripts/smoke-clinical-spine.js",

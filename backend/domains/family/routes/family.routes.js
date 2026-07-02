@@ -85,6 +85,24 @@ function stripFields(body, fields) {
   return clean;
 }
 
+// W1607 (REVIEW) — portal-role guard on the STAFF family-member admin surface. Guardians
+// use the SEPARATE parent-portal API (parent-portal-v1.routes.js: authenticate +
+// requireRole('guardian')) but share the same `authenticate` middleware, and these member
+// endpoints have NO requireRole — so a role:guardian caller with a branchId passes
+// requireBranchAccess and could POST /members with isLegalGuardian:true to SELF-DESIGNATE
+// legal-guardian authority (grants consent add/revoke). portalAccess is already stripped
+// (W1581); this refuses portal-role callers on the member writes. Staff roles unaffected.
+const PORTAL_ROLES = new Set(['guardian', 'beneficiary', 'parent', 'family']);
+function denyPortalRoles(req, res, next) {
+  const role = String(req.user && req.user.role ? req.user.role : '').toLowerCase();
+  if (PORTAL_ROLES.has(role)) {
+    return res
+      .status(403)
+      .json({ success: false, message: 'staff only: family-member management' });
+  }
+  return next();
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Family Members
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -92,6 +110,7 @@ function stripFields(body, fields) {
 /** POST /members — إضافة فرد أسرة */
 router.post(
   '/members',
+  denyPortalRoles,
   validate(validateAddFamilyMember),
   asyncHandler(async (req, res) => {
     const data = await familyService.addFamilyMember({
@@ -117,6 +136,7 @@ router.get(
 // ownership hook fires.
 router.put(
   '/members/:memberId',
+  denyPortalRoles,
   validate(validateUpdateFamilyMember),
   asyncHandler(async (req, res) => {
     const data = await familyService.updateFamilyMember(

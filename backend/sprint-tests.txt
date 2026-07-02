@@ -283,6 +283,7 @@ __tests__/complaints-analytics-service.test.js
 __tests__/complaints-digest-script.test.js
 __tests__/complaints-normalize-bridge-reconcile-wave940.test.js
 __tests__/complaints-routes-behavioral-wave866.test.js
+__tests__/complaints-write-branch-scope-wave1615.test.js
 __tests__/conflict-resolver-api-wave276b.test.js
 __tests__/consent-granted-core-linkage-wave1087.test.js
 __tests__/contract-management-branch-isolation-wave886.test.js

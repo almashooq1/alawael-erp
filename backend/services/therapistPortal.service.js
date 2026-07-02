@@ -1907,6 +1907,11 @@ class TherapistPortalService {
 
   // ─── Referrals (consumed by routes/therapistUltra.routes.js) ─────────────
 
+  // W1615 — TherapyGroup keys on `branchId` (camel); Referral/KPI/Equipment use `branch`.
+  _branchIdQ(branchScope) {
+    return branchScope ? { branchId: branchScope } : {};
+  }
+
   async getReferrals(therapistId) {
     const TherapyReferral = require('../models/TherapyReferral');
     return TherapyReferral.find({
@@ -1915,33 +1920,45 @@ class TherapistPortalService {
     }).sort({ createdAt: -1 });
   }
 
-  async createReferral(data, therapistId) {
+  async createReferral(data, therapistId, branchScope) {
     const TherapyReferral = require('../models/TherapyReferral');
     const year = new Date().getFullYear();
     const count = await TherapyReferral.countDocuments({
       referralNumber: { $regex: `^REF-${year}` },
     });
     const referralNumber = `REF-${year}-${String(count + 1).padStart(5, '0')}`;
-    return TherapyReferral.create({ ...data, referrer: therapistId, referralNumber });
+    // W1615 — stamp branch from the caller (restricted → own; HQ → body). Referral uses `branch`.
+    return TherapyReferral.create({
+      ...data,
+      referrer: therapistId,
+      referralNumber,
+      branch: branchScope || data.branch || null,
+    });
   }
 
-  async updateReferral(id, patch) {
+  async updateReferral(id, patch, branchScope) {
     const TherapyReferral = require('../models/TherapyReferral');
-    return TherapyReferral.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
+    const clean = { ...(patch || {}) };
+    delete clean.branch; // W1615 — no re-home
+    return TherapyReferral.findOneAndUpdate({ _id: id, ...this._branchQ(branchScope) }, clean, {
+      returnDocument: 'after',
+    });
   }
 
-  async updateReferralStatus(id, status) {
+  async updateReferralStatus(id, status, branchScope) {
     const TherapyReferral = require('../models/TherapyReferral');
     const update = { status };
     if (status === 'accepted' || status === 'declined') update.respondedAt = new Date();
     if (status === 'completed') update.completedAt = new Date();
-    return TherapyReferral.findByIdAndUpdate(id, update, { returnDocument: 'after' });
+    return TherapyReferral.findOneAndUpdate({ _id: id, ...this._branchQ(branchScope) }, update, {
+      returnDocument: 'after',
+    });
   }
 
-  async deleteReferral(id) {
+  async deleteReferral(id, branchScope) {
     const TherapyReferral = require('../models/TherapyReferral');
-    return TherapyReferral.findByIdAndUpdate(
-      id,
+    return TherapyReferral.findOneAndUpdate(
+      { _id: id, ...this._branchQ(branchScope) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -1957,7 +1974,7 @@ class TherapistPortalService {
     }).sort({ createdAt: -1 });
   }
 
-  async createGroup(data, therapistId) {
+  async createGroup(data, therapistId, branchScope) {
     const TherapyGroup = require('../models/TherapyGroup');
     // W930 — the web-admin form posts `name` (no `nameAr`) and no `type`, but the
     // model requires both → every create threw a ValidationError (500, "data not
@@ -1985,20 +2002,26 @@ class TherapistPortalService {
     if (!payload.type || !TYPE_ENUM.has(payload.type)) {
       payload.type = TYPE_ENUM.has(payload.focus) ? payload.focus : 'mixed';
     }
+    // W1615 — stamp branchId from the caller (TherapyGroup keys on `branchId`).
+    payload.branchId = branchScope || payload.branchId || null;
     return TherapyGroup.create(payload);
   }
 
-  async updateGroup(id, patch) {
+  async updateGroup(id, patch, branchScope) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
+    const clean = { ...(patch || {}) };
+    delete clean.branchId; // W1615 — no re-home
+    return TherapyGroup.findOneAndUpdate({ _id: id, ...this._branchIdQ(branchScope) }, clean, {
+      returnDocument: 'after',
+    });
   }
 
-  async addParticipant(groupId, payload) {
+  async addParticipant(groupId, payload, branchScope) {
     const TherapyGroup = require('../models/TherapyGroup');
     if (!payload?.beneficiary) {
       throw Object.assign(new Error('beneficiary required'), { status: 400 });
     }
-    const group = await TherapyGroup.findById(groupId);
+    const group = await TherapyGroup.findOne({ _id: groupId, ...this._branchIdQ(branchScope) });
     if (!group) return null;
     if (group.participants.some(p => String(p.beneficiary) === String(payload.beneficiary))) {
       throw Object.assign(new Error('beneficiary already in group'), { status: 400 });
@@ -2011,19 +2034,19 @@ class TherapistPortalService {
     return group;
   }
 
-  async removeParticipant(groupId, participantId) {
+  async removeParticipant(groupId, participantId, branchScope) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(
-      groupId,
+    return TherapyGroup.findOneAndUpdate(
+      { _id: groupId, ...this._branchIdQ(branchScope) },
       { $pull: { participants: { beneficiary: participantId } } },
       { returnDocument: 'after' }
     );
   }
 
-  async deleteGroup(id) {
+  async deleteGroup(id, branchScope) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(
-      id,
+    return TherapyGroup.findOneAndUpdate(
+      { _id: id, ...this._branchIdQ(branchScope) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -2102,17 +2125,22 @@ class TherapistPortalService {
     return TherapyCustomKPI.find({ therapist: therapistId, deletedAt: null }).sort({ name: 1 });
   }
 
-  async createCustomKPI(data, therapistId) {
+  async createCustomKPI(data, therapistId, branchScope) {
     const TherapyCustomKPI = require('../models/TherapyCustomKPI');
-    return TherapyCustomKPI.create({ ...data, therapist: therapistId });
+    // W1615 — stamp branch from the caller (KPI uses `branch`).
+    return TherapyCustomKPI.create({
+      ...data,
+      therapist: therapistId,
+      branch: branchScope || data.branch || null,
+    });
   }
 
-  async updateKPI(id, patch) {
+  async updateKPI(id, patch, branchScope) {
     const TherapyCustomKPI = require('../models/TherapyCustomKPI');
     // Treat measurement add as a special case so the parent currentValue
     // stays in sync without forcing the caller to pass both fields.
     if (patch.measurement) {
-      const kpi = await TherapyCustomKPI.findById(id);
+      const kpi = await TherapyCustomKPI.findOne({ _id: id, ...this._branchQ(branchScope) });
       if (!kpi) return null;
       kpi.measurements.push({
         date: patch.measurement.date ? new Date(patch.measurement.date) : new Date(),
@@ -2123,13 +2151,17 @@ class TherapistPortalService {
       await kpi.save();
       return kpi;
     }
-    return TherapyCustomKPI.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
+    const clean = { ...(patch || {}) };
+    delete clean.branch; // W1615 — no re-home
+    return TherapyCustomKPI.findOneAndUpdate({ _id: id, ...this._branchQ(branchScope) }, clean, {
+      returnDocument: 'after',
+    });
   }
 
-  async deleteKPI(id) {
+  async deleteKPI(id, branchScope) {
     const TherapyCustomKPI = require('../models/TherapyCustomKPI');
-    return TherapyCustomKPI.findByIdAndUpdate(
-      id,
+    return TherapyCustomKPI.findOneAndUpdate(
+      { _id: id, ...this._branchQ(branchScope) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );

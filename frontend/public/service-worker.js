@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-restricted-globals */
 /**
  * KILL-SWITCH service worker.
  *

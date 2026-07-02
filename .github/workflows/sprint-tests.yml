@@ -1868,6 +1868,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/capa-producers-branch-isolation-wave1616.test.js'
       - 'backend/__tests__/therapist-portal-referral-group-kpi-branch-isolation-wave1615.test.js'
       - 'backend/__tests__/hse-safety-inspection-branch-isolation-wave1614.test.js'
       - 'backend/__tests__/therapy-equipment-branch-isolation-wave1613.test.js'
@@ -2228,9 +2229,13 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notification-broadcast-authz-wave1612.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-write-branch-scope-wave1615.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mass-assign-attribution-wave1614.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/biometric-write-idor-wave1612.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/create-attribution-wave1616.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/attribution-sweep-wave1617.test.js'
       - 'backend/package.json'
@@ -4079,6 +4084,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/capa-producers-branch-isolation-wave1616.test.js'
       - 'backend/__tests__/therapist-portal-referral-group-kpi-branch-isolation-wave1615.test.js'
       - 'backend/__tests__/hse-safety-inspection-branch-isolation-wave1614.test.js'
       - 'backend/__tests__/therapy-equipment-branch-isolation-wave1613.test.js'
@@ -4438,9 +4444,13 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/notification-broadcast-authz-wave1612.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaints-write-branch-scope-wave1615.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mass-assign-attribution-wave1614.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/biometric-write-idor-wave1612.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/create-attribution-wave1616.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/attribution-sweep-wave1617.test.js'
       - 'backend/package.json'

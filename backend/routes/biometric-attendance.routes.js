@@ -49,7 +49,7 @@ const OvertimeRequest = require('../models/OvertimeRequest');
 
 const zktecoSdk = require('../services/zktecoSdk.service');
 const attendanceProcessing = require('../services/attendanceProcessing.service');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -584,7 +584,7 @@ router.get('/overtime', async (req, res) => {
 router.post('/overtime', async (req, res) => {
   try {
     const overtime = await OvertimeRequest.create({
-      ...stripUpdateMeta(req.body),
+      ...stripApprovalAttribution(stripUpdateMeta(req.body)),
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: overtime });

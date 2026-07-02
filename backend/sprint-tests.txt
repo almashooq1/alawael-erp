@@ -155,6 +155,7 @@ __tests__/branch-config-mfa-service-layer-wave275f.test.js
 __tests__/branch-denial-audit-c4.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-community-service-wave1445.test.js
+__tests__/capa-producers-branch-isolation-wave1616.test.js
 __tests__/therapist-portal-referral-group-kpi-branch-isolation-wave1615.test.js
 __tests__/hse-safety-inspection-branch-isolation-wave1614.test.js
 __tests__/therapy-equipment-branch-isolation-wave1613.test.js
@@ -286,6 +287,7 @@ __tests__/complaints-analytics-service.test.js
 __tests__/complaints-digest-script.test.js
 __tests__/complaints-normalize-bridge-reconcile-wave940.test.js
 __tests__/complaints-routes-behavioral-wave866.test.js
+__tests__/complaints-write-branch-scope-wave1615.test.js
 __tests__/conflict-resolver-api-wave276b.test.js
 __tests__/consent-granted-core-linkage-wave1087.test.js
 __tests__/contract-management-branch-isolation-wave886.test.js
@@ -1218,4 +1220,5 @@ __tests__/write-idor-branch-scope-wave1610.test.js
 __tests__/notification-broadcast-authz-wave1612.test.js
 __tests__/mass-assign-attribution-wave1614.test.js
 __tests__/biometric-write-idor-wave1612.test.js
+__tests__/create-attribution-wave1616.test.js
 __tests__/attribution-sweep-wave1617.test.js

@@ -15,6 +15,7 @@ const mongoose = require('mongoose');
 const { authenticateToken } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const {
   JobPosting,
   Candidate,
@@ -41,6 +42,21 @@ const {
 } = require('../models/EnterpriseProPlus');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
+
+// W1609 — EHS tenant isolation. The 4 EHS models (SafetyIncident/Inspection/HazardRegister/
+// PPERecord) gained a `branchId` field this wave; these routes now scope every EHS query with
+// branchFilter(req) and stamp branchId on create. `stripEhs` blocks caller-spoofable branch /
+// identity-number / reporter fields on create+update so an EHS record can't be re-homed to
+// another branch. (Only the /ehs/* handlers are touched; other EnterpriseProPlus surfaces are
+// out of scope for this wave.)
+const EHS_STRIP = [
+  'branchId', 'incidentNumber', 'inspectionNumber', 'hazardId', 'reportedBy', 'inspector',
+];
+const stripEhs = body => {
+  const b = stripUpdateMeta(body || {});
+  for (const k of EHS_STRIP) delete b[k];
+  return b;
+};
 
 // Helper
 const _oid = id => new mongoose.Types.ObjectId(id);
@@ -1017,7 +1033,7 @@ router.put(
 router.get('/ehs/incidents', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, severity, type, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1609 — restricted → own branch only
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
     if (type) filter.type = type;
@@ -1043,9 +1059,10 @@ router.post('/ehs/incidents', authenticateToken, requireBranchAccess, async (req
   try {
     const count = await SafetyIncident.countDocuments();
     const doc = await SafetyIncident.create({
-      ...req.body,
+      ...stripEhs(req.body), // W1609 — block branch/identity spoof
       incidentNumber: `SI-${Date.now()}-${count + 1}`,
       reportedBy: req.user?.id,
+      branchId: effectiveBranchScope(req) || req.body.branchId || null,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -1055,7 +1072,7 @@ router.post('/ehs/incidents', authenticateToken, requireBranchAccess, async (req
 
 router.get('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await SafetyIncident.findById(req.params.id)
+    const doc = await SafetyIncident.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('reportedBy', 'name')
       .populate('investigator', 'name')
       .lean();
@@ -1068,9 +1085,11 @@ router.get('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (
 
 router.put('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-    });
+    const doc = await SafetyIncident.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripEhs(req.body),
+      { returnDocument: 'after' }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1116,7 +1135,7 @@ router.get(
 router.get('/ehs/inspections', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, facility } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1609 — restricted → own branch only
     if (status) filter.status = status;
     if (facility) filter.facility = facility;
     const data = await SafetyInspection.find(filter)
@@ -1133,9 +1152,10 @@ router.post('/ehs/inspections', authenticateToken, requireBranchAccess, async (r
   try {
     const count = await SafetyInspection.countDocuments();
     const doc = await SafetyInspection.create({
-      ...req.body,
+      ...stripEhs(req.body), // W1609 — block branch/identity spoof
       inspectionNumber: `INSP-${Date.now()}-${count + 1}`,
       inspector: req.user?.id,
+      branchId: effectiveBranchScope(req) || req.body.branchId || null,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -1145,9 +1165,11 @@ router.post('/ehs/inspections', authenticateToken, requireBranchAccess, async (r
 
 router.put('/ehs/inspections/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-    });
+    const doc = await SafetyInspection.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripEhs(req.body),
+      { returnDocument: 'after' }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1159,7 +1181,7 @@ router.put('/ehs/inspections/:id', authenticateToken, requireBranchAccess, async
 router.get('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { category, status, riskLevel } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1609 — restricted → own branch only
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (riskLevel) filter['riskAssessment.riskLevel'] = riskLevel;
@@ -1177,8 +1199,9 @@ router.post('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, 
   try {
     const count = await HazardRegister.countDocuments();
     const doc = await HazardRegister.create({
-      ...req.body,
+      ...stripEhs(req.body), // W1609 — block branch/identity spoof
       hazardId: `HAZ-${Date.now()}-${count + 1}`,
+      branchId: effectiveBranchScope(req) || req.body.branchId || null,
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -1188,9 +1211,11 @@ router.post('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, 
 
 router.put('/ehs/hazards/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await HazardRegister.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-    });
+    const doc = await HazardRegister.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripEhs(req.body),
+      { returnDocument: 'after' }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1202,7 +1227,7 @@ router.put('/ehs/hazards/:id', authenticateToken, requireBranchAccess, async (re
 router.get('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { employee, department } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1609 — restricted → own branch only
     if (employee) filter.employee = employee;
     if (department) filter.department = department;
     const data = await PPERecord.find(filter)
@@ -1218,7 +1243,11 @@ router.get('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res) 
 
 router.post('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PPERecord.create({ ...req.body, issuedBy: req.user?.id });
+    const doc = await PPERecord.create({
+      ...stripEhs(req.body), // W1609 — block branch/identity spoof
+      issuedBy: req.user?.id,
+      branchId: effectiveBranchScope(req) || req.body.branchId || null,
+    });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     res.status(400).json({ success: false, message: safeError(err) });
@@ -1227,9 +1256,11 @@ router.post('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res)
 
 router.put('/ehs/ppe/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PPERecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      returnDocument: 'after',
-    });
+    const doc = await PPERecord.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripEhs(req.body),
+      { returnDocument: 'after' }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {

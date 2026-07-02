@@ -9,6 +9,7 @@ const FamilySatisfactionService = require('../services/familySatisfaction.servic
 const { authenticateToken, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch'); // W1618
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const SURVEY_ROLES = [
@@ -161,7 +162,11 @@ router.get(
   requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
-    const result = await FamilySatisfactionService.getResponses(req.query);
+    // W1618: force the caller's branch (restricted → own; cross-branch → query).
+    const result = await FamilySatisfactionService.getResponses({
+      ...req.query,
+      branch: effectiveBranchScope(req) || req.query.branch,
+    });
     res.json({ success: true, data: result });
   })
 );
@@ -174,7 +179,10 @@ router.get(
   requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
-    const response = await FamilySatisfactionService.getResponseById(req.params.id);
+    const response = await FamilySatisfactionService.getResponseById(
+      req.params.id,
+      effectiveBranchScope(req)
+    );
     if (!response) return res.status(404).json({ success: false, message: 'الاستجابة غير موجودة' });
     res.json({ success: true, data: response });
   })
@@ -209,7 +217,10 @@ router.get(
   requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
-    const nps = await FamilySatisfactionService.calculateNPS(req.query);
+    const nps = await FamilySatisfactionService.calculateNPS({
+      ...req.query,
+      branch: effectiveBranchScope(req) || req.query.branch,
+    });
     res.json({ success: true, data: nps });
   })
 );
@@ -226,7 +237,7 @@ router.post(
     const report = await FamilySatisfactionService.generateAnalyticsReport(
       startDate,
       endDate,
-      branch,
+      effectiveBranchScope(req) || branch, // W1618: restricted → own branch
       req.user.id || req.user._id
     );
     res.status(201).json({ success: true, data: report });
@@ -241,7 +252,9 @@ router.get(
   requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
-    const data = await FamilySatisfactionService.getDashboard(req.query.branch);
+    const data = await FamilySatisfactionService.getDashboard(
+      effectiveBranchScope(req) || req.query.branch
+    );
     res.json({ success: true, data });
   })
 );

@@ -102,7 +102,7 @@ router.post('/attendance/checkin', async (req, res) => {
     const record = await Attendance.create({
       ...req.body,
       employeeId: req.user?.id,
-      checkIn: new Date(),
+      checkInTime: new Date(),
     });
 
     // Check for late arrival and send alert (non-blocking)
@@ -142,9 +142,9 @@ router.post('/attendance/checkout', async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const record = await Attendance.findOneAndUpdate(
-      { employeeId: targetEmpId, checkIn: { $gte: today }, checkOut: null },
-      { checkOut: new Date() },
-      { returnDocument: 'after', sort: { checkIn: -1 } }
+      { employeeId: targetEmpId, checkInTime: { $gte: today }, checkOutTime: null },
+      { checkOutTime: new Date() },
+      { returnDocument: 'after', sort: { checkInTime: -1 } }
     );
     if (!record) {
       return res

@@ -25,7 +25,11 @@ on:
 
 # ── Shared Environment ──────────────────────────────────────────────────
 env:
-  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'http://72.60.84.56/health' }}
+  # Must be the HTTPS domain, NOT http://<IP>: nginx `listen 80` returns a 301
+  # to https, and the TLS cert is for alaweal.org (an IP host fails SNI), so a
+  # plain-HTTP-or-IP check always saw 301/handshake-fail and false-alarmed
+  # (opened a GitHub incident issue every 15 min). https://alaweal.org/health = 200.
+  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'https://alaweal.org/health' }}
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════
@@ -51,7 +55,7 @@ jobs:
           echo "Pinging ${{ env.HEALTH_CHECK_URL }} ..."
 
           # Perform the request, capture HTTP code and body separately
-          HTTP_CODE=$(curl -s -o response_body.txt -w "%{http_code}" \
+          HTTP_CODE=$(curl -sL -o response_body.txt -w "%{http_code}" \
             --max-time 30 \
             --retry 2 \
             --retry-delay 5 \
@@ -61,10 +65,15 @@ jobs:
           echo "HTTP_CODE=$HTTP_CODE"
           echo "RESPONSE=$RESPONSE"
 
-          # Export as step outputs for downstream jobs
+          # Export as step outputs for downstream jobs. Collapse the body to a
+          # SINGLE line — the heredoc-delimiter form breaks when the body has no
+          # trailing newline (the closing delimiter lands mid-line → "Matching
+          # delimiter not found"), and a `tr | head` pipe would SIGPIPE under
+          # pipefail. `tr -d < file` + bash substring avoids both.
+          RESP_ONELINE=$(tr -d '\r\n' < response_body.txt)
           echo "status=$([ "$HTTP_CODE" == "200" ] && echo 'UP' || echo 'DOWN')" >> "$GITHUB_OUTPUT"
           echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
-          echo "response=$RESPONSE" >> "$GITHUB_OUTPUT"
+          echo "response=${RESP_ONELINE:0:1500}" >> "$GITHUB_OUTPUT"
 
           # Pretty-print for logs
           echo "--- Health Check Result ---"

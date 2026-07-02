@@ -97,16 +97,39 @@ async function loadLandingCms() {
   }
 }
 
-// Register Service Worker for PWA support (production only)
+// Service Worker CLEANUP (formerly registration).
+// A root-scope ('/') SW registered here used to serve a stale legacy app-shell
+// for every navigation — including sibling apps (/rehab, /admin) — causing the
+// recurring "404 on most of the site". We now register NO service worker and
+// instead unregister any existing one + purge all caches (guarded single reload
+// so it can never loop). Correctness > offline for this online tool.
 function registerServiceWorker() {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/service-worker.js')
-        .then(reg => console.info('SW registered:', reg.scope))
-        .catch(err => console.warn('SW registration failed:', err));
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker
+    .getRegistrations()
+    .then(regs => {
+      const hadSw = regs.length > 0;
+      return Promise.all(regs.map(r => r.unregister()))
+        .then(() =>
+          typeof caches !== 'undefined' && caches.keys
+            ? caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+            : null
+        )
+        .then(() => hadSw);
+    })
+    .then(hadSw => {
+      try {
+        if (hadSw && !sessionStorage.getItem('__sw_purged_v1__')) {
+          sessionStorage.setItem('__sw_purged_v1__', '1');
+          window.location.reload();
+        }
+      } catch {
+        /* sessionStorage unavailable — cleanup already ran */
+      }
+    })
+    .catch(() => {
+      /* no-op — cleanup must never break boot */
     });
-  }
 }
 
 // Render app (App is dynamically imported AFTER the CMS fetch so that the

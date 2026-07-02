@@ -8,7 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
 router.post('/', authorize('admin', 'manager', 'dispatcher'), async (req, res) => {
   try {
     const Trip = require('../models/Fleet/Trip');
-    const trip = await Trip.create({ ...req.body, createdBy: req.user._id, status: 'scheduled' });
+    const trip = await Trip.create({ ...stripApprovalAttribution(req.body), createdBy: req.user._id, status: 'scheduled' });
     res.status(201).json({ success: true, data: trip });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

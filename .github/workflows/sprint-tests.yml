@@ -2231,6 +2231,8 @@ on:
       - 'backend/__tests__/mass-assign-attribution-wave1614.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/biometric-write-idor-wave1612.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/attribution-sweep-wave1617.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4439,6 +4441,8 @@ on:
       - 'backend/__tests__/mass-assign-attribution-wave1614.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/biometric-write-idor-wave1612.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/attribution-sweep-wave1617.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

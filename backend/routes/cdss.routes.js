@@ -44,7 +44,7 @@ const {
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -163,7 +163,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const rule = await ClinicalRule.create({
-      ...stripUpdateMeta(req.body),
+      ...stripApprovalAttribution(stripUpdateMeta(req.body)),
       branchId,
       createdBy: req.user?._id,
     });

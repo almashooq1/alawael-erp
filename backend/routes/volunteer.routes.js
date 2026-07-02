@@ -39,7 +39,7 @@ const router = express.Router();
 const _mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 
 // 🔒 All volunteer routes require authentication
 router.use(authenticate);
@@ -152,7 +152,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', requireCoordinator, async (req, res) => {
   try {
-    const doc = await Volunteer.create({ ...req.body, uuid: uuidv4() });
+    const doc = await Volunteer.create({ ...stripApprovalAttribution(req.body), uuid: uuidv4() });
     ok(res, { data: doc, message: 'تم إنشاء المتطوع بنجاح' }, 201);
   } catch (err) {
     fail(res, err.message, err.code === 11000 ? 409 : 400);
@@ -167,7 +167,7 @@ router.post('/register', async (req, res) => {
     if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
 
     const doc = await Volunteer.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       uuid: uuidv4(),
       status: 'pending',
     });

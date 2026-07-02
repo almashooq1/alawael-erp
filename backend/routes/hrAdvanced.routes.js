@@ -9,6 +9,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -64,7 +65,7 @@ router.get('/succession/plans', authorize('admin', 'hr_manager'), async (req, re
 router.post('/succession/plans', authorize('admin', 'hr_manager'), async (req, res) => {
   try {
     const SuccessionPlan = require('../models/HR/SuccessionPlan');
-    const plan = await SuccessionPlan.create({ ...req.body, createdBy: req.user._id });
+    const plan = await SuccessionPlan.create({ ...stripApprovalAttribution(req.body), createdBy: req.user._id });
     res.status(201).json({ success: true, data: plan });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

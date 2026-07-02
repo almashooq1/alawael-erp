@@ -30,6 +30,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const InsuranceTariff = require('../models/InsuranceTariff');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 router.use(authenticateToken);
 
@@ -76,13 +77,14 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
     const { provider, cptCode, isActive, q, page = 1, limit = 25 } = req.query;
     const filter = {};
-    if (provider) filter.provider = { $regex: String(provider), $options: 'i' };
+    // W1622: escape user input before $regex (ReDoS / collection-scan / injection)
+    if (provider) filter.provider = { $regex: escapeRegex(String(provider)), $options: 'i' };
     if (cptCode) filter.cptCode = String(cptCode).trim();
     if (isActive !== undefined && isActive !== '') {
       filter.isActive = String(isActive) === 'true';
     }
     if (q) {
-      const rx = { $regex: String(q), $options: 'i' };
+      const rx = { $regex: escapeRegex(String(q)), $options: 'i' };
       filter.$or = [{ provider: rx }, { providerId: rx }, { cptCode: rx }, { notes: rx }];
     }
 

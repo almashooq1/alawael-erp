@@ -15,6 +15,7 @@
 
 const express = require('express');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const escapeRegex = require('../utils/escapeRegex');
 
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
@@ -73,12 +74,15 @@ router.get(
   asyncHandler(async (req, res) => {
     const M = Discipline();
     const { q = '', limit = 10 } = req.query;
+    // W1622: escape user input before $regex — a crafted pattern is ReDoS +
+    // forces a full collection scan + regex-injection.
+    const safe = escapeRegex(String(q));
     const data = await M.find({
       isActive: true,
       $or: [
-        { name: { $regex: q, $options: 'i' } },
-        { nameAr: { $regex: q, $options: 'i' } },
-        { code: { $regex: q, $options: 'i' } },
+        { name: { $regex: safe, $options: 'i' } },
+        { nameAr: { $regex: safe, $options: 'i' } },
+        { code: { $regex: safe, $options: 'i' } },
       ],
     })
       .limit(Number(limit))

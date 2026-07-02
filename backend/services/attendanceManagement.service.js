@@ -17,6 +17,7 @@ const dayjs = require('dayjs');
 const duration = require('dayjs/plugin/duration');
 const isBetween = require('dayjs/plugin/isBetween');
 const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
+const escapeRegex = require('../utils/escapeRegex');
 dayjs.extend(duration);
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
@@ -1060,13 +1061,15 @@ class AttendanceManagementService {
     if (!query || query.trim().length < 2) return [];
 
     const q = query.trim();
+    // W1622: escape user input before $regex (ReDoS / collection-scan / injection)
+    const safe = escapeRegex(q);
     const employees = await Employee()
       .find({
         status: 'active',
         $or: [
-          { name_ar: { $regex: q, $options: 'i' } },
-          { name_en: { $regex: q, $options: 'i' } },
-          { employee_number: { $regex: q, $options: 'i' } },
+          { name_ar: { $regex: safe, $options: 'i' } },
+          { name_en: { $regex: safe, $options: 'i' } },
+          { employee_number: { $regex: safe, $options: 'i' } },
         ],
       })
       .select('name_ar name_en employee_number department job_title_ar')

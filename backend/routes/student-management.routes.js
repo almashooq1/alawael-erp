@@ -26,6 +26,7 @@ const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 const router = express.Router();
 router.use(authenticate);
@@ -280,12 +281,15 @@ router.get('/', async (req, res) => {
     const filter = { branchId: req.user.branchId, type: 'student' };
     if (status) filter.enrollmentStatus = status;
     if (classId) filter.classId = classId;
-    if (search)
+    if (search) {
+      // W1622: escape user input before $regex (ReDoS / collection-scan / injection)
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { 'name.first': { $regex: search, $options: 'i' } },
-        { 'name.last': { $regex: search, $options: 'i' } },
-        { fileNumber: { $regex: search, $options: 'i' } },
+        { 'name.first': { $regex: safe, $options: 'i' } },
+        { 'name.last': { $regex: safe, $options: 'i' } },
+        { fileNumber: { $regex: safe, $options: 'i' } },
       ];
+    }
     const skip = (Number(page) - 1) * Number(limit);
     const [data, total] = await Promise.all([
       Beneficiary.find(filter).sort({ 'name.first': 1 }).skip(skip).limit(Number(limit)).lean(),

@@ -65,16 +65,15 @@ jobs:
           echo "HTTP_CODE=$HTTP_CODE"
           echo "RESPONSE=$RESPONSE"
 
-          # Export as step outputs for downstream jobs. The response body may be
-          # multi-line (HTML/JSON), so it MUST use the heredoc-delimiter form —
-          # a bare `response=$RESPONSE` throws "Invalid format" on newlines.
+          # Export as step outputs for downstream jobs. Collapse the body to a
+          # SINGLE line — the heredoc-delimiter form breaks when the body has no
+          # trailing newline (the closing delimiter lands mid-line → "Matching
+          # delimiter not found"), and a `tr | head` pipe would SIGPIPE under
+          # pipefail. `tr -d < file` + bash substring avoids both.
+          RESP_ONELINE=$(tr -d '\r\n' < response_body.txt)
           echo "status=$([ "$HTTP_CODE" == "200" ] && echo 'UP' || echo 'DOWN')" >> "$GITHUB_OUTPUT"
           echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
-          {
-            echo "response<<__HEALTH_EOF__"
-            cat response_body.txt
-            echo "__HEALTH_EOF__"
-          } >> "$GITHUB_OUTPUT"
+          echo "response=${RESP_ONELINE:0:1500}" >> "$GITHUB_OUTPUT"
 
           # Pretty-print for logs
           echo "--- Health Check Result ---"

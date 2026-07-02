@@ -826,7 +826,7 @@ router.get('/notifications', async (req, res) => {
     try {
       const PortalNotification = require('../models/PortalNotification');
       const skip = (page - 1) * limit;
-      const query = { recipientId: guardianId };
+      const query = { guardianId };
       notifications = await PortalNotification.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -853,12 +853,12 @@ router.put('/notifications/mark-read', async (req, res) => {
       const PortalNotification = require('../models/PortalNotification');
       if (markAll) {
         await PortalNotification.updateMany(
-          { recipientId: guardianId, isRead: false },
+          { guardianId, isRead: false },
           { isRead: true, readAt: new Date() }
         );
       } else if (ids && ids.length) {
         await PortalNotification.updateMany(
-          { _id: { $in: ids }, recipientId: guardianId },
+          { _id: { $in: ids }, guardianId },
           { isRead: true, readAt: new Date() }
         );
       }

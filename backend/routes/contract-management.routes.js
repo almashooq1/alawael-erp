@@ -603,6 +603,7 @@ router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async 
     const amendmentNumber = genAmendmentNumber();
     const amendment = await ContractAmendment.create({
       ...stripApprovalAttribution(req.body),
+      status: 'draft',
       amendmentNumber,
       contractId: req.params.id,
       branchId: req.branchScope?.branchId || null,

@@ -602,6 +602,7 @@ router.post(
     const branchId = getBranchId(req);
     const record = await CpdRecord.create({
       ...stripApprovalAttribution(req.body),
+      status: 'pending',
       branchId,
       year: req.body.year || new Date().getFullYear(),
       createdBy: req.user?._id,

@@ -40,7 +40,14 @@ export default defineConfig(({ mode }) => {
     react(),
     VitePWA({
       registerType: 'prompt',
-      injectRegister: 'script',
+      // injectRegister:false — do NOT inject a SW-registration script into
+      // index.html. A root-scope ('/') SW registered here served a stale legacy
+      // app-shell for every navigation (incl. sibling apps /rehab, /admin) →
+      // the recurring "404 on most of the site". SW cleanup is handled by
+      // src/index.js + src/registerServiceWorker.js (unregister + purge) and,
+      // belt-and-suspenders, by nginx (/registerSW.js shim + /service-worker.js
+      // kill-switch). Do NOT set this back to 'script'/'auto'.
+      injectRegister: false,
       strategies: 'injectManifest',
       srcDir: 'public',
       filename: 'sw.js',

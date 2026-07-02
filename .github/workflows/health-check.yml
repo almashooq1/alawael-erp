@@ -25,7 +25,11 @@ on:
 
 # ── Shared Environment ──────────────────────────────────────────────────
 env:
-  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'http://72.60.84.56/health' }}
+  # Must be the HTTPS domain, NOT http://<IP>: nginx `listen 80` returns a 301
+  # to https, and the TLS cert is for alaweal.org (an IP host fails SNI), so a
+  # plain-HTTP-or-IP check always saw 301/handshake-fail and false-alarmed
+  # (opened a GitHub incident issue every 15 min). https://alaweal.org/health = 200.
+  HEALTH_CHECK_URL: ${{ secrets.HEALTH_CHECK_URL || 'https://alaweal.org/health' }}
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════
@@ -51,7 +55,7 @@ jobs:
           echo "Pinging ${{ env.HEALTH_CHECK_URL }} ..."
 
           # Perform the request, capture HTTP code and body separately
-          HTTP_CODE=$(curl -s -o response_body.txt -w "%{http_code}" \
+          HTTP_CODE=$(curl -sL -o response_body.txt -w "%{http_code}" \
             --max-time 30 \
             --retry 2 \
             --retry-delay 5 \
@@ -61,10 +65,15 @@ jobs:
           echo "HTTP_CODE=$HTTP_CODE"
           echo "RESPONSE=$RESPONSE"
 
-          # Export as step outputs for downstream jobs
+          # Export as step outputs for downstream jobs. Collapse the body to a
+          # SINGLE line — the heredoc-delimiter form breaks when the body has no
+          # trailing newline (the closing delimiter lands mid-line → "Matching
+          # delimiter not found"), and a `tr | head` pipe would SIGPIPE under
+          # pipefail. `tr -d < file` + bash substring avoids both.
+          RESP_ONELINE=$(tr -d '\r\n' < response_body.txt)
           echo "status=$([ "$HTTP_CODE" == "200" ] && echo 'UP' || echo 'DOWN')" >> "$GITHUB_OUTPUT"
           echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
-          echo "response=$RESPONSE" >> "$GITHUB_OUTPUT"
+          echo "response=${RESP_ONELINE:0:1500}" >> "$GITHUB_OUTPUT"
 
           # Pretty-print for logs
           echo "--- Health Check Result ---"
@@ -79,6 +88,57 @@ jobs:
           fi
 
           echo "Health check PASSED."
+
+  # ═══════════════════════════════════════════════════════════════════
+  # sw_guard — runtime anti-regression for the stale-shell 404 class (W1611)
+  # Independent of `ping` on purpose: a failure here fails the run VISIBLY but
+  # does NOT trigger the incident-issue `notify` job (which needs `ping`), so it
+  # can't spam issues. The source has CI drift guards (W1586/W1611) and the repo
+  # has an nginx snapshot, but nothing verified these invariants at RUNTIME on
+  # prod — this closes that gap (the nginx `/registerSW.js` override + SW
+  # no-cache headers are edited on the server directly, outside the deploy).
+  # ═══════════════════════════════════════════════════════════════════
+  sw_guard:
+    name: SW / stale-shell anti-regression (runtime)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_URL: ${{ secrets.PROD_BASE_URL || 'https://alaweal.org' }}
+    steps:
+      - name: Assert the SW-404 fix still holds in prod
+        run: |
+          set -euo pipefail
+          echo "Base: $BASE_URL"
+          CURL="curl -fsSL --retry 2 --retry-delay 3 --max-time 30"
+
+          # (1) The app shell must NOT register a root-scope service worker. A
+          # `<script src="/registerSW.js">` tag (vite-plugin-pwa injectRegister)
+          # or an inline `serviceWorker.register` is the exact regression that
+          # served a stale legacy shell for every navigation → 404 on /rehab,
+          # /admin, etc. (W1611).
+          SHELL_HTML=$($CURL "$BASE_URL/")
+          if printf '%s' "$SHELL_HTML" | grep -qiE 'registerSW\.js|serviceWorker\.register'; then
+            echo "::error::REGRESSION — the app shell registers a service worker again (W1611 stale-shell 404 class)."
+            exit 1
+          fi
+          echo "OK: shell registers no service worker."
+
+          # (2) /registerSW.js must be the nginx cleanup shim (unregister + purge),
+          # not a real registration. Guards the deploy-proof nginx override.
+          if ! $CURL "$BASE_URL/registerSW.js" | grep -q 'CLEANUP'; then
+            echo "::error::REGRESSION — /registerSW.js is not the cleanup shim (nginx override reverted?)."
+            exit 1
+          fi
+          echo "OK: /registerSW.js is the cleanup shim."
+
+          # (3) SW scripts must be served no-cache so a bad SW can always be superseded.
+          if ! curl -fsSI --retry 2 --max-time 30 "$BASE_URL/service-worker.js" | grep -qi 'cache-control: *no-cache'; then
+            echo "::error::REGRESSION — /service-worker.js is not served no-cache."
+            exit 1
+          fi
+          echo "OK: /service-worker.js served no-cache."
+
+          echo "SW-404 anti-regression checks PASSED."
 
   # ═══════════════════════════════════════════════════════════════════
   # notify — If health check failed, create an issue and send webhook

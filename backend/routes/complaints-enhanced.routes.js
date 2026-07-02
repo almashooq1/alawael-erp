@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter: branchScope } = require('../middleware/branchScope.middleware');
+const {
+  requireBranchAccess,
+  branchFilter: branchScope,
+} = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const _logger = require('../utils/logger');
 
 const {
@@ -350,7 +354,12 @@ router.post('/public-submit', async (req, res) => {
         message: 'الاسم والموضوع والوصف مطلوبون',
       });
 
-    const branchId = req.headers['x-branch-id'] || req.body.branchId;
+    // W1615: requireBranchAccess validates query/body/params branchId but NOT the
+    // x-branch-id header — trusting the header let an authenticated restricted user
+    // stamp a complaint to any branch (cross-branch write, bypassing isolation).
+    // Force the resolved scope for restricted callers; cross-branch roles (no scoped
+    // branch) may still name a branch via header/body.
+    const branchId = effectiveBranchScope(req) || req.headers['x-branch-id'] || req.body.branchId;
     if (!branchId) return res.status(400).json({ success: false, message: 'معرّف الفرع مطلوب' });
 
     const complaintNumber = await ComplaintV2.generateNumber(branchId);
@@ -407,7 +416,11 @@ router.get('/:id', async (req, res, next) => {
   try {
     // Non-ObjectId id → fall through to literal siblings (/categories, /sla-configs, /feedback).
     if (!mongoose.isValidObjectId(req.params.id)) return next();
-    const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) })
+    const complaint = await ComplaintV2.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchScope(req),
+    })
       .populate('assignedTo', 'name email')
       .populate('departmentId', 'name')
       .populate('patientId', 'name fileNumber')
@@ -427,7 +440,10 @@ router.post('/', async (req, res) => {
     if (!complainantName || !subject || !description)
       return res.status(400).json({ success: false, message: 'الاسم والموضوع والوصف مطلوبون' });
 
-    const effectiveBranchId = branchId || req.user?.branchId;
+    // W1615: prefer the resolved branch scope so a restricted caller cannot stamp a
+    // foreign branchId (defence-in-depth over requireBranchAccess) and the branch is
+    // never silently undefined; cross-branch roles fall back to the named branch.
+    const effectiveBranchId = effectiveBranchScope(req) || branchId || req.user?.branchId;
     const complaintNumber = await ComplaintV2.generateNumber(effectiveBranchId);
     const aiResult = ComplaintV2.classifyWithAI(description, subject);
 
@@ -505,7 +521,11 @@ router.post(
       if (!validStatuses.includes(status))
         return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
 
-      const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) });
+      const complaint = await ComplaintV2.findOne({
+        _id: req.params.id,
+        deletedAt: null,
+        ...branchScope(req),
+      });
       if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
 
       const oldStatus = complaint.status;
@@ -547,7 +567,11 @@ router.post('/:id/escalate', authorize(['admin', 'super_admin', 'manager']), asy
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const complaint = await ComplaintV2.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) });
+    const complaint = await ComplaintV2.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchScope(req),
+    });
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
 
     const newLevel = req.body.level || complaint.escalationLevel + 1;
@@ -620,7 +644,10 @@ router.delete('/:id', authorize(['admin', 'super_admin']), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await ComplaintV2.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
+    await ComplaintV2.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
+      { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
   } catch (err) {
     safeError(res, err, 'Complaint delete error');
@@ -680,7 +707,10 @@ router.delete('/categories/:id', authorize(['admin', 'super_admin']), async (req
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await ComplaintCategory.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
+    await ComplaintCategory.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
+      { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم حذف التصنيف بنجاح' });
   } catch (err) {
     safeError(res, err, 'Complaint category delete error');
@@ -793,7 +823,11 @@ router.get('/feedback/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const feedback = await CrmFeedback.findOne({ _id: req.params.id, deletedAt: null, ...branchScope(req) })
+    const feedback = await CrmFeedback.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+      ...branchScope(req),
+    })
       .populate('respondedBy', 'name email')
       .lean();
     if (!feedback) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
@@ -882,7 +916,10 @@ router.delete('/feedback/:id', authorize(['admin', 'super_admin']), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await CrmFeedback.findOneAndUpdate({ _id: req.params.id, deletedAt: null, ...branchScope(req) }, { deletedAt: new Date() });
+    await CrmFeedback.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null, ...branchScope(req) },
+      { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم حذف الملاحظة بنجاح' });
   } catch (err) {
     safeError(res, err, 'Feedback delete error');

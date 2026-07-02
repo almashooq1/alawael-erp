@@ -39,7 +39,7 @@ const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 
 // 🔒 All recruitment routes require authentication
 router.use(authenticate);
@@ -462,7 +462,7 @@ router.post('/applications/:id/offer', requireHr, async (req, res) => {
 
     const offerNumber = `OFF-${Date.now().toString(36).toUpperCase()}`;
     const offer = await JobOffer.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       uuid: uuidv4(),
       offerNumber,
       applicationId: application._id,

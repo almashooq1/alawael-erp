@@ -49,7 +49,7 @@ const OvertimeRequest = require('../models/OvertimeRequest');
 
 const zktecoSdk = require('../services/zktecoSdk.service');
 const attendanceProcessing = require('../services/attendanceProcessing.service');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -584,7 +584,7 @@ router.get('/overtime', async (req, res) => {
 router.post('/overtime', async (req, res) => {
   try {
     const overtime = await OvertimeRequest.create({
-      ...stripUpdateMeta(req.body),
+      ...stripApprovalAttribution(stripUpdateMeta(req.body)),
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: overtime });
@@ -596,8 +596,8 @@ router.post('/overtime', async (req, res) => {
 // PUT /api/biometric-attendance/overtime/:id/approve — اعتماد وقت إضافي (MFA tier 2)
 router.put('/overtime/:id/approve', requireMfaTier(2), async (req, res) => {
   try {
-    const overtime = await OvertimeRequest.findByIdAndUpdate(
-      req.params.id,
+    const overtime = await OvertimeRequest.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'approved', approvedBy: req.user?._id, approvedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -644,8 +644,8 @@ router.post('/policies', requireMfaTier(2), async (req, res) => {
 // W275k: policy update — same impact as create. Tier 2.
 router.put('/policies/:id', requireMfaTier(2), async (req, res) => {
   try {
-    const policy = await AttendancePolicyModel.findByIdAndUpdate(
-      req.params.id,
+    const policy = await AttendancePolicyModel.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { returnDocument: 'after' }
     );

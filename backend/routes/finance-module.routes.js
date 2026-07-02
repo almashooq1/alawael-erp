@@ -76,6 +76,12 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 // create; posting flows only through /approve.
 const JOURNAL_PROTECTED = ['_id', 'status', 'posted_by', 'posted_at', 'approved_by', 'approved_at', 'reversed_by', 'reversed_at', 'reversal_entry', 'created_by', 'deleted_at'];
 const ACCOUNT_PROTECTED = ['_id', 'created_by', 'current_balance', 'is_active', 'deleted_at'];
+// W1618 — an InsuranceClaim is adjudicated only via its submit/adjudication flow; new
+// InsuranceClaim({ ...req.body }) was raw, so a caller could create a claim already
+// status:'approved'/'paid' with forged adjudicated totals → an unsubmitted claim appears
+// approved/paid (insurance fraud). Strip lifecycle/adjudication/computed fields on create;
+// status defaults to 'draft'.
+const CLAIM_PROTECTED = ['_id', 'status', 'total_approved', 'total_rejected', 'total_approved_halalas', 'total_rejected_halalas', 'prior_auth_status', 'nphies_status', 'rejection_reason', 'submitted_at', 'created_by', 'deleted_at'];
 function stripFinanceFields(body, fields) {
   const clean = {};
   for (const k of Object.keys(body || {})) {
@@ -924,7 +930,7 @@ router.post(
   '/insurance-claims',
   asyncHandler(async (req, res) => {
     const claim = new InsuranceClaim({
-      ...req.body,
+      ...stripFinanceFields(req.body, CLAIM_PROTECTED),
       created_by: req.user?._id,
     });
     await claim.save();

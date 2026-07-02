@@ -24,9 +24,11 @@ class FieldTrainingService extends BaseService {
     return program;
   }
 
-  async listPrograms({ status, type, specialty, supervisorId, page = 1, limit = 20 } = {}) {
+  async listPrograms({ status, type, specialty, supervisorId, branchId, page = 1, limit = 20 } = {}) {
     const TrainingProgram = mongoose.model('TrainingProgram');
     const q = { isDeleted: { $ne: true } };
+    // W1622 — branch scope (falsy for cross-branch/HQ roles → unfiltered).
+    if (branchId) q.branchId = branchId;
     if (status) q.status = status;
     if (type) q.type = type;
     if (specialty) q.specialty = specialty;
@@ -72,9 +74,11 @@ class FieldTrainingService extends BaseService {
     return record;
   }
 
-  async listTrainees({ programId, status, page = 1, limit = 20 } = {}) {
+  async listTrainees({ programId, status, branchId, page = 1, limit = 20 } = {}) {
     const TraineeRecord = mongoose.model('TraineeRecord');
     const q = { isDeleted: { $ne: true } };
+    // W1622 — branch scope (falsy for cross-branch/HQ roles → unfiltered).
+    if (branchId) q.branchId = branchId;
     if (programId) q.programId = programId;
     if (status) q.status = status;
     const total = await TraineeRecord.countDocuments(q);

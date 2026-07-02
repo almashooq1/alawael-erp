@@ -93,6 +93,9 @@ router.get(
       type: req.query.type,
       specialty: req.query.specialty,
       supervisorId: req.query.supervisorId,
+      // W1622 — cross-branch isolation: W1160 guarded the :id params + dashboard
+      // but missed this list endpoint → it returned programs from ALL branches.
+      branchId: effectiveBranchScope(req),
       page: req.query.page,
       limit: req.query.limit,
     });
@@ -132,6 +135,9 @@ router.get(
     const result = await fieldTrainingService.listTrainees({
       programId: req.query.programId,
       status: req.query.status,
+      // W1622 — cross-branch isolation: this list endpoint leaked trainee records
+      // (PII: names, evaluations, competencies, caseload) from ALL branches.
+      branchId: effectiveBranchScope(req),
       page: req.query.page,
       limit: req.query.limit,
     });

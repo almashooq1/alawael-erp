@@ -188,7 +188,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.beneficiaryId;
     delete body.date;
     delete body.mealType;
-    const row = await MealEvent.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
+    const row = await MealEvent.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) }, body, { returnDocument: 'after' });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -201,7 +201,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await MealEvent.findByIdAndDelete(req.params.id);
+    const row = await MealEvent.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 // KILL-SWITCH service worker — Al-Awael ERP backend (backend/public).
 //
 // The backend serves this at /service-worker.js (startup/middleware.js), though

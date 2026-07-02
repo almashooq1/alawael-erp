@@ -1868,6 +1868,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/enterprise-ehs-branch-isolation-wave1609.test.js'
       - 'backend/__tests__/fleet-safety-branch-isolation-wave1607.test.js'
       - 'backend/__tests__/safety-protocol-branch-isolation-wave1606.test.js'
       - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
@@ -2220,7 +2221,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-beneficiary-branch-wave1610.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/goal-progress-beneficiary-scope-wave1611.test.js'
+      - 'backend/__tests__/write-idor-branch-scope-wave1610.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/notification-broadcast-authz-wave1612.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -4067,6 +4070,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/enterprise-ehs-branch-isolation-wave1609.test.js'
       - 'backend/__tests__/fleet-safety-branch-isolation-wave1607.test.js'
       - 'backend/__tests__/safety-protocol-branch-isolation-wave1606.test.js'
       - 'backend/__tests__/hse-safety-incident-branch-isolation-wave1604.test.js'
@@ -4418,7 +4422,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/document-access-beneficiary-branch-wave1610.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/goal-progress-beneficiary-scope-wave1611.test.js'
+      - 'backend/__tests__/write-idor-branch-scope-wave1610.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/notification-broadcast-authz-wave1612.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

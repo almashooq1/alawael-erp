@@ -3,8 +3,16 @@
 const express = require('express');
 
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+
+// W1612 — management roles for notification-admin actions (approve/send org-wide
+// broadcasts + create/edit/delete notification templates). Before this, these
+// endpoints had `authenticate + requireBranchAccess` but NO role gate, so any
+// authenticated principal could self-approve + send a broadcast to every recipient
+// or rewrite notification templates. Drafting a broadcast stays open (the draft →
+// approve → send workflow keeps staff able to draft; only approval/send needs authority).
+const NOTIF_ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager'];
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
 const safeError = require('../utils/safeError');
@@ -29,7 +37,7 @@ router.get('/templates', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.post('/templates', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/templates', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.create({
@@ -53,7 +61,7 @@ router.get('/templates/:id', authenticate, requireBranchAccess, async (req, res)
   }
 });
 
-router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.put('/templates/:id', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.findByIdAndUpdate(
@@ -68,7 +76,7 @@ router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res)
   }
 });
 
-router.delete('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.delete('/templates/:id', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     await NotificationTemplate.findByIdAndUpdate(req.params.id, { isActive: false });
@@ -155,9 +163,9 @@ router.get('/broadcasts', authenticate, requireBranchAccess, async (req, res) =>
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const { status, branchId } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W1610: scope broadcast list to caller's branch
     if (status) filter.status = status;
-    if (branchId) filter.branchId = branchId;
+    if (!filter.branchId && branchId) filter.branchId = branchId;
     const broadcasts = await BroadcastMessage.find(filter)
       .populate('senderId approvedBy')
       .sort({ createdAt: -1 });
@@ -184,7 +192,8 @@ router.post('/broadcasts', authenticate, requireBranchAccess, async (req, res) =
 router.get('/broadcasts/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
-    const broadcast = await BroadcastMessage.findById(req.params.id);
+    // W1610: scope by branch so a restricted caller can't read another branch's broadcast by id.
+    const broadcast = await BroadcastMessage.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!broadcast) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
     res.json({ success: true, data: broadcast });
   } catch (err) {
@@ -192,11 +201,11 @@ router.get('/broadcasts/:id', authenticate, requireBranchAccess, async (req, res
   }
 });
 
-router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
-    const broadcast = await BroadcastMessage.findByIdAndUpdate(
-      req.params.id,
+    const broadcast = await BroadcastMessage.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'approved', approvedBy: req.user._id, approvedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -206,8 +215,16 @@ router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async 
   }
 });
 
-router.post('/broadcasts/:id/send', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/broadcasts/:id/send', authenticate, requireBranchAccess, authorize(NOTIF_ADMIN_ROLES), async (req, res) => {
   try {
+    // W1612 — verify the broadcast belongs to the caller's branch before sending
+    // (the service loads by id only; a restricted caller must not send another
+    // branch's broadcast to its recipients).
+    const BroadcastMessage = require('../models/BroadcastMessage');
+    const owned = await BroadcastMessage.findOne({ _id: req.params.id, ...branchFilter(req) })
+      .select('_id')
+      .lean();
+    if (!owned) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
     const result = await notifSvc.sendBroadcast(req.params.id);
     res.json({ success: true, data: result });
   } catch (err) {
@@ -280,7 +297,8 @@ router.post('/escalations', authenticate, requireBranchAccess, async (req, res) 
 router.get('/escalations/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
-    const escalation = await Escalation.findById(req.params.id);
+    // W1610: scope by branch so a restricted caller can't read another branch's escalation by id.
+    const escalation = await Escalation.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!escalation) return res.status(404).json({ success: false, message: 'التصعيد غير موجود' });
     res.json({ success: true, data: escalation });
   } catch (err) {
@@ -291,8 +309,8 @@ router.get('/escalations/:id', authenticate, requireBranchAccess, async (req, re
 router.put('/escalations/:id/acknowledge', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
-    const escalation = await Escalation.findByIdAndUpdate(
-      req.params.id,
+    const escalation = await Escalation.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'acknowledged', acknowledgedAt: new Date(), acknowledgedBy: req.user._id },
       { returnDocument: 'after' }
     );
@@ -306,8 +324,8 @@ router.put('/escalations/:id/acknowledge', authenticate, requireBranchAccess, as
 router.put('/escalations/:id/resolve', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
-    const escalation = await Escalation.findByIdAndUpdate(
-      req.params.id,
+    const escalation = await Escalation.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         status: 'resolved',
         resolvedAt: new Date(),

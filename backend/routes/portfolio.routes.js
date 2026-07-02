@@ -193,7 +193,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'المستوى غير صالح' });
     }
     if (body.achievementDate) body.achievementDate = new Date(body.achievementDate);
-    const row = await Portfolio.findByIdAndUpdate(req.params.id, body, {
+    const row = await Portfolio.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) }, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -210,7 +210,7 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Portfolio.findByIdAndDelete(req.params.id);
+    const row = await Portfolio.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

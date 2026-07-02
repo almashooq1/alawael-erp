@@ -239,7 +239,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.parentResponse;
     delete body.parentRespondedAt;
     body.status = 'amended';
-    const row = await DailyCommunicationLog.findByIdAndUpdate(req.params.id, body, {
+    const row = await DailyCommunicationLog.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) }, body, {
       returnDocument: 'after',
       runValidators: true,
     });
@@ -256,8 +256,7 @@ router.post('/:id/parent-seen', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await DailyCommunicationLog.findByIdAndUpdate(
-      req.params.id,
+    const row = await DailyCommunicationLog.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) },
       { parentSeen: true, parentSeenAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -278,8 +277,7 @@ router.post('/:id/parent-response', requireRole(READ_ROLES), async (req, res) =>
     if (!response.trim()) {
       return res.status(400).json({ success: false, message: 'الرد مطلوب' });
     }
-    const row = await DailyCommunicationLog.findByIdAndUpdate(
-      req.params.id,
+    const row = await DailyCommunicationLog.findOneAndUpdate({ _id: req.params.id, ...branchFilter(req) },
       {
         parentResponse: response,
         parentRespondedAt: new Date(),
@@ -301,7 +299,7 @@ router.delete('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await DailyCommunicationLog.findByIdAndDelete(req.params.id);
+    const row = await DailyCommunicationLog.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

@@ -195,7 +195,7 @@ router.post(
       }
 
       const [employee, shift] = await Promise.all([
-        Employee.findOne({ _id: employeeId, deletedAt: null }),
+        Employee.findOne({ _id: employeeId, deleted_at: null }),
         WorkShift.findOne({ _id: shiftId, deletedAt: null }),
       ]);
 
@@ -245,7 +245,7 @@ router.get(
     try {
       const employee = await Employee.findOne({
         _id: req.params.employeeId,
-        deletedAt: null,
+        deleted_at: null,
       })
         .select('name currentShiftId shiftHistory')
         
@@ -312,7 +312,7 @@ router.get('/overtime/list', authenticate, requireBranchAccess, async (req, res)
  */
 router.post('/overtime', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const employee = await Employee.findOne({ _id: req.body.employeeId, deletedAt: null });
+    const employee = await Employee.findOne({ _id: req.body.employeeId, deleted_at: null });
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
     const overtime = await OvertimeRequest.create({

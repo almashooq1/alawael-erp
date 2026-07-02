@@ -33,6 +33,8 @@ const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../../middleware/auth');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware'); // W1622
+const { effectiveBranchScope } = require('../../middleware/assertBranchMatch'); // W1622
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/care/social.registry');
 
@@ -108,6 +110,7 @@ router.get(
 router.get(
   '/cases',
   authenticate,
+  requireBranchAccess,
   [
     query('branchId').optional().isMongoId(),
     query('status').optional().isIn(registry.CASE_STATUSES),
@@ -122,7 +125,8 @@ router.get(
   wrap(async (req, res) => {
     try {
       const rows = await getService().list({
-        branchId: req.query.branchId,
+        // W1622: restricted caller → own branch; cross-branch role → query value.
+        branchId: effectiveBranchScope(req) || req.query.branchId,
         status: req.query.status,
         assignedWorkerId: req.query.assignedWorkerId,
         riskLevel: req.query.riskLevel,
@@ -141,11 +145,12 @@ router.get(
 router.get(
   '/cases/:id',
   authenticate,
+  requireBranchAccess,
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getService().findById(req.params.id);
+      const doc = await getService().findById(req.params.id, effectiveBranchScope(req));
       if (!doc) return res.status(404).json({ success: false, error: 'Case not found' });
       res.json({ success: true, data: doc });
     } catch (err) {

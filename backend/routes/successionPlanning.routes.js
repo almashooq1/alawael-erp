@@ -13,7 +13,7 @@ const { authenticate: authMiddleware, authorize } = require('../middleware/auth'
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
 const _logger = require('../utils/logger');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, stripApprovalAttribution } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════
@@ -120,7 +120,7 @@ router.post(
   async (req, res) => {
     try {
       const plan = new SuccessionPlan({
-        ...req.body,
+        ...stripApprovalAttribution(req.body),
         status: 'draft',
         createdBy: req.userId || (req.user && req.user._id),
       });

@@ -28,6 +28,7 @@ const ContractApproval = require('../models/ContractApproval');
 const ContractAmendment = require('../models/ContractAmendment');
 const ContractNegotiation = require('../models/ContractNegotiation');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -546,7 +547,7 @@ router.post('/contracts/:id/parties', authorize(['admin', 'manager']), async (re
     if (!nameAr || !role || !partyType)
       return res.status(400).json({ success: false, message: 'الاسم، الدور، والنوع مطلوبة' });
     const party = await ContractParty.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       contractId: req.params.id,
       branchId: req.branchScope?.branchId || null,
       createdBy: req.user?.id,
@@ -601,7 +602,7 @@ router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async 
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
     const amendmentNumber = genAmendmentNumber();
     const amendment = await ContractAmendment.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       amendmentNumber,
       contractId: req.params.id,
       branchId: req.branchScope?.branchId || null,

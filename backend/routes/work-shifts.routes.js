@@ -15,6 +15,7 @@ const OvertimeRequest = require('../models/OvertimeRequest');
 const Employee = require('../models/HR/Employee');
 const escapeRegex = require('../utils/escapeRegex');
 const safeError = require('../utils/safeError');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. جداول الدوام — Work Shifts CRUD
@@ -315,7 +316,7 @@ router.post('/overtime', authenticate, requireBranchAccess, async (req, res) => 
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
     const overtime = await OvertimeRequest.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       branchId: employee.branchId,
       status: 'pending',
       createdBy: req.user._id,

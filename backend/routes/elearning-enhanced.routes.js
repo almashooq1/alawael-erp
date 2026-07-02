@@ -42,6 +42,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 const router = express.Router();
 
 // 🔒 All e-learning routes require authentication
@@ -600,7 +601,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const record = await CpdRecord.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       branchId,
       year: req.body.year || new Date().getFullYear(),
       createdBy: req.user?._id,

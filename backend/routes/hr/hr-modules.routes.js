@@ -127,7 +127,18 @@ function createHrModulesRouter({ logger } = {}) {
       try {
         const M = tryLoad(prefix, modelPath);
         if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
-        const doc = await M.create({ ...req.body });
+        // W1609 — the create previously spread req.body raw into M.create(), so a
+        // writeRoles user (some modules allow `employee`) could forge system keys
+        // AND, for branch-isolated modules, POST a foreign `branchId` to create
+        // cross-branch (reads/updates already guardDocBranch, but create did not).
+        // Strip forgeable system fields; for branch-isolated modules pin the
+        // caller's own branch when they are branch-restricted.
+        const { _id, id, __v, createdAt, updatedAt, ...body } = req.body || {};
+        if (scope) {
+          const bf = branchFilter(req); // {} for cross-branch/HQ roles; {branchId:X} for restricted
+          if (typeof bf.branchId === 'string') body.branchId = bf.branchId;
+        }
+        const doc = await M.create(body);
         res.status(201).json({ success: true, data: doc });
       } catch (err) {
         safeError(res, err, `hr-modules ${prefix}.create`);

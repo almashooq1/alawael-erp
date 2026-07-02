@@ -36,6 +36,8 @@ const mongoose = require('mongoose');
 
 const { authenticate } = require('../../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../../middleware/requireMfaTier');
+const { requireBranchAccess } = require('../../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../../middleware/assertBranchMatch');
 const logger = require('../../utils/logger');
 
 function _producers(req) {
@@ -80,10 +82,15 @@ function mapErrorToHttp(err) {
   if (err.code === 'REASON_CODE_REQUIRED') {
     return { status: 400, body: { code: err.code, message: err.message } };
   }
+  // W1616 — assertBranchMatch throws a 403-flagged (status) cross-branch error.
+  if (err.status === 403) {
+    return { status: 403, body: { code: err.code || 'CROSS_BRANCH_DENIED', message: err.message } };
+  }
   return { status: 500, body: { code: 'INTERNAL_ERROR', message: err.message } };
 }
 
 router.use(authenticate);
+router.use(requireBranchAccess); // W1616 — populate req.branchScope so assertBranchMatch can enforce
 router.use(attachMfaActor);
 
 // ── POST /audit/:occurrenceId/findings/:findingId ────────────────────────
@@ -97,6 +104,7 @@ router.post('/audit/:occurrenceId/findings/:findingId', requireMfaTier(1), async
       err.code = 'PARENT_NOT_FOUND';
       throw err;
     }
+    assertBranchMatch(req, occurrenceDoc.branchId, 'audit occurrence'); // W1616
     const capa = await producers.createCapaFromAuditFinding({
       occurrenceDoc,
       findingId: req.params.findingId,
@@ -140,6 +148,7 @@ router.post('/rca/:rcaId/root-causes/:rootCauseId', requireMfaTier(1), async (re
       err.code = 'PARENT_NOT_FOUND';
       throw err;
     }
+    assertBranchMatch(req, rcaDoc.branchId, 'RCA investigation'); // W1616
     const capa = await producers.createCapaFromRcaRootCause({
       rcaDoc,
       rootCauseId: req.params.rootCauseId,
@@ -182,6 +191,7 @@ router.post('/fmea/:fmeaId/rows/:rowId/actions/:actionId', requireMfaTier(1), as
       err.code = 'PARENT_NOT_FOUND';
       throw err;
     }
+    assertBranchMatch(req, fmeaDoc.branchId, 'FMEA worksheet'); // W1616
     const capa = await producers.createCapaFromFmeaAction({
       fmeaDoc,
       rowId: req.params.rowId,

@@ -40,6 +40,7 @@ const express = require('express');
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const escapeRegex = require('../utils/escapeRegex');
 const router = express.Router();
 
@@ -62,7 +63,23 @@ const TrainerEvaluation = require('../models/TrainerEvaluation');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-const getBranchId = req => req.user?.branchId || req.headers['x-branch-id'];
+// W1607: branch scope for every e-learning read filter + write stamp. The old
+// `req.user?.branchId || req.headers['x-branch-id']` was a cross-branch IDOR:
+// `req.user.branchId` is never on the JWT, so the client-controlled
+// `x-branch-id` header WAS the de-facto scope — any restricted user could read
+// (or stamp) another branch's staff training records by spoofing the header.
+// Now: a restricted caller is pinned to their own server-derived branch
+// (effectiveBranchScope ignores the header/query spoof); only a cross-branch
+// role may target a specific branch (via ?branchId= or, for back-compat, the
+// header). Restricted callers never trust the header → fail closed.
+const getBranchId = req => {
+  const scoped = effectiveBranchScope(req);
+  if (scoped) return scoped;
+  if (req.branchScope && !req.branchScope.restricted) {
+    return req.headers['x-branch-id'] || undefined;
+  }
+  return undefined;
+};
 const pad = (n, len = 6) => String(n).padStart(len, '0');
 
 // ─── Stats ────────────────────────────────────────────────────────────────────

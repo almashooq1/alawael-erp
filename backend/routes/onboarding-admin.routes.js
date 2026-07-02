@@ -26,27 +26,34 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 const OnboardingChecklist = require('../models/OnboardingChecklist');
 const oa = require('../services/onboardingAnalyticsService');
 const safeError = require('../utils/safeError');
 
 router.use(authenticateToken);
+// W1608: onboarding checklists are per-branch; WRITE_ROLES include branch-level roles
+// (manager/hr/hr_manager ∉ CROSS_BRANCH_ROLES → restricted). Pre-W1608 the list/stat
+// aggregates ran find({}) and the :id lookup was unscoped → a branch caller saw/modified
+// every branch's onboarding. requireBranchAccess sets req.branchScope; branchFilter scopes below.
+router.use(requireBranchAccess);
 
 const READ_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_manager', 'it'];
 const WRITE_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_manager'];
 const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager', 'hr', 'hr_manager'];
 
-function buildFilter(q) {
+function buildFilter(q, scopedBranchId) {
   const f = {};
+  if (scopedBranchId) f.branchId = scopedBranchId; // W1608: lock a restricted caller to own branch
   if (q.status && ['pending', 'in_progress', 'completed'].includes(q.status)) f.status = q.status;
-  if (q.branchId && mongoose.isValidObjectId(q.branchId)) f.branchId = q.branchId;
+  if (!f.branchId && q.branchId && mongoose.isValidObjectId(q.branchId)) f.branchId = q.branchId;
   return f;
 }
 
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = buildFilter(req.query);
+    const filter = buildFilter(req.query, branchFilter(req).branchId);
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const [items, total] = await Promise.all([
@@ -69,7 +76,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await OnboardingChecklist.find({}).lean();
+    const all = await OnboardingChecklist.find({ ...branchFilter(req) }).lean();
     res.json({
       success: true,
       summary: oa.summarize(all),
@@ -86,7 +93,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/by-status', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await OnboardingChecklist.find({}).select('status').lean();
+    const all = await OnboardingChecklist.find({ ...branchFilter(req) }).select('status').lean();
     res.json({ success: true, items: oa.byStatus(all) });
   } catch (err) {
     return safeError(res, err, 'onboarding.byStatus');
@@ -95,7 +102,7 @@ router.get('/by-status', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/task-completion', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await OnboardingChecklist.find({}).select('tasks').lean();
+    const all = await OnboardingChecklist.find({ ...branchFilter(req) }).select('tasks').lean();
     res.json({ success: true, items: oa.taskCompletion(all) });
   } catch (err) {
     return safeError(res, err, 'onboarding.taskCompletion');
@@ -104,7 +111,7 @@ router.get('/task-completion', requireRole(READ_ROLES), async (req, res) => {
 
 router.get('/by-responsible', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const all = await OnboardingChecklist.find({}).select('tasks').lean();
+    const all = await OnboardingChecklist.find({ ...branchFilter(req) }).select('tasks').lean();
     res.json({ success: true, items: oa.byResponsible(all) });
   } catch (err) {
     return safeError(res, err, 'onboarding.byResponsible');
@@ -115,6 +122,7 @@ router.get('/stalled', requireRole(READ_ROLES), async (req, res) => {
   try {
     const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const open = await OnboardingChecklist.find({
+      ...branchFilter(req),
       status: { $in: ['pending', 'in_progress'] },
     }).lean();
     res.json({ success: true, items: oa.stalledChecklists(open, new Date(), limit) });
@@ -129,6 +137,7 @@ router.get('/trend', requireRole(READ_ROLES), async (req, res) => {
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - months);
     const all = await OnboardingChecklist.find({
+      ...branchFilter(req),
       $or: [{ startDate: { $gte: cutoff } }, { actualCompletionDate: { $gte: cutoff } }],
     })
       .select('startDate actualCompletionDate status')
@@ -147,9 +156,12 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (patch.status === 'completed' && !patch.actualCompletionDate) {
       patch.actualCompletionDate = new Date();
     }
-    const row = await OnboardingChecklist.findByIdAndUpdate(req.params.id, patch, {
-      returnDocument: 'after',
-    });
+    // W1608: scope the update by branch so a restricted caller can't modify another branch's checklist.
+    const row = await OnboardingChecklist.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      patch,
+      { returnDocument: 'after' }
+    );
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -168,7 +180,8 @@ router.patch('/:id/tasks/:taskIdx', requireRole(WRITE_ROLES), async (req, res) =
     if (status && !['pending', 'in_progress', 'completed'].includes(status)) {
       return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
     }
-    const row = await OnboardingChecklist.findById(req.params.id);
+    // W1608: scope by branch so a restricted caller can't modify another branch's checklist task.
+    const row = await OnboardingChecklist.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     if (!row.tasks || idx >= row.tasks.length) {
       return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
@@ -196,6 +209,7 @@ router.patch('/:id/tasks/:taskIdx', requireRole(WRITE_ROLES), async (req, res) =
 router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     const open = await OnboardingChecklist.find({
+      ...branchFilter(req),
       status: { $in: ['pending', 'in_progress'] },
     }).lean();
     const items = oa.stalledChecklists(open, new Date(), 10_000);

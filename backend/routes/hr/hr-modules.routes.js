@@ -133,7 +133,9 @@ function createHrModulesRouter({ logger } = {}) {
         // cross-branch (reads/updates already guardDocBranch, but create did not).
         // Strip forgeable system fields; for branch-isolated modules pin the
         // caller's own branch when they are branch-restricted.
-        const { _id, id, __v, createdAt, updatedAt, ...body } = req.body || {};
+        // Renamed the discarded keys to _-prefixed (eslint no-unused-vars allowed
+        // pattern) — they are destructured only to strip them from `body`.
+        const { _id, id: _id2, __v, createdAt: _createdAt, updatedAt: _updatedAt, ...body } = req.body || {};
         if (scope) {
           const bf = branchFilter(req); // {} for cross-branch/HQ roles; {branchId:X} for restricted
           if (typeof bf.branchId === 'string') body.branchId = bf.branchId;

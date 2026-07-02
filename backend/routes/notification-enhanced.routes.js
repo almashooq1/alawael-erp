@@ -16,6 +16,7 @@ const NOTIF_ADMIN_ROLES = ['admin', 'superadmin', 'super_admin', 'manager'];
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
 const safeError = require('../utils/safeError');
+const { stripApprovalAttribution } = require('../utils/sanitize');
 
 // ============================================================
 // قوالب الإشعارات — تستخدم النموذج مباشرةً
@@ -179,7 +180,7 @@ router.post('/broadcasts', authenticate, requireBranchAccess, async (req, res) =
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const broadcast = await BroadcastMessage.create({
-      ...req.body,
+      ...stripApprovalAttribution(req.body),
       senderId: req.user._id,
       status: 'draft',
     });

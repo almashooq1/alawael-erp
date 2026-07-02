@@ -1868,6 +1868,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/no-x-branch-id-header-trust-wave1621.test.js'
       - 'backend/__tests__/no-branchid-query-override-wave1619.test.js'
       - 'backend/__tests__/capa-producers-branch-isolation-wave1616.test.js'
       - 'backend/__tests__/therapist-portal-referral-group-kpi-branch-isolation-wave1615.test.js'
@@ -4091,6 +4092,7 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/ai-scheduler-actual-progress-wave1443.test.js'
       - 'backend/__tests__/branch-isolation-community-service-wave1445.test.js'
+      - 'backend/__tests__/no-x-branch-id-header-trust-wave1621.test.js'
       - 'backend/__tests__/no-branchid-query-override-wave1619.test.js'
       - 'backend/__tests__/capa-producers-branch-isolation-wave1616.test.js'
       - 'backend/__tests__/therapist-portal-referral-group-kpi-branch-isolation-wave1615.test.js'
